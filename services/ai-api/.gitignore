@@ -1,0 +1,11 @@
+# ML raw and processed data
+services/ai-api/ml/data/raw/
+services/ai-api/ml/data/processed/
+
+# ML generated reports
+services/ai-api/ml/reports/
+
+# ML model artifacts
+services/ai-api/ml/artifacts/
+
+.env

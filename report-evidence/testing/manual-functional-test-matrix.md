@@ -1,0 +1,36 @@
+| ID    | Module            | Test Scenario                          | Preconditions                          | Steps                            | Expected Result                       | Actual Result | Status    |
+| ----- | ----------------- | -------------------------------------- | -------------------------------------- | -------------------------------- | ------------------------------------- | ------------- | --------- |
+| FT-01 | Authentication    | Sign up with valid credentials         | None                                   | Submit valid email/password      | Account created successfully          |               | Pass/Fail |
+| FT-02 | Authentication    | Sign in with valid account             | Account exists                         | Enter credentials and submit     | Redirect to dashboard                 |               | Pass/Fail |
+| FT-03 | Authentication    | Access protected route without login   | Not signed in                          | Open `/dashboard`                | Redirect to sign-in                   |               | Pass/Fail |
+| FT-04 | Onboarding        | Complete onboarding with valid weights | Signed in, not onboarded               | Fill profile and submit          | Profile saved, redirect dashboard     |               | Pass/Fail |
+| FT-05 | Settings          | Update PBI weights                     | Signed in                              | Change weights and save          | Weights updated successfully          |               | Pass/Fail |
+| FT-06 | Goals             | Create a goal                          | Signed in                              | Submit goal form                 | Goal appears in list                  |               | Pass/Fail |
+| FT-07 | Goals             | Update a goal                          | Existing goal                          | Edit and save                    | Updated values displayed              |               | Pass/Fail |
+| FT-08 | Goals             | Delete a goal                          | Existing goal                          | Delete goal                      | Goal removed                          |               | Pass/Fail |
+| FT-09 | Tasks             | Create a task linked to goal           | Existing goal                          | Submit task form                 | Task appears with correct goal        |               | Pass/Fail |
+| FT-10 | Tasks             | Complete a task                        | Existing task                          | Mark completed                   | Task status becomes completed         |               | Pass/Fail |
+| FT-11 | Focus             | Start focus session                    | Existing task optional                 | Start session                    | Active timer panel appears            |               | Pass/Fail |
+| FT-12 | Focus             | Pause/resume focus session             | Active focus session                   | Pause then resume                | Status changes correctly              |               | Pass/Fail |
+| FT-13 | Focus             | Complete focus session                 | Active session                         | Complete session                 | Session stored and appears in history |               | Pass/Fail |
+| FT-14 | Focus             | Log distraction                        | Active focus session                   | Add distraction event            | Distraction saved                     |               | Pass/Fail |
+| FT-15 | Dashboard         | Refresh PBI                            | Behavioural data exists                | Click refresh                    | New PBI snapshot generated            |               | Pass/Fail |
+| FT-16 | Dashboard         | View PBI explanation                   | PBI snapshot exists                    | Open dashboard                   | Explanation panel visible             |               | Pass/Fail |
+| FT-17 | Native Risk       | Run native task risk scan              | Open task with upcoming deadline       | Click refresh risk               | Risk card appears                     |               | Pass/Fail |
+| FT-18 | Native Risk AI    | Generate Gemini task insight           | Native risk assessment exists          | Click Generate AI Insight        | AI card saved and displayed           |               | Pass/Fail |
+| FT-19 | Weekly Reflection | Generate weekly reflection             | Behavioural data across windows exists | Click Generate Weekly Reflection | Reflection card displayed             |               | Pass/Fail |
+| FT-20 | Engagement        | Refresh engagement summary             | Completed tasks/focus exist            | Click Refresh Engagement         | Streak/token summary updated          |               | Pass/Fail |
+| FT-21 | Rooms            | Create public study room         | Signed in                 | Submit room form                | Room created and opened     |               | Pass/Fail |
+| FT-22 | Rooms            | Create private room              | Signed in                 | Select private and create       | Invite code generated       |               | Pass/Fail |
+| FT-23 | Rooms            | Join private room by invite code | Valid invite code         | Submit code                     | User joins room             |               | Pass/Fail |
+| FT-24 | Rooms            | Leave room                       | Joined room, not owner    | Click Leave Room                | User leaves and redirects   |               | Pass/Fail |
+| FT-25 | Realtime Members | Member join updates roster       | Two accounts              | B joins room while A is viewing | A roster updates live       |               | Pass/Fail |
+| FT-26 | Realtime Members | Member leave updates roster      | Two accounts              | B leaves room                   | A roster updates live       |               | Pass/Fail |
+| FT-27 | Presence         | Online participants sync         | Two accounts in same room | Both open room                  | Both see 2 online users     |               | Pass/Fail |
+| FT-28 | Presence         | Focus status sync                | Two accounts              | B switches Available → Focusing | A sees change live          |               | Pass/Fail |
+| FT-29 | Chat             | Send realtime chat message       | Two accounts in same room | A sends message                 | B receives without refresh  |               | Pass/Fail |
+| FT-30 | Chat             | Persist chat history             | Existing messages         | Refresh page                    | Messages remain visible     |               | Pass/Fail |
+| FT-31 | Voice            | Join voice room                  | Valid room membership     | Click Join Voice                | User connects to voice      |               | Pass/Fail |
+| FT-32 | Voice            | Voice participant count updates  | Two accounts              | Both join voice                 | Both see 2 participants     |               | Pass/Fail |
+| FT-33 | Voice            | Mute/unmute microphone           | Joined voice              | Toggle mic                      | Audio publish state changes |               | Pass/Fail |
+| FT-34 | Voice            | Leave voice room                 | Joined voice              | Click Leave Voice               | User disconnects from voice |               | Pass/Fail |
