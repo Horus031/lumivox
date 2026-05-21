@@ -1,6 +1,8 @@
 from contextlib import asynccontextmanager
+import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     deadline_risk,
@@ -32,6 +34,24 @@ app = FastAPI(
     description="AI and behavioural analytics microservice for Lumivox.",
     lifespan=lifespan,
 )
+
+allowed_origins = [
+    "http://localhost:3000",
+]
+
+production_web_url = os.getenv("WEB_APP_URL")
+
+if production_web_url:
+    allowed_origins.append(production_web_url)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 app.include_router(health.router, prefix="/api/v1", tags=["Health"])
 app.include_router(pbi.router, prefix="/api/v1/pbi", tags=["PBI"])
