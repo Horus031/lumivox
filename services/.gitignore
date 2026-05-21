@@ -6,6 +6,6 @@ services/ai-api/ml/data/processed/
 services/ai-api/ml/reports/
 
 # ML model artifacts
-services/ai-api/ml/artifacts/
+services/ai-api/ml/artifacts/*
 
 .env
