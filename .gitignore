@@ -8,3 +8,11 @@ node_modules/
 .next/
 playwright-report/
 test-results/
+
+services/ai-api/ml/artifacts/**/*.joblib
+services/ai-api/ml/artifacts/**/*.pkl
+services/ai-api/ml/artifacts/**/*.pickle
+services/ai-api/ml/artifacts/**/*.onnx
+services/ai-api/ml/artifacts/**/*.bin
+services/ai-api/ml/artifacts/**/*.pt
+services/ai-api/ml/artifacts/**/*.pth
