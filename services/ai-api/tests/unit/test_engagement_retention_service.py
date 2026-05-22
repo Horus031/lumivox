@@ -1,9 +1,11 @@
 from datetime import date
+from uuid import uuid4
 
 from app.services.engagement_retention_service import (
     build_reward_candidates,
     calculate_longest_streak,
     calculate_streak_ending_at_latest_activity,
+    get_previous_engagement_stats,
     is_valid_completed_task,
     is_valid_focus_session,
 )
@@ -114,3 +116,29 @@ def test_reward_candidates_include_only_valid_focus_and_task_rewards():
     assert "task_completed:task-1" in source_keys
     assert "task_completed:task-2" not in source_keys
     assert "streak_milestone_3:2026-05-12" in source_keys
+
+
+def test_previous_engagement_stats_returns_none_when_row_is_missing(monkeypatch):
+    class FakeQuery:
+        def select(self, *_args, **_kwargs):
+            return self
+
+        def eq(self, *_args, **_kwargs):
+            return self
+
+        def maybe_single(self):
+            return self
+
+        def execute(self):
+            return None
+
+    class FakeSupabase:
+        def table(self, *_args, **_kwargs):
+            return FakeQuery()
+
+    monkeypatch.setattr(
+        "app.services.engagement_retention_service.get_supabase_client",
+        lambda: FakeSupabase(),
+    )
+
+    assert get_previous_engagement_stats(uuid4()) is None

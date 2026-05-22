@@ -43,10 +43,10 @@ export function FrozenStreakAlert({ stats }: FrozenStreakAlertProps) {
         </div>
 
         <Link
-          href="#engagement-summary"
+          href="/settings#streak-restore"
           className="rounded-xl bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-700"
         >
-          Restore now
+          Restore in settings
         </Link>
       </div>
     </section>

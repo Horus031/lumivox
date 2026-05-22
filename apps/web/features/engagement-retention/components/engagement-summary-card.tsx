@@ -1,5 +1,4 @@
 import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
-import { RefreshEngagementButton } from "@/features/engagement-retention/components/refresh-engagement-button";
 import { RestoreStreakButton } from "@/features/engagement-retention/components/restore-streak-button";
 
 type EngagementSummaryCardProps = {
@@ -57,8 +56,6 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
 
         <div className="flex flex-wrap gap-2">
           {isFrozen ? <RestoreStreakButton disabled={!canRestore} /> : null}
-
-          <RefreshEngagementButton />
         </div>
       </div>
 
@@ -138,16 +135,6 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
               label="Tokens spent"
               value={`${stats.total_tokens_spent ?? 0}`}
             />
-
-            {/* <MetricCard
-              label="Valid focus sessions"
-              value={`${stats.valid_focus_sessions_total ?? 0}`}
-            />
-
-            <MetricCard
-              label="Valid completed tasks"
-              value={`${stats.valid_completed_tasks_total ?? 0}`}
-            /> */}
 
             <MetricCard
               label="Last valid activity"

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -14,26 +15,23 @@ import {
 function calculateElapsedFocusMinutes(
   startedAt: string,
   endedAt: Date,
-  totalPausedSeconds: number
+  totalPausedSeconds: number,
 ) {
   const startedMs = new Date(startedAt).getTime();
   const endedMs = endedAt.getTime();
 
   const rawElapsedSeconds = Math.max(
     0,
-    Math.floor((endedMs - startedMs) / 1000)
+    Math.floor((endedMs - startedMs) / 1000),
   );
 
-  const activeSeconds = Math.max(
-    0,
-    rawElapsedSeconds - totalPausedSeconds
-  );
+  const activeSeconds = Math.max(0, rawElapsedSeconds - totalPausedSeconds);
 
   return Math.floor(activeSeconds / 60);
 }
 
 export async function createFocusSessionAction(
-  input: CreateFocusSessionInput
+  input: CreateFocusSessionInput,
 ): Promise<ActionResult> {
   const parsed = createFocusSessionSchema.safeParse(input);
 
@@ -85,7 +83,7 @@ export async function createFocusSessionAction(
 }
 
 export async function pauseFocusSessionAction(
-  sessionId: string
+  sessionId: string,
 ): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
@@ -134,7 +132,7 @@ export async function pauseFocusSessionAction(
 }
 
 export async function resumeFocusSessionAction(
-  sessionId: string
+  sessionId: string,
 ): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
@@ -173,7 +171,7 @@ export async function resumeFocusSessionAction(
 
     const newlyPausedSeconds = Math.max(
       0,
-      Math.floor((nowMs - pausedAtMs) / 1000)
+      Math.floor((nowMs - pausedAtMs) / 1000),
     );
 
     const updatedTotalPausedSeconds =
@@ -214,7 +212,7 @@ export async function resumeFocusSessionAction(
 }
 
 export async function completeFocusSessionAction(
-  sessionId: string
+  sessionId: string,
 ): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
@@ -226,13 +224,11 @@ export async function completeFocusSessionAction(
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select(
-        "id, started_at, total_paused_seconds, status"
-      )
+      .select("id, started_at, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
       .single();
 
@@ -255,7 +251,7 @@ export async function completeFocusSessionAction(
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
-      session.total_paused_seconds
+      session.total_paused_seconds,
     );
 
     const { error: updateError } = await supabase
@@ -274,8 +270,19 @@ export async function completeFocusSessionAction(
       };
     }
 
+    try {
+      await recalculateEngagementForUser(user.id);
+    } catch (error) {
+      console.error(
+        "Failed to auto refresh engagement after focus completion:",
+        error,
+      );
+    }
+
     revalidatePath("/focus");
     revalidatePath("/dashboard");
+    revalidatePath("/settings");
+    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -294,7 +301,7 @@ export async function completeFocusSessionAction(
 }
 
 export async function cancelFocusSessionAction(
-  sessionId: string
+  sessionId: string,
 ): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
@@ -326,7 +333,7 @@ export async function cancelFocusSessionAction(
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
-      session.total_paused_seconds
+      session.total_paused_seconds,
     );
 
     const { error: updateError } = await supabase

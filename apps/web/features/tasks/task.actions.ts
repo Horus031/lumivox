@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -14,7 +15,7 @@ import {
 } from "./task.schemas";
 
 export async function createTaskAction(
-  input: CreateTaskInput
+  input: CreateTaskInput,
 ): Promise<ActionResult> {
   const parsed = createTaskSchema.safeParse(input);
 
@@ -29,14 +30,8 @@ export async function createTaskAction(
   try {
     const { supabase, user } = await requireUser();
 
-    const {
-      title,
-      description,
-      goalId,
-      priority,
-      estimatedMinutes,
-      dueAt,
-    } = parsed.data;
+    const { title, description, goalId, priority, estimatedMinutes, dueAt } =
+      parsed.data;
 
     const { error } = await supabase.from("tasks").insert({
       user_id: user.id,
@@ -76,7 +71,7 @@ export async function createTaskAction(
 }
 
 export async function updateTaskAction(
-  input: UpdateTaskInput
+  input: UpdateTaskInput,
 ): Promise<ActionResult> {
   const parsed = updateTaskSchema.safeParse(input);
 
@@ -89,7 +84,7 @@ export async function updateTaskAction(
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
     const {
       taskId,
@@ -104,9 +99,7 @@ export async function updateTaskAction(
     } = parsed.data;
 
     const completedAtValue =
-      status === "completed"
-        ? completedAt || new Date().toISOString()
-        : null;
+      status === "completed" ? completedAt || new Date().toISOString() : null;
 
     const { error } = await supabase
       .from("tasks")
@@ -129,6 +122,20 @@ export async function updateTaskAction(
       };
     }
 
+    try {
+      await recalculateEngagementForUser(user.id);
+    } catch (error) {
+      console.error(
+        "Failed to auto refresh engagement after task completion:",
+        error,
+      );
+    }
+
+    revalidatePath("/dashboard");
+    revalidatePath("/tasks");
+    revalidatePath("/settings");
+    revalidatePath("/", "layout");
+
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
     revalidatePath("/goals");
@@ -149,9 +156,7 @@ export async function updateTaskAction(
   }
 }
 
-export async function deleteTaskAction(
-  taskId: string
-): Promise<ActionResult> {
+export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
   const parsed = deleteTaskSchema.safeParse({ taskId });
 
   if (!parsed.success) {
