@@ -2,11 +2,57 @@ from datetime import date
 
 from app.services.engagement_retention_service import (
     build_reward_candidates,
-    calculate_streaks,
+    calculate_longest_streak,
+    calculate_streak_ending_at_latest_activity,
+    is_valid_completed_task,
+    is_valid_focus_session,
 )
 
 
-def test_calculate_streaks_returns_current_and_longest_streak():
+def test_valid_focus_session_requires_minimum_minutes():
+    valid_session = {
+        "id": "focus-1",
+        "status": "completed",
+        "ended_at": "2026-05-10T10:00:00+00:00",
+        "actual_focus_minutes": 12,
+    }
+
+    invalid_session = {
+        "id": "focus-2",
+        "status": "completed",
+        "ended_at": "2026-05-10T10:00:00+00:00",
+        "actual_focus_minutes": 2,
+    }
+
+    assert is_valid_focus_session(valid_session) is True
+    assert is_valid_focus_session(invalid_session) is False
+
+
+def test_valid_task_accepts_estimated_minutes():
+    task = {
+        "id": "task-1",
+        "status": "completed",
+        "created_at": "2026-05-10T10:00:00+00:00",
+        "completed_at": "2026-05-10T10:01:00+00:00",
+        "estimated_minutes": 15,
+    }
+
+    assert is_valid_completed_task(task) is True
+
+
+def test_valid_task_rejects_instant_low_effort_completion():
+    task = {
+        "id": "task-1",
+        "status": "completed",
+        "created_at": "2026-05-10T10:00:00+00:00",
+        "completed_at": "2026-05-10T10:01:00+00:00",
+        "estimated_minutes": 1,
+    }
+
+    assert is_valid_completed_task(task) is False
+
+
+def test_calculate_streaks():
     active_dates = [
         date(2026, 5, 10),
         date(2026, 5, 11),
@@ -14,62 +60,57 @@ def test_calculate_streaks_returns_current_and_longest_streak():
         date(2026, 5, 14),
     ]
 
-    current_streak, longest_streak, latest_date = calculate_streaks(
-        active_dates
-    )
-
-    assert longest_streak == 3
-    assert latest_date == date(2026, 5, 14)
-    assert current_streak >= 0
+    assert calculate_longest_streak(active_dates) == 3
+    assert calculate_streak_ending_at_latest_activity(active_dates) == 1
 
 
-def test_reward_candidates_include_focus_and_task_rewards():
+def test_reward_candidates_include_only_valid_focus_and_task_rewards():
     focus_sessions = [
         {
             "id": "focus-1",
+            "status": "completed",
             "ended_at": "2026-05-10T10:00:00+00:00",
-        }
+            "actual_focus_minutes": 12,
+        },
+        {
+            "id": "focus-2",
+            "status": "completed",
+            "ended_at": "2026-05-10T10:00:00+00:00",
+            "actual_focus_minutes": 2,
+        },
     ]
 
     completed_tasks = [
         {
             "id": "task-1",
-            "completed_at": "2026-05-10T11:00:00+00:00",
-        }
-    ]
-
-    active_dates = [
-        date(2026, 5, 10),
-        date(2026, 5, 11),
-        date(2026, 5, 12),
+            "status": "completed",
+            "created_at": "2026-05-10T10:00:00+00:00",
+            "completed_at": "2026-05-10T10:10:00+00:00",
+            "estimated_minutes": 5,
+        },
+        {
+            "id": "task-2",
+            "status": "completed",
+            "created_at": "2026-05-10T10:00:00+00:00",
+            "completed_at": "2026-05-10T10:01:00+00:00",
+            "estimated_minutes": 1,
+        },
     ]
 
     rewards = build_reward_candidates(
         completed_focus_sessions=focus_sessions,
         completed_tasks=completed_tasks,
-        active_dates=active_dates,
+        valid_activity_dates=[
+            date(2026, 5, 10),
+            date(2026, 5, 11),
+            date(2026, 5, 12),
+        ],
     )
 
-    event_types = [reward["event_type"] for reward in rewards]
+    source_keys = [reward["source_key"] for reward in rewards]
 
-    assert "focus_session_completed" in event_types
-    assert "task_completed" in event_types
-    assert "daily_streak_continued" in event_types
-    assert "streak_milestone_3" in event_types
-
-
-def test_reward_source_keys_are_stable():
-    focus_sessions = [
-        {
-            "id": "focus-1",
-            "ended_at": "2026-05-10T10:00:00+00:00",
-        }
-    ]
-
-    rewards = build_reward_candidates(
-        completed_focus_sessions=focus_sessions,
-        completed_tasks=[],
-        active_dates=[],
-    )
-
-    assert rewards[0]["source_key"] == "focus_session_completed:focus-1"
+    assert "focus_session_completed:focus-1" in source_keys
+    assert "focus_session_completed:focus-2" not in source_keys
+    assert "task_completed:task-1" in source_keys
+    assert "task_completed:task-2" not in source_keys
+    assert "streak_milestone_3:2026-05-12" in source_keys
