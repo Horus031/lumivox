@@ -27,6 +27,9 @@ import { getLatestNativeTaskAiInsights } from "@/features/native-task-insights/n
 import { NativeTaskAiInsightSection } from "@/features/native-task-insights/components/native-task-ai-insight-section";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
+import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
+import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
+import { EngagementSummaryCard } from "@/features/engagement-retention/components/engagement-summary-card";
 
 export default async function DashboardPage() {
   const [
@@ -38,6 +41,7 @@ export default async function DashboardPage() {
     aiInsightCards,
     nativeTaskRiskAssessments,
     nativeTaskAiInsights,
+    engagementStats,
   ] = await Promise.all([
     getDashboardSummary(),
     getLatestPbiSnapshot(),
@@ -47,6 +51,7 @@ export default async function DashboardPage() {
     getLatestAiInsightCards(),
     getLatestNativeTaskRiskAssessments(),
     getLatestNativeTaskAiInsights(),
+    getCurrentEngagementStats(),
   ]);
 
   const explanation =
@@ -64,6 +69,10 @@ export default async function DashboardPage() {
           description="Review your recent productivity behaviour, visualise study patterns, and understand the reasoning behind your behavioural signals."
           action={<RefreshPbiButton />}
         />
+
+        <FrozenStreakAlert stats={engagementStats} />
+
+        <EngagementSummaryCard stats={engagementStats} />
 
         <DashboardSummaryCards {...summary} />
 
