@@ -22,7 +22,7 @@ export function SidebarEngagementMiniStats({
   if (!stats) {
     return (
       <div className="mt-3 rounded-xl border bg-neutral-50 p-3 text-xs text-neutral-600">
-        Refresh engagement to see streak and tokens.
+        Engagement stats will appear after your first valid study activity.
       </div>
     );
   }

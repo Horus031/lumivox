@@ -618,6 +618,9 @@ def get_previous_engagement_stats(user_id: UUID) -> dict | None:
         .execute()
     )
 
+    if result is None:
+        return None
+
     return result.data
 
 

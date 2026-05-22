@@ -29,7 +29,6 @@ import { NativeTaskAiInsightSection } from "@/features/native-task-insights/comp
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
 import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
-import { EngagementSummaryCard } from "@/features/engagement-retention/components/engagement-summary-card";
 
 export default async function DashboardPage() {
   const [
@@ -71,8 +70,6 @@ export default async function DashboardPage() {
         />
 
         <FrozenStreakAlert stats={engagementStats} />
-
-        <EngagementSummaryCard stats={engagementStats} />
 
         <DashboardSummaryCards {...summary} />
 
