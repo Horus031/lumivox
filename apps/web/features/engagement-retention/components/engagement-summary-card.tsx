@@ -139,7 +139,7 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
               value={`${stats.total_tokens_spent ?? 0}`}
             />
 
-            <MetricCard
+            {/* <MetricCard
               label="Valid focus sessions"
               value={`${stats.valid_focus_sessions_total ?? 0}`}
             />
@@ -147,7 +147,7 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
             <MetricCard
               label="Valid completed tasks"
               value={`${stats.valid_completed_tasks_total ?? 0}`}
-            />
+            /> */}
 
             <MetricCard
               label="Last valid activity"
