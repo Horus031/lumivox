@@ -954,11 +954,17 @@ export type Database = {
           completed_tasks_total: number
           created_at: string
           current_streak_days: number
+          last_streak_evaluation_at: string | null
+          last_valid_activity_date: string | null
           latest_active_study_date: string | null
           longest_streak_days: number
+          streak_freeze_started_at: string | null
+          streak_restore_deadline_at: string | null
+          streak_status: Database["public"]["Enums"]["engagement_streak_status"]
           token_balance: number
           tokens_earned_last_7d: number
           total_tokens_earned: number
+          total_tokens_spent: number
           updated_at: string
           user_id: string
         }
@@ -968,11 +974,17 @@ export type Database = {
           completed_tasks_total?: number
           created_at?: string
           current_streak_days?: number
+          last_streak_evaluation_at?: string | null
+          last_valid_activity_date?: string | null
           latest_active_study_date?: string | null
           longest_streak_days?: number
+          streak_freeze_started_at?: string | null
+          streak_restore_deadline_at?: string | null
+          streak_status?: Database["public"]["Enums"]["engagement_streak_status"]
           token_balance?: number
           tokens_earned_last_7d?: number
           total_tokens_earned?: number
+          total_tokens_spent?: number
           updated_at?: string
           user_id: string
         }
@@ -982,11 +994,17 @@ export type Database = {
           completed_tasks_total?: number
           created_at?: string
           current_streak_days?: number
+          last_streak_evaluation_at?: string | null
+          last_valid_activity_date?: string | null
           latest_active_study_date?: string | null
           longest_streak_days?: number
+          streak_freeze_started_at?: string | null
+          streak_restore_deadline_at?: string | null
+          streak_status?: Database["public"]["Enums"]["engagement_streak_status"]
           token_balance?: number
           tokens_earned_last_7d?: number
           total_tokens_earned?: number
+          total_tokens_spent?: number
           updated_at?: string
           user_id?: string
         }
@@ -995,6 +1013,68 @@ export type Database = {
             foreignKeyName: "user_engagement_stats_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_streak_events: {
+        Row: {
+          created_at: string
+          event_date: string
+          event_type: Database["public"]["Enums"]["streak_event_type"]
+          id: string
+          metadata: Json
+          next_status:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          occurred_at: string
+          previous_status:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          source_key: string
+          token_delta: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_date?: string
+          event_type: Database["public"]["Enums"]["streak_event_type"]
+          id?: string
+          metadata?: Json
+          next_status?:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          occurred_at?: string
+          previous_status?:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          source_key: string
+          token_delta?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_date?: string
+          event_type?: Database["public"]["Enums"]["streak_event_type"]
+          id?: string
+          metadata?: Json
+          next_status?:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          occurred_at?: string
+          previous_status?:
+            | Database["public"]["Enums"]["engagement_streak_status"]
+            | null
+          source_key?: string
+          token_delta?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streak_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -1157,6 +1237,8 @@ export type Database = {
         }
         Returns: string
       }
+      expire_frozen_streaks: { Args: never; Returns: number }
+      get_user_token_balance: { Args: { p_user_id: string }; Returns: number }
       is_active_study_room_member: {
         Args: { p_room_id: string; p_user_id?: string }
         Returns: boolean
@@ -1170,6 +1252,7 @@ export type Database = {
         Returns: string
       }
       leave_study_room: { Args: { p_room_id: string }; Returns: undefined }
+      restore_my_streak_with_tokens: { Args: never; Returns: Json }
     }
     Enums: {
       ai_insight_type: "deadline_risk" | "native_task_risk"
@@ -1182,6 +1265,7 @@ export type Database = {
         | "external_interrupt"
         | "fatigue"
         | "other"
+      engagement_streak_status: "active" | "frozen" | "lost"
       feature_attribution_effect:
         | "increases_risk"
         | "decreases_risk"
@@ -1196,6 +1280,14 @@ export type Database = {
         | "daily_streak_continued"
         | "streak_milestone_3"
         | "streak_milestone_7"
+        | "streak_restored_with_tokens"
+      streak_event_type:
+        | "activity_detected"
+        | "streak_started"
+        | "streak_continued"
+        | "streak_frozen"
+        | "streak_restored"
+        | "streak_lost"
       study_room_member_role: "owner" | "member"
       study_room_member_status: "active" | "left" | "removed"
       study_room_status: "active" | "archived"
@@ -1351,6 +1443,7 @@ export const Constants = {
         "fatigue",
         "other",
       ],
+      engagement_streak_status: ["active", "frozen", "lost"],
       feature_attribution_effect: [
         "increases_risk",
         "decreases_risk",
@@ -1366,6 +1459,15 @@ export const Constants = {
         "daily_streak_continued",
         "streak_milestone_3",
         "streak_milestone_7",
+        "streak_restored_with_tokens",
+      ],
+      streak_event_type: [
+        "activity_detected",
+        "streak_started",
+        "streak_continued",
+        "streak_frozen",
+        "streak_restored",
+        "streak_lost",
       ],
       study_room_member_role: ["owner", "member"],
       study_room_member_status: ["active", "left", "removed"],
