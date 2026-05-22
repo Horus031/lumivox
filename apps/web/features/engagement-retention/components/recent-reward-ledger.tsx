@@ -18,9 +18,7 @@ function formatEventType(eventType: string) {
     .join(" ");
 }
 
-export function RecentRewardLedger({
-  rewards,
-}: RecentRewardLedgerProps) {
+export function RecentRewardLedger({ rewards }: RecentRewardLedgerProps) {
   return (
     <section className="rounded-[28px] border border-border/70 bg-card/90 p-6 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
       <div>
@@ -63,8 +61,15 @@ export function RecentRewardLedger({
                 </p>
               </div>
 
-              <div className="rounded-full bg-amber-100 px-4 py-2 text-sm font-semibold text-amber-800">
-                +{reward.token_delta} tokens
+              <div
+                className={`rounded-full px-4 py-2 text-sm font-bold ${
+                  reward.token_delta >= 0
+                    ? "bg-amber-50 text-amber-700"
+                    : "bg-red-50 text-red-700"
+                }`}
+              >
+                {reward.token_delta >= 0 ? "+" : ""}
+                {reward.token_delta} tokens
               </div>
             </article>
           ))}

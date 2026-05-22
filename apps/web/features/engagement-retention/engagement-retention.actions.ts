@@ -13,9 +13,7 @@ type RecalculateEngagementApiResponse = {
   };
 };
 
-export async function refreshEngagementSummaryAction(): Promise<
-  ActionResult
-> {
+export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
   try {
     const { user } = await requireUser();
 
@@ -31,7 +29,7 @@ export async function refreshEngagementSummaryAction(): Promise<
     }
 
     const response = await fetch(
-      `${apiBaseUrl}/api/v1/engagement/recalculate`,
+      `${apiBaseUrl.replace(/\/$/, "")}/api/v1/engagement/recalculate`,
       {
         method: "POST",
         headers: {
@@ -43,7 +41,7 @@ export async function refreshEngagementSummaryAction(): Promise<
           persist_results: true,
         }),
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -55,7 +53,7 @@ export async function refreshEngagementSummaryAction(): Promise<
       };
     }
 
-    await response.json() as RecalculateEngagementApiResponse;
+    (await response.json()) as RecalculateEngagementApiResponse;
 
     revalidatePath("/dashboard");
 
@@ -71,6 +69,43 @@ export async function refreshEngagementSummaryAction(): Promise<
         error instanceof Error
           ? error.message
           : "Unexpected error while refreshing engagement summary.",
+    };
+  }
+}
+
+export async function restoreStreakWithTokensAction(): Promise<ActionResult> {
+  try {
+    const { supabase } = await requireUser();
+
+    const { data, error } = await supabase.rpc("restore_my_streak_with_tokens");
+
+    if (error) {
+      return {
+        success: false,
+        message: error.message,
+      };
+    }
+
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      message:
+        typeof data === "object" &&
+        data !== null &&
+        "message" in data &&
+        typeof data.message === "string"
+          ? data.message
+          : "Streak restored successfully.",
+      data: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while restoring streak.",
     };
   }
 }

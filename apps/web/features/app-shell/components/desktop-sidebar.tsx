@@ -2,12 +2,15 @@ import type { Profile } from "@/features/profiles/profile.types";
 
 import { AppNavigation } from "@/features/app-shell/components/app-navigation";
 import { UserMenuCard } from "@/features/app-shell/components/user-menu-card";
+import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
+import { SidebarEngagementMiniStats } from "@/features/engagement-retention/components/sidebar-engagement-mini-stats";
 
 type DesktopSidebarProps = {
   profile: Profile;
 };
 
-export function DesktopSidebar({ profile }: DesktopSidebarProps) {
+export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
+  const engagementStats = await getCurrentEngagementStats();
   return (
     <aside className="hidden lg:fixed lg:inset-y-0 lg:block lg:w-77 lg:p-4 xl:p-0">
       <div className="flex h-full flex-col rounded-4xl bg-sidebar/95 px-4 py-5 gap-4 shadow-[0_20px_70px_-55px_hsl(var(--primary)/0.28)] ring-1 ring-border/70 backdrop-blur-xl">
@@ -30,6 +33,7 @@ export function DesktopSidebar({ profile }: DesktopSidebarProps) {
         </div>
 
         <div>
+          <SidebarEngagementMiniStats stats={engagementStats} />
           <UserMenuCard profile={profile} />
         </div>
       </div>

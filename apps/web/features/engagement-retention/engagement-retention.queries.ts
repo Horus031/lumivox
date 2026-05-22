@@ -9,9 +9,7 @@ export async function getCurrentEngagementStats() {
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to fetch engagement stats: ${error.message}`
-    );
+    throw new Error(`Failed to fetch engagement stats: ${error.message}`);
   }
 
   return data;
@@ -28,8 +26,24 @@ export async function getRecentRewardLedgerEntries(limit = 5) {
 
   if (error) {
     throw new Error(
-      `Failed to fetch recent reward ledger entries: ${error.message}`
+      `Failed to fetch recent reward ledger entries: ${error.message}`,
     );
+  }
+
+  return data ?? [];
+}
+
+export async function getRecentStreakEvents(limit = 5) {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("user_streak_events")
+    .select("*")
+    .order("occurred_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    throw new Error(`Failed to fetch recent streak events: ${error.message}`);
   }
 
   return data ?? [];
