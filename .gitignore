@@ -16,3 +16,4 @@ services/ai-api/ml/artifacts/**/*.onnx
 services/ai-api/ml/artifacts/**/*.bin
 services/ai-api/ml/artifacts/**/*.pt
 services/ai-api/ml/artifacts/**/*.pth
+services/ai-api/ml/experiments/

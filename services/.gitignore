@@ -2,4 +2,5 @@ ai-api/ml/data/raw/
 ai-api/ml/data/processed/
 ai-api/ml/reports/
 ai-api/ml/artifacts/
+ai-api/ml/experiments/
 .env
