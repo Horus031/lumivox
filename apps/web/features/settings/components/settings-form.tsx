@@ -8,6 +8,19 @@ import type {
   Profile,
 } from "@/features/profiles/profile.types";
 import { updateSettingsAction } from "../settings.actions";
+import { ThemeToggle } from "@/features/theme/theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type OnboardingFormProps = {
   profile: Profile;
@@ -98,7 +111,7 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="mb-5">
           <h2 className="text-xl font-semibold">Profile setup</h2>
           <p className="mt-1 text-sm text-neutral-600">
@@ -109,37 +122,44 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-sm font-medium">
+            <Label className="mb-1.5 block text-sm font-medium">
               Full name
-            </label>
-            <input
+            </Label>
+            <Input
               type="text"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
-              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
               placeholder="Vo Minh Nghia"
               required
             />
           </div>
 
           <div>
-            <label className="mb-1.5 block text-sm font-medium">Timezone</label>
-            <select
-              value={timezone}
-              onChange={(event) => setTimezone(event.target.value)}
-              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+            <Label className="mb-1.5 block text-sm font-medium">Timezone</Label>
+
+            <Select
+              value={timezone ?? ""}
+              onValueChange={(event) => setTimezone(event)}
             >
-              {commonTimezones.map((item) => (
-                <option key={item} value={item}>
-                  {item}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Timezone" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Timezone</SelectLabel>
+                  {commonTimezones.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {item}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
+      <section className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-start">
           <div>
             <h2 className="text-xl font-semibold">Personalize your PBI</h2>
@@ -149,16 +169,17 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
             </p>
           </div>
 
-          <button
+          <Button
+            variant={"outline"}
             type="button"
             onClick={resetToDefaultWeights}
-            className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50"
+            className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-surface"
           >
             Reset to academic default
-          </button>
+          </Button>
         </div>
 
-        <div className="mb-6 rounded-2xl border bg-neutral-50 p-4">
+        <div className="mb-6 rounded-2xl border bg-surface p-4">
           <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
             <p className="text-sm font-medium">Current total weight</p>
 
@@ -217,14 +238,35 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
         </div>
       </section>
 
+      <section className="rounded-2xl border bg-background p-6 shadow-sm">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            Appearance
+          </p>
+
+          <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+            Theme preference
+          </h2>
+
+          <p className="mt-2 max-w-3xl text-secondary">
+            Choose between light mode, dark mode, or follow your system
+            preference.
+          </p>
+        </div>
+
+        <div className="mt-5 max-w-md">
+          <ThemeToggle />
+        </div>
+      </section>
+
       <div className="flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={isPending || Math.abs(totalWeight - 1) > 0.0001}
-          className="rounded-xl bg-neutral-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+          className="rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Saving settings..." : "Save settings"}
-        </button>
+        </Button>
       </div>
     </form>
   );
@@ -248,7 +290,7 @@ function WeightInput({
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
         <div>
           <p className="font-medium">{label}</p>
-          <p className="mt-1 text-sm text-neutral-600">{description}</p>
+          <p className="mt-1 text-sm text-secondary">{description}</p>
         </div>
 
         <div className="w-full md:w-56">

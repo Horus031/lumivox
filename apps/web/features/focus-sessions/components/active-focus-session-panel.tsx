@@ -185,7 +185,7 @@ export function ActiveFocusSessionPanel({
 
   return (
     <section className="space-y-6">
-      <article className="rounded-2xl border bg-white p-6 shadow-sm">
+      <article className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
@@ -197,29 +197,29 @@ export function ActiveFocusSessionPanel({
             </h2>
 
             <div className="mt-3 flex flex-wrap gap-2">
-              <span className="rounded-full bg-neutral-100 px-3 py-1 text-sm font-medium capitalize">
+              <span className="rounded-full bg-surface px-3 py-1 text-sm font-medium capitalize">
                 {session.status}
               </span>
 
-              <span className="rounded-full bg-neutral-100 px-3 py-1 text-sm font-medium">
+              <span className="rounded-full bg-surface px-3 py-1 text-sm font-medium">
                 Planned: {session.planned_minutes} min
               </span>
             </div>
           </div>
 
           <div className="text-left md:text-right">
-            <p className="text-sm text-neutral-500">Remaining time</p>
+            <p className="text-sm text-foreground">Remaining time</p>
 
             <p
               className={`mt-1 text-5xl font-bold tracking-tight ${
-                remainingSeconds <= 0 ? "text-emerald-600" : "text-neutral-900"
+                remainingSeconds <= 0 ? "text-success" : "text-foreground"
               }`}
             >
               {timerText}
             </p>
 
             {remainingSeconds <= 0 && (
-              <p className="mt-2 text-sm font-medium text-emerald-700">
+              <p className="mt-2 text-sm font-medium text-success">
                 Planned duration reached. You may complete the session.
               </p>
             )}
@@ -256,14 +256,14 @@ export function ActiveFocusSessionPanel({
             variant={"outline"}
             onClick={handleCancel}
             disabled={isPending}
-            className="border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+            className="border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-60"
           >
             Cancel session
           </Button>
         </div>
       </article>
 
-      <article className="rounded-2xl border bg-white p-6 shadow-sm">
+      <article className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="mb-5">
           <h3 className="text-xl font-semibold">Log a distraction</h3>
           <p className="mt-1 text-sm text-neutral-600">

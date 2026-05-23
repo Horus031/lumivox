@@ -43,11 +43,11 @@ export function RoomCard({ room, mode }: RoomCardProps) {
   }
 
   return (
-    <article className="rounded-2xl border bg-white p-5 shadow-sm h-full">
-      <div className="flex flex-col justify-between h-full">
+    <article className="rounded-2xl border bg-background p-5 shadow-sm h-full">
+      <div className="flex flex-col gap-4 justify-between h-full">
         <div>
           <div className="mb-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold capitalize text-neutral-700">
+            <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold capitalize text-foreground">
               {room.visibility}
             </span>
 
@@ -59,7 +59,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
           <h3 className="text-xl font-bold">{room.title}</h3>
 
           {room.description ? (
-            <p className="mt-2 text-sm leading-6 text-neutral-700">
+            <p className="mt-2 text-sm leading-6 text-foreground">
               {room.description}
             </p>
           ) : null}
@@ -73,7 +73,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
           {mode === "joined" ? (
             <Link
               href={`/rooms/${room.id}`}
-              className="bg-transparent w-full text-center border border-primary rounded-md px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary hover:text-white"
+              className="bg-transparent w-full text-center border border-primary rounded-md px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary hover:text-primary-foreground"
             >
               Enter room
             </Link>
@@ -81,7 +81,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
             <Button
               onClick={handleJoin}
               disabled={isPending}
-              className="border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="border px-4 py-2.5 text-sm font-medium transition hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Joining..." : "Join room"}
             </Button>

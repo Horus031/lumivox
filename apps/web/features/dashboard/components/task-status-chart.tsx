@@ -21,7 +21,7 @@ type TaskStatusChartProps = {
 
 export function TaskStatusChart({ data }: TaskStatusChartProps) {
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
         <h2 className="text-xl font-semibold">Task status overview</h2>
         <p className="mt-1 text-sm text-neutral-600">

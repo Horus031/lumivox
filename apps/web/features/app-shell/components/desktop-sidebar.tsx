@@ -32,7 +32,7 @@ export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
           <AppNavigation />
         </div>
 
-        <div>
+        <div className="space-y-4">
           <SidebarEngagementMiniStats stats={engagementStats} />
           <UserMenuCard profile={profile} />
         </div>

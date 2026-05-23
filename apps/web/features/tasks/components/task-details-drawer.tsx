@@ -11,6 +11,7 @@ import { deleteTaskAction } from "@/features/tasks/task.actions";
 import { formatDisplayDate } from "@/lib/utils/date";
 
 import { TaskModalShell } from "./task-modal-shell";
+import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
@@ -93,13 +94,13 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="secondary"
-            className="rounded-full px-3 py-1.5 capitalize"
+            className={`rounded-full px-3 py-1.5 capitalize ${getPriorityTone(currentTask.priority)}`}
           >
             {currentTask.priority}
           </Badge>
           <Badge
             variant="outline"
-            className="rounded-full px-3 py-1.5 capitalize"
+            className={`rounded-full px-3 py-1.5 capitalize ${getStatusTone(currentTask.status)}`}
           >
             {getStatusLabel(currentTask.status)}
           </Badge>

@@ -91,7 +91,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
 
   if (isEditing) {
     return (
-      <article className="rounded-2xl border bg-white p-5 shadow-sm">
+      <article className="rounded-2xl border bg-backgroud p-5 shadow-sm">
         <form onSubmit={handleUpdate} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium">
@@ -100,7 +100,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
               required
             />
           </div>
@@ -113,7 +113,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={3}
-              className="w-full resize-none rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              className="w-full resize-none rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
             />
           </div>
 
@@ -125,7 +125,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
               <select
                 value={goalId}
                 onChange={(event) => setGoalId(event.target.value)}
-                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
               >
                 <option value="">No goal</option>
                 {goals.map((goal) => (
@@ -151,7 +151,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
                       | "critical"
                   )
                 }
-                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
               >
                 <option value="low">Low</option>
                 <option value="medium">Medium</option>
@@ -176,7 +176,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
                       | "cancelled"
                   )
                 }
-                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
               >
                 <option value="todo">Todo</option>
                 <option value="in_progress">In progress</option>
@@ -197,7 +197,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
                 onChange={(event) =>
                   setEstimatedMinutes(event.target.value)
                 }
-                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
               />
             </div>
           </div>
@@ -210,7 +210,7 @@ export function TaskCard({ task, goals }: TaskCardProps) {
               type="datetime-local"
               value={dueAt}
               onChange={(event) => setDueAt(event.target.value)}
-              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-background"
             />
           </div>
 
@@ -238,15 +238,15 @@ export function TaskCard({ task, goals }: TaskCardProps) {
   }
 
   return (
-    <article className="rounded-2xl border bg-white p-5 shadow-sm">
+    <article className="rounded-2xl border bg-background p-5 shadow-sm">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <div className="mb-2 flex flex-wrap gap-2">
-            <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium capitalize">
+            <span className="rounded-full bg-background/10 px-2.5 py-1 text-xs font-medium capitalize">
               {task.priority}
             </span>
 
-            <span className="rounded-full bg-neutral-100 px-2.5 py-1 text-xs font-medium capitalize">
+            <span className="rounded-full bg-background/10 px-2.5 py-1 text-xs font-medium capitalize">
               {task.status.replace("_", " ")}
             </span>
           </div>
@@ -254,12 +254,12 @@ export function TaskCard({ task, goals }: TaskCardProps) {
           <h3 className="text-lg font-semibold">{task.title}</h3>
 
           {task.description && (
-            <p className="mt-1 text-sm text-neutral-600">
+            <p className="mt-1 text-sm text-foreground">
               {task.description}
             </p>
           )}
 
-          <div className="mt-3 space-y-1 text-sm text-neutral-600">
+          <div className="mt-3 space-y-1 text-sm text-foreground">
             <p>
               Goal:{" "}
               <span className="font-medium text-neutral-900">

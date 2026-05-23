@@ -6,9 +6,9 @@ type RecentFocusSessionsProps = {
 
 export function RecentFocusSessions({ sessions }: RecentFocusSessionsProps) {
   return (
-    <section className="rounded-2xl space-y-4 bg-white border p-6">
+    <section className="rounded-2xl space-y-4 bg-background border p-6">
       <div>
-        <h2 className="text-xs text-neutral-600 uppercase font-semibold">
+        <h2 className="text-xs text-foreground uppercase font-semibold">
           Recent focus sessions
         </h2>
       </div>
@@ -16,7 +16,7 @@ export function RecentFocusSessions({ sessions }: RecentFocusSessionsProps) {
       {sessions.length === 0 ? (
         <div className="p-10 text-center">
           <h3 className="text-lg font-semibold">No focus sessions yet</h3>
-          <p className="mt-2 text-sm text-neutral-600">
+          <p className="mt-2 text-sm text-foreground">
             Start your first session to begin collecting behavioural data.
           </p>
         </div>
@@ -39,7 +39,7 @@ export function RecentFocusSessions({ sessions }: RecentFocusSessionsProps) {
                   </p>
                 </div>
 
-                <span className="w-fit rounded font-mono text-xs bg-neutral-100 px-3 py-1 font-semibold capitalize">
+                <span className="w-fit rounded font-mono text-xs bg-surface px-3 py-1 font-semibold capitalize">
                   {session.status}
                 </span>
               </div>
