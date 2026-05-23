@@ -119,7 +119,7 @@ export function StudyRoomMemberRoster({
   }, [roomId, supabase]);
 
   return (
-    <article className="rounded-2xl border bg-white p-6 shadow-sm">
+    <article className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-xl font-semibold">Persistent members</h2>
@@ -144,7 +144,7 @@ export function StudyRoomMemberRoster({
 
       <div className="mt-5 space-y-3">
         {members.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-4 text-sm text-neutral-600">
+          <div className="rounded-xl border border-dashed p-4 text-sm text-foreground">
             No active members found.
           </div>
         ) : (
@@ -162,7 +162,7 @@ export function StudyRoomMemberRoster({
                 </p>
               </div>
 
-              <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+              <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
                 Member
               </span>
             </div>

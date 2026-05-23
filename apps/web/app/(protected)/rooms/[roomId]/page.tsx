@@ -65,7 +65,7 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
         />
 
         <section className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-          <article className="rounded-2xl border bg-white p-6 shadow-sm">
+          <article className="rounded-2xl border bg-background p-6 shadow-sm">
             <h2 className="text-xl font-semibold">Room details</h2>
 
             <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -133,8 +133,8 @@ type DetailCardProps = {
 
 function DetailCard({ label, value }: DetailCardProps) {
   return (
-    <div className="rounded-2xl bg-neutral-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+    <div className="rounded-2xl bg-surface p-4">
+      <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
         {label}
       </p>
       <p className="mt-2 text-sm font-semibold capitalize">{value}</p>

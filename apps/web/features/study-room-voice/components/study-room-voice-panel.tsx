@@ -11,6 +11,7 @@ import { Track } from "livekit-client";
 import { toast } from "sonner";
 
 import type { StudyRoomVoiceTokenResponse } from "@/features/study-room-voice/study-room-voice.types";
+import { Button } from "@/components/ui/button";
 
 type StudyRoomVoicePanelProps = {
   roomId: string;
@@ -61,10 +62,10 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
+          <p className="text-sm font-medium uppercase tracking-wide text-foreground">
             Voice Room
           </p>
 
@@ -78,20 +79,21 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
         </div>
 
         {!credentials ? (
-          <button
+          <Button
             onClick={handleJoinVoice}
             disabled={isJoining}
-            className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+            className="rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isJoining ? "Joining voice..." : "Join Voice"}
-          </button>
+          </Button>
         ) : (
-          <button
+          <Button
+            variant={'outline'}
             onClick={handleLeaveVoice}
-            className="rounded-xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            className="rounded-xl border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/40"
           >
             Leave Voice
-          </button>
+          </Button>
         )}
       </div>
 
@@ -105,6 +107,7 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
       ) : (
         <div className="mt-6 rounded-2xl border p-4">
           <LiveKitRoom
+            className="bg-background"
             token={credentials.participant_token}
             serverUrl={credentials.server_url}
             connect={true}
@@ -133,10 +136,10 @@ function VoiceRoomContent() {
   const participants = useParticipants();
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 bg-background">
       <RoomAudioRenderer />
 
-      <div className="flex flex-col justify-between gap-4 rounded-2xl bg-neutral-50 p-4 md:flex-row md:items-center">
+      <div className="flex flex-col justify-between gap-4 rounded-2xl bg-surface p-4 md:flex-row md:items-center">
         <div>
           <p className="text-sm font-semibold">Microphone control</p>
           <p className="mt-1 text-sm text-neutral-600">
@@ -151,13 +154,13 @@ function VoiceRoomContent() {
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Voice participants</h3>
 
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
+          <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold text-foreground">
             {participants.length} in voice
           </span>
         </div>
 
         {participants.length === 0 ? (
-          <div className="rounded-2xl border border-dashed p-6 text-sm text-neutral-600">
+          <div className="rounded-2xl border border-dashed p-6 text-sm text-surface">
             No one is currently connected to voice.
           </div>
         ) : (
@@ -165,7 +168,7 @@ function VoiceRoomContent() {
             {participants.map((participant) => (
               <article
                 key={participant.identity}
-                className="rounded-2xl border bg-white p-4"
+                className="rounded-2xl border bg-background p-4"
               >
                 <p className="font-semibold">
                   {participant.name ?? participant.identity}

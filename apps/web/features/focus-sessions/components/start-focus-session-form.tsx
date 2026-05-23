@@ -50,9 +50,9 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-xs text-center uppercase font-semibold text-neutral-600">
+        <h2 className="text-xs text-center uppercase font-semibold text-foreground">
           Start a focus session
         </h2>
       </div>
@@ -113,10 +113,10 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                 key={value}
                 type="button"
                 onClick={() => setPlannedMinutes(value)}
-                className={`border bg-transparent text-black px-4 py-2 text-sm font-medium transition ${
+                className={`border bg-transparent text-primary-foreground px-4 py-2 text-sm font-medium transition ${
                   plannedMinutes === value
-                    ? "border-primary bg-primary text-white"
-                    : "hover:bg-neutral-50"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "text-foreground hover:text-primary-foreground"
                 }`}
               >
                 {value} min
@@ -139,7 +139,7 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full px-4 py-2.5 mt-2 text-sm font-medium text-white transition  disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full px-4 py-2.5 mt-2 text-sm font-medium text-primary-foreground transition  disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "Starting..." : "Start focus session"}
         </Button>

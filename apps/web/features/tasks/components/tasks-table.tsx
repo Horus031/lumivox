@@ -26,33 +26,13 @@ import { updateTaskAction } from "@/features/tasks/task.actions";
 import { TaskDetailsDrawer } from "./task-details-drawer";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
 type TasksTableProps = {
   tasks: TaskWithGoal[];
   goals: Goal[];
 };
 
-function getStatusTone(status: TaskWithGoal["status"]) {
-  if (status === "completed")
-    return "bg-emerald-500/10 text-emerald-700 ring-emerald-500/15";
-  if (status === "overdue")
-    return "bg-rose-500/10 text-rose-700 ring-rose-500/15";
-  if (status === "in_progress")
-    return "bg-sky-500/10 text-sky-700 ring-sky-500/15";
-  if (status === "cancelled")
-    return "bg-neutral-500/10 text-neutral-700 ring-neutral-500/15";
-  return "bg-amber-500/10 text-amber-700 ring-amber-500/15";
-}
-
-function getPriorityTone(priority: TaskWithGoal["priority"]) {
-  if (priority === "critical")
-    return "bg-rose-500/10 text-rose-700 ring-rose-500/15";
-  if (priority === "high")
-    return "bg-orange-500/10 text-orange-700 ring-orange-500/15";
-  if (priority === "medium")
-    return "bg-sky-500/10 text-sky-700 ring-sky-500/15";
-  return "bg-neutral-500/10 text-neutral-700 ring-neutral-500/15";
-}
 
 export function TasksTable({ tasks, goals }: TasksTableProps) {
   const router = useRouter();
@@ -313,8 +293,8 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                       <p className="font-medium text-foreground">
                         {task.goals?.title ?? "No goal"}
                       </p>
-                      <p className="mt-1 text-xs uppercase tracking-[0.18em] text-muted-foreground">
-                        {task.goals?.goal_type ?? "Unlinked"}
+                      <p className="mt-1 text-xs capitalize tracking-[0.18em] text-muted-foreground">
+                        {task.goals?.goal_type.replace("_", " ") ?? "Unlinked"}
                       </p>
                     </td>
                     <td className="px-4 py-4 align-top">

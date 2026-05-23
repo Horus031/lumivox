@@ -36,7 +36,7 @@ export function StreakRestoreSettingsCard({
   return (
     <section
       id="streak-restore"
-      className="scroll-mt-24 rounded-2xl border bg-white p-6 shadow-sm"
+      className="scroll-mt-24 rounded-2xl border bg-background p-6 shadow-sm"
     >
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
@@ -72,11 +72,11 @@ export function StreakRestoreSettingsCard({
               {stats.streak_status} streak
             </span>
 
-            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+            <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
               {stats.token_balance} tokens
             </span>
 
-            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+            <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
               {stats.current_streak_days} day streak
             </span>
           </div>
@@ -114,8 +114,8 @@ export function StreakRestoreSettingsCard({
               ) : null}
             </div>
           ) : (
-            <div className="rounded-2xl border bg-neutral-50 p-5">
-              <p className="font-semibold text-neutral-900">
+            <div className="rounded-2xl border bg-surface p-5">
+              <p className="font-semibold text-foreground">
                 No restore action is needed.
               </p>
 
@@ -156,7 +156,7 @@ type MiniMetricProps = {
 
 function MiniMetric({ label, value }: MiniMetricProps) {
   return (
-    <div className="rounded-2xl border bg-neutral-50 p-4">
+    <div className="rounded-2xl border bg-surface p-4">
       <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
         {label}
       </p>

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskDatePicker } from "./task-date-picker";
+import { Label } from "@/components/ui/label";
 
 type CreateTaskModalProps = {
   goals: Goal[];
@@ -104,10 +105,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
 
   return (
     <>
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="gap-2 px-4"
-      >
+      <Button onClick={() => setIsOpen(true)} className="gap-2 px-4">
         <Plus className="h-4 w-4" />
         New task
       </Button>
@@ -132,22 +130,23 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">
+            <Label className="text-sm font-medium text-foreground">
               Description
-            </label>
+            </Label>
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={4}
+              className="resize-none"
               placeholder="Optional notes or execution details"
-            ></Textarea>
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <Label className="text-sm font-medium text-foreground">
                 Linked goal
-              </label>
+              </Label>
               <Select
                 value={goalId ?? ""}
                 onValueChange={(value) =>
@@ -155,7 +154,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
                 }
                 defaultValue="no-goal"
               >
-                <SelectTrigger className="flex w-full h-11! rounded-xl border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+                <SelectTrigger className="flex w-full h-11! px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
                   <SelectValue placeholder="Linked goal" />
                 </SelectTrigger>
                 <SelectContent>
@@ -173,9 +172,9 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
+              <Label className="text-sm font-medium text-foreground">
                 Priority
-              </label>
+              </Label>
 
               <Select
                 value={priority ?? ""}
@@ -183,7 +182,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
                   setPriority(value as "low" | "medium" | "high" | "critical")
                 }
               >
-                <SelectTrigger className="flex w-full h-11! rounded-xl border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+                <SelectTrigger className="flex w-full h-11! bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
                   <SelectValue placeholder="Linked goal" />
                 </SelectTrigger>
                 <SelectContent>
@@ -212,12 +211,12 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
             </div>
 
             <div className="space-y-2">
-                <TaskDatePicker
-                  dueAt={dueAt}
-                  setDueAt={setDueAt}
-                  dueTime={dueTime}
-                  setDueTime={setDueTime}
-                />
+              <TaskDatePicker
+                dueAt={dueAt}
+                setDueAt={setDueAt}
+                dueTime={dueTime}
+                setDueTime={setDueTime}
+              />
 
               {/* <Input
                 type="datetime-local"

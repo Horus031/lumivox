@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 type PresenceStatus = "available" | "focusing" | "paused";
 
@@ -365,10 +366,10 @@ export function StudyRoomPresencePanel({
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
+          <p className="text-sm font-medium uppercase tracking-wide text-foreground">
             Realtime Presence
           </p>
 
@@ -382,8 +383,8 @@ export function StudyRoomPresencePanel({
           </p>
         </div>
 
-        <div className="rounded-2xl bg-neutral-50 px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        <div className="rounded-2xl bg-surface px-4 py-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
             Connection
           </p>
 
@@ -399,7 +400,7 @@ export function StudyRoomPresencePanel({
             {connectionState}
           </p>
 
-          <p className="mt-1 max-w-[220px] text-xs leading-5 text-neutral-500">
+          <p className="mt-1 max-w-55 text-xs leading-5 text-foreground">
             {connectionMessage}
           </p>
         </div>
@@ -409,38 +410,28 @@ export function StudyRoomPresencePanel({
         <p className="text-sm font-semibold">My current room status</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          <button
+          <Button
             onClick={() => updateMyStatus("available")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-              myStatus === "available"
-                ? "bg-neutral-900 text-white"
-                : "border hover:bg-neutral-50"
-            }`}
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition `}
           >
             Available
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={"outline"}
             onClick={() => updateMyStatus("focusing")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-              myStatus === "focusing"
-                ? "bg-neutral-900 text-white"
-                : "border hover:bg-neutral-50"
-            }`}
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
           >
             Focusing
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={"outline"}
             onClick={() => updateMyStatus("paused")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
-              myStatus === "paused"
-                ? "bg-neutral-900 text-white"
-                : "border hover:bg-neutral-50"
-            }`}
+            className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
           >
             Paused
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -448,7 +439,7 @@ export function StudyRoomPresencePanel({
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">Online participants</h3>
 
-          <span className="rounded-full bg-indigo-50 px-3 py-1 text-sm font-semibold text-indigo-700">
+          <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold text-foreground">
             {participants.length} online
           </span>
         </div>

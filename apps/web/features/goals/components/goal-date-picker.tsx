@@ -31,7 +31,7 @@ export function GoalDatePicker(props: GoalDatePickerProps) {
         <FieldLabel htmlFor="date">Start date</FieldLabel>
         <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline" className="text-left!">
+            <Button type="button" variant="outline" className="text-left! hover:bg-foreground/10">
               {formatDateValue(startDate) || "Select date"}
               <ChevronDownIcon />
             </Button>
@@ -58,7 +58,7 @@ export function GoalDatePicker(props: GoalDatePickerProps) {
         <FieldLabel htmlFor="date">Target date</FieldLabel>
         <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
           <PopoverTrigger asChild>
-            <Button type="button" variant="outline">
+            <Button type="button" variant="outline" className="hover:bg-foreground/10">
               {formatDateValue(targetDate) || "Select date"}
               <ChevronDownIcon />
             </Button>

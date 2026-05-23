@@ -56,13 +56,13 @@ export function TaskModalShell({
 
   return (
     <div
-      className="fixed m-0 h-screen inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-md md:items-center"
+      className="fixed m-0 h-screen inset-0 z-50 flex items-start justify-center bg-background/80 backdrop-blur-md md:items-center"
       onClick={onClose}
       role="presentation"
     >
       <div
         aria-modal="true"
-        className={`relative flex h-fit flex-col bg-white shadow-[0_28px_90px_-50px_hsl(var(--primary)/0.36)] ring-1 ring-border/60 ${panelAlignment}`}
+        className={`relative flex h-fit flex-col bg-background shadow-[0_28px_90px_-50px_hsl(var(--primary)/0.36)] ring-1 ring-border/60 ${panelAlignment}`}
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >

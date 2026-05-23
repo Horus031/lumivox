@@ -33,10 +33,10 @@ export function JoinPrivateRoomForm() {
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-sm uppercase text-neutral-600 font-semibold">Join a private room</h2>
-        <p className="mt-1 text-sm text-neutral-600">
+        <h2 className="text-sm uppercase text-foreground font-semibold">Join a private room</h2>
+        <p className="mt-1 text-sm text-foreground">
           Enter an invite code shared by the room owner.
         </p>
       </div>

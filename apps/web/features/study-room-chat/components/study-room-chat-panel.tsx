@@ -2,6 +2,7 @@
 
 import {
   FormEvent,
+  KeyboardEvent,
   useEffect,
   useMemo,
   useRef,
@@ -12,9 +13,9 @@ import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
 import { sendStudyRoomMessageAction } from "@/features/study-room-chat/study-room-chat.actions";
-import type {
-  StudyRoomMessageWithSender,
-} from "@/features/study-room-chat/study-room-chat.types";
+import type { StudyRoomMessageWithSender } from "@/features/study-room-chat/study-room-chat.types";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 
 type StudyRoomChatPanelProps = {
   roomId: string;
@@ -53,6 +54,7 @@ export function StudyRoomChatPanel({
 }: StudyRoomChatPanelProps) {
   const supabase = useMemo(() => createClient(), []);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const [isPending, startTransition] = useTransition();
   const [content, setContent] = useState("");
@@ -81,7 +83,7 @@ export function StudyRoomChatPanel({
           id,
           full_name
         )
-      `
+      `,
       )
       .eq("id", messageId)
       .single();
@@ -109,40 +111,33 @@ export function StudyRoomChatPanel({
               private: true,
             },
           })
-          .on(
-            "broadcast",
-            { event: "INSERT" },
-            async ({ payload }) => {
-              const typedPayload = payload as BroadcastMessagePayload;
+          .on("broadcast", { event: "INSERT" }, async ({ payload }) => {
+            const typedPayload = payload as BroadcastMessagePayload;
 
-              const messageId =
-                typedPayload.record?.id ??
-                typedPayload.new?.id;
+            const messageId = typedPayload.record?.id ?? typedPayload.new?.id;
 
-              if (!messageId) {
-                return;
-              }
-
-              const freshMessage =
-                await fetchMessageWithSender(messageId);
-
-              if (!freshMessage) {
-                return;
-              }
-
-              setMessages((current) => {
-                const alreadyExists = current.some(
-                  (message) => message.id === freshMessage.id
-                );
-
-                if (alreadyExists) {
-                  return current;
-                }
-
-                return [...current, freshMessage];
-              });
+            if (!messageId) {
+              return;
             }
-          )
+
+            const freshMessage = await fetchMessageWithSender(messageId);
+
+            if (!freshMessage) {
+              return;
+            }
+
+            setMessages((current) => {
+              const alreadyExists = current.some(
+                (message) => message.id === freshMessage.id,
+              );
+
+              if (alreadyExists) {
+                return current;
+              }
+
+              return [...current, freshMessage];
+            });
+          })
           .subscribe((status) => {
             if (status === "SUBSCRIBED") {
               setLiveState("connected");
@@ -199,8 +194,20 @@ export function StudyRoomChatPanel({
     });
   }
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Check for Enter key without Shift
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault(); // Prevent adding a new line
+
+      // Submit the form manually
+      if (formRef.current) {
+        formRef.current.requestSubmit();
+      }
+    }
+  };
+
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
@@ -212,8 +219,8 @@ export function StudyRoomChatPanel({
           </h2>
 
           <p className="mt-2 max-w-2xl text-neutral-600">
-            Messages are stored permanently and broadcast to active room
-            members in real time.
+            Messages are stored permanently and broadcast to active room members
+            in real time.
           </p>
         </div>
 
@@ -222,15 +229,15 @@ export function StudyRoomChatPanel({
             liveState === "connected"
               ? "bg-emerald-50 text-emerald-700"
               : liveState === "error"
-              ? "bg-red-50 text-red-700"
-              : "bg-neutral-100 text-neutral-700"
+                ? "bg-red-50 text-red-700"
+                : "bg-neutral-100 text-neutral-700"
           }`}
         >
           {liveState}
         </span>
       </div>
 
-      <div className="mt-6 flex h-[460px] flex-col rounded-2xl border bg-neutral-50">
+      <div className="mt-6 flex h-115 flex-col rounded-2xl border bg-surface">
         <div className="flex-1 space-y-4 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center text-center">
@@ -247,16 +254,12 @@ export function StudyRoomChatPanel({
                   key={message.id}
                   className={`max-w-[88%] rounded-2xl border p-4 ${
                     isMine
-                      ? "ml-auto border-neutral-900 bg-neutral-900 text-white"
-                      : "bg-white text-neutral-900"
+                      ? "ml-auto border-background bg-background text-foreground"
+                      : "bg-background text-foreground"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-4">
-                    <p
-                      className={`text-sm font-semibold ${
-                        isMine ? "text-white" : "text-neutral-900"
-                      }`}
-                    >
+                    <p className={`text-sm font-semibold text-foreground}`}>
                       {message.profiles?.full_name ?? "Lumivox User"}
                     </p>
 
@@ -280,26 +283,24 @@ export function StudyRoomChatPanel({
           <div ref={bottomRef} />
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          className="border-t bg-white p-4"
-        >
+        <form ref={formRef} onSubmit={handleSubmit} className="border-t bg-background p-4">
           <div className="flex flex-col gap-3 md:flex-row">
-            <textarea
+            <Textarea
               value={content}
+              onKeyDown={handleKeyDown}
               onChange={(event) => setContent(event.target.value)}
               placeholder="Write a message to the room..."
-              rows={2}
-              className="w-full resize-none rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              rows={1}
+              className="w-full h-fit resize-none border px-3 py-2.5 outline-none transition focus:border-neutral-900"
             />
 
-            <button
+            <Button
               type="submit"
               disabled={isPending}
-              className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+              className="px-5 py-2.5 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isPending ? "Sending..." : "Send"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

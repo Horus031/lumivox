@@ -32,6 +32,7 @@
   --color-destructive-foreground: oklch(1 0 0);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-danger: var(--danger);
   --color-info: var(--info);
   --color-token: var(--token-gold);
   --color-streak: var(--streak-fire);
@@ -114,6 +115,13 @@
   --primary-foreground: #1f1f1f;
   --primary-glow: #7aa520;
   --accent-soft: #36421d;
+
+  --success: oklch(0.7 0.16 162);           /* #10B981 */
+  --warning: oklch(0.78 0.16 70);           /* #F59E0B */
+  --danger: oklch(0.65 0.22 25);            /* #EF4444 */
+  --info: oklch(0.65 0.18 250);             /* #3B82F6 */
+  --token-gold: #cddd77;
+  --streak-fire: oklch(0.72 0.18 45);       /* #FB923C */
 
   --gradient-ai: linear-gradient(90deg, rgba(122, 165, 32, 0.22) 0%, rgba(44, 108, 36, 0) 100%);
 
