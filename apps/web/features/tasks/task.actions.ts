@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -13,6 +12,7 @@ import {
   type CreateTaskInput,
   type UpdateTaskInput,
 } from "./task.schemas";
+import { invalidateEngagementCache, recalculateEngagementForUser } from "../engagement-retention/engagement-retention.server";
 
 export async function createTaskAction(
   input: CreateTaskInput,
@@ -123,6 +123,7 @@ export async function updateTaskAction(
     }
 
     try {
+      await invalidateEngagementCache(user.id);
       await recalculateEngagementForUser(user.id);
     } catch (error) {
       console.error(
