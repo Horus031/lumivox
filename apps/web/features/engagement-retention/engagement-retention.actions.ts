@@ -5,10 +5,24 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
+import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
   try {
     const { user } = await requireUser();
+
+    const rateLimit = await checkRateLimit({
+      key: `engagement-recalculate:${user.id}`,
+      limit: 10,
+      window: "10 m",
+    });
+
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        message: formatRateLimitMessage(rateLimit.reset),
+      };
+    }
 
     await recalculateEngagementForUser(user.id);
 

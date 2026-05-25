@@ -4,12 +4,24 @@ import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
+import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
-export async function generateCurrentPbiSnapshotAction(): Promise<
-  ActionResult
-> {
+export async function generateCurrentPbiSnapshotAction(): Promise<ActionResult> {
   try {
     const { user } = await requireUser();
+
+    const rateLimit = await checkRateLimit({
+      key: `pbi-refresh:${user.id}`,
+      limit: 5,
+      window: "10 m",
+    });
+
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        message: formatRateLimitMessage(rateLimit.reset),
+      };
+    }
 
     const response = await fetch(
       `${process.env.AI_API_BASE_URL}/api/v1/pbi/generate-snapshot`,
@@ -17,14 +29,13 @@ export async function generateCurrentPbiSnapshotAction(): Promise<
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-lumivox-internal-key":
-            process.env.AI_INTERNAL_API_KEY ?? "",
+          "x-lumivox-internal-key": process.env.AI_INTERNAL_API_KEY ?? "",
         },
         body: JSON.stringify({
           user_id: user.id,
         }),
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
+import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 type NativeTaskRiskInsightApiResponse = {
   insight_id: string | null;
@@ -13,10 +14,23 @@ type NativeTaskRiskInsightApiResponse = {
 };
 
 export async function generateNativeTaskRiskInsightAction(
-  assessmentId: string
+  assessmentId: string,
 ): Promise<ActionResult<{ insightId: string | null }>> {
   try {
-    await requireUser();
+    const { user } = await requireUser();
+
+    const rateLimit = await checkRateLimit({
+      key: `native-task-ai-insight:${user.id}`,
+      limit: 3,
+      window: "10 m",
+    });
+
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        message: formatRateLimitMessage(rateLimit.reset),
+      };
+    }
 
     const apiBaseUrl = process.env.AI_API_BASE_URL;
     const internalKey = process.env.AI_INTERNAL_API_KEY;
@@ -42,7 +56,7 @@ export async function generateNativeTaskRiskInsightAction(
           persist_insight: true,
         }),
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -54,8 +68,7 @@ export async function generateNativeTaskRiskInsightAction(
       };
     }
 
-    const data =
-      (await response.json()) as NativeTaskRiskInsightApiResponse;
+    const data = (await response.json()) as NativeTaskRiskInsightApiResponse;
 
     revalidatePath("/dashboard");
 

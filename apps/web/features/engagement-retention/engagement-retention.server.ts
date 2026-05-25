@@ -1,5 +1,8 @@
 "use server";
 
+import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
+import { deleteCacheByKey, getOrSetJsonCache } from "@/lib/redis/cache";
+
 type RecalculateEngagementApiResponse = {
   stats: {
     current_streak_days: number;
@@ -9,41 +12,27 @@ type RecalculateEngagementApiResponse = {
   };
 };
 
+function engagementCacheKey(userId: string) {
+  return `lumivox:engagement:recalculate:${userId}`;
+}
+
 export async function recalculateEngagementForUser(
-  userId: string
+  userId: string,
 ): Promise<RecalculateEngagementApiResponse> {
-  const apiBaseUrl = process.env.AI_API_BASE_URL;
-  const internalKey = process.env.AI_INTERNAL_API_KEY;
-
-  if (!apiBaseUrl || !internalKey) {
-    throw new Error(
-      "AI backend environment variables are not configured correctly."
-    );
-  }
-
-  const response = await fetch(
-    `${apiBaseUrl.replace(/\/$/, "")}/api/v1/engagement/recalculate`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-lumivox-internal-key": internalKey,
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        persist_results: true,
+  return getOrSetJsonCache({
+    key: engagementCacheKey(userId),
+    ttlSeconds: 30,
+    fetcher: () =>
+      fetchAiApi<RecalculateEngagementApiResponse>({
+        path: "/api/v1/engagement/recalculate",
+        body: {
+          user_id: userId,
+          persist_results: true,
+        },
       }),
-      cache: "no-store",
-    }
-  );
+  });
+}
 
-  if (!response.ok) {
-    const errorBody = await response.text();
-
-    throw new Error(
-      `Engagement recalculation failed (${response.status}): ${errorBody}`
-    );
-  }
-
-  return (await response.json()) as RecalculateEngagementApiResponse;
+export async function invalidateEngagementCache(userId: string) {
+  await deleteCacheByKey(engagementCacheKey(userId));
 }

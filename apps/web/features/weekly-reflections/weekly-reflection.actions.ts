@@ -4,15 +4,12 @@ import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
+import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 type GenerateWeeklyReflectionApiResponse = {
   reflection_id: string | null;
   card_id: string | null;
-  reflection_direction:
-    | "improving"
-    | "stable"
-    | "mixed"
-    | "needs_attention";
+  reflection_direction: "improving" | "stable" | "mixed" | "needs_attention";
 };
 
 export async function generateWeeklyReflectionAction(): Promise<
@@ -23,6 +20,19 @@ export async function generateWeeklyReflectionAction(): Promise<
 > {
   try {
     const { user } = await requireUser();
+
+    const rateLimit = await checkRateLimit({
+      key: `weekly-reflection:${user.id}`,
+      limit: 2,
+      window: "1 d",
+    });
+
+    if (!rateLimit.success) {
+      return {
+        success: false,
+        message: formatRateLimitMessage(rateLimit.reset),
+      };
+    }
 
     const apiBaseUrl = process.env.AI_API_BASE_URL;
     const internalKey = process.env.AI_INTERNAL_API_KEY;
@@ -49,7 +59,7 @@ export async function generateWeeklyReflectionAction(): Promise<
           generate_ai_card: true,
         }),
         cache: "no-store",
-      }
+      },
     );
 
     if (!response.ok) {
@@ -61,8 +71,7 @@ export async function generateWeeklyReflectionAction(): Promise<
       };
     }
 
-    const data =
-      (await response.json()) as GenerateWeeklyReflectionApiResponse;
+    const data = (await response.json()) as GenerateWeeklyReflectionApiResponse;
 
     revalidatePath("/dashboard");
     revalidatePath("/reflections");
