@@ -1,7 +1,13 @@
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
+import { Suspense } from "react";
 
-export default function Footer() {
+async function getCurrentYear() {
+  "use cache";
+  return new Date().getFullYear();
+}
+
+export default async function Footer() {
   return (
     <footer className="border-t border-border bg-surface">
       <div className="max-w-310 mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
@@ -74,9 +80,11 @@ export default function Footer() {
       </div>
       <div className="border-t border-border">
         <div className="max-w-310 mx-auto px-6 py-5 text-[12px] text-muted-foreground flex flex-col sm:flex-row gap-2 justify-between">
-          <span>
-            © {new Date().getFullYear()} Lumivox. All rights reserved.
-          </span>
+          <Suspense fallback={<span>...</span>}>
+            <span>
+              © {await getCurrentYear()} Lumivox. All rights reserved.
+            </span>
+          </Suspense>
           <span>Made calmly, with care.</span>
         </div>
       </div>
