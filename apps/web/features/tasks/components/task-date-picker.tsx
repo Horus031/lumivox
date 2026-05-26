@@ -65,7 +65,7 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
             <Button
               variant={"outline"}
               id="date-picker-optional"
-              className="w-32 h-11 font-normal"
+              className="w-32 h-11 font-normal hover:text-primary-foreground"
             >
               {dueAt ? format(dueAt, "PPP") : "Select date"}
               <ChevronDownIcon />

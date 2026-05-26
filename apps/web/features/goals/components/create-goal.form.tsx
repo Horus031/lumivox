@@ -195,9 +195,9 @@ export function CreateGoalForm({
             </Field>
 
             <FieldGroup className="w-full flex-row">
-              <Field>
-                <div className="gap-3">
-                  <Label className="mb-2">Goal type</Label>
+              <Field className="h-full">
+                <div className="flex flex-col justify-between h-full">
+                  <Label className="mb-4">Goal type</Label>
 
                   <Select
                     value={goalType ?? ""}
