@@ -2,6 +2,24 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { hasEnvVars } from "../utils";
 
+const AUTH_PAGES = new Set(["/", "/auth/login", "/auth/sign-up"]);
+const PROTECTED_PATH_PREFIXES = [
+  "/dashboard",
+  "/focus",
+  "/goals",
+  "/onboarding",
+  "/reflections",
+  "/rooms",
+  "/settings",
+  "/tasks",
+];
+
+function isProtectedPath(pathname: string) {
+  return PROTECTED_PATH_PREFIXES.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -45,15 +63,17 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: If you remove getClaims() and you use server-side rendering
   // with the Supabase client, your users may be randomly logged out.
   const { data } = await supabase.auth.getClaims();
-  const user = data?.claims;
+  const isAuthenticated = Boolean(data?.claims);
+  const pathname = request.nextUrl.pathname;
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth")
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  if (isAuthenticated && AUTH_PAGES.has(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
+  if (!isAuthenticated && isProtectedPath(pathname)) {
+    // no user, redirect to the login page before rendering protected content
     const url = request.nextUrl.clone();
     url.pathname = "/auth/login";
     return NextResponse.redirect(url);
