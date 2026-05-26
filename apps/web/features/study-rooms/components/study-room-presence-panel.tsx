@@ -77,7 +77,7 @@ export function StudyRoomPresencePanel({
     "Connecting to room presence...",
   );
 
-  const [myStatus, setMyStatus] = useState<PresenceStatus>("available");
+  const [, setMyStatus] = useState<PresenceStatus>("available");
 
   const [participants, setParticipants] = useState<PresencePayload[]>([]);
 

@@ -17,6 +17,16 @@ import { getRecentStudyRoomMessages } from "@/features/study-room-chat/study-roo
 import { StudyRoomChatPanel } from "@/features/study-room-chat/components/study-room-chat-panel";
 
 import { StudyRoomVoicePanel } from "@/features/study-room-voice/components/study-room-voice-panel";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 type StudyRoomPageProps = {
   params: Promise<{
@@ -49,78 +59,99 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
   return (
     <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-6xl space-y-8">
-        <PageHeader
-          eyebrow="Study Room"
-          title={room.title}
-          description={
-            room.description ??
-            "A collaborative room where learners can stay present and study together."
-          }
-          action={
+        <div className="flex flex-row items-center justify-between">
+          <PageHeader
+            eyebrow="Study Room"
+            title={room.title}
+            description={
+              room.description ??
+              "A collaborative room where learners can stay present and study together."
+            }
+          />
+          <div className="flex flex-row gap-4">
+            <Dialog>
+              <DialogTrigger>
+                <Button>View Room Details</Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl!">
+                <DialogHeader>
+                  <DialogTitle>Room Details</DialogTitle>
+                </DialogHeader>
+                <section className="flex flex-col gap-5 -mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+                  <article className="rounded-2xl border bg-background p-6 shadow-sm">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <DetailCard label="Visibility" value={room.visibility} />
+
+                      <DetailCard
+                        label="Maximum participants"
+                        value={`${room.max_participants}`}
+                      />
+
+                      <DetailCard
+                        label="Owner"
+                        value={room.profiles?.full_name ?? "Unknown user"}
+                      />
+
+                      <DetailCard label="Your role" value={membership.role} />
+                    </div>
+
+                    {room.visibility === "private" &&
+                    membership.role === "owner" ? (
+                      <div className="mt-5 rounded-2xl border border-dashed p-4">
+                        <p className="text-sm font-semibold">
+                          Private invite code
+                        </p>
+                        <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
+                          {room.invite_code}
+                        </p>
+                        <p className="mt-2 text-sm text-neutral-600">
+                          Share this code with people you want to invite into
+                          the room.
+                        </p>
+                      </div>
+                    ) : null}
+                  </article>
+
+                  <StudyRoomMemberRoster
+                    roomId={room.id}
+                    initialMembers={members as any}
+                  />
+                </section>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
             <LeaveRoomButton
               roomId={room.id}
               disabledForOwner={ownerCannotLeave}
             />
-          }
-        />
+          </div>
+        </div>
 
-        <section className="grid gap-5 lg:grid-cols-[1.4fr_1fr]">
-          <article className="rounded-2xl border bg-background p-6 shadow-sm">
-            <h2 className="text-xl font-semibold">Room details</h2>
-
-            <div className="mt-5 grid gap-4 md:grid-cols-2">
-              <DetailCard label="Visibility" value={room.visibility} />
-
-              <DetailCard
-                label="Maximum participants"
-                value={`${room.max_participants}`}
-              />
-
-              <DetailCard
-                label="Owner"
-                value={room.profiles?.full_name ?? "Unknown user"}
-              />
-
-              <DetailCard label="Your role" value={membership.role} />
-            </div>
-
-            {room.visibility === "private" && membership.role === "owner" ? (
-              <div className="mt-5 rounded-2xl border border-dashed p-4">
-                <p className="text-sm font-semibold">Private invite code</p>
-                <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
-                  {room.invite_code}
-                </p>
-                <p className="mt-2 text-sm text-neutral-600">
-                  Share this code with people you want to invite into the room.
-                </p>
-              </div>
-            ) : null}
-          </article>
-
-          <StudyRoomMemberRoster
+        <div className="flex flex-row gap-3">
+          <StudyRoomPresencePanel
             roomId={room.id}
-            initialMembers={members as any}
+            currentUserId={user.id}
+            currentUserName={
+              room.owner_id === user.id
+                ? (room.profiles?.full_name ?? "Room owner")
+                : (members.find((member) => member.user_id === user.id)
+                    ?.profiles?.full_name ?? "Lumivox user")
+            }
           />
-        </section>
 
-        <StudyRoomPresencePanel
-          roomId={room.id}
-          currentUserId={user.id}
-          currentUserName={
-            room.owner_id === user.id
-              ? (room.profiles?.full_name ?? "Room owner")
-              : (members.find((member) => member.user_id === user.id)?.profiles
-                  ?.full_name ?? "Lumivox user")
-          }
-        />
+          <StudyRoomChatPanel
+            roomId={room.id}
+            currentUserId={user.id}
+            initialMessages={initialMessages as any}
+          />
+        </div>
 
         <StudyRoomVoicePanel roomId={room.id} />
-
-        <StudyRoomChatPanel
-          roomId={room.id}
-          currentUserId={user.id}
-          initialMessages={initialMessages as any}
-        />
       </div>
     </section>
   );

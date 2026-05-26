@@ -11,8 +11,8 @@ export default function NavBar() {
             <Image
               src={"/logo.png"}
               alt="lumivox-logo"
-              width={16}
-              height={16}
+              width={48}
+              height={48}
             />
           </div>
           <span className="font-semibold tracking-tight text-[15px]">
@@ -47,13 +47,13 @@ export default function NavBar() {
         </nav>
         <div className="flex items-center gap-2">
           <Link
-            href="/app"
+            href="/auth/login"
             className="hidden sm:inline-flex items-center h-9 px-3 rounded-md text-[13px] font-medium text-secondary hover:text-foreground transition-colors"
           >
             Sign in
           </Link>
           <Link
-            href="/app"
+            href="/auth/sign-up"
             className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
           >
             Get started <ArrowRight className="size-3.5" />

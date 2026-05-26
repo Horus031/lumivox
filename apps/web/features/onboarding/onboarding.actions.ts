@@ -1,6 +1,6 @@
 "use server";
 
-import { redirect } from "next/navigation";
+import { redirect, unstable_rethrow } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/require-user";
@@ -77,6 +77,8 @@ export async function completeOnboardingAction(
 
     redirect("/dashboard");
   } catch (error) {
+    unstable_rethrow(error);
+
     return {
       success: false,
       message:

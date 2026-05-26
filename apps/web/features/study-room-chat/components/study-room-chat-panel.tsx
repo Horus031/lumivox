@@ -53,7 +53,6 @@ export function StudyRoomChatPanel({
   initialMessages,
 }: StudyRoomChatPanelProps) {
   const supabase = useMemo(() => createClient(), []);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const [isPending, startTransition] = useTransition();
@@ -64,10 +63,6 @@ export function StudyRoomChatPanel({
   const [liveState, setLiveState] = useState<
     "connecting" | "connected" | "error"
   >("connecting");
-
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
 
   async function fetchMessageWithSender(messageId: string) {
     const { data, error } = await supabase
@@ -265,7 +260,7 @@ export function StudyRoomChatPanel({
 
                     <span
                       className={`text-xs ${
-                        isMine ? "text-neutral-300" : "text-neutral-500"
+                        isMine ? "text-foreground" : "text-foreground"
                       }`}
                     >
                       {formatMessageTime(message.created_at)}
@@ -279,11 +274,13 @@ export function StudyRoomChatPanel({
               );
             })
           )}
-
-          <div ref={bottomRef} />
         </div>
 
-        <form ref={formRef} onSubmit={handleSubmit} className="border-t bg-background p-4">
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="border-t bg-background p-4"
+        >
           <div className="flex flex-col gap-3 md:flex-row">
             <Textarea
               value={content}
