@@ -12,7 +12,7 @@ const defaultUrl = process.env.VERCEL_URL
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
   title: "Lumivox",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  description: "Productivity Support Platform Using Behavioral Analysis and AI-Based Recommendations",
 };
 
 const geistSans = Geist({
