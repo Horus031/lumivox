@@ -53,7 +53,7 @@ export function StudyRoomChatPanel({
 }: StudyRoomChatPanelProps) {
   const supabase = useMemo(() => createClient(), []);
   const formRef = useRef<HTMLFormElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const isSubmittingRef = useRef(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -66,8 +66,15 @@ export function StudyRoomChatPanel({
   >("connecting");
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const container = messagesContainerRef.current;
+
+    if (!container) {
+      return;
+    }
+
+    // Update only the chat container scroll position and avoid viewport movement.
+    container.scrollTop = container.scrollHeight;
+  }, [messages.length]);
 
   useEffect(() => {
     let mounted = true;
@@ -258,7 +265,7 @@ export function StudyRoomChatPanel({
       </div>
 
       <div className="mt-6 flex h-115 flex-col rounded-2xl border bg-surface">
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <div ref={messagesContainerRef} className="flex-1 space-y-4 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center text-center">
               <p className="text-sm text-neutral-500">
@@ -299,7 +306,6 @@ export function StudyRoomChatPanel({
               );
             })
           )}
-          <div ref={messagesEndRef} />
         </div>
 
         <form
