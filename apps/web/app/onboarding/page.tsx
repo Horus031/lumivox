@@ -18,14 +18,14 @@ async function OnboardingPageContent() {
   const { profile, weights } = await getCurrentProfileWithWeights();
 
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-8">
+    <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-8">
         <header>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
             Lumivox
           </p>
 
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">
+          <h1 className="mt-2 text-foreground text-3xl font-bold tracking-tight">
             Welcome — let&apos;s calibrate your learning profile
           </h1>
 
@@ -44,10 +44,10 @@ async function OnboardingPageContent() {
 
 function OnboardingPageFallback() {
   return (
-    <main className="min-h-screen bg-neutral-50 px-4 py-8">
+    <main className="min-h-screen bg-background px-4 py-8">
       <div className="mx-auto max-w-5xl space-y-8">
         <div className="h-28 animate-pulse rounded-[28px] border border-border/70 bg-card/70" />
-        <div className="h-[28rem] animate-pulse rounded-[28px] border border-border/70 bg-card/70" />
+        <div className="h-112 animate-pulse rounded-[28px] border border-border/70 bg-card/70" />
       </div>
     </main>
   );

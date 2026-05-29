@@ -7,7 +7,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useTransition,
 } from "react";
 import { toast } from "sonner";
 
@@ -54,8 +53,10 @@ export function StudyRoomChatPanel({
 }: StudyRoomChatPanelProps) {
   const supabase = useMemo(() => createClient(), []);
   const formRef = useRef<HTMLFormElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isSubmittingRef = useRef(false);
 
-  const [isPending, startTransition] = useTransition();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [content, setContent] = useState("");
   const [messages, setMessages] =
     useState<StudyRoomMessageWithSender[]>(initialMessages);
@@ -64,11 +65,18 @@ export function StudyRoomChatPanel({
     "connecting" | "connected" | "error"
   >("connecting");
 
-  async function fetchMessageWithSender(messageId: string) {
-    const { data, error } = await supabase
-      .from("study_room_messages")
-      .select(
-        `
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchMessageWithSender(messageId: string) {
+      const { data, error } = await supabase
+        .from("study_room_messages")
+        .select(
+          `
         id,
         room_id,
         sender_id,
@@ -79,20 +87,17 @@ export function StudyRoomChatPanel({
           full_name
         )
       `,
-      )
-      .eq("id", messageId)
-      .single();
+        )
+        .eq("id", messageId)
+        .single();
 
-    if (error) {
-      console.error("Failed to fetch realtime room message:", error);
-      return null;
+      if (error) {
+        console.error("Failed to fetch realtime room message:", error);
+        return null;
+      }
+
+      return data as StudyRoomMessageWithSender;
     }
-
-    return data as StudyRoomMessageWithSender;
-  }
-
-  useEffect(() => {
-    let mounted = true;
 
     async function subscribeToRoomChat() {
       try {
@@ -167,6 +172,10 @@ export function StudyRoomChatPanel({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (isSubmittingRef.current) {
+      return;
+    }
+
     const trimmed = content.trim();
 
     if (!trimmed) {
@@ -174,22 +183,38 @@ export function StudyRoomChatPanel({
       return;
     }
 
-    startTransition(async () => {
-      const result = await sendStudyRoomMessageAction({
-        roomId,
-        content: trimmed,
-      });
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
 
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+    void (async () => {
+      try {
+        const result = await sendStudyRoomMessageAction({
+          roomId,
+          content: trimmed,
+        });
+
+        if (!result.success) {
+          toast.error(result.message);
+          return;
+        }
+
+        setContent("");
+      } catch (error) {
+        console.error("Failed to send study room message:", error);
+        toast.error("Failed to send message.");
+      } finally {
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
-
-      setContent("");
-    });
+    })();
   }
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (isSubmittingRef.current) {
+      e.preventDefault();
+      return;
+    }
+
     // Check for Enter key without Shift
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault(); // Prevent adding a new line
@@ -202,7 +227,7 @@ export function StudyRoomChatPanel({
   };
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
+    <section className="rounded-2xl max-w-2xl border bg-background p-6 shadow-sm">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
@@ -274,6 +299,7 @@ export function StudyRoomChatPanel({
               );
             })
           )}
+          <div ref={messagesEndRef} />
         </div>
 
         <form
@@ -284,6 +310,7 @@ export function StudyRoomChatPanel({
           <div className="flex flex-col gap-3 md:flex-row">
             <Textarea
               value={content}
+              disabled={isSubmitting}
               onKeyDown={handleKeyDown}
               onChange={(event) => setContent(event.target.value)}
               placeholder="Write a message to the room..."
@@ -293,10 +320,10 @@ export function StudyRoomChatPanel({
 
             <Button
               type="submit"
-              disabled={isPending}
+              disabled={isSubmitting}
               className="px-5 py-2.5 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Sending..." : "Send"}
+              {isSubmitting ? "Sending..." : "Send"}
             </Button>
           </div>
         </form>
