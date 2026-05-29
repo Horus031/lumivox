@@ -23,3 +23,4 @@ flowchart TD
     SB --> RT[Realtime Channels]
 
     LK --> Voice[Voice Rooms]
+```
