@@ -17,7 +17,6 @@ type TaskModalShellProps = {
 export function TaskModalShell({
   open,
   title,
-  description,
   onClose,
   children,
   footer,
@@ -66,7 +65,7 @@ export function TaskModalShell({
         onClick={(event) => event.stopPropagation()}
         role="dialog"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-border/50 px-5 py-4 md:px-6">
+        <div className="flex items-start justify-between gap-4 border-b border-border/50 px-5 pt-4 md:px-6">
           <div>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
               Task detail
@@ -74,11 +73,6 @@ export function TaskModalShell({
             <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
               {title}
             </h2>
-            {description ? (
-              <p className="mt-1 text-sm text-muted-foreground">
-                {description}
-              </p>
-            ) : null}
           </div>
 
           <button

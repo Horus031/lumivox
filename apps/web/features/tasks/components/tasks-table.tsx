@@ -275,7 +275,7 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
               {tasks.map((task) => (
                 <Fragment key={task.id}>
                   <tr className="border-t border-border/60 transition hover:bg-muted/35">
-                    <td className="px-5 py-4 align-top">
+                    <td className="px-5 py-4 align-top max-w-56">
                       <button
                         type="button"
                         onClick={() => setSelectedTaskId(task.id)}
@@ -284,7 +284,7 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                         <p className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary">
                           {task.title}
                         </p>
-                        <p className="mt-1 truncate text-sm text-muted-foreground">
+                        <p className="mt-1 truncate line-clamp-2 text-wrap text-sm text-muted-foreground">
                           {task.description ?? "No description available"}
                         </p>
                       </button>
