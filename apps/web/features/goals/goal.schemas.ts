@@ -29,11 +29,6 @@ export const updateGoalSchema = createGoalSchema.extend({
   status: z.enum(["active", "completed", "paused", "archived"], {
     message: "Invalid goal status.",
   }),
-
-  progressPercent: z.coerce
-    .number()
-    .min(0, "Progress cannot be below 0.")
-    .max(100, "Progress cannot exceed 100."),
 });
 
 export const deleteGoalSchema = z.object({
