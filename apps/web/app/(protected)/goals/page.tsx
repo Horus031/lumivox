@@ -1,10 +1,10 @@
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
 import { GoalCard } from "@/features/goals/components/goal-card";
-import { getGoals } from "@/features/goals/goal.queries";
+import { getGoalsWithProgress } from "@/features/goals/goal.queries";
 
 export default async function GoalsPage() {
-  const goals = await getGoals();
+  const goals = await getGoalsWithProgress();
 
   return (
     <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8 xl:px-0">
@@ -35,7 +35,7 @@ export default async function GoalsPage() {
               </p>
             </div>
           ) : (
-            <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+            <div className="space-y-4 grid grid-cols-1 lg:space-y-0 lg:grid-cols-2 xl:grid-cols-3 gap-2">
               {goals.map((goal) => (
                 <GoalCard key={goal.id} goal={goal} />
               ))}

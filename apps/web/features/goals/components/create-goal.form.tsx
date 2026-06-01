@@ -5,7 +5,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { Goal } from "@/features/goals/goal.types";
-import { createGoalAction, updateGoalAction } from "@/features/goals/goal.actions";
+import {
+  createGoalAction,
+  updateGoalAction,
+} from "@/features/goals/goal.actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,7 +34,7 @@ import {
 } from "@/components/ui/dialog";
 import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+// import { Slider } from "@/components/ui/slider";
 
 type CreateGoalFormProps = {
   mode?: "create" | "edit";
@@ -89,9 +92,9 @@ export function CreateGoalForm({
   const [status, setStatus] = useState<
     "active" | "completed" | "paused" | "archived"
   >(initialState.status);
-  const [progressPercent, setProgressPercent] = useState(
-    initialState.progressPercent,
-  );
+  // const [progressPercent, setProgressPercent] = useState(
+  //   initialState.progressPercent,
+  // );
   const [startDate, setStartDate] = useState<Date | undefined>(
     initialState.startDate,
   );
@@ -104,7 +107,7 @@ export function CreateGoalForm({
     setDescription(initialState.description);
     setGoalType(initialState.goalType);
     setStatus(initialState.status);
-    setProgressPercent(initialState.progressPercent);
+    // setProgressPercent(initialState.progressPercent);
     setStartDate(initialState.startDate);
     setTargetDate(initialState.targetDate);
   }
@@ -128,7 +131,6 @@ export function CreateGoalForm({
             description,
             goalType,
             status,
-            progressPercent,
             startDate: formatDateValue(startDate),
             targetDate: formatDateValue(targetDate),
           })
@@ -173,7 +175,7 @@ export function CreateGoalForm({
           </DialogDescription>
           <FieldGroup>
             <Field>
-              <Label htmlFor="title">Goal title</Label> 
+              <Label htmlFor="title">Goal title</Label>
               <Input
                 id="title"
                 type="text"
@@ -274,9 +276,11 @@ export function CreateGoalForm({
               </Field>
             </FieldGroup>
 
-            {isEditMode && (
+            {/* {isEditMode && (
               <Field>
-                <Label className="mb-2 block">Progress: {progressPercent}%</Label>
+                <Label className="mb-2 block">
+                  Progress: {progressPercent}%
+                </Label>
                 <Slider
                   value={[progressPercent]}
                   onValueChange={(value) =>
@@ -288,11 +292,15 @@ export function CreateGoalForm({
                   className="mx-auto w-full"
                 />
               </Field>
-            )}
+            )} */}
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline" className="hover:bg-foreground/10">
+              <Button
+                type="button"
+                variant="outline"
+                className="hover:bg-foreground/10"
+              >
                 Cancel
               </Button>
             </DialogClose>

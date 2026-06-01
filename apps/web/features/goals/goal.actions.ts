@@ -14,7 +14,7 @@ import {
 } from "./goal.schemas";
 
 export async function createGoalAction(
-  input: CreateGoalInput
+  input: CreateGoalInput,
 ): Promise<ActionResult> {
   const parsed = createGoalSchema.safeParse(input);
 
@@ -29,8 +29,7 @@ export async function createGoalAction(
   try {
     const { supabase, user } = await requireUser();
 
-    const { title, description, goalType, startDate, targetDate } =
-      parsed.data;
+    const { title, description, goalType, startDate, targetDate } = parsed.data;
 
     const { error } = await supabase.from("goals").insert({
       user_id: user.id,
@@ -50,6 +49,7 @@ export async function createGoalAction(
 
     revalidatePath("/goals");
     revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -68,7 +68,7 @@ export async function createGoalAction(
 }
 
 export async function updateGoalAction(
-  input: UpdateGoalInput
+  input: UpdateGoalInput,
 ): Promise<ActionResult> {
   const parsed = updateGoalSchema.safeParse(input);
 
@@ -89,7 +89,6 @@ export async function updateGoalAction(
       description,
       goalType,
       status,
-      progressPercent,
       startDate,
       targetDate,
     } = parsed.data;
@@ -101,7 +100,6 @@ export async function updateGoalAction(
         description: description || null,
         goal_type: goalType,
         status,
-        progress_percent: progressPercent,
         start_date: startDate || null,
         target_date: targetDate || null,
       })
@@ -116,6 +114,7 @@ export async function updateGoalAction(
 
     revalidatePath("/goals");
     revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -133,9 +132,7 @@ export async function updateGoalAction(
   }
 }
 
-export async function deleteGoalAction(
-  goalId: string
-): Promise<ActionResult> {
+export async function deleteGoalAction(goalId: string): Promise<ActionResult> {
   const parsed = deleteGoalSchema.safeParse({ goalId });
 
   if (!parsed.success) {
