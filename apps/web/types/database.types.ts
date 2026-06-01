@@ -447,6 +447,118 @@ export type Database = {
           },
         ]
       }
+      learning_document_permissions: {
+        Row: {
+          created_at: string
+          created_by: string
+          document_id: string
+          id: string
+          role: Database["public"]["Enums"]["learning_document_permission_role"]
+          user_email: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          document_id: string
+          id?: string
+          role?: Database["public"]["Enums"]["learning_document_permission_role"]
+          user_email: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          document_id?: string
+          id?: string
+          role?: Database["public"]["Enums"]["learning_document_permission_role"]
+          user_email?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_document_permissions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_document_permissions_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "learning_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_documents: {
+        Row: {
+          created_at: string
+          extracted_text_preview: string | null
+          extracted_text_status: string
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          goal_id: string | null
+          id: string
+          mime_type: string
+          owner_id: string
+          task_id: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["learning_document_visibility"]
+        }
+        Insert: {
+          created_at?: string
+          extracted_text_preview?: string | null
+          extracted_text_status?: string
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          goal_id?: string | null
+          id?: string
+          mime_type: string
+          owner_id: string
+          task_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["learning_document_visibility"]
+        }
+        Update: {
+          created_at?: string
+          extracted_text_preview?: string | null
+          extracted_text_status?: string
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number
+          goal_id?: string | null
+          id?: string
+          mime_type?: string
+          owner_id?: string
+          task_id?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["learning_document_visibility"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_documents_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_documents_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ml_model_versions: {
         Row: {
           algorithm: string
@@ -1216,6 +1328,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_access_learning_document: {
+        Args: { p_document_id: string; p_user_id: string }
+        Returns: boolean
+      }
       can_access_study_room_presence_topic: {
         Args: { p_topic: string; p_user_id?: string }
         Returns: boolean
@@ -1273,6 +1389,8 @@ export type Database = {
       focus_session_status: "ongoing" | "paused" | "completed" | "cancelled"
       goal_status: "active" | "completed" | "paused" | "archived"
       goal_type: "short_term" | "long_term"
+      learning_document_permission_role: "viewer" | "editor"
+      learning_document_visibility: "private" | "shared" | "public"
       native_task_risk_band: "low" | "moderate" | "elevated" | "high"
       reward_event_type:
         | "focus_session_completed"
@@ -1452,6 +1570,8 @@ export const Constants = {
       focus_session_status: ["ongoing", "paused", "completed", "cancelled"],
       goal_status: ["active", "completed", "paused", "archived"],
       goal_type: ["short_term", "long_term"],
+      learning_document_permission_role: ["viewer", "editor"],
+      learning_document_visibility: ["private", "shared", "public"],
       native_task_risk_band: ["low", "moderate", "elevated", "high"],
       reward_event_type: [
         "focus_session_completed",
