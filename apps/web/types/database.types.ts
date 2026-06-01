@@ -1332,6 +1332,10 @@ export type Database = {
         Args: { p_document_id: string; p_user_id: string }
         Returns: boolean
       }
+      can_access_learning_document_storage_object: {
+        Args: { p_object_name: string; p_user_id: string }
+        Returns: boolean
+      }
       can_access_study_room_presence_topic: {
         Args: { p_topic: string; p_user_id?: string }
         Returns: boolean
@@ -1354,6 +1358,10 @@ export type Database = {
         Returns: string
       }
       expire_frozen_streaks: { Args: never; Returns: number }
+      extract_learning_document_id_from_storage_path: {
+        Args: { p_object_name: string }
+        Returns: string
+      }
       get_user_token_balance: { Args: { p_user_id: string }; Returns: number }
       is_active_study_room_member: {
         Args: { p_room_id: string; p_user_id?: string }

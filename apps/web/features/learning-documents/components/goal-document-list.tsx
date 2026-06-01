@@ -1,6 +1,7 @@
 import type { LearningDocument } from "@/features/learning-documents/learning-document.types";
 import { DeleteLearningDocumentButton } from "@/features/learning-documents/components/delete-learning-document-button";
 import { DocumentPreviewLink } from "@/features/learning-documents/components/document-preview-link";
+import Link from "next/link";
 
 type GoalDocumentListProps = {
   documents: LearningDocument[];
@@ -61,6 +62,14 @@ export function GoalDocumentList({ documents }: GoalDocumentListProps) {
 
               <div className="flex flex-wrap gap-2">
                 <DocumentPreviewLink document={document} />
+
+                <Link
+                  href={`/documents/${document.id}/share`}
+                  className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+                >
+                  Share
+                </Link>
+
                 <DeleteLearningDocumentButton documentId={document.id} />
               </div>
             </article>
