@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisIcon } from "lucide-react";
+import Link from "next/link";
 
 type GoalCardProps = {
   goal: GoalWithProgress;
@@ -46,7 +47,7 @@ export function GoalCard({ goal }: GoalCardProps) {
   }
 
   return (
-    <article className="rounded-2xl border bg-background text-foreground p-5 shadow-sm lg:min-h-96 xl:min-h-0">
+    <article className="rounded-2xl flex flex-col gap-2 justify-between border bg-background text-foreground p-5 shadow-sm lg:min-h-96 xl:min-h-0">
       <div className="flex flex-col justify-between gap-4 md:items-start">
         <div className="flex w-full justify-between items-center">
           <div>
@@ -122,6 +123,13 @@ export function GoalCard({ goal }: GoalCardProps) {
         <p>Start: {goal.start_date ?? "Not set"}</p>
         <p>Target: {goal.target_date ?? "Not set"}</p>
       </div>
+
+      <Link
+        href={`/goals/${goal.id}`}
+        className="border rounded-md text-center mt-4 px-4 py-2 text-sm font-medium transition bg-background hover:bg-primary hover:text-primary-foreground"
+      >
+        View documents
+      </Link>
     </article>
   );
 }
