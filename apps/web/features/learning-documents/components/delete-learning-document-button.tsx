@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { deleteLearningDocumentAction } from "@/features/learning-documents/learning-document.actions";
+import { Button } from "@/components/ui/button";
 
 type DeleteLearningDocumentButtonProps = {
   documentId: string;
@@ -37,13 +38,14 @@ export function DeleteLearningDocumentButton({
   }
 
   return (
-    <button
+    <Button
+      variant={"outline"}
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="rounded-xl border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/30"
+      className="cursor-pointer border border-danger/20 px-4 py-2 text-sm font-medium text-danger/60 transition hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/30"
     >
       {isPending ? "Deleting..." : "Delete"}
-    </button>
+    </Button>
   );
 }

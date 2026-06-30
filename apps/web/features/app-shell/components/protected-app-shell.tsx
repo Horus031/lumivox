@@ -15,13 +15,17 @@ export function ProtectedAppShell({
   children,
 }: ProtectedAppShellProps) {
   return (
-    <div className="min-h-screen w-full bg-background text-foreground">
+    <div className="relative min-h-screen w-full bg-background text-foreground">
+      {/* <div className="fixed h-screen w-full bg-[url('/app-bg6.jpg')] bg-cover bg-no-repeat bg-center z-0 blur-xs brightness-75 "></div> */}
+
       <MobileAppHeader profile={profile} />
 
       <div className="flex min-h-screen">
         <DesktopSidebar profile={profile} />
 
-        <main className="min-w-0 flex-1 pb-28 lg:pb-0 lg:pl-81">{children}</main>
+        <main className="min-w-0 flex-1 pb-28 lg:pb-0 lg:pl-81 z-1">
+          {children}
+        </main>
       </div>
 
       <MobileBottomNav />

@@ -34,7 +34,7 @@ export function GoalProgressBar({
         </span>
       </div>
 
-      <div className="h-2.5 overflow-hidden rounded-full bg-background ">
+      <div className="h-2.5 overflow-hidden rounded-full bg-muted-foreground ">
         <div
           className="h-full rounded-full bg-primary transition-all "
           style={{

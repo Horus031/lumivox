@@ -50,7 +50,7 @@ export function GoalCard({ goal }: GoalCardProps) {
     <article className="rounded-2xl flex flex-col gap-2 justify-between border bg-background text-foreground p-5 shadow-sm lg:min-h-96 xl:min-h-0">
       <div className="flex flex-col justify-between gap-4 md:items-start">
         <div className="flex w-full justify-between items-center">
-          <div>
+          <div className="gap-2 flex items-center">
             <span className="rounded-full bg-surface text-foreground px-2.5 py-1 text-xs font-medium">
               {goal.goal_type === "short_term" ? "Short term" : "Long term"}
             </span>
@@ -97,19 +97,22 @@ export function GoalCard({ goal }: GoalCardProps) {
 
           <h3 className="text-lg font-semibold">{goal.title}</h3>
 
-          {goal.description && (
+          {goal.description ? (
             <p className="mt-1 text-sm text-neutral-600">{goal.description}</p>
+          ) : (
+            <p className="mt-1 text-sm text-neutral-600">{"No description"}</p>
           )}
         </div>
       </div>
 
-      <div className="mt-5">
-        <GoalProgressBar
-          totalTasks={goal.total_tasks}
-          completedTasks={goal.completed_tasks}
-        />
+      <div className="flex flex-col">
+        <div className="mt-5">
+          <GoalProgressBar
+            totalTasks={goal.total_tasks}
+            completedTasks={goal.completed_tasks}
+          />
 
-        {/* <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
+          {/* <div className="h-2 overflow-hidden rounded-full bg-neutral-100">
           <Progress className="bg-primary/20" value={goal.progress_percent} />
 
           <div
@@ -117,19 +120,20 @@ export function GoalCard({ goal }: GoalCardProps) {
             style={{ width: `${goal.progress_percent}%` }}
           />
         </div> */}
-      </div>
+        </div>
 
-      <div className="mt-4 grid gap-2 text-sm text-foreground md:grid-cols-2">
-        <p>Start: {goal.start_date ?? "Not set"}</p>
-        <p>Target: {goal.target_date ?? "Not set"}</p>
-      </div>
+        <div className="mt-4 grid gap-2 text-sm text-foreground md:grid-cols-2">
+          <p>Start: {goal.start_date ?? "Not set"}</p>
+          <p>Target: {goal.target_date ?? "Not set"}</p>
+        </div>
 
-      <Link
-        href={`/goals/${goal.id}`}
-        className="border rounded-md text-center mt-4 px-4 py-2 text-sm font-medium transition bg-background hover:bg-primary hover:text-primary-foreground"
-      >
-        View documents
-      </Link>
+        <Link
+          href={`/goals/${goal.id}`}
+          className="border rounded-md text-center mt-4 px-4 py-2 text-sm font-medium transition bg-background hover:bg-primary hover:text-primary-foreground"
+        >
+          View documents
+        </Link>
+      </div>
     </article>
   );
 }

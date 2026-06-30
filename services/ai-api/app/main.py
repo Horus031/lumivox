@@ -1,5 +1,8 @@
-from contextlib import asynccontextmanager
 import os
+from contextlib import asynccontextmanager
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,6 +16,7 @@ from app.api.routes import (
     native_task_risk_insight,
     pbi,
     weekly_reflection,
+    rag
 )
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
@@ -40,6 +44,8 @@ allowed_origins = [
 ]
 
 production_web_url = os.getenv("WEB_APP_URL")
+
+print(production_web_url)
 
 if production_web_url:
     allowed_origins.append(production_web_url)
@@ -85,3 +91,5 @@ app.include_router(
     prefix="/api/v1/engagement",
     tags=["Engagement Retention"],
 )
+
+app.include_router(rag.router)

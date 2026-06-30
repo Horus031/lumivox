@@ -49,7 +49,6 @@ export async function createGoalAction(
 
     revalidatePath("/goals");
     revalidatePath("/dashboard");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -114,7 +113,6 @@ export async function updateGoalAction(
 
     revalidatePath("/goals");
     revalidatePath("/dashboard");
-    revalidatePath("/", "layout");
 
     return {
       success: true,

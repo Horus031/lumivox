@@ -59,77 +59,83 @@
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 
   --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.05);
-  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.08);
-  --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.12);
-  --shadow-glow: 0 0 0 3px oklch(0.57 0.14 140 / 0.18);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.06);
+  --shadow-lg: 0 12px 40px oklch(0 0 0 / 0.1);
+  --shadow-glow: 0 0 0 3px oklch(0.45 0.08 160 / 0.15);
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 :root {
-  --background: #ecebf0;
-  --surface: #fffdf8;
-  --elevated: #f5f3ea;
-  --overlay: #d7d6db;
+  /* Minimal Studio Light Neutrals */
+  --background: #f4f6f5;           /* Nền xám nhạt studio sạch sẽ, dịu mát */
+  --surface: #ffffff;              /* Các thẻ card màu trắng tinh khiết tạo chiều sâu tương phản */
+  --elevated: #eaedea;             /* Vùng nổi hoặc trạng thái hover nhẹ */
+  --overlay: #dbe1dc;              /* Đường border mảnh thanh lịch */
 
-  --foreground: #1f1f1f;
-  --text-secondary: #565656;
-  --text-muted: #7f7f7f;
+  --foreground: #141c17;           /* Chữ chính màu graphite sẫm pha sắc lá sâu (mềm hơn đen thuần) */
+  --text-secondary: #47514a;       /* Chữ phụ phụ trách mô tả */
+  --text-muted: #76837a;           /* Trạng thái chữ disabled hoặc icon phụ */
 
-  --primary: #2c6c24;
-  --primary-foreground: #fbfbf4;
-  --primary-glow: #7aa520;
-  --accent-soft: #e8eabc;
+  /* Elegant Premium Greens */
+  --primary: #194126;              /* Xanh Forest Deep - cực kỳ cao cấp, tối giản và uy tín */
+  --primary-foreground: #f4f6f5;
+  --primary-glow: #2d613d;
+  --accent-soft: #e3ece6;          /* Nền nhạt cho các vùng highlight tinh tế */
 
-  --success: oklch(0.7 0.16 162);           /* #10B981 */
-  --warning: oklch(0.78 0.16 70);           /* #F59E0B */
-  --danger: oklch(0.65 0.22 25);            /* #EF4444 */
-  --info: oklch(0.65 0.18 250);             /* #3B82F6 */
-  --token-gold: #cddd77;
-  --streak-fire: oklch(0.72 0.18 45);       /* #FB923C */
+  /* Semantics & Extras */
+  --success: oklch(0.65 0.14 160); 
+  --warning: oklch(0.75 0.12 75);  
+  --danger: oklch(0.62 0.18 28);   
+  --info: oklch(0.62 0.15 245);    
+  --token-gold: #c3a680;           /* Màu vàng champagne lì thay cho màu vàng chanh cũ */
+  --streak-fire: oklch(0.7 0.15 45); 
 
   --radius: 0.625rem;
 
-  --gradient-ai: linear-gradient(90deg, rgba(44, 108, 36, 0.16) 0%, rgba(232, 234, 188, 0.18) 100%);
-  --gradient-hero: linear-gradient(135deg, #2c6c24 0%, #7aa520 52%, #cddd77 100%);
+  --gradient-ai: linear-gradient(90deg, rgba(25, 65, 38, 0.08) 0%, rgba(227, 236, 230, 0.15) 100%);
+  --gradient-hero: linear-gradient(135deg, #194126 0%, #2d613d 52%, #568a67 100%);
 
-  --chart-1: 112 49% 28%;
-  --chart-2: 77 62% 40%;
-  --chart-3: 68 44% 64%;
-  --chart-axis: 0 0% 35%;
-  --chart-grid: 0 0% 82%;
+  --chart-1: 155 45% 22%;
+  --chart-2: 150 25% 42%;
+  --chart-3: 145 20% 65%;
+  --chart-axis: 0 0% 30%;
+  --chart-grid: 0 0% 88%;
 }
 
 .dark {
-  --background: #1f1f1f;
-  --surface: #262626;
-  --elevated: #2f2f2f;
-  --overlay: #3b3b3b;
+  /* Premium Obsidian Dark Neutrals */
+  --background: #0d110f;           /* Nền bóng đêm sâu thẳm pha sắc rêu cực nhẹ */
+  --surface: #151a17;              /* Card dark mode sang trọng, không bị xám xịt */
+  --elevated: #1f2622;             /* Khối nổi mượt mà */
+  --overlay: #2a332d;              /* Border tối giản tinh tế */
 
-  --foreground: #ecebf0;
-  --text-secondary: #c4c4c9;
-  --text-muted: #98989f;
+  --foreground: #ecf0ed;           /* Chữ sáng dịu mắt, tránh chói */
+  --text-secondary: #9cb0a4;
+  --text-muted: #6e8075;
 
-  --primary: #cddd77;
-  --primary-foreground: #1f1f1f;
-  --primary-glow: #7aa520;
-  --accent-soft: #36421d;
+  /* Frosted Modern Greens */
+  --primary: #5ba374;              /* Xanh Sage Mint hiện đại, phát sáng sang trọng trên nền tối */
+  --primary-foreground: #0d110f;
+  --primary-glow: #346b47;
+  --accent-soft: #1b2620;          /* Highlight chìm thanh lịch */
 
-  --success: oklch(0.7 0.16 162);           /* #10B981 */
-  --warning: oklch(0.78 0.16 70);           /* #F59E0B */
-  --danger: oklch(0.65 0.22 25);            /* #EF4444 */
-  --info: oklch(0.65 0.18 250);             /* #3B82F6 */
-  --token-gold: #cddd77;
-  --streak-fire: oklch(0.72 0.18 45);       /* #FB923C */
+  /* Semantics & Extras */
+  --success: oklch(0.7 0.14 160);
+  --warning: oklch(0.78 0.12 75);
+  --danger: oklch(0.65 0.18 28);
+  --info: oklch(0.65 0.15 245);
+  --token-gold: #e1cfb3;
+  --streak-fire: oklch(0.72 0.15 45);
 
-  --gradient-ai: linear-gradient(90deg, rgba(122, 165, 32, 0.22) 0%, rgba(44, 108, 36, 0) 100%);
+  --gradient-ai: linear-gradient(90deg, rgba(91, 163, 116, 0.15) 0%, rgba(25, 65, 38, 0) 100%);
 
-  --chart-1: 76 62% 68%;
-  --chart-2: 112 45% 46%;
-  --chart-3: 68 44% 56%;
-  --chart-axis: 0 0% 72%;
-  --chart-grid: 0 0% 28%;
+  --chart-1: 150 40% 60%;
+  --chart-2: 155 25% 45%;
+  --chart-3: 145 15% 35%;
+  --chart-axis: 0 0% 70%;
+  --chart-grid: 0 0% 25%;
 }
 
 @layer base {

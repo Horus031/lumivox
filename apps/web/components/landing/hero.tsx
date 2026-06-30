@@ -60,7 +60,7 @@ export default function Hero() {
           </h1>
         </div>
 
-        <p className="relative mt-7 max-w-160 text-[16.5px] md:text-[18px] text-background/80 leading-relaxed animate-fade-up [animation-delay:160ms]">
+        <p className="relative mt-7 max-w-160 text-[16.5px] md:text-[18px] text-foreground/80 leading-relaxed animate-fade-up [animation-delay:160ms]">
           Lumivox turns your everyday focus, tasks and habits into a personal
           learning signal — then quietly recommends the next best step. Built
           for students who want to grow without burning out.
@@ -96,8 +96,8 @@ export default function Hero() {
 
         {/* Floating glass stat cards */}
         <div className="pointer-events-none hidden md:block">
-          <div className="absolute left-4 lg:left-10 top-[28%] px-3.5 py-2.5 rounded-2xl bg-white/12 backdrop-blur-xl border border-white/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float">
-            <div className="size-7 rounded-lg bg-primary/20 flex items-center justify-center text-primary text-[12px]">
+          <div className="absolute left-4 lg:left-10 top-[28%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float">
+            <div className="size-7 rounded-lg bg-primary/20 flex items-center justify-center text-foreground text-[12px]">
               ✦
             </div>
             <div className="text-left">
@@ -107,14 +107,14 @@ export default function Hero() {
               </p>
             </div>
           </div>
-          <div className="absolute right-4 lg:right-10 top-[34%] px-3.5 py-2.5 rounded-2xl bg-white/12 backdrop-blur-xl border border-white/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-2s]">
+          <div className="absolute right-4 lg:right-10 top-[34%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-2s]">
             <Timer className="size-4 " />
             <div className="text-left">
               <p className="font-medium leading-tight font-mono">24:32</p>
               <p className="text-[10.5px] text-foreground/70">In focus</p>
             </div>
           </div>
-          <div className="absolute left-8 lg:left-16 bottom-[18%] px-3.5 py-2.5 rounded-2xl bg-white/12 backdrop-blur-xl border border-white/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-4s]">
+          <div className="absolute left-8 lg:left-16 bottom-[18%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-4s]">
             <Flame className="size-4" style={{ color: "var(--streak-fire)" }} />
             <div className="text-left">
               <p className="font-medium leading-tight">12-day streak</p>
@@ -123,7 +123,7 @@ export default function Hero() {
               </p>
             </div>
           </div>
-          <div className="absolute right-8 lg:right-16 bottom-[20%] px-3.5 py-2.5 rounded-2xl bg-white/12 backdrop-blur-xl border border-white/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-3s]">
+          <div className="absolute right-8 lg:right-16 bottom-[20%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-3s]">
             <BarChart3 className="size-4" />
             <div className="text-left">
               <p className="font-medium leading-tight">+18% this week</p>

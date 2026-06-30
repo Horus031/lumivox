@@ -12,19 +12,11 @@ type LeaveRoomButtonProps = {
   disabledForOwner?: boolean;
 };
 
-export function LeaveRoomButton({
-  roomId,
-  disabledForOwner = false,
-}: LeaveRoomButtonProps) {
+export function LeaveRoomButton({ roomId }: LeaveRoomButtonProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleLeave() {
-    if (disabledForOwner) {
-      toast.error("Room owners cannot leave directly.");
-      return;
-    }
-
     const confirmed = window.confirm("Leave this study room?");
 
     if (!confirmed) return;
@@ -57,7 +49,7 @@ export function LeaveRoomButton({
 
   return (
     <Button
-      variant={'outline'}
+      variant={"outline"}
       onClick={handleLeave}
       disabled={isPending}
       className="border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/40 disabled:cursor-not-allowed disabled:opacity-60"

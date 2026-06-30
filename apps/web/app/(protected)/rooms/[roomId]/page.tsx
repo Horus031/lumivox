@@ -54,8 +54,6 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
     notFound();
   }
 
-  const ownerCannotLeave = membership.role === "owner";
-
   return (
     <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8">
       <div className="mx-auto max-w-6xl space-y-8">
@@ -125,10 +123,7 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
               </DialogContent>
             </Dialog>
 
-            <LeaveRoomButton
-              roomId={room.id}
-              disabledForOwner={ownerCannotLeave}
-            />
+            <LeaveRoomButton roomId={room.id} />
           </div>
         </div>
 
