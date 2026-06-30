@@ -293,6 +293,69 @@ export type Database = {
           },
         ]
       }
+      document_chunks: {
+        Row: {
+          chunk_index: number
+          content: string
+          content_char_count: number
+          created_at: string
+          document_id: string
+          embedding: string | null
+          embedding_model: string | null
+          id: string
+          metadata: Json
+          owner_id: string
+          status: Database["public"]["Enums"]["document_chunk_status"]
+          token_estimate: number
+          updated_at: string
+        }
+        Insert: {
+          chunk_index: number
+          content: string
+          content_char_count: number
+          created_at?: string
+          document_id: string
+          embedding?: string | null
+          embedding_model?: string | null
+          id?: string
+          metadata?: Json
+          owner_id: string
+          status?: Database["public"]["Enums"]["document_chunk_status"]
+          token_estimate?: number
+          updated_at?: string
+        }
+        Update: {
+          chunk_index?: number
+          content?: string
+          content_char_count?: number
+          created_at?: string
+          document_id?: string
+          embedding?: string | null
+          embedding_model?: string | null
+          id?: string
+          metadata?: Json
+          owner_id?: string
+          status?: Database["public"]["Enums"]["document_chunk_status"]
+          token_estimate?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_chunks_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "learning_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_chunks_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       focus_sessions: {
         Row: {
           actual_focus_minutes: number
@@ -811,6 +874,134 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      rag_chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          latency_ms: number | null
+          model_name: string | null
+          prompt_variant:
+            | Database["public"]["Enums"]["rag_prompt_variant"]
+            | null
+          retrieved_chunk_ids: string[]
+          retrieved_context: Json
+          role: Database["public"]["Enums"]["rag_message_role"]
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          model_name?: string | null
+          prompt_variant?:
+            | Database["public"]["Enums"]["rag_prompt_variant"]
+            | null
+          retrieved_chunk_ids?: string[]
+          retrieved_context?: Json
+          role: Database["public"]["Enums"]["rag_message_role"]
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          latency_ms?: number | null
+          model_name?: string | null
+          prompt_variant?:
+            | Database["public"]["Enums"]["rag_prompt_variant"]
+            | null
+          retrieved_chunk_ids?: string[]
+          retrieved_context?: Json
+          role?: Database["public"]["Enums"]["rag_message_role"]
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rag_chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "rag_chat_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rag_chat_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rag_chat_sessions: {
+        Row: {
+          created_at: string
+          focus_session_id: string | null
+          goal_id: string | null
+          id: string
+          prompt_variant: Database["public"]["Enums"]["rag_prompt_variant"]
+          task_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          focus_session_id?: string | null
+          goal_id?: string | null
+          id?: string
+          prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
+          task_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          focus_session_id?: string | null
+          goal_id?: string | null
+          id?: string
+          prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
+          task_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rag_chat_sessions_focus_session_id_fkey"
+            columns: ["focus_session_id"]
+            isOneToOne: false
+            referencedRelation: "focus_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rag_chat_sessions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rag_chat_sessions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rag_chat_sessions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reward_ledger: {
         Row: {
@@ -1376,6 +1567,23 @@ export type Database = {
         Returns: string
       }
       leave_study_room: { Args: { p_room_id: string }; Returns: undefined }
+      match_learning_document_chunks: {
+        Args: {
+          p_document_ids?: string[]
+          p_goal_id?: string
+          p_match_count?: number
+          p_query_embedding: string
+          p_task_id?: string
+        }
+        Returns: {
+          chunk_id: string
+          chunk_index: number
+          content: string
+          document_id: string
+          file_name: string
+          similarity: number
+        }[]
+      }
       restore_my_streak_with_tokens: { Args: never; Returns: Json }
     }
     Enums: {
@@ -1389,6 +1597,7 @@ export type Database = {
         | "external_interrupt"
         | "fatigue"
         | "other"
+      document_chunk_status: "pending" | "embedded" | "failed"
       engagement_streak_status: "active" | "frozen" | "lost"
       feature_attribution_effect:
         | "increases_risk"
@@ -1400,6 +1609,8 @@ export type Database = {
       learning_document_permission_role: "viewer" | "editor"
       learning_document_visibility: "private" | "shared" | "public"
       native_task_risk_band: "low" | "moderate" | "elevated" | "high"
+      rag_message_role: "user" | "assistant" | "system"
+      rag_prompt_variant: "no_rule" | "grounded_rule"
       reward_event_type:
         | "focus_session_completed"
         | "task_completed"
@@ -1569,6 +1780,7 @@ export const Constants = {
         "fatigue",
         "other",
       ],
+      document_chunk_status: ["pending", "embedded", "failed"],
       engagement_streak_status: ["active", "frozen", "lost"],
       feature_attribution_effect: [
         "increases_risk",
@@ -1581,6 +1793,8 @@ export const Constants = {
       learning_document_permission_role: ["viewer", "editor"],
       learning_document_visibility: ["private", "shared", "public"],
       native_task_risk_band: ["low", "moderate", "elevated", "high"],
+      rag_message_role: ["user", "assistant", "system"],
+      rag_prompt_variant: ["no_rule", "grounded_rule"],
       reward_event_type: [
         "focus_session_completed",
         "task_completed",
