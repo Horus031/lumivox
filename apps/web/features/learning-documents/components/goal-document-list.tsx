@@ -2,6 +2,7 @@ import type { LearningDocument } from "@/features/learning-documents/learning-do
 import { DeleteLearningDocumentButton } from "@/features/learning-documents/components/delete-learning-document-button";
 import { DocumentPreviewLink } from "@/features/learning-documents/components/document-preview-link";
 import Link from "next/link";
+import { ProcessLearningDocumentButton } from "./process-learning-document-button";
 
 type GoalDocumentListProps = {
   documents: LearningDocument[];
@@ -56,16 +57,22 @@ export function GoalDocumentList({ documents }: GoalDocumentListProps) {
                 </p>
 
                 <p className="mt-1 text-xs capitalize text-muted-foreground">
-                  Visibility: {document.visibility}
+                  Visibility: {document.visibility} · AI:{" "}
+                  {document.extracted_text_status ?? "pending"}
                 </p>
               </div>
 
               <div className="flex flex-wrap gap-2">
+                <ProcessLearningDocumentButton
+                  documentId={document.id}
+                  status={document.extracted_text_status}
+                />
+
                 <DocumentPreviewLink document={document} />
 
                 <Link
                   href={`/documents/${document.id}/share`}
-                  className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+                  className="rounded-md border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
                 >
                   Share
                 </Link>

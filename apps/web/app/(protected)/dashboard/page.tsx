@@ -17,14 +17,14 @@ import { PbiScoreCards } from "@/features/pbi/components/pbi-score-cards";
 import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
 import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
 
-import { getLatestAiInsightCards } from "@/features/ai-insights/ai-insight.queries";
-import { AiInsightSection } from "@/features/ai-insights/components/ai-insight-section";
+// import { getLatestAiInsightCards } from "@/features/ai-insights/ai-insight.queries";
+// import { AiInsightSection } from "@/features/ai-insights/components/ai-insight-section";
 
-import { getLatestNativeTaskRiskAssessments } from "@/features/native-task-risk/native-task-risk.queries";
-import { NativeTaskRiskSection } from "@/features/native-task-risk/components/native-task-risk-section";
+// import { getLatestNativeTaskRiskAssessments } from "@/features/native-task-risk/native-task-risk.queries";
+// import { NativeTaskRiskSection } from "@/features/native-task-risk/components/native-task-risk-section";
 
-import { getLatestNativeTaskAiInsights } from "@/features/native-task-insights/native-task-insight.queries";
-import { NativeTaskAiInsightSection } from "@/features/native-task-insights/components/native-task-ai-insight-section";
+// import { getLatestNativeTaskAiInsights } from "@/features/native-task-insights/native-task-insight.queries";
+// import { NativeTaskAiInsightSection } from "@/features/native-task-insights/components/native-task-ai-insight-section";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
@@ -37,9 +37,9 @@ export default async function DashboardPage() {
     behaviourTrend,
     pbiHistory,
     taskStatusBreakdown,
-    aiInsightCards,
-    nativeTaskRiskAssessments,
-    nativeTaskAiInsights,
+    // aiInsightCards,
+    // nativeTaskRiskAssessments,
+    // nativeTaskAiInsights,
     engagementStats,
   ] = await Promise.all([
     getDashboardSummary(),
@@ -47,9 +47,9 @@ export default async function DashboardPage() {
     getBehaviourTrend(),
     getPbiSnapshotHistory(),
     getTaskStatusBreakdown(),
-    getLatestAiInsightCards(),
-    getLatestNativeTaskRiskAssessments(),
-    getLatestNativeTaskAiInsights(),
+    // getLatestAiInsightCards(),
+    // getLatestNativeTaskRiskAssessments(),
+    // getLatestNativeTaskAiInsights(),
     getCurrentEngagementStats(),
   ]);
 
@@ -75,6 +75,8 @@ export default async function DashboardPage() {
 
         <PbiScoreCards snapshot={latestSnapshot} />
 
+        <PbiExplanationPanel explanation={explanation} />
+
         <BehaviourTrendChart data={behaviourTrend} />
 
         <div className="grid gap-6 xl:grid-cols-2">
@@ -82,13 +84,13 @@ export default async function DashboardPage() {
           <TaskStatusChart data={taskStatusBreakdown} />
         </div>
 
-        <PbiExplanationPanel explanation={explanation} />
+        {/* Product Native Model for Production */}
+        {/* <NativeTaskRiskSection assessments={nativeTaskRiskAssessments} /> */}
 
-        <NativeTaskRiskSection assessments={nativeTaskRiskAssessments} />
+        {/* <NativeTaskAiInsightSection cards={nativeTaskAiInsights} /> */}
 
-        <NativeTaskAiInsightSection cards={nativeTaskAiInsights} />
-
-        <AiInsightSection cards={aiInsightCards} />
+        {/* AI Insight Model Demo */}
+        {/* <AiInsightSection cards={aiInsightCards} /> */}
       </div>
     </section>
   );

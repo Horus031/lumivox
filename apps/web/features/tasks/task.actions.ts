@@ -12,7 +12,10 @@ import {
   type CreateTaskInput,
   type UpdateTaskInput,
 } from "./task.schemas";
-import { invalidateEngagementCache, recalculateEngagementForUser } from "../engagement-retention/engagement-retention.server";
+import {
+  invalidateEngagementCache,
+  recalculateEngagementForUser,
+} from "../engagement-retention/engagement-retention.server";
 
 export async function createTaskAction(
   input: CreateTaskInput,
@@ -52,7 +55,6 @@ export async function createTaskAction(
 
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
-    revalidatePath("/goals");
 
     return {
       success: true,
@@ -123,8 +125,12 @@ export async function updateTaskAction(
     }
 
     try {
-      await invalidateEngagementCache(user.id);
-      await recalculateEngagementForUser(user.id);
+      invalidateEngagementCache(user.id).catch((error) =>
+        console.log("Error:", error),
+      );
+      recalculateEngagementForUser(user.id).catch((error) =>
+        console.log("Error:", error),
+      );
     } catch (error) {
       console.error(
         "Failed to auto refresh engagement after task completion:",
@@ -132,14 +138,8 @@ export async function updateTaskAction(
       );
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/tasks");
-    revalidatePath("/settings");
-    revalidatePath("/", "layout");
-
     revalidatePath("/tasks");
     revalidatePath("/dashboard");
-    revalidatePath("/goals");
 
     return {
       success: true,

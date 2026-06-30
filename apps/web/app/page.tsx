@@ -12,7 +12,7 @@ import Testimonials from "@/components/landing/testimonials";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-transparent text-foreground">
       <NavBar />
       <main>
         <Hero />

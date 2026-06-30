@@ -28,7 +28,7 @@ export default async function GoalsPage() {
           </div>
 
           {goals.length === 0 ? (
-            <div className="rounded-2xl border border-dashed bg-white p-10 text-center">
+            <div className="rounded-2xl border border-dashed bg-background p-10 text-center">
               <h3 className="text-lg font-semibold">No goals created yet</h3>
               <p className="mt-2 text-sm text-neutral-600">
                 Your first goal will appear here after creation.

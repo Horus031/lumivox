@@ -11,29 +11,31 @@ type DesktopSidebarProps = {
 
 export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
   const engagementStats = await getCurrentEngagementStats();
-  return (
-    <aside className="hidden lg:fixed lg:inset-y-0 lg:block lg:w-77 lg:p-4 xl:p-0">
-      <div className="flex h-full flex-col rounded-4xl bg-sidebar/95 px-4 py-5 gap-4 shadow-[0_20px_70px_-55px_hsl(var(--primary)/0.28)] ring-1 ring-border/70 backdrop-blur-xl">
-        <div className="">
-          <div className="rounded-[28px] bg-sidebar px-1 py-1">
-            <div className="rounded-3xl bg-muted/55 px-4 py-4">
-              <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
-                Lumivox
-              </p>
 
-              <h4 className="mt-3 font-semibold tracking-tight text-foreground">
-                Behaviour Intelligence
-              </h4>
-            </div>
+  return (
+    <aside className="hidden lg:fixed lg:inset-y-0 lg:block lg:w-77 lg:p-4 xl:p-0 z-2">
+      <div className="flex h-full flex-col rounded-tr-2xl rounded-br-2xl bg-sidebar/95 px-4 py-5 gap-4 shadow-[0_20px_70px_-55px_hsl(var(--primary)/0.28)] ring-1 ring-border/70 backdrop-blur-xl">
+        <div className="rounded-[28px] bg-sidebar px-1 py-1">
+          <div className="rounded-3xl">
+            <p className="text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-muted-foreground">
+              Lumivox
+            </p>
+
+            <h4 className="mt-3 font-semibold tracking-tight text-foreground">
+              Behaviour Intelligence
+            </h4>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto lg:h-full pr-1">
+        <div className="flex-1 overflow-y-auto lg:h-full pr-1 mt-4">
           <AppNavigation />
         </div>
 
         <div className="space-y-4">
-          <SidebarEngagementMiniStats stats={engagementStats} />
+          <SidebarEngagementMiniStats
+            userId={profile.id}
+            stats={engagementStats}
+          />
           <UserMenuCard profile={profile} />
         </div>
       </div>

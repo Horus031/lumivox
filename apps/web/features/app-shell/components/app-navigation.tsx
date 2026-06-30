@@ -51,24 +51,18 @@ export function AppNavigation({ variant = "desktop" }: AppNavigationProps) {
             href={item.href}
             className={`group flex items-start gap-3 rounded-[22px] px-3 py-3 transition-all duration-200 ${
               isActive
-                ? "bg-linear-to-r from-primary to-primary-glow text-primary-foreground shadow-[0_14px_32px_-24px_hsl(var(--primary)/0.72)]"
+                ? "text-foreground bg-background shadow-[0_14px_32px_-24px_hsl(var(--primary)/0.72)]"
                 : "text-foreground hover:bg-muted/65"
             }`}
           >
-            <div
-              className={`mt-0.5 rounded-2xl p-2 ${
-                isActive
-                  ? "bg-white/14"
-                  : "bg-sidebar-accent/80 group-hover:bg-sidebar-accent"
-              }`}
-            >
+            <div className={`mt-0.5 rounded-2xl p-2`}>
               <AppNavigationIcon icon={item.icon} />
             </div>
 
             <div>
               <p className="text-sm font-semibold">{item.label}</p>
               <p
-                className={`mt-0.5 text-xs leading-5 ${isActive ? "text-primary-foreground/82" : "text-muted-foreground"}`}
+                className={`mt-0.5 text-xs leading-5 ${isActive ? "text-foreground/82" : "text-muted-foreground"}`}
               >
                 {item.description}
               </p>

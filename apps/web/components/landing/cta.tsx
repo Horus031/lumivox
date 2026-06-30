@@ -5,7 +5,7 @@ export default function CTA() {
   return (
     <section className="py-24">
       <div className="max-w-310 mx-auto px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-hero text-primary-foreground p-10 md:p-16 text-center">
+        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-hero text-foreground p-10 md:p-16 text-center">
           <div
             className="pointer-events-none absolute inset-0 opacity-30 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)]"
             style={{
