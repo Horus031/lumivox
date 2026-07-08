@@ -2,6 +2,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyRoomList } from "./my-room-list";
 import { PublicRoomList } from "./public-room-list";
+import { JoinPrivateRoomForm } from "./join-private-room-form";
 
 type RoomListTabsType = {
   myRooms: any;
@@ -15,12 +16,16 @@ export function RoomListTabs(props: RoomListTabsType) {
       <TabsList>
         <TabsTrigger value="my-room-list">My Room List</TabsTrigger>
         <TabsTrigger value="public-room">Public Rooms</TabsTrigger>
+        <TabsTrigger value="code-joining">Join With Code</TabsTrigger>
       </TabsList>
       <TabsContent className="w-full" value="my-room-list">
         <MyRoomList rooms={myRooms} />
       </TabsContent>
       <TabsContent value="public-room">
         <PublicRoomList rooms={discoverablePublicRooms} />
+      </TabsContent>
+      <TabsContent value="code-joining">
+        <JoinPrivateRoomForm />
       </TabsContent>
     </Tabs>
   );

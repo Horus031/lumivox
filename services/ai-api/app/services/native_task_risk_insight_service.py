@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from app.clients.gemini_client import get_gemini_client
+from app.clients.llm_client import LLMStructuredGeneration, generate_structured
 from app.clients.supabase_client import get_supabase_client
-from app.core.config import settings
 from app.schemas.native_task_risk_insight import (
     GenerateNativeTaskRiskInsightRequest,
     GenerateNativeTaskRiskInsightResponse,
@@ -128,23 +127,11 @@ Structured context:
 
 def _generate_structured_insight(
     prompt: str,
-) -> GeminiNativeTaskRiskInsightOutput:
-    client = get_gemini_client()
-
-    response = client.models.generate_content(
-        model=settings.gemini_insight_model,
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json",
-            "response_json_schema": (
-                GeminiNativeTaskRiskInsightOutput
-                .model_json_schema()
-            ),
-        },
-    )
-
-    return GeminiNativeTaskRiskInsightOutput.model_validate_json(
-        response.text
+) -> LLMStructuredGeneration[GeminiNativeTaskRiskInsightOutput]:
+    return generate_structured(
+        prompt=prompt,
+        output_model=GeminiNativeTaskRiskInsightOutput,
+        schema_name="native_task_risk_insight",
     )
 
 
@@ -153,6 +140,7 @@ def _persist_native_task_risk_insight(
     assessment_id: UUID,
     user_id: str,
     insight: GeminiNativeTaskRiskInsightOutput,
+    generation: LLMStructuredGeneration[GeminiNativeTaskRiskInsightOutput],
 ) -> UUID:
     supabase = get_supabase_client()
 
@@ -176,12 +164,16 @@ def _persist_native_task_risk_insight(
                     for item in insight.recommended_actions
                 ],
                 "confidence_note": insight.confidence_note,
-                "llm_provider": "google",
-                "llm_model": settings.gemini_insight_model,
+                "llm_provider": generation.provider,
+                "llm_model": generation.model,
                 "prompt_version": PROMPT_VERSION,
                 "structured_output_schema_version": "v1",
                 "generation_metadata": {
-                    "source": "FastAPI Gemini Native Task Risk Insight Generator",
+                    "source": "FastAPI Native Task Risk Insight Generator",
+                    "provider": generation.provider,
+                    "model": generation.model,
+                    "latency_ms": generation.latency_ms,
+                    "attempts": generation.attempts,
                 },
             },
             on_conflict="native_task_risk_assessment_id",
@@ -201,7 +193,8 @@ def generate_native_task_risk_insight(
 
     prompt = _build_prompt(context)
 
-    insight = _generate_structured_insight(prompt)
+    generation = _generate_structured_insight(prompt)
+    insight = generation.output
 
     insight_id = None
 
@@ -210,12 +203,13 @@ def generate_native_task_risk_insight(
             assessment_id=payload.assessment_id,
             user_id=context["user_id"],
             insight=insight,
+            generation=generation,
         )
 
     return GenerateNativeTaskRiskInsightResponse(
         insight_id=insight_id,
         assessment_id=payload.assessment_id,
-        llm_model=settings.gemini_insight_model,
+        llm_model=generation.model,
         prompt_version=PROMPT_VERSION,
         insight=insight,
     )

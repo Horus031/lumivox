@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Task = Database["public"]["Tables"]["tasks"]["Row"];
 
@@ -113,10 +114,10 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                 key={value}
                 type="button"
                 onClick={() => setPlannedMinutes(value)}
-                className={`border bg-transparent text-primary-foreground px-4 py-2 text-sm font-medium transition ${
+                className={`border bg-transparent text-foreground px-4 py-2 text-sm font-medium transition ${
                   plannedMinutes === value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "text-foreground hover:text-primary-foreground"
+                    ? "border-primary bg-primary text-foreground"
+                    : "text-foreground hover:text-foreground"
                 }`}
               >
                 {value} min
@@ -124,22 +125,23 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
             ))}
           </div>
 
-          {/* <div className="mt-3">
-            <input
+          <div className="mt-3">
+            <Input
+              placeholder="Your desired planned minutes..."
               type="number"
               min={1}
               max={240}
               value={plannedMinutes}
               onChange={(event) => setPlannedMinutes(event.target.value)}
-              className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              className="w-full border px-3 py-2.5 outline-none transition"
             />
-          </div> */}
+          </div>
         </div>
 
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full px-4 py-2.5 mt-2 text-sm font-medium text-primary-foreground transition  disabled:cursor-not-allowed disabled:opacity-60"
+          className="w-full disabled:cursor-not-allowed"
         >
           {isPending ? "Starting..." : "Start focus session"}
         </Button>

@@ -6,9 +6,8 @@ from datetime import datetime, timedelta, timezone
 from statistics import mean
 from uuid import UUID
 
-from app.clients.gemini_client import get_gemini_client
+from app.clients.llm_client import LLMStructuredGeneration, generate_structured
 from app.clients.supabase_client import get_supabase_client
-from app.core.config import settings
 from app.schemas.weekly_reflection import (
     GeminiWeeklyReflectionOutput,
     GenerateWeeklyReflectionRequest,
@@ -503,10 +502,10 @@ def persist_weekly_reflection(
 
 
 # ============================================================
-# 8. Gemini weekly reflection
+# 8. LLM weekly reflection
 # ============================================================
 
-def build_gemini_prompt(
+def build_llm_prompt(
     *,
     reflection_direction: str,
     current_metrics: WeeklyReflectionMetricPayload,
@@ -547,23 +546,14 @@ Structured context:
 """.strip()
 
 
-def generate_gemini_weekly_reflection(
+def generate_llm_weekly_reflection(
     *,
     prompt: str,
-) -> GeminiWeeklyReflectionOutput:
-    client = get_gemini_client()
-
-    response = client.models.generate_content(
-        model=settings.gemini_insight_model,
-        contents=prompt,
-        config={
-            "response_mime_type": "application/json",
-            "response_json_schema": GeminiWeeklyReflectionOutput.model_json_schema(),
-        },
-    )
-
-    return GeminiWeeklyReflectionOutput.model_validate_json(
-        response.text
+) -> LLMStructuredGeneration[GeminiWeeklyReflectionOutput]:
+    return generate_structured(
+        prompt=prompt,
+        output_model=GeminiWeeklyReflectionOutput,
+        schema_name="weekly_reflection",
     )
 
 
@@ -572,6 +562,7 @@ def persist_weekly_reflection_card(
     reflection_id: UUID,
     user_id: UUID,
     card: GeminiWeeklyReflectionOutput,
+    generation: LLMStructuredGeneration[GeminiWeeklyReflectionOutput],
 ) -> UUID:
     supabase = get_supabase_client()
 
@@ -597,12 +588,16 @@ def persist_weekly_reflection_card(
                     for item in card.next_week_actions
                 ],
                 "confidence_note": card.confidence_note,
-                "llm_provider": "google",
-                "llm_model": settings.gemini_insight_model,
+                "llm_provider": generation.provider,
+                "llm_model": generation.model,
                 "prompt_version": PROMPT_VERSION,
                 "structured_output_schema_version": "v1",
                 "generation_metadata": {
                     "source": "FastAPI Weekly Reflection Generator",
+                    "provider": generation.provider,
+                    "model": generation.model,
+                    "latency_ms": generation.latency_ms,
+                    "attempts": generation.attempts,
                 },
             }
         )
@@ -662,7 +657,7 @@ def generate_weekly_reflection(
         )
 
     if payload.generate_ai_card:
-        prompt = build_gemini_prompt(
+        prompt = build_llm_prompt(
             reflection_direction=reflection_direction,
             current_metrics=current_metrics,
             previous_metrics=previous_metrics,
@@ -670,15 +665,17 @@ def generate_weekly_reflection(
             evidence=evidence,
         )
 
-        ai_card = generate_gemini_weekly_reflection(
+        generation = generate_llm_weekly_reflection(
             prompt=prompt,
         )
+        ai_card = generation.output
 
         if payload.persist_reflection:
             card_id = persist_weekly_reflection_card(
                 reflection_id=reflection_id,
                 user_id=payload.user_id,
                 card=ai_card,
+                generation=generation,
             )
 
     return GenerateWeeklyReflectionResponse(

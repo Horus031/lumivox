@@ -878,6 +878,7 @@ export type Database = {
       rag_chat_messages: {
         Row: {
           content: string
+          context_mode: Database["public"]["Enums"]["rag_context_mode"]
           created_at: string
           id: string
           latency_ms: number | null
@@ -888,11 +889,14 @@ export type Database = {
           retrieved_chunk_ids: string[]
           retrieved_context: Json
           role: Database["public"]["Enums"]["rag_message_role"]
+          selected_document_ids: string[]
           session_id: string
+          top_k: number | null
           user_id: string
         }
         Insert: {
           content: string
+          context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           id?: string
           latency_ms?: number | null
@@ -903,11 +907,14 @@ export type Database = {
           retrieved_chunk_ids?: string[]
           retrieved_context?: Json
           role: Database["public"]["Enums"]["rag_message_role"]
+          selected_document_ids?: string[]
           session_id: string
+          top_k?: number | null
           user_id: string
         }
         Update: {
           content?: string
+          context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           id?: string
           latency_ms?: number | null
@@ -918,7 +925,9 @@ export type Database = {
           retrieved_chunk_ids?: string[]
           retrieved_context?: Json
           role?: Database["public"]["Enums"]["rag_message_role"]
+          selected_document_ids?: string[]
           session_id?: string
+          top_k?: number | null
           user_id?: string
         }
         Relationships: [
@@ -940,35 +949,44 @@ export type Database = {
       }
       rag_chat_sessions: {
         Row: {
+          context_mode: Database["public"]["Enums"]["rag_context_mode"]
           created_at: string
           focus_session_id: string | null
           goal_id: string | null
           id: string
           prompt_variant: Database["public"]["Enums"]["rag_prompt_variant"]
+          selected_document_ids: string[]
           task_id: string | null
           title: string | null
+          top_k: number
           updated_at: string
           user_id: string
         }
         Insert: {
+          context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           focus_session_id?: string | null
           goal_id?: string | null
           id?: string
           prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
+          selected_document_ids?: string[]
           task_id?: string | null
           title?: string | null
+          top_k?: number
           updated_at?: string
           user_id: string
         }
         Update: {
+          context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           focus_session_id?: string | null
           goal_id?: string | null
           id?: string
           prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
+          selected_document_ids?: string[]
           task_id?: string | null
           title?: string | null
+          top_k?: number
           updated_at?: string
           user_id?: string
         }
@@ -1570,10 +1588,9 @@ export type Database = {
       match_learning_document_chunks: {
         Args: {
           p_document_ids?: string[]
-          p_goal_id?: string
           p_match_count?: number
           p_query_embedding: string
-          p_task_id?: string
+          p_user_id?: string
         }
         Returns: {
           chunk_id: string
@@ -1609,6 +1626,7 @@ export type Database = {
       learning_document_permission_role: "viewer" | "editor"
       learning_document_visibility: "private" | "shared" | "public"
       native_task_risk_band: "low" | "moderate" | "elevated" | "high"
+      rag_context_mode: "general" | "document_rag"
       rag_message_role: "user" | "assistant" | "system"
       rag_prompt_variant: "no_rule" | "grounded_rule"
       reward_event_type:
@@ -1793,6 +1811,7 @@ export const Constants = {
       learning_document_permission_role: ["viewer", "editor"],
       learning_document_visibility: ["private", "shared", "public"],
       native_task_risk_band: ["low", "moderate", "elevated", "high"],
+      rag_context_mode: ["general", "document_rag"],
       rag_message_role: ["user", "assistant", "system"],
       rag_prompt_variant: ["no_rule", "grounded_rule"],
       reward_event_type: [

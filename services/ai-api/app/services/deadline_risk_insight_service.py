@@ -3,9 +3,8 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from app.clients.gemini_client import get_gemini_client
+from app.clients.llm_client import LLMStructuredGeneration, generate_structured
 from app.clients.supabase_client import get_supabase_client
-from app.core.config import settings
 from app.schemas.deadline_risk_insight import (
     GenerateDeadlineRiskInsightRequest,
     GenerateDeadlineRiskInsightResponse,
@@ -119,20 +118,11 @@ Structured context:
 
 def _generate_structured_insight(
     prompt: str,
-) -> GeminiDeadlineRiskInsightOutput:
-    client = get_gemini_client()
-
-    response = client.models.generate_content(
-    model=settings.gemini_insight_model,
-    contents=prompt,
-    config={
-        "response_mime_type": "application/json",
-        "response_json_schema": GeminiDeadlineRiskInsightOutput.model_json_schema(),
-    },
-)
-
-    return GeminiDeadlineRiskInsightOutput.model_validate_json(
-        response.text
+) -> LLMStructuredGeneration[GeminiDeadlineRiskInsightOutput]:
+    return generate_structured(
+        prompt=prompt,
+        output_model=GeminiDeadlineRiskInsightOutput,
+        schema_name="deadline_risk_insight",
     )
 
 
@@ -141,6 +131,7 @@ def _persist_insight_card(
     prediction_id: UUID,
     user_id: str | None,
     insight: GeminiDeadlineRiskInsightOutput,
+    generation: LLMStructuredGeneration[GeminiDeadlineRiskInsightOutput],
 ) -> UUID:
     supabase = get_supabase_client()
 
@@ -163,12 +154,16 @@ def _persist_insight_card(
                     for item in insight.recommended_actions
                 ],
                 "confidence_note": insight.confidence_note,
-                "llm_provider": "google",
-                "llm_model": settings.gemini_insight_model,
+                "llm_provider": generation.provider,
+                "llm_model": generation.model,
                 "prompt_version": PROMPT_VERSION,
                 "structured_output_schema_version": "v1",
                 "generation_metadata": {
-                    "source": "FastAPI Gemini Deadline Risk Insight Generator",
+                    "source": "FastAPI Deadline Risk Insight Generator",
+                    "provider": generation.provider,
+                    "model": generation.model,
+                    "latency_ms": generation.latency_ms,
+                    "attempts": generation.attempts,
                 },
             },
             on_conflict="deadline_risk_prediction_id",
@@ -190,7 +185,8 @@ def generate_deadline_risk_insight(
 
     prompt = _build_prompt(context)
 
-    insight = _generate_structured_insight(prompt)
+    generation = _generate_structured_insight(prompt)
+    insight = generation.output
 
     insight_id = None
 
@@ -199,12 +195,13 @@ def generate_deadline_risk_insight(
             prediction_id=payload.prediction_id,
             user_id=prediction.get("user_id"),
             insight=insight,
+            generation=generation,
         )
 
     return GenerateDeadlineRiskInsightResponse(
         insight_id=insight_id,
         prediction_id=payload.prediction_id,
-        llm_model=settings.gemini_insight_model,
+        llm_model=generation.model,
         prompt_version=PROMPT_VERSION,
         insight=insight,
     )
