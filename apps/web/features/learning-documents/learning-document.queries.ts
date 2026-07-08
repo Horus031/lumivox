@@ -90,3 +90,21 @@ export async function createLearningDocumentSignedUrl(filePath: string) {
 
   return data.signedUrl;
 }
+
+export async function getAccessibleProcessedLearningDocuments() {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("learning_documents")
+    .select("*")
+    .eq("extracted_text_status", "completed")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(
+      `Failed to fetch processed learning documents: ${error.message}`,
+    );
+  }
+
+  return data ?? [];
+}

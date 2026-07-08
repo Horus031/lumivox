@@ -1,4 +1,4 @@
-import { getTasks } from "@/features/tasks/task.queries";
+import { getTaskById, getTasks } from "@/features/tasks/task.queries";
 import {
   getActiveFocusSession,
   getRecentFocusSessions,
@@ -10,13 +10,18 @@ import { RecentFocusSessions } from "@/features/focus-sessions/components/recent
 
 import type { FocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import { PageHeader } from "@/features/app-shell/components/page-header";
+import { getAccessibleProcessedLearningDocuments } from "@/features/learning-documents/learning-document.queries";
+import { RagStudyAssistant } from "@/features/rag/components/rag-study-assistant";
 
 export default async function FocusPage() {
-  const [tasks, activeSession, recentSessions] = await Promise.all([
+  const [tasks, activeSession, recentSessions, documents] = await Promise.all([
     getTasks(),
     getActiveFocusSession(),
     getRecentFocusSessions(),
+    getAccessibleProcessedLearningDocuments(),
   ]);
+
+  const task = await getTaskById(activeSession?.task_id ?? null);
 
   const availableTasks = tasks.filter(
     (task) => task.status !== "completed" && task.status !== "cancelled",
@@ -32,9 +37,17 @@ export default async function FocusPage() {
         />
 
         {activeSession ? (
-          <ActiveFocusSessionPanel
-            session={activeSession as FocusSessionWithTask}
-          />
+          <div className="flex flex-col gap-4">
+            <ActiveFocusSessionPanel
+              session={activeSession as FocusSessionWithTask}
+              task={task}
+            />
+
+            <RagStudyAssistant
+              focusSessionId={activeSession?.id ?? null}
+              documents={documents}
+            />
+          </div>
         ) : (
           <StartFocusSessionForm tasks={availableTasks} />
         )}

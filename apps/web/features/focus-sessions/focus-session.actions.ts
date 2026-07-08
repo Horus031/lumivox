@@ -1,7 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { invalidateEngagementCache, recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
+import {
+  invalidateEngagementCache,
+  recalculateEngagementForUser,
+} from "@/features/engagement-retention/engagement-retention.server";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -15,6 +18,7 @@ import {
 function calculateElapsedFocusMinutes(
   startedAt: string,
   endedAt: Date,
+  plannedMinutes: number,
   totalPausedSeconds: number,
 ) {
   const startedMs = new Date(startedAt).getTime();
@@ -27,7 +31,13 @@ function calculateElapsedFocusMinutes(
 
   const activeSeconds = Math.max(0, rawElapsedSeconds - totalPausedSeconds);
 
-  return Math.floor(activeSeconds / 60);
+  const activeMinutes = Math.floor(activeSeconds / 60);
+
+  if (activeMinutes > plannedMinutes) {
+    return plannedMinutes;
+  }
+
+  return activeMinutes;
 }
 
 export async function createFocusSessionAction(
@@ -228,7 +238,7 @@ export async function completeFocusSessionAction(
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select("id, started_at, total_paused_seconds, status")
+      .select("id, started_at, planned_minutes, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
       .single();
 
@@ -251,6 +261,7 @@ export async function completeFocusSessionAction(
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
+      session.planned_minutes,
       session.total_paused_seconds,
     );
 
@@ -283,7 +294,6 @@ export async function completeFocusSessionAction(
     revalidatePath("/focus");
     revalidatePath("/dashboard");
     revalidatePath("/settings");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -318,7 +328,7 @@ export async function cancelFocusSessionAction(
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select("id, started_at, total_paused_seconds, status")
+      .select("id, started_at, planned_minutes, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
       .single();
 
@@ -334,6 +344,7 @@ export async function cancelFocusSessionAction(
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
+      session.planned_minutes,
       session.total_paused_seconds,
     );
 

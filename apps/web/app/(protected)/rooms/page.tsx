@@ -6,7 +6,6 @@ import {
 } from "@/features/study-rooms/study-room.queries";
 
 import { CreateStudyRoomForm } from "@/features/study-rooms/components/create-study-room-form";
-import { JoinPrivateRoomForm } from "@/features/study-rooms/components/join-private-room-form";
 // import { MyRoomList } from "@/features/study-rooms/components/my-room-list";
 // import { PublicRoomList } from "@/features/study-rooms/components/public-room-list";
 import { RoomListTabs } from "@/features/study-rooms/components/room-list-tabs";
@@ -35,15 +34,12 @@ export default async function RoomsPage() {
             />
             <CreateStudyRoomForm />
           </div>
-
-          <JoinPrivateRoomForm />
         </div>
 
-        <RoomListTabs myRooms={myRooms} discoverablePublicRooms={discoverablePublicRooms}/>
-
-        {/* <MyRoomList rooms={myRooms as any} />
-
-        <PublicRoomList rooms={discoverablePublicRooms as any[]} /> */}
+        <RoomListTabs
+          myRooms={myRooms}
+          discoverablePublicRooms={discoverablePublicRooms}
+        />
       </div>
     </section>
   );

@@ -13,6 +13,8 @@ from google.genai import types
 from pypdf import PdfReader
 from supabase import create_client
 
+from app.core.config import settings
+
 
 LEARNING_DOCUMENT_BUCKET = "learning-documents"
 
@@ -39,12 +41,10 @@ def _get_supabase_admin():
 
 
 def _configure_gemini():
-    api_key = os.getenv("GEMINI_API_KEY")
-
-    if not api_key:
+    if not settings.gemini_api_key:
         raise RuntimeError("GEMINI_API_KEY must be configured.")
 
-    return genai.Client(api_key=api_key)
+    return genai.Client(api_key=settings.gemini_api_key)
 
 
 def _clean_text(text: str) -> str:
@@ -138,7 +138,7 @@ def _estimate_tokens(text: str) -> int:
 def _generate_embedding(text: str) -> list[float]:
     client = _configure_gemini()
 
-    model_name = os.getenv("GEMINI_EMBEDDING_MODEL", "gemini-embedding-001")
+    model_name = settings.gemini_embedding_model
 
     result = client.models.embed_content(
         model=model_name,
@@ -293,7 +293,7 @@ def process_learning_document(
             document.id,
         ).execute()
 
-        embedding_model = os.getenv("GEMINI_EMBEDDING_MODEL", "text-embedding-004")
+        embedding_model = settings.gemini_embedding_model
 
         rows: list[dict[str, Any]] = []
 

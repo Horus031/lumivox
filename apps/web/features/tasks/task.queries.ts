@@ -25,7 +25,7 @@ export async function getTasks() {
         goal_type,
         status
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false });
 
@@ -54,7 +54,7 @@ export async function getTasksPage(filters: TasksPageFilters = {}) {
         status
       )
     `,
-      { count: "exact" }
+      { count: "exact" },
     )
     .order("due_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
@@ -64,7 +64,7 @@ export async function getTasksPage(filters: TasksPageFilters = {}) {
   if (search) {
     const normalizedSearch = search.replace(/,/g, " ");
     query = query.or(
-      `title.ilike.%${normalizedSearch}%,description.ilike.%${normalizedSearch}%`
+      `title.ilike.%${normalizedSearch}%,description.ilike.%${normalizedSearch}%`,
     );
   }
 
@@ -100,8 +100,10 @@ export async function getTasksPage(filters: TasksPageFilters = {}) {
   };
 }
 
-export async function getTaskById(taskId: string) {
+export async function getTaskById(taskId: string | null) {
   const { supabase } = await requireUser();
+
+  if (!taskId) return null;
 
   const { data, error } = await supabase
     .from("tasks")
@@ -114,7 +116,7 @@ export async function getTaskById(taskId: string) {
         goal_type,
         status
       )
-    `
+    `,
     )
     .eq("id", taskId)
     .single();
