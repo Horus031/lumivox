@@ -9,5 +9,6 @@ export type AppNavigationItem = {
     | "focus"
     | "rooms"
     | "reflections"
-    | "settings";
+    | "settings"
+    | "users";
 };

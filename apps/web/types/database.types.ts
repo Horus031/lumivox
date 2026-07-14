@@ -1162,9 +1162,11 @@ export type Database = {
           description: string | null
           id: string
           invite_code: string
+          is_private: boolean
           max_participants: number
           owner_id: string
           realtime_topic: string | null
+          room_type: Database["public"]["Enums"]["study_room_type"]
           status: Database["public"]["Enums"]["study_room_status"]
           title: string
           updated_at: string
@@ -1176,9 +1178,11 @@ export type Database = {
           description?: string | null
           id?: string
           invite_code?: string
+          is_private?: boolean
           max_participants?: number
           owner_id: string
           realtime_topic?: string | null
+          room_type?: Database["public"]["Enums"]["study_room_type"]
           status?: Database["public"]["Enums"]["study_room_status"]
           title: string
           updated_at?: string
@@ -1190,9 +1194,11 @@ export type Database = {
           description?: string | null
           id?: string
           invite_code?: string
+          is_private?: boolean
           max_participants?: number
           owner_id?: string
           realtime_topic?: string | null
+          room_type?: Database["public"]["Enums"]["study_room_type"]
           status?: Database["public"]["Enums"]["study_room_status"]
           title?: string
           updated_at?: string
@@ -1545,12 +1551,20 @@ export type Database = {
         Args: { p_object_name: string; p_user_id: string }
         Returns: boolean
       }
+      can_access_study_group_realtime_topic: {
+        Args: { p_topic: string; p_user_id: string }
+        Returns: boolean
+      }
       can_access_study_room_presence_topic: {
         Args: { p_topic: string; p_user_id?: string }
         Returns: boolean
       }
       can_access_study_room_realtime_topic: {
         Args: { p_topic: string; p_user_id?: string }
+        Returns: boolean
+      }
+      can_manage_study_group_members: {
+        Args: { p_room_id: string; p_user_id: string }
         Returns: boolean
       }
       can_view_study_room_peer_profile: {
@@ -1571,9 +1585,41 @@ export type Database = {
         Args: { p_object_name: string }
         Returns: string
       }
+      find_user_id_by_auth_email: { Args: { p_email: string }; Returns: string }
+      get_study_group_members_with_email: {
+        Args: { p_group_id: string }
+        Returns: {
+          email: string
+          joined_at: string
+          member_id: string
+          membership_status: string
+          role: string
+          room_id: string
+          user_id: string
+        }[]
+      }
+      get_study_group_messages_with_email: {
+        Args: { p_group_id: string; p_limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          email: string
+          message_id: string
+          room_id: string
+          user_id: string
+        }[]
+      }
       get_user_token_balance: { Args: { p_user_id: string }; Returns: number }
+      is_active_study_group_member: {
+        Args: { p_room_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_active_study_room_member: {
         Args: { p_room_id: string; p_user_id?: string }
+        Returns: boolean
+      }
+      is_study_group_owner: {
+        Args: { p_room_id: string; p_user_id: string }
         Returns: boolean
       }
       join_study_room: {
@@ -1646,6 +1692,7 @@ export type Database = {
       study_room_member_role: "owner" | "member"
       study_room_member_status: "active" | "left" | "removed"
       study_room_status: "active" | "archived"
+      study_room_type: "room" | "group"
       study_room_visibility: "public" | "private"
       task_priority: "low" | "medium" | "high" | "critical"
       task_status:
@@ -1833,6 +1880,7 @@ export const Constants = {
       study_room_member_role: ["owner", "member"],
       study_room_member_status: ["active", "left", "removed"],
       study_room_status: ["active", "archived"],
+      study_room_type: ["room", "group"],
       study_room_visibility: ["public", "private"],
       task_priority: ["low", "medium", "high", "critical"],
       task_status: ["todo", "in_progress", "completed", "overdue", "cancelled"],

@@ -32,6 +32,12 @@ export const appNavigationItems: AppNavigationItem[] = [
     icon: "rooms",
   },
   {
+    label: "Groups",
+    href: "/groups",
+    description: "Group Chats",
+    icon: "users",
+  },
+  {
     label: "Reflections",
     href: "/reflections",
     description: "Weekly Behaviour Reflection",
