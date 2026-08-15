@@ -38,7 +38,6 @@ Write a short interpretation here.
 ## Test Question 2
 
 **Question:**  
-`Paste question here`
 
 | Condition | Top-k | Prompt Variant | Sources Retrieved | Latency (ms) | Relevance (1-5) | Groundedness (1-5) | Clarity (1-5) | Completeness (1-5) | Hallucination Safety (1-5) | Usefulness (1-5) | Notes |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -59,7 +58,6 @@ Write a short interpretation here.
 ## Test Question 3: Out-of-context Question
 
 **Question:**  
-`Ask something not covered by the selected document`
 
 | Condition | Top-k | Prompt Variant | Sources Retrieved | Latency (ms) | Relevance (1-5) | Groundedness (1-5) | Clarity (1-5) | Completeness (1-5) | Hallucination Safety (1-5) | Usefulness (1-5) | Notes |
 |---|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---|

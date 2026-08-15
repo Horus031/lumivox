@@ -1,13 +1,14 @@
 import { Sparkles } from "lucide-react";
-import Link from "next/link";
-import { Suspense } from "react";
+import { useTranslations } from "next-intl";
 
-async function getCurrentYear() {
-  "use cache";
-  return new Date().getFullYear();
-}
+import { Link } from "@/i18n/navigation";
 
-export default async function Footer() {
+const currentYear = new Date().getFullYear();
+
+export default function Footer() {
+  const t = useTranslations("landing.footer");
+  const common = useTranslations("common");
+
   return (
     <footer className="border-t border-border bg-surface">
       <div className="max-w-310 mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
@@ -16,63 +17,64 @@ export default async function Footer() {
             <div className="size-7 rounded-md bg-gradient-hero flex items-center justify-center">
               <Sparkles className="size-4 text-white" strokeWidth={2.5} />
             </div>
-            <span className="font-semibold tracking-tight">Lumivox</span>
+            <span className="font-semibold tracking-tight">
+              {common("appName")}
+            </span>
           </div>
           <p className="text-[13.5px] text-secondary max-w-sm leading-relaxed">
-            Calm intelligence for your study — behavioral analytics and AI
-            recommendations for the next generation of learners.
+            {t("description")}
           </p>
         </div>
         <div>
           <p className="text-[12px] font-semibold tracking-wider uppercase text-muted-foreground mb-3">
-            Product
+            {t("product.title")}
           </p>
           <ul className="space-y-2 text-[13.5px] text-secondary">
             <li>
               <a href="#features" className="hover:text-foreground">
-                Features
+                {t("product.features")}
               </a>
             </li>
             <li>
               <a href="#analytics" className="hover:text-foreground">
-                Analytics
+                {t("product.analytics")}
               </a>
             </li>
             <li>
               <a href="#pricing" className="hover:text-foreground">
-                Pricing
+                {t("product.pricing")}
               </a>
             </li>
             <li>
               <Link href="/app" className="hover:text-foreground">
-                Open app
+                {t("product.openApp")}
               </Link>
             </li>
           </ul>
         </div>
         <div>
           <p className="text-[12px] font-semibold tracking-wider uppercase text-muted-foreground mb-3">
-            Company
+            {t("company.title")}
           </p>
           <ul className="space-y-2 text-[13.5px] text-secondary">
             <li>
               <a href="#" className="hover:text-foreground">
-                About
+                {t("company.about")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-foreground">
-                Privacy
+                {t("company.privacy")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-foreground">
-                Terms
+                {t("company.terms")}
               </a>
             </li>
             <li>
               <a href="#" className="hover:text-foreground">
-                Contact
+                {t("company.contact")}
               </a>
             </li>
           </ul>
@@ -80,12 +82,8 @@ export default async function Footer() {
       </div>
       <div className="border-t border-border">
         <div className="max-w-310 mx-auto px-6 py-5 text-[12px] text-muted-foreground flex flex-col sm:flex-row gap-2 justify-between">
-          <Suspense fallback={<span>...</span>}>
-            <span>
-              © {await getCurrentYear()} Lumivox. All rights reserved.
-            </span>
-          </Suspense>
-          <span>Made calmly, with care.</span>
+          <span>{t("copyright", { year: currentYear })}</span>
+          <span>{t("madeWithCare")}</span>
         </div>
       </div>
     </footer>

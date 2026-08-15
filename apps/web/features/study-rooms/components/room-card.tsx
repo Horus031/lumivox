@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link, useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { joinPublicStudyRoomAction } from "@/features/study-rooms/study-room.actions";
@@ -25,6 +25,7 @@ type RoomCardProps = {
 
 export function RoomCard({ room, mode }: RoomCardProps) {
   const router = useRouter();
+  const t = useTranslations("rooms.card");
   const [isPending, startTransition] = useTransition();
 
   function handleJoin() {
@@ -48,11 +49,11 @@ export function RoomCard({ room, mode }: RoomCardProps) {
         <div>
           <div className="mb-3 flex flex-wrap gap-2">
             <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold capitalize text-foreground">
-              {room.visibility}
+              {t(`visibility.${room.visibility}`)}
             </span>
 
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              Up to {room.max_participants} learners
+              {t("capacity", { count: room.max_participants })}
             </span>
           </div>
 
@@ -65,7 +66,9 @@ export function RoomCard({ room, mode }: RoomCardProps) {
           ) : null}
 
           <p className="mt-3 text-sm text-neutral-500">
-            Owner: {room.profiles?.full_name ?? "Unknown user"}
+            {t("owner", {
+              name: room.profiles?.full_name ?? t("unknownUser"),
+            })}
           </p>
         </div>
 
@@ -75,7 +78,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
               href={`/rooms/${room.id}`}
               className="bg-transparent w-full text-center border border-primary rounded-md px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary hover:text-primary-foreground"
             >
-              Enter room
+              {t("enter")}
             </Link>
           ) : (
             <Button
@@ -83,7 +86,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
               disabled={isPending}
               className="border px-4 py-2.5 text-sm font-medium transition hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isPending ? "Joining..." : "Join room"}
+              {isPending ? t("joining") : t("join")}
             </Button>
           )}
         </div>

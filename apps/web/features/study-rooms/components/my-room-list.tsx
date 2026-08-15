@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { useTranslations } from "next-intl";
+
 import { RoomCard } from "@/features/study-rooms/components/room-card";
 
 type MyRoomListProps = {
@@ -9,6 +11,7 @@ type MyRoomListProps = {
 };
 
 export function MyRoomList({ rooms }: MyRoomListProps) {
+  const t = useTranslations("rooms.myList");
   const uniqueRoomsMap = new Map<string, (typeof rooms)[number]>();
 
   for (const room of rooms) {
@@ -22,16 +25,16 @@ export function MyRoomList({ rooms }: MyRoomListProps) {
   return (
     <section className="space-y-4 w-full">
       <div>
-        <h2 className="text-xl font-semibold">My study rooms</h2>
+        <h2 className="text-xl font-semibold">{t("title")}</h2>
         <p className="mt-1 text-sm text-neutral-600">
-          Rooms you have already joined and can re-enter.
+          {t("description")}
         </p>
       </div>
 
       {uniqueRooms.length === 0 ? (
         <div className="rounded-2xl border border-dashed bg-white p-8 text-center">
           <p className="text-sm text-neutral-600">
-            You have not joined any study rooms yet.
+            {t("empty")}
           </p>
         </div>
       ) : (

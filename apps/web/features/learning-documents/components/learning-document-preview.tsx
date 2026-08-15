@@ -3,7 +3,7 @@ import {
   getLearningDocumentPreviewMode,
   getOfficeViewerUrl,
 } from "@/features/learning-documents/learning-document-preview.utils";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 
 type LearningDocumentPreviewProps = {
@@ -27,13 +27,15 @@ export async function LearningDocumentPreview({
 }: LearningDocumentPreviewProps) {
   const previewMode = getLearningDocumentPreviewMode(document.mime_type);
 
+  console.log(previewMode);
+
   if (previewMode === "text") {
     const previewText = await getTextPreviewContent(signedUrl);
 
     return (
       <div className="space-y-4">
         <div className="rounded-xl border bg-background p-4 dark:border-neutral-800">
-          <pre className="max-h-[75vh] overflow-auto whitespace-pre-wrap wrap-break-word text-sm leading-6 text-foreground">
+          <pre className="max-h-[65vh] overflow-auto whitespace-pre-wrap wrap-break-word text-sm leading-6 text-foreground">
             {previewText}
           </pre>
         </div>
@@ -42,7 +44,7 @@ export async function LearningDocumentPreview({
           href={signedUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex bg-neutral-900 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+          className="inline-flex rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-foreground transition"
         >
           Open original file
         </Link>
@@ -59,14 +61,14 @@ export async function LearningDocumentPreview({
           title={document.file_name}
         />
 
-        <a
+        <Link
           href={signedUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+          className="inline-flex rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-foreground transition"
         >
           Open original file
-        </a>
+        </Link>
       </div>
     );
   }
@@ -82,14 +84,14 @@ export async function LearningDocumentPreview({
           />
         </div>
 
-        <a
+        <Link
           href={signedUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+          className="inline-flex rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-foreground transition"
         >
           Open original file
-        </a>
+        </Link>
       </div>
     );
   }
@@ -103,14 +105,14 @@ export async function LearningDocumentPreview({
           title={document.file_name}
         />
 
-        <a
+        <Link
           href={signedUrl}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+          className="inline-flex rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-foreground transition"
         >
           Open original file
-        </a>
+        </Link>
       </div>
     );
   }
@@ -121,14 +123,14 @@ export async function LearningDocumentPreview({
         This file type cannot be previewed inline.
       </p>
 
-      <a
-        href={signedUrl}
-        target="_blank"
-        rel="noreferrer"
-        className="inline-flex rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-foreground transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-      >
-        Open Document
-      </a>
+      <Link
+          href={signedUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-foreground transition"
+        >
+          Open document
+        </Link>
     </div>
   );
 }

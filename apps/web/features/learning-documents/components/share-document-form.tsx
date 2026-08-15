@@ -5,6 +5,18 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { shareLearningDocumentByEmailAction } from "@/features/learning-documents/learning-document-sharing.actions";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 type ShareDocumentFormProps = {
   documentId: string;
@@ -41,64 +53,60 @@ export function ShareDocumentForm({ documentId }: ShareDocumentFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+      className="rounded-2xl border bg-background p-6 shadow-sm space-y-4"
     >
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
           Share by Email
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
           Grant document access
         </h2>
 
-        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Add the email address of a Lumivox user who should be allowed to
           access this document.
         </p>
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-[1fr_180px]">
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Email
-          </span>
+        <div>
+          <Label>Email</Label>
 
-          <input
+          <Input
             value={email}
             onChange={(event) => setEmail(event.target.value)}
             type="email"
             required
             placeholder="friend@example.com"
-            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 dark:focus:border-neutral-400"
           />
-        </label>
+        </div>
 
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            Role
-          </span>
+        <div>
+          <Label>Role</Label>
 
-          <select
+          <Select
             value={role}
-            onChange={(event) =>
-              setRole(event.target.value as "viewer" | "editor")
-            }
-            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 dark:focus:border-neutral-400"
+            onValueChange={(value) => setRole(value as "viewer" | "editor")}
           >
-            <option value="viewer">Viewer</option>
-            <option value="editor">Editor</option>
-          </select>
-        </label>
+            <SelectTrigger className="w-full max-w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Roles</SelectLabel>
+                <SelectItem value="viewer">Viewer</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="mt-5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? "Sharing..." : "Share Document"}
-      </button>
+      </Button>
     </form>
   );
 }

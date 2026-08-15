@@ -1,14 +1,15 @@
 import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
 import { RestoreStreakButton } from "@/features/engagement-retention/components/restore-streak-button";
+import { useLocale, useTranslations } from "next-intl";
 
 type StreakRestoreSettingsCardProps = {
   stats: UserEngagementStats | null;
 };
 
-function formatDeadline(value: string | null) {
-  if (!value) return "Not available";
+function formatDeadline(value: string | null, locale: string, fallback: string) {
+  if (!value) return fallback;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(value));
@@ -29,6 +30,8 @@ function getStatusClass(status: string | null | undefined) {
 export function StreakRestoreSettingsCard({
   stats,
 }: StreakRestoreSettingsCardProps) {
+  const locale = useLocale();
+  const t = useTranslations("settings.streak");
   const isFrozen = stats?.streak_status === "frozen";
   const hasEnoughTokens = Number(stats?.token_balance ?? 0) >= 30;
   const canRestore = isFrozen && hasEnoughTokens;
@@ -41,25 +44,22 @@ export function StreakRestoreSettingsCard({
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
-            Streak Protection
+            {t("eyebrow")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold tracking-tight">
-            Restore your study streak
+            {t("title")}
           </h2>
 
           <p className="mt-2 max-w-3xl text-neutral-600">
-            If your streak becomes frozen after missing a valid study activity
-            day, you can spend tokens to restore it before the restore window
-            expires.
+            {t("description")}
           </p>
         </div>
       </div>
 
       {!stats ? (
         <p className="mt-2 text-sm text-neutral-600">
-          Your engagement status is being prepared. Complete a valid task or
-          focus session, then revisit this page.
+          {t("preparing")}
         </p>
       ) : (
         <div className="mt-6 space-y-5">
@@ -69,36 +69,45 @@ export function StreakRestoreSettingsCard({
                 stats.streak_status,
               )}`}
             >
-              {stats.streak_status} streak
+              {t("statusBadge", {
+                status: t(`status.${stats.streak_status}`),
+              })}
             </span>
 
             <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
-              {stats.token_balance} tokens
+              {t("tokens", { count: stats.token_balance })}
             </span>
 
             <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
-              {stats.current_streak_days} day streak
+              {t("dayStreak", { count: stats.current_streak_days })}
             </span>
           </div>
 
           {isFrozen ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5">
               <p className="font-semibold text-amber-950">
-                Your streak is currently frozen.
+                {t("frozenTitle")}
               </p>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Restore deadline:{" "}
+                {t("restoreDeadline")}{" "}
                 <span className="font-semibold">
-                  {formatDeadline(stats.streak_restore_deadline_at)}
+                  {formatDeadline(
+                    stats.streak_restore_deadline_at,
+                    locale,
+                    t("notAvailable"),
+                  )}
                 </span>
               </p>
 
               <p className="mt-2 text-sm leading-6 text-amber-900">
-                Restore cost: <span className="font-semibold">30 tokens</span>.
-                You currently have{" "}
+                {t("restoreCost")}{" "}
                 <span className="font-semibold">
-                  {stats.token_balance} tokens
+                  {t("tokens", { count: 30 })}
+                </span>
+                . {t("currentlyHave")}{" "}
+                <span className="font-semibold">
+                  {t("tokens", { count: stats.token_balance })}
                 </span>
                 .
               </p>
@@ -109,37 +118,40 @@ export function StreakRestoreSettingsCard({
 
               {!hasEnoughTokens ? (
                 <p className="mt-3 text-sm font-medium text-amber-950">
-                  You do not have enough tokens to restore this streak.
+                  {t("notEnoughTokens")}
                 </p>
               ) : null}
             </div>
           ) : (
             <div className="rounded-2xl border bg-surface p-5">
               <p className="font-semibold text-foreground">
-                No restore action is needed.
+                {t("noActionTitle")}
               </p>
 
               <p className="mt-2 text-sm leading-6 text-neutral-600">
-                Your streak is currently{" "}
-                <span className="font-semibold">{stats.streak_status}</span>.
-                Restore is only available when a streak is frozen.
+                {t.rich("noActionDescription", {
+                  status: t(`status.${stats.streak_status}`),
+                  strong: (chunks) => (
+                    <span className="font-semibold">{chunks}</span>
+                  ),
+                })}
               </p>
             </div>
           )}
 
           <div className="grid gap-4 md:grid-cols-3">
             <MiniMetric
-              label="Current streak"
-              value={`${stats.current_streak_days} day(s)`}
+              label={t("metrics.currentStreak")}
+              value={t("days", { count: stats.current_streak_days })}
             />
 
             <MiniMetric
-              label="Longest streak"
-              value={`${stats.longest_streak_days} day(s)`}
+              label={t("metrics.longestStreak")}
+              value={t("days", { count: stats.longest_streak_days })}
             />
 
             <MiniMetric
-              label="Tokens spent"
+              label={t("metrics.tokensSpent")}
               value={`${stats.total_tokens_spent ?? 0}`}
             />
           </div>

@@ -5,6 +5,7 @@ import { z } from "zod";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
+import { getCurrentWeekRange } from "@/features/study-groups/study-group-date.utils";
 
 const createStudyGroupSchema = z.object({
   title: z.string().min(2).max(80),
@@ -14,6 +15,13 @@ const createStudyGroupSchema = z.object({
 const inviteStudyGroupMemberSchema = z.object({
   groupId: z.string().uuid(),
   email: z.string().email(),
+});
+
+const upsertWeeklyChallengeSchema = z.object({
+  groupId: z.string().uuid(),
+  title: z.string().min(2).max(120),
+  targetFocusMinutes: z.coerce.number().int().min(0).max(10000),
+  targetCompletedTasks: z.coerce.number().int().min(0).max(1000),
 });
 
 export async function createStudyGroupAction(
@@ -288,6 +296,93 @@ export async function sendStudyGroupMessageAction(
         error instanceof Error
           ? error.message
           : "Unexpected error while sending message.",
+    };
+  }
+}
+
+export async function upsertStudyGroupWeeklyChallengeAction(
+  input: z.infer<typeof upsertWeeklyChallengeSchema>,
+): Promise<ActionResult> {
+  try {
+    const { supabase, user } = await requireUser();
+
+    const parsed = upsertWeeklyChallengeSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: "Invalid weekly challenge input.",
+      };
+    }
+
+    const { groupId, title, targetFocusMinutes, targetCompletedTasks } =
+      parsed.data;
+
+    const { data: membership, error: membershipError } = await supabase
+      .from("study_room_members")
+      .select("id,role,membership_status")
+      .eq("room_id", groupId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (membershipError) {
+      return {
+        success: false,
+        message: `Failed to verify group permission: ${membershipError.message}`,
+      };
+    }
+
+    if (
+      !membership ||
+      membership.membership_status !== "active" ||
+      !["owner", "admin", "host"].includes(membership.role)
+    ) {
+      return {
+        success: false,
+        message: "Only group managers can update weekly challenges.",
+      };
+    }
+
+    const { weekStart, weekEnd } = getCurrentWeekRange();
+
+    const { error } = await supabase
+      .from("study_group_weekly_challenges")
+      .upsert(
+        {
+          group_id: groupId,
+          created_by: user.id,
+          week_start: weekStart,
+          week_end: weekEnd,
+          title,
+          target_focus_minutes: targetFocusMinutes,
+          target_completed_tasks: targetCompletedTasks,
+        },
+        {
+          onConflict: "group_id,week_start",
+        },
+      );
+
+    if (error) {
+      return {
+        success: false,
+        message: `Failed to save weekly challenge: ${error.message}`,
+      };
+    }
+
+    revalidatePath(`/groups/${groupId}`);
+
+    return {
+      success: true,
+      message: "Weekly challenge saved.",
+      data: null,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while saving weekly challenge.",
     };
   }
 }

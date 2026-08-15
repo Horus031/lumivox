@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import type { Profile } from "@/features/profiles/profile.types";
+import { AppShellFrame } from "@/features/app-shell/components/app-shell-frame";
 import { DesktopSidebar } from "@/features/app-shell/components/desktop-sidebar";
 import { MobileAppHeader } from "@/features/app-shell/components/mobile-app-header";
 import { MobileBottomNav } from "@/features/app-shell/components/mobile-bottom-nav";
@@ -20,15 +21,14 @@ export function ProtectedAppShell({
 
       <MobileAppHeader profile={profile} />
 
-      <div className="flex min-h-screen">
-        <DesktopSidebar profile={profile} />
+      <AppShellFrame
+        profile={profile}
+        sidebar={<DesktopSidebar profile={profile} />}
+      >
+        {children}
+      </AppShellFrame>
 
-        <main className="min-w-0 flex-1 pb-28 lg:pb-0 lg:pl-81 z-1">
-          {children}
-        </main>
-      </div>
-
-      <MobileBottomNav />
+      <MobileBottomNav profile={profile} />
     </div>
   );
 }

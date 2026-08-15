@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 type DocumentShareLinkCardProps = {
@@ -21,35 +23,27 @@ export function DocumentShareLinkCard({
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
           Share Link
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
           Document access link
         </h2>
 
-        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Users still need the correct permission unless the document is public.
         </p>
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 md:flex-row">
-        <input
-          readOnly
-          value={shareUrl}
-          className="w-full rounded-xl border bg-neutral-50 px-3 py-2.5 text-sm text-neutral-700 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-300"
-        />
+      <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center">
+        <Input readOnly value={shareUrl} />
 
-        <button
-          type="button"
-          onClick={handleCopy}
-          className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-        >
+        <Button type="button" onClick={handleCopy}>
           Copy Link
-        </button>
+        </Button>
       </div>
     </section>
   );

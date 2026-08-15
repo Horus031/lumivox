@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 type StudyGroupMemberListProps = {
   members: Array<{
     member_id: string;
@@ -15,10 +17,12 @@ function getDisplayName(member: StudyGroupMemberListProps["members"][number]) {
 }
 
 export function StudyGroupMemberList({ members }: StudyGroupMemberListProps) {
+  const t = useTranslations("groups.members");
+
   return (
     <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
       <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
-        Members
+        {t("title")}
       </h2>
 
       <div className="mt-5 space-y-3">
@@ -32,7 +36,8 @@ export function StudyGroupMemberList({ members }: StudyGroupMemberListProps) {
             </p>
 
             <p className="mt-2 text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-              {member.role} · {member.membership_status}
+              {t(`roles.${member.role}`)} -{" "}
+              {t(`status.${member.membership_status}`)}
             </p>
           </article>
         ))}

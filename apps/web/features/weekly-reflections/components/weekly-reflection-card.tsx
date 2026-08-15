@@ -1,3 +1,5 @@
+import { useLocale, useTranslations } from "next-intl";
+
 import type {
   WeeklyReflectionAction,
   WeeklyReflectionCardWithReflection,
@@ -33,17 +35,17 @@ function directionBadgeClass(
   return "bg-secondary text-foreground";
 }
 
-function formatWindow(value: string | undefined) {
-  if (!value) return "Unknown";
+function formatWindow(value: string | undefined, locale: string) {
+  if (!value) return null;
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
   }).format(new Date(value));
 }
 
-export function WeeklyReflectionCard({
-  card,
-}: WeeklyReflectionCardProps) {
+export function WeeklyReflectionCard({ card }: WeeklyReflectionCardProps) {
+  const locale = useLocale();
+  const t = useTranslations("reflections.card");
   const reflection = card.weekly_reflections;
 
   const currentMetrics =
@@ -51,7 +53,14 @@ export function WeeklyReflectionCard({
 
   const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
   const watchouts = (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-  const actions = (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+  const actions =
+    (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+
+  const direction = reflection?.reflection_direction ?? "unknown";
+  const windowStart =
+    formatWindow(reflection?.current_window_start, locale) ?? t("unknown");
+  const windowEnd =
+    formatWindow(reflection?.current_window_end, locale) ?? t("unknown");
 
   return (
     <article className="rounded-[28px] border border-border/70 bg-card/90 p-5 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
@@ -59,7 +68,7 @@ export function WeeklyReflectionCard({
         <div className="max-w-4xl space-y-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              Weekly Reflection
+              {t("badge")}
             </span>
 
             <span
@@ -67,7 +76,7 @@ export function WeeklyReflectionCard({
                 reflection?.reflection_direction,
               )}`}
             >
-              {reflection?.reflection_direction?.replace("_", " ") ?? "unknown"}
+              {t(`direction.${direction}`)}
             </span>
           </div>
 
@@ -81,7 +90,7 @@ export function WeeklyReflectionCard({
 
           <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
             <p className="text-sm font-semibold text-muted-foreground">
-              Reflection
+              {t("reflection")}
             </p>
             <p className="mt-2 text-sm leading-6 text-foreground/75">
               {card.reflection_interpretation}
@@ -89,28 +98,35 @@ export function WeeklyReflectionCard({
           </div>
         </div>
 
-        <div className="min-w-[230px] rounded-2xl border border-border/70 bg-secondary/35 p-4">
+        <div className="min-w-57.5 rounded-2xl border border-border/70 bg-secondary/35 p-4">
           <p className="text-sm font-semibold text-muted-foreground">
-            Current window
+            {t("currentWindow")}
           </p>
 
-          <p className="mt-2 text-sm text-foreground">
-            {formatWindow(reflection?.current_window_start)}
-          </p>
-          <p className="text-sm text-foreground">
-            → {formatWindow(reflection?.current_window_end)}
-          </p>
+          <p className="mt-2 text-sm text-foreground">{windowStart}</p>
+          <p className="text-sm text-foreground">{"->"} {windowEnd}</p>
 
           {currentMetrics ? (
             <div className="mt-4 space-y-2 text-sm text-foreground/80">
               <p>
-                Focus: <span className="font-semibold">{currentMetrics.completed_focus_minutes} min</span>
+                {t("metrics.focus")}{" "}
+                <span className="font-semibold">
+                  {t("metrics.minutes", {
+                    count: currentMetrics.completed_focus_minutes,
+                  })}
+                </span>
               </p>
               <p>
-                Tasks done: <span className="font-semibold">{currentMetrics.completed_tasks}</span>
+                {t("metrics.tasksDone")}{" "}
+                <span className="font-semibold">
+                  {currentMetrics.completed_tasks}
+                </span>
               </p>
               <p>
-                Active days: <span className="font-semibold">{currentMetrics.active_focus_days}</span>
+                {t("metrics.activeDays")}{" "}
+                <span className="font-semibold">
+                  {currentMetrics.active_focus_days}
+                </span>
               </p>
             </div>
           ) : null}
@@ -118,31 +134,35 @@ export function WeeklyReflectionCard({
       </div>
 
       <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <MiniSummary label="Wins" value={wins.length} tone="emerald" />
-        <MiniSummary label="Watchouts" value={watchouts.length} tone="amber" />
-        <MiniSummary label="Actions" value={actions.length} tone="primary" />
+        <MiniSummary label={t("wins")} value={wins.length} tone="emerald" />
+        <MiniSummary
+          label={t("watchouts")}
+          value={watchouts.length}
+          tone="amber"
+        />
+        <MiniSummary label={t("actions")} value={actions.length} tone="primary" />
       </div>
 
       <details className="group mt-5 rounded-2xl border border-border/70 bg-secondary/20 p-4">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none">
           <div>
             <h4 className="text-lg font-semibold text-foreground">
-              Reflection details
+              {t("detailsTitle")}
             </h4>
             <p className="mt-1 text-sm text-muted-foreground">
-              Wins, watchouts, and next-week actions.
+              {t("detailsDescription")}
             </p>
           </div>
 
           <span className="rounded-full border border-border/70 bg-card/90 px-3 py-1 text-xs font-semibold text-muted-foreground transition group-open:bg-primary group-open:text-primary-foreground">
-            Toggle
+            {t("toggle")}
           </span>
         </summary>
 
-        <div className="mt-4 grid gap-4 xl:grid-cols-3">
+        <div className="mt-4 space-y-4">
           <ReflectionList
-            title="Wins"
-            empty="No strong positive signal was detected in this reflection."
+            title={t("wins")}
+            empty={t("emptyWins")}
             items={wins.map((item) => ({
               key: item.evidence_key,
               body: item.student_friendly_explanation,
@@ -150,8 +170,8 @@ export function WeeklyReflectionCard({
           />
 
           <ReflectionList
-            title="Watchouts"
-            empty="No major watchout was highlighted."
+            title={t("watchouts")}
+            empty={t("emptyWatchouts")}
             items={watchouts.map((item) => ({
               key: item.evidence_key,
               body: item.student_friendly_explanation,
@@ -159,8 +179,8 @@ export function WeeklyReflectionCard({
           />
 
           <ReflectionList
-            title="Next-week actions"
-            empty="No action items were generated."
+            title={t("nextWeekActions")}
+            empty={t("emptyActions")}
             items={actions.map((item) => ({
               key: item.action,
               body: item.rationale,
@@ -171,22 +191,12 @@ export function WeeklyReflectionCard({
 
       <div className="mt-5 rounded-2xl border border-dashed border-border/70 p-4">
         <p className="text-sm font-semibold text-foreground">
-          Confidence note
+          {t("confidenceNote")}
         </p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {card.confidence_note}
         </p>
       </div>
-
-      {/* <footer className="mt-5 flex flex-col justify-between gap-2 border-t border-border/70 pt-4 text-xs text-muted-foreground md:flex-row md:items-center">
-        <p>
-          LLM: {card.llm_provider} / {card.llm_model}
-        </p>
-
-        <p>
-          Prompt: {card.prompt_version} · Schema: {card.structured_output_schema_version}
-        </p>
-      </footer> */}
     </article>
   );
 }
@@ -207,7 +217,9 @@ function MiniSummary({ label, value, tone }: MiniSummaryProps) {
 
   return (
     <div className="rounded-2xl border border-border/70 bg-secondary/25 p-4">
-      <p className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${toneClass}`}>
+      <p
+        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${toneClass}`}
+      >
         {label}
       </p>
       <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
@@ -226,16 +238,12 @@ type ReflectionListProps = {
   }>;
 };
 
-function ReflectionList({
-  title,
-  empty,
-  items,
-}: ReflectionListProps) {
+function ReflectionList({ title, empty, items }: ReflectionListProps) {
   return (
-    <section className="rounded-[24px] border border-border/70 bg-card/90 p-4">
+    <section className="rounded-3xl border border-border/70 bg-card/90 p-4">
       <h4 className="text-lg font-semibold text-foreground">{title}</h4>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-4 grid gap-4 xl:grid-cols-3">
         {items.length === 0 ? (
           <p className="text-sm leading-6 text-muted-foreground">{empty}</p>
         ) : (

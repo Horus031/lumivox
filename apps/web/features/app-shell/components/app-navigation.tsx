@@ -1,6 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import type { Profile } from "@/features/profiles/profile.types";
+import { Link } from "@/i18n/navigation";
+import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
 import { appNavigationItems } from "@/features/app-shell/app-navigation.config";
@@ -8,17 +10,33 @@ import { AppNavigationIcon } from "@/features/app-shell/components/app-navigatio
 
 type AppNavigationProps = {
   variant?: "desktop" | "mobile";
+  profile?: Profile;
 };
 
-export function AppNavigation({ variant = "desktop" }: AppNavigationProps) {
+export function AppNavigation({
+  variant = "desktop",
+  profile,
+}: AppNavigationProps) {
+  const locale = useLocale();
+  const t = useTranslations("appShell.navigation");
   const pathname = usePathname();
+  const normalizedPathname = pathname.replace(new RegExp(`^/${locale}`), "") || "/";
+
+  const visibleItems = appNavigationItems.filter((item) => {
+    if (item.adminOnly) {
+      return profile?.role === "admin";
+    }
+
+    return true;
+  });
 
   if (variant === "mobile") {
     return (
       <nav className="grid grid-cols-5 gap-1.5 rounded-3xl bg-sidebar/95 p-2 shadow-[0_18px_55px_-45px_hsl(var(--primary)/0.24)] ring-1 ring-border/70 backdrop-blur-xl">
-        {appNavigationItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+            normalizedPathname === item.href ||
+            normalizedPathname.startsWith(`${item.href}/`);
 
           return (
             <Link
@@ -31,7 +49,9 @@ export function AppNavigation({ variant = "desktop" }: AppNavigationProps) {
               }`}
             >
               <AppNavigationIcon icon={item.icon} />
-              <span className="mt-1 text-[11px] font-medium">{item.label}</span>
+              <span className="mt-1 text-[11px] font-medium">
+                {t(`${item.key}.label`)}
+              </span>
             </Link>
           );
         })}
@@ -41,30 +61,34 @@ export function AppNavigation({ variant = "desktop" }: AppNavigationProps) {
 
   return (
     <nav className="space-y-1.5">
-      {appNavigationItems.map((item) => {
+      {visibleItems.map((item) => {
         const isActive =
-          pathname === item.href || pathname.startsWith(`${item.href}/`);
+          normalizedPathname === item.href ||
+          normalizedPathname.startsWith(`${item.href}/`);
 
         return (
           <Link
             key={item.href}
+            title={t(`${item.key}.label`)}
             href={item.href}
-            className={`group flex items-start gap-3 rounded-[22px] px-3 py-3 transition-all duration-200 ${
+            className={`desktop-sidebar-nav-link group flex items-start gap-3 rounded-[22px] px-3 py-3 transition-all duration-200 ${
               isActive
                 ? "text-foreground bg-background shadow-[0_14px_32px_-24px_hsl(var(--primary)/0.72)]"
                 : "text-foreground hover:bg-muted/65"
             }`}
           >
-            <div className={`mt-0.5 rounded-2xl p-2`}>
+            <div className="desktop-sidebar-nav-icon mt-0.5 flex items-center justify-center rounded-2xl p-2">
               <AppNavigationIcon icon={item.icon} />
             </div>
 
-            <div>
-              <p className="text-sm font-semibold">{item.label}</p>
+            <div className="desktop-sidebar-link-copy min-w-0 transition-all duration-200">
+              <p className="text-sm font-semibold">
+                {t(`${item.key}.label`)}
+              </p>
               <p
                 className={`mt-0.5 text-xs leading-5 ${isActive ? "text-foreground/82" : "text-muted-foreground"}`}
               >
-                {item.description}
+                {t(`${item.key}.description`)}
               </p>
             </div>
           </Link>

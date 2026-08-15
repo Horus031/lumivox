@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useMemo, useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type {
@@ -39,6 +40,7 @@ const commonTimezones = [
 ];
 
 export function SettingsForm({ profile, weights }: OnboardingFormProps) {
+  const t = useTranslations("settings.form");
   const [isPending, startTransition] = useTransition();
 
   const [fullName, setFullName] = useState(profile.full_name ?? "");
@@ -113,17 +115,16 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
     <form onSubmit={handleSubmit} className="space-y-8">
       <section className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="mb-5">
-          <h2 className="text-xl font-semibold">Profile setup</h2>
+          <h2 className="text-xl font-semibold">{t("profile.title")}</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Tell Lumivox who you are and which timezone should be used for
-            behavioural analytics.
+            {t("profile.description")}
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <Label className="mb-1.5 block text-sm font-medium">
-              Full name
+              {t("profile.fullName")}
             </Label>
             <Input
               type="text"
@@ -135,18 +136,20 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
           </div>
 
           <div>
-            <Label className="mb-1.5 block text-sm font-medium">Timezone</Label>
+            <Label className="mb-1.5 block text-sm font-medium">
+              {t("profile.timezone")}
+            </Label>
 
             <Select
               value={timezone ?? ""}
               onValueChange={(event) => setTimezone(event)}
             >
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Timezone" />
+                <SelectValue placeholder={t("profile.timezone")} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectLabel>Timezone</SelectLabel>
+                  <SelectLabel>{t("profile.timezone")}</SelectLabel>
                   {commonTimezones.map((item) => (
                     <SelectItem key={item} value={item}>
                       {item}
@@ -162,10 +165,9 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
       <section className="rounded-2xl border bg-background p-6 shadow-sm">
         <div className="mb-5 flex flex-col justify-between gap-3 md:flex-row md:items-start">
           <div>
-            <h2 className="text-xl font-semibold">Personalize your PBI</h2>
+            <h2 className="text-xl font-semibold">{t("pbi.title")}</h2>
             <p className="mt-1 max-w-2xl text-sm text-neutral-600">
-              Adjust how strongly each behavioural dimension contributes to your
-              Personalized Productive Behaviour Index.
+              {t("pbi.description")}
             </p>
           </div>
 
@@ -175,13 +177,13 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
             onClick={resetToDefaultWeights}
             className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-surface"
           >
-            Reset to academic default
+            {t("pbi.reset")}
           </Button>
         </div>
 
         <div className="mb-6 rounded-2xl border bg-surface p-4">
           <div className="flex flex-col justify-between gap-2 md:flex-row md:items-center">
-            <p className="text-sm font-medium">Current total weight</p>
+            <p className="text-sm font-medium">{t("pbi.totalWeight")}</p>
 
             <p
               className={`text-lg font-bold ${
@@ -195,43 +197,42 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
           </div>
 
           <p className="mt-2 text-sm text-neutral-600">
-            The total must equal exactly 1.00 before onboarding can be
-            completed.
+            {t("pbi.totalHelp")}
           </p>
         </div>
 
         <div className="space-y-5">
           <WeightInput
-            label="Task Completion Rate"
-            description="How strongly completed tasks should influence your PBI."
+            label={t("weights.taskCompletion.label")}
+            description={t("weights.taskCompletion.description")}
             value={taskCompletionWeight}
             onChange={setTaskCompletionWeight}
           />
 
           <WeightInput
-            label="Focus Quality Score"
-            description="How strongly focused study sessions and low distraction should matter."
+            label={t("weights.focusQuality.label")}
+            description={t("weights.focusQuality.description")}
             value={focusQualityWeight}
             onChange={setFocusQualityWeight}
           />
 
           <WeightInput
-            label="Deadline Adherence Score"
-            description="How strongly meeting deadlines should contribute."
+            label={t("weights.deadlineAdherence.label")}
+            description={t("weights.deadlineAdherence.description")}
             value={deadlineAdherenceWeight}
             onChange={setDeadlineAdherenceWeight}
           />
 
           <WeightInput
-            label="Goal Momentum Score"
-            description="How strongly progress growth across goals should matter."
+            label={t("weights.goalMomentum.label")}
+            description={t("weights.goalMomentum.description")}
             value={goalMomentumWeight}
             onChange={setGoalMomentumWeight}
           />
 
           <WeightInput
-            label="Consistency Score"
-            description="How strongly regular learning behaviour should affect your PBI."
+            label={t("weights.consistency.label")}
+            description={t("weights.consistency.description")}
             value={consistencyWeight}
             onChange={setConsistencyWeight}
           />
@@ -241,16 +242,15 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
       <section className="rounded-2xl border bg-background p-6 shadow-sm">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-            Appearance
+            {t("appearance.eyebrow")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-            Theme preference
+            {t("appearance.title")}
           </h2>
 
           <p className="mt-2 max-w-3xl text-secondary">
-            Choose between light mode, dark mode, or follow your system
-            preference.
+            {t("appearance.description")}
           </p>
         </div>
 
@@ -265,7 +265,7 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
           disabled={isPending || Math.abs(totalWeight - 1) > 0.0001}
           className="rounded-xl px-5 py-3 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isPending ? "Saving settings..." : "Save settings"}
+          {isPending ? t("saving") : t("save")}
         </Button>
       </div>
     </form>
@@ -285,6 +285,8 @@ function WeightInput({
   value,
   onChange,
 }: WeightInputProps) {
+  const t = useTranslations("settings.form.weights");
+
   return (
     <div className="rounded-2xl border p-4">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-center">
@@ -294,7 +296,9 @@ function WeightInput({
         </div>
 
         <div className="w-full md:w-56">
-          <label className="mb-1 block text-sm font-medium">Weight</label>
+          <label className="mb-1 block text-sm font-medium">
+            {t("weight")}
+          </label>
 
           <input
             type="number"

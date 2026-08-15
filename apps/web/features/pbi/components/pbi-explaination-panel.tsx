@@ -1,4 +1,5 @@
 import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
+import { useTranslations } from "next-intl";
 
 type PbiExplanationPanelProps = {
   explanation: PbiExplanationPayload | null;
@@ -33,15 +34,16 @@ function getComponentLevelClass(level: "low" | "moderate" | "strong") {
 }
 
 export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
+  const t = useTranslations("dashboard.pbiExplanation");
+
   if (!explanation) {
     return (
       <section className="rounded-[28px] border border-dashed border-border/70 bg-card/80 p-8 text-center">
         <h2 className="text-xl font-semibold text-foreground">
-          No behavioural explanation yet
+          {t("emptyTitle")}
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Generate a PBI snapshot to view an interpretable breakdown of your
-          behaviour.
+          {t("emptyDescription")}
         </p>
       </section>
     );
@@ -53,7 +55,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
           <div>
             <p className="text-sm font-medium uppercase tracking-[0.22em] text-primary/70">
-              PBI interpretation
+              {t("eyebrow")}
             </p>
 
             <h2 className="mt-2 text-2xl font-semibold text-foreground">
@@ -88,7 +90,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
                   insight.type,
                 )}`}
               >
-                {insight.type}
+                {t(`insightTypes.${insight.type}`)}
               </span>
 
               <h3 className="mt-3 text-lg font-semibold text-foreground">
@@ -106,11 +108,10 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
           <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-1 py-1 outline-none">
             <div>
               <h3 className="text-xl font-semibold text-foreground">
-                Component-level explanations
+                {t("componentTitle")}
               </h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Each PBI dimension is explained using the rule-based
-                interpretation layer.
+                {t("componentDescription")}
               </p>
             </div>
           </summary>
@@ -140,7 +141,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
                         component.level,
                       )}`}
                     >
-                      {component.level}
+                      {t(`levels.${component.level}`)}
                     </p>
                   </div>
                 </div>

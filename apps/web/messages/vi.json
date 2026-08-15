@@ -1,0 +1,1593 @@
+{
+  "common": {
+    "appName": "Lumivox",
+    "save": "Lưu",
+    "cancel": "Hủy",
+    "delete": "Xóa",
+    "edit": "Chỉnh sửa",
+    "loading": "Đang tải...",
+    "search": "Tìm kiếm",
+    "settings": "Cài đặt",
+    "language": "Ngôn ngữ"
+  },
+  "nav": {
+    "dashboard": "Tổng quan",
+    "tasks": "Nhiệm vụ",
+    "goals": "Mục tiêu",
+    "focus": "Tập trung",
+    "groups": "Nhóm học",
+    "leaderboard": "Bảng xếp hạng",
+    "settings": "Cài đặt"
+  },
+  "dashboard": {
+    "title": "Tổng quan",
+    "subtitle": "Theo dõi tiến độ học tập, phiên tập trung và gợi ý cá nhân hóa.",
+    "header": {
+      "eyebrow": "Lumivox",
+      "title": "Bảng phân tích hành vi",
+      "description": "Xem lại hành vi năng suất gần đây, trực quan hóa nhịp học tập và hiểu lý do phía sau các tín hiệu hành vi của bạn."
+    },
+    "summary": {
+      "completedTasks": {
+        "title": "Nhiệm vụ đã hoàn thành",
+        "subtitle": "7 ngày gần đây"
+      },
+      "focusSessions": {
+        "title": "Phiên tập trung",
+        "subtitle": "Phiên đã hoàn thành"
+      },
+      "focusMinutes": {
+        "title": "Phút tập trung",
+        "subtitle": "Thời gian tập trung thực tế"
+      },
+      "distractions": {
+        "title": "Xao nhãng",
+        "subtitle": "Lần gián đoạn đã ghi nhận"
+      }
+    },
+    "refreshPbi": {
+      "button": "Tạo / làm mới PBI",
+      "calculating": "Đang tính..."
+    },
+    "pbiScore": {
+      "emptyTitle": "Chưa có snapshot PBI",
+      "emptyDescription": "Tạo snapshot PBI đầu tiên sau khi bạn đã tạo nhiệm vụ, mục tiêu và phiên tập trung.",
+      "standard": {
+        "title": "PBI tiêu chuẩn",
+        "description": "Dùng trọng số học thuật cố định."
+      },
+      "personalized": {
+        "title": "PBI cá nhân hóa",
+        "description": "Dùng trọng số từ onboarding/hiệu chỉnh của người dùng."
+      },
+      "period": "Khoảng snapshot: {start} -> {end}"
+    },
+    "pbiExplanation": {
+      "emptyTitle": "Chưa có giải thích hành vi",
+      "emptyDescription": "Tạo snapshot PBI để xem phân tích dễ hiểu về hành vi của bạn.",
+      "eyebrow": "Diễn giải PBI",
+      "componentTitle": "Giải thích theo từng thành phần",
+      "componentDescription": "Mỗi chiều PBI được giải thích bằng lớp diễn giải dựa trên quy tắc.",
+      "insightTypes": {
+        "positive": "Tích cực",
+        "warning": "Cảnh báo",
+        "neutral": "Trung lập"
+      },
+      "levels": {
+        "low": "Thấp",
+        "moderate": "Vừa phải",
+        "strong": "Mạnh"
+      }
+    },
+    "behaviourTrend": {
+      "title": "Xu hướng hành vi - 7 ngày gần đây",
+      "description": "So sánh thời gian tập trung và các lần xao nhãng trong những ngày gần đây.",
+      "focusMinutes": "Phút tập trung",
+      "distractions": "Xao nhãng"
+    },
+    "pbiHistory": {
+      "title": "Lịch sử PBI",
+      "description": "Theo dõi PBI tiêu chuẩn và PBI cá nhân hóa thay đổi qua các snapshot.",
+      "empty": "Chưa có snapshot PBI lịch sử.",
+      "standardPbi": "PBI tiêu chuẩn",
+      "personalizedPbi": "PBI cá nhân hóa"
+    },
+    "taskStatus": {
+      "title": "Tổng quan trạng thái nhiệm vụ",
+      "description": "Phân bố hiện tại của các trạng thái nhiệm vụ trong hệ thống.",
+      "tasks": "Nhiệm vụ"
+    },
+    "frozenStreak": {
+      "eyebrow": "Chuỗi ngày bị đóng băng",
+      "title": "Chuỗi học của bạn đang có rủi ro",
+      "description": "Bạn đã bỏ lỡ một ngày có hoạt động học hợp lệ, nhưng vẫn có thể khôi phục chuỗi bằng token trước <deadline></deadline>.",
+      "soon": "sớm",
+      "cta": "Khôi phục trong cài đặt"
+    }
+  },
+  "appShell": {
+    "sidebar": {
+      "eyebrow": "Lumivox",
+      "title": "Trí tuệ hành vi",
+      "fallbackUser": "Người dùng Lumivox",
+      "signOut": "Đăng xuất",
+      "collapseSidebar": "Thu gọn thanh bên",
+      "expandSidebar": "Mở rộng thanh bên"
+    },
+    "navigation": {
+      "dashboard": {
+        "label": "Tổng quan",
+        "description": "Phân tích và insight hành vi"
+      },
+      "goals": {
+        "label": "Mục tiêu",
+        "description": "Mục tiêu học tập"
+      },
+      "tasks": {
+        "label": "Nhiệm vụ",
+        "description": "Việc cần làm rõ ràng"
+      },
+      "focus": {
+        "label": "Tập trung",
+        "description": "Phiên tập trung và xao nhãng"
+      },
+      "rooms": {
+        "label": "Phòng học",
+        "description": "Không gian học cộng tác"
+      },
+      "groups": {
+        "label": "Nhóm",
+        "description": "Trò chuyện nhóm"
+      },
+      "leaderboard": {
+        "label": "Bảng xếp hạng",
+        "description": "Xem thành tích của bạn"
+      },
+      "reflections": {
+        "label": "Phản tư",
+        "description": "Phản tư hành vi hằng tuần"
+      },
+      "settings": {
+        "label": "Cài đặt",
+        "description": "Hồ sơ và hiệu chỉnh PBI"
+      },
+      "admin": {
+        "label": "Quản trị",
+        "description": "Công cụ quản trị"
+      }
+    },
+    "engagement": {
+      "empty": "Thống kê tương tác sẽ xuất hiện sau hoạt động học hợp lệ đầu tiên.",
+      "status": "Chuỗi {status}",
+      "statuses": {
+        "active": "đang hoạt động",
+        "frozen": "đóng băng",
+        "lost": "đã mất"
+      },
+      "streak": "Chuỗi",
+      "day": "ngày",
+      "days": "ngày",
+      "tokens": "Token"
+    }
+  },
+  "auth": {
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "fields": {
+      "email": "Email",
+      "password": "Mật khẩu",
+      "repeatPassword": "Nhập lại mật khẩu"
+    },
+    "errors": {
+      "generic": "Đã xảy ra lỗi"
+    },
+    "login": {
+      "title": "Đăng nhập",
+      "description": "Nhập email bên dưới để đăng nhập vào tài khoản của bạn",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "submitting": "Đang đăng nhập...",
+      "noAccount": "Chưa có tài khoản?",
+      "signUpLink": "Đăng ký"
+    },
+    "register": {
+      "title": "Đăng ký",
+      "description": "Tạo tài khoản mới",
+      "submit": "Đăng ký",
+      "submitting": "Đang tạo tài khoản...",
+      "hasAccount": "Đã có tài khoản?",
+      "loginLink": "Đăng nhập",
+      "passwordMismatch": "Mật khẩu không khớp"
+    },
+    "registerSuccess": {
+      "title": "Cảm ơn bạn đã đăng ký!",
+      "description": "Kiểm tra email để xác nhận",
+      "body": "Bạn đã đăng ký thành công. Vui lòng kiểm tra email để xác nhận tài khoản trước khi đăng nhập."
+    },
+    "error": {
+      "title": "Rất tiếc, đã có lỗi xảy ra.",
+      "codeError": "Lỗi mã: {error}",
+      "unspecified": "Đã xảy ra lỗi không xác định."
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Tính năng",
+      "howItWorks": "Cách hoạt động",
+      "analytics": "Phân tích",
+      "pricing": "Bảng giá",
+      "faq": "FAQ",
+      "signIn": "Đăng nhập",
+      "getStarted": "Bắt đầu"
+    },
+    "hero": {
+      "badge": "Mới - trợ lý AI hành vi đang beta",
+      "title": {
+        "before": "Học với",
+        "accent": "trí tuệ dịu nhẹ",
+        "after": "."
+      },
+      "subtitle": "Lumivox biến các phiên tập trung, nhiệm vụ và thói quen hằng ngày của bạn thành tín hiệu học tập cá nhân - rồi âm thầm gợi ý bước tiếp theo phù hợp nhất. Dành cho học sinh, sinh viên muốn tiến bộ mà không kiệt sức.",
+      "primaryCta": "Bắt đầu tập trung miễn phí",
+      "secondaryCta": "Xem cách hoạt động",
+      "proof": {
+        "freePlan": "Gói miễn phí lâu dài",
+        "noCard": "Không cần thẻ",
+        "private": "Riêng tư mặc định"
+      },
+      "floating": {
+        "aiSuggested": {
+          "title": "AI gợi ý",
+          "subtitle": "Tập trung sâu - 25 phút"
+        },
+        "focusTimer": {
+          "title": "24:32",
+          "subtitle": "Đang tập trung"
+        },
+        "streak": {
+          "title": "Chuỗi 12 ngày",
+          "subtitle": "+3 token đã nhận"
+        },
+        "consistency": {
+          "title": "+18% tuần này",
+          "subtitle": "Độ đều đặn"
+        }
+      },
+      "trustedBy": "Được tin dùng bởi người học tò mò từ"
+    },
+    "features": {
+      "eyebrow": "Mọi thứ bạn cần",
+      "title": {
+        "before": "Không gian học tập biết suy nghĩ",
+        "accent": "cùng",
+        "after": "bạn"
+      },
+      "subtitle": "Sáu năng lực thầm lặng, được thiết kế để giảm ma sát trong học tập và thay thế bằng đà tiến bộ.",
+      "items": {
+        "behavioralAnalytics": {
+          "title": "Phân tích hành vi",
+          "desc": "Lumivox học từ phiên học, thời gian nghỉ và nhịp năng lượng để chỉ ra lúc bạn làm việc hiệu quả nhất."
+        },
+        "aiRecommendations": {
+          "title": "Gợi ý từ AI",
+          "desc": "Một trợ lý nhẹ nhàng gợi ý nên học gì tiếp theo, tập trung bao lâu và khi nào nên nghỉ thật sự."
+        },
+        "focusMode": {
+          "title": "Chế độ tập trung nhập vai",
+          "desc": "Bộ đếm giờ dịu, phòng nền và lớp chắn xao nhãng giúp mọi khoảnh khắc thành phiên học sâu."
+        },
+        "goalTasks": {
+          "title": "Nhiệm vụ gắn với mục tiêu",
+          "desc": "Mỗi nhiệm vụ nối với một mục tiêu dài hạn, để tiến độ luôn có ý nghĩa thay vì chỉ là việc máy móc."
+        },
+        "studyRooms": {
+          "title": "Phòng học trực tiếp",
+          "desc": "Ngồi cạnh những người học khác trong các phòng theo chủ đề - có hiện diện, không áp lực."
+        },
+        "rewards": {
+          "title": "Chuỗi ngày và phần thưởng",
+          "desc": "Nhận token, bảo vệ chuỗi bằng khiên và mở khóa chủ đề ấm áp khi bạn tiến bộ."
+        }
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "Cách hoạt động",
+      "title": "Từ rời rạc đến tập trung - qua ba bước nhẹ nhàng",
+      "steps": {
+        "capture": {
+          "title": "Ghi lại ý định",
+          "desc": "Thêm nhiệm vụ, liên kết với mục tiêu hoặc để AI chia dự án lớn thành các bước nhỏ dễ làm."
+        },
+        "focus": {
+          "title": "Bước vào tập trung",
+          "desc": "Chọn một phòng nền, đặt bộ đếm giờ và để Lumivox âm thầm theo dõi điều giúp bạn vào guồng."
+        },
+        "patterns": {
+          "title": "Học từ nhịp của bạn",
+          "desc": "Xem khung giờ tốt nhất, điểm gây vướng và gợi ý AI để giữ tuần học cân bằng."
+        }
+      }
+    },
+    "showcase": {
+      "analytics": {
+        "eyebrow": "Phân tích",
+        "title": "Những mô thức cuối cùng cũng hiện rõ",
+        "desc": "Bản đồ nhiệt độ đều đặn 12 tuần, phân bố tập trung theo loại nhiệm vụ và KPI hằng tuần - tất cả đều nhẹ nhàng, dễ đọc, không chạy theo số đẹp.",
+        "items": {
+          "peakHours": "Khám phá khung giờ tập trung tốt nhất",
+          "energy": "Nhận ra môn học khiến bạn kiệt sức hoặc có năng lượng",
+          "rewards": "Theo dõi chuỗi ngày, khiên bảo vệ và token đã nhận"
+        }
+      },
+      "focus": {
+        "eyebrow": "Phiên tập trung",
+        "title": "Bộ đếm giờ tôn trọng sự chú ý của bạn",
+        "desc": "Chế độ tối nhập vai, vòng thở theo nhịp và tín hiệu mềm để bắt đầu và kết thúc không đột ngột.",
+        "modes": {
+          "pomodoro": "Pomodoro",
+          "deepWork": "Tập trung sâu",
+          "custom": "Tùy chỉnh",
+          "reading": "Đọc tài liệu"
+        }
+      },
+      "rooms": {
+        "eyebrow": "Phòng học",
+        "title": "Học yên tĩnh - cùng nhau",
+        "desc": "Vào Calm Forest, Midnight Mode hoặc Library Quiet. Thấy người khác đang tập trung theo thời gian thực, cổ vũ bằng phản ứng nhẹ và không còn cảm giác một mình lúc 2 giờ sáng."
+      }
+    },
+    "stats": {
+      "items": {
+        "sessions": "Phiên học đã hoàn thành",
+        "focus": "Cảm thấy tập trung tốt hơn",
+        "rating": "Đánh giá trung bình",
+        "saved": "Tiết kiệm mỗi ngày học"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Được học sinh, sinh viên yêu thích",
+      "title": "Tâm trí bình tĩnh hơn, kết quả sắc nét hơn",
+      "items": {
+        "linh": {
+          "quote": "Lumivox giống một bạn học thật sự chú ý đến mình. Các gợi ý AI rất đúng lúc mà không gây phiền.",
+          "role": "Khoa học máy tính, NUS"
+        },
+        "marcus": {
+          "quote": "Mình bớt lên kế hoạch quá mức và bắt đầu hoàn thành thật sự. Chỉ riêng bản đồ nhiệt đã thay đổi cách mình nhìn cả tuần.",
+          "role": "Dự bị y khoa, Stanford"
+        },
+        "trang": {
+          "quote": "Calm Forest lúc 11 giờ tối với ba người bạn cùng im lặng tập trung là mẹo năng suất hay nhất mình từng tìm được.",
+          "role": "Sinh viên thiết kế, RMIT"
+        }
+      }
+    },
+    "pricing": {
+      "eyebrow": "Bảng giá",
+      "title": "Đơn giản, thân thiện với người học",
+      "subtitle": "Bắt đầu miễn phí. Nâng cấp khi bạn sẵn sàng dùng trợ lý AI.",
+      "popular": "Phổ biến nhất",
+      "plans": {
+        "starter": {
+          "name": "Starter",
+          "price": "Miễn phí",
+          "period": "lâu dài",
+          "desc": "Đủ những gì bạn cần để xây dựng thói quen tập trung.",
+          "features": [
+            "Nhiệm vụ không giới hạn",
+            "Bộ đếm tập trung và 4 phòng",
+            "Phân tích hằng tuần",
+            "Chuỗi ngày và token"
+          ],
+          "cta": "Bắt đầu miễn phí"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$6",
+          "period": "/ tháng",
+          "desc": "Mở khóa đầy đủ trợ lý AI và phân tích chuyên sâu.",
+          "features": [
+            "Tất cả trong Starter",
+            "Trợ lý AI hành vi",
+            "Bản đồ nhiệt và insight 12 tuần",
+            "Tất cả phòng nền",
+            "Khiên bảo vệ chuỗi"
+          ],
+          "cta": "Dùng thử Pro"
+        },
+        "campus": {
+          "name": "Campus",
+          "price": "Tùy chỉnh",
+          "period": "cho nhóm",
+          "desc": "Dành cho trường, nhóm học và câu lạc bộ.",
+          "features": [
+            "Tất cả trong Pro",
+            "Phòng nhóm và bảng xếp hạng",
+            "Phân tích cho tổ chức",
+            "Hỗ trợ ưu tiên"
+          ],
+          "cta": "Liên hệ"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Câu hỏi thường gặp",
+      "items": {
+        "free": {
+          "question": "Lumivox có miễn phí không?",
+          "answer": "Có - gói Starter miễn phí lâu dài và bao gồm nhiệm vụ, bộ đếm tập trung, bốn phòng nền và phân tích hằng tuần."
+        },
+        "coach": {
+          "question": "Trợ lý AI hoạt động như thế nào?",
+          "answer": "AI âm thầm quan sát phiên tập trung, nhiệm vụ hoàn thành và nhịp nghỉ của bạn, rồi gợi ý nên học gì tiếp theo, độ dài phiên phù hợp và khi nào nên nghỉ."
+        },
+        "privacy": {
+          "question": "Dữ liệu của tôi có riêng tư không?",
+          "answer": "Dữ liệu hành vi thuộc về bạn. Chúng tôi không bán dữ liệu, và bạn có thể xuất hoặc xóa mọi thứ trong phần cài đặt bất kỳ lúc nào."
+        },
+        "friends": {
+          "question": "Tôi có thể học cùng bạn bè không?",
+          "answer": "Có - tham gia các phòng học theo chủ đề, xem hiện diện trực tiếp và dùng phản ứng nhẹ. Phòng nhóm nằm trong gói Campus."
+        }
+      }
+    },
+    "cta": {
+      "title": "Biến phiên học tiếp theo thành phiên tốt nhất của bạn.",
+      "subtitle": "Tham gia cùng hàng nghìn người học dùng Lumivox để tập trung sâu hơn, lập kế hoạch thông minh hơn và tự hào hơn về tuần của mình.",
+      "primaryCta": "Bắt đầu miễn phí",
+      "secondaryCta": "Khám phá tính năng",
+      "proof": {
+        "setup": "Thiết lập trong 60 giây",
+        "privacy": "Ưu tiên quyền riêng tư",
+        "students": "Được 47k+ người học yêu thích"
+      }
+    },
+    "footer": {
+      "description": "Trí tuệ dịu nhẹ cho việc học của bạn - phân tích hành vi và gợi ý AI dành cho thế hệ người học tiếp theo.",
+      "product": {
+        "title": "Sản phẩm",
+        "features": "Tính năng",
+        "analytics": "Phân tích",
+        "pricing": "Bảng giá",
+        "openApp": "Mở ứng dụng"
+      },
+      "company": {
+        "title": "Công ty",
+        "about": "Giới thiệu",
+        "privacy": "Quyền riêng tư",
+        "terms": "Điều khoản",
+        "contact": "Liên hệ"
+      },
+      "copyright": "(c) {year} Lumivox. Đã đăng ký bản quyền.",
+      "madeWithCare": "Được làm bình tĩnh và chỉn chu."
+    }
+  },
+  "tasks": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Nhiệm vụ",
+      "description": "Quản lý các việc cần làm, liên kết chúng với mục tiêu và tạo dữ liệu hành vi để Lumivox phân tích."
+    },
+    "modalShell": {
+      "eyebrow": "Chi tiết nhiệm vụ",
+      "close": "Đóng hộp thoại"
+    },
+    "form": {
+      "trigger": "Nhiệm vụ mới",
+      "createTitle": "Tạo nhiệm vụ mới",
+      "createDescription": "Ghi lại việc cần làm, gắn với mục tiêu khi cần và giữ danh sách thật tập trung.",
+      "fields": {
+        "title": "Tiêu đề nhiệm vụ",
+        "description": "Mô tả",
+        "linkedGoal": "Mục tiêu liên kết",
+        "priority": "Độ ưu tiên",
+        "status": "Trạng thái",
+        "estimatedMinutes": "Số phút ước tính",
+        "dueDate": "Ngày đến hạn",
+        "dueTime": "Giờ đến hạn"
+      },
+      "placeholders": {
+        "title": "Hoàn thành bản nháp tổng quan tài liệu",
+        "description": "Ghi chú tùy chọn hoặc chi tiết thực hiện"
+      },
+      "priorities": {
+        "low": "Thấp",
+        "medium": "Trung bình",
+        "high": "Cao",
+        "critical": "Khẩn cấp"
+      },
+      "statuses": {
+        "todo": "Cần làm",
+        "in_progress": "Đang thực hiện",
+        "completed": "Hoàn thành",
+        "overdue": "Quá hạn",
+        "cancelled": "Đã hủy"
+      },
+      "goalTypes": {
+        "short_term": "Ngắn hạn",
+        "long_term": "Dài hạn"
+      },
+      "noGoal": "Không có mục tiêu",
+      "noGoalAssigned": "Chưa gán mục tiêu",
+      "unlinked": "Chưa liên kết",
+      "selectDate": "Chọn ngày",
+      "creating": "Đang tạo...",
+      "createSubmit": "Tạo nhiệm vụ"
+    },
+    "filters": {
+      "searchLabel": "Tìm nhiệm vụ",
+      "searchPlaceholder": "Tìm nhiệm vụ",
+      "allStatuses": "Tất cả trạng thái",
+      "allPriorities": "Tất cả ưu tiên",
+      "allGoals": "Tất cả mục tiêu",
+      "apply": "Áp dụng",
+      "reset": "Đặt lại"
+    },
+    "list": {
+      "title": "Nhiệm vụ",
+      "filtered": " (đã lọc)",
+      "shown": "Hiển thị {shown} nhiệm vụ{filtered} - tổng cộng {total} mục đã ghi nhận.",
+      "page": "Trang {page} / {totalPages}"
+    },
+    "table": {
+      "emptyTitle": "Không tìm thấy nhiệm vụ",
+      "emptyDescription": "Thử tìm kiếm hoặc bộ lọc khác, hoặc tạo nhiệm vụ mới để bắt đầu.",
+      "paginatedHint": "Kết quả được phân trang ở đây.",
+      "headers": {
+        "task": "Nhiệm vụ",
+        "goal": "Mục tiêu",
+        "priority": "Ưu tiên",
+        "status": "Trạng thái",
+        "due": "Đến hạn",
+        "estimate": "Ước tính",
+        "details": "Chi tiết"
+      },
+      "noDescription": "Chưa có mô tả",
+      "open": "Mở",
+      "minutesShort": "{minutes}p"
+    },
+    "details": {
+      "fallbackDescription": "Chi tiết nhiệm vụ",
+      "close": "Đóng",
+      "deleteTask": "Xóa nhiệm vụ",
+      "deleting": "Đang xóa...",
+      "summary": {
+        "goal": "Mục tiêu",
+        "due": "Đến hạn",
+        "estimate": "Ước tính",
+        "priority": "Ưu tiên",
+        "status": "Trạng thái"
+      },
+      "minutes": "{minutes} phút",
+      "notSet": "Chưa đặt",
+      "notes": "Ghi chú",
+      "noDescription": "Chưa thêm mô tả cho nhiệm vụ này.",
+      "systemFields": "Trường hệ thống",
+      "created": "Đã tạo",
+      "updated": "Đã cập nhật"
+    },
+    "pagination": {
+      "showing": "Đang hiển thị trang {page} / {totalPages}",
+      "previous": "Trước",
+      "next": "Tiếp"
+    }
+  },
+  "goals": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Mục tiêu",
+      "description": "Tạo, theo dõi và cập nhật mục tiêu học tập để làm nền cho phân tích hành vi và tính toán PBI.",
+      "sectionTitle": "Mục tiêu của bạn",
+      "recorded": "Đã ghi nhận {count} mục tiêu.",
+      "emptyTitle": "Chưa tạo mục tiêu nào",
+      "emptyDescription": "Mục tiêu đầu tiên của bạn sẽ xuất hiện ở đây sau khi tạo."
+    },
+    "detail": {
+      "eyebrow": "Chi tiết mục tiêu"
+    },
+    "form": {
+      "trigger": "Tạo mục tiêu",
+      "createTitle": "Tạo mục tiêu mới",
+      "editTitle": "Cập nhật mục tiêu",
+      "createDescription": "Định nghĩa một mục tiêu học tập ngắn hạn hoặc dài hạn.",
+      "editDescription": "Điều chỉnh tiến độ, thời gian và trạng thái cho mục tiêu này.",
+      "fields": {
+        "title": "Tiêu đề mục tiêu",
+        "description": "Mô tả",
+        "goalType": "Loại mục tiêu",
+        "status": "Trạng thái",
+        "startDate": "Ngày bắt đầu",
+        "targetDate": "Ngày mục tiêu"
+      },
+      "placeholders": {
+        "title": "Hoàn thành ôn tập AWS Cloud Practitioner",
+        "description": "Thành công của mục tiêu này trông như thế nào?"
+      },
+      "goalTypes": {
+        "short_term": "Ngắn hạn",
+        "long_term": "Dài hạn"
+      },
+      "statuses": {
+        "active": "Đang hoạt động",
+        "completed": "Hoàn thành",
+        "paused": "Tạm dừng",
+        "archived": "Lưu trữ"
+      },
+      "selectDate": "Chọn ngày",
+      "creating": "Đang tạo...",
+      "saving": "Đang lưu...",
+      "createSubmit": "Tạo mục tiêu",
+      "saveChanges": "Lưu thay đổi"
+    },
+    "card": {
+      "deleteConfirm": "Xóa mục tiêu này? Các nhiệm vụ liên kết vẫn được giữ lại, nhưng tham chiếu đến mục tiêu sẽ bị gỡ.",
+      "deleting": "Đang xóa...",
+      "noDescription": "Không có mô tả",
+      "start": "Bắt đầu",
+      "target": "Mục tiêu",
+      "notSet": "Chưa đặt",
+      "viewDocuments": "Xem tài liệu"
+    },
+    "progress": {
+      "label": "Tiến độ",
+      "noTasks": "Chưa có nhiệm vụ",
+      "tasksCompleted": "Đã hoàn thành {completed}/{total} nhiệm vụ"
+    },
+    "documents": {
+      "upload": {
+        "eyebrow": "Tài liệu học tập",
+        "title": "Tải tài liệu học lên",
+        "description": "Tải PDF, ghi chú văn bản, file markdown hoặc hình ảnh cho mục tiêu này. Các file này sẽ được dùng bởi trợ lý học tập RAG sau đó.",
+        "uploading": "Đang tải lên...",
+        "button": "Tải tài liệu lên"
+      },
+      "list": {
+        "eyebrow": "Thư viện tài liệu",
+        "title": "Tài liệu đã tải lên",
+        "empty": "Chưa có tài liệu học tập nào được tải lên cho mục tiêu này.",
+        "metadata": "Quyền xem: {visibility} - AI: {status}",
+        "visibility": {
+          "private": "Riêng tư",
+          "shared": "Đã chia sẻ",
+          "public": "Công khai"
+        },
+        "aiStatus": {
+          "pending": "Đang chờ",
+          "processing": "Đang xử lý",
+          "completed": "Hoàn thành",
+          "failed": "Thất bại"
+        },
+        "preview": "Xem trước",
+        "share": "Chia sẻ"
+      },
+      "delete": {
+        "confirm": "Xóa tài liệu này? Hành động này không thể hoàn tác.",
+        "deleting": "Đang xóa..."
+      },
+      "process": {
+        "processing": "Đang xử lý...",
+        "reprocess": "Xử lý lại",
+        "process": "Xử lý cho AI"
+      }
+    }
+  },
+  "focus": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Phiên tập trung",
+      "description": "Theo dõi các phiên học có chủ đích, ghi nhận gián đoạn và xây dựng dữ liệu hành vi ý nghĩa cho lớp phân tích."
+    },
+    "startForm": {
+      "title": "Bắt đầu phiên tập trung",
+      "linkedTask": "Nhiệm vụ liên kết",
+      "chooseTask": "Chọn nhiệm vụ liên kết",
+      "noLinkedTask": "Không liên kết nhiệm vụ",
+      "plannedDuration": "Thời lượng dự kiến",
+      "minutes": "{value} phút",
+      "plannedMinutesPlaceholder": "Nhập số phút bạn muốn...",
+      "starting": "Đang bắt đầu...",
+      "start": "Bắt đầu phiên tập trung"
+    },
+    "active": {
+      "eyebrow": "Phiên tập trung đang diễn ra",
+      "generalSession": "Phiên tập trung chung",
+      "remainingTime": "Thời gian còn lại",
+      "compactProgress": "Còn {remaining} / dự kiến {minutes} phút",
+      "plannedBadge": "Dự kiến: {minutes} phút",
+      "durationReached": "Đã đạt thời lượng dự kiến. Bạn có thể hoàn thành phiên này.",
+      "cancelConfirm": "Hủy phiên tập trung này? Phiên vẫn sẽ được lưu với trạng thái đã hủy.",
+      "actions": {
+        "pause": "Tạm dừng phiên tập trung",
+        "resume": "Tiếp tục phiên tập trung",
+        "complete": "Hoàn thành phiên tập trung",
+        "cancel": "Hủy phiên tập trung",
+        "expand": "Mở rộng bộ đếm giờ",
+        "collapse": "Thu gọn bộ đếm giờ"
+      },
+      "status": {
+        "ongoing": "Đang diễn ra",
+        "paused": "Tạm dừng",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy"
+      }
+    },
+    "recent": {
+      "title": "Phiên tập trung gần đây",
+      "emptyTitle": "Chưa có phiên tập trung",
+      "emptyDescription": "Bắt đầu phiên đầu tiên để thu thập dữ liệu hành vi.",
+      "generalSession": "Phiên tập trung chung",
+      "sessionMetrics": "Dự kiến {planned} phút - Thực tế {actual} phút",
+      "status": {
+        "ongoing": "Đang diễn ra",
+        "paused": "Tạm dừng",
+        "completed": "Hoàn thành",
+        "cancelled": "Đã hủy"
+      }
+    }
+  },
+  "leaderboard": {
+    "title": "Bảng xếp hạng",
+    "subtitle": "Xem những người học tích cực nhất trên Lumivox trong tuần này.",
+    "global": "Bảng xếp hạng toàn hệ thống",
+    "topLearners": "Người học nổi bật trong tuần",
+    "myRank": "Thứ hạng của tôi",
+    "notRanked": "Chưa có thứ hạng",
+    "scoreFormula": "Điểm = phút tập trung + nhiệm vụ x 10 + phiên học x 5",
+    "rank": "Hạng",
+    "learner": "Người học",
+    "focus": "Tập trung",
+    "tasks": "Nhiệm vụ",
+    "sessions": "Phiên học",
+    "streak": "Chuỗi ngày",
+    "score": "Điểm",
+    "page": {
+      "eyebrow": "Động lực",
+      "title": "Bảng xếp hạng",
+      "description": "Xem những người học tích cực nhất trên Lumivox trong tuần này. Thứ hạng dựa trên phút tập trung, nhiệm vụ đã hoàn thành và phiên tập trung.",
+      "disabledEyebrow": "Bảng xếp hạng",
+      "disabledTitle": "Bảng xếp hạng toàn hệ thống hiện đang tắt",
+      "disabledDescription": "Bảng xếp hạng toàn hệ thống tạm thời chưa khả dụng. Tiến độ học tập cá nhân của bạn vẫn đang được theo dõi."
+    },
+    "myRankCard": {
+      "eyebrow": "Thứ hạng của tôi",
+      "notRanked": "Chưa có thứ hạng",
+      "notRankedDescription": "Hoàn thành một phiên tập trung hoặc nhiệm vụ trong tuần này để xuất hiện trên bảng xếp hạng.",
+      "minutes": "{count} phút",
+      "labels": {
+        "rank": "Hạng",
+        "score": "Điểm",
+        "focus": "Tập trung",
+        "tasks": "Nhiệm vụ",
+        "sessions": "Phiên học"
+      }
+    },
+    "table": {
+      "eyebrow": "Bảng xếp hạng toàn hệ thống",
+      "title": "Người học nổi bật trong tuần",
+      "scoreFormula": "Điểm = phút tập trung + nhiệm vụ x 10 + phiên học x 5",
+      "empty": "Chưa ghi nhận hoạt động bảng xếp hạng nào trong tuần này.",
+      "minutes": "{count} phút",
+      "days": "{count} ngày",
+      "columns": {
+        "rank": "Hạng",
+        "learner": "Người học",
+        "focus": "Tập trung",
+        "tasks": "Nhiệm vụ",
+        "sessions": "Phiên học",
+        "streak": "Chuỗi ngày",
+        "score": "Điểm"
+      }
+    }
+  },
+  "settings": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Cài đặt",
+      "description": "Cập nhật hồ sơ, múi giờ và tùy chỉnh hiệu chỉnh PBI cá nhân hóa."
+    },
+    "form": {
+      "profile": {
+        "title": "Thiết lập hồ sơ",
+        "description": "Cho Lumivox biết bạn là ai và múi giờ nào sẽ được dùng cho phân tích hành vi.",
+        "fullName": "Họ và tên",
+        "timezone": "Múi giờ"
+      },
+      "pbi": {
+        "title": "Cá nhân hóa PBI của bạn",
+        "description": "Điều chỉnh mức độ tác động của từng chiều hành vi đến Chỉ số Hành vi Năng suất Cá nhân hóa.",
+        "reset": "Đặt lại theo mặc định học thuật",
+        "totalWeight": "Tổng trọng số hiện tại",
+        "totalHelp": "Tổng phải bằng chính xác 1.00 trước khi có thể hoàn tất onboarding."
+      },
+      "weights": {
+        "weight": "Trọng số",
+        "taskCompletion": {
+          "label": "Tỷ lệ hoàn thành nhiệm vụ",
+          "description": "Mức độ nhiệm vụ đã hoàn thành ảnh hưởng đến PBI của bạn."
+        },
+        "focusQuality": {
+          "label": "Điểm chất lượng tập trung",
+          "description": "Mức độ các phiên học tập trung và ít xao nhãng được tính đến."
+        },
+        "deadlineAdherence": {
+          "label": "Điểm tuân thủ hạn chót",
+          "description": "Mức độ việc đáp ứng hạn chót đóng góp vào PBI."
+        },
+        "goalMomentum": {
+          "label": "Điểm đà tiến triển mục tiêu",
+          "description": "Mức độ tăng trưởng tiến độ trên các mục tiêu được tính đến."
+        },
+        "consistency": {
+          "label": "Điểm nhất quán",
+          "description": "Mức độ hành vi học tập đều đặn ảnh hưởng đến PBI của bạn."
+        }
+      },
+      "appearance": {
+        "eyebrow": "Giao diện",
+        "title": "Tùy chọn giao diện",
+        "description": "Chọn chế độ sáng, chế độ tối hoặc theo tùy chọn hệ thống."
+      },
+      "saving": "Đang lưu cài đặt...",
+      "save": "Lưu cài đặt"
+    },
+    "theme": {
+      "light": "Sáng",
+      "dark": "Tối",
+      "system": "Hệ thống"
+    },
+    "streak": {
+      "eyebrow": "Bảo vệ chuỗi ngày",
+      "title": "Khôi phục chuỗi học tập",
+      "description": "Nếu chuỗi ngày của bạn bị đóng băng sau khi bỏ lỡ một ngày hoạt động hợp lệ, bạn có thể dùng token để khôi phục trước khi cửa sổ khôi phục hết hạn.",
+      "preparing": "Trạng thái tương tác của bạn đang được chuẩn bị. Hãy hoàn thành một nhiệm vụ hợp lệ hoặc phiên tập trung, rồi quay lại trang này.",
+      "notAvailable": "Không khả dụng",
+      "statusBadge": "Chuỗi {status}",
+      "tokens": "{count} token",
+      "dayStreak": "Chuỗi {count} ngày",
+      "frozenTitle": "Chuỗi ngày của bạn hiện đang bị đóng băng.",
+      "restoreDeadline": "Hạn khôi phục:",
+      "restoreCost": "Chi phí khôi phục:",
+      "currentlyHave": "Bạn hiện có",
+      "notEnoughTokens": "Bạn không có đủ token để khôi phục chuỗi này.",
+      "noActionTitle": "Không cần hành động khôi phục.",
+      "noActionDescription": "Chuỗi của bạn hiện là <strong>{status}</strong>. Chỉ có thể khôi phục khi chuỗi bị đóng băng.",
+      "days": "{count} ngày",
+      "status": {
+        "active": "đang hoạt động",
+        "frozen": "đóng băng",
+        "lost": "đã mất"
+      },
+      "metrics": {
+        "currentStreak": "Chuỗi hiện tại",
+        "longestStreak": "Chuỗi dài nhất",
+        "tokensSpent": "Token đã dùng"
+      }
+    },
+    "restoreButton": {
+      "restoring": "Đang khôi phục...",
+      "restore": "Khôi phục chuỗi"
+    }
+  },
+  "reflections": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Suy ngẫm hàng tuần",
+      "description": "Xem lại các tóm tắt hành vi hàng tuần có cấu trúc và phản ánh do AI tạo, được neo vào dữ liệu học tập của chính bạn."
+    },
+    "generateButton": {
+      "generating": "Đang tạo suy ngẫm...",
+      "generate": "Tạo suy ngẫm hàng tuần"
+    },
+    "section": {
+      "emptyTitle": "Chưa có suy ngẫm hàng tuần nào",
+      "emptyDescription": "Tạo suy ngẫm hàng tuần đầu tiên để so sánh hành vi học tập gần đây với giai đoạn trước."
+    },
+    "card": {
+      "badge": "Suy ngẫm hàng tuần",
+      "unknown": "Không xác định",
+      "reflection": "Suy ngẫm",
+      "currentWindow": "Khoảng thời gian hiện tại",
+      "wins": "Điểm tích cực",
+      "watchouts": "Điểm cần lưu ý",
+      "actions": "Hành động",
+      "nextWeekActions": "Hành động tuần tới",
+      "detailsTitle": "Chi tiết suy ngẫm",
+      "detailsDescription": "Điểm tích cực, điểm cần lưu ý và hành động cho tuần tới.",
+      "toggle": "Đóng/mở",
+      "emptyWins": "Không phát hiện tín hiệu tích cực nổi bật trong suy ngẫm này.",
+      "emptyWatchouts": "Không có điểm cần lưu ý lớn nào được nêu ra.",
+      "emptyActions": "Không có hành động nào được tạo.",
+      "confidenceNote": "Ghi chú độ tin cậy",
+      "direction": {
+        "improving": "Đang cải thiện",
+        "stable": "Ổn định",
+        "mixed": "Pha trộn",
+        "needs_attention": "Cần chú ý",
+        "unknown": "Không xác định"
+      },
+      "metrics": {
+        "focus": "Tập trung:",
+        "tasksDone": "Nhiệm vụ xong:",
+        "activeDays": "Ngày hoạt động:",
+        "minutes": "{count} phút"
+      }
+    }
+  },
+  "groups": {
+    "title": "Nhóm học",
+    "subtitle": "Tạo nhóm học riêng để trò chuyện, theo dõi tiến độ và học cùng nhau.",
+    "createGroup": "Tạo nhóm học",
+    "myGroups": "Nhóm của tôi",
+    "groupChat": "Trò chuyện nhóm",
+    "members": {
+      "title": "Thành viên",
+      "roles": {
+        "owner": "Chủ nhóm",
+        "admin": "Quản trị viên",
+        "member": "Thành viên"
+      },
+      "status": {
+        "active": "Đang hoạt động",
+        "invited": "Đã mời",
+        "removed": "Đã gỡ",
+        "left": "Đã rời"
+      }
+    },
+    "weeklyChallenge": "Thử thách tuần",
+    "leaderboard": "Bảng xếp hạng tuần",
+    "page": {
+      "eyebrow": "Học tập xã hội",
+      "title": "Nhóm học",
+      "description": "Tạo nhóm học riêng để trò chuyện, chia sẻ tiến độ và học cùng người dùng Lumivox khác.",
+      "myGroups": "Nhóm của tôi",
+      "empty": "Bạn chưa tham gia nhóm học nào.",
+      "openGroup": "Mở nhóm",
+      "roles": {
+        "owner": "Chủ nhóm",
+        "admin": "Quản trị viên",
+        "member": "Thành viên"
+      }
+    },
+    "detail": {
+      "eyebrow": "Nhóm học",
+      "leaderboardDisabledTitle": "Bảng xếp hạng nhóm đang tắt",
+      "leaderboardDisabledDescription": "Cạnh tranh nhóm hàng tuần tạm thời chưa khả dụng."
+    },
+    "createForm": {
+      "eyebrow": "Nhóm học riêng tư",
+      "title": "Tạo nhóm học",
+      "description": "Tạo nhóm riêng cho trò chuyện học tập và cộng tác dài hạn.",
+      "creating": "Đang tạo...",
+      "create": "Tạo nhóm",
+      "fields": {
+        "name": "Tên nhóm",
+        "description": "Mô tả"
+      },
+      "placeholders": {
+        "name": "Nhóm học AWS",
+        "description": "Một nhóm riêng để học cùng nhau."
+      }
+    },
+    "inviteForm": {
+      "title": "Mời thành viên",
+      "description": "Thêm người dùng Lumivox vào nhóm học riêng này bằng email.",
+      "placeholder": "friend@example.com",
+      "inviting": "Đang mời...",
+      "invite": "Mời"
+    },
+    "chat": {
+      "title": "Trò chuyện nhóm",
+      "description": "Tin nhắn xuất hiện theo thời gian thực cho các thành viên đang hoạt động.",
+      "realtime": "Thời gian thực",
+      "empty": "Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện nhóm.",
+      "you": "Bạn",
+      "placeholder": "Viết tin nhắn...",
+      "sending": "Đang gửi...",
+      "send": "Gửi"
+    },
+    "leaderboardPanel": {
+      "eyebrow": "Bảng xếp hạng tuần",
+      "title": "Xếp hạng nhóm",
+      "scoreFormula": "Điểm = phút tập trung + nhiệm vụ x 10",
+      "empty": "Chưa ghi nhận hoạt động nào trong tuần này.",
+      "minutes": "{count} phút",
+      "columns": {
+        "rank": "Hạng",
+        "member": "Thành viên",
+        "focus": "Tập trung",
+        "tasks": "Nhiệm vụ",
+        "score": "Điểm"
+      },
+      "roles": {
+        "owner": "Chủ nhóm",
+        "admin": "Quản trị viên",
+        "member": "Thành viên"
+      }
+    },
+    "weeklyChallengePanel": {
+      "eyebrow": "Thử thách tuần",
+      "title": "Tiến độ nhóm",
+      "empty": "Chưa có dữ liệu thử thách.",
+      "focusMinutes": "Phút tập trung",
+      "completedTasks": "Nhiệm vụ hoàn thành",
+      "focusMetric": "{actual}/{target} phút",
+      "taskMetric": "{actual}/{target} nhiệm vụ",
+      "completedPercent": "Đã hoàn thành {percent}%"
+    },
+    "challengeForm": {
+      "defaultTitle": "Thử thách học tập tuần",
+      "title": "Thiết lập thử thách tuần",
+      "description": "Quản lý nhóm có thể đặt mục tiêu hàng tuần cho phút tập trung và nhiệm vụ hoàn thành.",
+      "fields": {
+        "title": "Tiêu đề",
+        "focusMinutes": "Phút tập trung",
+        "completedTasks": "Nhiệm vụ hoàn thành"
+      },
+      "saving": "Đang lưu...",
+      "save": "Lưu thử thách"
+    }
+  },
+  "rooms": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Phòng học",
+      "description": "Tạo hoặc tham gia không gian học tập cộng tác, nơi người học có thể hiện diện, tập trung cùng nhau và xây dựng đà học tập mạnh hơn."
+    },
+    "detail": {
+      "eyebrow": "Phòng học",
+      "fallbackDescription": "Một phòng cộng tác nơi người học có thể hiện diện và học cùng nhau.",
+      "viewDetails": "Xem chi tiết phòng",
+      "roomDetails": "Chi tiết phòng",
+      "cancel": "Hủy",
+      "unknownUser": "Người dùng không xác định",
+      "roomOwner": "Chủ phòng",
+      "lumivoxUser": "Người dùng Lumivox",
+      "maxParticipants": "{count} người tham gia",
+      "privateInviteCode": "Mã mời riêng tư",
+      "privateInviteDescription": "Chia sẻ mã này với những người bạn muốn mời vào phòng.",
+      "labels": {
+        "visibility": "Quyền xem",
+        "maxParticipants": "Số người tối đa",
+        "owner": "Chủ phòng",
+        "yourRole": "Vai trò của bạn"
+      },
+      "visibility": {
+        "public": "Công khai",
+        "private": "Riêng tư"
+      },
+      "roles": {
+        "owner": "Chủ phòng",
+        "member": "Thành viên"
+      }
+    },
+    "createForm": {
+      "trigger": "Tạo phòng",
+      "title": "Tạo phòng học",
+      "description": "Mở một không gian cộng tác nơi người học có thể học cùng nhau.",
+      "cancel": "Hủy",
+      "creating": "Đang tạo phòng...",
+      "create": "Tạo phòng",
+      "fields": {
+        "title": "Tiêu đề phòng",
+        "description": "Mô tả",
+        "visibility": "Quyền xem",
+        "maxParticipants": "Số người tối đa"
+      },
+      "placeholders": {
+        "title": "Phòng chạy nước rút dự án cuối kỳ",
+        "description": "Một phòng tập trung cho các buổi học buổi tối."
+      },
+      "visibility": {
+        "public": "Phòng công khai",
+        "private": "Phòng riêng tư"
+      }
+    },
+    "tabs": {
+      "myRooms": "Phòng của tôi",
+      "publicRooms": "Phòng công khai",
+      "joinWithCode": "Tham gia bằng mã"
+    },
+    "myList": {
+      "title": "Phòng học của tôi",
+      "description": "Những phòng bạn đã tham gia và có thể quay lại.",
+      "empty": "Bạn chưa tham gia phòng học nào."
+    },
+    "publicList": {
+      "title": "Khám phá phòng công khai",
+      "description": "Tham gia các không gian cộng tác mở cho cộng đồng Lumivox.",
+      "empty": "Chưa có phòng học công khai nào."
+    },
+    "card": {
+      "capacity": "Tối đa {count} người học",
+      "owner": "Chủ phòng: {name}",
+      "unknownUser": "Người dùng không xác định",
+      "enter": "Vào phòng",
+      "joining": "Đang tham gia...",
+      "join": "Tham gia phòng",
+      "visibility": {
+        "public": "Công khai",
+        "private": "Riêng tư"
+      }
+    },
+    "joinPrivate": {
+      "title": "Tham gia phòng riêng tư",
+      "description": "Nhập mã mời do chủ phòng chia sẻ.",
+      "placeholder": "E7F8A2C1",
+      "joining": "Đang tham gia...",
+      "submit": "Tham gia bằng mã"
+    },
+    "leave": {
+      "confirm": "Rời khỏi phòng học này?",
+      "leaving": "Đang rời phòng...",
+      "leave": "Rời phòng"
+    },
+    "memberRoster": {
+      "title": "Thành viên thường trực",
+      "description": "Những thành viên hiện thuộc phòng này. Danh sách sẽ cập nhật trực tiếp khi có người tham gia hoặc rời đi.",
+      "empty": "Không tìm thấy thành viên đang hoạt động.",
+      "unknownUser": "Người dùng không xác định",
+      "memberBadge": "Thành viên",
+      "connection": {
+        "connecting": "Đang kết nối",
+        "connected": "Đã kết nối",
+        "error": "Lỗi"
+      },
+      "roles": {
+        "owner": "Chủ phòng",
+        "member": "Thành viên"
+      }
+    },
+    "presence": {
+      "eyebrow": "Hiện diện thời gian thực",
+      "title": "Ai đang học ở đây?",
+      "description": "Presence theo dõi người học đang kết nối, trong khi sự kiện phòng độ trễ thấp giúp thay đổi trạng thái phản hồi nhanh.",
+      "connectionLabel": "Kết nối",
+      "myStatus": "Trạng thái phòng hiện tại của tôi",
+      "onlineParticipants": "Người tham gia trực tuyến",
+      "onlineCount": "{count} trực tuyến",
+      "empty": "Chưa phát hiện hiện diện trực tiếp nào.",
+      "connectedNow": "Đang kết nối",
+      "messages": {
+        "connecting": "Đang kết nối với hiện diện phòng...",
+        "preparing": "Đang chuẩn bị phiên realtime đã xác thực...",
+        "connected": "Đã kết nối presence.",
+        "failed": "Kênh presence không thể kết nối.",
+        "timedOut": "Kênh presence đã hết thời gian chờ.",
+        "closed": "Kênh presence đã đóng.",
+        "unexpected": "Lỗi kết nối presence không mong đợi."
+      },
+      "connection": {
+        "connecting": "Đang kết nối",
+        "connected": "Đã kết nối",
+        "error": "Lỗi"
+      },
+      "status": {
+        "available": "Sẵn sàng",
+        "focusing": "Đang tập trung",
+        "paused": "Tạm dừng"
+      }
+    },
+    "chat": {
+      "eyebrow": "Trò chuyện phòng",
+      "title": "Cuộc trò chuyện trực tiếp",
+      "description": "Tin nhắn được lưu vĩnh viễn và phát đến các thành viên đang hoạt động trong thời gian thực.",
+      "empty": "Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện trong phòng.",
+      "placeholder": "Viết tin nhắn cho phòng...",
+      "sending": "Đang gửi...",
+      "send": "Gửi",
+      "lumivoxUser": "Người dùng Lumivox",
+      "connection": {
+        "connecting": "Đang kết nối",
+        "connected": "Đã kết nối",
+        "error": "Lỗi"
+      },
+      "errors": {
+        "empty": "Tin nhắn không được để trống.",
+        "failed": "Không thể gửi tin nhắn."
+      }
+    },
+    "voice": {
+      "eyebrow": "Phòng thoại",
+      "title": "Trò chuyện khi đang học",
+      "description": "Tham gia kênh thoại của phòng để trò chuyện với những người học đang hoạt động khác.",
+      "joining": "Đang tham gia thoại...",
+      "join": "Tham gia thoại",
+      "leave": "Rời thoại",
+      "inactive": "Kênh thoại hiện chưa hoạt động với bạn. Hãy tham gia khi bạn muốn trò chuyện với phòng.",
+      "microphoneTitle": "Điều khiển micrô",
+      "microphoneDescription": "Bật hoặc tắt micrô trong khi vẫn ở trong phòng thoại.",
+      "participantsTitle": "Người tham gia thoại",
+      "participantsCount": "{count} trong thoại",
+      "empty": "Hiện không có ai kết nối vào thoại.",
+      "you": "Bạn",
+      "roomParticipant": "Người tham gia phòng",
+      "toasts": {
+        "joined": "Đã tham gia phòng thoại.",
+        "left": "Đã rời phòng thoại.",
+        "connected": "Đã thiết lập kết nối thoại."
+      },
+      "errors": {
+        "joinFailed": "Không thể tham gia phòng thoại.",
+        "unexpected": "Lỗi không mong đợi khi tham gia phòng thoại.",
+        "roomError": "Lỗi phòng thoại: {message}"
+      }
+    }
+  },
+  "rag": {
+    "title": "Trợ lý học tập",
+    "ragTitle": "Trợ lý học tập RAG",
+    "emptyPrompt": "Mình có thể giúp gì cho bạn?",
+    "you": "Bạn",
+    "assistant": "Trợ lý",
+    "documentContext": "Ngữ cảnh tài liệu",
+    "generalAi": "AI thông thường",
+    "chooseDocuments": "Chọn tài liệu",
+    "selectedCount": "Đã chọn {count}",
+    "documentDescription": "Chọn các tài liệu đã xử lý nếu bạn muốn trợ lý trả lời dựa trên tài liệu đã tải lên. Nếu không chọn tài liệu, trợ lý sẽ hoạt động như một trợ lý học tập chung.",
+    "noDocuments": "Chưa có tài liệu đã xử lý. Hãy tải lên và xử lý tài liệu học tập trước để bật câu trả lời dựa trên tài liệu.",
+    "documentStatus": "{visibility} - Sẵn sàng cho AI",
+    "visibility": {
+      "private": "Riêng tư",
+      "shared": "Đã chia sẻ",
+      "public": "Công khai"
+    },
+    "askPlaceholder": "Hỏi về tài liệu học tập của bạn...",
+    "ask": "Hỏi",
+    "thinking": "Đang suy nghĩ..."
+  },
+  "admin": {
+    "common": {
+      "adminCms": "CMS quản trị",
+      "search": "Tìm kiếm",
+      "all": "Tất cả",
+      "view": "Xem",
+      "actions": "Hành động",
+      "user": "Người dùng",
+      "role": "Vai trò",
+      "leaderboard": "Bảng xếp hạng",
+      "leaderboardVisibility": "Hiển thị bảng xếp hạng",
+      "activity": "Hoạt động",
+      "created": "Đã tạo",
+      "updated": "Đã cập nhật",
+      "lastSignIn": "Lần đăng nhập cuối",
+      "noEmail": "Không có email",
+      "na": "Không có",
+      "file": "Tệp",
+      "owner": "Chủ sở hữu",
+      "unknownOwner": "Không rõ chủ sở hữu",
+      "aiStatus": "Trạng thái AI",
+      "chunks": "Phân đoạn",
+      "visibilityLabel": "Quyền xem",
+      "size": "Kích thước",
+      "group": "Nhóm",
+      "stats": "Thống kê",
+      "status": "Trạng thái",
+      "messages": "Tin nhắn",
+      "goals": "Mục tiêu",
+      "tasks": "Nhiệm vụ",
+      "focusSessions": "Phiên tập trung",
+      "documents": "Tài liệu",
+      "ragSessions": "Phiên RAG",
+      "groups": "Nhóm",
+      "noDescription": "Không có mô tả",
+      "completed": "Đã hoàn thành {count}",
+      "processed": "Đã xử lý {count}",
+      "focusMinutes": "{count} phút tập trung",
+      "messagesCount": "{count} tin nhắn",
+      "days": "{count} ngày",
+      "roles": {
+        "user": "Người dùng",
+        "admin": "Quản trị viên",
+        "owner": "Chủ sở hữu",
+        "member": "Thành viên",
+        "assistant": "Trợ lý",
+        "system": "Hệ thống"
+      },
+      "visibility": {
+        "visible": "Hiển thị",
+        "hidden": "Ẩn"
+      },
+      "aiStatuses": {
+        "pending": "Đang chờ",
+        "processing": "Đang xử lý",
+        "completed": "Hoàn thành",
+        "failed": "Thất bại",
+        "unsupported": "Không hỗ trợ"
+      },
+      "documentVisibility": {
+        "private": "Riêng tư",
+        "shared": "Đã chia sẻ",
+        "public": "Công khai"
+      },
+      "groupStatus": {
+        "active": "Đang hoạt động",
+        "archived": "Đã lưu trữ"
+      },
+      "membershipStatus": {
+        "active": "Đang hoạt động",
+        "invited": "Đã mời",
+        "removed": "Đã gỡ",
+        "left": "Đã rời"
+      },
+      "contextModes": {
+        "general": "AI thông thường",
+        "document_rag": "RAG tài liệu"
+      },
+      "yes": "Có",
+      "no": "Không",
+      "topK": "Top-k",
+      "sources": "Nguồn",
+      "latency": "Độ trễ"
+    },
+    "dashboard": {
+      "eyebrow": "CMS quản trị",
+      "title": "Bảng điều khiển quản trị",
+        "description": "Theo dõi người dùng, hoạt động học tập, tài liệu, nhóm và mức sử dụng AI trên Lumivox.",
+        "actions": {
+          "overview": "Tổng quan",
+          "users": "Quản lý người dùng",
+          "documents": "Quản lý tài liệu",
+          "groups": "Quản lý nhóm",
+        "ai": "Theo dõi AI",
+        "settings": "Cài đặt CMS"
+      },
+      "metrics": {
+        "totalUsers": "Tổng người dùng",
+        "newUsers": "{count} người dùng mới trong 7 ngày qua",
+        "admins": "Quản trị viên",
+        "adminsDescription": "Người dùng có quyền truy cập CMS",
+        "goals": "Mục tiêu",
+        "goalsDescription": "Mục tiêu học tập đã tạo",
+        "tasks": "Nhiệm vụ",
+        "completed": "Đã hoàn thành {count}",
+        "focusSessions": "Phiên tập trung",
+        "totalFocusMinutes": "{count} phút tập trung tổng cộng",
+        "documents": "Tài liệu",
+        "processedDocuments": "{count} đã xử lý cho AI",
+        "documentChunks": "Phân đoạn tài liệu",
+        "documentChunksDescription": "Phân đoạn RAG đã embedding",
+        "studyGroups": "Nhóm học",
+        "groupMessages": "{count} tin nhắn nhóm",
+        "ragSessions": "Phiên RAG",
+        "ragMessages": "{count} tin nhắn RAG",
+        "failedDocuments": "Tài liệu lỗi",
+        "failedDocumentsDescription": "Tài liệu xử lý AI thất bại"
+      }
+    },
+    "users": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Quản lý người dùng",
+        "description": "Tìm người dùng, xem hoạt động, cập nhật vai trò và quản lý hiển thị bảng xếp hạng."
+      },
+      "search": {
+        "label": "Tìm người dùng",
+        "placeholder": "Tìm theo tên, email hoặc ID người dùng..."
+      },
+      "table": {
+        "eyebrow": "Quản lý người dùng",
+        "title": "Người dùng",
+        "empty": "Không tìm thấy người dùng.",
+        "activity": {
+          "focusMinutes": "{count} phút tập trung",
+          "tasks": "{completed}/{total} nhiệm vụ",
+          "docs": "{count} tài liệu"
+        }
+      },
+      "recentTable": {
+        "eyebrow": "Người dùng",
+        "title": "Người dùng gần đây",
+        "empty": "Không tìm thấy người dùng."
+      },
+      "detail": {
+        "eyebrow": "CMS quản trị",
+        "activeGroupMemberships": "Tư cách thành viên nhóm đang hoạt động",
+        "currentStreak": "Chuỗi hiện tại",
+        "tokenBalance": "Số dư token",
+        "timeline": "Dòng thời gian tài khoản",
+        "createdAt": "Thời điểm tạo"
+      }
+    },
+    "documents": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Quản lý tài liệu & RAG",
+        "description": "Xem tài liệu học tập đã tải lên, theo dõi trạng thái xử lý AI, kiểm tra phân đoạn và xử lý lại tài liệu lỗi."
+      },
+      "search": {
+        "label": "Tìm tài liệu",
+        "placeholder": "Tìm theo tên tệp, chủ sở hữu, email hoặc ID tài liệu..."
+      },
+      "table": {
+        "eyebrow": "Quản lý tài liệu",
+        "title": "Tài liệu học tập",
+        "empty": "Không tìm thấy tài liệu."
+      },
+      "actions": {
+        "processing": "Đang xử lý...",
+        "reprocess": "Xử lý lại",
+        "process": "Xử lý",
+        "deleteConfirm": "Bạn có chắc muốn xóa tài liệu này? Thao tác này sẽ xóa tệp, quyền và phân đoạn RAG.",
+        "deleting": "Đang xóa...",
+        "deleteDocument": "Xóa tài liệu"
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "embeddedChunksDescription": "Chunk đã nhúng / tổng số chunk",
+        "failedChunks": "Chunk lỗi",
+        "fileSize": "Kích thước tệp",
+        "mimeType": "Loại MIME",
+        "extractedTextPreview": "Bản xem trước văn bản trích xuất"
+      },
+      "chunks": {
+        "eyebrow": "Chunk RAG",
+        "title": "Chunk tài liệu",
+        "empty": "Không tìm thấy chunk nào cho tài liệu này.",
+        "chunkNumber": "Chunk #{index}",
+        "chunkMeta": "{chars} ký tự - {tokens} token - {embedding}",
+        "embedded": "đã nhúng",
+        "noEmbedding": "chưa có embedding",
+        "model": "Mô hình"
+      }
+    },
+    "groups": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Quản lý nhóm",
+        "description": "Xem nhóm học, kiểm tra thành viên, kiểm duyệt tin nhắn và lưu trữ nhóm có vấn đề."
+      },
+      "search": {
+        "label": "Tìm nhóm",
+        "placeholder": "Tìm theo tên nhóm, chủ sở hữu, email hoặc ID nhóm..."
+      },
+      "table": {
+        "eyebrow": "Quản lý nhóm",
+        "title": "Nhóm học",
+        "empty": "Không tìm thấy nhóm.",
+        "stats": {
+          "members": "{count} thành viên",
+          "messages": "{count} tin nhắn"
+        }
+      },
+      "actions": {
+        "restoreConfirm": "Khôi phục nhóm này?",
+        "archiveConfirm": "Lưu trữ nhóm này? Thành viên không nên tiếp tục dùng nó như nhóm đang hoạt động.",
+        "adminNotePlaceholder": "Ghi chú quản trị...",
+        "updating": "Đang cập nhật...",
+        "restore": "Khôi phục",
+        "archive": "Lưu trữ",
+        "deleteMessageConfirm": "Xóa tin nhắn nhóm này? Thao tác này không thể hoàn tác.",
+        "deleting": "Đang xóa...",
+        "delete": "Xóa"
+      },
+      "members": {
+        "title": "Thành viên"
+      },
+      "messages": {
+        "eyebrow": "Kiểm duyệt",
+        "title": "Tin nhắn gần đây",
+        "empty": "Không tìm thấy tin nhắn."
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "adminNote": "Ghi chú quản trị",
+        "members": "Thành viên",
+        "private": "Riêng tư"
+      }
+    },
+    "ai": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Theo dõi AI",
+        "description": "Theo dõi mức sử dụng RAG, biến thể prompt, chất lượng nguồn, sức khỏe tài liệu và độ trễ phản hồi AI trên Lumivox."
+      },
+      "search": {
+        "label": "Tìm phiên AI",
+        "placeholder": "Tìm theo người dùng, email, ID phiên hoặc ID người dùng...",
+        "contextMode": "Chế độ ngữ cảnh"
+      },
+      "metrics": {
+        "ragSessions": "Phiên RAG",
+        "totalMessages": "Tổng {count} tin nhắn",
+        "generalAi": "AI thông thường",
+        "generalAiDescription": "Tin nhắn không chọn tài liệu",
+        "documentRag": "RAG tài liệu",
+        "documentRagDescription": "Tin nhắn dùng tài liệu đã chọn",
+        "avgLatency": "Độ trễ TB",
+        "maxLatency": "Tối đa: {count} ms",
+        "groundedRule": "Luật neo nguồn",
+        "groundedRuleDescription": "Biến thể prompt an toàn hơn",
+        "noRule": "Không luật",
+        "noRuleDescription": "Biến thể prompt cơ sở",
+        "messagesWithSources": "Tin nhắn có nguồn",
+        "messagesWithSourcesDescription": "Câu trả lời có bằng chứng truy xuất",
+        "emptySourceRag": "RAG thiếu nguồn",
+        "emptySourceRagDescription": "Câu trả lời RAG tài liệu không có nguồn",
+        "processedDocs": "Tài liệu đã xử lý",
+        "failedDocs": "{count} thất bại",
+        "pendingDocs": "Tài liệu đang chờ",
+        "unsupportedDocs": "{count} không hỗ trợ",
+        "documentChunks": "Phân đoạn tài liệu",
+        "embeddedChunks": "{count} đã embedding",
+        "topKUsage": "Mức dùng top-k"
+      },
+      "sessions": {
+        "eyebrow": "Phiên AI",
+        "title": "Phiên chat RAG",
+        "empty": "Không tìm thấy phiên AI.",
+        "fallbackUser": "Người dùng {id}",
+        "documentMeta": "Tài liệu: {count} - top-k: {topK}",
+        "totalMessages": "Tổng {count}",
+        "assistantMessages": "{count} trợ lý",
+        "latencyMs": "{count} ms",
+        "columns": {
+          "session": "Phiên",
+          "mode": "Chế độ",
+          "latency": "Độ trễ"
+        }
+      },
+      "emptySources": {
+        "eyebrow": "Cảnh báo giám sát",
+        "title": "Câu trả lời RAG tài liệu không có nguồn",
+        "description": "Các câu trả lời này cần được xem lại vì RAG tài liệu thường phải trả về nguồn.",
+        "empty": "Không tìm thấy câu trả lời RAG thiếu nguồn.",
+        "fallbackUser": "Người dùng {id}",
+        "metadata": "top-k: {topK} - prompt: {prompt} - độ trễ: {latency} ms",
+        "reviewSession": "Xem phiên"
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "title": "Phiên AI {id}",
+        "fallbackUser": "Người dùng {id}",
+        "contextMode": "Chế độ ngữ cảnh",
+        "selectedDocuments": "Tài liệu đã chọn",
+        "promptVariant": "Biến thể prompt"
+      },
+      "messages": {
+        "eyebrow": "Hội thoại",
+        "title": "Tin nhắn RAG",
+        "empty": "Không tìm thấy tin nhắn nào.",
+        "viewRawSources": "Xem nguồn thô"
+      }
+    },
+    "settings": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Cài đặt CMS",
+        "description": "Quản lý cờ tính năng, mặc định RAG, mặc định thử thách tuần và cài đặt vận hành nền tảng."
+      },
+      "form": {
+        "featureFlags": {
+          "title": "Cờ tính năng",
+          "globalLeaderboard": {
+            "title": "Bảng xếp hạng toàn hệ thống",
+            "description": "Bật hoặc tắt bảng xếp hạng toàn hệ thống."
+          },
+          "groupLeaderboard": {
+            "title": "Bảng xếp hạng nhóm",
+            "description": "Bật hoặc tắt xếp hạng nhóm hàng tuần."
+          },
+          "maintenanceMode": {
+            "title": "Chế độ bảo trì",
+            "description": "Dùng làm cờ vận hành cho bảo trì theo kế hoạch."
+          }
+        },
+        "ragDefaults": {
+          "title": "Mặc định RAG",
+          "defaultTopK": "Top-k mặc định",
+          "defaultPromptVariant": "Biến thể prompt mặc định",
+          "promptVariants": {
+            "groundedRule": "Quy tắc có căn cứ",
+            "noRule": "Không có quy tắc"
+          }
+        },
+        "weeklyChallenge": {
+          "title": "Mặc định thử thách hàng tuần",
+          "defaultFocusMinutes": "Phút tập trung mặc định",
+          "defaultCompletedTasks": "Nhiệm vụ hoàn thành mặc định"
+        }
+      }
+    }
+  }
+}

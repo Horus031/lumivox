@@ -36,6 +36,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 
 type ActiveFocusSessionPanelProps = {
   session: FocusSessionWithTask;
@@ -81,6 +82,7 @@ export function ActiveFocusSessionPanel({
   session,
 }: ActiveFocusSessionPanelProps) {
   const router = useRouter();
+  const t = useTranslations("focus.active");
   const [isPending, startTransition] = useTransition();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
@@ -155,9 +157,7 @@ export function ActiveFocusSessionPanel({
   }
 
   function handleCancel() {
-    const confirmed = window.confirm(
-      "Cancel this focus session? It will still be stored as cancelled.",
-    );
+    const confirmed = window.confirm(t("cancelConfirm"));
 
     if (!confirmed) return;
 
@@ -205,8 +205,8 @@ export function ActiveFocusSessionPanel({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Pause focus session"
-          title="Pause focus session"
+          aria-label={t("actions.pause")}
+          title={t("actions.pause")}
           onClick={handlePause}
           disabled={isPending}
           className="size-8 rounded-full"
@@ -218,8 +218,8 @@ export function ActiveFocusSessionPanel({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Resume focus session"
-          title="Resume focus session"
+          aria-label={t("actions.resume")}
+          title={t("actions.resume")}
           onClick={handleResume}
           disabled={isPending}
           className="size-8 rounded-full"
@@ -232,8 +232,8 @@ export function ActiveFocusSessionPanel({
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Complete focus session"
-        title="Complete focus session"
+        aria-label={t("actions.complete")}
+        title={t("actions.complete")}
         onClick={handleComplete}
         disabled={isPending || !isOngoing}
         className="size-8 rounded-full text-success hover:bg-success/10 hover:text-success"
@@ -245,8 +245,8 @@ export function ActiveFocusSessionPanel({
         type="button"
         variant="ghost"
         size="icon"
-        aria-label="Cancel focus session"
-        title="Cancel focus session"
+        aria-label={t("actions.cancel")}
+        title={t("actions.cancel")}
         onClick={handleCancel}
         disabled={isPending}
         className="size-8 rounded-full text-danger/70 hover:bg-danger/10 hover:text-danger"
@@ -274,14 +274,17 @@ export function ActiveFocusSessionPanel({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
                   <h2 className="truncate text-sm font-semibold text-foreground">
-                    {session.tasks?.title ?? "General focus session"}
+                    {session.tasks?.title ?? t("generalSession")}
                   </h2>
                   <Badge className="shrink-0 capitalize">
-                    {session.status}
+                    {t(`status.${session.status}`)}
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {timerText} remaining / {session.planned_minutes} min planned
+                  {t("compactProgress", {
+                    remaining: timerText,
+                    minutes: session.planned_minutes,
+                  })}
                 </p>
               </div>
             </div>
@@ -293,9 +296,9 @@ export function ActiveFocusSessionPanel({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Expand focus session timer"
+                aria-label={t("actions.expand")}
                 aria-expanded={!isCollapsed}
-                title="Expand focus session timer"
+                title={t("actions.expand")}
                 onClick={() => setIsCollapsed(false)}
                 className="size-9 rounded-full"
               >
@@ -308,16 +311,20 @@ export function ActiveFocusSessionPanel({
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">
                 <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                  Active focus session
+                  {t("eyebrow")}
                 </p>
 
                 <h2 className="mt-2 truncate text-xl font-bold text-foreground">
-                  {session.tasks?.title ?? "General focus session"}
+                  {session.tasks?.title ?? t("generalSession")}
                 </h2>
 
                 <div className="mt-3 flex flex-wrap gap-2 text-primary-foreground">
-                  <Badge className="capitalize">{session.status}</Badge>
-                  <Badge>Planned: {session.planned_minutes} min</Badge>
+                  <Badge className="capitalize">
+                    {t(`status.${session.status}`)}
+                  </Badge>
+                  <Badge>
+                    {t("plannedBadge", { minutes: session.planned_minutes })}
+                  </Badge>
                 </div>
               </div>
 
@@ -325,9 +332,9 @@ export function ActiveFocusSessionPanel({
                 type="button"
                 variant="ghost"
                 size="icon"
-                aria-label="Collapse focus session timer"
+                aria-label={t("actions.collapse")}
                 aria-expanded={!isCollapsed}
-                title="Collapse focus session timer"
+                title={t("actions.collapse")}
                 onClick={() => setIsCollapsed(true)}
                 className="size-9 shrink-0 rounded-full"
               >
@@ -338,7 +345,7 @@ export function ActiveFocusSessionPanel({
             <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
               <div className="rounded-2xl border bg-muted/20 px-5 py-4">
                 <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Remaining time
+                  {t("remainingTime")}
                 </p>
 
                 <p
@@ -351,7 +358,7 @@ export function ActiveFocusSessionPanel({
 
                 {remainingSeconds <= 0 && (
                   <p className="mt-2 text-xs font-medium text-success">
-                    Planned duration reached. You may complete the session.
+                    {t("durationReached")}
                   </p>
                 )}
               </div>

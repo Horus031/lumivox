@@ -1,6 +1,10 @@
+import { useTranslations } from "next-intl";
+
 import { steps } from "@/lib/constants";
 
 export default function HowItWorks() {
+  const t = useTranslations("landing.howItWorks");
+
   return (
     <section
       id="how"
@@ -9,10 +13,10 @@ export default function HowItWorks() {
       <div className="max-w-310 mx-auto px-6">
         <div className="max-w-2xl mb-14">
           <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
-            How it works
+            {t("eyebrow")}
           </p>
           <h2 className="text-[34px] md:text-[42px] font-semibold tracking-tight leading-tight">
-            From scattered to focused — in three quiet steps
+            {t("title")}
           </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
@@ -30,10 +34,10 @@ export default function HowItWorks() {
                   <Icon className="size-5" />
                 </div>
                 <h3 className="mt-5 text-[18px] font-semibold tracking-tight">
-                  {s.title}
+                  {t(`steps.${s.key}.title`)}
                 </h3>
                 <p className="mt-2 text-[14px] text-secondary leading-relaxed">
-                  {s.desc}
+                  {t(`steps.${s.key}.desc`)}
                 </p>
               </div>
             );

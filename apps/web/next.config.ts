@@ -1,14 +1,10 @@
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
 const nextConfig: NextConfig = {
-  cacheComponents: true,
-  allowedDevOrigins: [
-    "127.0.0.1",
-    "10.25.34.167",
-    "10.25.35.29",
-    "0.0.0.0",
-    "172.16.99.187",
-  ],
+  allowedDevOrigins: ["127.0.0.1", "0.0.0.0"],
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
@@ -16,4 +12,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);

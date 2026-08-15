@@ -1,4 +1,5 @@
 import { requireUser } from "@/lib/auth/require-user";
+import { getCurrentWeekRange } from "@/features/study-groups/study-group-date.utils";
 
 export async function getMyStudyGroups() {
   const { supabase, user } = await requireUser();
@@ -64,6 +65,7 @@ export async function getStudyGroupById(groupId: string) {
     .eq("user_id", user.id)
     .eq("membership_status", "active")
     .eq("study_rooms.room_type", "group")
+    .is("study_rooms.archived_at", null)
     .maybeSingle();
 
   if (error) {
@@ -106,4 +108,48 @@ export async function getStudyGroupMessages(groupId: string) {
   }
 
   return data ?? [];
+}
+
+export async function getStudyGroupWeeklyLeaderboard(groupId: string) {
+  const { supabase } = await requireUser();
+  const { weekStart, weekEnd } = getCurrentWeekRange();
+
+  const { data, error } = await supabase.rpc(
+    "get_study_group_weekly_leaderboard",
+    {
+      p_group_id: groupId,
+      p_week_start: weekStart,
+      p_week_end: weekEnd,
+    },
+  );
+
+  if (error) {
+    throw new Error(`Failed to fetch group leaderboard: ${error.message}`);
+  }
+
+  return {
+    weekStart,
+    weekEnd,
+    rows: data ?? [],
+  };
+}
+
+export async function getStudyGroupWeeklyChallengeProgress(groupId: string) {
+  const { supabase } = await requireUser();
+  const { weekStart, weekEnd } = getCurrentWeekRange();
+
+  const { data, error } = await supabase.rpc(
+    "get_study_group_weekly_challenge_progress",
+    {
+      p_group_id: groupId,
+      p_week_start: weekStart,
+      p_week_end: weekEnd,
+    },
+  );
+
+  if (error) {
+    throw new Error(`Failed to fetch challenge progress: ${error.message}`);
+  }
+
+  return data?.[0] ?? null;
 }

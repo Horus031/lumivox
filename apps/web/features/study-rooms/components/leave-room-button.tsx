@@ -1,7 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
 import { leaveStudyRoomAction } from "@/features/study-rooms/study-room.actions";
@@ -14,10 +15,11 @@ type LeaveRoomButtonProps = {
 
 export function LeaveRoomButton({ roomId }: LeaveRoomButtonProps) {
   const router = useRouter();
+  const t = useTranslations("rooms.leave");
   const [isPending, startTransition] = useTransition();
 
   function handleLeave() {
-    const confirmed = window.confirm("Leave this study room?");
+    const confirmed = window.confirm(t("confirm"));
 
     if (!confirmed) return;
 
@@ -54,7 +56,7 @@ export function LeaveRoomButton({ roomId }: LeaveRoomButtonProps) {
       disabled={isPending}
       className="border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/40 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {isPending ? "Leaving..." : "Leave room"}
+      {isPending ? t("leaving") : t("leave")}
     </Button>
   );
 }

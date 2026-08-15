@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { Monitor, Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("settings.theme");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -22,17 +24,17 @@ export function ThemeToggle() {
   const options = [
     {
       value: "light",
-      label: "Light",
+      label: t("light"),
       icon: Sun,
     },
     {
       value: "dark",
-      label: "Dark",
+      label: t("dark"),
       icon: Moon,
     },
     {
       value: "system",
-      label: "System",
+      label: t("system"),
       icon: Monitor,
     },
   ];
@@ -45,7 +47,7 @@ export function ThemeToggle() {
 
         return (
           <Button
-            variant={'outline'}
+            variant={"outline"}
             key={option.value}
             type="button"
             onClick={() => setTheme(option.value)}

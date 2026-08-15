@@ -1,7 +1,11 @@
 import { ArrowRight, Flame, ShieldCheck, Sparkles, Zap } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+
+import { Link } from "@/i18n/navigation";
 
 export default function CTA() {
+  const t = useTranslations("landing.cta");
+
   return (
     <section className="py-24">
       <div className="max-w-310 mx-auto px-6">
@@ -16,35 +20,34 @@ export default function CTA() {
           />
           <Sparkles className="size-7 mx-auto mb-4 opacity-90" />
           <h2 className="text-[32px] md:text-[44px] font-semibold tracking-tight leading-tight max-w-2xl mx-auto">
-            Make your next study session your best one.
+            {t("title")}
           </h2>
           <p className="mt-3 text-[15px] opacity-90 max-w-xl mx-auto">
-            Join thousands of students using Lumivox to focus deeper, plan
-            smarter, and finally feel proud of their week.
+            {t("subtitle")}
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/auth/sign-up"
               className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-white text-primary text-[14px] font-semibold hover:bg-white/95 transition-colors"
             >
-              Get started free <ArrowRight className="size-4" />
+              {t("primaryCta")} <ArrowRight className="size-4" />
             </Link>
             <a
               href="#features"
               className="inline-flex items-center h-11 px-5 rounded-lg border border-white/30 text-[14px] font-medium hover:bg-white/10 transition-colors"
             >
-              Explore features
+              {t("secondaryCta")}
             </a>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[12.5px] opacity-85">
             <span className="flex items-center gap-1.5">
-              <Zap className="size-3.5" /> 60-second setup
+              <Zap className="size-3.5" /> {t("proof.setup")}
             </span>
             <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5" /> Privacy-first
+              <ShieldCheck className="size-3.5" /> {t("proof.privacy")}
             </span>
             <span className="flex items-center gap-1.5">
-              <Flame className="size-3.5" /> Loved by 47k+ students
+              <Flame className="size-3.5" /> {t("proof.students")}
             </span>
           </div>
         </div>

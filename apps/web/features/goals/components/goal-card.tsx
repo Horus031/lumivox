@@ -16,20 +16,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { EllipsisIcon } from "lucide-react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 
 type GoalCardProps = {
   goal: GoalWithProgress;
 };
 
 export function GoalCard({ goal }: GoalCardProps) {
+  const t = useTranslations("goals.card");
+  const formT = useTranslations("goals.form");
+  const commonT = useTranslations("common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
-    const confirmed = window.confirm(
-      "Delete this goal? Tasks linked to it will remain, but their goal reference will be removed.",
-    );
+    const confirmed = window.confirm(t("deleteConfirm"));
 
     if (!confirmed) return;
 
@@ -52,11 +54,11 @@ export function GoalCard({ goal }: GoalCardProps) {
         <div className="flex w-full justify-between items-center">
           <div className="gap-2 flex items-center">
             <span className="rounded-full bg-surface text-foreground px-2.5 py-1 text-xs font-medium">
-              {goal.goal_type === "short_term" ? "Short term" : "Long term"}
+              {formT(`goalTypes.${goal.goal_type}`)}
             </span>
 
             <span className="rounded-full bg-surface text-foreground px-2.5 py-1 text-xs font-medium capitalize">
-              {goal.status}
+              {formT(`statuses.${goal.status}`)}
             </span>
           </div>
 
@@ -76,7 +78,7 @@ export function GoalCard({ goal }: GoalCardProps) {
                       variant={"outline"}
                       className="border-0 px-3 py-2 text-sm font-medium transition bg-transparent hover:text-primary-foreground"
                     >
-                      Edit
+                      {commonT("edit")}
                     </Button>
                   }
                 />
@@ -86,7 +88,7 @@ export function GoalCard({ goal }: GoalCardProps) {
                   disabled={isPending}
                   className="border-0 border-danger/20 px-3 py-2 text-sm font-medium text-danger transition hover:bg-danger/10 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {isPending ? "Deleting..." : "Delete"}
+                  {isPending ? t("deleting") : commonT("delete")}
                 </Button>
               </DropdownMenuGroup>
             </DropdownMenuContent>
@@ -100,7 +102,9 @@ export function GoalCard({ goal }: GoalCardProps) {
           {goal.description ? (
             <p className="mt-1 text-sm text-neutral-600">{goal.description}</p>
           ) : (
-            <p className="mt-1 text-sm text-neutral-600">{"No description"}</p>
+            <p className="mt-1 text-sm text-neutral-600">
+              {t("noDescription")}
+            </p>
           )}
         </div>
       </div>
@@ -123,15 +127,19 @@ export function GoalCard({ goal }: GoalCardProps) {
         </div>
 
         <div className="mt-4 grid gap-2 text-sm text-foreground md:grid-cols-2">
-          <p>Start: {goal.start_date ?? "Not set"}</p>
-          <p>Target: {goal.target_date ?? "Not set"}</p>
+          <p>
+            {t("start")}: {goal.start_date ?? t("notSet")}
+          </p>
+          <p>
+            {t("target")}: {goal.target_date ?? t("notSet")}
+          </p>
         </div>
 
         <Link
           href={`/goals/${goal.id}`}
           className="border rounded-md text-center mt-4 px-4 py-2 text-sm font-medium transition bg-background hover:bg-primary hover:text-primary-foreground"
         >
-          View documents
+          {t("viewDocuments")}
         </Link>
       </div>
     </article>

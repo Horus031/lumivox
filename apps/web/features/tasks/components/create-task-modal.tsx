@@ -4,6 +4,7 @@ import type { FormEvent } from "react";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,8 @@ type CreateTaskModalProps = {
 };
 
 export function CreateTaskModal({ goals }: CreateTaskModalProps) {
+  const t = useTranslations("tasks.form");
+  const commonT = useTranslations("common");
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -107,45 +110,45 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
     <>
       <Button onClick={() => setIsOpen(true)} className="gap-2 px-4">
         <Plus className="h-4 w-4" />
-        New task
+        {t("trigger")}
       </Button>
 
       <TaskModalShell
         open={isOpen}
         onClose={handleClose}
-        title="Create a new task"
-        description="Capture a work item, attach a goal if needed, and keep the list focused."
+        title={t("createTitle")}
+        description={t("createDescription")}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">
-              Task title
+              {t("fields.title")}
             </label>
             <Input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Finish the literature review draft"
+              placeholder={t("placeholders.title")}
               required
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-sm font-medium text-foreground">
-              Description
+              {t("fields.description")}
             </Label>
             <Textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
               rows={4}
               className="resize-none"
-              placeholder="Optional notes or execution details"
+              placeholder={t("placeholders.description")}
             />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">
-                Linked goal
+                {t("fields.linkedGoal")}
               </Label>
               <Select
                 value={goalId ?? ""}
@@ -155,12 +158,12 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
                 defaultValue="no-goal"
               >
                 <SelectTrigger className="flex w-full h-11! px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                  <SelectValue placeholder="Linked goal" />
+                  <SelectValue placeholder={t("fields.linkedGoal")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Linked goal</SelectLabel>
-                    <SelectItem value="no-goal">No goal</SelectItem>
+                    <SelectLabel>{t("fields.linkedGoal")}</SelectLabel>
+                    <SelectItem value="no-goal">{t("noGoal")}</SelectItem>
                     {goals.map((goal) => (
                       <SelectItem key={goal.id} value={goal.id}>
                         {goal.title}
@@ -173,7 +176,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
 
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">
-                Priority
+                {t("fields.priority")}
               </Label>
 
               <Select
@@ -183,15 +186,19 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
                 }
               >
                 <SelectTrigger className="flex w-full h-11! bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                  <SelectValue placeholder="Linked goal" />
+                  <SelectValue placeholder={t("fields.priority")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    <SelectLabel>Priorities</SelectLabel>
-                    <SelectItem value="low">Low</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="critical">Critical</SelectItem>
+                    <SelectLabel>{t("fields.priority")}</SelectLabel>
+                    <SelectItem value="low">{t("priorities.low")}</SelectItem>
+                    <SelectItem value="medium">
+                      {t("priorities.medium")}
+                    </SelectItem>
+                    <SelectItem value="high">{t("priorities.high")}</SelectItem>
+                    <SelectItem value="critical">
+                      {t("priorities.critical")}
+                    </SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -199,7 +206,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
 
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                Estimated minutes
+                {t("fields.estimatedMinutes")}
               </label>
               <Input
                 type="number"
@@ -232,7 +239,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
               disabled={isPending}
               className="rounded-full px-5"
             >
-              {isPending ? "Creating..." : "Create task"}
+              {isPending ? t("creating") : t("createSubmit")}
             </Button>
 
             <Button
@@ -242,7 +249,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
               disabled={isPending}
               className="rounded-full px-5 bg-transparent hover:bg-black/10"
             >
-              Cancel
+              {commonT("cancel")}
             </Button>
           </div>
         </form>

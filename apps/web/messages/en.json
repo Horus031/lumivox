@@ -1,0 +1,1593 @@
+{
+  "common": {
+    "appName": "Lumivox",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "search": "Search",
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "goals": "Goals",
+    "focus": "Focus",
+    "groups": "Groups",
+    "leaderboard": "Leaderboard",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Track your learning progress, focus, and recommendations.",
+    "header": {
+      "eyebrow": "Lumivox",
+      "title": "Behaviour Analytics Dashboard",
+      "description": "Review your recent productivity behaviour, visualise study patterns, and understand the reasoning behind your behavioural signals."
+    },
+    "summary": {
+      "completedTasks": {
+        "title": "Completed tasks",
+        "subtitle": "Last 7 days"
+      },
+      "focusSessions": {
+        "title": "Focus sessions",
+        "subtitle": "Completed sessions"
+      },
+      "focusMinutes": {
+        "title": "Focus minutes",
+        "subtitle": "Actual focused time"
+      },
+      "distractions": {
+        "title": "Distractions",
+        "subtitle": "Logged interruptions"
+      }
+    },
+    "refreshPbi": {
+      "button": "Generate / Refresh PBI",
+      "calculating": "Calculating..."
+    },
+    "pbiScore": {
+      "emptyTitle": "No PBI snapshot yet",
+      "emptyDescription": "Generate your first PBI snapshot after creating tasks, goals, and focus sessions.",
+      "standard": {
+        "title": "Standard PBI",
+        "description": "Fixed academic baseline weights."
+      },
+      "personalized": {
+        "title": "Personalized PBI",
+        "description": "Uses the user's onboarding/calibration weights."
+      },
+      "period": "Snapshot period: {start} -> {end}"
+    },
+    "pbiExplanation": {
+      "emptyTitle": "No behavioural explanation yet",
+      "emptyDescription": "Generate a PBI snapshot to view an interpretable breakdown of your behaviour.",
+      "eyebrow": "PBI interpretation",
+      "componentTitle": "Component-level explanations",
+      "componentDescription": "Each PBI dimension is explained using the rule-based interpretation layer.",
+      "insightTypes": {
+        "positive": "Positive",
+        "warning": "Warning",
+        "neutral": "Neutral"
+      },
+      "levels": {
+        "low": "Low",
+        "moderate": "Moderate",
+        "strong": "Strong"
+      }
+    },
+    "behaviourTrend": {
+      "title": "Behaviour trend - last 7 days",
+      "description": "Compare focused time and distraction events across recent days.",
+      "focusMinutes": "Focus minutes",
+      "distractions": "Distractions"
+    },
+    "pbiHistory": {
+      "title": "PBI history",
+      "description": "Track how Standard and Personalized PBI evolve across snapshots.",
+      "empty": "No historical PBI snapshots available yet.",
+      "standardPbi": "Standard PBI",
+      "personalizedPbi": "Personalized PBI"
+    },
+    "taskStatus": {
+      "title": "Task status overview",
+      "description": "Current distribution of task states across the system.",
+      "tasks": "Tasks"
+    },
+    "frozenStreak": {
+      "eyebrow": "Streak Frozen",
+      "title": "Your study streak is at risk",
+      "description": "You missed a valid study activity day, but your streak can still be restored using tokens before <deadline></deadline>.",
+      "soon": "soon",
+      "cta": "Restore in settings"
+    }
+  },
+  "appShell": {
+    "sidebar": {
+      "eyebrow": "Lumivox",
+      "title": "Behaviour Intelligence",
+      "fallbackUser": "Lumivox User",
+      "signOut": "Sign out",
+      "collapseSidebar": "Collapse sidebar",
+      "expandSidebar": "Expand sidebar"
+    },
+    "navigation": {
+      "dashboard": {
+        "label": "Dashboard",
+        "description": "Behaviour analytics and insights"
+      },
+      "goals": {
+        "label": "Goals",
+        "description": "Learning objectives"
+      },
+      "tasks": {
+        "label": "Tasks",
+        "description": "Actionable work items"
+      },
+      "focus": {
+        "label": "Focus",
+        "description": "Focus sessions and distractions"
+      },
+      "rooms": {
+        "label": "Rooms",
+        "description": "Collaborative study spaces"
+      },
+      "groups": {
+        "label": "Groups",
+        "description": "Group chats"
+      },
+      "leaderboard": {
+        "label": "Leaderboard",
+        "description": "Check your achievements"
+      },
+      "reflections": {
+        "label": "Reflections",
+        "description": "Weekly behaviour reflection"
+      },
+      "settings": {
+        "label": "Settings",
+        "description": "Profile and PBI calibration"
+      },
+      "admin": {
+        "label": "Admin",
+        "description": "Administration tools"
+      }
+    },
+    "engagement": {
+      "empty": "Engagement stats will appear after your first valid study activity.",
+      "status": "{status} streak",
+      "statuses": {
+        "active": "active",
+        "frozen": "frozen",
+        "lost": "lost"
+      },
+      "streak": "Streak",
+      "day": "day",
+      "days": "days",
+      "tokens": "Tokens"
+    }
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "repeatPassword": "Repeat password"
+    },
+    "errors": {
+      "generic": "An error occurred"
+    },
+    "login": {
+      "title": "Login",
+      "description": "Enter your email below to login to your account",
+      "forgotPassword": "Forgot your password?",
+      "submit": "Login",
+      "submitting": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "signUpLink": "Sign up"
+    },
+    "register": {
+      "title": "Sign up",
+      "description": "Create a new account",
+      "submit": "Sign up",
+      "submitting": "Creating an account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Login",
+      "passwordMismatch": "Passwords do not match"
+    },
+    "registerSuccess": {
+      "title": "Thank you for signing up!",
+      "description": "Check your email to confirm",
+      "body": "You've successfully signed up. Please check your email to confirm your account before signing in."
+    },
+    "error": {
+      "title": "Sorry, something went wrong.",
+      "codeError": "Code error: {error}",
+      "unspecified": "An unspecified error occurred."
+    }
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "analytics": "Analytics",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "signIn": "Sign in",
+      "getStarted": "Get started"
+    },
+    "hero": {
+      "badge": "New - AI behavioral coach in beta",
+      "title": {
+        "before": "Study with",
+        "accent": "calm intelligence",
+        "after": "."
+      },
+      "subtitle": "Lumivox turns your everyday focus, tasks and habits into a personal learning signal - then quietly recommends the next best step. Built for students who want to grow without burning out.",
+      "primaryCta": "Start focusing free",
+      "secondaryCta": "See how it works",
+      "proof": {
+        "freePlan": "Free forever plan",
+        "noCard": "No card required",
+        "private": "Private by default"
+      },
+      "floating": {
+        "aiSuggested": {
+          "title": "AI suggested",
+          "subtitle": "Deep work - 25 min"
+        },
+        "focusTimer": {
+          "title": "24:32",
+          "subtitle": "In focus"
+        },
+        "streak": {
+          "title": "12-day streak",
+          "subtitle": "+3 tokens earned"
+        },
+        "consistency": {
+          "title": "+18% this week",
+          "subtitle": "Consistency"
+        }
+      },
+      "trustedBy": "Trusted by curious learners from"
+    },
+    "features": {
+      "eyebrow": "Everything you need",
+      "title": {
+        "before": "A study workspace that thinks",
+        "accent": "with",
+        "after": "you"
+      },
+      "subtitle": "Six quiet superpowers, designed to remove friction from learning and replace it with momentum.",
+      "items": {
+        "behavioralAnalytics": {
+          "title": "Behavioral analytics",
+          "desc": "We learn from your sessions, breaks and energy patterns to surface when you do your best work."
+        },
+        "aiRecommendations": {
+          "title": "AI recommendations",
+          "desc": "A gentle coach that suggests what to study next, how long to focus, and when to truly rest."
+        },
+        "focusMode": {
+          "title": "Immersive focus mode",
+          "desc": "Calm timers, ambient rooms and distraction shields turn any moment into deep work."
+        },
+        "goalTasks": {
+          "title": "Goal-linked tasks",
+          "desc": "Every task maps to a long-term goal, so progress always feels meaningful, not mechanical."
+        },
+        "studyRooms": {
+          "title": "Live study rooms",
+          "desc": "Sit beside other learners in themed rooms - presence, not pressure."
+        },
+        "rewards": {
+          "title": "Streaks and rewards",
+          "desc": "Earn tokens, protect streaks with shields, and unlock cozy themes as you grow."
+        }
+      }
+    },
+    "howItWorks": {
+      "eyebrow": "How it works",
+      "title": "From scattered to focused - in three quiet steps",
+      "steps": {
+        "capture": {
+          "title": "Capture your intentions",
+          "desc": "Drop tasks, link them to goals, or let AI break a big project into bite-sized steps."
+        },
+        "focus": {
+          "title": "Enter calm focus",
+          "desc": "Pick an ambient room, set a timer, and let Lumivox quietly track what helps you flow."
+        },
+        "patterns": {
+          "title": "Learn from your patterns",
+          "desc": "See your best hours, your friction points, and AI suggestions to keep your week balanced."
+        }
+      }
+    },
+    "showcase": {
+      "analytics": {
+        "eyebrow": "Analytics",
+        "title": "Patterns you can finally see",
+        "desc": "A 12-week consistency heatmap, focus distribution by task type, and weekly KPIs - all calm, all readable. No vanity charts.",
+        "items": {
+          "peakHours": "Discover your peak focus hours",
+          "energy": "Spot subjects that drain or energize you",
+          "rewards": "Track streaks, shields, and tokens earned"
+        }
+      },
+      "focus": {
+        "eyebrow": "Focus session",
+        "title": "A timer that respects your attention",
+        "desc": "Immersive dark mode, breath-paced rings, and soft cues to start and end without shock.",
+        "modes": {
+          "pomodoro": "Pomodoro",
+          "deepWork": "Deep work",
+          "custom": "Custom",
+          "reading": "Reading"
+        }
+      },
+      "rooms": {
+        "eyebrow": "Study rooms",
+        "title": "Quietly study - together",
+        "desc": "Drop into Calm Forest, Midnight Mode or Library Quiet. See others focusing in real time, cheer with reactions, never feel alone at 2 AM again."
+      }
+    },
+    "stats": {
+      "items": {
+        "sessions": "Sessions completed",
+        "focus": "Report better focus",
+        "rating": "Average user rating",
+        "saved": "Saved per study day"
+      }
+    },
+    "testimonials": {
+      "eyebrow": "Loved by students",
+      "title": "Calmer minds, sharper results",
+      "items": {
+        "linh": {
+          "quote": "Lumivox feels like a study partner who actually pays attention. The AI nudges are scary-accurate without being annoying.",
+          "role": "Computer Science, NUS"
+        },
+        "marcus": {
+          "quote": "I stopped over-planning and started actually finishing. The heatmap alone changed how I think about my week.",
+          "role": "Pre-med, Stanford"
+        },
+        "trang": {
+          "quote": "Calm Forest at 11pm with three friends silently focusing is the best productivity trick I've ever found.",
+          "role": "Design student, RMIT"
+        }
+      }
+    },
+    "pricing": {
+      "eyebrow": "Pricing",
+      "title": "Simple, student-friendly",
+      "subtitle": "Start free. Upgrade when you're ready for the AI coach.",
+      "popular": "Most popular",
+      "plans": {
+        "starter": {
+          "name": "Starter",
+          "price": "Free",
+          "period": "forever",
+          "desc": "Everything you need to build a focused habit.",
+          "features": [
+            "Unlimited tasks",
+            "Focus timer and 4 rooms",
+            "Weekly analytics",
+            "Streaks and tokens"
+          ],
+          "cta": "Start free"
+        },
+        "pro": {
+          "name": "Pro",
+          "price": "$6",
+          "period": "/ month",
+          "desc": "Unlock the full AI coach and deep analytics.",
+          "features": [
+            "Everything in Starter",
+            "AI behavioral coach",
+            "12-week heatmap and insights",
+            "All ambient rooms",
+            "Streak shields"
+          ],
+          "cta": "Try Pro free"
+        },
+        "campus": {
+          "name": "Campus",
+          "price": "Custom",
+          "period": "for teams",
+          "desc": "For universities, study groups and clubs.",
+          "features": [
+            "Everything in Pro",
+            "Group rooms and leaderboards",
+            "Org analytics",
+            "Priority support"
+          ],
+          "cta": "Talk to us"
+        }
+      }
+    },
+    "faq": {
+      "eyebrow": "FAQ",
+      "title": "Questions, answered",
+      "items": {
+        "free": {
+          "question": "Is Lumivox free to use?",
+          "answer": "Yes - the Starter plan is free forever and includes tasks, the focus timer, four ambient rooms and weekly analytics."
+        },
+        "coach": {
+          "question": "How does the AI coach work?",
+          "answer": "It quietly observes your focus sessions, completions and break patterns, then recommends what to study next, ideal session length, and when to rest."
+        },
+        "privacy": {
+          "question": "Is my data private?",
+          "answer": "Your behavioral data is yours. We never sell it, and you can export or delete everything from settings at any time."
+        },
+        "friends": {
+          "question": "Can I study with friends?",
+          "answer": "Yes - join themed study rooms, see live presence, and use light reactions. Group rooms come with Campus plans."
+        }
+      }
+    },
+    "cta": {
+      "title": "Make your next study session your best one.",
+      "subtitle": "Join thousands of students using Lumivox to focus deeper, plan smarter, and finally feel proud of their week.",
+      "primaryCta": "Get started free",
+      "secondaryCta": "Explore features",
+      "proof": {
+        "setup": "60-second setup",
+        "privacy": "Privacy-first",
+        "students": "Loved by 47k+ students"
+      }
+    },
+    "footer": {
+      "description": "Calm intelligence for your study - behavioral analytics and AI recommendations for the next generation of learners.",
+      "product": {
+        "title": "Product",
+        "features": "Features",
+        "analytics": "Analytics",
+        "pricing": "Pricing",
+        "openApp": "Open app"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "privacy": "Privacy",
+        "terms": "Terms",
+        "contact": "Contact"
+      },
+      "copyright": "(c) {year} Lumivox. All rights reserved.",
+      "madeWithCare": "Made calmly, with care."
+    }
+  },
+  "tasks": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Tasks",
+      "description": "Manage actionable work items, connect them to goals, and generate the behavioural records Lumivox analyses."
+    },
+    "modalShell": {
+      "eyebrow": "Task detail",
+      "close": "Close dialog"
+    },
+    "form": {
+      "trigger": "New task",
+      "createTitle": "Create a new task",
+      "createDescription": "Capture a work item, attach a goal if needed, and keep the list focused.",
+      "fields": {
+        "title": "Task title",
+        "description": "Description",
+        "linkedGoal": "Linked goal",
+        "priority": "Priority",
+        "status": "Status",
+        "estimatedMinutes": "Estimated minutes",
+        "dueDate": "Due date",
+        "dueTime": "Due time"
+      },
+      "placeholders": {
+        "title": "Finish the literature review draft",
+        "description": "Optional notes or execution details"
+      },
+      "priorities": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "critical": "Critical"
+      },
+      "statuses": {
+        "todo": "Todo",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "overdue": "Overdue",
+        "cancelled": "Cancelled"
+      },
+      "goalTypes": {
+        "short_term": "Short term",
+        "long_term": "Long term"
+      },
+      "noGoal": "No goal",
+      "noGoalAssigned": "No goal assigned",
+      "unlinked": "Unlinked",
+      "selectDate": "Select date",
+      "creating": "Creating...",
+      "createSubmit": "Create task"
+    },
+    "filters": {
+      "searchLabel": "Search tasks",
+      "searchPlaceholder": "Search tasks",
+      "allStatuses": "All statuses",
+      "allPriorities": "All priorities",
+      "allGoals": "All goals",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "list": {
+      "title": "Tasks",
+      "filtered": " (filtered)",
+      "shown": "{shown, plural, one {# task shown} other {# tasks shown}}{filtered} - {total} total recorded.",
+      "page": "Page {page} of {totalPages}"
+    },
+    "table": {
+      "emptyTitle": "No tasks found",
+      "emptyDescription": "Try a different search or filter, or create a fresh task to get started.",
+      "paginatedHint": "Results are paginated here.",
+      "headers": {
+        "task": "Task",
+        "goal": "Goal",
+        "priority": "Priority",
+        "status": "Status",
+        "due": "Due",
+        "estimate": "Estimate",
+        "details": "Details"
+      },
+      "noDescription": "No description available",
+      "open": "Open",
+      "minutesShort": "{minutes}m"
+    },
+    "details": {
+      "fallbackDescription": "Task details",
+      "close": "Close",
+      "deleteTask": "Delete task",
+      "deleting": "Deleting...",
+      "summary": {
+        "goal": "Goal",
+        "due": "Due",
+        "estimate": "Estimate",
+        "priority": "Priority",
+        "status": "Status"
+      },
+      "minutes": "{minutes} minutes",
+      "notSet": "Not set",
+      "notes": "Notes",
+      "noDescription": "No description has been added for this task yet.",
+      "systemFields": "System fields",
+      "created": "Created",
+      "updated": "Updated"
+    },
+    "pagination": {
+      "showing": "Showing page {page} of {totalPages}",
+      "previous": "Previous",
+      "next": "Next"
+    }
+  },
+  "goals": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Goals",
+      "description": "Create, monitor, and update learning goals that provide structure for behavioural analytics and PBI computation.",
+      "sectionTitle": "Your goals",
+      "recorded": "{count, plural, one {# goal recorded.} other {# goals recorded.}}",
+      "emptyTitle": "No goals created yet",
+      "emptyDescription": "Your first goal will appear here after creation."
+    },
+    "detail": {
+      "eyebrow": "Goal Detail"
+    },
+    "form": {
+      "trigger": "Create Goals",
+      "createTitle": "Create a new goal",
+      "editTitle": "Update goal",
+      "createDescription": "Define a short-term or long-term learning objective.",
+      "editDescription": "Adjust progress, timeline, and status for this goal.",
+      "fields": {
+        "title": "Goal title",
+        "description": "Description",
+        "goalType": "Goal type",
+        "status": "Status",
+        "startDate": "Start date",
+        "targetDate": "Target date"
+      },
+      "placeholders": {
+        "title": "Complete AWS Cloud Practitioner revision",
+        "description": "What does success look like for this goal?"
+      },
+      "goalTypes": {
+        "short_term": "Short term",
+        "long_term": "Long term"
+      },
+      "statuses": {
+        "active": "Active",
+        "completed": "Completed",
+        "paused": "Paused",
+        "archived": "Archived"
+      },
+      "selectDate": "Select date",
+      "creating": "Creating...",
+      "saving": "Saving...",
+      "createSubmit": "Create goal",
+      "saveChanges": "Save changes"
+    },
+    "card": {
+      "deleteConfirm": "Delete this goal? Tasks linked to it will remain, but their goal reference will be removed.",
+      "deleting": "Deleting...",
+      "noDescription": "No description",
+      "start": "Start",
+      "target": "Target",
+      "notSet": "Not set",
+      "viewDocuments": "View documents"
+    },
+    "progress": {
+      "label": "Progress",
+      "noTasks": "No tasks yet",
+      "tasksCompleted": "{completed}/{total} tasks completed"
+    },
+    "documents": {
+      "upload": {
+        "eyebrow": "Learning Documents",
+        "title": "Upload study material",
+        "description": "Upload PDFs, text notes, markdown files, or images for this goal. These files will later be used by the RAG study assistant.",
+        "uploading": "Uploading...",
+        "button": "Upload Document"
+      },
+      "list": {
+        "eyebrow": "Document Library",
+        "title": "Uploaded documents",
+        "empty": "No learning documents have been uploaded for this goal yet.",
+        "metadata": "Visibility: {visibility} - AI: {status}",
+        "visibility": {
+          "private": "Private",
+          "shared": "Shared",
+          "public": "Public"
+        },
+        "aiStatus": {
+          "pending": "Pending",
+          "processing": "Processing",
+          "completed": "Completed",
+          "failed": "Failed"
+        },
+        "preview": "Preview",
+        "share": "Share"
+      },
+      "delete": {
+        "confirm": "Delete this document? This action cannot be undone.",
+        "deleting": "Deleting..."
+      },
+      "process": {
+        "processing": "Processing...",
+        "reprocess": "Re-process",
+        "process": "Process for AI"
+      }
+    }
+  },
+  "focus": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Focus Sessions",
+      "description": "Track intentional study sessions, log interruptions, and build meaningful behavioural evidence for the analytics layer."
+    },
+    "startForm": {
+      "title": "Start a focus session",
+      "linkedTask": "Linked task",
+      "chooseTask": "Choose your linked task",
+      "noLinkedTask": "No linked task",
+      "plannedDuration": "Planned duration",
+      "minutes": "{value} min",
+      "plannedMinutesPlaceholder": "Your desired planned minutes...",
+      "starting": "Starting...",
+      "start": "Start focus session"
+    },
+    "active": {
+      "eyebrow": "Active focus session",
+      "generalSession": "General focus session",
+      "remainingTime": "Remaining time",
+      "compactProgress": "{remaining} remaining / {minutes} min planned",
+      "plannedBadge": "Planned: {minutes} min",
+      "durationReached": "Planned duration reached. You may complete the session.",
+      "cancelConfirm": "Cancel this focus session? It will still be stored as cancelled.",
+      "actions": {
+        "pause": "Pause focus session",
+        "resume": "Resume focus session",
+        "complete": "Complete focus session",
+        "cancel": "Cancel focus session",
+        "expand": "Expand focus session timer",
+        "collapse": "Collapse focus session timer"
+      },
+      "status": {
+        "ongoing": "Ongoing",
+        "paused": "Paused",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    },
+    "recent": {
+      "title": "Recent focus sessions",
+      "emptyTitle": "No focus sessions yet",
+      "emptyDescription": "Start your first session to begin collecting behavioural data.",
+      "generalSession": "General focus session",
+      "sessionMetrics": "Planned {planned} min - Actual {actual} min",
+      "status": {
+        "ongoing": "Ongoing",
+        "paused": "Paused",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      }
+    }
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "See the most active learners across Lumivox this week.",
+    "global": "Global Leaderboard",
+    "topLearners": "Top learners this week",
+    "myRank": "My Rank",
+    "notRanked": "Not ranked yet",
+    "scoreFormula": "Score = focus minutes + tasks x 10 + sessions x 5",
+    "rank": "Rank",
+    "learner": "Learner",
+    "focus": "Focus",
+    "tasks": "Tasks",
+    "sessions": "Sessions",
+    "streak": "Streak",
+    "score": "Score",
+    "page": {
+      "eyebrow": "Motivation",
+      "title": "Leaderboard",
+      "description": "See the most active learners across Lumivox this week. Rankings are based on focus minutes, completed tasks, and focus sessions.",
+      "disabledEyebrow": "Leaderboard",
+      "disabledTitle": "Global leaderboard is currently disabled",
+      "disabledDescription": "The global leaderboard is temporarily unavailable. Your personal learning progress is still being tracked."
+    },
+    "myRankCard": {
+      "eyebrow": "My Rank",
+      "notRanked": "Not ranked yet",
+      "notRankedDescription": "Complete a focus session or task this week to appear on the leaderboard.",
+      "minutes": "{count} min",
+      "labels": {
+        "rank": "Rank",
+        "score": "Score",
+        "focus": "Focus",
+        "tasks": "Tasks",
+        "sessions": "Sessions"
+      }
+    },
+    "table": {
+      "eyebrow": "Global Leaderboard",
+      "title": "Top learners this week",
+      "scoreFormula": "Score = focus minutes + tasks x 10 + sessions x 5",
+      "empty": "No leaderboard activity has been recorded this week yet.",
+      "minutes": "{count} min",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "columns": {
+        "rank": "Rank",
+        "learner": "Learner",
+        "focus": "Focus",
+        "tasks": "Tasks",
+        "sessions": "Sessions",
+        "streak": "Streak",
+        "score": "Score"
+      }
+    }
+  },
+  "settings": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Settings",
+      "description": "Update your profile, timezone, and Personalized PBI calibration preferences."
+    },
+    "form": {
+      "profile": {
+        "title": "Profile setup",
+        "description": "Tell Lumivox who you are and which timezone should be used for behavioural analytics.",
+        "fullName": "Full name",
+        "timezone": "Timezone"
+      },
+      "pbi": {
+        "title": "Personalize your PBI",
+        "description": "Adjust how strongly each behavioural dimension contributes to your Personalized Productive Behaviour Index.",
+        "reset": "Reset to academic default",
+        "totalWeight": "Current total weight",
+        "totalHelp": "The total must equal exactly 1.00 before onboarding can be completed."
+      },
+      "weights": {
+        "weight": "Weight",
+        "taskCompletion": {
+          "label": "Task Completion Rate",
+          "description": "How strongly completed tasks should influence your PBI."
+        },
+        "focusQuality": {
+          "label": "Focus Quality Score",
+          "description": "How strongly focused study sessions and low distraction should matter."
+        },
+        "deadlineAdherence": {
+          "label": "Deadline Adherence Score",
+          "description": "How strongly meeting deadlines should contribute."
+        },
+        "goalMomentum": {
+          "label": "Goal Momentum Score",
+          "description": "How strongly progress growth across goals should matter."
+        },
+        "consistency": {
+          "label": "Consistency Score",
+          "description": "How strongly regular learning behaviour should affect your PBI."
+        }
+      },
+      "appearance": {
+        "eyebrow": "Appearance",
+        "title": "Theme preference",
+        "description": "Choose between light mode, dark mode, or follow your system preference."
+      },
+      "saving": "Saving settings...",
+      "save": "Save settings"
+    },
+    "theme": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "streak": {
+      "eyebrow": "Streak Protection",
+      "title": "Restore your study streak",
+      "description": "If your streak becomes frozen after missing a valid study activity day, you can spend tokens to restore it before the restore window expires.",
+      "preparing": "Your engagement status is being prepared. Complete a valid task or focus session, then revisit this page.",
+      "notAvailable": "Not available",
+      "statusBadge": "{status} streak",
+      "tokens": "{count, plural, one {# token} other {# tokens}}",
+      "dayStreak": "{count, plural, one {# day streak} other {# day streak}}",
+      "frozenTitle": "Your streak is currently frozen.",
+      "restoreDeadline": "Restore deadline:",
+      "restoreCost": "Restore cost:",
+      "currentlyHave": "You currently have",
+      "notEnoughTokens": "You do not have enough tokens to restore this streak.",
+      "noActionTitle": "No restore action is needed.",
+      "noActionDescription": "Your streak is currently <strong>{status}</strong>. Restore is only available when a streak is frozen.",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "status": {
+        "active": "active",
+        "frozen": "frozen",
+        "lost": "lost"
+      },
+      "metrics": {
+        "currentStreak": "Current streak",
+        "longestStreak": "Longest streak",
+        "tokensSpent": "Tokens spent"
+      }
+    },
+    "restoreButton": {
+      "restoring": "Restoring...",
+      "restore": "Restore Streak"
+    }
+  },
+  "reflections": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Weekly Reflections",
+      "description": "Review structured weekly behaviour summaries and AI-generated reflections grounded in your own learning data."
+    },
+    "generateButton": {
+      "generating": "Generating reflection...",
+      "generate": "Generate Weekly Reflection"
+    },
+    "section": {
+      "emptyTitle": "No weekly reflections generated yet",
+      "emptyDescription": "Generate your first weekly reflection to compare recent study behaviour against the previous period."
+    },
+    "card": {
+      "badge": "Weekly Reflection",
+      "unknown": "Unknown",
+      "reflection": "Reflection",
+      "currentWindow": "Current window",
+      "wins": "Wins",
+      "watchouts": "Watchouts",
+      "actions": "Actions",
+      "nextWeekActions": "Next-week actions",
+      "detailsTitle": "Reflection details",
+      "detailsDescription": "Wins, watchouts, and next-week actions.",
+      "toggle": "Toggle",
+      "emptyWins": "No strong positive signal was detected in this reflection.",
+      "emptyWatchouts": "No major watchout was highlighted.",
+      "emptyActions": "No action items were generated.",
+      "confidenceNote": "Confidence note",
+      "direction": {
+        "improving": "Improving",
+        "stable": "Stable",
+        "mixed": "Mixed",
+        "needs_attention": "Needs attention",
+        "unknown": "Unknown"
+      },
+      "metrics": {
+        "focus": "Focus:",
+        "tasksDone": "Tasks done:",
+        "activeDays": "Active days:",
+        "minutes": "{count} min"
+      }
+    }
+  },
+  "groups": {
+    "title": "Study Groups",
+    "subtitle": "Create private study groups to chat, share progress, and learn together.",
+    "createGroup": "Create a study group",
+    "myGroups": "My Groups",
+    "groupChat": "Group Chat",
+    "members": {
+      "title": "Members",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      },
+      "status": {
+        "active": "Active",
+        "invited": "Invited",
+        "removed": "Removed",
+        "left": "Left"
+      }
+    },
+    "weeklyChallenge": "Weekly Challenge",
+    "leaderboard": "Weekly Leaderboard",
+    "page": {
+      "eyebrow": "Social Learning",
+      "title": "Study Groups",
+      "description": "Create private study groups to chat, share progress, and learn with other Lumivox users.",
+      "myGroups": "My Groups",
+      "empty": "You are not part of any study group yet.",
+      "openGroup": "Open Group",
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      }
+    },
+    "detail": {
+      "eyebrow": "Study Group",
+      "leaderboardDisabledTitle": "Group leaderboard is disabled",
+      "leaderboardDisabledDescription": "Weekly group competition is temporarily unavailable."
+    },
+    "createForm": {
+      "eyebrow": "Private Study Group",
+      "title": "Create a study group",
+      "description": "Create a private group for long-term study chat and collaboration.",
+      "creating": "Creating...",
+      "create": "Create Group",
+      "fields": {
+        "name": "Group name",
+        "description": "Description"
+      },
+      "placeholders": {
+        "name": "AWS Study Group",
+        "description": "A private group for learning together."
+      }
+    },
+    "inviteForm": {
+      "title": "Invite member",
+      "description": "Add a Lumivox user to this private study group by email.",
+      "placeholder": "friend@example.com",
+      "inviting": "Inviting...",
+      "invite": "Invite"
+    },
+    "chat": {
+      "title": "Group Chat",
+      "description": "Messages appear in real time for active group members.",
+      "realtime": "Realtime",
+      "empty": "No messages yet. Start the group conversation.",
+      "you": "You",
+      "placeholder": "Write a message...",
+      "sending": "Sending...",
+      "send": "Send"
+    },
+    "leaderboardPanel": {
+      "eyebrow": "Weekly Leaderboard",
+      "title": "Group ranking",
+      "scoreFormula": "Score = focus minutes + tasks x 10",
+      "empty": "No activity has been recorded this week yet.",
+      "minutes": "{count} min",
+      "columns": {
+        "rank": "Rank",
+        "member": "Member",
+        "focus": "Focus",
+        "tasks": "Tasks",
+        "score": "Score"
+      },
+      "roles": {
+        "owner": "Owner",
+        "admin": "Admin",
+        "member": "Member"
+      }
+    },
+    "weeklyChallengePanel": {
+      "eyebrow": "Weekly Challenge",
+      "title": "Group progress",
+      "empty": "No challenge data is available yet.",
+      "focusMinutes": "Focus minutes",
+      "completedTasks": "Completed tasks",
+      "focusMetric": "{actual}/{target} min",
+      "taskMetric": "{actual}/{target} tasks",
+      "completedPercent": "{percent}% completed"
+    },
+    "challengeForm": {
+      "defaultTitle": "Weekly Study Challenge",
+      "title": "Set weekly challenge",
+      "description": "Group managers can set weekly targets for focus minutes and completed tasks.",
+      "fields": {
+        "title": "Title",
+        "focusMinutes": "Focus minutes",
+        "completedTasks": "Completed tasks"
+      },
+      "saving": "Saving...",
+      "save": "Save Challenge"
+    }
+  },
+  "rooms": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Study Rooms",
+      "description": "Create or join collaborative study spaces where learners can stay present, focus together, and build a stronger sense of study momentum."
+    },
+    "detail": {
+      "eyebrow": "Study Room",
+      "fallbackDescription": "A collaborative room where learners can stay present and study together.",
+      "viewDetails": "View Room Details",
+      "roomDetails": "Room Details",
+      "cancel": "Cancel",
+      "unknownUser": "Unknown user",
+      "roomOwner": "Room owner",
+      "lumivoxUser": "Lumivox user",
+      "maxParticipants": "{count} participants",
+      "privateInviteCode": "Private invite code",
+      "privateInviteDescription": "Share this code with people you want to invite into the room.",
+      "labels": {
+        "visibility": "Visibility",
+        "maxParticipants": "Maximum participants",
+        "owner": "Owner",
+        "yourRole": "Your role"
+      },
+      "visibility": {
+        "public": "Public",
+        "private": "Private"
+      },
+      "roles": {
+        "owner": "Owner",
+        "member": "Member"
+      }
+    },
+    "createForm": {
+      "trigger": "Create Rooms",
+      "title": "Create a study room",
+      "description": "Open a collaborative space where learners can study together.",
+      "cancel": "Cancel",
+      "creating": "Creating room...",
+      "create": "Create room",
+      "fields": {
+        "title": "Room title",
+        "description": "Description",
+        "visibility": "Visibility",
+        "maxParticipants": "Max participants"
+      },
+      "placeholders": {
+        "title": "Final Project Sprint Room",
+        "description": "A focused room for evening study sessions."
+      },
+      "visibility": {
+        "public": "Public room",
+        "private": "Private room"
+      }
+    },
+    "tabs": {
+      "myRooms": "My Room List",
+      "publicRooms": "Public Rooms",
+      "joinWithCode": "Join With Code"
+    },
+    "myList": {
+      "title": "My study rooms",
+      "description": "Rooms you have already joined and can re-enter.",
+      "empty": "You have not joined any study rooms yet."
+    },
+    "publicList": {
+      "title": "Discover public rooms",
+      "description": "Join collaborative spaces that are open to the Lumivox community.",
+      "empty": "No public study rooms are available yet."
+    },
+    "card": {
+      "capacity": "Up to {count} learners",
+      "owner": "Owner: {name}",
+      "unknownUser": "Unknown user",
+      "enter": "Enter room",
+      "joining": "Joining...",
+      "join": "Join room",
+      "visibility": {
+        "public": "Public",
+        "private": "Private"
+      }
+    },
+    "joinPrivate": {
+      "title": "Join a private room",
+      "description": "Enter an invite code shared by the room owner.",
+      "placeholder": "E7F8A2C1",
+      "joining": "Joining...",
+      "submit": "Join with code"
+    },
+    "leave": {
+      "confirm": "Leave this study room?",
+      "leaving": "Leaving...",
+      "leave": "Leave room"
+    },
+    "memberRoster": {
+      "title": "Persistent members",
+      "description": "Members who currently belong to this room. This roster updates live whenever someone joins or leaves.",
+      "empty": "No active members found.",
+      "unknownUser": "Unknown user",
+      "memberBadge": "Member",
+      "connection": {
+        "connecting": "Connecting",
+        "connected": "Connected",
+        "error": "Error"
+      },
+      "roles": {
+        "owner": "Owner",
+        "member": "Member"
+      }
+    },
+    "presence": {
+      "eyebrow": "Realtime Presence",
+      "title": "Who is studying here now?",
+      "description": "Presence tracks connected learners, while low-latency room events keep status changes responsive.",
+      "connectionLabel": "Connection",
+      "myStatus": "My current room status",
+      "onlineParticipants": "Online participants",
+      "onlineCount": "{count} online",
+      "empty": "No live participant presence has been detected yet.",
+      "connectedNow": "Connected now",
+      "messages": {
+        "connecting": "Connecting to room presence...",
+        "preparing": "Preparing authenticated realtime session...",
+        "connected": "Presence connected.",
+        "failed": "Presence channel failed to connect.",
+        "timedOut": "Presence channel timed out.",
+        "closed": "Presence channel was closed.",
+        "unexpected": "Unexpected presence connection error."
+      },
+      "connection": {
+        "connecting": "Connecting",
+        "connected": "Connected",
+        "error": "Error"
+      },
+      "status": {
+        "available": "Available",
+        "focusing": "Focusing",
+        "paused": "Paused"
+      }
+    },
+    "chat": {
+      "eyebrow": "Room Chat",
+      "title": "Live conversation",
+      "description": "Messages are stored permanently and broadcast to active room members in real time.",
+      "empty": "No messages yet. Start the room conversation.",
+      "placeholder": "Write a message to the room...",
+      "sending": "Sending...",
+      "send": "Send",
+      "lumivoxUser": "Lumivox User",
+      "connection": {
+        "connecting": "Connecting",
+        "connected": "Connected",
+        "error": "Error"
+      },
+      "errors": {
+        "empty": "Message cannot be empty.",
+        "failed": "Failed to send message."
+      }
+    },
+    "voice": {
+      "eyebrow": "Voice Room",
+      "title": "Talk while studying",
+      "description": "Join the room voice channel to talk with other active learners.",
+      "joining": "Joining voice...",
+      "join": "Join Voice",
+      "leave": "Leave Voice",
+      "inactive": "Voice channel is currently inactive for you. Join when you want to talk with the room.",
+      "microphoneTitle": "Microphone control",
+      "microphoneDescription": "Toggle your microphone on or off while staying in the voice room.",
+      "participantsTitle": "Voice participants",
+      "participantsCount": "{count} in voice",
+      "empty": "No one is currently connected to voice.",
+      "you": "You",
+      "roomParticipant": "Room participant",
+      "toasts": {
+        "joined": "Joined voice room.",
+        "left": "Left voice room.",
+        "connected": "Voice connection established."
+      },
+      "errors": {
+        "joinFailed": "Failed to join voice room.",
+        "unexpected": "Unexpected error while joining voice room.",
+        "roomError": "Voice room error: {message}"
+      }
+    }
+  },
+  "rag": {
+    "title": "Study Assistant",
+    "ragTitle": "RAG Study Assistant",
+    "emptyPrompt": "How can I help you?",
+    "you": "You",
+    "assistant": "Assistant",
+    "documentContext": "Document context",
+    "generalAi": "General AI",
+    "chooseDocuments": "Choose your documents",
+    "selectedCount": "{count, plural, one {# selected} other {# selected}}",
+    "documentDescription": "Select processed documents if you want the assistant to answer using your uploaded materials. If no document is selected, it works as a general study assistant.",
+    "noDocuments": "No processed documents are available yet. Upload and process a learning document first to enable document-grounded answers.",
+    "documentStatus": "{visibility} - AI ready",
+    "visibility": {
+      "private": "Private",
+      "shared": "Shared",
+      "public": "Public"
+    },
+    "askPlaceholder": "Ask a question about your study materials...",
+    "ask": "Ask",
+    "thinking": "Thinking..."
+  },
+  "admin": {
+    "common": {
+      "adminCms": "Admin CMS",
+      "search": "Search",
+      "all": "All",
+      "view": "View",
+      "actions": "Actions",
+      "user": "User",
+      "role": "Role",
+      "leaderboard": "Leaderboard",
+      "leaderboardVisibility": "Leaderboard Visibility",
+      "activity": "Activity",
+      "created": "Created",
+      "updated": "Updated",
+      "lastSignIn": "Last sign in",
+      "noEmail": "No email",
+      "na": "N/A",
+      "file": "File",
+      "owner": "Owner",
+      "unknownOwner": "Unknown owner",
+      "aiStatus": "AI Status",
+      "chunks": "Chunks",
+      "visibilityLabel": "Visibility",
+      "size": "Size",
+      "group": "Group",
+      "stats": "Stats",
+      "status": "Status",
+      "messages": "Messages",
+      "goals": "Goals",
+      "tasks": "Tasks",
+      "focusSessions": "Focus Sessions",
+      "documents": "Documents",
+      "ragSessions": "RAG Sessions",
+      "groups": "Groups",
+      "noDescription": "No description",
+      "completed": "{count} completed",
+      "processed": "{count} processed",
+      "focusMinutes": "{count} focus minutes",
+      "messagesCount": "{count} messages",
+      "days": "{count} days",
+      "roles": {
+        "user": "User",
+        "admin": "Admin",
+        "owner": "Owner",
+        "member": "Member",
+        "assistant": "Assistant",
+        "system": "System"
+      },
+      "visibility": {
+        "visible": "Visible",
+        "hidden": "Hidden"
+      },
+      "aiStatuses": {
+        "pending": "Pending",
+        "processing": "Processing",
+        "completed": "Completed",
+        "failed": "Failed",
+        "unsupported": "Unsupported"
+      },
+      "documentVisibility": {
+        "private": "Private",
+        "shared": "Shared",
+        "public": "Public"
+      },
+      "groupStatus": {
+        "active": "Active",
+        "archived": "Archived"
+      },
+      "membershipStatus": {
+        "active": "Active",
+        "invited": "Invited",
+        "removed": "Removed",
+        "left": "Left"
+      },
+      "contextModes": {
+        "general": "General AI",
+        "document_rag": "Document RAG"
+      },
+      "yes": "Yes",
+      "no": "No",
+      "topK": "Top-k",
+      "sources": "Sources",
+      "latency": "Latency"
+    },
+    "dashboard": {
+      "eyebrow": "Admin CMS",
+      "title": "Admin Dashboard",
+        "description": "Monitor users, learning activity, documents, groups, and AI usage across Lumivox.",
+        "actions": {
+          "overview": "Overview",
+          "users": "Manage Users",
+          "documents": "Manage Documents",
+          "groups": "Manage Groups",
+        "ai": "Monitor AI",
+        "settings": "CMS Settings"
+      },
+      "metrics": {
+        "totalUsers": "Total Users",
+        "newUsers": "{count} new users in the last 7 days",
+        "admins": "Admins",
+        "adminsDescription": "Users with admin CMS access",
+        "goals": "Goals",
+        "goalsDescription": "Created learning goals",
+        "tasks": "Tasks",
+        "completed": "{count} completed",
+        "focusSessions": "Focus Sessions",
+        "totalFocusMinutes": "{count} total focus minutes",
+        "documents": "Documents",
+        "processedDocuments": "{count} processed for AI",
+        "documentChunks": "Document Chunks",
+        "documentChunksDescription": "Embedded RAG chunks",
+        "studyGroups": "Study Groups",
+        "groupMessages": "{count} group messages",
+        "ragSessions": "RAG Sessions",
+        "ragMessages": "{count} RAG messages",
+        "failedDocuments": "Failed Documents",
+        "failedDocumentsDescription": "Documents that failed AI processing"
+      }
+    },
+    "users": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "User Management",
+        "description": "Search users, review activity, update roles, and manage leaderboard visibility."
+      },
+      "search": {
+        "label": "Search users",
+        "placeholder": "Search by name, email, or user id..."
+      },
+      "table": {
+        "eyebrow": "User Management",
+        "title": "Users",
+        "empty": "No users found.",
+        "activity": {
+          "focusMinutes": "{count} focus min",
+          "tasks": "{completed}/{total} tasks",
+          "docs": "{count} docs"
+        }
+      },
+      "recentTable": {
+        "eyebrow": "Users",
+        "title": "Recent users",
+        "empty": "No users found."
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "activeGroupMemberships": "Active group memberships",
+        "currentStreak": "Current Streak",
+        "tokenBalance": "Token Balance",
+        "timeline": "Account Timeline",
+        "createdAt": "Created at"
+      }
+    },
+    "documents": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "Document & RAG Management",
+        "description": "Review uploaded learning documents, monitor AI processing status, inspect generated chunks, and re-process failed documents."
+      },
+      "search": {
+        "label": "Search documents",
+        "placeholder": "Search by file name, owner, email, or document id..."
+      },
+      "table": {
+        "eyebrow": "Document Management",
+        "title": "Learning documents",
+        "empty": "No documents found."
+      },
+      "actions": {
+        "processing": "Processing...",
+        "reprocess": "Re-process",
+        "process": "Process",
+        "deleteConfirm": "Are you sure you want to delete this document? This will remove the file, permissions, and RAG chunks.",
+        "deleting": "Deleting...",
+        "deleteDocument": "Delete Document"
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "embeddedChunksDescription": "Embedded chunks / total chunks",
+        "failedChunks": "Failed Chunks",
+        "fileSize": "File Size",
+        "mimeType": "MIME Type",
+        "extractedTextPreview": "Extracted Text Preview"
+      },
+      "chunks": {
+        "eyebrow": "RAG Chunks",
+        "title": "Document chunks",
+        "empty": "No chunks found for this document.",
+        "chunkNumber": "Chunk #{index}",
+        "chunkMeta": "{chars} chars - {tokens} tokens - {embedding}",
+        "embedded": "embedded",
+        "noEmbedding": "no embedding",
+        "model": "Model"
+      }
+    },
+    "groups": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "Group Management",
+        "description": "Review study groups, inspect members, moderate messages, and archive problematic groups."
+      },
+      "search": {
+        "label": "Search groups",
+        "placeholder": "Search by group name, owner, email, or group id..."
+      },
+      "table": {
+        "eyebrow": "Group Management",
+        "title": "Study groups",
+        "empty": "No groups found.",
+        "stats": {
+          "members": "{count} members",
+          "messages": "{count} messages"
+        }
+      },
+      "actions": {
+        "restoreConfirm": "Restore this group?",
+        "archiveConfirm": "Archive this group? Members should no longer use it as an active group.",
+        "adminNotePlaceholder": "Admin note...",
+        "updating": "Updating...",
+        "restore": "Restore",
+        "archive": "Archive",
+        "deleteMessageConfirm": "Delete this group message? This action cannot be undone.",
+        "deleting": "Deleting...",
+        "delete": "Delete"
+      },
+      "members": {
+        "title": "Members"
+      },
+      "messages": {
+        "eyebrow": "Moderation",
+        "title": "Recent messages",
+        "empty": "No messages found."
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "adminNote": "Admin note",
+        "members": "Members",
+        "private": "Private"
+      }
+    },
+    "ai": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "AI Monitoring",
+        "description": "Monitor RAG usage, prompt variants, source quality, document health, and AI response latency across Lumivox."
+      },
+      "search": {
+        "label": "Search AI sessions",
+        "placeholder": "Search by user, email, session id, or user id...",
+        "contextMode": "Context mode"
+      },
+      "metrics": {
+        "ragSessions": "RAG Sessions",
+        "totalMessages": "{count} total messages",
+        "generalAi": "General AI",
+        "generalAiDescription": "Messages without selected documents",
+        "documentRag": "Document RAG",
+        "documentRagDescription": "Messages using selected documents",
+        "avgLatency": "Avg Latency",
+        "maxLatency": "Max: {count} ms",
+        "groundedRule": "Grounded Rule",
+        "groundedRuleDescription": "Safer prompt variant",
+        "noRule": "No Rule",
+        "noRuleDescription": "Baseline prompt variant",
+        "messagesWithSources": "Messages With Sources",
+        "messagesWithSourcesDescription": "Assistant answers with retrieved evidence",
+        "emptySourceRag": "Empty-source RAG",
+        "emptySourceRagDescription": "Document RAG answers without sources",
+        "processedDocs": "Processed Docs",
+        "failedDocs": "{count} failed",
+        "pendingDocs": "Pending Docs",
+        "unsupportedDocs": "{count} unsupported",
+        "documentChunks": "Document Chunks",
+        "embeddedChunks": "{count} embedded",
+        "topKUsage": "Top-k Usage"
+      },
+      "sessions": {
+        "eyebrow": "AI Sessions",
+        "title": "RAG chat sessions",
+        "empty": "No AI sessions found.",
+        "fallbackUser": "User {id}",
+        "documentMeta": "Docs: {count} - top-k: {topK}",
+        "totalMessages": "{count} total",
+        "assistantMessages": "{count} assistant",
+        "latencyMs": "{count} ms",
+        "columns": {
+          "session": "Session",
+          "mode": "Mode",
+          "latency": "Latency"
+        }
+      },
+      "emptySources": {
+        "eyebrow": "Monitoring Alerts",
+        "title": "Document RAG answers without sources",
+        "description": "These answers should be reviewed because document RAG normally should return sources.",
+        "empty": "No empty-source RAG answers found.",
+        "fallbackUser": "User {id}",
+        "metadata": "top-k: {topK} - prompt: {prompt} - latency: {latency} ms",
+        "reviewSession": "Review Session"
+      },
+      "detail": {
+        "eyebrow": "Admin CMS",
+        "title": "AI Session {id}",
+        "fallbackUser": "User {id}",
+        "contextMode": "Context Mode",
+        "selectedDocuments": "Selected Documents",
+        "promptVariant": "Prompt Variant"
+      },
+      "messages": {
+        "eyebrow": "Conversation",
+        "title": "RAG messages",
+        "empty": "No messages found.",
+        "viewRawSources": "View raw sources"
+      }
+    },
+    "settings": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "CMS Settings",
+        "description": "Manage feature flags, RAG defaults, weekly challenge defaults, and operational platform settings."
+      },
+      "form": {
+        "featureFlags": {
+          "title": "Feature Flags",
+          "globalLeaderboard": {
+            "title": "Global leaderboard",
+            "description": "Enable or disable the system-wide leaderboard."
+          },
+          "groupLeaderboard": {
+            "title": "Group leaderboard",
+            "description": "Enable or disable weekly group ranking."
+          },
+          "maintenanceMode": {
+            "title": "Maintenance mode",
+            "description": "Used as an operational flag for planned maintenance."
+          }
+        },
+        "ragDefaults": {
+          "title": "RAG Defaults",
+          "defaultTopK": "Default top-k",
+          "defaultPromptVariant": "Default prompt variant",
+          "promptVariants": {
+            "groundedRule": "Grounded rule",
+            "noRule": "No rule"
+          }
+        },
+        "weeklyChallenge": {
+          "title": "Weekly Challenge Defaults",
+          "defaultFocusMinutes": "Default focus minutes",
+          "defaultCompletedTasks": "Default completed tasks"
+        }
+      }
+    }
+  }
+}

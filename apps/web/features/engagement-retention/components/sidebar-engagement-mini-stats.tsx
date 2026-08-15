@@ -3,6 +3,7 @@
 import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
 import { createClient } from "@/lib/supabase/client";
 import { Coins, Flame } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 
 type SidebarEngagementMiniStatsProps = {
@@ -26,12 +27,11 @@ export function SidebarEngagementMiniStats({
   userId,
   stats,
 }: SidebarEngagementMiniStatsProps) {
-  console.log(userId, stats);
+  const t = useTranslations("appShell.engagement");
   const [engageStats, setEngageStats] = useState(stats);
   const supabase = createClient();
 
   useEffect(() => {
-    // Lắng nghe xem khi nào dòng dữ liệu stats của User này thay đổi trong DB
     const channel = supabase
       .channel(`stats-changes-${userId}`)
       .on(
@@ -43,9 +43,7 @@ export function SidebarEngagementMiniStats({
           filter: `user_id=eq.${userId}`,
         },
         (payload) => {
-          // Khi background task tính xong và update DB, hàm này lập tức kích hoạt
-          console.log("Streak cập nhật realtime:", payload.new);
-          setEngageStats(payload.new as UserEngagementStats); // Cập nhật UI ngay lập tức!
+          setEngageStats(payload.new as UserEngagementStats);
         },
       )
       .subscribe();
@@ -58,7 +56,7 @@ export function SidebarEngagementMiniStats({
   if (!engageStats) {
     return (
       <div className="mt-3 rounded-xl border bg-neutral-50 p-3 text-xs text-neutral-600">
-        Engagement stats will appear after your first valid study activity.
+        {t("empty")}
       </div>
     );
   }
@@ -75,7 +73,9 @@ export function SidebarEngagementMiniStats({
         )}
 
         <p className="text-xs font-semibold capitalize text-foreground">
-          {engageStats.streak_status} streak
+          {t("status", {
+            status: t(`statuses.${engageStats.streak_status}`),
+          })}
         </p>
       </div>
 
@@ -86,38 +86,25 @@ export function SidebarEngagementMiniStats({
               className="size-3.5"
               style={{ color: "var(--streak-fire)" }}
             />
-            Streak
+            {t("streak")}
           </span>
           <span className="font-mono font-semibold">
             {engageStats.current_streak_days}{" "}
-            {engageStats.current_streak_days == 1 ? "day" : "days"}
+            {engageStats.current_streak_days === 1 ? t("day") : t("days")}
           </span>
         </div>
-        <div className="flex items-center justify-between text-xs mt-2">
+        <div className="mt-2 flex items-center justify-between text-xs">
           <span className="flex items-center gap-1.5 text-secondary">
             <Coins
               className="size-3.5"
               style={{ color: "var(--token-gold)" }}
             />
-            Tokens
+            {t("tokens")}
           </span>
           <span className="font-mono font-semibold">
             {engageStats.token_balance}
           </span>
         </div>
-        {/* <div>
-          <p className="text-neutral-500">Streak</p>
-          <p className="mt-1 font-bold text-foreground">
-            {stats.current_streak_days}d
-          </p>
-        </div>
-
-        <div>
-          <p className="text-neutral-500">Tokens</p>
-          <p className="mt-1 font-bold text-foreground">
-            {stats.token_balance}
-          </p>
-        </div> */}
       </div>
     </div>
   );

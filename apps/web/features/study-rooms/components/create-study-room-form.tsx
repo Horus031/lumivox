@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
 import { createStudyRoomAction } from "@/features/study-rooms/study-room.actions";
@@ -32,6 +33,7 @@ import {
 
 export function CreateStudyRoomForm() {
   const router = useRouter();
+  const t = useTranslations("rooms.createForm");
   const [isPending, startTransition] = useTransition();
 
   const [title, setTitle] = useState("");
@@ -70,38 +72,38 @@ export function CreateStudyRoomForm() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button type="button">Create Rooms</Button>
+        <Button type="button">{t("trigger")}</Button>
       </DialogTrigger>
       <DialogContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
-            <DialogTitle>Create a study room</DialogTitle>
+            <DialogTitle>{t("title")}</DialogTitle>
             <DialogDescription>
-              Open a collaborative space where learners can study together.
+              {t("description")}
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
             <Field>
-              <Label>Room title</Label>
+              <Label>{t("fields.title")}</Label>
               <Input
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Final Project Sprint Room"
+                placeholder={t("placeholders.title")}
               />
             </Field>
             <Field>
-              <Label>Description</Label>
+              <Label>{t("fields.description")}</Label>
               <Textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="A focused room for evening study sessions."
+                placeholder={t("placeholders.description")}
                 rows={3}
               />
             </Field>
             <FieldGroup className="flex-row gap-4">
               <Field>
-                <Label>Visibility</Label>
+                <Label>{t("fields.visibility")}</Label>
 
                 <Select
                   value={visibility ?? ""}
@@ -110,13 +112,17 @@ export function CreateStudyRoomForm() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Visibility" />
+                    <SelectValue placeholder={t("fields.visibility")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Visibilities</SelectLabel>
-                      <SelectItem value="public">Public room</SelectItem>
-                      <SelectItem value="private">Private room</SelectItem>
+                      <SelectLabel>{t("fields.visibility")}</SelectLabel>
+                      <SelectItem value="public">
+                        {t("visibility.public")}
+                      </SelectItem>
+                      <SelectItem value="private">
+                        {t("visibility.private")}
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -133,7 +139,7 @@ export function CreateStudyRoomForm() {
               </Field>
 
               <Field>
-                <Label>Max participants</Label>
+                <Label>{t("fields.maxParticipants")}</Label>
                 <Input
                   type="number"
                   min={2}
@@ -146,10 +152,10 @@ export function CreateStudyRoomForm() {
           </FieldGroup>
           <DialogFooter>
             <DialogClose asChild>
-              <Button variant={"outline"}>Cancel</Button>
+              <Button variant={"outline"}>{t("cancel")}</Button>
             </DialogClose>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Creating room..." : "Create room"}
+              {isPending ? t("creating") : t("create")}
             </Button>
           </DialogFooter>
         </form>

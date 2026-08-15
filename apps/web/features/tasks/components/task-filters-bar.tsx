@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import type { Goal } from "@/features/goals/goal.types";
@@ -37,6 +38,8 @@ export function TaskFiltersBar({
   onApply,
   onReset,
 }: TaskFiltersBarProps) {
+  const t = useTranslations("tasks.filters");
+  const taskT = useTranslations("tasks.form");
   const [q, setQ] = useState(initialFilters.q ?? "");
   const [status, setStatus] = useState<string | undefined>(
     initialFilters.status,
@@ -73,13 +76,13 @@ export function TaskFiltersBar({
     >
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_180px_180px_220px_auto]">
         <Label className="relative block">
-          <span className="sr-only">Search tasks</span>
+          <span className="sr-only">{t("searchLabel")}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             name="q"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Search tasks"
+            placeholder={t("searchPlaceholder")}
             className="flex h-full w-full border border-input bg-transparent pl-10 pr-3 text-sm shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
           />
         </Label>
@@ -89,16 +92,24 @@ export function TaskFiltersBar({
           onValueChange={(value) => setStatus(value || undefined)}
         >
           <SelectTrigger className="flex w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-            <SelectValue placeholder="All statuses" />
+            <SelectValue placeholder={t("allStatuses")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Statuses</SelectLabel>
-              <SelectItem value="todo">Todo</SelectItem>
-              <SelectItem value="in_progress">In progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="overdue">Overdue</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectLabel>{taskT("fields.status")}</SelectLabel>
+              <SelectItem value="todo">{taskT("statuses.todo")}</SelectItem>
+              <SelectItem value="in_progress">
+                {taskT("statuses.in_progress")}
+              </SelectItem>
+              <SelectItem value="completed">
+                {taskT("statuses.completed")}
+              </SelectItem>
+              <SelectItem value="overdue">
+                {taskT("statuses.overdue")}
+              </SelectItem>
+              <SelectItem value="cancelled">
+                {taskT("statuses.cancelled")}
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -108,15 +119,19 @@ export function TaskFiltersBar({
           onValueChange={(value) => setPriority(value || undefined)}
         >
           <SelectTrigger className="flex h-11 w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-            <SelectValue placeholder="All priorities" />
+            <SelectValue placeholder={t("allPriorities")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Priorities</SelectLabel>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
+              <SelectLabel>{taskT("fields.priority")}</SelectLabel>
+              <SelectItem value="low">{taskT("priorities.low")}</SelectItem>
+              <SelectItem value="medium">
+                {taskT("priorities.medium")}
+              </SelectItem>
+              <SelectItem value="high">{taskT("priorities.high")}</SelectItem>
+              <SelectItem value="critical">
+                {taskT("priorities.critical")}
+              </SelectItem>
             </SelectGroup>
           </SelectContent>
         </Select>
@@ -126,11 +141,11 @@ export function TaskFiltersBar({
           onValueChange={(value) => setGoalId(value || undefined)}
         >
           <SelectTrigger className="flex h-11 w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-            <SelectValue placeholder="All goals" />
+            <SelectValue placeholder={t("allGoals")} />
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              <SelectLabel>Goals</SelectLabel>
+              <SelectLabel>{taskT("fields.linkedGoal")}</SelectLabel>
               {goals.map((goal) => (
                 <SelectItem key={goal.id} value={goal.id}>
                   {goal.title}
@@ -142,7 +157,7 @@ export function TaskFiltersBar({
 
         <div className="flex items-center gap-2">
           <Button type="submit" className="h-11 px-5">
-            Apply
+            {t("apply")}
           </Button>
 
           {hasActiveFilters ? (
@@ -152,7 +167,7 @@ export function TaskFiltersBar({
               className="px-5 h-11"
               onClick={handleReset}
             >
-              Reset
+              {t("reset")}
             </Button>
           ) : null}
         </div>

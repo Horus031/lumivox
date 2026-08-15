@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   Bar,
   BarChart,
@@ -20,13 +21,13 @@ type TaskStatusChartProps = {
 };
 
 export function TaskStatusChart({ data }: TaskStatusChartProps) {
+  const t = useTranslations("dashboard.taskStatus");
+
   return (
     <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-xl font-semibold">Task status overview</h2>
-        <p className="mt-1 text-sm text-neutral-600">
-          Current distribution of task states across the system.
-        </p>
+        <h2 className="text-xl font-semibold">{t("title")}</h2>
+        <p className="mt-1 text-sm text-neutral-600">{t("description")}</p>
       </div>
 
       <div className="h-85 w-full">
@@ -40,7 +41,10 @@ export function TaskStatusChart({ data }: TaskStatusChartProps) {
             data={data}
             margin={{ top: 10, right: 18, left: 0, bottom: 0 }}
           >
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              stroke="hsl(var(--chart-grid))"
+            />
             <XAxis
               dataKey="status"
               tick={{ fill: "hsl(var(--chart-axis))" }}
@@ -52,7 +56,7 @@ export function TaskStatusChart({ data }: TaskStatusChartProps) {
             <Tooltip />
             <Bar
               dataKey="count"
-              name="Tasks"
+              name={t("tasks")}
               fill="hsl(var(--chart-1))"
               radius={[10, 10, 0, 0]}
             />

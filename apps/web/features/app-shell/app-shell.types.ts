@@ -1,7 +1,17 @@
 export type AppNavigationItem = {
-  label: string;
+  key:
+    | "dashboard"
+    | "goals"
+    | "tasks"
+    | "focus"
+    | "rooms"
+    | "groups"
+    | "leaderboard"
+    | "reflections"
+    | "settings"
+    | "admin";
   href: string;
-  description: string;
+  adminOnly?: boolean;
   icon:
     | "dashboard"
     | "goals"
@@ -10,5 +20,6 @@ export type AppNavigationItem = {
     | "rooms"
     | "reflections"
     | "settings"
-    | "users";
+    | "users"
+    | "shield";
 };

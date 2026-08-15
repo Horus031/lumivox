@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import type { RealtimeChannel } from "@supabase/supabase-js";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { sendStudyGroupMessageAction } from "@/features/study-groups/study-group.actions";
@@ -50,6 +51,8 @@ export function StudyGroupChat({
   currentUserEmail,
   initialMessages,
 }: StudyGroupChatProps) {
+  const locale = useLocale();
+  const t = useTranslations("groups.chat");
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [content, setContent] = useState("");
   const [connectionStatus, setConnectionStatus] = useState("CONNECTING");
@@ -184,15 +187,13 @@ export function StudyGroupChat({
   const isConnected = connectionStatus === "SUBSCRIBED";
 
   return (
-    <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="rounded-2xl border bg-background p-5 shadow-sm">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
-            Group Chat
-          </h2>
+          <h2 className="text-xl font-bold text-foreground">{t("title")}</h2>
 
-          <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-            Messages appear in real time for active group members.
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t("description")}
           </p>
         </div>
 
@@ -203,18 +204,18 @@ export function StudyGroupChat({
               : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
           }`}
         >
-          {isConnected ? "Realtime" : connectionStatus}
+          {isConnected ? t("realtime") : connectionStatus}
         </span>
       </div>
 
       <div
         ref={scrollRef}
-        className="mt-5 h-130 space-y-3 overflow-y-auto rounded-2xl border bg-neutral-50 p-4 dark:border-neutral-800 dark:bg-neutral-900"
+        className="mt-5 h-130 space-y-3 overflow-y-auto rounded-2xl border bg-surface p-4 "
       >
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
-            <p className="max-w-sm text-sm text-neutral-600 dark:text-neutral-400">
-              No messages yet. Start the group conversation.
+            <p className="max-w-sm text-sm text-muted-foreground">
+              {t("empty")}
             </p>
           </div>
         ) : (
@@ -232,11 +233,11 @@ export function StudyGroupChat({
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-neutral-950 dark:text-neutral-50">
-                    {isMine ? "You" : getDisplayName(message)}
+                    {isMine ? t("you") : getDisplayName(message)}
                   </p>
 
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {new Date(message.created_at).toLocaleString()}
+                    {new Date(message.created_at).toLocaleString(locale)}
                   </p>
                 </div>
 
@@ -257,7 +258,7 @@ export function StudyGroupChat({
           value={content}
           onChange={(event) => setContent(event.target.value)}
           rows={2}
-          placeholder="Write a message..."
+          placeholder={t("placeholder")}
           className="min-h-13 flex-1 rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
         />
 
@@ -266,7 +267,7 @@ export function StudyGroupChat({
           disabled={isPending || !content.trim()}
           className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
         >
-          {isPending ? "Sending..." : "Send"}
+          {isPending ? t("sending") : t("send")}
         </button>
       </form>
     </section>

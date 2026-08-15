@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
 import type { StudyRoomMemberWithProfile } from "@/features/study-rooms/study-room.types";
@@ -14,6 +15,7 @@ export function StudyRoomMemberRoster({
   roomId,
   initialMembers,
 }: StudyRoomMemberRosterProps) {
+  const t = useTranslations("rooms.memberRoster");
   const supabase = useMemo(() => createClient(), []);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -122,10 +124,9 @@ export function StudyRoomMemberRoster({
     <article className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-xl font-semibold">Persistent members</h2>
+          <h2 className="text-xl font-semibold">{t("title")}</h2>
           <p className="mt-1 text-sm text-neutral-600">
-            Members who currently belong to this room. This roster updates live
-            whenever someone joins or leaves.
+            {t("description")}
           </p>
         </div>
 
@@ -138,14 +139,14 @@ export function StudyRoomMemberRoster({
                 : "bg-neutral-100 text-neutral-700"
           }`}
         >
-          {liveState}
+          {t(`connection.${liveState}`)}
         </span>
       </div>
 
       <div className="mt-5 space-y-3">
         {members.length === 0 ? (
           <div className="rounded-xl border border-dashed p-4 text-sm text-foreground">
-            No active members found.
+            {t("empty")}
           </div>
         ) : (
           members.map((member) => (
@@ -155,15 +156,15 @@ export function StudyRoomMemberRoster({
             >
               <div>
                 <p className="font-medium">
-                  {member.profiles?.full_name ?? "Unknown user"}
+                  {member.profiles?.full_name ?? t("unknownUser")}
                 </p>
                 <p className="mt-1 text-xs capitalize text-neutral-500">
-                  {member.role}
+                  {t(`roles.${member.role}`)}
                 </p>
               </div>
 
               <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
-                Member
+                {t("memberBadge")}
               </span>
             </div>
           ))

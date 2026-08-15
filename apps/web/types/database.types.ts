@@ -99,6 +99,33 @@ export type Database = {
           },
         ]
       }
+      cms_settings: {
+        Row: {
+          created_at: string
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       deadline_risk_feature_attributions: {
         Row: {
           absolute_rank: number
@@ -849,27 +876,36 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          display_name: string | null
           full_name: string | null
           id: string
+          leaderboard_opt_in: boolean
           onboarding_completed: boolean
+          role: Database["public"]["Enums"]["app_role"]
           timezone: string
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           full_name?: string | null
           id: string
+          leaderboard_opt_in?: boolean
           onboarding_completed?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
           timezone?: string
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string | null
           full_name?: string | null
           id?: string
+          leaderboard_opt_in?: boolean
           onboarding_completed?: boolean
+          role?: Database["public"]["Enums"]["app_role"]
           timezone?: string
           updated_at?: string
         }
@@ -1065,6 +1101,53 @@ export type Database = {
           },
         ]
       }
+      study_group_weekly_challenges: {
+        Row: {
+          created_at: string
+          created_by: string
+          group_id: string
+          id: string
+          target_completed_tasks: number
+          target_focus_minutes: number
+          title: string
+          updated_at: string
+          week_end: string
+          week_start: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          group_id: string
+          id?: string
+          target_completed_tasks?: number
+          target_focus_minutes?: number
+          title?: string
+          updated_at?: string
+          week_end: string
+          week_start: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          group_id?: string
+          id?: string
+          target_completed_tasks?: number
+          target_focus_minutes?: number
+          title?: string
+          updated_at?: string
+          week_end?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_weekly_challenges_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_room_members: {
         Row: {
           created_at: string
@@ -1157,7 +1240,9 @@ export type Database = {
       }
       study_rooms: {
         Row: {
+          admin_note: string | null
           archived_at: string | null
+          archived_by: string | null
           created_at: string
           description: string | null
           id: string
@@ -1173,7 +1258,9 @@ export type Database = {
           visibility: Database["public"]["Enums"]["study_room_visibility"]
         }
         Insert: {
+          admin_note?: string | null
           archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1189,7 +1276,9 @@ export type Database = {
           visibility?: Database["public"]["Enums"]["study_room_visibility"]
         }
         Update: {
+          admin_note?: string | null
           archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -1543,6 +1632,321 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_learning_document: {
+        Args: { p_document_id: string }
+        Returns: undefined
+      }
+      admin_delete_study_group_message: {
+        Args: { p_message_id: string }
+        Returns: undefined
+      }
+      admin_get_ai_monitoring_metrics: {
+        Args: never
+        Returns: {
+          assistant_messages: number
+          avg_latency_ms: number
+          document_rag_messages: number
+          document_rag_messages_without_sources: number
+          embedded_document_chunks: number
+          failed_documents: number
+          general_ai_messages: number
+          grounded_rule_messages: number
+          max_latency_ms: number
+          messages_with_sources: number
+          no_rule_messages: number
+          pending_documents: number
+          processed_documents: number
+          top_k_3_messages: number
+          top_k_5_messages: number
+          top_k_7_messages: number
+          total_document_chunks: number
+          total_rag_messages: number
+          total_rag_sessions: number
+          unsupported_documents: number
+          user_messages: number
+        }[]
+      }
+      admin_get_cms_settings: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          key: string
+          updated_at: string
+          updated_by: string
+          value: Json
+        }[]
+      }
+      admin_get_document_chunks: {
+        Args: { p_document_id: string; p_limit?: number }
+        Returns: {
+          chunk_id: string
+          chunk_index: number
+          content: string
+          content_char_count: number
+          created_at: string
+          document_id: string
+          embedding_model: string
+          has_embedding: boolean
+          status: string
+          token_estimate: number
+          updated_at: string
+        }[]
+      }
+      admin_get_learning_document_detail: {
+        Args: { p_document_id: string }
+        Returns: {
+          chunk_count: number
+          created_at: string
+          document_id: string
+          embedded_chunk_count: number
+          extracted_text_preview: string
+          extracted_text_status: string
+          failed_chunk_count: number
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          goal_id: string
+          mime_type: string
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          task_id: string
+          updated_at: string
+          visibility: string
+        }[]
+      }
+      admin_get_rag_chat_messages: {
+        Args: { p_limit?: number; p_session_id: string }
+        Returns: {
+          content: string
+          context_mode: string
+          created_at: string
+          latency_ms: number
+          message_id: string
+          prompt_variant: string
+          role: string
+          selected_document_ids: string[]
+          session_id: string
+          source_count: number
+          sources: Json
+          top_k: number
+          user_id: string
+        }[]
+      }
+      admin_get_rag_chat_session_detail: {
+        Args: { p_session_id: string }
+        Returns: {
+          context_mode: string
+          created_at: string
+          prompt_variant: string
+          selected_document_count: number
+          selected_document_ids: string[]
+          session_id: string
+          top_k: number
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
+      }
+      admin_get_rag_empty_source_answers: {
+        Args: { p_limit?: number }
+        Returns: {
+          content: string
+          context_mode: string
+          created_at: string
+          latency_ms: number
+          message_id: string
+          prompt_variant: string
+          session_id: string
+          top_k: number
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
+      }
+      admin_get_study_group_detail: {
+        Args: { p_group_id: string }
+        Returns: {
+          admin_note: string
+          archived_at: string
+          archived_by: string
+          created_at: string
+          description: string
+          group_id: string
+          is_private: boolean
+          member_count: number
+          message_count: number
+          name: string
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          updated_at: string
+        }[]
+      }
+      admin_get_study_group_members: {
+        Args: { p_group_id: string }
+        Returns: {
+          display_name: string
+          email: string
+          full_name: string
+          group_id: string
+          joined_at: string
+          member_id: string
+          membership_status: string
+          role: string
+          user_id: string
+        }[]
+      }
+      admin_get_study_group_messages: {
+        Args: { p_group_id: string; p_limit?: number }
+        Returns: {
+          content: string
+          created_at: string
+          display_name: string
+          email: string
+          full_name: string
+          group_id: string
+          message_id: string
+          user_id: string
+        }[]
+      }
+      admin_get_user_detail: {
+        Args: { p_user_id: string }
+        Returns: {
+          completed_tasks: number
+          created_at: string
+          current_streak: number
+          display_name: string
+          email: string
+          full_name: string
+          last_sign_in_at: string
+          leaderboard_opt_in: boolean
+          processed_documents: number
+          rag_chat_messages: number
+          rag_chat_sessions: number
+          role: string
+          study_group_memberships: number
+          token_balance: number
+          total_focus_minutes: number
+          total_focus_sessions: number
+          total_goals: number
+          total_tasks: number
+          uploaded_documents: number
+          user_id: string
+        }[]
+      }
+      admin_search_learning_documents: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_status?: string
+        }
+        Returns: {
+          chunk_count: number
+          created_at: string
+          document_id: string
+          embedded_chunk_count: number
+          extracted_text_preview: string
+          extracted_text_status: string
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          goal_id: string
+          mime_type: string
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          task_id: string
+          updated_at: string
+          visibility: string
+        }[]
+      }
+      admin_search_rag_chat_sessions: {
+        Args: {
+          p_context_mode?: string
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+        }
+        Returns: {
+          assistant_message_count: number
+          avg_latency_ms: number
+          context_mode: string
+          created_at: string
+          message_count: number
+          selected_document_count: number
+          session_id: string
+          top_k: number
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }[]
+      }
+      admin_search_study_groups: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_status?: string
+        }
+        Returns: {
+          admin_note: string
+          archived_at: string
+          created_at: string
+          description: string
+          group_id: string
+          is_private: boolean
+          member_count: number
+          message_count: number
+          name: string
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          updated_at: string
+        }[]
+      }
+      admin_search_users: {
+        Args: { p_limit?: number; p_offset?: number; p_query?: string }
+        Returns: {
+          completed_tasks: number
+          created_at: string
+          display_name: string
+          email: string
+          full_name: string
+          last_sign_in_at: string
+          leaderboard_opt_in: boolean
+          role: string
+          total_focus_minutes: number
+          total_focus_sessions: number
+          total_goals: number
+          total_tasks: number
+          uploaded_documents: number
+          user_id: string
+        }[]
+      }
+      admin_set_study_group_archived: {
+        Args: { p_admin_note?: string; p_archived: boolean; p_group_id: string }
+        Returns: undefined
+      }
+      admin_update_cms_setting: {
+        Args: { p_key: string; p_value: Json }
+        Returns: undefined
+      }
+      admin_update_user_leaderboard_visibility: {
+        Args: { p_leaderboard_opt_in: boolean; p_user_id: string }
+        Returns: undefined
+      }
+      admin_update_user_role: {
+        Args: {
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       can_access_learning_document: {
         Args: { p_document_id: string; p_user_id: string }
         Returns: boolean
@@ -1586,6 +1990,67 @@ export type Database = {
         Returns: string
       }
       find_user_id_by_auth_email: { Args: { p_email: string }; Returns: string }
+      get_admin_dashboard_metrics: {
+        Args: never
+        Returns: {
+          completed_tasks: number
+          failed_learning_documents: number
+          processed_learning_documents: number
+          total_admins: number
+          total_document_chunks: number
+          total_focus_minutes: number
+          total_focus_sessions: number
+          total_goals: number
+          total_group_messages: number
+          total_learning_documents: number
+          total_rag_chat_messages: number
+          total_rag_chat_sessions: number
+          total_study_groups: number
+          total_tasks: number
+          total_users: number
+          users_created_last_7_days: number
+        }[]
+      }
+      get_admin_recent_users: {
+        Args: { p_limit?: number }
+        Returns: {
+          created_at: string
+          display_name: string
+          full_name: string
+          last_sign_in_at: string
+          leaderboard_opt_in: boolean
+          role: string
+          user_id: string
+        }[]
+      }
+      get_cms_setting: { Args: { p_key: string }; Returns: Json }
+      get_global_weekly_leaderboard: {
+        Args: { p_limit?: number; p_week_end: string; p_week_start: string }
+        Returns: {
+          avatar_url: string
+          completed_tasks: number
+          current_streak: number
+          display_name: string
+          focus_minutes: number
+          focus_sessions: number
+          rank_position: number
+          score: number
+          user_id: string
+        }[]
+      }
+      get_my_global_weekly_rank: {
+        Args: { p_week_end: string; p_week_start: string }
+        Returns: {
+          completed_tasks: number
+          current_streak: number
+          display_name: string
+          focus_minutes: number
+          focus_sessions: number
+          rank_position: number
+          score: number
+          user_id: string
+        }[]
+      }
       get_study_group_members_with_email: {
         Args: { p_group_id: string }
         Returns: {
@@ -1609,6 +2074,32 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_study_group_weekly_challenge_progress: {
+        Args: { p_group_id: string; p_week_end: string; p_week_start: string }
+        Returns: {
+          actual_completed_tasks: number
+          actual_focus_minutes: number
+          focus_progress_percent: number
+          group_id: string
+          target_completed_tasks: number
+          target_focus_minutes: number
+          task_progress_percent: number
+          week_end: string
+          week_start: string
+        }[]
+      }
+      get_study_group_weekly_leaderboard: {
+        Args: { p_group_id: string; p_week_end: string; p_week_start: string }
+        Returns: {
+          completed_tasks: number
+          email: string
+          focus_minutes: number
+          rank_position: number
+          role: string
+          score: number
+          user_id: string
+        }[]
+      }
       get_user_token_balance: { Args: { p_user_id: string }; Returns: number }
       is_active_study_group_member: {
         Args: { p_room_id: string; p_user_id: string }
@@ -1618,6 +2109,7 @@ export type Database = {
         Args: { p_room_id: string; p_user_id?: string }
         Returns: boolean
       }
+      is_admin: { Args: { p_user_id: string }; Returns: boolean }
       is_study_group_owner: {
         Args: { p_room_id: string; p_user_id: string }
         Returns: boolean
@@ -1651,6 +2143,7 @@ export type Database = {
     }
     Enums: {
       ai_insight_type: "deadline_risk" | "native_task_risk"
+      app_role: "user" | "admin"
       deadline_risk_input_mode:
         | "oulad_compatible_features"
         | "lumivox_native_features"
@@ -1834,6 +2327,7 @@ export const Constants = {
   public: {
     Enums: {
       ai_insight_type: ["deadline_risk", "native_task_risk"],
+      app_role: ["user", "admin"],
       deadline_risk_input_mode: [
         "oulad_compatible_features",
         "lumivox_native_features",
