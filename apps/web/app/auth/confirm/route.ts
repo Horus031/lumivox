@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const token_hash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  const next = getSafeRedirectPath(searchParams.get("next"));
 
   if (token_hash && type) {
     const supabase = await createClient();
@@ -28,4 +28,12 @@ export async function GET(request: NextRequest) {
 
   // redirect the user to an error page with some instructions
   redirect(`/${routing.defaultLocale}/auth/error?error=No token hash or type`);
+}
+
+function getSafeRedirectPath(next: string | null) {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+    return "/onboarding";
+  }
+
+  return next;
 }
