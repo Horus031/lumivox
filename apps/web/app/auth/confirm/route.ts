@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { routing } from "@/i18n/routing";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 import { type NextRequest } from "next/server";
@@ -21,10 +22,10 @@ export async function GET(request: NextRequest) {
       redirect(next);
     } else {
       // redirect the user to an error page with some instructions
-      redirect(`/auth/error?error=${error?.message}`);
+      redirect(`/${routing.defaultLocale}/auth/error?error=${error?.message}`);
     }
   }
 
   // redirect the user to an error page with some instructions
-  redirect(`/auth/error?error=No token hash or type`);
+  redirect(`/${routing.defaultLocale}/auth/error?error=No token hash or type`);
 }

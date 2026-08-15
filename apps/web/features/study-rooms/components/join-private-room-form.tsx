@@ -1,7 +1,8 @@
 "use client";
 
 import { FormEvent, useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
 import { joinPrivateStudyRoomByCodeAction } from "@/features/study-rooms/study-room.actions";
@@ -10,6 +11,7 @@ import { Button } from "@/components/ui/button";
 
 export function JoinPrivateRoomForm() {
   const router = useRouter();
+  const t = useTranslations("rooms.joinPrivate");
   const [isPending, startTransition] = useTransition();
   const [inviteCode, setInviteCode] = useState("");
 
@@ -35,9 +37,11 @@ export function JoinPrivateRoomForm() {
   return (
     <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-sm uppercase text-foreground font-semibold">Join a private room</h2>
+        <h2 className="text-sm uppercase text-foreground font-semibold">
+          {t("title")}
+        </h2>
         <p className="mt-1 text-sm text-foreground">
-          Enter an invite code shared by the room owner.
+          {t("description")}
         </p>
       </div>
 
@@ -46,11 +50,11 @@ export function JoinPrivateRoomForm() {
           type="text"
           value={inviteCode}
           onChange={(event) => setInviteCode(event.target.value)}
-          placeholder="E7F8A2C1"
+          placeholder={t("placeholder")}
         />
 
         <Button type="submit" disabled={isPending}>
-          {isPending ? "Joining..." : "Join with code"}
+          {isPending ? t("joining") : t("submit")}
         </Button>
       </form>
     </section>

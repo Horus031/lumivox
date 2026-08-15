@@ -1,20 +1,24 @@
+import { useTranslations } from "next-intl";
+
 import { features } from "@/lib/constants";
 
 export default function Features() {
+  const t = useTranslations("landing.features");
+
   return (
     <section id="features" className="relative py-24">
       <div className="max-w-310 mx-auto px-6">
         <div className="max-w-2xl mx-auto text-center mb-14">
           <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
-            Everything you need
+            {t("eyebrow")}
           </p>
           <h2 className="text-[34px] md:text-[42px] font-semibold tracking-tight leading-tight">
-            A study workspace that thinks{" "}
-            <span className="italic text-secondary">with</span> you
+            {t("title.before")}{" "}
+            <span className="italic text-secondary">{t("title.accent")}</span>{" "}
+            {t("title.after")}
           </h2>
           <p className="mt-4 text-secondary text-[15.5px] leading-relaxed">
-            Six quiet superpowers, designed to remove friction from learning and
-            replace it with momentum.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -23,7 +27,7 @@ export default function Features() {
             const Icon = f.icon;
             return (
               <div
-                key={f.title}
+                key={f.key}
                 className="group relative rounded-2xl border border-border bg-surface p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
                 style={{ animationDelay: `${i * 60}ms` }}
               >
@@ -32,10 +36,10 @@ export default function Features() {
                   <Icon className="size-5" strokeWidth={2} />
                 </div>
                 <h3 className="text-[16px] font-semibold tracking-tight mb-1.5">
-                  {f.title}
+                  {t(`items.${f.key}.title`)}
                 </h3>
                 <p className="text-[13.5px] text-secondary leading-relaxed">
-                  {f.desc}
+                  {t(`items.${f.key}.desc`)}
                 </p>
               </div>
             );

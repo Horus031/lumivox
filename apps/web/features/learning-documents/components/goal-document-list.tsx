@@ -1,7 +1,8 @@
 import type { LearningDocument } from "@/features/learning-documents/learning-document.types";
 import { DeleteLearningDocumentButton } from "@/features/learning-documents/components/delete-learning-document-button";
 import { DocumentPreviewLink } from "@/features/learning-documents/components/document-preview-link";
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { ProcessLearningDocumentButton } from "./process-learning-document-button";
 
 type GoalDocumentListProps = {
@@ -20,24 +21,24 @@ function formatFileSize(bytes: number) {
   return `${mb.toFixed(1)} MB`;
 }
 
-export function GoalDocumentList({ documents }: GoalDocumentListProps) {
+export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
+  const t = await getTranslations("goals.documents.list");
+
   return (
     <section className="rounded-2xl border bg-background p-5 shadow-sm">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground ">
-          Document Library
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {t("eyebrow")}
         </p>
 
         <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
-          Uploaded documents
+          {t("title")}
         </h3>
       </div>
 
       {documents.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed p-8 text-center ">
-          <p className="text-sm text-muted-foreground">
-            No learning documents have been uploaded for this goal yet.
-          </p>
+        <div className="mt-5 rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
         <div className="mt-5 space-y-3">
@@ -52,13 +53,17 @@ export function GoalDocumentList({ documents }: GoalDocumentListProps) {
                 </p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {document.mime_type} ·{" "}
+                  {document.mime_type} -{" "}
                   {formatFileSize(Number(document.file_size_bytes))}
                 </p>
 
                 <p className="mt-1 text-xs capitalize text-muted-foreground">
-                  Visibility: {document.visibility} · AI:{" "}
-                  {document.extracted_text_status ?? "pending"}
+                  {t("metadata", {
+                    visibility: t(`visibility.${document.visibility}`),
+                    status: t(
+                      `aiStatus.${document.extracted_text_status ?? "pending"}`,
+                    ),
+                  })}
                 </p>
               </div>
 
@@ -74,7 +79,7 @@ export function GoalDocumentList({ documents }: GoalDocumentListProps) {
                   href={`/documents/${document.id}/share`}
                   className="rounded-md border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
                 >
-                  Share
+                  {t("share")}
                 </Link>
 
                 <DeleteLearningDocumentButton documentId={document.id} />

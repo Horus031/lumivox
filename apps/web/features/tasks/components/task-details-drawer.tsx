@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -9,20 +10,17 @@ import { Button } from "@/components/ui/button";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { deleteTaskAction } from "@/features/tasks/task.actions";
 import { formatDisplayDate } from "@/lib/utils/date";
-
-import { TaskModalShell } from "./task-modal-shell";
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
+import { TaskModalShell } from "./task-modal-shell";
 
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
   onClose: () => void;
 };
 
-function getStatusLabel(status: TaskWithGoal["status"]) {
-  return status.replace("_", " ");
-}
-
 export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
+  const t = useTranslations("tasks.details");
+  const formT = useTranslations("tasks.form");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -33,16 +31,25 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
   const currentTask = task;
 
   const summaryRows = [
-    { label: "Goal", value: currentTask.goals?.title ?? "No goal assigned" },
-    { label: "Due", value: formatDisplayDate(currentTask.due_at) },
     {
-      label: "Estimate",
-      value: currentTask.estimated_minutes
-        ? `${currentTask.estimated_minutes} minutes`
-        : "Not set",
+      label: t("summary.goal"),
+      value: currentTask.goals?.title ?? formT("noGoalAssigned"),
     },
-    { label: "Priority", value: currentTask.priority },
-    { label: "Status", value: getStatusLabel(currentTask.status) },
+    { label: t("summary.due"), value: formatDisplayDate(currentTask.due_at) },
+    {
+      label: t("summary.estimate"),
+      value: currentTask.estimated_minutes
+        ? t("minutes", { minutes: currentTask.estimated_minutes })
+        : t("notSet"),
+    },
+    {
+      label: t("summary.priority"),
+      value: formT(`priorities.${currentTask.priority}`),
+    },
+    {
+      label: t("summary.status"),
+      value: formT(`statuses.${currentTask.status}`),
+    },
   ];
 
   function handleDelete() {
@@ -65,7 +72,7 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
       open={Boolean(task)}
       onClose={onClose}
       title={currentTask.title}
-      description={currentTask.description ?? "Task details"}
+      description={currentTask.description ?? t("fallbackDescription")}
       align="right"
       footer={
         <div className="flex items-center gap-3">
@@ -75,7 +82,7 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
             onClick={onClose}
             className="rounded-full px-5"
           >
-            Close
+            {t("close")}
           </Button>
 
           <Button
@@ -85,7 +92,7 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
             disabled={isPending}
             className="rounded-full px-5"
           >
-            {isPending ? "Deleting..." : "Delete task"}
+            {isPending ? t("deleting") : t("deleteTask")}
           </Button>
         </div>
       }
@@ -94,15 +101,19 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="secondary"
-            className={`rounded-full px-3 py-1.5 capitalize ${getPriorityTone(currentTask.priority)}`}
+            className={`rounded-full px-3 py-1.5 capitalize ${getPriorityTone(
+              currentTask.priority,
+            )}`}
           >
-            {currentTask.priority}
+            {formT(`priorities.${currentTask.priority}`)}
           </Badge>
           <Badge
             variant="outline"
-            className={`rounded-full px-3 py-1.5 capitalize ${getStatusTone(currentTask.status)}`}
+            className={`rounded-full px-3 py-1.5 capitalize ${getStatusTone(
+              currentTask.status,
+            )}`}
           >
-            {getStatusLabel(currentTask.status)}
+            {formT(`statuses.${currentTask.status}`)}
           </Badge>
         </div>
 
@@ -115,35 +126,37 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
               <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
                 {row.label}
               </p>
-              <p className="mt-2 text-sm font-medium text-foreground">{row.value}</p>
+              <p className="mt-2 text-sm font-medium text-foreground">
+                {row.value}
+              </p>
             </div>
           ))}
         </div>
 
         <div className="rounded-3xl bg-muted/35 p-4 ring-1 ring-border/50">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            Notes
+            {t("notes")}
           </p>
           <p className="mt-2 text-sm leading-6 text-foreground/90">
             {currentTask.description?.trim()
               ? currentTask.description
-              : "No description has been added for this task yet."}
+              : t("noDescription")}
           </p>
         </div>
 
         <div className="rounded-3xl bg-muted/35 p-4 ring-1 ring-border/50">
           <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-            System fields
+            {t("systemFields")}
           </p>
           <div className="mt-3 grid gap-2 text-sm text-muted-foreground">
             <div className="flex items-center justify-between gap-3">
-              <span>Created</span>
+              <span>{t("created")}</span>
               <span className="font-medium text-foreground">
                 {formatDisplayDate(currentTask.created_at)}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <span>Updated</span>
+              <span>{t("updated")}</span>
               <span className="font-medium text-foreground">
                 {formatDisplayDate(currentTask.updated_at)}
               </span>

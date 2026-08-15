@@ -2,6 +2,7 @@
 
 import { useRef, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { uploadGoalLearningDocumentAction } from "@/features/learning-documents/learning-document.actions";
@@ -14,6 +15,7 @@ type GoalDocumentUploadFormProps = {
 export function GoalDocumentUploadForm({
   goalId,
 }: GoalDocumentUploadFormProps) {
+  const t = useTranslations("goals.documents.upload");
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
   const [isPending, startTransition] = useTransition();
@@ -43,16 +45,15 @@ export function GoalDocumentUploadForm({
 
       <div>
         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Learning Documents
+          {t("eyebrow")}
         </p>
 
         <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
-          Upload study material
+          {t("title")}
         </h3>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Upload PDFs, text notes, markdown files, or images for this goal.
-          These files will later be used by the RAG study assistant.
+          {t("description")}
         </p>
       </div>
 
@@ -71,7 +72,7 @@ export function GoalDocumentUploadForm({
         disabled={isPending}
         className="mt-4 px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {isPending ? "Uploading..." : "Upload Document"}
+        {isPending ? t("uploading") : t("button")}
       </Button>
     </form>
   );

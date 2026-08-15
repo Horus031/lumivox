@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { createClient } from "@/lib/supabase/client";
@@ -39,8 +40,8 @@ type BroadcastMessagePayload = {
   };
 };
 
-function formatMessageTime(value: string) {
-  return new Intl.DateTimeFormat("en-US", {
+function formatMessageTime(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
     minute: "2-digit",
   }).format(new Date(value));
@@ -51,6 +52,8 @@ export function StudyRoomChatPanel({
   currentUserId,
   initialMessages,
 }: StudyRoomChatPanelProps) {
+  const locale = useLocale();
+  const t = useTranslations("rooms.chat");
   const supabase = useMemo(() => createClient(), []);
   const formRef = useRef<HTMLFormElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -186,7 +189,7 @@ export function StudyRoomChatPanel({
     const trimmed = content.trim();
 
     if (!trimmed) {
-      toast.error("Message cannot be empty.");
+      toast.error(t("errors.empty"));
       return;
     }
 
@@ -208,7 +211,7 @@ export function StudyRoomChatPanel({
         setContent("");
       } catch (error) {
         console.error("Failed to send study room message:", error);
-        toast.error("Failed to send message.");
+        toast.error(t("errors.failed"));
       } finally {
         isSubmittingRef.current = false;
         setIsSubmitting(false);
@@ -238,16 +241,15 @@ export function StudyRoomChatPanel({
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
-            Room Chat
+            {t("eyebrow")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold tracking-tight">
-            Live conversation
+            {t("title")}
           </h2>
 
           <p className="mt-2 max-w-2xl text-neutral-600">
-            Messages are stored permanently and broadcast to active room members
-            in real time.
+            {t("description")}
           </p>
         </div>
 
@@ -260,7 +262,7 @@ export function StudyRoomChatPanel({
                 : "bg-neutral-100 text-neutral-700"
           }`}
         >
-          {liveState}
+          {t(`connection.${liveState}`)}
         </span>
       </div>
 
@@ -269,7 +271,7 @@ export function StudyRoomChatPanel({
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center text-center">
               <p className="text-sm text-neutral-500">
-                No messages yet. Start the room conversation.
+                {t("empty")}
               </p>
             </div>
           ) : (
@@ -287,7 +289,7 @@ export function StudyRoomChatPanel({
                 >
                   <div className="flex items-center justify-between gap-4">
                     <p className={`text-sm font-semibold text-foreground}`}>
-                      {message.profiles?.full_name ?? "Lumivox User"}
+                      {message.profiles?.full_name ?? t("lumivoxUser")}
                     </p>
 
                     <span
@@ -295,7 +297,7 @@ export function StudyRoomChatPanel({
                         isMine ? "text-foreground" : "text-foreground"
                       }`}
                     >
-                      {formatMessageTime(message.created_at)}
+                      {formatMessageTime(message.created_at, locale)}
                     </span>
                   </div>
 
@@ -319,7 +321,7 @@ export function StudyRoomChatPanel({
               disabled={isSubmitting}
               onKeyDown={handleKeyDown}
               onChange={(event) => setContent(event.target.value)}
-              placeholder="Write a message to the room..."
+              placeholder={t("placeholder")}
               rows={1}
               className="w-full h-fit resize-none border px-3 py-2.5 outline-none transition focus:border-neutral-900"
             />
@@ -329,7 +331,7 @@ export function StudyRoomChatPanel({
               disabled={isSubmitting}
               className="px-5 py-2.5 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isSubmitting ? "Sending..." : "Send"}
+              {isSubmitting ? t("sending") : t("send")}
             </Button>
           </div>
         </form>

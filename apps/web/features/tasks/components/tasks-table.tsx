@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState, Fragment } from "react";
+import { Fragment, useMemo, useState, useTransition } from "react";
 import type React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { useTransition } from "react";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -17,24 +19,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { TaskWithGoal } from "@/features/tasks/task.types";
 import type { Goal } from "@/features/goals/goal.types";
-import { formatDisplayDate } from "@/lib/utils/date";
-import { TaskDatePicker } from "./task-date-picker";
-
+import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { updateTaskAction } from "@/features/tasks/task.actions";
-import { TaskDetailsDrawer } from "./task-details-drawer";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+import { formatDisplayDate } from "@/lib/utils/date";
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
+import { TaskDatePicker } from "./task-date-picker";
+import { TaskDetailsDrawer } from "./task-details-drawer";
 
 type TasksTableProps = {
   tasks: TaskWithGoal[];
   goals: Goal[];
 };
 
+function formatGoalType(
+  goalType: string | null | undefined,
+  t: ReturnType<typeof useTranslations>,
+) {
+  if (goalType === "short_term" || goalType === "long_term") {
+    return t(`goalTypes.${goalType}`);
+  }
+
+  return t("unlinked");
+}
 
 export function TasksTable({ tasks, goals }: TasksTableProps) {
+  const t = useTranslations("tasks.table");
+  const formT = useTranslations("tasks.form");
+  const commonT = useTranslations("common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -50,15 +62,14 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
     return (
       <div className="rounded-[28px] border border-dashed border-border/60 bg-muted/30 p-10 text-center">
         <h3 className="text-lg font-semibold text-foreground">
-          No tasks found
+          {t("emptyTitle")}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          Try a different search or filter, or create a fresh task to get
-          started.
+          {t("emptyDescription")}
         </p>
 
         <div className="mt-5 inline-flex items-center gap-2 rounded-full bg-background px-4 py-2 text-sm text-muted-foreground ring-1 ring-border/60">
-          Results are paginated here.
+          {t("paginatedHint")}
         </div>
       </div>
     );
@@ -82,17 +93,17 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
     );
     const [dueTime, setDueTime] = useState(() => {
       if (task.due_at) {
-        const d = new Date(task.due_at);
-        const hh = String(d.getHours()).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        return `${hh}:${mm}`;
+        const date = new Date(task.due_at);
+        const hours = String(date.getHours()).padStart(2, "0");
+        const minutes = String(date.getMinutes()).padStart(2, "0");
+        return `${hours}:${minutes}`;
       }
 
       return "10:30";
     });
 
-    async function handleUpdate(e: React.FormEvent) {
-      e.preventDefault();
+    async function handleUpdate(event: React.FormEvent) {
+      event.preventDefault();
 
       startTransition(async () => {
         const result = await updateTaskAction({
@@ -127,16 +138,16 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
           <form onSubmit={handleUpdate} className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-3">
-                <Label>Title</Label>
+                <Label>{formT("fields.title")}</Label>
                 <Input
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={(event) => setTitle(event.target.value)}
                   required
                 />
               </div>
 
               <div className="space-y-3">
-                <Label>Linked goal</Label>
+                <Label>{formT("fields.linkedGoal")}</Label>
 
                 <Select
                   value={goalId ?? ""}
@@ -145,15 +156,14 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                   }
                 >
                   <SelectTrigger className="w-full! h-11! border border-input bg-transparent px-3 text-sm">
-                    <SelectValue placeholder="Priority" />
+                    <SelectValue placeholder={formT("fields.linkedGoal")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectItem value="no-goal">No goal</SelectItem>
-                      {/** goals prop is available in parent scope via closure */}
-                      {goals?.map((g: Goal) => (
-                        <SelectItem key={g.id} value={g.id}>
-                          {g.title}
+                      <SelectItem value="no-goal">{formT("noGoal")}</SelectItem>
+                      {goals.map((goal) => (
+                        <SelectItem key={goal.id} value={goal.id}>
+                          {goal.title}
                         </SelectItem>
                       ))}
                     </SelectGroup>
@@ -162,35 +172,45 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
               </div>
 
               <div className="space-y-3">
-                <label>Priority</label>
+                <Label>{formT("fields.priority")}</Label>
                 <Select
                   value={priority}
-                  onValueChange={(v) =>
-                    setPriority(v as "low" | "medium" | "high" | "critical")
+                  onValueChange={(value) =>
+                    setPriority(
+                      value as "low" | "medium" | "high" | "critical",
+                    )
                   }
                 >
-                  <SelectTrigger className="w-full h-11 border border-input bg-transparent px-3 text-sm">
-                    <SelectValue placeholder="Priority" />
+                  <SelectTrigger className="h-11 w-full border border-input bg-transparent px-3 text-sm">
+                    <SelectValue placeholder={formT("fields.priority")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Priorities</SelectLabel>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
+                      <SelectLabel>{formT("fields.priority")}</SelectLabel>
+                      <SelectItem value="low">
+                        {formT("priorities.low")}
+                      </SelectItem>
+                      <SelectItem value="medium">
+                        {formT("priorities.medium")}
+                      </SelectItem>
+                      <SelectItem value="high">
+                        {formT("priorities.high")}
+                      </SelectItem>
+                      <SelectItem value="critical">
+                        {formT("priorities.critical")}
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
-                <label>Status</label>
+                <Label>{formT("fields.status")}</Label>
                 <Select
                   value={status}
-                  onValueChange={(v) =>
+                  onValueChange={(value) =>
                     setStatus(
-                      v as
+                      value as
                         | "todo"
                         | "in_progress"
                         | "completed"
@@ -199,17 +219,27 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                     )
                   }
                 >
-                  <SelectTrigger className="w-full h-11 border border-input bg-transparent px-3 text-sm">
-                    <SelectValue placeholder="Status" />
+                  <SelectTrigger className="h-11 w-full border border-input bg-transparent px-3 text-sm">
+                    <SelectValue placeholder={formT("fields.status")} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      <SelectLabel>Statuses</SelectLabel>
-                      <SelectItem value="todo">Todo</SelectItem>
-                      <SelectItem value="in_progress">In progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="overdue">Overdue</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                      <SelectLabel>{formT("fields.status")}</SelectLabel>
+                      <SelectItem value="todo">
+                        {formT("statuses.todo")}
+                      </SelectItem>
+                      <SelectItem value="in_progress">
+                        {formT("statuses.in_progress")}
+                      </SelectItem>
+                      <SelectItem value="completed">
+                        {formT("statuses.completed")}
+                      </SelectItem>
+                      <SelectItem value="overdue">
+                        {formT("statuses.overdue")}
+                      </SelectItem>
+                      <SelectItem value="cancelled">
+                        {formT("statuses.cancelled")}
+                      </SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -218,12 +248,12 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-3">
-                <label>Estimate (minutes)</label>
+                <Label>{formT("fields.estimatedMinutes")}</Label>
                 <Input
                   type="number"
                   min={0}
                   value={estimatedMinutes}
-                  onChange={(e) => setEstimatedMinutes(e.target.value)}
+                  onChange={(event) => setEstimatedMinutes(event.target.value)}
                 />
               </div>
 
@@ -239,14 +269,14 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
 
             <div className="flex gap-2">
               <Button type="submit" disabled={isPending}>
-                Save
+                {commonT("save")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => setEditingTaskId(null)}
               >
-                Cancel
+                {commonT("cancel")}
               </Button>
             </div>
           </form>
@@ -262,20 +292,28 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
           <table className="min-w-230 w-full border-collapse">
             <thead className="bg-muted/45 text-left text-xs uppercase tracking-[0.22em] text-muted-foreground">
               <tr>
-                <th className="px-5 py-4 font-semibold">Task</th>
-                <th className="px-4 py-4 font-semibold">Goal</th>
-                <th className="px-4 py-4 font-semibold">Priority</th>
-                <th className="px-4 py-4 font-semibold">Status</th>
-                <th className="px-4 py-4 font-semibold">Due</th>
-                <th className="px-4 py-4 font-semibold">Estimate</th>
-                <th className="px-5 py-4 font-semibold text-right">Details</th>
+                <th className="px-5 py-4 font-semibold">{t("headers.task")}</th>
+                <th className="px-4 py-4 font-semibold">{t("headers.goal")}</th>
+                <th className="px-4 py-4 font-semibold">
+                  {t("headers.priority")}
+                </th>
+                <th className="px-4 py-4 font-semibold">
+                  {t("headers.status")}
+                </th>
+                <th className="px-4 py-4 font-semibold">{t("headers.due")}</th>
+                <th className="px-4 py-4 font-semibold">
+                  {t("headers.estimate")}
+                </th>
+                <th className="px-5 py-4 text-right font-semibold">
+                  {t("headers.details")}
+                </th>
               </tr>
             </thead>
             <tbody>
               {tasks.map((task) => (
                 <Fragment key={task.id}>
                   <tr className="border-t border-border/60 transition hover:bg-muted/35">
-                    <td className="px-5 py-4 align-top max-w-56">
+                    <td className="max-w-56 px-5 py-4 align-top">
                       <button
                         type="button"
                         onClick={() => setSelectedTaskId(task.id)}
@@ -284,17 +322,17 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                         <p className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary">
                           {task.title}
                         </p>
-                        <p className="mt-1 truncate line-clamp-2 text-wrap text-sm text-muted-foreground">
-                          {task.description ?? "No description available"}
+                        <p className="mt-1 line-clamp-2 truncate text-wrap text-sm text-muted-foreground">
+                          {task.description ?? t("noDescription")}
                         </p>
                       </button>
                     </td>
                     <td className="px-4 py-4 align-top text-sm text-muted-foreground">
                       <p className="font-medium text-foreground">
-                        {task.goals?.title ?? "No goal"}
+                        {task.goals?.title ?? formT("noGoal")}
                       </p>
                       <p className="mt-1 text-xs capitalize tracking-[0.18em] text-muted-foreground">
-                        {task.goals?.goal_type.replace("_", " ") ?? "Unlinked"}
+                        {formatGoalType(task.goals?.goal_type, formT)}
                       </p>
                     </td>
                     <td className="px-4 py-4 align-top">
@@ -304,7 +342,7 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                           task.priority,
                         )}`}
                       >
-                        {task.priority}
+                        {formT(`priorities.${task.priority}`)}
                       </Badge>
                     </td>
                     <td className="px-4 py-4 align-top">
@@ -314,7 +352,7 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                           task.status,
                         )}`}
                       >
-                        {task.status.replace("_", " ")}
+                        {formT(`statuses.${task.status}`)}
                       </Badge>
                     </td>
                     <td className="px-4 py-4 align-top text-sm text-foreground">
@@ -322,24 +360,24 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                     </td>
                     <td className="px-4 py-4 align-top text-sm text-foreground">
                       {task.estimated_minutes
-                        ? `${task.estimated_minutes}m`
-                        : "—"}
+                        ? t("minutesShort", { minutes: task.estimated_minutes })
+                        : "-"}
                     </td>
-                    <td className="px-5 py-4 align-top text-right">
+                    <td className="px-5 py-4 text-right align-top">
                       <div className="flex items-center justify-end gap-2">
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => setEditingTaskId(task.id)}
                         >
-                          Edit
+                          {commonT("edit")}
                         </Button>
                         <Button
                           type="button"
                           onClick={() => setSelectedTaskId(task.id)}
                           className="rounded-full bg-muted/70 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary hover:text-primary-foreground"
                         >
-                          Open
+                          {t("open")}
                         </Button>
                       </div>
                     </td>

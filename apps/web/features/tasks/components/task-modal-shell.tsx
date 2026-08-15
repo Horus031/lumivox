@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 type TaskModalShellProps = {
   open: boolean;
@@ -22,6 +23,8 @@ export function TaskModalShell({
   footer,
   align = "center",
 }: TaskModalShellProps) {
+  const t = useTranslations("tasks.modalShell");
+
   useEffect(() => {
     if (!open) {
       return;
@@ -68,7 +71,7 @@ export function TaskModalShell({
         <div className="flex items-start justify-between gap-4 border-b border-border/50 px-5 pt-4 md:px-6">
           <div>
             <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
-              Task detail
+              {t("eyebrow")}
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
               {title}
@@ -79,7 +82,7 @@ export function TaskModalShell({
             type="button"
             className="rounded-full p-2 text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={t("close")}
           >
             <X className="h-4 w-4" />
           </button>

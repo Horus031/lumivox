@@ -9,6 +9,15 @@ import type {
   LearningDocumentVisibility,
 } from "@/features/learning-documents/learning-document.types";
 import { updateLearningDocumentVisibilityAction } from "@/features/learning-documents/learning-document-sharing.actions";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type DocumentVisibilityControlProps = {
   document: LearningDocument;
@@ -38,25 +47,45 @@ export function DocumentVisibilityControl({
   }
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
           Visibility
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
           Document access mode
         </h2>
 
-        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Private documents are only visible to you. Shared documents are
-          visible to specific email permissions. Public documents are visible
-          to authenticated users with the link.
+          visible to specific email permissions. Public documents are visible to
+          authenticated users with the link.
         </p>
       </div>
 
       <div className="mt-5">
-        <select
+        <Select
+          disabled={isPending}
+          value={document.visibility}
+          onValueChange={(value) =>
+            handleChange(value as LearningDocumentVisibility)
+          }
+        >
+          <SelectTrigger className="w-full max-w-48">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Visibilities</SelectLabel>
+              <SelectItem value="private">Private</SelectItem>
+              <SelectItem value="shared">Shared by email</SelectItem>
+              <SelectItem value="public">Public link</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+
+        {/* <select
           value={document.visibility}
           disabled={isPending}
           onChange={(event) =>
@@ -67,7 +96,7 @@ export function DocumentVisibilityControl({
           <option value="private">Private</option>
           <option value="shared">Shared by email</option>
           <option value="public">Public link</option>
-        </select>
+        </select> */}
       </div>
     </section>
   );

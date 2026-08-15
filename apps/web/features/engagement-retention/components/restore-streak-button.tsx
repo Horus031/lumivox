@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { restoreStreakWithTokensAction } from "@/features/engagement-retention/engagement-retention.actions";
@@ -14,6 +15,7 @@ export function RestoreStreakButton({
   disabled = false,
 }: RestoreStreakButtonProps) {
   const router = useRouter();
+  const t = useTranslations("settings.restoreButton");
   const [isPending, startTransition] = useTransition();
 
   function handleRestore() {
@@ -36,7 +38,7 @@ export function RestoreStreakButton({
       disabled={disabled || isPending}
       className="rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {isPending ? "Restoring..." : "Restore Streak"}
+      {isPending ? t("restoring") : t("restore")}
     </button>
   );
 }

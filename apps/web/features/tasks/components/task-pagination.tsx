@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type TaskPaginationProps = {
@@ -35,13 +36,14 @@ export function TaskPagination({
   totalPages,
   filters,
 }: TaskPaginationProps) {
+  const t = useTranslations("tasks.pagination");
   const isFirstPage = page <= 1;
   const isLastPage = page >= totalPages;
 
   return (
     <div className="flex flex-col items-center justify-between gap-3 border-t border-border/50 pt-4 sm:flex-row">
       <p className="text-sm text-muted-foreground">
-        Showing page {page} of {totalPages}
+        {t("showing", { page, totalPages })}
       </p>
 
       <div className="flex items-center gap-2">
@@ -57,7 +59,7 @@ export function TaskPagination({
           }
         >
           <ChevronLeft className="h-4 w-4" />
-          Previous
+          {t("previous")}
         </Link>
 
         <Link
@@ -71,7 +73,7 @@ export function TaskPagination({
             isLastPage ? buildHref(page, filters) : buildHref(page + 1, filters)
           }
         >
-          Next
+          {t("next")}
           <ChevronRight className="h-4 w-4" />
         </Link>
       </div>

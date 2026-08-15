@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,7 @@ export function StudyRoomPresencePanel({
   currentUserId,
   currentUserName,
 }: StudyRoomPresencePanelProps) {
+  const t = useTranslations("rooms.presence");
   const supabase = useMemo(() => createClient(), []);
 
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
@@ -74,7 +76,7 @@ export function StudyRoomPresencePanel({
   >("connecting");
 
   const [connectionMessage, setConnectionMessage] = useState(
-    "Connecting to room presence...",
+    t("messages.connecting"),
   );
 
   const [, setMyStatus] = useState<PresenceStatus>("available");
@@ -133,7 +135,7 @@ export function StudyRoomPresencePanel({
     async function subscribeToPresence() {
       try {
         setConnectionState("connecting");
-        setConnectionMessage("Preparing authenticated realtime session...");
+        setConnectionMessage(t("messages.preparing"));
 
         const {
           data: { user },
@@ -228,7 +230,7 @@ export function StudyRoomPresencePanel({
           .subscribe(async (status, error) => {
             if (status === "SUBSCRIBED") {
               setConnectionState("connected");
-              setConnectionMessage("Presence connected.");
+              setConnectionMessage(t("messages.connected"));
 
               const payload: PresenceBroadcastPayload = {
                 userId: currentUserId,
@@ -251,18 +253,18 @@ export function StudyRoomPresencePanel({
             if (status === "CHANNEL_ERROR") {
               setConnectionState("error");
               setConnectionMessage(
-                error?.message ?? "Presence channel failed to connect.",
+                error?.message ?? t("messages.failed"),
               );
             }
 
             if (status === "TIMED_OUT") {
               setConnectionState("error");
-              setConnectionMessage("Presence channel timed out.");
+              setConnectionMessage(t("messages.timedOut"));
             }
 
             if (status === "CLOSED") {
               setConnectionState("error");
-              setConnectionMessage("Presence channel was closed.");
+              setConnectionMessage(t("messages.closed"));
             }
           });
       } catch (error) {
@@ -270,7 +272,7 @@ export function StudyRoomPresencePanel({
         setConnectionMessage(
           error instanceof Error
             ? error.message
-            : "Unexpected presence connection error.",
+            : t("messages.unexpected"),
         );
       }
     }
@@ -293,7 +295,7 @@ export function StudyRoomPresencePanel({
         })();
       }
     };
-  }, [currentUserId, currentUserName, roomId, supabase]);
+  }, [currentUserId, currentUserName, roomId, supabase, t]);
 
   useEffect(() => {
     async function handleLeaveRoom(event: Event) {
@@ -370,22 +372,21 @@ export function StudyRoomPresencePanel({
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <p className="text-sm font-medium uppercase tracking-wide text-foreground">
-            Realtime Presence
+            {t("eyebrow")}
           </p>
 
           <h2 className="mt-2 text-2xl font-bold tracking-tight">
-            Who is studying here now?
+            {t("title")}
           </h2>
 
           <p className="mt-2 max-w-2xl text-neutral-600">
-            Presence tracks connected learners, while low-latency room events
-            keep status changes responsive.
+            {t("description")}
           </p>
         </div>
 
         <div className="rounded-2xl bg-surface px-4 py-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
-            Connection
+            {t("connectionLabel")}
           </p>
 
           <p
@@ -397,7 +398,7 @@ export function StudyRoomPresencePanel({
                   : "text-neutral-700"
             }`}
           >
-            {connectionState}
+            {t(`connection.${connectionState}`)}
           </p>
 
           <p className="mt-1 max-w-55 text-xs leading-5 text-foreground">
@@ -407,14 +408,14 @@ export function StudyRoomPresencePanel({
       </div>
 
       <div className="mt-6 rounded-2xl border p-4">
-        <p className="text-sm font-semibold">My current room status</p>
+        <p className="text-sm font-semibold">{t("myStatus")}</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
           <Button
             onClick={() => updateMyStatus("available")}
             className={`rounded-xl px-4 py-2 text-sm font-medium transition `}
           >
-            Available
+            {t("status.available")}
           </Button>
 
           <Button
@@ -422,7 +423,7 @@ export function StudyRoomPresencePanel({
             onClick={() => updateMyStatus("focusing")}
             className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
           >
-            Focusing
+            {t("status.focusing")}
           </Button>
 
           <Button
@@ -430,24 +431,24 @@ export function StudyRoomPresencePanel({
             onClick={() => updateMyStatus("paused")}
             className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
           >
-            Paused
+            {t("status.paused")}
           </Button>
         </div>
       </div>
 
       <div className="mt-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Online participants</h3>
+          <h3 className="text-lg font-semibold">{t("onlineParticipants")}</h3>
 
           <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold text-foreground">
-            {participants.length} online
+            {t("onlineCount", { count: participants.length })}
           </span>
         </div>
 
         {participants.length === 0 ? (
           <div className="rounded-2xl border border-dashed p-8 text-center">
             <p className="text-sm text-neutral-600">
-              No live participant presence has been detected yet.
+              {t("empty")}
             </p>
           </div>
         ) : (
@@ -461,7 +462,7 @@ export function StudyRoomPresencePanel({
                   <div>
                     <p className="font-semibold">{participant.fullName}</p>
                     <p className="mt-1 text-xs text-neutral-500">
-                      Connected now
+                      {t("connectedNow")}
                     </p>
                   </div>
 
@@ -470,7 +471,7 @@ export function StudyRoomPresencePanel({
                       participant.status,
                     )}`}
                   >
-                    {participant.status}
+                    {t(`status.${participant.status}`)}
                   </span>
                 </div>
               </article>

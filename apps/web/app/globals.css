@@ -188,4 +188,72 @@
     from { width: 0; }
   }
   .animate-progress { animation: progress-fill 0.6s var(--ease-out); }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar {
+    width: 5.5rem;
+    padding-inline: 0.75rem;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-panel {
+    align-items: center;
+    padding-inline: 0.5rem;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-brand-copy,
+  [data-sidebar-collapsed="true"] .desktop-sidebar-link-copy,
+  [data-sidebar-collapsed="true"] .desktop-sidebar-user-copy,
+  [data-sidebar-collapsed="true"] .desktop-sidebar-engagement {
+    display: none;
+    width: 0;
+    max-width: 0;
+    height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-nav-link {
+    width: 3.5rem;
+    height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    margin-inline: auto;
+    padding: 0;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-nav-icon {
+    margin-top: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-nav-scroll {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-brand-mark {
+    display: flex;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-user {
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-user-inner {
+    gap: 0;
+  }
+
+  [data-sidebar-collapsed="true"] .desktop-sidebar-avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 1rem;
+  }
 }

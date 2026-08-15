@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useTranslations } from "next-intl";
 
 type Task = Database["public"]["Tables"]["tasks"]["Row"];
 
@@ -26,6 +27,7 @@ type StartFocusSessionFormProps = {
 
 export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
   const router = useRouter();
+  const t = useTranslations("focus.startForm");
   const [isPending, startTransition] = useTransition();
 
   const [taskId, setTaskId] = useState("");
@@ -54,14 +56,14 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
     <section className="rounded-2xl border bg-background p-6 shadow-sm">
       <div className="mb-5">
         <h2 className="text-xs text-center uppercase font-semibold text-foreground">
-          Start a focus session
+          {t("title")}
         </h2>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="mb-1.5 block text-sm font-medium">
-            Linked task
+            {t("linkedTask")}
           </label>
 
           <Select
@@ -72,12 +74,12 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
             defaultValue="no-task"
           >
             <SelectTrigger className="flex w-full h-11! rounded-xl border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-              <SelectValue placeholder="Choose your linked task" />
+              <SelectValue placeholder={t("chooseTask")} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>Linked task</SelectLabel>
-                <SelectItem value="no-task">No linked task</SelectItem>
+                <SelectLabel>{t("linkedTask")}</SelectLabel>
+                <SelectItem value="no-task">{t("noLinkedTask")}</SelectItem>
                 {tasks.map((tasks) => (
                   <SelectItem key={tasks.id} value={tasks.id}>
                     {tasks.title}
@@ -104,7 +106,7 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium">
-            Planned duration
+            {t("plannedDuration")}
           </label>
 
           <div className="flex flex-wrap gap-2">
@@ -120,14 +122,14 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                     : "text-foreground hover:text-foreground"
                 }`}
               >
-                {value} min
+                {t("minutes", { value: Number(value) })}
               </Button>
             ))}
           </div>
 
           <div className="mt-3">
             <Input
-              placeholder="Your desired planned minutes..."
+              placeholder={t("plannedMinutesPlaceholder")}
               type="number"
               min={1}
               max={240}
@@ -143,7 +145,7 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
           disabled={isPending}
           className="w-full disabled:cursor-not-allowed"
         >
-          {isPending ? "Starting..." : "Start focus session"}
+          {isPending ? t("starting") : t("start")}
         </Button>
       </form>
     </section>

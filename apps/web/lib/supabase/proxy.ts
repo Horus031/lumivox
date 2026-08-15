@@ -1,12 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasLocale } from "next-intl";
+
+import { routing } from "@/i18n/routing";
 import { hasEnvVars } from "../utils";
 
 const AUTH_PAGES = new Set(["/", "/auth/login", "/auth/sign-up"]);
 const PROTECTED_PATH_PREFIXES = [
+  "/admin",
   "/dashboard",
+  "/documents",
   "/focus",
   "/goals",
+  "/groups",
+  "/leaderboard",
   "/onboarding",
   "/reflections",
   "/rooms",
@@ -15,16 +22,38 @@ const PROTECTED_PATH_PREFIXES = [
 ];
 
 function isProtectedPath(pathname: string) {
+  const pathWithoutLocale = removeLocalePrefix(pathname);
+
   return PROTECTED_PATH_PREFIXES.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
+    (path) =>
+      pathWithoutLocale === path || pathWithoutLocale.startsWith(`${path}/`),
   );
 }
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  });
+function getLocaleFromPathname(pathname: string) {
+  const [, maybeLocale] = pathname.split("/");
 
+  return hasLocale(routing.locales, maybeLocale)
+    ? maybeLocale
+    : routing.defaultLocale;
+}
+
+function removeLocalePrefix(pathname: string) {
+  const [, maybeLocale, ...segments] = pathname.split("/");
+
+  if (hasLocale(routing.locales, maybeLocale)) {
+    return `/${segments.join("/")}`;
+  }
+
+  return pathname;
+}
+
+export async function updateSession(
+  request: NextRequest,
+  supabaseResponse = NextResponse.next({
+    request,
+  }),
+) {
   // If the env vars are not set, skip proxy check. You can remove this
   // once you setup the project.
   if (!hasEnvVars) {
@@ -45,9 +74,6 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value }) =>
             request.cookies.set(name, value),
           );
-          supabaseResponse = NextResponse.next({
-            request,
-          });
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );
@@ -65,17 +91,19 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isAuthenticated = Boolean(data?.claims);
   const pathname = request.nextUrl.pathname;
+  const locale = getLocaleFromPathname(pathname);
+  const pathWithoutLocale = removeLocalePrefix(pathname);
 
-  if (isAuthenticated && AUTH_PAGES.has(pathname)) {
+  if (isAuthenticated && AUTH_PAGES.has(pathWithoutLocale)) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = `/${locale}/dashboard`;
     return NextResponse.redirect(url);
   }
 
   if (!isAuthenticated && isProtectedPath(pathname)) {
     // no user, redirect to the login page before rendering protected content
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = `/${locale}/auth/login`;
     return NextResponse.redirect(url);
   }
 

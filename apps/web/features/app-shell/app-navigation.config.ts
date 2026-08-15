@@ -2,46 +2,55 @@ import type { AppNavigationItem } from "./app-shell.types";
 
 export const appNavigationItems: AppNavigationItem[] = [
   {
-    label: "Dashboard",
+    key: "dashboard",
     href: "/dashboard",
-    description: "Behaviour analytics and insights",
     icon: "dashboard",
   },
   {
-    label: "Goals",
+    key: "goals",
     href: "/goals",
-    description: "Learning objectives",
     icon: "goals",
   },
   {
-    label: "Tasks",
+    key: "tasks",
     href: "/tasks",
-    description: "Actionable work items",
     icon: "tasks",
   },
   {
-    label: "Focus",
+    key: "focus",
     href: "/focus",
-    description: "Focus sessions and distractions",
     icon: "focus",
   },
   {
-    label: "Rooms",
+    key: "rooms",
     href: "/rooms",
-    description: "Collaborative study spaces",
     icon: "rooms",
   },
   {
-    label: "Reflections",
+    key: "groups",
+    href: "/groups",
+    icon: "users",
+  },
+  {
+    key: "leaderboard",
+    href: "/leaderboard",
+    icon: "users",
+  },
+  {
+    key: "reflections",
     href: "/reflections",
-    description: "Weekly Behaviour Reflection",
     icon: "reflections",
   },
 
   {
-    label: "Settings",
+    key: "settings",
     href: "/settings",
-    description: "Profile and PBI calibration",
     icon: "settings",
+  },
+  {
+    key: "admin",
+    href: "/admin",
+    icon: "shield",
+    adminOnly: true,
   },
 ];

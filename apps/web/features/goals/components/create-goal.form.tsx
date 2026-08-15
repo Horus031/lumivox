@@ -2,6 +2,7 @@
 
 import { FormEvent, ReactNode, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import type { Goal } from "@/features/goals/goal.types";
@@ -61,6 +62,8 @@ export function CreateGoalForm({
   goal,
   trigger,
 }: CreateGoalFormProps) {
+  const t = useTranslations("goals.form");
+  const commonT = useTranslations("common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
@@ -161,36 +164,34 @@ export function CreateGoalForm({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {trigger ?? <Button type="button">Create Goals</Button>}
+        {trigger ?? <Button type="button">{t("trigger")}</Button>}
       </DialogTrigger>
       <DialogContent className="text-foreground max-w-2xl!">
         <form onSubmit={handleSubmit} className="space-y-4">
           <DialogTitle>
-            {isEditMode ? "Update goal" : "Create a new goal"}
+            {isEditMode ? t("editTitle") : t("createTitle")}
           </DialogTitle>
           <DialogDescription>
-            {isEditMode
-              ? "Adjust progress, timeline, and status for this goal."
-              : "Define a short-term or long-term learning objective."}
+            {isEditMode ? t("editDescription") : t("createDescription")}
           </DialogDescription>
           <FieldGroup>
             <Field>
-              <Label htmlFor="title">Goal title</Label>
+              <Label htmlFor="title">{t("fields.title")}</Label>
               <Input
                 id="title"
                 type="text"
                 value={title}
                 onChange={(event) => setTitle(event.target.value)}
-                placeholder="Complete AWS Cloud Practitioner revision"
+                placeholder={t("placeholders.title")}
                 required
               />
             </Field>
             <Field>
-              <Label>Description</Label>
+              <Label>{t("fields.description")}</Label>
               <Textarea
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
-                placeholder="What does success look like for this goal?"
+                placeholder={t("placeholders.description")}
                 className="resize-none"
                 rows={3}
               />
@@ -199,7 +200,7 @@ export function CreateGoalForm({
             <FieldGroup className="w-full flex-row">
               <Field className="h-full">
                 <div className="flex flex-col justify-between h-full">
-                  <Label className="mb-4">Goal type</Label>
+                  <Label className="mb-4">{t("fields.goalType")}</Label>
 
                   <Select
                     value={goalType ?? ""}
@@ -208,13 +209,17 @@ export function CreateGoalForm({
                     }
                   >
                     <SelectTrigger className="flex w-full h-11! border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                      <SelectValue placeholder="Goal type" />
+                      <SelectValue placeholder={t("fields.goalType")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectLabel>Goal type</SelectLabel>
-                        <SelectItem value="short_term">Short term</SelectItem>
-                        <SelectItem value="long_term">Long term</SelectItem>
+                        <SelectLabel>{t("fields.goalType")}</SelectLabel>
+                        <SelectItem value="short_term">
+                          {t("goalTypes.short_term")}
+                        </SelectItem>
+                        <SelectItem value="long_term">
+                          {t("goalTypes.long_term")}
+                        </SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>
@@ -224,7 +229,7 @@ export function CreateGoalForm({
               {isEditMode && (
                 <Field>
                   <div className="gap-3">
-                    <Label className="mb-2">Status</Label>
+                    <Label className="mb-2">{t("fields.status")}</Label>
 
                     <Select
                       value={status}
@@ -239,15 +244,23 @@ export function CreateGoalForm({
                       }
                     >
                       <SelectTrigger className="flex w-full h-11! border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                        <SelectValue placeholder="Status" />
+                        <SelectValue placeholder={t("fields.status")} />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
-                          <SelectLabel>Statuses</SelectLabel>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                          <SelectItem value="paused">Paused</SelectItem>
-                          <SelectItem value="archived">Archived</SelectItem>
+                          <SelectLabel>{t("fields.status")}</SelectLabel>
+                          <SelectItem value="active">
+                            {t("statuses.active")}
+                          </SelectItem>
+                          <SelectItem value="completed">
+                            {t("statuses.completed")}
+                          </SelectItem>
+                          <SelectItem value="paused">
+                            {t("statuses.paused")}
+                          </SelectItem>
+                          <SelectItem value="archived">
+                            {t("statuses.archived")}
+                          </SelectItem>
                         </SelectGroup>
                       </SelectContent>
                     </Select>
@@ -301,7 +314,7 @@ export function CreateGoalForm({
                 variant="outline"
                 className="hover:bg-foreground/10"
               >
-                Cancel
+                {commonT("cancel")}
               </Button>
             </DialogClose>
             <Button
@@ -311,11 +324,11 @@ export function CreateGoalForm({
             >
               {isPending
                 ? isEditMode
-                  ? "Saving..."
-                  : "Creating..."
+                  ? t("saving")
+                  : t("creating")
                 : isEditMode
-                  ? "Save changes"
-                  : "Create goal"}
+                  ? t("saveChanges")
+                  : t("createSubmit")}
             </Button>
           </DialogFooter>
         </form>

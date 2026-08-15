@@ -1,4 +1,5 @@
-// import Link from "next/link";
+// import { Link } from "@/i18n/navigation";;
+import { useTranslations } from "next-intl";
 
 import type { WeeklyReflectionCardWithReflection } from "@/features/weekly-reflections/weekly-reflection.types";
 
@@ -13,17 +14,18 @@ type WeeklyReflectionSectionProps = {
 export function WeeklyReflectionSection({
   cards,
 }: WeeklyReflectionSectionProps) {
+  const t = useTranslations("reflections.section");
+
   return (
     <section className="space-y-5">
       {cards.length === 0 ? (
         <div className="rounded-[28px] border border-dashed border-border/70 bg-card/80 p-10 text-center">
           <h3 className="text-lg font-semibold text-foreground">
-            No weekly reflections generated yet
+            {t("emptyTitle")}
           </h3>
 
           <p className="mt-2 text-sm text-muted-foreground">
-            Generate your first weekly reflection to compare recent study
-            behaviour against the previous period.
+            {t("emptyDescription")}
           </p>
         </div>
       ) : (

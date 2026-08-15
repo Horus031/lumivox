@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/popover";
 import { formatDateValue } from "@/lib/utils/date";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useState } from "react";
 
 type GoalDatePickerProps = {
@@ -21,6 +22,7 @@ type GoalDatePickerProps = {
 };
 
 export function GoalDatePicker(props: GoalDatePickerProps) {
+  const t = useTranslations("goals.form");
   const { type, startDate, setStartDate, targetDate, setTargetDate } = props;
   const [startDateOpen, setStartDateOpen] = useState(false);
   const [endDateOpen, setEndDateOpen] = useState(false);
@@ -28,11 +30,11 @@ export function GoalDatePicker(props: GoalDatePickerProps) {
   if (type === "start" && setStartDate)
     return (
       <Field>
-        <FieldLabel htmlFor="date">Start date</FieldLabel>
+        <FieldLabel htmlFor="date">{t("fields.startDate")}</FieldLabel>
         <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
           <PopoverTrigger asChild>
             <Button type="button" variant="outline" className="text-left! h-11 hover:bg-foreground/10">
-              {formatDateValue(startDate) || "Select date"}
+              {formatDateValue(startDate) || t("selectDate")}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>
@@ -55,11 +57,11 @@ export function GoalDatePicker(props: GoalDatePickerProps) {
   if (type === "target" && setTargetDate)
     return (
       <Field>
-        <FieldLabel htmlFor="date">Target date</FieldLabel>
+        <FieldLabel htmlFor="date">{t("fields.targetDate")}</FieldLabel>
         <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
           <PopoverTrigger asChild>
             <Button type="button" variant="outline" className="h-11 hover:bg-foreground/10">
-              {formatDateValue(targetDate) || "Select date"}
+              {formatDateValue(targetDate) || t("selectDate")}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>

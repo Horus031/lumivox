@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { ChevronDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Dispatch, SetStateAction, useState } from "react";
 
 type TaskDatePickerProps = {
@@ -21,6 +22,7 @@ type TaskDatePickerProps = {
 };
 
 export function TaskDatePicker(props: TaskDatePickerProps) {
+  const t = useTranslations("tasks.form");
   const { dueAt, setDueAt, dueTime, setDueTime } = props;
   const [open, setOpen] = useState(false);
 
@@ -59,7 +61,9 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
   return (
     <FieldGroup className="mx-auto max-w-xs flex-row">
       <Field className="gap-1">
-        <FieldLabel htmlFor="date-picker-optional">Due date</FieldLabel>
+        <FieldLabel htmlFor="date-picker-optional">
+          {t("fields.dueDate")}
+        </FieldLabel>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
@@ -67,7 +71,7 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
               id="date-picker-optional"
               className="w-32 h-11 font-normal hover:text-primary-foreground"
             >
-              {dueAt ? format(dueAt, "PPP") : "Select date"}
+              {dueAt ? format(dueAt, "PPP") : t("selectDate")}
               <ChevronDownIcon />
             </Button>
           </PopoverTrigger>
@@ -83,7 +87,9 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
         </Popover>
       </Field>
       <Field className="w-32 gap-1">
-        <FieldLabel htmlFor="time-picker-optional">Due time</FieldLabel>
+        <FieldLabel htmlFor="time-picker-optional">
+          {t("fields.dueTime")}
+        </FieldLabel>
         <Input
           type="time"
           id="time-picker-optional"

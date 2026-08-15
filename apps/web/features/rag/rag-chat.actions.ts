@@ -23,7 +23,7 @@ export type RagAskActionPayload = {
   selectedDocumentIds?: string[];
   focusSessionId?: string | null;
   sessionId?: string | null;
-  topK?: 3 | 5 | 7;
+  topK?: number;
   promptVariant?: RagPromptVariant;
 };
 

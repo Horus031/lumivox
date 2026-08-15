@@ -11,12 +11,12 @@ export async function loginAsTestUser(page: Page) {
     );
   }
 
-  await page.goto("/auth/login");
+  await page.goto("/en/auth/login");
 
   await page.getByLabel(/email/i).fill(email);
   await page.getByLabel(/password/i).fill(password);
 
   await page.getByRole("button", { name: /login/i }).click();
 
-  await page.waitForURL("**/dashboard");
+  await page.waitForURL("**/en/dashboard");
 }
