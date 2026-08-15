@@ -48,7 +48,7 @@ export function SignUpForm({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/onboarding`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?next=/onboarding`,
         },
       });
       if (error) throw error;
