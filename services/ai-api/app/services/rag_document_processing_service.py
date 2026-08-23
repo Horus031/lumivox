@@ -155,7 +155,7 @@ def _generate_embedding(text: str) -> list[float]:
 
     if embedding_length != 768:
         raise RuntimeError(
-            f"Embedding dimension mismatch. Expected 768, got {len(embedding_length)}. "
+            f"Embedding dimension mismatch. Expected 768, got {embedding_length}. "
             "Update the document_chunks.embedding vector dimension if you choose another embedding model."
         )
 

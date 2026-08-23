@@ -70,7 +70,7 @@ def _generate_query_embedding(question: str) -> list[float]:
 
     if embedding_length != 768:
         raise RuntimeError(
-            f"Embedding dimension mismatch. Expected 768, got {len(embedding_length)}. "
+            f"Embedding dimension mismatch. Expected 768, got {embedding_length}. "
         )
 
     return embedding.values
