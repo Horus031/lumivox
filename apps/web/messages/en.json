@@ -1329,6 +1329,7 @@
           "users": "Manage Users",
           "documents": "Manage Documents",
           "groups": "Manage Groups",
+          "translations": "Monitor Translations",
         "ai": "Monitor AI",
         "settings": "CMS Settings"
       },

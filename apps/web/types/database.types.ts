@@ -10,10 +10,64 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
+      ai_content_translations: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          error_message: string | null
+          field_name: string
+          id: string
+          model_name: string | null
+          owner_id: string
+          provider: string | null
+          source_hash: string
+          source_locale: string
+          status: Database["public"]["Enums"]["ai_translation_status"]
+          target_locale: string
+          translated_text: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          error_message?: string | null
+          field_name: string
+          id?: string
+          model_name?: string | null
+          owner_id: string
+          provider?: string | null
+          source_hash: string
+          source_locale?: string
+          status?: Database["public"]["Enums"]["ai_translation_status"]
+          target_locale: string
+          translated_text: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          error_message?: string | null
+          field_name?: string
+          id?: string
+          model_name?: string | null
+          owner_id?: string
+          provider?: string | null
+          source_hash?: string
+          source_locale?: string
+          status?: Database["public"]["Enums"]["ai_translation_status"]
+          target_locale?: string
+          translated_text?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       ai_insight_cards: {
         Row: {
           confidence_note: string
@@ -494,6 +548,8 @@ export type Database = {
           goal_type: Database["public"]["Enums"]["goal_type"]
           id: string
           progress_percent: number
+          source_roadmap_id: string | null
+          source_roadmap_node_id: string | null
           start_date: string | null
           status: Database["public"]["Enums"]["goal_status"]
           target_date: string | null
@@ -507,6 +563,8 @@ export type Database = {
           goal_type: Database["public"]["Enums"]["goal_type"]
           id?: string
           progress_percent?: number
+          source_roadmap_id?: string | null
+          source_roadmap_node_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["goal_status"]
           target_date?: string | null
@@ -520,6 +578,8 @@ export type Database = {
           goal_type?: Database["public"]["Enums"]["goal_type"]
           id?: string
           progress_percent?: number
+          source_roadmap_id?: string | null
+          source_roadmap_node_id?: string | null
           start_date?: string | null
           status?: Database["public"]["Enums"]["goal_status"]
           target_date?: string | null
@@ -528,6 +588,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "goals_source_roadmap_id_fkey"
+            columns: ["source_roadmap_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "goals_source_roadmap_node_id_fkey"
+            columns: ["source_roadmap_node_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmap_nodes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "goals_user_id_fkey"
             columns: ["user_id"]
@@ -648,6 +722,188 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      learning_roadmap_nodes: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_hours: number
+          id: string
+          linked_goal_id: string | null
+          linked_task_id: string | null
+          metadata: Json
+          node_type: Database["public"]["Enums"]["learning_roadmap_node_type"]
+          parent_node_id: string | null
+          position_x: number
+          position_y: number
+          priority: number
+          roadmap_id: string
+          sort_order: number
+          suggested_end_date: string | null
+          suggested_start_date: string | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          linked_goal_id?: string | null
+          linked_task_id?: string | null
+          metadata?: Json
+          node_type: Database["public"]["Enums"]["learning_roadmap_node_type"]
+          parent_node_id?: string | null
+          position_x?: number
+          position_y?: number
+          priority?: number
+          roadmap_id: string
+          sort_order?: number
+          suggested_end_date?: string | null
+          suggested_start_date?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_hours?: number
+          id?: string
+          linked_goal_id?: string | null
+          linked_task_id?: string | null
+          metadata?: Json
+          node_type?: Database["public"]["Enums"]["learning_roadmap_node_type"]
+          parent_node_id?: string | null
+          position_x?: number
+          position_y?: number
+          priority?: number
+          roadmap_id?: string
+          sort_order?: number
+          suggested_end_date?: string | null
+          suggested_start_date?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_roadmap_nodes_linked_goal_id_fkey"
+            columns: ["linked_goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_roadmap_nodes_linked_task_id_fkey"
+            columns: ["linked_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_roadmap_nodes_parent_node_id_fkey"
+            columns: ["parent_node_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmap_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_roadmap_nodes_roadmap_id_fkey"
+            columns: ["roadmap_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmaps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learning_roadmaps: {
+        Row: {
+          ai_latency_ms: number | null
+          ai_model: string | null
+          ai_provider: string | null
+          applied_at: string | null
+          archived_at: string | null
+          available_weekdays: string[]
+          created_at: string
+          current_level: Database["public"]["Enums"]["learning_roadmap_level"]
+          custom_current_level: string | null
+          custom_target_level: string | null
+          description: string | null
+          end_date: string
+          generation_input: Json
+          id: string
+          minutes_per_study_day: number
+          preferred_locale: string
+          source_prompt: string | null
+          start_date: string
+          status: Database["public"]["Enums"]["learning_roadmap_status"]
+          study_days_per_week: number
+          subject_name: string | null
+          target_level: Database["public"]["Enums"]["learning_roadmap_level"]
+          title: string
+          topic: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_latency_ms?: number | null
+          ai_model?: string | null
+          ai_provider?: string | null
+          applied_at?: string | null
+          archived_at?: string | null
+          available_weekdays?: string[]
+          created_at?: string
+          current_level?: Database["public"]["Enums"]["learning_roadmap_level"]
+          custom_current_level?: string | null
+          custom_target_level?: string | null
+          description?: string | null
+          end_date: string
+          generation_input?: Json
+          id?: string
+          minutes_per_study_day?: number
+          preferred_locale?: string
+          source_prompt?: string | null
+          start_date: string
+          status?: Database["public"]["Enums"]["learning_roadmap_status"]
+          study_days_per_week?: number
+          subject_name?: string | null
+          target_level?: Database["public"]["Enums"]["learning_roadmap_level"]
+          title: string
+          topic: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_latency_ms?: number | null
+          ai_model?: string | null
+          ai_provider?: string | null
+          applied_at?: string | null
+          archived_at?: string | null
+          available_weekdays?: string[]
+          created_at?: string
+          current_level?: Database["public"]["Enums"]["learning_roadmap_level"]
+          custom_current_level?: string | null
+          custom_target_level?: string | null
+          description?: string | null
+          end_date?: string
+          generation_input?: Json
+          id?: string
+          minutes_per_study_day?: number
+          preferred_locale?: string
+          source_prompt?: string | null
+          start_date?: string
+          status?: Database["public"]["Enums"]["learning_roadmap_status"]
+          study_days_per_week?: number
+          subject_name?: string | null
+          target_level?: Database["public"]["Enums"]["learning_roadmap_level"]
+          title?: string
+          topic?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       ml_model_versions: {
         Row: {
@@ -914,11 +1170,13 @@ export type Database = {
       rag_chat_messages: {
         Row: {
           content: string
+          content_locale: string | null
           context_mode: Database["public"]["Enums"]["rag_context_mode"]
           created_at: string
           id: string
           latency_ms: number | null
           model_name: string | null
+          preferred_locale: string | null
           prompt_variant:
             | Database["public"]["Enums"]["rag_prompt_variant"]
             | null
@@ -932,11 +1190,13 @@ export type Database = {
         }
         Insert: {
           content: string
+          content_locale?: string | null
           context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           id?: string
           latency_ms?: number | null
           model_name?: string | null
+          preferred_locale?: string | null
           prompt_variant?:
             | Database["public"]["Enums"]["rag_prompt_variant"]
             | null
@@ -950,11 +1210,13 @@ export type Database = {
         }
         Update: {
           content?: string
+          content_locale?: string | null
           context_mode?: Database["public"]["Enums"]["rag_context_mode"]
           created_at?: string
           id?: string
           latency_ms?: number | null
           model_name?: string | null
+          preferred_locale?: string | null
           prompt_variant?:
             | Database["public"]["Enums"]["rag_prompt_variant"]
             | null
@@ -990,6 +1252,7 @@ export type Database = {
           focus_session_id: string | null
           goal_id: string | null
           id: string
+          preferred_locale: string | null
           prompt_variant: Database["public"]["Enums"]["rag_prompt_variant"]
           selected_document_ids: string[]
           task_id: string | null
@@ -1004,6 +1267,7 @@ export type Database = {
           focus_session_id?: string | null
           goal_id?: string | null
           id?: string
+          preferred_locale?: string | null
           prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
           selected_document_ids?: string[]
           task_id?: string | null
@@ -1018,6 +1282,7 @@ export type Database = {
           focus_session_id?: string | null
           goal_id?: string | null
           id?: string
+          preferred_locale?: string | null
           prompt_variant?: Database["public"]["Enums"]["rag_prompt_variant"]
           selected_document_ids?: string[]
           task_id?: string | null
@@ -1312,7 +1577,10 @@ export type Database = {
           estimated_minutes: number | null
           goal_id: string | null
           id: string
+          parent_task_id: string | null
           priority: Database["public"]["Enums"]["task_priority"]
+          source_roadmap_id: string | null
+          source_roadmap_node_id: string | null
           status: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at: string
@@ -1326,7 +1594,10 @@ export type Database = {
           estimated_minutes?: number | null
           goal_id?: string | null
           id?: string
+          parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
+          source_roadmap_id?: string | null
+          source_roadmap_node_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title: string
           updated_at?: string
@@ -1340,7 +1611,10 @@ export type Database = {
           estimated_minutes?: number | null
           goal_id?: string | null
           id?: string
+          parent_task_id?: string | null
           priority?: Database["public"]["Enums"]["task_priority"]
+          source_roadmap_id?: string | null
+          source_roadmap_node_id?: string | null
           status?: Database["public"]["Enums"]["task_status"]
           title?: string
           updated_at?: string
@@ -1352,6 +1626,27 @@ export type Database = {
             columns: ["goal_id"]
             isOneToOne: false
             referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_roadmap_id_fkey"
+            columns: ["source_roadmap_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmaps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_source_roadmap_node_id_fkey"
+            columns: ["source_roadmap_node_id"]
+            isOneToOne: false
+            referencedRelation: "learning_roadmap_nodes"
             referencedColumns: ["id"]
           },
           {
@@ -1632,6 +1927,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_clear_ai_entity_translations: {
+        Args: { p_entity_id: string; p_entity_type: string }
+        Returns: number
+      }
+      admin_delete_ai_content_translation: {
+        Args: { p_translation_id: string }
+        Returns: undefined
+      }
       admin_delete_learning_document: {
         Args: { p_document_id: string }
         Returns: undefined
@@ -1664,6 +1967,16 @@ export type Database = {
           total_rag_sessions: number
           unsupported_documents: number
           user_messages: number
+        }[]
+      }
+      admin_get_ai_translation_metrics: {
+        Args: never
+        Returns: {
+          english_translations: number
+          failed_translations: number
+          total_translations: number
+          unique_entities: number
+          vietnamese_translations: number
         }[]
       }
       admin_get_cms_settings: {
@@ -1835,6 +2148,34 @@ export type Database = {
           total_tasks: number
           uploaded_documents: number
           user_id: string
+        }[]
+      }
+      admin_search_ai_content_translations: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_status?: string
+          p_target_locale?: string
+        }
+        Returns: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          error_message: string
+          field_name: string
+          model_name: string
+          owner_email: string
+          owner_id: string
+          owner_name: string
+          provider: string
+          source_hash: string
+          source_locale: string
+          status: string
+          target_locale: string
+          translated_text: string
+          translation_id: string
+          updated_at: string
         }[]
       }
       admin_search_learning_documents: {
@@ -2143,6 +2484,7 @@ export type Database = {
     }
     Enums: {
       ai_insight_type: "deadline_risk" | "native_task_risk"
+      ai_translation_status: "completed" | "failed"
       app_role: "user" | "admin"
       deadline_risk_input_mode:
         | "oulad_compatible_features"
@@ -2164,6 +2506,13 @@ export type Database = {
       goal_type: "short_term" | "long_term"
       learning_document_permission_role: "viewer" | "editor"
       learning_document_visibility: "private" | "shared" | "public"
+      learning_roadmap_level:
+        | "beginner"
+        | "intermediate"
+        | "advanced"
+        | "custom"
+      learning_roadmap_node_type: "goal" | "task" | "subtask"
+      learning_roadmap_status: "draft" | "applied" | "archived"
       native_task_risk_band: "low" | "moderate" | "elevated" | "high"
       rag_context_mode: "general" | "document_rag"
       rag_message_role: "user" | "assistant" | "system"
@@ -2327,6 +2676,7 @@ export const Constants = {
   public: {
     Enums: {
       ai_insight_type: ["deadline_risk", "native_task_risk"],
+      ai_translation_status: ["completed", "failed"],
       app_role: ["user", "admin"],
       deadline_risk_input_mode: [
         "oulad_compatible_features",
@@ -2351,6 +2701,14 @@ export const Constants = {
       goal_type: ["short_term", "long_term"],
       learning_document_permission_role: ["viewer", "editor"],
       learning_document_visibility: ["private", "shared", "public"],
+      learning_roadmap_level: [
+        "beginner",
+        "intermediate",
+        "advanced",
+        "custom",
+      ],
+      learning_roadmap_node_type: ["goal", "task", "subtask"],
+      learning_roadmap_status: ["draft", "applied", "archived"],
       native_task_risk_band: ["low", "moderate", "elevated", "high"],
       rag_context_mode: ["general", "document_rag"],
       rag_message_role: ["user", "assistant", "system"],

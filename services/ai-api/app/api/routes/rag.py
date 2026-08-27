@@ -62,6 +62,7 @@ def ask_question(
             session_id=payload.session_id,
             top_k=payload.top_k,
             prompt_variant=payload.prompt_variant,
+            preferred_locale=payload.preferred_locale
         )
 
         return RagAskResponse(**result)

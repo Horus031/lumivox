@@ -1,10 +1,13 @@
 import { requireUser } from "@/lib/auth/require-user";
+import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
+import { translateAiInsightCards } from "@/features/ai-insights/ai-insight-translations.server";
 import type {
   NativeTaskAiInsightCardWithAssessment,
 } from "@/features/native-task-insights/native-task-insight.types";
 
 export async function getLatestNativeTaskAiInsights(
-  limit = 3
+  limit = 3,
+  targetLocale?: SupportedLocale,
 ): Promise<NativeTaskAiInsightCardWithAssessment[]> {
   const { supabase } = await requireUser();
 
@@ -38,5 +41,11 @@ export async function getLatestNativeTaskAiInsights(
     );
   }
 
-  return (data ?? []) as NativeTaskAiInsightCardWithAssessment[];
+  const cards = (data ?? []) as NativeTaskAiInsightCardWithAssessment[];
+
+  if (!targetLocale) {
+    return cards;
+  }
+
+  return translateAiInsightCards(cards, targetLocale);
 }

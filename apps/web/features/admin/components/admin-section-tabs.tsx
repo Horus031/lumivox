@@ -1,6 +1,6 @@
 "use client";
 
-import { Bot, FileText, LayoutDashboard, Settings, Users } from "lucide-react";
+import { Bot, FileText, Languages, LayoutDashboard, Settings, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
 
@@ -37,6 +37,12 @@ const adminTabs = [
     href: "/admin/ai",
     labelKey: "ai",
     icon: Bot,
+  },
+  {
+    value: "translations",
+    href: "/admin/ai/translations",
+    labelKey: "translations",
+    icon: Languages,
   },
   {
     value: "settings",
