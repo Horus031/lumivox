@@ -40,7 +40,7 @@ function RoadmapNodeCard({
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${nodeBadgeClass(
-                  node.node_type
+                  node.node_type,
                 )}`}
               >
                 {node.node_type}
@@ -53,6 +53,12 @@ function RoadmapNodeCard({
               <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
                 {node.estimated_hours}h
               </span>
+
+              {node.linked_goal_id || node.linked_task_id ? (
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                  Applied
+                </span>
+              ) : null}
             </div>
 
             <h3 className="mt-3 text-lg font-semibold text-neutral-950 dark:text-neutral-50">

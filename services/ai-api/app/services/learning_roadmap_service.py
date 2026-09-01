@@ -117,6 +117,7 @@ Planning rules:
 12. The output must be valid JSON matching the provided schema.
 13. Do not include Markdown outside JSON.
 14. {_language_instruction(request.preferred_locale)}
+15. Goal/tasks/subtasks should be more detail with step-by-step learning, attach link for learning resources will be better.
 
 Important:
 The output will be saved directly to a database and rendered as a visual tree, so the hierarchy must be clean and consistent.

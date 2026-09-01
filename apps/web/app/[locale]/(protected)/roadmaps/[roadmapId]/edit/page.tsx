@@ -1,5 +1,6 @@
 import { RoadmapVisualEditor } from "@/features/roadmaps/components/roadmap-visual-editor";
 import { getMyRoadmapDetail } from "@/features/roadmaps/roadmap.queries";
+import { redirect } from "next/navigation";
 
 type RoadmapEditPageProps = {
   params: Promise<{
@@ -13,6 +14,10 @@ export default async function RoadmapEditPage({
   const { roadmapId } = await params;
 
   const { roadmap, nodes } = await getMyRoadmapDetail(roadmapId);
+
+  if (roadmap.status !== "draft") {
+    redirect(`/roadmaps/${roadmap.id}`);
+  }
 
   return (
     <main>

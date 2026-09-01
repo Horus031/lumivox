@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import type { LearningRoadmap } from "@/features/roadmaps/roadmap.types";
+import { RoadmapApplyButton } from "@/features/roadmaps/components/roadmap-apply-button";
 
 type RoadmapDetailHeaderProps = {
   roadmap: LearningRoadmap;
@@ -61,6 +62,19 @@ export function RoadmapDetailHeader({
           >
             Edit visual tree
           </Link>
+
+          {roadmap.status === "draft" ? (
+            <RoadmapApplyButton roadmapId={roadmap.id} />
+          ) : null}
+
+          {roadmap.status === "applied" ? (
+            <Link
+              href="/goals"
+              className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+            >
+              View generated goals
+            </Link>
+          ) : null}
         </div>
       </div>
 

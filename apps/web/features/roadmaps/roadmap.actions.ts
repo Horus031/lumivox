@@ -399,3 +399,70 @@ export async function deleteRoadmapNodeAction(
     };
   }
 }
+
+const applyRoadmapSchema = z.object({
+  roadmapId: z.string().uuid(),
+});
+
+type ApplyRoadmapResult = {
+  roadmap_id: string;
+  created_goals: number;
+  created_tasks: number;
+  created_subtasks: number;
+};
+
+export async function applyLearningRoadmapAction(
+  input: z.infer<typeof applyRoadmapSchema>
+): Promise<ActionResult<ApplyRoadmapResult>> {
+  try {
+    const { supabase } = await requireUser();
+
+    const parsed = applyRoadmapSchema.safeParse(input);
+
+    if (!parsed.success) {
+      return {
+        success: false,
+        message: "Invalid roadmap id.",
+      };
+    }
+
+    const { data, error } = await supabase.rpc("apply_learning_roadmap", {
+      p_roadmap_id: parsed.data.roadmapId,
+    });
+
+    if (error) {
+      return {
+        success: false,
+        message: `Failed to apply roadmap: ${error.message}`,
+      };
+    }
+
+    const result = data?.[0] as ApplyRoadmapResult | undefined;
+
+    revalidatePath("/roadmaps");
+    revalidatePath(`/roadmaps/${parsed.data.roadmapId}`);
+    revalidatePath(`/roadmaps/${parsed.data.roadmapId}/edit`);
+    revalidatePath("/goals");
+    revalidatePath("/tasks");
+    revalidatePath("/dashboard");
+
+    return {
+      success: true,
+      message: "Roadmap applied successfully.",
+      data: result ?? {
+        roadmap_id: parsed.data.roadmapId,
+        created_goals: 0,
+        created_tasks: 0,
+        created_subtasks: 0,
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while applying roadmap.",
+    };
+  }
+}

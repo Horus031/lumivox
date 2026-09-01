@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.17"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -560,7 +560,7 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
-          goal_type: Database["public"]["Enums"]["goal_type"]
+          goal_type?: Database["public"]["Enums"]["goal_type"]
           id?: string
           progress_percent?: number
           source_roadmap_id?: string | null
@@ -1574,6 +1574,7 @@ export type Database = {
           created_at: string
           description: string | null
           due_at: string | null
+          due_date: string | null
           estimated_minutes: number | null
           goal_id: string | null
           id: string
@@ -1591,6 +1592,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_at?: string | null
+          due_date?: string | null
           estimated_minutes?: number | null
           goal_id?: string | null
           id?: string
@@ -1608,6 +1610,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_at?: string | null
+          due_date?: string | null
           estimated_minutes?: number | null
           goal_id?: string | null
           id?: string
@@ -2287,6 +2290,15 @@ export type Database = {
           p_user_id: string
         }
         Returns: undefined
+      }
+      apply_learning_roadmap: {
+        Args: { p_roadmap_id: string }
+        Returns: {
+          created_goals: number
+          created_subtasks: number
+          created_tasks: number
+          roadmap_id: string
+        }[]
       }
       can_access_learning_document: {
         Args: { p_document_id: string; p_user_id: string }
