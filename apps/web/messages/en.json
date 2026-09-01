@@ -127,6 +127,10 @@
         "label": "Tasks",
         "description": "Actionable work items"
       },
+      "roadmaps": {
+        "label": "Roadmaps",
+        "description": "Study roadmaps"
+      },
       "focus": {
         "label": "Focus",
         "description": "Focus sessions and distractions"

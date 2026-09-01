@@ -127,6 +127,10 @@
         "label": "Nhiệm vụ",
         "description": "Việc cần làm rõ ràng"
       },
+      "roadmaps": {
+        "label": "Lộ trình",
+        "description": "Các lộ trình học tập"
+      },
       "focus": {
         "label": "Tập trung",
         "description": "Phiên tập trung và xao nhãng"

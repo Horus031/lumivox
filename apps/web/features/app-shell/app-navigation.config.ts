@@ -17,6 +17,11 @@ export const appNavigationItems: AppNavigationItem[] = [
     icon: "tasks",
   },
   {
+    key: "roadmaps",
+    href: "/roadmaps",
+    icon: "map",
+  },
+  {
     key: "focus",
     href: "/focus",
     icon: "focus",
