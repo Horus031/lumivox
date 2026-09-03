@@ -1,3 +1,5 @@
+import { useLocale, useTranslations } from "next-intl";
+
 import {
   AdminClearEntityTranslationsButton,
   AdminTranslationDeleteButton,
@@ -42,22 +44,26 @@ function statusClass(status: string) {
 export function AdminTranslationsTable({
   translations,
 }: AdminTranslationsTableProps) {
+  const locale = useLocale();
+  const t = useTranslations("admin.translations.table");
+  const commonT = useTranslations("admin.common");
+
   return (
     <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
       <div>
         <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-          Translation Cache
+          {t("eyebrow")}
         </p>
 
         <h2 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
-          AI content translations
+          {t("title")}
         </h2>
       </div>
 
       {translations.length === 0 ? (
         <div className="mt-6 rounded-2xl border border-dashed p-8 text-center dark:border-neutral-800">
           <p className="text-sm text-neutral-600 dark:text-neutral-400">
-            No cached translations found.
+            {t("empty")}
           </p>
         </div>
       ) : (
@@ -75,7 +81,7 @@ export function AdminTranslationsTable({
                         translation.status
                       )}`}
                     >
-                      {translation.status}
+                      {t(`statuses.${translation.status}`)}
                     </span>
 
                     <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
@@ -88,7 +94,7 @@ export function AdminTranslationsTable({
                   </div>
 
                   <p className="mt-3 text-sm font-medium text-neutral-950 dark:text-neutral-50">
-                    {translation.owner_name ?? "Unknown owner"}
+                    {translation.owner_name ?? commonT("unknownOwner")}
                   </p>
 
                   <p className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -96,16 +102,22 @@ export function AdminTranslationsTable({
                   </p>
 
                   <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
-                    Entity: {translation.entity_id}
+                    {t("entity", { id: translation.entity_id })}
                   </p>
 
                   <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                    Provider: {translation.provider ?? "N/A"} · Model:{" "}
-                    {translation.model_name ?? "N/A"}
+                    {t("providerMeta", {
+                      provider: translation.provider ?? commonT("na"),
+                      model: translation.model_name ?? commonT("na"),
+                    })}
                   </p>
 
                   <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                    Updated: {new Date(translation.updated_at).toLocaleString()}
+                    {t("updated", {
+                      value: new Date(translation.updated_at).toLocaleString(
+                        locale,
+                      ),
+                    })}
                   </p>
                 </div>
 
@@ -123,7 +135,7 @@ export function AdminTranslationsTable({
 
               <details className="mt-4">
                 <summary className="cursor-pointer text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  View translated text
+                  {t("viewTranslatedText")}
                 </summary>
 
                 <div className="mt-3 rounded-xl bg-neutral-50 p-4 dark:bg-neutral-900">

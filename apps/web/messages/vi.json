@@ -1333,6 +1333,7 @@
           "users": "Quản lý người dùng",
           "documents": "Quản lý tài liệu",
           "groups": "Quản lý nhóm",
+          "roadmaps": "Theo dõi lộ trình",
           "translations": "Theo dõi phiên dịch",
         "ai": "Theo dõi AI",
         "settings": "Cài đặt CMS"
@@ -1481,6 +1482,55 @@
         "private": "Riêng tư"
       }
     },
+    "roadmaps": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Theo dõi lộ trình",
+        "description": "Theo dõi các lộ trình học do AI tạo, trạng thái áp dụng, số lượng node và metadata sinh lộ trình."
+      },
+      "search": {
+        "label": "Tìm lộ trình",
+        "placeholder": "Tìm theo tiêu đề, chủ đề, chủ sở hữu, email...",
+        "statuses": {
+          "draft": "Bản nháp",
+          "applied": "Đã áp dụng",
+          "archived": "Đã lưu trữ"
+        }
+      },
+      "metrics": {
+        "totalRoadmaps": "Tổng lộ trình",
+        "totalRoadmapsDescription": "Tất cả lộ trình AI đã tạo",
+        "draft": "Bản nháp",
+        "draftDescription": "Lộ trình còn chỉnh sửa được",
+        "applied": "Đã áp dụng",
+        "appliedDescription": "Đã chuyển thành mục tiêu/nhiệm vụ",
+        "nodes": "Node",
+        "nodesDescription": "{goals} mục tiêu - {tasks} nhiệm vụ - {subtasks} nhiệm vụ con"
+      },
+      "table": {
+        "eyebrow": "Bản ghi lộ trình",
+        "title": "Lộ trình học đã tạo",
+        "empty": "Không tìm thấy lộ trình.",
+        "nodesCount": "{count} node",
+        "owner": "Chủ sở hữu: {name}",
+        "nodeBreakdown": "Node: {goals} mục tiêu - {tasks} nhiệm vụ - {subtasks} nhiệm vụ con",
+        "studyPlan": "Ngày: {start} -> {end} - Học: {days} ngày/tuần - {minutes} phút/ngày",
+        "aiMeta": "AI: {provider} - {model} - {latency}",
+        "latencyMs": "{count}ms",
+        "statuses": {
+          "draft": "Bản nháp",
+          "applied": "Đã áp dụng",
+          "archived": "Đã lưu trữ"
+        }
+      },
+      "actions": {
+        "restoreConfirm": "Khôi phục lộ trình này về bản nháp?",
+        "archiveConfirm": "Lưu trữ lộ trình này? Người dùng sẽ không còn chỉnh sửa được lộ trình.",
+        "updating": "Đang cập nhật...",
+        "restore": "Khôi phục",
+        "archive": "Lưu trữ"
+      }
+    },
     "ai": {
       "page": {
         "eyebrow": "CMS quản trị",
@@ -1554,6 +1604,59 @@
         "title": "Tin nhắn RAG",
         "empty": "Không tìm thấy tin nhắn nào.",
         "viewRawSources": "Xem nguồn thô"
+      }
+    },
+    "translations": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Theo dõi bản dịch AI",
+        "description": "Theo dõi cache bản dịch cho nội dung do AI tạo trên giao diện tiếng Anh và tiếng Việt."
+      },
+      "search": {
+        "label": "Tìm bản dịch",
+        "placeholder": "Tìm theo nội dung, entity, chủ sở hữu, email...",
+        "targetLocale": "Ngôn ngữ đích",
+        "locales": {
+          "en": "Tiếng Anh",
+          "vi": "Tiếng Việt"
+        },
+        "statuses": {
+          "completed": "Hoàn thành",
+          "failed": "Thất bại"
+        }
+      },
+      "metrics": {
+        "totalTranslations": "Tổng bản dịch",
+        "totalTranslationsDescription": "Cache bản dịch nội dung AI",
+        "english": "Tiếng Anh",
+        "englishDescription": "Ngôn ngữ đích: en",
+        "vietnamese": "Tiếng Việt",
+        "vietnameseDescription": "Ngôn ngữ đích: vi",
+        "failed": "Thất bại",
+        "failedDescription": "Bản ghi dịch thất bại",
+        "uniqueEntities": "Entity riêng biệt",
+        "uniqueEntitiesDescription": "Entity AI có cache bản dịch"
+      },
+      "table": {
+        "eyebrow": "Cache bản dịch",
+        "title": "Bản dịch nội dung AI",
+        "empty": "Không tìm thấy bản dịch đã cache.",
+        "entity": "Entity: {id}",
+        "providerMeta": "Provider: {provider} - Mô hình: {model}",
+        "updated": "Đã cập nhật: {value}",
+        "viewTranslatedText": "Xem nội dung đã dịch",
+        "statuses": {
+          "completed": "Hoàn thành",
+          "failed": "Thất bại"
+        }
+      },
+      "actions": {
+        "deleteConfirm": "Xóa bản dịch đã cache này? Bản dịch có thể được tạo lại sau.",
+        "clearEntityConfirm": "Xóa toàn bộ cache bản dịch cho entity này?",
+        "deleting": "Đang xóa...",
+        "delete": "Xóa",
+        "clearing": "Đang xóa cache...",
+        "clearEntityCache": "Xóa cache entity"
       }
     },
     "settings": {

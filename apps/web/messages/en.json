@@ -1333,6 +1333,7 @@
           "users": "Manage Users",
           "documents": "Manage Documents",
           "groups": "Manage Groups",
+          "roadmaps": "Monitor Roadmaps",
           "translations": "Monitor Translations",
         "ai": "Monitor AI",
         "settings": "CMS Settings"
@@ -1481,6 +1482,55 @@
         "private": "Private"
       }
     },
+    "roadmaps": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "Roadmap Monitoring",
+        "description": "Monitor AI-generated learning roadmaps, their application status, node counts, and generation metadata."
+      },
+      "search": {
+        "label": "Search roadmaps",
+        "placeholder": "Search by title, topic, owner, email...",
+        "statuses": {
+          "draft": "Draft",
+          "applied": "Applied",
+          "archived": "Archived"
+        }
+      },
+      "metrics": {
+        "totalRoadmaps": "Total Roadmaps",
+        "totalRoadmapsDescription": "All generated AI roadmaps",
+        "draft": "Draft",
+        "draftDescription": "Editable roadmaps",
+        "applied": "Applied",
+        "appliedDescription": "Converted to goals/tasks",
+        "nodes": "Nodes",
+        "nodesDescription": "{goals} goals - {tasks} tasks - {subtasks} subtasks"
+      },
+      "table": {
+        "eyebrow": "Roadmap Records",
+        "title": "Generated learning roadmaps",
+        "empty": "No roadmaps found.",
+        "nodesCount": "{count} nodes",
+        "owner": "Owner: {name}",
+        "nodeBreakdown": "Nodes: {goals} goals - {tasks} tasks - {subtasks} subtasks",
+        "studyPlan": "Date: {start} -> {end} - Study: {days}d/week - {minutes}m/day",
+        "aiMeta": "AI: {provider} - {model} - {latency}",
+        "latencyMs": "{count}ms",
+        "statuses": {
+          "draft": "Draft",
+          "applied": "Applied",
+          "archived": "Archived"
+        }
+      },
+      "actions": {
+        "restoreConfirm": "Restore this roadmap to draft?",
+        "archiveConfirm": "Archive this roadmap? It will no longer be editable by the user.",
+        "updating": "Updating...",
+        "restore": "Restore",
+        "archive": "Archive"
+      }
+    },
     "ai": {
       "page": {
         "eyebrow": "Admin CMS",
@@ -1554,6 +1604,59 @@
         "title": "RAG messages",
         "empty": "No messages found.",
         "viewRawSources": "View raw sources"
+      }
+    },
+    "translations": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "AI Translation Monitoring",
+        "description": "Monitor cached translations for AI-generated content across English and Vietnamese interfaces."
+      },
+      "search": {
+        "label": "Search translations",
+        "placeholder": "Search by text, entity, owner, email...",
+        "targetLocale": "Target locale",
+        "locales": {
+          "en": "English",
+          "vi": "Vietnamese"
+        },
+        "statuses": {
+          "completed": "Completed",
+          "failed": "Failed"
+        }
+      },
+      "metrics": {
+        "totalTranslations": "Total Translations",
+        "totalTranslationsDescription": "Cached AI content translations",
+        "english": "English",
+        "englishDescription": "Target locale: en",
+        "vietnamese": "Vietnamese",
+        "vietnameseDescription": "Target locale: vi",
+        "failed": "Failed",
+        "failedDescription": "Failed translation records",
+        "uniqueEntities": "Unique Entities",
+        "uniqueEntitiesDescription": "AI entities with cached translations"
+      },
+      "table": {
+        "eyebrow": "Translation Cache",
+        "title": "AI content translations",
+        "empty": "No cached translations found.",
+        "entity": "Entity: {id}",
+        "providerMeta": "Provider: {provider} - Model: {model}",
+        "updated": "Updated: {value}",
+        "viewTranslatedText": "View translated text",
+        "statuses": {
+          "completed": "Completed",
+          "failed": "Failed"
+        }
+      },
+      "actions": {
+        "deleteConfirm": "Delete this cached translation? It can be regenerated later.",
+        "clearEntityConfirm": "Clear all cached translations for this entity?",
+        "deleting": "Deleting...",
+        "delete": "Delete",
+        "clearing": "Clearing...",
+        "clearEntityCache": "Clear entity cache"
       }
     },
     "settings": {

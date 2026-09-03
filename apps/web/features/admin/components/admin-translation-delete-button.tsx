@@ -1,6 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
 
@@ -17,12 +18,11 @@ export function AdminTranslationDeleteButton({
   translationId,
 }: AdminTranslationDeleteButtonProps) {
   const router = useRouter();
+  const t = useTranslations("admin.translations.actions");
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
-    const confirmed = window.confirm(
-      "Delete this cached translation? It can be regenerated later."
-    );
+    const confirmed = window.confirm(t("deleteConfirm"));
 
     if (!confirmed) return;
 
@@ -48,7 +48,7 @@ export function AdminTranslationDeleteButton({
       disabled={isPending}
       className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30"
     >
-      {isPending ? "Deleting..." : "Delete"}
+      {isPending ? t("deleting") : t("delete")}
     </button>
   );
 }
@@ -63,12 +63,11 @@ export function AdminClearEntityTranslationsButton({
   entityId,
 }: AdminClearEntityTranslationsButtonProps) {
   const router = useRouter();
+  const t = useTranslations("admin.translations.actions");
   const [isPending, startTransition] = useTransition();
 
   function handleClear() {
-    const confirmed = window.confirm(
-      "Clear all cached translations for this entity?"
-    );
+    const confirmed = window.confirm(t("clearEntityConfirm"));
 
     if (!confirmed) return;
 
@@ -95,7 +94,7 @@ export function AdminClearEntityTranslationsButton({
       disabled={isPending}
       className="rounded-xl border px-3 py-2 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-800 dark:hover:bg-neutral-900"
     >
-      {isPending ? "Clearing..." : "Clear entity cache"}
+      {isPending ? t("clearing") : t("clearEntityCache")}
     </button>
   );
 }

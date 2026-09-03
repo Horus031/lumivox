@@ -2082,6 +2082,19 @@ export type Database = {
           user_name: string
         }[]
       }
+      admin_get_roadmap_metrics: {
+        Args: never
+        Returns: {
+          applied_roadmaps: number
+          archived_roadmaps: number
+          draft_roadmaps: number
+          total_goal_nodes: number
+          total_roadmap_nodes: number
+          total_roadmaps: number
+          total_subtask_nodes: number
+          total_task_nodes: number
+        }[]
+      }
       admin_get_study_group_detail: {
         Args: { p_group_id: string }
         Returns: {
@@ -2208,6 +2221,43 @@ export type Database = {
           visibility: string
         }[]
       }
+      admin_search_learning_roadmaps: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_status?: string
+        }
+        Returns: {
+          ai_latency_ms: number
+          ai_model: string
+          ai_provider: string
+          applied_at: string
+          archived_at: string
+          created_at: string
+          current_level: string
+          description: string
+          end_date: string
+          goal_nodes: number
+          minutes_per_study_day: number
+          owner_email: string
+          owner_name: string
+          preferred_locale: string
+          roadmap_id: string
+          start_date: string
+          status: string
+          study_days_per_week: number
+          subject_name: string
+          subtask_nodes: number
+          target_level: string
+          task_nodes: number
+          title: string
+          topic: string
+          total_nodes: number
+          updated_at: string
+          user_id: string
+        }[]
+      }
       admin_search_rag_chat_sessions: {
         Args: {
           p_context_mode?: string
@@ -2271,6 +2321,10 @@ export type Database = {
           uploaded_documents: number
           user_id: string
         }[]
+      }
+      admin_set_learning_roadmap_archived: {
+        Args: { p_archived: boolean; p_roadmap_id: string }
+        Returns: undefined
       }
       admin_set_study_group_archived: {
         Args: { p_admin_note?: string; p_archived: boolean; p_group_id: string }

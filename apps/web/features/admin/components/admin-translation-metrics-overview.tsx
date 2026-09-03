@@ -1,4 +1,5 @@
 import { AdminMetricCard } from "@/features/admin/components/admin-metric-card";
+import { useTranslations } from "next-intl";
 
 type TranslationMetrics = {
   total_translations: number;
@@ -19,36 +20,38 @@ function value(input: number | null | undefined) {
 export function AdminTranslationMetricsOverview({
   metrics,
 }: AdminTranslationMetricsOverviewProps) {
+  const t = useTranslations("admin.translations.metrics");
+
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
       <AdminMetricCard
-        label="Total Translations"
+        label={t("totalTranslations")}
         value={value(metrics?.total_translations)}
-        description="Cached AI content translations"
+        description={t("totalTranslationsDescription")}
       />
 
       <AdminMetricCard
-        label="English"
+        label={t("english")}
         value={value(metrics?.english_translations)}
-        description="Target locale: en"
+        description={t("englishDescription")}
       />
 
       <AdminMetricCard
-        label="Vietnamese"
+        label={t("vietnamese")}
         value={value(metrics?.vietnamese_translations)}
-        description="Target locale: vi"
+        description={t("vietnameseDescription")}
       />
 
       <AdminMetricCard
-        label="Failed"
+        label={t("failed")}
         value={value(metrics?.failed_translations)}
-        description="Failed translation records"
+        description={t("failedDescription")}
       />
 
       <AdminMetricCard
-        label="Unique Entities"
+        label={t("uniqueEntities")}
         value={value(metrics?.unique_entities)}
-        description="AI entities with cached translations"
+        description={t("uniqueEntitiesDescription")}
       />
     </section>
   );
