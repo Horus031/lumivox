@@ -1,8 +1,11 @@
 import { requireUser } from "@/lib/auth/require-user";
+import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
+import { translateAiInsightCards } from "@/features/ai-insights/ai-insight-translations.server";
 import type { AiInsightCardWithPrediction } from "./ai-insight.types";
 
 export async function getLatestAiInsightCards(
-  limit = 3
+  limit = 3,
+  targetLocale?: SupportedLocale,
 ): Promise<AiInsightCardWithPrediction[]> {
   const { supabase } = await requireUser();
 
@@ -28,5 +31,11 @@ export async function getLatestAiInsightCards(
     throw new Error(`Failed to fetch AI insight cards: ${error.message}`);
   }
 
-  return (data ?? []) as AiInsightCardWithPrediction[];
+  const cards = (data ?? []) as AiInsightCardWithPrediction[];
+
+  if (!targetLocale) {
+    return cards;
+  }
+
+  return translateAiInsightCards(cards, targetLocale);
 }

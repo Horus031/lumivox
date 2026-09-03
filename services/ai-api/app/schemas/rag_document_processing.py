@@ -25,6 +25,7 @@ class RagAskRequest(BaseModel):
 
     top_k: int = Field(default=5, ge=1, le=9)
     prompt_variant: Literal["no_rule", "grounded_rule"] = "grounded_rule"
+    preferred_locale: Literal["auto", "en", "vi"] = "auto"
 
 
 class RagSourceChunk(BaseModel):

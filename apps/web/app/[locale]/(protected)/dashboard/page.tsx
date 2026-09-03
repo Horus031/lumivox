@@ -15,6 +15,7 @@ import { RefreshPbiButton } from "@/features/pbi/components/refresh-pbi-button";
 import { PbiScoreCards } from "@/features/pbi/components/pbi-score-cards";
 
 import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
+import { translatePbiExplanationPayload } from "@/features/pbi/pbi-translations.server";
 import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
 
 // import { getLatestAiInsightCards } from "@/features/ai-insights/ai-insight.queries";
@@ -31,7 +32,19 @@ import { FrozenStreakAlert } from "@/features/engagement-retention/components/fr
 import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
 import { getTranslations } from "next-intl/server";
 
-export default async function DashboardPage() {
+type DashboardPageProps = {
+  params: Promise<{
+    locale: string;
+  }>;
+};
+
+function normalizeAiLocale(locale: string) {
+  return locale === "vi" ? "vi" : "en";
+}
+
+export default async function DashboardPage({ params }: DashboardPageProps) {
+  const { locale } = await params;
+  const aiLocale = normalizeAiLocale(locale);
   const t = await getTranslations("dashboard.header");
   const [
     summary,
@@ -55,11 +68,16 @@ export default async function DashboardPage() {
     getCurrentEngagementStats(),
   ]);
 
-  const explanation =
+  const sourceExplanation =
     latestSnapshot?.explanation_payload &&
     typeof latestSnapshot.explanation_payload === "object"
       ? (latestSnapshot.explanation_payload as PbiExplanationPayload)
       : null;
+  const explanation = await translatePbiExplanationPayload(
+    sourceExplanation,
+    latestSnapshot?.id,
+    aiLocale,
+  );
 
   return (
     <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8">

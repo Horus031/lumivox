@@ -25,6 +25,7 @@ export type RagAskActionPayload = {
   sessionId?: string | null;
   topK?: number;
   promptVariant?: RagPromptVariant;
+  preferredLocale?: "vi" | "en";
 };
 
 export type RagAskActionResponse = {
@@ -85,6 +86,7 @@ export async function askRagQuestionAction(
         session_id: payload.sessionId ?? null,
         top_k: topK ?? 5,
         prompt_variant: payload.promptVariant ?? "grounded_rule",
+        preferred_locale: payload.preferredLocale ?? "auto",
       },
     });
 

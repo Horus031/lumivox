@@ -4,9 +4,23 @@ import { WeeklyReflectionSection } from "@/features/weekly-reflections/component
 import { GenerateWeeklyReflectionButton } from "@/features/weekly-reflections/components/generate-weekly-reflection-button";
 import { getTranslations } from "next-intl/server";
 
-export default async function ReflectionsPage() {
+type ReflectionsPageProps = {
+  params: Promise<{
+    locale: string;
+  }>;
+};
+
+function normalizeAiLocale(locale: string) {
+  return locale === "vi" ? "vi" : "en";
+}
+
+export default async function ReflectionsPage({
+  params,
+}: ReflectionsPageProps) {
+  const { locale } = await params;
+  const aiLocale = normalizeAiLocale(locale);
   const [reflectionCards, t] = await Promise.all([
-    getLatestWeeklyReflectionCards(20),
+    getLatestWeeklyReflectionCards(20, aiLocale),
     getTranslations("reflections.page"),
   ]);
 

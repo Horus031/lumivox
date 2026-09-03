@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 // import {
 //   Select,
@@ -67,6 +67,7 @@ export function RagStudyAssistant({
   defaultTopK,
   defaultPromptVariant,
 }: RagStudyAssistantProps) {
+  const locale = useLocale();
   const t = useTranslations("rag");
   const [question, setQuestion] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
@@ -116,6 +117,7 @@ export function RagStudyAssistant({
         sessionId,
         topK,
         promptVariant,
+        preferredLocale: locale === "vi" ? "vi" : "en",
       });
 
       if (!result.success || !result.data) {

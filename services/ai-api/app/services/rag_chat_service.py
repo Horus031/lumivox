@@ -22,6 +22,20 @@ Formatting:
 - Do not wrap the entire answer in a code block.
 """.strip()
 
+def _locale_instruction(preferred_locale: str | None) -> str:
+    if preferred_locale == "vi":
+        return (
+            "Respond STRICTLY in Vietnamese. "
+            "Technical terms may remain in English if needed, but explain them in Vietnamese."
+        )
+
+    if preferred_locale == "en":
+        return "Respond STRICTLY in English."
+
+    return (
+        "Detect the language of the user's question and respond strictly in that same language."
+    )
+
 
 def _get_supabase_admin():
     supabase_url = os.getenv("SUPABASE_URL")
@@ -70,7 +84,7 @@ def _generate_query_embedding(question: str) -> list[float]:
 
     if embedding_length != 768:
         raise RuntimeError(
-            f"Embedding dimension mismatch. Expected 768, got {len(embedding_length)}. "
+            f"Embedding dimension mismatch. Expected 768, got {embedding_length}. "
         )
 
     return embedding.values
@@ -91,6 +105,7 @@ def _get_or_create_session(
     selected_document_ids: list[str],
     top_k: int,
     question: str,
+    preferred_locale: str | None,
 ) -> str:
     if session_id:
         response = (
@@ -116,6 +131,7 @@ def _get_or_create_session(
                 "context_mode": context_mode,
                 "selected_document_ids": selected_document_ids,
                 "top_k": top_k,
+                "preferred_locale": preferred_locale or "auto",
             }
         )
         .execute()
@@ -150,7 +166,7 @@ def _retrieve_chunks(
     return response.data or []
 
 
-def _build_general_prompt(question: str) -> str:
+def _build_general_prompt(question: str, preferred_locale: str | None) -> str:
     return f"""
 You are Lumivox Study Assistant, a helpful AI tutor for students.
 
@@ -160,8 +176,9 @@ Rules:
 3. Encourage focused learning.
 4. Do not claim that you used uploaded documents unless document context was provided.
 5. Do not answer questions outside study scope, politely refusing users if you receive unrelevant questions.
-6. Detect the language of the user's question and respond STRICTLY in that same language. Do not switch languages mid-response.
-7. Technical terms may be kept in English but must be explained in user's language.
+6. {_locale_instruction(preferred_locale)}
+7. Do not switch languages mid-response.
+8. Technical terms may be kept in English but must be explained in user's language.
 
 {MARKDOWN_FORMATTING_RULES}
 
@@ -176,6 +193,7 @@ def _build_no_rule_prompt(
     *,
     question: str,
     chunks: list[dict[str, Any]],
+    preferred_locale: str | None
 ) -> str:
     context = "\n\n".join(
         [
@@ -197,6 +215,9 @@ Question:
 
 {MARKDOWN_FORMATTING_RULES}
 
+{_locale_instruction(preferred_locale)}
+Do not switch languages mid-response.
+
 Answer the user's question clearly.
 """.strip()
 
@@ -205,6 +226,7 @@ def _build_grounded_prompt(
     *,
     question: str,
     chunks: list[dict[str, Any]],
+    preferred_locale: str | None
 ) -> str:
     context = "\n\n".join(
         [
@@ -223,8 +245,9 @@ Rules:
 4. Keep the answer concise and useful for a student.
 5. Mention the most relevant source numbers at the end of the answer.
 6. Do not answer questions outside study scope, politely refusing users if you receive unrelevant questions.
-7. Detect the language of the user's question and respond STRICTLY in that same language. Do not switch languages mid-response.
-8. Technical terms may be kept in English but must be explained in user's language.
+7. {_locale_instruction(preferred_locale)}
+8. Do not switch languages mid-response.
+9. Technical terms may be kept in English but must be explained in user's language.
 
 {MARKDOWN_FORMATTING_RULES}
 
@@ -256,6 +279,8 @@ def _store_message(
     retrieved_chunks: list[dict[str, Any]] | None = None,
     model_name: str | None = None,
     latency_ms: int | None = None,
+    content_locale: str | None = None,
+    preferred_locale: str | None = None,
 ) -> None:
     retrieved_chunks = retrieved_chunks or []
 
@@ -275,6 +300,8 @@ def _store_message(
             "retrieved_context": retrieved_chunks,
             "model_name": model_name,
             "latency_ms": latency_ms,
+            "content_locale": content_locale or "auto",
+            "preferred_locale": preferred_locale or "auto",
         }
     ).execute()
 
@@ -288,6 +315,7 @@ def ask_rag_question(
     session_id: str | None,
     top_k: int,
     prompt_variant: Literal["no_rule", "grounded_rule"],
+    preferred_locale: Literal["auto", "en", "vi"] = "auto",
 ) -> dict[str, Any]:
     started_at = time.perf_counter()
     supabase = _get_supabase_admin()
@@ -310,6 +338,7 @@ def ask_rag_question(
         selected_document_ids=selected_document_ids,
         top_k=normalized_top_k,
         question=question,
+        preferred_locale=preferred_locale,
     )
 
     _store_message(
@@ -322,12 +351,14 @@ def ask_rag_question(
         context_mode=context_mode,
         selected_document_ids=selected_document_ids,
         top_k=normalized_top_k if context_mode == "document_rag" else None,
+        content_locale="auto",
+        preferred_locale=preferred_locale,
     )
 
     generation: LLMTextGeneration | None = None
 
     if context_mode == "general":
-        prompt = _build_general_prompt(question)
+        prompt = _build_general_prompt(question, preferred_locale=preferred_locale,)
         generation = _generate_answer_from_prompt(prompt)
         answer = generation.text
         sources: list[dict[str, Any]] = []
@@ -353,11 +384,13 @@ def ask_rag_question(
                 prompt = _build_no_rule_prompt(
                     question=question,
                     chunks=sources,
+                    preferred_locale=preferred_locale,
                 )
             else:
                 prompt = _build_grounded_prompt(
                     question=question,
                     chunks=sources,
+                    preferred_locale=preferred_locale,
                 )
 
             generation = _generate_answer_from_prompt(prompt)
@@ -378,6 +411,8 @@ def ask_rag_question(
         retrieved_chunks=sources,
         model_name=generation.model if generation else None,
         latency_ms=latency_ms,
+        content_locale=preferred_locale,
+        preferred_locale=preferred_locale,
     )
 
     return {
@@ -389,4 +424,5 @@ def ask_rag_question(
         "selected_document_ids": selected_document_ids,
         "top_k": normalized_top_k,
         "latency_ms": latency_ms,
+        "preferred_locale": preferred_locale,
     }

@@ -1,4 +1,5 @@
 import type { AppNavigationItem } from "@/features/app-shell/app-shell.types";
+import { Map } from "lucide-react";
 
 type AppNavigationIconProps = {
   icon: AppNavigationItem["icon"];
@@ -43,6 +44,12 @@ export function AppNavigationIcon({ icon }: AppNavigationIconProps) {
           strokeLinecap="round"
         />
       </svg>
+    );
+  }
+
+  if (icon === "map") {
+    return (
+      <Map size={"20"}/>
     );
   }
 

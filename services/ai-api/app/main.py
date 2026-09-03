@@ -16,7 +16,9 @@ from app.api.routes import (
     native_task_risk_insight,
     pbi,
     weekly_reflection,
-    rag
+    rag,
+    ai_translations,
+    learning_roadmaps
 )
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
@@ -91,5 +93,8 @@ app.include_router(
     prefix="/api/v1/engagement",
     tags=["Engagement Retention"],
 )
+app.include_router(ai_translations.router, prefix="/api/v1/ai-translations", tags=["ai-translations"])
+
+app.include_router(learning_roadmaps.router, prefix="/api/v1/learning-roadmaps", tags=["learning-roadmaps"])
 
 app.include_router(rag.router)
