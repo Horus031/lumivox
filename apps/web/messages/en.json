@@ -549,7 +549,11 @@
       },
       "noDescription": "No description available",
       "open": "Open",
-      "minutesShort": "{minutes}m"
+      "minutesShort": "{minutes}m",
+      "subtask": "Subtask",
+      "subtaskProgress": "{completed}/{total} subtasks",
+      "expandSubtasks": "Expand subtasks",
+      "collapseSubtasks": "Collapse subtasks"
     },
     "details": {
       "fallbackDescription": "Task details",
@@ -688,6 +692,7 @@
       "chooseTask": "Choose your linked task",
       "noLinkedTask": "No linked task",
       "plannedDuration": "Planned duration",
+      "plannedDurationSub": "You can adjust this to your preference, beyond the duration listed below.",
       "minutes": "{value} min",
       "plannedMinutesPlaceholder": "Your desired planned minutes...",
       "starting": "Starting...",

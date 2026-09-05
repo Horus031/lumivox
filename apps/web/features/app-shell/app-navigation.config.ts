@@ -34,12 +34,12 @@ export const appNavigationItems: AppNavigationItem[] = [
   {
     key: "groups",
     href: "/groups",
-    icon: "users",
+    icon: "groups",
   },
   {
     key: "leaderboard",
     href: "/leaderboard",
-    icon: "users",
+    icon: "leaderboard",
   },
   {
     key: "reflections",
@@ -47,15 +47,15 @@ export const appNavigationItems: AppNavigationItem[] = [
     icon: "reflections",
   },
 
-  {
-    key: "settings",
-    href: "/settings",
-    icon: "settings",
-  },
-  {
-    key: "admin",
-    href: "/admin",
-    icon: "shield",
-    adminOnly: true,
-  },
+  // {
+  //   key: "settings",
+  //   href: "/settings",
+  //   icon: "settings",
+  // },
+  // {
+  //   key: "admin",
+  //   href: "/admin",
+  //   icon: "shield",
+  //   adminOnly: true,
+  // },
 ];

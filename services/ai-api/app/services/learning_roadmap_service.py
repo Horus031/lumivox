@@ -104,20 +104,21 @@ User inputs:
 
 Planning rules:
 1. Make the roadmap realistic for the given time range.
-2. Break the roadmap into 3 to 6 goals.
-3. Each goal should have 2 to 5 tasks.
-4. Each task should have 2 to 4 subtasks.
-5. Estimate hours based on available study time.
-6. Use suggested_start_date and suggested_end_date inside the user's date range.
-7. Earlier goals should cover foundations, later goals should cover practice, projects, revision, and assessment.
-8. Keep node titles short and actionable.
-9. Descriptions should explain what the learner needs to do.
-10. Priority must be 1 to 5, where 5 is most important.
-11. sort_order should start at 0 within each parent.
-12. The output must be valid JSON matching the provided schema.
-13. Do not include Markdown outside JSON.
-14. {_language_instruction(request.preferred_locale)}
-15. Goal/tasks/subtasks should be more detail with step-by-step learning, attach link for learning resources will be better.
+2. Roadmap must be details, which must contain goals, tasks, and subtaks.
+3. Goal/tasks/subtasks should be more detail with step-by-step learning, attach link for learning resources will be better.
+4. Break the roadmap into 3 to 6 goals.
+5. Each goal should have 2 to 5 tasks.
+6. Each task should have 2 to 4 subtasks.
+7. Estimate hours based on available study time.
+8. Use suggested_start_date and suggested_end_date inside the user's date range.
+9. Earlier goals should cover foundations, later goals should cover practice, projects, revision, and assessment.
+10. Keep node titles short and actionable.
+11. Descriptions should explain what the learner needs to do.
+12. Priority must be 1 to 5, where 5 is most important.
+13. sort_order should start at 0 within each parent.
+14. The output must be valid JSON matching the provided schema.
+15. Do not include Markdown outside JSON.
+16. {_language_instruction(request.preferred_locale)}
 
 Important:
 The output will be saved directly to a database and rendered as a visual tree, so the hierarchy must be clean and consistent.

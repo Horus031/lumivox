@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth/require-user";
 
-import type { Task, TaskWithGoal } from "./task.types";
+import type { Task, TaskWithGoal, TaskWithSubtasks } from "./task.types";
 
 type TasksPageFilters = {
   page?: number;
@@ -11,22 +11,22 @@ type TasksPageFilters = {
   goalId?: string;
 };
 
+const TASK_WITH_GOAL_SELECT = `
+  *,
+  goals (
+    id,
+    title,
+    goal_type,
+    status
+  )
+`;
+
 export async function getTasks() {
   const { supabase } = await requireUser();
 
   const { data, error } = await supabase
     .from("tasks")
-    .select(
-      `
-      *,
-      goals (
-        id,
-        title,
-        goal_type,
-        status
-      )
-    `,
-    )
+    .select(TASK_WITH_GOAL_SELECT)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -44,18 +44,8 @@ export async function getTasksPage(filters: TasksPageFilters = {}) {
 
   let query = supabase
     .from("tasks")
-    .select(
-      `
-      *,
-      goals (
-        id,
-        title,
-        goal_type,
-        status
-      )
-    `,
-      { count: "exact" },
-    )
+    .select(TASK_WITH_GOAL_SELECT, { count: "exact" })
+    .is("parent_task_id", null)
     .order("due_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: false });
 
@@ -89,10 +79,44 @@ export async function getTasksPage(filters: TasksPageFilters = {}) {
     throw new Error(`Failed to fetch tasks: ${error.message}`);
   }
 
+  const rootTasks = (data ?? []) as TaskWithGoal[];
+  const rootTaskIds = rootTasks.map((task) => task.id);
+  let subtasks: TaskWithGoal[] = [];
+
+  if (rootTaskIds.length > 0) {
+    const { data: subtaskData, error: subtaskError } = await supabase
+      .from("tasks")
+      .select(TASK_WITH_GOAL_SELECT)
+      .in("parent_task_id", rootTaskIds)
+      .order("due_at", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true });
+
+    if (subtaskError) {
+      throw new Error(`Failed to fetch subtasks: ${subtaskError.message}`);
+    }
+
+    subtasks = (subtaskData ?? []) as TaskWithGoal[];
+  }
+
+  const subtasksByParentId = new Map<string, TaskWithGoal[]>();
+
+  for (const subtask of subtasks) {
+    if (!subtask.parent_task_id) continue;
+
+    const existing = subtasksByParentId.get(subtask.parent_task_id) ?? [];
+    existing.push(subtask);
+    subtasksByParentId.set(subtask.parent_task_id, existing);
+  }
+
   const totalCount = count ?? 0;
 
   return {
-    tasks: data as TaskWithGoal[],
+    tasks: rootTasks.map(
+      (task): TaskWithSubtasks => ({
+        ...task,
+        subtasks: subtasksByParentId.get(task.id) ?? [],
+      }),
+    ),
     totalCount,
     page,
     pageSize,
@@ -107,17 +131,7 @@ export async function getTaskById(taskId: string | null) {
 
   const { data, error } = await supabase
     .from("tasks")
-    .select(
-      `
-      *,
-      goals (
-        id,
-        title,
-        goal_type,
-        status
-      )
-    `,
-    )
+    .select(TASK_WITH_GOAL_SELECT)
     .eq("id", taskId)
     .single();
 

@@ -2,6 +2,7 @@
 
 import { Fragment, useMemo, useState, useTransition } from "react";
 import type React from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -20,7 +21,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Goal } from "@/features/goals/goal.types";
-import type { TaskWithGoal } from "@/features/tasks/task.types";
+import type {
+  TaskWithGoal,
+  TaskWithSubtasks,
+} from "@/features/tasks/task.types";
 import { updateTaskAction } from "@/features/tasks/task.actions";
 import { formatDisplayDate } from "@/lib/utils/date";
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
@@ -28,7 +32,7 @@ import { TaskDatePicker } from "./task-date-picker";
 import { TaskDetailsDrawer } from "./task-details-drawer";
 
 type TasksTableProps = {
-  tasks: TaskWithGoal[];
+  tasks: TaskWithSubtasks[];
   goals: Goal[];
 };
 
@@ -52,11 +56,33 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [expandedTaskIds, setExpandedTaskIds] = useState<Set<string>>(
+    () => new Set(),
+  );
+
+  const displayTasks = useMemo(
+    () => tasks.flatMap((task) => [task, ...task.subtasks]),
+    [tasks],
+  );
 
   const selectedTask = useMemo(
-    () => tasks.find((task) => task.id === selectedTaskId) ?? null,
-    [selectedTaskId, tasks],
+    () => displayTasks.find((task) => task.id === selectedTaskId) ?? null,
+    [displayTasks, selectedTaskId],
   );
+
+  function toggleSubtasks(taskId: string) {
+    setExpandedTaskIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(taskId)) {
+        next.delete(taskId);
+      } else {
+        next.add(taskId);
+      }
+
+      return next;
+    });
+  }
 
   if (tasks.length === 0) {
     return (
@@ -285,6 +311,78 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
     );
   }
 
+  function TaskMetaCells({
+    task,
+    goalCaption,
+  }: {
+    task: TaskWithGoal;
+    goalCaption: string;
+  }) {
+    return (
+      <>
+        <td className="px-4 py-4 align-top text-sm text-muted-foreground">
+          <p className="font-medium text-foreground">
+            {task.goals?.title ?? formT("noGoal")}
+          </p>
+          <p className="mt-1 text-xs capitalize tracking-[0.18em] text-muted-foreground">
+            {goalCaption}
+          </p>
+        </td>
+        <td className="px-4 py-4 align-top">
+          <Badge
+            variant="secondary"
+            className={`rounded-full px-3 py-1.5 capitalize ring-1 ${getPriorityTone(
+              task.priority,
+            )}`}
+          >
+            {formT(`priorities.${task.priority}`)}
+          </Badge>
+        </td>
+        <td className="px-4 py-4 align-top">
+          <Badge
+            variant="secondary"
+            className={`rounded-full px-3 py-1.5 capitalize ring-1 ${getStatusTone(
+              task.status,
+            )}`}
+          >
+            {formT(`statuses.${task.status}`)}
+          </Badge>
+        </td>
+        <td className="px-4 py-4 align-top text-sm text-foreground">
+          {formatDisplayDate(task.due_at)}
+        </td>
+        <td className="px-4 py-4 align-top text-sm text-foreground">
+          {task.estimated_minutes
+            ? t("minutesShort", { minutes: task.estimated_minutes })
+            : "-"}
+        </td>
+      </>
+    );
+  }
+
+  function TaskActions({ task }: { task: TaskWithGoal }) {
+    return (
+      <td className="px-5 py-4 text-right align-top">
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            onClick={() => setEditingTaskId(task.id)}
+          >
+            {commonT("edit")}
+          </Button>
+          <Button
+            type="button"
+            onClick={() => setSelectedTaskId(task.id)}
+            className="rounded-full bg-muted/70 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary hover:text-primary-foreground"
+          >
+            {t("open")}
+          </Button>
+        </div>
+      </td>
+    );
+  }
+
   return (
     <>
       <div className="overflow-hidden rounded-[28px] border border-border/60 bg-background">
@@ -310,83 +408,117 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
               </tr>
             </thead>
             <tbody>
-              {tasks.map((task) => (
-                <Fragment key={task.id}>
-                  <tr className="border-t border-border/60 transition hover:bg-muted/35">
-                    <td className="max-w-56 px-5 py-4 align-top">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTaskId(task.id)}
-                        className="group text-left"
-                      >
-                        <p className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary">
-                          {task.title}
-                        </p>
-                        <p className="mt-1 line-clamp-2 truncate text-wrap text-sm text-muted-foreground">
-                          {task.description ?? t("noDescription")}
-                        </p>
-                      </button>
-                    </td>
-                    <td className="px-4 py-4 align-top text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground">
-                        {task.goals?.title ?? formT("noGoal")}
-                      </p>
-                      <p className="mt-1 text-xs capitalize tracking-[0.18em] text-muted-foreground">
-                        {formatGoalType(task.goals?.goal_type, formT)}
-                      </p>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <Badge
-                        variant="secondary"
-                        className={`rounded-full px-3 py-1.5 capitalize ring-1 ${getPriorityTone(
-                          task.priority,
-                        )}`}
-                      >
-                        {formT(`priorities.${task.priority}`)}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-4 align-top">
-                      <Badge
-                        variant="secondary"
-                        className={`rounded-full px-3 py-1.5 capitalize ring-1 ${getStatusTone(
-                          task.status,
-                        )}`}
-                      >
-                        {formT(`statuses.${task.status}`)}
-                      </Badge>
-                    </td>
-                    <td className="px-4 py-4 align-top text-sm text-foreground">
-                      {formatDisplayDate(task.due_at)}
-                    </td>
-                    <td className="px-4 py-4 align-top text-sm text-foreground">
-                      {task.estimated_minutes
-                        ? t("minutesShort", { minutes: task.estimated_minutes })
-                        : "-"}
-                    </td>
-                    <td className="px-5 py-4 text-right align-top">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          onClick={() => setEditingTaskId(task.id)}
-                        >
-                          {commonT("edit")}
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setSelectedTaskId(task.id)}
-                          className="rounded-full bg-muted/70 px-4 py-2 text-sm font-medium text-foreground transition hover:bg-primary hover:text-primary-foreground"
-                        >
-                          {t("open")}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                  {editingTaskId === task.id ? (
-                    <TaskRowEditor key={`${task.id}-editor`} task={task} />
-                  ) : null}
-                </Fragment>
-              ))}
+              {tasks.map((task) => {
+                const hasSubtasks = task.subtasks.length > 0;
+                const isExpanded = expandedTaskIds.has(task.id);
+                const completedSubtasks = task.subtasks.filter(
+                  (subtask) => subtask.status === "completed",
+                ).length;
+
+                return (
+                  <Fragment key={task.id}>
+                    <tr className="border-t border-border/60 transition hover:bg-muted/35">
+                      <td className="max-w-56 px-5 py-4 align-top">
+                        <div className="flex items-start gap-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label={
+                              isExpanded
+                                ? t("collapseSubtasks")
+                                : t("expandSubtasks")
+                            }
+                            onClick={() =>
+                              hasSubtasks && toggleSubtasks(task.id)
+                            }
+                            disabled={!hasSubtasks}
+                            className="mt-0.5 h-7 w-7 shrink-0 rounded-full text-muted-foreground disabled:opacity-30"
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedTaskId(task.id)}
+                            className="group min-w-0 text-left"
+                          >
+                            <p className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary">
+                              {task.title}
+                            </p>
+                            <p className="mt-1 line-clamp-2 truncate text-wrap text-sm text-muted-foreground">
+                              {task.description ?? t("noDescription")}
+                            </p>
+                            {hasSubtasks ? (
+                              <p className="mt-2 text-xs font-medium text-muted-foreground">
+                                {t("subtaskProgress", {
+                                  completed: completedSubtasks,
+                                  total: task.subtasks.length,
+                                })}
+                              </p>
+                            ) : null}
+                          </button>
+                        </div>
+                      </td>
+                      <TaskMetaCells
+                        task={task}
+                        goalCaption={formatGoalType(
+                          task.goals?.goal_type,
+                          formT,
+                        )}
+                      />
+                      <TaskActions task={task} />
+                    </tr>
+                    {editingTaskId === task.id ? (
+                      <TaskRowEditor key={`${task.id}-editor`} task={task} />
+                    ) : null}
+
+                    {isExpanded
+                      ? task.subtasks.map((subtask) => (
+                          <Fragment key={subtask.id}>
+                            <tr className="border-t border-border/40 bg-muted/15 transition hover:bg-muted/35">
+                              <td className="max-w-56 px-5 py-4 align-top">
+                                <div className="flex items-start gap-2 pl-9">
+                                  <span className="mt-2 h-px w-6 shrink-0 bg-border" />
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      setSelectedTaskId(subtask.id)
+                                    }
+                                    className="group min-w-0 text-left"
+                                  >
+                                    <p className="text-sm font-semibold tracking-tight text-foreground group-hover:text-primary">
+                                      {subtask.title}
+                                    </p>
+                                    <p className="mt-1 line-clamp-2 truncate text-wrap text-sm text-muted-foreground">
+                                      {subtask.description ??
+                                        t("noDescription")}
+                                    </p>
+                                  </button>
+                                </div>
+                              </td>
+                              <TaskMetaCells
+                                task={subtask}
+                                goalCaption={t("subtask")}
+                              />
+                              <TaskActions task={subtask} />
+                            </tr>
+                            {editingTaskId === subtask.id ? (
+                              <TaskRowEditor
+                                key={`${subtask.id}-editor`}
+                                task={subtask}
+                              />
+                            ) : null}
+                          </Fragment>
+                        ))
+                      : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

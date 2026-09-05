@@ -72,7 +72,7 @@ export function TaskFiltersBar({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-[28px] bg-card/95 p-4 ring-1 ring-border/60 md:p-5"
+      className=""
     >
       <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_180px_180px_220px_auto]">
         <Label className="relative block">
@@ -83,7 +83,7 @@ export function TaskFiltersBar({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="flex h-full w-full border border-input bg-transparent pl-10 pr-3 text-sm shadow-sm outline-none transition placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring"
+            className="pl-10 pr-3"
           />
         </Label>
 

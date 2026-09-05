@@ -51,27 +51,30 @@ export function AppShellFrame({
     >
       {sidebar}
 
-      <header
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={toggleSidebar}
+        aria-label={
+          isSidebarCollapsed ? t("expandSidebar") : t("collapseSidebar")
+        }
+        title={isSidebarCollapsed ? t("expandSidebar") : t("collapseSidebar")}
         className={cn(
-          "hidden lg:fixed lg:right-0 lg:top-0 lg:z-20 lg:flex lg:h-18 lg:items-center lg:justify-between lg:border-b lg:border-border/60 lg:bg-background/86 lg:px-6 lg:backdrop-blur-xl",
-          "transition-[left] duration-300 ease-out",
-          isSidebarCollapsed ? "lg:left-22" : "lg:left-77",
+          "hidden lg:fixed lg:top-5 lg:z-30 lg:flex lg:h-10 lg:w-10 lg:rounded-full lg:border lg:border-border/70 lg:bg-surface lg:shadow-sm lg:transition-[left] lg:duration-300 lg:ease-out lg:hover:bg-muted/80",
+          isSidebarCollapsed ? "lg:left-17" : "lg:left-63",
         )}
       >
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          onClick={toggleSidebar}
-          aria-label={
-            isSidebarCollapsed ? t("expandSidebar") : t("collapseSidebar")
-          }
-          title={isSidebarCollapsed ? t("expandSidebar") : t("collapseSidebar")}
-          className="h-10 w-10 rounded-full border border-border/70 bg-surface shadow-sm hover:bg-muted/80"
-        >
-          {isSidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
-        </Button>
+        {isSidebarCollapsed ? <PanelLeftOpen /> : <PanelLeftClose />}
+      </Button>
 
+      <header
+        className={cn(
+          "hidden lg:fixed lg:right-0 lg:top-0 lg:z-20 lg:flex lg:h-18 lg:items-center lg:justify-end lg:border-b lg:border-border/60 lg:bg-background/86 lg:px-8 lg:backdrop-blur-xl",
+          "transition-[left] duration-300 ease-out",
+          isSidebarCollapsed ? "lg:left-22" : "lg:left-68",
+        )}
+      >
         <div className="flex items-center gap-4">
           <LanguageSwitcher />
 
@@ -81,11 +84,13 @@ export function AppShellFrame({
 
       <main
         className={cn(
-          "z-1 min-w-0 flex-1 pb-28 transition-[padding-left] duration-300 ease-out lg:pb-8 lg:pt-22",
-          isSidebarCollapsed ? "lg:pl-22" : "lg:pl-81",
+          "z-1 min-w-0 flex-1 transition-[padding-left] duration-300 ease-out lg:pt-18",
+          isSidebarCollapsed ? "lg:pl-22" : "lg:pl-68",
         )}
       >
-        {children}
+        <div className="px-4 py-6 pb-28 md:px-6 lg:px-8 lg:py-8 lg:pb-8">
+          {children}
+        </div>
       </main>
     </div>
   );

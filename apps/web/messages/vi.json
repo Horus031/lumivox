@@ -549,7 +549,11 @@
       },
       "noDescription": "Chưa có mô tả",
       "open": "Mở",
-      "minutesShort": "{minutes}p"
+      "minutesShort": "{minutes}p",
+      "subtask": "Nhiệm vụ con",
+      "subtaskProgress": "{completed}/{total} nhiệm vụ con",
+      "expandSubtasks": "Mở nhiệm vụ con",
+      "collapseSubtasks": "Thu gọn nhiệm vụ con"
     },
     "details": {
       "fallbackDescription": "Chi tiết nhiệm vụ",
@@ -688,6 +692,7 @@
       "chooseTask": "Chọn nhiệm vụ liên kết",
       "noLinkedTask": "Không liên kết nhiệm vụ",
       "plannedDuration": "Thời lượng dự kiến",
+      "plannedDurationSub": "Bạn có thể thay đổi theo ý thích ngoài các thời lượng bên dưới.",
       "minutes": "{value} phút",
       "plannedMinutesPlaceholder": "Nhập số phút bạn muốn...",
       "starting": "Đang bắt đầu...",

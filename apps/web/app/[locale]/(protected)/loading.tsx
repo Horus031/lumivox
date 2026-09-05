@@ -15,7 +15,7 @@ export default function ProtectedLoading() {
     <section
       aria-busy="true"
       aria-label="Loading page"
-      className="relative overflow-hidden px-4 py-6 md:px-6 lg:px-8 lg:py-8 xl:px-0"
+      className="relative overflow-hidden"
     >
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.08),transparent_32%),radial-gradient(circle_at_top_right,hsl(var(--primary-glow)/0.08),transparent_24%)]" />
 

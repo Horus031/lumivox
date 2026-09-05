@@ -77,8 +77,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   });
 
   return (
-    <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8 xl:px-0">
-      <div className="mx-auto max-w-7xl space-y-6">
+    <section>
+      <div className="mx-auto space-y-16">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}

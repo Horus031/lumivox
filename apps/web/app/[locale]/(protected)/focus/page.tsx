@@ -33,8 +33,8 @@ export default async function FocusPage() {
   );
 
   return (
-    <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8">
-      <div className="mx-auto max-w-6xl space-y-8">
+    <section>
+      <div className="mx-auto space-y-8">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}

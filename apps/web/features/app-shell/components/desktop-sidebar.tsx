@@ -15,7 +15,7 @@ export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
   const engagementStats = await getCurrentEngagementStats();
 
   return (
-    <aside className="desktop-sidebar z-2 hidden transition-all duration-300 ease-out lg:fixed lg:inset-y-0 lg:block lg:w-77 lg:p-4 xl:p-0">
+    <aside className="desktop-sidebar z-2 hidden transition-all duration-300 ease-out lg:fixed lg:inset-y-0 lg:block lg:w-68 lg:p-4 xl:p-0">
       <div className="desktop-sidebar-panel flex h-full flex-col gap-4 rounded-tr-2xl rounded-br-2xl bg-sidebar/95 px-4 py-5 shadow-[0_20px_70px_-55px_hsl(var(--primary)/0.28)] ring-1 ring-border/70 backdrop-blur-xl transition-all duration-300 ease-out">
         <div className="rounded-[28px] bg-sidebar px-1 py-1">
           <div className="rounded-3xl">

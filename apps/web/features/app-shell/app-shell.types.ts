@@ -20,6 +20,8 @@ export type AppNavigationItem = {
     | "map"
     | "focus"
     | "rooms"
+    | "groups"
+    | "leaderboard"
     | "reflections"
     | "settings"
     | "users"

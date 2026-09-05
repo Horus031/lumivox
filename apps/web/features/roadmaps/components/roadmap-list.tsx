@@ -20,12 +20,12 @@ function statusClass(status: string) {
 export function RoadmapList({ roadmaps }: RoadmapListProps) {
   if (roadmaps.length === 0) {
     return (
-      <section className="rounded-2xl border border-dashed bg-white p-10 text-center dark:border-neutral-800 dark:bg-neutral-950">
-        <h2 className="text-xl font-semibold text-neutral-950 dark:text-neutral-50">
+      <section className="rounded-2xl border border-dashed bg-surface p-10 text-center">
+        <h2 className="text-xl font-semibold text-foreground">
           No roadmaps yet
         </h2>
 
-        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-2 text-sm text-muted-foreground">
           Generate your first AI learning roadmap to turn a study goal into a
           structured plan.
         </p>
@@ -46,15 +46,15 @@ export function RoadmapList({ roadmaps }: RoadmapListProps) {
         <Link
           key={roadmap.id}
           href={`/roadmaps/${roadmap.id}`}
-          className="rounded-2xl border bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-950"
+          className="rounded-2xl border bg-surface p-5 shadow-sm transition hover:-translate-y-0.5"
         >
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+              <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
                 {roadmap.subject_name ?? "Learning Roadmap"}
               </p>
 
-              <h2 className="mt-2 line-clamp-2 text-xl font-bold text-neutral-950 dark:text-neutral-50">
+              <h2 className="mt-2 line-clamp-2 text-xl font-bold text-foreground">
                 {roadmap.title}
               </h2>
             </div>
@@ -68,25 +68,25 @@ export function RoadmapList({ roadmaps }: RoadmapListProps) {
             </span>
           </div>
 
-          <p className="mt-3 line-clamp-3 text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="mt-3 line-clamp-3 text-sm text-muted-foreground">
             {roadmap.description ?? roadmap.topic}
           </p>
 
           <div className="mt-5 grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="rounded-xl bg-background p-3">
+              <p className="text-xs text-muted-foreground">
                 Duration
               </p>
-              <p className="mt-1 font-medium text-neutral-950 dark:text-neutral-50">
+              <p className="mt-1 font-medium text-foreground">
                 {roadmap.start_date} → {roadmap.end_date}
               </p>
             </div>
 
-            <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            <div className="rounded-xl bg-background p-3">
+              <p className="text-xs text-muted-foreground">
                 Study time
               </p>
-              <p className="mt-1 font-medium text-neutral-950 dark:text-neutral-50">
+              <p className="mt-1 font-medium text-foreground">
                 {roadmap.study_days_per_week}d/w ·{" "}
                 {roadmap.minutes_per_study_day}m
               </p>

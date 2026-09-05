@@ -1,23 +1,19 @@
-from fastapi import APIRouter, Depends
+from __future__ import annotations
+
+from fastapi import APIRouter
 
 from app.schemas.native_task_risk import (
-    GenerateNativeTaskRiskScanRequest,
-    GenerateNativeTaskRiskScanResponse,
+    NativeTaskRiskPredictRequest,
+    NativeTaskRiskPredictResponse,
 )
-from app.security.internal_api_key import verify_internal_api_key
-from app.services.native_task_risk_service import (
-    generate_native_task_risk_scan,
-)
+from app.services.native_task_risk_service import predict_native_task_risk
+
 
 router = APIRouter()
 
 
-@router.post(
-    "/scan",
-    response_model=GenerateNativeTaskRiskScanResponse,
-    dependencies=[Depends(verify_internal_api_key)],
-)
-def generate_native_task_risk_scan_endpoint(
-    payload: GenerateNativeTaskRiskScanRequest,
-):
-    return generate_native_task_risk_scan(payload)
+@router.post("/predict", response_model=NativeTaskRiskPredictResponse)
+def predict_task_risk(
+    request: NativeTaskRiskPredictRequest,
+) -> NativeTaskRiskPredictResponse:
+    return predict_native_task_risk(request)

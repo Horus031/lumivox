@@ -9,7 +9,7 @@ export default async function AdminSettingsPage() {
   ]);
 
   return (
-    <main className="space-y-6 px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+    <main className="space-y-6">
       <section className="rounded-2xl border bg-surface p-6 shadow-sm">
         <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
           {t("eyebrow")}

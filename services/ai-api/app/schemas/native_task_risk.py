@@ -1,49 +1,49 @@
 from __future__ import annotations
 
 from typing import Literal
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 
-class GenerateNativeTaskRiskScanRequest(BaseModel):
-    user_id: UUID
-    task_id: UUID | None = None
-
-    horizon_days: int = Field(default=14, ge=1, le=60)
-    focus_window_days: int = Field(default=7, ge=1, le=30)
-    history_window_days: int = Field(default=30, ge=1, le=180)
-
-    persist_assessments: bool = True
+RiskBand = Literal["low", "moderate", "elevated", "high"]
+PredictionMode = Literal["native_ml", "deterministic_fallback"]
 
 
-class NativeTaskRiskEvidenceItem(BaseModel):
-    key: str
-    title: str
-    message: str
-    severity: Literal["neutral", "watch", "important"]
+class NativeTaskRiskPredictRequest(BaseModel):
+    user_id: str
+    task_id: str
+    persist: bool = True
 
 
-class NativeTaskRiskAssessmentResponse(BaseModel):
-    assessment_id: UUID | None
-
-    task_id: UUID
-    task_title: str
-    task_due_at: str | None
-    task_priority: str
-
-    risk_score: float
-    risk_band: Literal["low", "moderate", "elevated", "high"]
-
-    deadline_pressure_score: float
-    priority_pressure_score: float
-    focus_neglect_score: float
-    deadline_reliability_risk_score: float
-    workload_pressure_score: float
-
-    evidence: list[NativeTaskRiskEvidenceItem]
+class NativeTaskRiskReason(BaseModel):
+    feature_name: str
+    feature_value: float
+    contribution: float
+    effect: Literal["increases_risk", "decreases_risk", "neutral"]
+    reason: str
 
 
-class GenerateNativeTaskRiskScanResponse(BaseModel):
-    assessed_task_count: int
-    assessments: list[NativeTaskRiskAssessmentResponse]
+class NativeTaskRiskPredictResponse(BaseModel):
+    user_id: str
+    task_id: str
+    goal_id: str | None = None
+
+    prediction_mode: PredictionMode
+
+    model_key: str
+    model_version: str
+    model_name: str
+
+    risk_probability: float = Field(ge=0, le=1)
+    risk_score: float = Field(ge=0, le=100)
+    risk_band: RiskBand
+    predicted_late: bool
+    decision_threshold: float
+
+    days_until_due: int | None = None
+    due_at: str | None = None
+
+    features: dict[str, float]
+    reasons: list[NativeTaskRiskReason]
+
+    prediction_id: str | None = None

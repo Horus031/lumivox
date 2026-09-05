@@ -104,10 +104,15 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
           </select> */}
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">
-            {t("plannedDuration")}
-          </label>
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium">
+              {t("plannedDuration")}
+            </label>
+            <label className="mb-1.5 block text-xs text-muted-foreground ">
+              {t("plannedDurationSub")}
+            </label>
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {["25", "45", "60"].map((value) => (
@@ -116,10 +121,10 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                 key={value}
                 type="button"
                 onClick={() => setPlannedMinutes(value)}
-                className={`border bg-transparent text-foreground px-4 py-2 text-sm font-medium transition ${
+                className={`border bg-transparent text-primary-foreground px-4 py-2 text-sm font-medium transition ${
                   plannedMinutes === value
-                    ? "border-primary bg-primary text-foreground"
-                    : "text-foreground hover:text-foreground"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "text-foreground hover:text-primary-foreground"
                 }`}
               >
                 {t("minutes", { value: Number(value) })}
