@@ -1,4 +1,7 @@
-import type { TypedSupabaseClient } from "@/types/database.types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@/types/database.types";
+
+type TypedSupabaseClient = SupabaseClient<Database>;
 
 function getRollingDateKeys(days = 7) {
   const dates: string[] = [];
