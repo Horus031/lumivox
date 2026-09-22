@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/native-task-risk",
-      "schedule": "0 */6 * * *"
+      "schedule": "0 1 * * *"
     }
   ]
 }
