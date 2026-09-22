@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
 import { getMyNativeTaskRiskCandidateTasks } from "@/features/native-task-risk/native-task-risk.queries";
@@ -46,9 +44,6 @@ export async function refreshNativeTaskRiskPredictionsAction(): Promise<
       },
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/tasks");
-    revalidatePath("/goals");
 
     return {
       success: true,
@@ -152,9 +147,6 @@ export async function rescheduleTaskFromRiskAlertAction(
       };
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/tasks");
-    revalidatePath("/goals");
 
     return {
       success: true,
