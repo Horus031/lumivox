@@ -301,6 +301,13 @@ export async function cancelFocusSessionAction(
       };
     }
 
+    if (session.status !== "ongoing" && session.status !== "paused") {
+      return {
+        success: false,
+        message: "Only active sessions can be cancelled.",
+      };
+    }
+
     const endedAt = new Date();
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
