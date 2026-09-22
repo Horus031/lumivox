@@ -1,20 +1,36 @@
+import { Suspense } from "react";
 import type { Profile } from "@/features/profiles/profile.types";
 
 import { AppNavigation } from "@/features/app-shell/components/app-navigation";
-// import { UserMenuCard } from "@/features/app-shell/components/user-menu-card";
 import { SidebarEngagementMiniStats } from "@/features/engagement-retention/components/sidebar-engagement-mini-stats";
-import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
+import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
 import { getTranslations } from "next-intl/server";
 
 type DesktopSidebarProps = {
   profile: Profile;
-  engagementStats: UserEngagementStats | null;
 };
 
-export async function DesktopSidebar({
-  profile,
-  engagementStats,
-}: DesktopSidebarProps) {
+async function SidebarEngagement({ userId }: { userId: string }) {
+  const engagementStats = await getCurrentEngagementStats();
+
+  return (
+    <SidebarEngagementMiniStats
+      userId={userId}
+      stats={engagementStats}
+    />
+  );
+}
+
+function SidebarEngagementFallback() {
+  return (
+    <div
+      aria-hidden="true"
+      className="mt-3 h-24 animate-pulse rounded-xl border border-border/60 bg-muted/40"
+    />
+  );
+}
+
+export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
   const t = await getTranslations("appShell.sidebar");
 
   return (
@@ -41,12 +57,10 @@ export async function DesktopSidebar({
 
         <div className="space-y-4">
           <div className="desktop-sidebar-engagement transition-all duration-200">
-            <SidebarEngagementMiniStats
-              userId={profile.id}
-              stats={engagementStats}
-            />
+            <Suspense fallback={<SidebarEngagementFallback />}>
+              <SidebarEngagement userId={profile.id} />
+            </Suspense>
           </div>
-          {/* <UserMenuCard profile={profile} /> */}
         </div>
       </div>
     </aside>
