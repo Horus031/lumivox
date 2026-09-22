@@ -83,7 +83,6 @@ export async function createStudyGroupAction(
     }
 
     revalidatePath("/groups");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
