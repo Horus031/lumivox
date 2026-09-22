@@ -2,6 +2,21 @@ import { requireUser } from "@/lib/auth/require-user";
 import { GoalWithProgress } from "./goal.types";
 import { calculateGoalProgress } from "./goal-progress.utils";
 
+export async function getGoalOptions() {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("goals")
+    .select("id, title")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch goal options: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
 export async function getGoals() {
   const { supabase } = await requireUser();
 
