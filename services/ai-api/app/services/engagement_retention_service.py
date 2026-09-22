@@ -3,6 +3,8 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
+from supabase import Client
+
 from app.clients.supabase_client import get_supabase_client
 from app.schemas.engagement_retention import (
     EngagementStatsPayload,
@@ -409,8 +411,9 @@ def insert_missing_rewards(
     *,
     user_id: UUID,
     reward_candidates: list[dict],
+    supabase: Client | None = None,
 ) -> list[RewardLedgerEntryPreview]:
-    supabase = get_supabase_client()
+    supabase = supabase or get_supabase_client()
 
     created_rewards: list[RewardLedgerEntryPreview] = []
     
@@ -451,8 +454,9 @@ def insert_streak_event_if_missing(
     source_key: str,
     metadata: dict,
     token_delta: int = 0,
+    supabase: Client | None = None,
 ) -> None:
-    supabase = get_supabase_client()
+    supabase = supabase or get_supabase_client()
 
     (
         supabase.table("user_streak_events")
@@ -480,7 +484,9 @@ def persist_streak_transition_event(
     user_id: UUID,
     previous_stats: dict | None,
     next_stats: EngagementStatsPayload,
+    supabase: Client | None = None,
 ) -> None:
+    supabase = supabase or get_supabase_client()
     previous_status = (
         previous_stats.get("streak_status")
         if previous_stats
@@ -504,6 +510,7 @@ def persist_streak_transition_event(
                 "last_valid_activity_date": latest_activity,
                 "current_streak_days": next_stats.current_streak_days,
             },
+            supabase=supabase,
         )
 
     if previous_status == next_status:
@@ -531,6 +538,7 @@ def persist_streak_transition_event(
             "current_streak_days": next_stats.current_streak_days,
             "restore_deadline_at": next_stats.streak_restore_deadline_at,
         },
+        supabase=supabase,
     )
 
 
@@ -538,8 +546,11 @@ def persist_streak_transition_event(
 # 6. Token aggregation
 # ============================================================
 
-def aggregate_reward_stats(user_id: UUID) -> tuple[int, int, int, int]:
-    supabase = get_supabase_client()
+def aggregate_reward_stats(
+    user_id: UUID,
+    supabase: Client | None = None,
+) -> tuple[int, int, int, int]:
+    supabase = supabase or get_supabase_client()
 
     reward_result = (
         supabase.table("reward_ledger")
@@ -598,8 +609,11 @@ def aggregate_reward_stats(user_id: UUID) -> tuple[int, int, int, int]:
 # 7. Database persistence
 # ============================================================
 
-def get_previous_engagement_stats(user_id: UUID) -> dict | None:
-    supabase = get_supabase_client()
+def get_previous_engagement_stats(
+    user_id: UUID,
+    supabase: Client | None = None,
+) -> dict | None:
+    supabase = supabase or get_supabase_client()
 
     result = (
         supabase.table("user_engagement_stats")
@@ -619,8 +633,9 @@ def persist_engagement_stats(
     *,
     user_id: UUID,
     stats: EngagementStatsPayload,
+    supabase: Client | None = None,
 ) -> None:
-    supabase = get_supabase_client()
+    supabase = supabase or get_supabase_client()
 
     (
         supabase.table("user_engagement_stats")
@@ -658,7 +673,10 @@ def recalculate_engagement(
 ) -> RecalculateEngagementResponse:
     supabase = get_supabase_client()
 
-    previous_stats = get_previous_engagement_stats(payload.user_id)
+    previous_stats = get_previous_engagement_stats(
+        payload.user_id,
+        supabase=supabase,
+    )
 
     focus_result = (
         supabase.table("focus_sessions")
@@ -745,6 +763,7 @@ def recalculate_engagement(
         newly_created_rewards = insert_missing_rewards(
             user_id=payload.user_id,
             reward_candidates=reward_candidates,
+            supabase=supabase,
         )
 
     (
@@ -752,7 +771,10 @@ def recalculate_engagement(
         total_tokens_earned,
         total_tokens_spent,
         tokens_last_7d,
-    ) = aggregate_reward_stats(payload.user_id)
+    ) = aggregate_reward_stats(
+        payload.user_id,
+        supabase=supabase,
+    )
 
     stats = EngagementStatsPayload(
         current_streak_days=status_payload["current_streak_days"],
@@ -788,12 +810,14 @@ def recalculate_engagement(
         persist_engagement_stats(
             user_id=payload.user_id,
             stats=stats,
+            supabase=supabase,
         )
 
         persist_streak_transition_event(
             user_id=payload.user_id,
             previous_stats=previous_stats,
             next_stats=stats,
+            supabase=supabase,
         )
 
     return RecalculateEngagementResponse(
