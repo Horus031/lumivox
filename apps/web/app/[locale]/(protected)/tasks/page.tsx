@@ -1,5 +1,5 @@
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import { getGoals } from "@/features/goals/goal.queries";
+import { getGoalOptions } from "@/features/goals/goal.queries";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import TasksClient from "@/features/tasks/components/tasks-client";
 import { getTasksPage } from "@/features/tasks/task.queries";
@@ -76,7 +76,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const goalId = parseQueryValue(params.goalId);
 
   const [goals, tasksResult, nativeTaskRiskAlerts] = await Promise.all([
-    getGoals(),
+    getGoalOptions(),
     getTasksPage({
       page,
       pageSize: 8,
