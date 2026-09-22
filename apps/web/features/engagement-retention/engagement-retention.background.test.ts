@@ -74,6 +74,21 @@ describe("scheduleEngagementRecalculation", () => {
     expect(mocks.processEngagementActivityForUser).not.toHaveBeenCalled();
   });
 
+
+  it("reuses the short recalculation cache for stale page reads", async () => {
+    scheduleEngagementRecalculation({
+      userId: "user-stale",
+      source: "stale-read",
+    });
+
+    await scheduledTask?.();
+
+    expect(mocks.invalidateEngagementCache).not.toHaveBeenCalled();
+    expect(mocks.recalculateEngagementForUser).toHaveBeenCalledWith(
+      "user-stale",
+    );
+  });
+
   it("contains background failures", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
     mocks.recalculateEngagementForUser.mockRejectedValue(
