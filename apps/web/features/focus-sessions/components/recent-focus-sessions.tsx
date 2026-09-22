@@ -1,6 +1,6 @@
 "use client";
 
-import type { RecentRecentFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
+import type { RecentFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import { useTranslations } from "next-intl";
 
 type RecentFocusSessionsProps = {
