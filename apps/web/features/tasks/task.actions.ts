@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -50,9 +48,6 @@ export async function createTaskAction(
       };
     }
 
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
-
     return {
       success: true,
       message: "Task created successfully.",
@@ -97,6 +92,19 @@ export async function updateTaskAction(
       completedAt,
     } = parsed.data;
 
+    const { data: existingTask, error: existingTaskError } = await supabase
+      .from("tasks")
+      .select("status")
+      .eq("id", taskId)
+      .single();
+
+    if (existingTaskError || !existingTask) {
+      return {
+        success: false,
+        message: "Task not found.",
+      };
+    }
+
     const completedAtValue =
       status === "completed" ? completedAt || new Date().toISOString() : null;
 
@@ -121,10 +129,23 @@ export async function updateTaskAction(
       };
     }
 
-    scheduleEngagementRecalculation({
-      userId: user.id,
-      source: "task-update",
-    });
+    if (status === "completed" && existingTask.status !== "completed") {
+      scheduleEngagementRecalculation({
+        userId: user.id,
+        source: "task-update",
+        activity: {
+          type: "task",
+          id: taskId,
+        },
+      });
+    } else if (existingTask.status === "completed") {
+      // Reverting or editing an already-completed task can alter historical
+      // validity, so use the canonical reconciliation outside the request path.
+      scheduleEngagementRecalculation({
+        userId: user.id,
+        source: "task-update",
+      });
+    }
 
     return {
       success: true,
@@ -154,7 +175,20 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
+
+    const { data: existingTask, error: existingTaskError } = await supabase
+      .from("tasks")
+      .select("status")
+      .eq("id", parsed.data.taskId)
+      .single();
+
+    if (existingTaskError || !existingTask) {
+      return {
+        success: false,
+        message: "Task not found.",
+      };
+    }
 
     const { error } = await supabase
       .from("tasks")
@@ -168,9 +202,12 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
       };
     }
 
-    revalidatePath("/tasks");
-    revalidatePath("/dashboard");
-    revalidatePath("/goals");
+    if (existingTask.status === "completed") {
+      scheduleEngagementRecalculation({
+        userId: user.id,
+        source: "task-update",
+      });
+    }
 
     return {
       success: true,
