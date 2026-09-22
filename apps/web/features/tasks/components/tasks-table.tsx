@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Goal } from "@/features/goals/goal.types";
+import type { GoalOption } from "@/features/goals/goal.types";
 import type {
   TaskWithGoal,
   TaskWithSubtasks,
@@ -33,7 +33,7 @@ import { TaskDetailsDrawer } from "./task-details-drawer";
 
 type TasksTableProps = {
   tasks: TaskWithSubtasks[];
-  goals: Goal[];
+  goals: GoalOption[];
 };
 
 function formatGoalType(
