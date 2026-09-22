@@ -9,7 +9,6 @@ import { StartFocusSessionForm } from "@/features/focus-sessions/components/star
 import { ActiveFocusSessionPanel } from "@/features/focus-sessions/components/active-focus-session-panel";
 import { RecentFocusSessions } from "@/features/focus-sessions/components/recent-focus-sessions";
 
-import type { FocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getAccessibleProcessedLearningDocuments } from "@/features/learning-documents/learning-document.queries";
 import { RagStudyAssistant } from "@/features/rag/components/rag-study-assistant";
@@ -57,9 +56,7 @@ export default async function FocusPage() {
 
         {activeSession ? (
           <div className="flex flex-col gap-4">
-            <ActiveFocusSessionPanel
-              session={activeSession as FocusSessionWithTask}
-            />
+            <ActiveFocusSessionPanel session={activeSession} />
 
             <Suspense fallback={<RagLoadingFallback />}>
               <FocusRagSection focusSessionId={activeSession.id} />
@@ -69,9 +66,7 @@ export default async function FocusPage() {
           <StartFocusSessionForm tasks={tasks} />
         )}
 
-        <RecentFocusSessions
-          sessions={recentSessions as FocusSessionWithTask[]}
-        />
+        <RecentFocusSessions sessions={recentSessions} />
       </div>
     </section>
   );
