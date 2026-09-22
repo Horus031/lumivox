@@ -1,38 +1,22 @@
-import {
-  getBehaviourTrend,
-  getDashboardSummary,
-  getLatestPbiSnapshot,
-  getPbiSnapshotHistory,
-  getTaskStatusBreakdown,
-} from "@/features/dashboard/dashboard.queries";
+import { Suspense } from "react";
+import { getTranslations } from "next-intl/server";
 
-import { DashboardSummaryCards } from "@/features/dashboard/components/dashboard-summary-cards";
 import { BehaviourTrendChart } from "@/features/dashboard/components/behaviour-trend-chart";
+import { DashboardSummaryCards } from "@/features/dashboard/components/dashboard-summary-cards";
 import { PbiHistoryChart } from "@/features/dashboard/components/pbi-history-chart";
 import { TaskStatusChart } from "@/features/dashboard/components/task-status-chart";
-
-import { RefreshPbiButton } from "@/features/pbi/components/refresh-pbi-button";
-import { PbiScoreCards } from "@/features/pbi/components/pbi-score-cards";
-
-import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
-import { translatePbiExplanationPayload } from "@/features/pbi/pbi-translations.server";
-import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
-
+import {
+  getDashboardActivityOverview,
+  getDashboardPbiOverview,
+} from "@/features/dashboard/dashboard.queries";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
 import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
-
-// import { getLatestAiInsightCards } from "@/features/ai-insights/ai-insight.queries";
-// import { AiInsightSection } from "@/features/ai-insights/components/ai-insight-section";
-
-// import { getLatestNativeTaskRiskAssessments } from "@/features/native-task-risk/native-task-risk.queries";
-// import { NativeTaskRiskSection } from "@/features/native-task-risk/components/native-task-risk-section";
-
-// import { getLatestNativeTaskAiInsights } from "@/features/native-task-insights/native-task-insight.queries";
-// import { NativeTaskAiInsightSection } from "@/features/native-task-insights/components/native-task-ai-insight-section";
-
-import { PageHeader } from "@/features/app-shell/components/page-header";
-// import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
-import { getTranslations } from "next-intl/server";
+import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
+import { RefreshPbiButton } from "@/features/pbi/components/refresh-pbi-button";
+import { PbiScoreCards } from "@/features/pbi/components/pbi-score-cards";
+import { translatePbiExplanationPayload } from "@/features/pbi/pbi-translations.server";
+import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
 import { requireUser } from "@/lib/auth/require-user";
 
 type DashboardPageProps = {
@@ -45,39 +29,69 @@ function normalizeAiLocale(locale: string) {
   return locale === "vi" ? "vi" : "en";
 }
 
-export default async function DashboardPage({ params }: DashboardPageProps) {
-  const { locale } = await params;
-  const aiLocale = normalizeAiLocale(locale);
-  const t = await getTranslations("dashboard.header");
+function DashboardSectionSkeleton({ height = "h-56" }: { height?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`${height} animate-pulse rounded-[28px] border border-border/60 bg-card/60`}
+    />
+  );
+}
 
+async function DashboardActivitySection() {
   const { supabase } = await requireUser();
+  const { summary, behaviourTrend, taskStatusBreakdown } =
+    await getDashboardActivityOverview(supabase);
 
-  const [
-    summary,
-    latestSnapshot,
-    behaviourTrend,
-    pbiHistory,
-    taskStatusBreakdown,
-    nativeTaskRiskAlerts,
-  ] = await Promise.all([
-    getDashboardSummary(supabase),
-    getLatestPbiSnapshot(supabase),
-    getBehaviourTrend(undefined, supabase),
-    getPbiSnapshotHistory(undefined, supabase),
-    getTaskStatusBreakdown(supabase),
-    getMyNativeTaskRiskAlerts(6, supabase),
-  ]);
+  return (
+    <>
+      <DashboardSummaryCards {...summary} />
+
+      <BehaviourTrendChart data={behaviourTrend} />
+
+      <TaskStatusChart data={taskStatusBreakdown} />
+    </>
+  );
+}
+
+async function DashboardPbiSection({ locale }: { locale: string }) {
+  const { supabase } = await requireUser();
+  const { latestSnapshot, pbiHistory } =
+    await getDashboardPbiOverview(supabase);
 
   const sourceExplanation =
     latestSnapshot?.explanation_payload &&
     typeof latestSnapshot.explanation_payload === "object"
       ? (latestSnapshot.explanation_payload as PbiExplanationPayload)
       : null;
+
   const explanation = await translatePbiExplanationPayload(
     sourceExplanation,
     latestSnapshot?.id,
-    aiLocale,
+    normalizeAiLocale(locale),
   );
+
+  return (
+    <>
+      <PbiScoreCards snapshot={latestSnapshot} />
+      <PbiExplanationPanel explanation={explanation} />
+      <PbiHistoryChart data={pbiHistory} />
+    </>
+  );
+}
+
+async function DashboardRiskSection() {
+  const { supabase } = await requireUser();
+  const alerts = await getMyNativeTaskRiskAlerts(6, supabase);
+
+  return <NativeTaskRiskAlertsCard alerts={alerts} />;
+}
+
+export default async function DashboardPage({ params }: DashboardPageProps) {
+  const [{ locale }, t] = await Promise.all([
+    params,
+    getTranslations("dashboard.header"),
+  ]);
 
   return (
     <section>
@@ -89,30 +103,17 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           action={<RefreshPbiButton />}
         />
 
-        {/* <FrozenStreakAlert stats={engagementStats} /> */}
+        <Suspense fallback={<DashboardSectionSkeleton height="h-96" />}>
+          <DashboardActivitySection />
+        </Suspense>
 
-        <DashboardSummaryCards {...summary} />
+        <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+          <DashboardPbiSection locale={locale} />
+        </Suspense>
 
-        <PbiScoreCards snapshot={latestSnapshot} />
-
-        <PbiExplanationPanel explanation={explanation} />
-
-        <BehaviourTrendChart data={behaviourTrend} />
-
-        <div className="grid gap-6 xl:grid-cols-2">
-          <PbiHistoryChart data={pbiHistory} />
-          <TaskStatusChart data={taskStatusBreakdown} />
-        </div>
-
-        <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
-
-        {/* Product Native Model for Production */}
-        {/* <NativeTaskRiskSection assessments={nativeTaskRiskAssessments} /> */}
-
-        {/* <NativeTaskAiInsightSection cards={nativeTaskAiInsights} /> */}
-
-        {/* AI Insight Model Demo */}
-        {/* <AiInsightSection cards={aiInsightCards} /> */}
+        <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
+          <DashboardRiskSection />
+        </Suspense>
       </div>
     </section>
   );
