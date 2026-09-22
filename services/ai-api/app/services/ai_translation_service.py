@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import os
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
 from supabase import create_client
@@ -206,12 +207,183 @@ def translate_ai_content(request: AITranslationRequest) -> AITranslationResponse
     )
 
 
+AI_TRANSLATION_MAX_WORKERS = 4
+
+
+def _translation_cache_group_key(request: AITranslationRequest) -> tuple[str, str, str, str]:
+    return (
+        request.user_id,
+        request.entity_type,
+        request.entity_id,
+        request.target_locale,
+    )
+
+
+def _response_from_cached_row(row: dict) -> AITranslationResponse:
+    return AITranslationResponse(
+        entity_type=row["entity_type"],
+        entity_id=row["entity_id"],
+        field_name=row["field_name"],
+        source_locale=row["source_locale"],
+        target_locale=row["target_locale"],
+        source_hash=row["source_hash"],
+        translated_text=row["translated_text"],
+        provider=row.get("provider"),
+        model_name=row.get("model_name"),
+        cached=True,
+    )
+
+
+def _generate_translation_result(
+    item: AITranslationRequest,
+    source_hash: str,
+) -> tuple[AITranslationResponse, dict]:
+    prompt = _build_translation_prompt(item)
+    generation = generate_text(prompt)
+    translated_text = generation.text.strip()
+
+    response = AITranslationResponse(
+        entity_type=item.entity_type,
+        entity_id=item.entity_id,
+        field_name=item.field_name,
+        source_locale=item.source_locale,
+        target_locale=item.target_locale,
+        source_hash=source_hash,
+        translated_text=translated_text,
+        provider=generation.provider,
+        model_name=generation.model,
+        cached=False,
+    )
+
+    row = {
+        "owner_id": item.user_id,
+        "entity_type": item.entity_type,
+        "entity_id": item.entity_id,
+        "field_name": item.field_name,
+        "source_locale": item.source_locale,
+        "target_locale": item.target_locale,
+        "source_hash": source_hash,
+        "translated_text": translated_text,
+        "provider": generation.provider,
+        "model_name": generation.model,
+        "status": "completed",
+        "error_message": None,
+    }
+
+    return response, row
+
+
 def translate_ai_content_batch(
     request: AITranslationBatchRequest,
 ) -> AITranslationBatchResponse:
-    translated_items = [
-        translate_ai_content(item)
-        for item in request.items
-    ]
+    """
+    Resolve a translation batch with one cache scan per entity group, bounded
+    parallel generation for misses, and one batch upsert for newly generated
+    translations. Response order always matches request order.
+    """
+    supabase = _get_supabase_admin()
+    responses: list[AITranslationResponse | None] = [None] * len(request.items)
+    pending: list[tuple[int, AITranslationRequest, str]] = []
 
-    return AITranslationBatchResponse(items=translated_items)
+    groups: dict[
+        tuple[str, str, str, str],
+        list[tuple[int, AITranslationRequest, str]],
+    ] = {}
+
+    for index, item in enumerate(request.items):
+        source_hash = _hash_source_text(item.source_text)
+
+        if item.source_locale == item.target_locale:
+            responses[index] = AITranslationResponse(
+                entity_type=item.entity_type,
+                entity_id=item.entity_id,
+                field_name=item.field_name,
+                source_locale=item.source_locale,
+                target_locale=item.target_locale,
+                source_hash=source_hash,
+                translated_text=item.source_text,
+                provider=None,
+                model_name=None,
+                cached=True,
+            )
+            continue
+
+        groups.setdefault(_translation_cache_group_key(item), []).append(
+            (index, item, source_hash)
+        )
+
+    for group_key, group_items in groups.items():
+        user_id, entity_type, entity_id, target_locale = group_key
+        field_names = sorted({item.field_name for _, item, _ in group_items})
+
+        cache_result = (
+            supabase.table("ai_content_translations")
+            .select(
+                "entity_type,entity_id,field_name,source_locale,target_locale,"
+                "source_hash,translated_text,provider,model_name"
+            )
+            .eq("owner_id", user_id)
+            .eq("entity_type", entity_type)
+            .eq("entity_id", entity_id)
+            .eq("target_locale", target_locale)
+            .eq("status", "completed")
+            .in_("field_name", field_names)
+            .execute()
+        )
+
+        cached_by_key = {
+            (row["field_name"], row["source_hash"]): row
+            for row in (cache_result.data or [])
+        }
+
+        for index, item, source_hash in group_items:
+            cached = cached_by_key.get((item.field_name, source_hash))
+
+            if cached:
+                responses[index] = _response_from_cached_row(cached)
+            else:
+                pending.append((index, item, source_hash))
+
+    generated_rows: list[dict] = []
+
+    if pending:
+        max_workers = min(AI_TRANSLATION_MAX_WORKERS, len(pending))
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                (
+                    index,
+                    executor.submit(
+                        _generate_translation_result,
+                        item,
+                        source_hash,
+                    ),
+                )
+                for index, item, source_hash in pending
+            ]
+
+            for index, future in futures:
+                response, row = future.result()
+                responses[index] = response
+                generated_rows.append(row)
+
+    if generated_rows:
+        (
+            supabase.table("ai_content_translations")
+            .upsert(
+                generated_rows,
+                on_conflict=(
+                    "owner_id,entity_type,entity_id,field_name,"
+                    "target_locale,source_hash"
+                ),
+            )
+            .execute()
+        )
+
+    return AITranslationBatchResponse(
+        items=[
+            response
+            for response in responses
+            if response is not None
+        ]
+    )
