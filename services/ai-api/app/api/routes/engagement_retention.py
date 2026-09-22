@@ -1,10 +1,14 @@
 from fastapi import APIRouter, Depends
 
 from app.schemas.engagement_retention import (
+    ProcessEngagementActivityRequest,
     RecalculateEngagementRequest,
     RecalculateEngagementResponse,
 )
 from app.security.internal_api_key import verify_internal_api_key
+from app.services.engagement_incremental_service import (
+    process_engagement_activity,
+)
 from app.services.engagement_retention_service import (
     recalculate_engagement,
 )
@@ -21,3 +25,14 @@ def recalculate_engagement_endpoint(
     payload: RecalculateEngagementRequest,
 ):
     return recalculate_engagement(payload)
+
+
+@router.post(
+    "/process-activity",
+    response_model=RecalculateEngagementResponse,
+    dependencies=[Depends(verify_internal_api_key)],
+)
+def process_engagement_activity_endpoint(
+    payload: ProcessEngagementActivityRequest,
+):
+    return process_engagement_activity(payload)
