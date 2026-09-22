@@ -25,6 +25,12 @@ type DashboardPageProps = {
   }>;
 };
 
+type ActivityOverview = Awaited<
+  ReturnType<typeof getDashboardActivityOverview>
+>;
+type PbiOverview = Awaited<ReturnType<typeof getDashboardPbiOverview>>;
+type NativeRiskAlerts = Awaited<ReturnType<typeof getMyNativeTaskRiskAlerts>>;
+
 function normalizeAiLocale(locale: string) {
   return locale === "vi" ? "vi" : "en";
 }
@@ -38,26 +44,32 @@ function DashboardSectionSkeleton({ height = "h-56" }: { height?: string }) {
   );
 }
 
-async function DashboardActivitySection() {
-  const { supabase } = await requireUser();
-  const { summary, behaviourTrend, taskStatusBreakdown } =
-    await getDashboardActivityOverview(supabase);
-
-  return (
-    <>
-      <DashboardSummaryCards {...summary} />
-
-      <BehaviourTrendChart data={behaviourTrend} />
-
-      <TaskStatusChart data={taskStatusBreakdown} />
-    </>
-  );
+async function DashboardSummarySection({
+  activityPromise,
+}: {
+  activityPromise: Promise<ActivityOverview>;
+}) {
+  const { summary } = await activityPromise;
+  return <DashboardSummaryCards {...summary} />;
 }
 
-async function DashboardPbiSection({ locale }: { locale: string }) {
-  const { supabase } = await requireUser();
-  const { latestSnapshot, pbiHistory } =
-    await getDashboardPbiOverview(supabase);
+async function DashboardPbiScoreSection({
+  pbiPromise,
+}: {
+  pbiPromise: Promise<PbiOverview>;
+}) {
+  const { latestSnapshot } = await pbiPromise;
+  return <PbiScoreCards snapshot={latestSnapshot} />;
+}
+
+async function DashboardPbiExplanationSection({
+  pbiPromise,
+  locale,
+}: {
+  pbiPromise: Promise<PbiOverview>;
+  locale: string;
+}) {
+  const { latestSnapshot } = await pbiPromise;
 
   const sourceExplanation =
     latestSnapshot?.explanation_payload &&
@@ -71,27 +83,57 @@ async function DashboardPbiSection({ locale }: { locale: string }) {
     normalizeAiLocale(locale),
   );
 
-  return (
-    <>
-      <PbiScoreCards snapshot={latestSnapshot} />
-      <PbiExplanationPanel explanation={explanation} />
-      <PbiHistoryChart data={pbiHistory} />
-    </>
-  );
+  return <PbiExplanationPanel explanation={explanation} />;
 }
 
-async function DashboardRiskSection() {
-  const { supabase } = await requireUser();
-  const alerts = await getMyNativeTaskRiskAlerts(6, supabase);
+async function DashboardBehaviourSection({
+  activityPromise,
+}: {
+  activityPromise: Promise<ActivityOverview>;
+}) {
+  const { behaviourTrend } = await activityPromise;
+  return <BehaviourTrendChart data={behaviourTrend} />;
+}
 
+async function DashboardPbiHistorySection({
+  pbiPromise,
+}: {
+  pbiPromise: Promise<PbiOverview>;
+}) {
+  const { pbiHistory } = await pbiPromise;
+  return <PbiHistoryChart data={pbiHistory} />;
+}
+
+async function DashboardTaskStatusSection({
+  activityPromise,
+}: {
+  activityPromise: Promise<ActivityOverview>;
+}) {
+  const { taskStatusBreakdown } = await activityPromise;
+  return <TaskStatusChart data={taskStatusBreakdown} />;
+}
+
+async function DashboardRiskSection({
+  riskPromise,
+}: {
+  riskPromise: Promise<NativeRiskAlerts>;
+}) {
+  const alerts = await riskPromise;
   return <NativeTaskRiskAlertsCard alerts={alerts} />;
 }
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
-  const [{ locale }, t] = await Promise.all([
+  const [{ locale }, t, { supabase }] = await Promise.all([
     params,
     getTranslations("dashboard.header"),
+    requireUser(),
   ]);
+
+  // Start independent dashboard reads immediately. The same promises are shared
+  // by multiple streamed sections, so each dataset is fetched only once.
+  const activityPromise = getDashboardActivityOverview(supabase);
+  const pbiPromise = getDashboardPbiOverview(supabase);
+  const riskPromise = getMyNativeTaskRiskAlerts(6, supabase);
 
   return (
     <section>
@@ -103,16 +145,37 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           action={<RefreshPbiButton />}
         />
 
-        <Suspense fallback={<DashboardSectionSkeleton height="h-96" />}>
-          <DashboardActivitySection />
+        <Suspense fallback={<DashboardSectionSkeleton height="h-36" />}>
+          <DashboardSummarySection activityPromise={activityPromise} />
+        </Suspense>
+
+        <Suspense fallback={<DashboardSectionSkeleton height="h-44" />}>
+          <DashboardPbiScoreSection pbiPromise={pbiPromise} />
+        </Suspense>
+
+        <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
+          <DashboardPbiExplanationSection
+            pbiPromise={pbiPromise}
+            locale={locale}
+          />
         </Suspense>
 
         <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
-          <DashboardPbiSection locale={locale} />
+          <DashboardBehaviourSection activityPromise={activityPromise} />
         </Suspense>
 
+        <div className="grid gap-6 xl:grid-cols-2">
+          <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
+            <DashboardPbiHistorySection pbiPromise={pbiPromise} />
+          </Suspense>
+
+          <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
+            <DashboardTaskStatusSection activityPromise={activityPromise} />
+          </Suspense>
+        </div>
+
         <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
-          <DashboardRiskSection />
+          <DashboardRiskSection riskPromise={riskPromise} />
         </Suspense>
       </div>
     </section>
