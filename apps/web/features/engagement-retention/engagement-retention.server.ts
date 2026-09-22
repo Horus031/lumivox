@@ -12,6 +12,11 @@ type RecalculateEngagementApiResponse = {
   };
 };
 
+type EngagementActivity = {
+  type: "focus_session" | "task";
+  id: string;
+};
+
 function engagementCacheKey(userId: string) {
   return `lumivox:engagement:recalculate:${userId}`;
 }
@@ -30,6 +35,20 @@ export async function recalculateEngagementForUser(
           persist_results: true,
         },
       }),
+  });
+}
+
+export async function processEngagementActivityForUser(
+  userId: string,
+  activity: EngagementActivity,
+): Promise<RecalculateEngagementApiResponse> {
+  return fetchAiApi<RecalculateEngagementApiResponse>({
+    path: "/api/v1/engagement/process-activity",
+    body: {
+      user_id: userId,
+      activity_type: activity.type,
+      activity_id: activity.id,
+    },
   });
 }
 
