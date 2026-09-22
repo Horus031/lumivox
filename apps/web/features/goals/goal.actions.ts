@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
@@ -47,8 +45,6 @@ export async function createGoalAction(
       };
     }
 
-    revalidatePath("/goals");
-    revalidatePath("/dashboard");
 
     return {
       success: true,
@@ -111,8 +107,6 @@ export async function updateGoalAction(
       };
     }
 
-    revalidatePath("/goals");
-    revalidatePath("/dashboard");
 
     return {
       success: true,
@@ -156,8 +150,6 @@ export async function deleteGoalAction(goalId: string): Promise<ActionResult> {
       };
     }
 
-    revalidatePath("/goals");
-    revalidatePath("/dashboard");
 
     return {
       success: true,
