@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { ActiveActiveFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
+import type { ActiveFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import {
   cancelFocusSessionAction,
   completeFocusSessionAction,
