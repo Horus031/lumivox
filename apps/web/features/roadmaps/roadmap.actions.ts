@@ -444,7 +444,6 @@ export async function applyLearningRoadmapAction(
     revalidatePath(`/roadmaps/${parsed.data.roadmapId}/edit`);
     revalidatePath("/goals");
     revalidatePath("/tasks");
-    revalidatePath("/dashboard");
 
     return {
       success: true,
