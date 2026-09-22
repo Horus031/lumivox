@@ -3,22 +3,19 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   after: vi.fn(),
   invalidateEngagementCache: vi.fn(),
+  processEngagementActivityForUser: vi.fn(),
   recalculateEngagementForUser: vi.fn(),
-  revalidatePath: vi.fn(),
 }));
 
 vi.mock("next/server", () => ({
   after: mocks.after,
 }));
 
-vi.mock("next/cache", () => ({
-  revalidatePath: mocks.revalidatePath,
-}));
-
 vi.mock(
   "@/features/engagement-retention/engagement-retention.server",
   () => ({
     invalidateEngagementCache: mocks.invalidateEngagementCache,
+    processEngagementActivityForUser: mocks.processEngagementActivityForUser,
     recalculateEngagementForUser: mocks.recalculateEngagementForUser,
   }),
 );
@@ -35,31 +32,46 @@ describe("scheduleEngagementRecalculation", () => {
       scheduledTask = task;
     });
     mocks.invalidateEngagementCache.mockResolvedValue(undefined);
+    mocks.processEngagementActivityForUser.mockResolvedValue({});
     mocks.recalculateEngagementForUser.mockResolvedValue({});
   });
 
-  it("defers recalculation until the after callback runs", async () => {
+  it("uses the incremental fast path for a completion event", async () => {
     scheduleEngagementRecalculation({
       userId: "user-1",
       source: "focus-completion",
+      activity: {
+        type: "focus_session",
+        id: "session-1",
+      },
     });
 
     expect(mocks.after).toHaveBeenCalledOnce();
-    expect(mocks.invalidateEngagementCache).not.toHaveBeenCalled();
-    expect(mocks.recalculateEngagementForUser).not.toHaveBeenCalled();
+    expect(mocks.processEngagementActivityForUser).not.toHaveBeenCalled();
 
     await scheduledTask?.();
 
     expect(mocks.invalidateEngagementCache).toHaveBeenCalledWith("user-1");
-    expect(mocks.recalculateEngagementForUser).toHaveBeenCalledWith("user-1");
-    expect(
-      mocks.invalidateEngagementCache.mock.invocationCallOrder[0],
-    ).toBeLessThan(
-      mocks.recalculateEngagementForUser.mock.invocationCallOrder[0],
+    expect(mocks.processEngagementActivityForUser).toHaveBeenCalledWith(
+      "user-1",
+      {
+        type: "focus_session",
+        id: "session-1",
+      },
     );
-    expect(mocks.revalidatePath).toHaveBeenCalledWith("/dashboard");
-    expect(mocks.revalidatePath).toHaveBeenCalledWith("/settings");
-    expect(mocks.revalidatePath).toHaveBeenCalledWith("/", "layout");
+    expect(mocks.recalculateEngagementForUser).not.toHaveBeenCalled();
+  });
+
+  it("keeps canonical recalculation as a deferred fallback", async () => {
+    scheduleEngagementRecalculation({
+      userId: "user-2",
+      source: "task-update",
+    });
+
+    await scheduledTask?.();
+
+    expect(mocks.recalculateEngagementForUser).toHaveBeenCalledWith("user-2");
+    expect(mocks.processEngagementActivityForUser).not.toHaveBeenCalled();
   });
 
   it("contains background failures", async () => {
@@ -69,12 +81,11 @@ describe("scheduleEngagementRecalculation", () => {
     );
 
     scheduleEngagementRecalculation({
-      userId: "user-2",
+      userId: "user-3",
       source: "task-update",
     });
 
     await expect(scheduledTask?.()).resolves.toBeUndefined();
-    expect(mocks.revalidatePath).not.toHaveBeenCalled();
     expect(consoleError).toHaveBeenCalledWith(
       "[Engagement] Deferred recalculation failed after task-update:",
       expect.any(Error),
