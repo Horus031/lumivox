@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { redirectToOnboardingIfNeeded } from "@/lib/auth/onboarding-guard";
 import { ProtectedAppShell } from "@/features/app-shell/components/protected-app-shell";
+import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
 
 type ProtectedLayoutProps = {
   children: ReactNode;
@@ -18,13 +19,14 @@ export default async function ProtectedLayout({
   );
 }
 
-async function ProtectedLayoutContent({
-  children,
-}: ProtectedLayoutProps) {
-  const profile = await redirectToOnboardingIfNeeded();
+async function ProtectedLayoutContent({ children }: ProtectedLayoutProps) {
+  const [profile, engagementStats] = await Promise.all([
+    redirectToOnboardingIfNeeded(),
+    getCurrentEngagementStats(),
+  ]);
 
   return (
-    <ProtectedAppShell profile={profile}>
+    <ProtectedAppShell profile={profile} engagementStats={engagementStats}>
       {children}
     </ProtectedAppShell>
   );

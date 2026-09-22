@@ -2,17 +2,20 @@ import type { Profile } from "@/features/profiles/profile.types";
 
 import { AppNavigation } from "@/features/app-shell/components/app-navigation";
 // import { UserMenuCard } from "@/features/app-shell/components/user-menu-card";
-import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
 import { SidebarEngagementMiniStats } from "@/features/engagement-retention/components/sidebar-engagement-mini-stats";
+import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
 import { getTranslations } from "next-intl/server";
 
 type DesktopSidebarProps = {
   profile: Profile;
+  engagementStats: UserEngagementStats | null;
 };
 
-export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
+export async function DesktopSidebar({
+  profile,
+  engagementStats,
+}: DesktopSidebarProps) {
   const t = await getTranslations("appShell.sidebar");
-  const engagementStats = await getCurrentEngagementStats();
 
   return (
     <aside className="desktop-sidebar z-2 hidden transition-all duration-300 ease-out lg:fixed lg:inset-y-0 lg:block lg:w-68 lg:p-4 xl:p-0">

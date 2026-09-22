@@ -31,9 +31,9 @@ import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-ta
 // import { NativeTaskAiInsightSection } from "@/features/native-task-insights/components/native-task-ai-insight-section";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
-import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
+// import { FrozenStreakAlert } from "@/features/engagement-retention/components/frozen-streak-alert";
 import { getTranslations } from "next-intl/server";
+import { requireUser } from "@/lib/auth/require-user";
 
 type DashboardPageProps = {
   params: Promise<{
@@ -49,6 +49,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const { locale } = await params;
   const aiLocale = normalizeAiLocale(locale);
   const t = await getTranslations("dashboard.header");
+
+  const { supabase } = await requireUser();
+
   const [
     summary,
     latestSnapshot,
@@ -56,15 +59,13 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     pbiHistory,
     taskStatusBreakdown,
     nativeTaskRiskAlerts,
-    engagementStats,
   ] = await Promise.all([
-    getDashboardSummary(),
-    getLatestPbiSnapshot(),
-    getBehaviourTrend(),
-    getPbiSnapshotHistory(),
-    getTaskStatusBreakdown(),
-    getMyNativeTaskRiskAlerts(6),
-    getCurrentEngagementStats(),
+    getDashboardSummary(supabase),
+    getLatestPbiSnapshot(supabase),
+    getBehaviourTrend(undefined, supabase),
+    getPbiSnapshotHistory(undefined, supabase),
+    getTaskStatusBreakdown(supabase),
+    getMyNativeTaskRiskAlerts(6, supabase),
   ]);
 
   const sourceExplanation =
@@ -88,7 +89,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           action={<RefreshPbiButton />}
         />
 
-        <FrozenStreakAlert stats={engagementStats} />
+        {/* <FrozenStreakAlert stats={engagementStats} /> */}
 
         <DashboardSummaryCards {...summary} />
 

@@ -85,6 +85,8 @@ export function ActiveFocusSessionPanel({
   const t = useTranslations("focus.active");
   const [isPending, startTransition] = useTransition();
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const [isCompletingOptimistically, setIsCompletingOptimistically] =
+    useState(false);
 
   const [remainingSeconds, setRemainingSeconds] = useState(() =>
     calculateRemainingSeconds(session),
@@ -113,6 +115,10 @@ export function ActiveFocusSessionPanel({
     [remainingSeconds],
   );
   const isOngoing = session.status === "ongoing";
+  const displayedStatus = isCompletingOptimistically
+    ? "completed"
+    : session.status;
+  const areActionsDisabled = isPending || isCompletingOptimistically;
 
   function handlePause() {
     startTransition(async () => {
@@ -143,10 +149,13 @@ export function ActiveFocusSessionPanel({
   }
 
   function handleComplete() {
+    setIsCompletingOptimistically(true);
+
     startTransition(async () => {
       const result = await completeFocusSessionAction(session.id);
 
       if (!result.success) {
+        setIsCompletingOptimistically(false);
         toast.error(result.message);
         return;
       }
@@ -208,7 +217,7 @@ export function ActiveFocusSessionPanel({
           aria-label={t("actions.pause")}
           title={t("actions.pause")}
           onClick={handlePause}
-          disabled={isPending}
+          disabled={areActionsDisabled}
           className="size-8 rounded-full"
         >
           <Pause />
@@ -221,7 +230,7 @@ export function ActiveFocusSessionPanel({
           aria-label={t("actions.resume")}
           title={t("actions.resume")}
           onClick={handleResume}
-          disabled={isPending}
+          disabled={areActionsDisabled}
           className="size-8 rounded-full"
         >
           <Play />
@@ -235,7 +244,7 @@ export function ActiveFocusSessionPanel({
         aria-label={t("actions.complete")}
         title={t("actions.complete")}
         onClick={handleComplete}
-        disabled={isPending || !isOngoing}
+        disabled={areActionsDisabled || !isOngoing}
         className="size-8 rounded-full text-success hover:bg-success/10 hover:text-success"
       >
         <Check />
@@ -248,7 +257,7 @@ export function ActiveFocusSessionPanel({
         aria-label={t("actions.cancel")}
         title={t("actions.cancel")}
         onClick={handleCancel}
-        disabled={isPending}
+        disabled={areActionsDisabled}
         className="size-8 rounded-full text-danger/70 hover:bg-danger/10 hover:text-danger"
       >
         <X />
@@ -274,10 +283,10 @@ export function ActiveFocusSessionPanel({
               <div className="min-w-0">
                 <div className="flex min-w-0 items-center gap-2">
                   <h2 className="truncate text-sm font-semibold text-foreground">
-                    {session.tasks?.title ?? t("generalSession")}
+                   {session.tasks?.title ?? t("generalSession")}
                   </h2>
                   <Badge className="shrink-0 capitalize">
-                    {t(`status.${session.status}`)}
+                    {t(`status.${displayedStatus}`)}
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
@@ -320,7 +329,7 @@ export function ActiveFocusSessionPanel({
 
                 <div className="mt-3 flex flex-wrap gap-2 text-primary-foreground">
                   <Badge className="capitalize">
-                    {t(`status.${session.status}`)}
+                    {t(`status.${displayedStatus}`)}
                   </Badge>
                   <Badge>
                     {t("plannedBadge", { minutes: session.planned_minutes })}

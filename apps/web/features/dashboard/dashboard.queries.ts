@@ -1,8 +1,6 @@
-import { requireUser } from "@/lib/auth/require-user";
+import type { TypedSupabaseClient } from "@/types/database.types";
 
-export async function getLatestPbiSnapshot() {
-  const { supabase } = await requireUser();
-
+export async function getLatestPbiSnapshot(supabase: TypedSupabaseClient) {
   const { data, error } = await supabase
     .from("pbi_snapshots")
     .select("*")
@@ -17,9 +15,7 @@ export async function getLatestPbiSnapshot() {
   return data;
 }
 
-export async function getDashboardSummary() {
-  const { supabase } = await requireUser();
-
+export async function getDashboardSummary(supabase: TypedSupabaseClient) {
   const now = new Date();
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(now.getDate() - 6);
@@ -93,9 +89,10 @@ function formatDayLabel(dateKey: string) {
   }).format(date);
 }
 
-export async function getBehaviourTrend(days = 7) {
-  const { supabase } = await requireUser();
-
+export async function getBehaviourTrend(
+  days = 7,
+  supabase: TypedSupabaseClient,
+) {
   const dateKeys = getRollingDateKeys(days);
 
   const firstDate = `${dateKeys[0]}T00:00:00.000Z`;
@@ -154,9 +151,10 @@ export async function getBehaviourTrend(days = 7) {
   }));
 }
 
-export async function getPbiSnapshotHistory(limit = 8) {
-  const { supabase } = await requireUser();
-
+export async function getPbiSnapshotHistory(
+  limit = 8,
+  supabase: TypedSupabaseClient,
+) {
   const { data, error } = await supabase
     .from("pbi_snapshots")
     .select(
@@ -166,7 +164,7 @@ export async function getPbiSnapshotHistory(limit = 8) {
       standard_pbi,
       personalized_pbi,
       created_at
-      `
+      `,
     )
     .order("period_end", { ascending: true })
     .limit(limit);
@@ -182,12 +180,8 @@ export async function getPbiSnapshotHistory(limit = 8) {
   }));
 }
 
-export async function getTaskStatusBreakdown() {
-  const { supabase } = await requireUser();
-
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("status");
+export async function getTaskStatusBreakdown(supabase: TypedSupabaseClient) {
+  const { data, error } = await supabase.from("tasks").select("status");
 
   if (error) {
     throw new Error(`Failed to fetch task status breakdown: ${error.message}`);

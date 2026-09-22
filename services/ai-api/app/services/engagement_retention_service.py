@@ -413,36 +413,27 @@ def insert_missing_rewards(
     supabase = get_supabase_client()
 
     created_rewards: list[RewardLedgerEntryPreview] = []
-
-    for reward in reward_candidates:
-        result = (
-            supabase.table("reward_ledger")
-            .upsert(
-                {
-                    "user_id": str(user_id),
-                    "event_type": reward["event_type"],
-                    "token_delta": reward["token_delta"],
-                    "source_key": reward["source_key"],
-                    "source_payload": reward["source_payload"],
-                    "reward_note": reward["reward_note"],
-                    "occurred_at": reward["occurred_at"],
-                },
-                on_conflict="user_id,source_key",
-                ignore_duplicates=True,
-            )
-            .execute()
-        )
-
-        if result.data:
-            created_rewards.append(
-                RewardLedgerEntryPreview(
-                    event_type=reward["event_type"],
-                    token_delta=reward["token_delta"],
-                    source_key=reward["source_key"],
-                    reward_note=reward["reward_note"],
-                )
-            )
-
+    
+    rows = [
+        {
+            "user_id": str(user_id),
+            "event_type": reward["event_type"],
+            "token_delta": reward["token_delta"],
+            "source_key": reward["source_key"],
+            "source_payload": reward["source_payload"],
+            "reward_note": reward["reward_note"],
+            "occurred_at": reward["occurred_at"],
+        }
+        for reward in reward_candidates
+    ]
+    
+    supabase.table("reward_ledger").upsert(
+        rows,
+        on_conflict="user_id,source_key",
+        ignore_duplicates=True,
+    ).execute()
+    
+    
     return created_rewards
 
 

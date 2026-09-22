@@ -1,10 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import {
-  invalidateEngagementCache,
-  recalculateEngagementForUser,
-} from "@/features/engagement-retention/engagement-retention.server";
+import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -281,19 +278,10 @@ export async function completeFocusSessionAction(
       };
     }
 
-    try {
-      await invalidateEngagementCache(user.id);
-      await recalculateEngagementForUser(user.id);
-    } catch (error) {
-      console.error(
-        "Failed to auto refresh engagement after focus completion:",
-        error,
-      );
-    }
-
-    revalidatePath("/focus");
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
+    scheduleEngagementRecalculation({
+      userId: user.id,
+      source: "focus-completion",
+    });
 
     return {
       success: true,
