@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 //   SelectValue,
 // } from "@/components/ui/select";
 // import { Input } from "@/components/ui/input";
-import { Task } from "@/features/tasks/task.types";
 import { Badge } from "@/components/ui/badge";
 import {
   Check,
@@ -40,7 +39,6 @@ import { useTranslations } from "next-intl";
 
 type ActiveFocusSessionPanelProps = {
   session: FocusSessionWithTask;
-  task: Task | null;
 };
 
 function formatClock(totalSeconds: number) {
