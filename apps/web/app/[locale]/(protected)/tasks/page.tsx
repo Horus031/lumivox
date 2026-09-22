@@ -64,9 +64,10 @@ function parseTaskPriority(
 }
 
 export default async function TasksPage({ searchParams }: TasksPageProps) {
-  const t = await getTranslations("tasks.page");
-  const params = await searchParams;
-  const goals = await getGoals();
+  const [t, params] = await Promise.all([
+    getTranslations("tasks.page"),
+    searchParams,
+  ]);
 
   const page = parsePage(params.page);
   const query = parseQueryValue(params.q);
@@ -74,16 +75,18 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const priority = parseTaskPriority(params.priority);
   const goalId = parseQueryValue(params.goalId);
 
-  const { tasks, totalCount, totalPages } = await getTasksPage({
-    page,
-    pageSize: 8,
-    search: query,
-    status,
-    priority,
-    goalId,
-  });
-
-  const nativeTaskRiskAlerts = await getMyNativeTaskRiskAlerts(8);
+  const [goals, tasksResult, nativeTaskRiskAlerts] = await Promise.all([
+    getGoals(),
+    getTasksPage({
+      page,
+      pageSize: 8,
+      search: query,
+      status,
+      priority,
+      goalId,
+    }),
+    getMyNativeTaskRiskAlerts(8),
+  ]);
 
   return (
     <section>
@@ -98,11 +101,11 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
         <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
 
         <TasksClient
-          initialTasks={tasks}
+          initialTasks={tasksResult.tasks}
           goals={goals}
           page={page}
-          totalPages={totalPages}
-          totalCount={totalCount}
+          totalPages={tasksResult.totalPages}
+          totalCount={tasksResult.totalCount}
           initialFilters={{ q: query, status, priority, goalId }}
         />
       </div>
