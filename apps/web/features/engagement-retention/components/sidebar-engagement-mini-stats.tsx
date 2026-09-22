@@ -4,7 +4,7 @@ import type { UserEngagementStats } from "@/features/engagement-retention/engage
 import { createClient } from "@/lib/supabase/client";
 import { Coins, Flame } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 type SidebarEngagementMiniStatsProps = {
   userId: string | null;
@@ -12,14 +12,8 @@ type SidebarEngagementMiniStatsProps = {
 };
 
 function getStatusDotClass(status: string | null | undefined) {
-  if (status === "active") {
-    return "bg-emerald-500";
-  }
-
-  if (status === "frozen") {
-    return "bg-amber-500";
-  }
-
+  if (status === "active") return "bg-emerald-500";
+  if (status === "frozen") return "bg-amber-500";
   return "bg-red-500";
 }
 
@@ -29,11 +23,31 @@ export function SidebarEngagementMiniStats({
 }: SidebarEngagementMiniStatsProps) {
   const t = useTranslations("appShell.engagement");
   const [engageStats, setEngageStats] = useState(stats);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
+    setEngageStats(stats);
+  }, [stats]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const handleStatsChange = (payload: { new: unknown }) => {
+      setEngageStats(payload.new as UserEngagementStats);
+    };
+
     const channel = supabase
       .channel(`stats-changes-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "user_engagement_stats",
+          filter: `user_id=eq.${userId}`,
+        },
+        handleStatsChange,
+      )
       .on(
         "postgres_changes",
         {
@@ -42,14 +56,12 @@ export function SidebarEngagementMiniStats({
           table: "user_engagement_stats",
           filter: `user_id=eq.${userId}`,
         },
-        (payload) => {
-          setEngageStats(payload.new as UserEngagementStats);
-        },
+        handleStatsChange,
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      void supabase.removeChannel(channel);
     };
   }, [userId, supabase]);
 
