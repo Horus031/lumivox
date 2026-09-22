@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { FocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
+import type { ActiveActiveFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import {
   cancelFocusSessionAction,
   completeFocusSessionAction,
@@ -38,7 +38,7 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 type ActiveFocusSessionPanelProps = {
-  session: FocusSessionWithTask;
+  session: ActiveFocusSessionWithTask;
 };
 
 function formatClock(totalSeconds: number) {
@@ -53,7 +53,7 @@ function formatClock(totalSeconds: number) {
   )}`;
 }
 
-function calculateRemainingSeconds(session: FocusSessionWithTask) {
+function calculateRemainingSeconds(session: ActiveFocusSessionWithTask) {
   const plannedSeconds = session.planned_minutes * 60;
   const nowMs = Date.now();
   const startedMs = new Date(session.started_at).getTime();
