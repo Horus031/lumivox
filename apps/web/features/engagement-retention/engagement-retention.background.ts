@@ -57,7 +57,11 @@ export function scheduleEngagementRecalculation({
   after(() =>
     enqueueUserEngagementWork(userId, async () => {
       try {
-        await invalidateEngagementCache(userId);
+        // Stale reads can share the short-lived recalculation cache. Mutations
+        // must invalidate it because they represent new activity.
+        if (source !== "stale-read") {
+          await invalidateEngagementCache(userId);
+        }
 
         if (activity) {
           await processEngagementActivityForUser(userId, activity);
