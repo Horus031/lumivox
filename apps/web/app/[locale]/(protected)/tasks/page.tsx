@@ -5,6 +5,8 @@ import TasksClient from "@/features/tasks/components/tasks-client";
 import { getTasksPage } from "@/features/tasks/task.queries";
 import type { Task } from "@/features/tasks/task.types";
 import { getTranslations } from "next-intl/server";
+import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
+import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
 
 type TasksPageProps = {
   searchParams: Promise<{
@@ -49,7 +51,12 @@ function parseTaskStatus(
 function parseTaskPriority(
   value: string | undefined,
 ): Task["priority"] | undefined {
-  if (value === "low" || value === "medium" || value === "high" || value === "critical") {
+  if (
+    value === "low" ||
+    value === "medium" ||
+    value === "high" ||
+    value === "critical"
+  ) {
     return value;
   }
 
@@ -76,6 +83,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
     goalId,
   });
 
+  const nativeTaskRiskAlerts = await getMyNativeTaskRiskAlerts(8);
+
   return (
     <section>
       <div className="mx-auto space-y-16">
@@ -85,6 +94,8 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
           description={t("description")}
           action={<CreateTaskModal goals={goals} />}
         />
+
+        <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
 
         <TasksClient
           initialTasks={tasks}

@@ -1568,6 +1568,72 @@ export type Database = {
           },
         ]
       }
+      task_risk_predictions: {
+        Row: {
+          created_at: string
+          days_until_due: number | null
+          due_date: string | null
+          features: Json
+          goal_id: string | null
+          id: string
+          model_name: string
+          model_version: string
+          predicted_at: string
+          reasons: Json
+          risk_level: Database["public"]["Enums"]["task_risk_level"]
+          risk_score: number
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_until_due?: number | null
+          due_date?: string | null
+          features?: Json
+          goal_id?: string | null
+          id?: string
+          model_name: string
+          model_version: string
+          predicted_at?: string
+          reasons?: Json
+          risk_level: Database["public"]["Enums"]["task_risk_level"]
+          risk_score: number
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_until_due?: number | null
+          due_date?: string | null
+          features?: Json
+          goal_id?: string | null
+          id?: string
+          model_name?: string
+          model_version?: string
+          predicted_at?: string
+          reasons?: Json
+          risk_level?: Database["public"]["Enums"]["task_risk_level"]
+          risk_score?: number
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_risk_predictions_goal_id_fkey"
+            columns: ["goal_id"]
+            isOneToOne: false
+            referencedRelation: "goals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_risk_predictions_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           completed_at: string | null
@@ -2032,6 +2098,72 @@ export type Database = {
           visibility: string
         }[]
       }
+      admin_get_native_task_risk_metrics: {
+        Args: never
+        Returns: {
+          active_algorithm: string
+          active_model_created_at: string
+          active_model_key: string
+          active_model_version: string
+          avg_risk_probability: number
+          avg_risk_score: number
+          elevated_risk_predictions: number
+          high_risk_predictions: number
+          low_risk_predictions: number
+          moderate_risk_predictions: number
+          predictions_last_24h: number
+          predictions_last_7d: number
+          total_predictions: number
+        }[]
+      }
+      admin_get_native_task_risk_model_versions: {
+        Args: never
+        Returns: {
+          algorithm: string
+          artifact_path: string
+          created_at: string
+          explainability_metadata: Json
+          feature_schema: Json
+          is_active: boolean
+          metrics: Json
+          model_key: string
+          model_version_id: string
+          training_dataset: string
+          updated_at: string
+          version: string
+        }[]
+      }
+      admin_get_native_task_risk_prediction_detail: {
+        Args: { p_prediction_id: string }
+        Returns: {
+          algorithm: string
+          attributions: Json
+          created_at: string
+          decision_threshold: number
+          feature_payload: Json
+          feature_schema: Json
+          goal_id: string
+          goal_title: string
+          model_key: string
+          model_metrics: Json
+          model_version: string
+          owner_email: string
+          owner_name: string
+          predicted_label: boolean
+          prediction_id: string
+          prediction_metadata: Json
+          risk_band: string
+          risk_probability: number
+          risk_score: number
+          task_due_at: string
+          task_due_date: string
+          task_id: string
+          task_priority: string
+          task_status: string
+          task_title: string
+          user_id: string
+        }[]
+      }
       admin_get_rag_chat_messages: {
         Args: { p_limit?: number; p_session_id: string }
         Returns: {
@@ -2258,6 +2390,39 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_search_native_task_risk_predictions: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_query?: string
+          p_risk_band?: string
+        }
+        Returns: {
+          algorithm: string
+          created_at: string
+          days_until_due: number
+          decision_threshold: number
+          due_at: string
+          feature_payload: Json
+          goal_id: string
+          goal_title: string
+          model_key: string
+          model_version: string
+          owner_email: string
+          owner_name: string
+          predicted_label: boolean
+          prediction_id: string
+          prediction_mode: string
+          reason_summaries: Json
+          recommended_actions: Json
+          risk_band: string
+          risk_probability: number
+          risk_score: number
+          task_id: string
+          task_title: string
+          user_id: string
+        }[]
+      }
       admin_search_rag_chat_sessions: {
         Args: {
           p_context_mode?: string
@@ -2458,6 +2623,75 @@ export type Database = {
           user_id: string
         }[]
       }
+      get_my_latest_native_task_risk_alerts: {
+        Args: { p_limit?: number }
+        Returns: {
+          algorithm: string
+          days_until_due: number
+          decision_threshold: number
+          due_at: string
+          goal_id: string
+          goal_title: string
+          model_key: string
+          model_version: string
+          predicted_at: string
+          predicted_label: boolean
+          prediction_id: string
+          reason_summaries: Json
+          recommended_actions: Json
+          risk_band: string
+          risk_probability: number
+          risk_score: number
+          task_id: string
+          task_title: string
+          top_attributions: Json
+        }[]
+      }
+      get_my_latest_task_risk_predictions: {
+        Args: { p_limit?: number }
+        Returns: {
+          days_until_due: number
+          due_date: string
+          goal_id: string
+          goal_title: string
+          model_name: string
+          model_version: string
+          predicted_at: string
+          prediction_id: string
+          reasons: Json
+          risk_level: string
+          risk_score: number
+          task_id: string
+          task_title: string
+        }[]
+      }
+      get_my_native_task_risk_candidate_tasks: {
+        Args: { p_horizon_days?: number; p_limit?: number }
+        Returns: {
+          days_until_due: number
+          due_at: string
+          goal_id: string
+          goal_title: string
+          priority: string
+          status: string
+          task_id: string
+          task_title: string
+        }[]
+      }
+      get_native_task_risk_system_candidates: {
+        Args: {
+          p_horizon_days?: number
+          p_max_tasks_per_user?: number
+          p_max_users?: number
+          p_skip_recent_hours?: number
+        }
+        Returns: {
+          days_until_due: number
+          effective_due_at: string
+          task_id: string
+          user_id: string
+        }[]
+      }
       get_study_group_members_with_email: {
         Args: { p_group_id: string }
         Returns: {
@@ -2603,6 +2837,7 @@ export type Database = {
       study_room_type: "room" | "group"
       study_room_visibility: "public" | "private"
       task_priority: "low" | "medium" | "high" | "critical"
+      task_risk_level: "low" | "medium" | "high"
       task_status:
         | "todo"
         | "in_progress"
@@ -2629,12 +2864,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2658,11 +2893,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2683,11 +2918,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2708,11 +2943,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2725,11 +2960,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -2801,6 +3036,7 @@ export const Constants = {
       study_room_type: ["room", "group"],
       study_room_visibility: ["public", "private"],
       task_priority: ["low", "medium", "high", "critical"],
+      task_risk_level: ["low", "medium", "high"],
       task_status: ["todo", "in_progress", "completed", "overdue", "cancelled"],
       weekly_reflection_direction: [
         "improving",

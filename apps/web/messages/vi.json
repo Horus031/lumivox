@@ -1664,6 +1664,98 @@
         "clearEntityCache": "Xóa cache entity"
       }
     },
+    "nativeTaskRisk": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Theo dõi rủi ro nhiệm vụ native",
+        "description": "Theo dõi mô hình dự đoán rủi ro trễ nhiệm vụ native của Lumivox, log dự đoán, mức rủi ro và metadata giải thích."
+      },
+      "metrics": {
+        "notAvailable": "Không có",
+        "nativePredictions": {
+          "label": "Dự đoán native",
+          "description": "{count} trong 24 giờ qua"
+        },
+        "avgRisk": {
+          "label": "Rủi ro TB",
+          "description": "Điểm trung bình: {score}"
+        },
+        "highElevated": {
+          "label": "Cao / Tăng cao",
+          "description": "Phân bố rủi ro"
+        },
+        "activeModel": {
+          "label": "Mô hình active",
+          "empty": "Chưa có mô hình active"
+        }
+      },
+      "models": {
+        "eyebrow": "Sổ đăng ký mô hình",
+        "title": "Các phiên bản mô hình rủi ro nhiệm vụ native",
+        "empty": "Chưa đăng ký phiên bản mô hình native nào.",
+        "active": "Đang active",
+        "artifact": "Artifact: {path}",
+        "notAvailable": "Không có",
+        "metricLabels": {
+          "recall": "Recall",
+          "precision": "Precision",
+          "f1": "F1",
+          "rocAuc": "ROC-AUC"
+        }
+      },
+      "search": {
+        "queryLabel": "Tìm dự đoán",
+        "queryPlaceholder": "Tìm theo nhiệm vụ, mục tiêu, người dùng, email, mô hình...",
+        "riskBandLabel": "Mức rủi ro",
+        "submit": "Tìm kiếm",
+        "riskBands": {
+          "all": "Tất cả",
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        }
+      },
+      "predictions": {
+        "eyebrow": "Log dự đoán",
+        "title": "Dự đoán rủi ro nhiệm vụ native",
+        "empty": "Không tìm thấy dự đoán rủi ro nhiệm vụ native.",
+        "riskBands": {
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        },
+        "threshold": "ngưỡng {value}",
+        "daysLeft": "còn {count} ngày",
+        "goal": "Mục tiêu: {title}",
+        "unknownOwner": "Không rõ",
+        "owner": "Chủ sở hữu: {name} · {email}",
+        "model": "Mô hình: {algorithm} · {version} · {mode}",
+        "created": "Đã tạo: {value}",
+        "viewDetail": "Xem chi tiết",
+        "explanationSummary": "Tóm tắt giải thích"
+      },
+      "detail": {
+        "eyebrow": "Chi tiết dự đoán ML native",
+        "unknownOwner": "Không rõ",
+        "owner": "Chủ sở hữu: {name} · {email}",
+        "back": "Quay lại",
+        "riskBands": {
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        },
+        "probability": "Xác suất: {value}%",
+        "threshold": "Ngưỡng: {value}",
+        "attributionsTitle": "Các feature attribution nổi bật",
+        "attributionMeta": "Giá trị: {value} · Đóng góp: {contribution}",
+        "modelMetricsTitle": "Chỉ số mô hình",
+        "featurePayloadTitle": "Feature payload",
+        "predictionMetadataTitle": "Metadata dự đoán"
+      }
+    },
     "settings": {
       "page": {
         "eyebrow": "CMS quản trị",

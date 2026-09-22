@@ -1664,6 +1664,98 @@
         "clearEntityCache": "Clear entity cache"
       }
     },
+    "nativeTaskRisk": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "Native Task Risk Monitoring",
+        "description": "Monitor the native Lumivox task delay risk model, prediction logs, risk bands, and explanation metadata."
+      },
+      "metrics": {
+        "notAvailable": "N/A",
+        "nativePredictions": {
+          "label": "Native Predictions",
+          "description": "{count} in last 24h"
+        },
+        "avgRisk": {
+          "label": "Avg Risk",
+          "description": "Average score: {score}"
+        },
+        "highElevated": {
+          "label": "High / Elevated",
+          "description": "Risk distribution"
+        },
+        "activeModel": {
+          "label": "Active Model",
+          "empty": "No active model"
+        }
+      },
+      "models": {
+        "eyebrow": "Model Registry",
+        "title": "Native task risk model versions",
+        "empty": "No native model version registered.",
+        "active": "Active",
+        "artifact": "Artifact: {path}",
+        "notAvailable": "N/A",
+        "metricLabels": {
+          "recall": "Recall",
+          "precision": "Precision",
+          "f1": "F1",
+          "rocAuc": "ROC-AUC"
+        }
+      },
+      "search": {
+        "queryLabel": "Search predictions",
+        "queryPlaceholder": "Search by task, goal, user, email, model...",
+        "riskBandLabel": "Risk band",
+        "submit": "Search",
+        "riskBands": {
+          "all": "All",
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        }
+      },
+      "predictions": {
+        "eyebrow": "Prediction Logs",
+        "title": "Native task risk predictions",
+        "empty": "No native task risk predictions found.",
+        "riskBands": {
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        },
+        "threshold": "threshold {value}",
+        "daysLeft": "{count, plural, one {# day left} other {# days left}}",
+        "goal": "Goal: {title}",
+        "unknownOwner": "Unknown",
+        "owner": "Owner: {name} · {email}",
+        "model": "Model: {algorithm} · {version} · {mode}",
+        "created": "Created: {value}",
+        "viewDetail": "View detail",
+        "explanationSummary": "Explanation summary"
+      },
+      "detail": {
+        "eyebrow": "Native ML Prediction Detail",
+        "unknownOwner": "Unknown",
+        "owner": "Owner: {name} · {email}",
+        "back": "Back",
+        "riskBands": {
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        },
+        "probability": "Probability: {value}%",
+        "threshold": "Threshold: {value}",
+        "attributionsTitle": "Top feature attributions",
+        "attributionMeta": "Value: {value} · Contribution: {contribution}",
+        "modelMetricsTitle": "Model metrics",
+        "featurePayloadTitle": "Feature payload",
+        "predictionMetadataTitle": "Prediction metadata"
+      }
+    },
     "settings": {
       "page": {
         "eyebrow": "Admin CMS",

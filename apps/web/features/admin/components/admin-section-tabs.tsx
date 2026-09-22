@@ -2,6 +2,7 @@
 
 import {
   Bot,
+  BrainCircuit,
   FileText,
   Languages,
   LayoutDashboard,
@@ -51,6 +52,12 @@ const adminTabs = [
     href: "/admin/roadmaps",
     labelKey: "roadmaps",
     icon: Map,
+  },
+  {
+    value: "nativeTaskRisk",
+    href: "/admin/native-task-risk",
+    labelKey: "nativeTaskRisk",
+    icon: BrainCircuit,
   },
   {
     value: "translations",

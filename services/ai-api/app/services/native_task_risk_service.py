@@ -14,10 +14,205 @@ import pandas as pd
 from supabase import create_client
 
 from app.schemas.native_task_risk import (
+    NativeTaskRiskBatchError,
+    NativeTaskRiskBatchPredictRequest,
+    NativeTaskRiskBatchPredictResponse,
     NativeTaskRiskPredictRequest,
     NativeTaskRiskPredictResponse,
     NativeTaskRiskReason,
+    NativeTaskRiskReasonSummary,
+    NativeTaskRiskRecommendedAction,
+    NativeTaskRiskCronRefreshRequest,
+    NativeTaskRiskCronRefreshResponse,
+    NativeTaskRiskBatchError,
 )
+
+def _build_reason_summaries(
+    *,
+    features: dict[str, float],
+    probability: float,
+    reasons: list[NativeTaskRiskReason],
+) -> list[NativeTaskRiskReasonSummary]:
+    summaries: list[NativeTaskRiskReasonSummary] = []
+
+    days_until_due = int(features.get("days_until_due", 999))
+    task_age_days = int(features.get("task_age_days", 0))
+    focus_7d = int(features.get("focus_minutes_last_7d", 0))
+    focus_14d = int(features.get("focus_minutes_last_14d", 0))
+    overdue_30d = int(features.get("overdue_tasks_last_30d", 0))
+    estimated_minutes = int(features.get("estimated_minutes", 0))
+    goal_completion = float(features.get("goal_completion_ratio", 0))
+
+    if days_until_due <= 1:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Deadline is very close",
+                description="This task is due within 1 day, so the system flags it as requiring immediate attention.",
+                severity="critical",
+            )
+        )
+    elif days_until_due <= 3:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Deadline is approaching",
+                description=f"This task is due in {days_until_due} days, leaving limited time to recover if progress is delayed.",
+                severity="warning",
+            )
+        )
+
+    if focus_7d <= 30:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Recent focus time is low",
+                description=f"You only recorded {focus_7d} focus minutes in the last 7 days, which may make this task harder to finish on time.",
+                severity="warning",
+            )
+        )
+    elif focus_14d <= 90:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Focus momentum is limited",
+                description=f"Your recent 14-day focus time is {focus_14d} minutes, so the model sees limited study momentum.",
+                severity="info",
+            )
+        )
+
+    if overdue_30d > 0:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Recent overdue history detected",
+                description=f"You had {overdue_30d} overdue task(s) in the last 30 days. This pattern increases the predicted delay risk.",
+                severity="warning",
+            )
+        )
+
+    if task_age_days >= 7:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Task has been open for a while",
+                description=f"This task has been open for {task_age_days} days. Long-open tasks are more likely to need rescheduling or breakdown.",
+                severity="info",
+            )
+        )
+
+    if estimated_minutes >= 180:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Estimated workload is high",
+                description=f"This task is estimated at {estimated_minutes} minutes, so it may need to be split into smaller work blocks.",
+                severity="warning",
+            )
+        )
+
+    if goal_completion < 0.25 and features.get("has_goal", 0) == 1:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Related goal progress is still low",
+                description="The related goal has low completion progress, which may indicate that the task is part of a larger delayed goal.",
+                severity="info",
+            )
+        )
+
+    if not summaries:
+        summaries.append(
+            NativeTaskRiskReasonSummary(
+                title="Risk is based on combined behavior patterns",
+                description="The model combines deadline distance, task history, focus activity, and goal progress to estimate this risk.",
+                severity="info",
+            )
+        )
+
+    return summaries[:4]
+
+
+def _build_recommended_actions(
+    *,
+    task_id: str,
+    features: dict[str, float],
+    probability: float,
+    risk_band: str,
+) -> list[NativeTaskRiskRecommendedAction]:
+    actions: list[NativeTaskRiskRecommendedAction] = []
+
+    days_until_due = int(features.get("days_until_due", 999))
+    focus_7d = int(features.get("focus_minutes_last_7d", 0))
+    estimated_minutes = int(features.get("estimated_minutes", 0))
+    child_task_count = int(features.get("child_task_count", 0))
+    is_subtask = int(features.get("is_subtask", 0))
+
+    if risk_band in {"moderate", "elevated", "high"}:
+        actions.append(
+            NativeTaskRiskRecommendedAction(
+                action_id="start_focus",
+                label="Start focus",
+                description="Start a focus session for this task now.",
+                action_type="start_focus",
+                priority=5,
+                payload={"task_id": task_id},
+            )
+        )
+
+    if days_until_due <= 3 and risk_band in {"elevated", "high"}:
+        actions.append(
+            NativeTaskRiskRecommendedAction(
+                action_id="reschedule_plus_1_day",
+                label="Reschedule +1 day",
+                description="Move the deadline 1 day later if the current date is unrealistic.",
+                action_type="reschedule",
+                priority=4,
+                payload={"task_id": task_id, "days_to_add": 1},
+            )
+        )
+
+        actions.append(
+            NativeTaskRiskRecommendedAction(
+                action_id="reschedule_plus_3_days",
+                label="Reschedule +3 days",
+                description="Move the deadline 3 days later and reduce deadline pressure.",
+                action_type="reschedule",
+                priority=3,
+                payload={"task_id": task_id, "days_to_add": 3},
+            )
+        )
+
+    if estimated_minutes >= 120 and child_task_count == 0 and is_subtask == 0:
+        actions.append(
+            NativeTaskRiskRecommendedAction(
+                action_id="split_task",
+                label="Break into subtasks",
+                description="Split this task into smaller subtasks to make progress easier.",
+                action_type="split_task",
+                priority=4,
+                payload={"task_id": task_id},
+            )
+        )
+
+    if risk_band == "high":
+        actions.append(
+            NativeTaskRiskRecommendedAction(
+                action_id="reduce_scope",
+                label="Reduce scope",
+                description="Review the task and reduce its scope to the minimum achievable outcome.",
+                action_type="reduce_scope",
+                priority=3,
+                payload={"task_id": task_id},
+            )
+        )
+
+    actions.append(
+        NativeTaskRiskRecommendedAction(
+            action_id="view_task",
+            label="View task",
+            description="Open the task and review its details.",
+            action_type="view_task",
+            priority=1,
+            payload={"task_id": task_id},
+        )
+    )
+
+    actions.sort(key=lambda item: item.priority, reverse=True)
+
+    return actions[:5]
 
 
 MODEL_KEY = "native_task_delay_risk_classifier"
@@ -704,6 +899,14 @@ def _persist_prediction(
                     "risk_band": response.risk_band,
                     "due_at": response.due_at,
                     "days_until_due": response.days_until_due,
+                    "reason_summaries": [
+                        item.model_dump()
+                        for item in response.reason_summaries
+                    ],
+                    "recommended_actions": [
+                        item.model_dump()
+                        for item in response.recommended_actions
+                    ],
                 },
             }
         )
@@ -793,6 +996,19 @@ def predict_native_task_risk(
         reasons = _fallback_reasons(features)
 
     risk_band = _risk_band(probability)
+    
+    reason_summaries = _build_reason_summaries(
+        features=features,
+        probability=probability,
+        reasons=reasons,
+    )
+
+    recommended_actions = _build_recommended_actions(
+        task_id=request.task_id,
+        features=features,
+        probability=probability,
+        risk_band=risk_band,
+    )
 
     due_at_iso = due_at.isoformat() if due_at else None
     days_until_due = int(features["days_until_due"]) if due_at else None
@@ -808,6 +1024,8 @@ def predict_native_task_risk(
         risk_probability=round(probability, 6),
         risk_score=round(probability * 100, 2),
         risk_band=risk_band,
+        reason_summaries=reason_summaries,
+        recommended_actions=recommended_actions,
         predicted_late=probability >= threshold,
         decision_threshold=threshold,
         days_until_due=days_until_due,
@@ -828,3 +1046,87 @@ def predict_native_task_risk(
         response.prediction_id = prediction_id
 
     return response
+
+def predict_native_task_risk_batch(
+    request: NativeTaskRiskBatchPredictRequest,
+) -> NativeTaskRiskBatchPredictResponse:
+    predictions: list[NativeTaskRiskPredictResponse] = []
+    errors: list[NativeTaskRiskBatchError] = []
+
+    unique_task_ids = list(dict.fromkeys(request.task_ids))
+
+    for task_id in unique_task_ids:
+        try:
+            prediction = predict_native_task_risk(
+                NativeTaskRiskPredictRequest(
+                    user_id=request.user_id,
+                    task_id=task_id,
+                    persist=request.persist,
+                )
+            )
+            predictions.append(prediction)
+        except Exception as error:
+            errors.append(
+                NativeTaskRiskBatchError(
+                    task_id=task_id,
+                    error=str(error),
+                )
+            )
+
+    return NativeTaskRiskBatchPredictResponse(
+        predictions=predictions,
+        errors=errors,
+    )
+
+def refresh_native_task_risk_for_cron(
+    request: NativeTaskRiskCronRefreshRequest,
+) -> NativeTaskRiskCronRefreshResponse:
+    supabase = _get_supabase_admin()
+
+    response = (
+        supabase.rpc(
+            "get_native_task_risk_system_candidates",
+            {
+                "p_horizon_days": request.horizon_days,
+                "p_max_users": request.max_users,
+                "p_max_tasks_per_user": request.max_tasks_per_user,
+                "p_skip_recent_hours": request.skip_recent_hours,
+            },
+        )
+        .execute()
+    )
+
+    candidates = response.data or []
+
+    predictions_created = 0
+    errors: list[NativeTaskRiskBatchError] = []
+
+    for candidate in candidates:
+        user_id = str(candidate["user_id"])
+        task_id = str(candidate["task_id"])
+
+        try:
+            prediction = predict_native_task_risk(
+                NativeTaskRiskPredictRequest(
+                    user_id=user_id,
+                    task_id=task_id,
+                    persist=True,
+                )
+            )
+
+            if prediction.prediction_id:
+                predictions_created += 1
+
+        except Exception as error:
+            errors.append(
+                NativeTaskRiskBatchError(
+                    task_id=task_id,
+                    error=str(error),
+                )
+            )
+
+    return NativeTaskRiskCronRefreshResponse(
+        candidates=len(candidates),
+        predictions_created=predictions_created,
+        errors=errors,
+    )

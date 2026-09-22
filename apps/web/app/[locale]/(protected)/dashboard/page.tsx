@@ -18,6 +18,9 @@ import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
 import { translatePbiExplanationPayload } from "@/features/pbi/pbi-translations.server";
 import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
 
+import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
+import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
+
 // import { getLatestAiInsightCards } from "@/features/ai-insights/ai-insight.queries";
 // import { AiInsightSection } from "@/features/ai-insights/components/ai-insight-section";
 
@@ -52,9 +55,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     behaviourTrend,
     pbiHistory,
     taskStatusBreakdown,
-    // aiInsightCards,
-    // nativeTaskRiskAssessments,
-    // nativeTaskAiInsights,
+    nativeTaskRiskAlerts,
     engagementStats,
   ] = await Promise.all([
     getDashboardSummary(),
@@ -62,9 +63,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
     getBehaviourTrend(),
     getPbiSnapshotHistory(),
     getTaskStatusBreakdown(),
-    // getLatestAiInsightCards(),
-    // getLatestNativeTaskRiskAssessments(),
-    // getLatestNativeTaskAiInsights(),
+    getMyNativeTaskRiskAlerts(6),
     getCurrentEngagementStats(),
   ]);
 
@@ -103,6 +102,8 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <PbiHistoryChart data={pbiHistory} />
           <TaskStatusChart data={taskStatusBreakdown} />
         </div>
+
+        <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
 
         {/* Product Native Model for Production */}
         {/* <NativeTaskRiskSection assessments={nativeTaskRiskAssessments} /> */}
