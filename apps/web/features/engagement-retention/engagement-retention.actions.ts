@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
@@ -25,10 +23,6 @@ export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
     }
 
     await recalculateEngagementForUser(user.id);
-
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -58,10 +52,6 @@ export async function restoreStreakWithTokensAction(): Promise<ActionResult> {
         message: error.message,
       };
     }
-
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
