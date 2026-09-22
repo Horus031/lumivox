@@ -5,7 +5,7 @@ import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import type { Goal } from "@/features/goals/goal.types";
+import type { GoalOption } from "@/features/goals/goal.types";
 import {
   Select,
   SelectContent,
@@ -26,7 +26,7 @@ type Filters = {
 };
 
 type TaskFiltersBarProps = {
-  goals: Goal[];
+  goals: GoalOption[];
   initialFilters: Filters;
   onApply: (filters: Filters) => void;
   onReset?: () => void;
