@@ -2,15 +2,15 @@ import { translateAiContentBatch } from "@/features/ai-translations/ai-translati
 import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
 import type {
   WeeklyReflectionAction,
-  WeeklyReflectionCardWithReflection,
+  WeeklyReflectionCardView,
   WeeklyReflectionWatchout,
   WeeklyReflectionWin,
 } from "@/features/weekly-reflections/weekly-reflection.types";
 
 export async function translateWeeklyReflectionCards(
-  cards: WeeklyReflectionCardWithReflection[],
+  cards: WeeklyReflectionCardView[],
   targetLocale: SupportedLocale,
-): Promise<WeeklyReflectionCardWithReflection[]> {
+): Promise<WeeklyReflectionCardView[]> {
   if (cards.length === 0 || targetLocale === "en") {
     return cards;
   }
