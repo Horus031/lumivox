@@ -1,15 +1,11 @@
-import os
 import time
 from typing import Any, Literal
-from dotenv import load_dotenv
 
-load_dotenv()
-
-from google import genai
 from google.genai import types
-from supabase import create_client
 
+from app.clients.gemini_client import get_gemini_client
 from app.clients.llm_client import LLMTextGeneration, generate_text
+from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
 
 
@@ -37,25 +33,6 @@ def _locale_instruction(preferred_locale: str | None) -> str:
     )
 
 
-def _get_supabase_admin():
-    supabase_url = os.getenv("SUPABASE_URL")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-    if not supabase_url or not service_role_key:
-        raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured."
-        )
-
-    return create_client(supabase_url, service_role_key)
-
-
-def _configure_gemini():
-    if not settings.gemini_api_key:
-        raise RuntimeError("GEMINI_API_KEY must be configured.")
-
-    return genai.Client(api_key=settings.gemini_api_key)
-
-
 def _normalize_top_k(top_k: int) -> int:
     allowed = [3, 5, 7]
 
@@ -66,7 +43,7 @@ def _normalize_top_k(top_k: int) -> int:
 
 
 def _generate_query_embedding(question: str) -> list[float]:
-    client = _configure_gemini()
+    client = get_gemini_client()
 
     model_name = settings.gemini_embedding_model
 
@@ -318,7 +295,7 @@ def ask_rag_question(
     preferred_locale: Literal["auto", "en", "vi"] = "auto",
 ) -> dict[str, Any]:
     started_at = time.perf_counter()
-    supabase = _get_supabase_admin()
+    supabase = get_supabase_client()
 
     normalized_top_k = _normalize_top_k(top_k)
 
