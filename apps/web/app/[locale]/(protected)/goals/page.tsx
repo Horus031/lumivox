@@ -5,8 +5,10 @@ import { getGoalsWithProgress } from "@/features/goals/goal.queries";
 import { getTranslations } from "next-intl/server";
 
 export default async function GoalsPage() {
-  const t = await getTranslations("goals.page");
-  const goals = await getGoalsWithProgress();
+  const [t, goals] = await Promise.all([
+    getTranslations("goals.page"),
+    getGoalsWithProgress(),
+  ]);
 
   return (
     <section>
