@@ -131,20 +131,39 @@ export async function getDashboardPbiOverview(
   supabase: TypedSupabaseClient,
   limit = 8,
 ) {
-  const { data, error } = await supabase
-    .from("pbi_snapshots")
-    .select("*")
-    .order("period_end", { ascending: false })
-    .limit(limit);
+  const [latestResult, historyResult] = await Promise.all([
+    supabase
+      .from("pbi_snapshots")
+      .select(
+        [
+          "id",
+          "standard_pbi",
+          "personalized_pbi",
+          "task_completion_rate",
+          "focus_quality_score",
+          "deadline_adherence_score",
+          "goal_momentum_score",
+          "consistency_score",
+          "period_start",
+          "period_end",
+          "explanation_payload",
+        ].join(","),
+      )
+      .order("period_end", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from("pbi_snapshots")
+      .select("period_end,standard_pbi,personalized_pbi")
+      .order("period_end", { ascending: false })
+      .limit(limit),
+  ]);
 
-  if (error) {
-    throw new Error(`Failed to fetch PBI dashboard data: ${error.message}`);
+  if (latestResult.error || historyResult.error) {
+    throw new Error("Failed to fetch PBI dashboard data.");
   }
 
-  const snapshots = data ?? [];
-  const latestSnapshot = snapshots[0] ?? null;
-
-  const pbiHistory = [...snapshots]
+  const pbiHistory = [...(historyResult.data ?? [])]
     .reverse()
     .map((snapshot) => ({
       label: snapshot.period_end,
@@ -153,7 +172,7 @@ export async function getDashboardPbiOverview(
     }));
 
   return {
-    latestSnapshot,
+    latestSnapshot: latestResult.data,
     pbiHistory,
   };
 }
