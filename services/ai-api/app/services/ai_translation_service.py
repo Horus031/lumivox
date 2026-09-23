@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 from typing import Any
 
 from supabase import create_client
@@ -16,6 +17,7 @@ from app.schemas.ai_translation import (
 )
 
 
+@lru_cache(maxsize=1)
 def _get_supabase_admin():
     supabase_url = os.getenv("SUPABASE_URL")
     service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
@@ -210,11 +212,12 @@ def translate_ai_content(request: AITranslationRequest) -> AITranslationResponse
 AI_TRANSLATION_MAX_WORKERS = 4
 
 
-def _translation_cache_group_key(request: AITranslationRequest) -> tuple[str, str, str, str]:
+def _translation_cache_group_key(
+    request: AITranslationRequest,
+) -> tuple[str, str, str]:
     return (
         request.user_id,
         request.entity_type,
-        request.entity_id,
         request.target_locale,
     )
 
@@ -286,7 +289,7 @@ def translate_ai_content_batch(
     pending: list[tuple[int, AITranslationRequest, str]] = []
 
     groups: dict[
-        tuple[str, str, str, str],
+        tuple[str, str, str],
         list[tuple[int, AITranslationRequest, str]],
     ] = {}
 
@@ -313,7 +316,8 @@ def translate_ai_content_batch(
         )
 
     for group_key, group_items in groups.items():
-        user_id, entity_type, entity_id, target_locale = group_key
+        user_id, entity_type, target_locale = group_key
+        entity_ids = sorted({item.entity_id for _, item, _ in group_items})
         field_names = sorted({item.field_name for _, item, _ in group_items})
 
         cache_result = (
@@ -324,20 +328,22 @@ def translate_ai_content_batch(
             )
             .eq("owner_id", user_id)
             .eq("entity_type", entity_type)
-            .eq("entity_id", entity_id)
             .eq("target_locale", target_locale)
             .eq("status", "completed")
+            .in_("entity_id", entity_ids)
             .in_("field_name", field_names)
             .execute()
         )
 
         cached_by_key = {
-            (row["field_name"], row["source_hash"]): row
+            (row["entity_id"], row["field_name"], row["source_hash"]): row
             for row in (cache_result.data or [])
         }
 
         for index, item, source_hash in group_items:
-            cached = cached_by_key.get((item.field_name, source_hash))
+            cached = cached_by_key.get(
+                (item.entity_id, item.field_name, source_hash)
+            )
 
             if cached:
                 responses[index] = _response_from_cached_row(cached)
