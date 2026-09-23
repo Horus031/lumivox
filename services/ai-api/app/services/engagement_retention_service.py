@@ -552,56 +552,19 @@ def aggregate_reward_stats(
 ) -> tuple[int, int, int, int]:
     supabase = supabase or get_supabase_client()
 
-    reward_result = (
-        supabase.table("reward_ledger")
-        .select(
-            """
-            token_delta,
-            occurred_at
-            """
-        )
-        .eq("user_id", str(user_id))
-        .execute()
-    )
+    result = supabase.rpc(
+        "get_engagement_reward_aggregates",
+        {"p_user_id": str(user_id)},
+    ).execute()
 
-    reward_rows = reward_result.data or []
-
-    token_balance = sum(int(row["token_delta"]) for row in reward_rows)
-
-    total_tokens_earned = sum(
-        int(row["token_delta"])
-        for row in reward_rows
-        if int(row["token_delta"]) > 0
-    )
-
-    total_tokens_spent = abs(
-        sum(
-            int(row["token_delta"])
-            for row in reward_rows
-            if int(row["token_delta"]) < 0
-        )
-    )
-
-    last_7d_start = now_utc() - timedelta(days=7)
-
-    tokens_last_7d = 0
-
-    for row in reward_rows:
-        token_delta = int(row["token_delta"])
-
-        if token_delta <= 0:
-            continue
-
-        occurred_at = parse_dt(row.get("occurred_at"))
-
-        if occurred_at and to_utc(occurred_at) >= last_7d_start:
-            tokens_last_7d += token_delta
+    rows = result.data or []
+    row = rows[0] if rows else {}
 
     return (
-        token_balance,
-        total_tokens_earned,
-        total_tokens_spent,
-        tokens_last_7d,
+        int(row.get("token_balance") or 0),
+        int(row.get("total_tokens_earned") or 0),
+        int(row.get("total_tokens_spent") or 0),
+        int(row.get("tokens_earned_last_7d") or 0),
     )
 
 

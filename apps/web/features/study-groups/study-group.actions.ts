@@ -146,8 +146,9 @@ export async function inviteStudyGroupMemberAction(
     }
 
     const { data: targetUserId, error: findUserError } = await supabase.rpc(
-      "find_user_id_by_auth_email",
+      "find_user_id_by_auth_email_for_group",
       {
+        p_group_id: groupId,
         p_email: normalizedEmail,
       },
     );
