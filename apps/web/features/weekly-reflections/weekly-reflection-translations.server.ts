@@ -1,4 +1,7 @@
+import { createHash } from "node:crypto";
+
 import { translateAiContentBatch } from "@/features/ai-translations/ai-translation.server";
+import { getOrSetJsonCache } from "@/lib/redis/cache";
 import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
 import type {
   WeeklyReflectionAction,
@@ -15,7 +18,16 @@ export async function translateWeeklyReflectionCards(
     return cards;
   }
 
-  const translationItems = cards.flatMap((card) => {
+  const sourceHash = createHash("sha256")
+    .update(JSON.stringify(cards))
+    .digest("hex")
+    .slice(0, 20);
+
+  return getOrSetJsonCache({
+    key: `lumivox:translation:weekly-reflections:${targetLocale}:${sourceHash}`,
+    ttlSeconds: 60 * 60 * 6,
+    fetcher: async () => {
+      const translationItems = cards.flatMap((card) => {
     const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
     const watchouts =
       (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
@@ -90,17 +102,17 @@ export async function translateWeeklyReflectionCards(
         },
       ]),
     ];
-  });
+      });
 
-  const translations = await translateAiContentBatch(translationItems);
-  const translatedTextByField = new Map(
-    translations.map((item) => [
-      `${item.entity_id}:${item.field_name}`,
-      item.translated_text,
-    ]),
-  );
+      const translations = await translateAiContentBatch(translationItems);
+      const translatedTextByField = new Map(
+        translations.map((item) => [
+          `${item.entity_id}:${item.field_name}`,
+          item.translated_text,
+        ]),
+      );
 
-  return cards.map((card) => {
+      return cards.map((card) => {
     const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
     const watchouts =
       (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
@@ -110,37 +122,45 @@ export async function translateWeeklyReflectionCards(
     const getTranslation = (fieldName: string, fallback: string) =>
       translatedTextByField.get(`${card.id}:${fieldName}`) ?? fallback;
 
-    return {
-      ...card,
-      title: getTranslation("title", card.title),
-      summary: getTranslation("summary", card.summary),
-      reflection_interpretation: getTranslation(
-        "reflection_interpretation",
-        card.reflection_interpretation,
-      ),
-      confidence_note: getTranslation("confidence_note", card.confidence_note),
-      wins: wins.map((item, index) => ({
-        ...item,
-        student_friendly_explanation: getTranslation(
-          `wins.${index}.student_friendly_explanation`,
-          item.student_friendly_explanation,
-        ),
-      })) as unknown as typeof card.wins,
-      watchouts: watchouts.map((item, index) => ({
-        ...item,
-        student_friendly_explanation: getTranslation(
-          `watchouts.${index}.student_friendly_explanation`,
-          item.student_friendly_explanation,
-        ),
-      })) as unknown as typeof card.watchouts,
-      next_week_actions: actions.map((item, index) => ({
-        ...item,
-        action: getTranslation(`next_week_actions.${index}.action`, item.action),
-        rationale: getTranslation(
-          `next_week_actions.${index}.rationale`,
-          item.rationale,
-        ),
-      })) as unknown as typeof card.next_week_actions,
-    };
+        return {
+          ...card,
+          title: getTranslation("title", card.title),
+          summary: getTranslation("summary", card.summary),
+          reflection_interpretation: getTranslation(
+            "reflection_interpretation",
+            card.reflection_interpretation,
+          ),
+          confidence_note: getTranslation(
+            "confidence_note",
+            card.confidence_note,
+          ),
+          wins: wins.map((item, index) => ({
+            ...item,
+            student_friendly_explanation: getTranslation(
+              `wins.${index}.student_friendly_explanation`,
+              item.student_friendly_explanation,
+            ),
+          })) as unknown as typeof card.wins,
+          watchouts: watchouts.map((item, index) => ({
+            ...item,
+            student_friendly_explanation: getTranslation(
+              `watchouts.${index}.student_friendly_explanation`,
+              item.student_friendly_explanation,
+            ),
+          })) as unknown as typeof card.watchouts,
+          next_week_actions: actions.map((item, index) => ({
+            ...item,
+            action: getTranslation(
+              `next_week_actions.${index}.action`,
+              item.action,
+            ),
+            rationale: getTranslation(
+              `next_week_actions.${index}.rationale`,
+              item.rationale,
+            ),
+          })) as unknown as typeof card.next_week_actions,
+        };
+      });
+    },
   });
 }
