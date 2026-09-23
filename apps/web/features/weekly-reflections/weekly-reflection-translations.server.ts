@@ -1,7 +1,6 @@
 import { createHash } from "node:crypto";
 
 import { translateAiContentBatch } from "@/features/ai-translations/ai-translation.server";
-import { getOrSetJsonCache } from "@/lib/redis/cache";
 import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
 import type {
   WeeklyReflectionAction,
@@ -9,6 +8,7 @@ import type {
   WeeklyReflectionWatchout,
   WeeklyReflectionWin,
 } from "@/features/weekly-reflections/weekly-reflection.types";
+import { getOrSetJsonCache } from "@/lib/redis/cache";
 
 export async function translateWeeklyReflectionCards(
   cards: WeeklyReflectionCardView[],
@@ -28,80 +28,80 @@ export async function translateWeeklyReflectionCards(
     ttlSeconds: 60 * 60 * 6,
     fetcher: async () => {
       const translationItems = cards.flatMap((card) => {
-    const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
-    const watchouts =
-      (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-    const actions =
-      (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+        const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
+        const watchouts =
+          (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
+        const actions =
+          (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
 
-    return [
-      {
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: "title",
-        sourceText: card.title,
-        sourceLocale: "en" as const,
-        targetLocale,
-      },
-      {
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: "summary",
-        sourceText: card.summary,
-        sourceLocale: "en" as const,
-        targetLocale,
-      },
-      {
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: "reflection_interpretation",
-        sourceText: card.reflection_interpretation,
-        sourceLocale: "en" as const,
-        targetLocale,
-      },
-      {
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: "confidence_note",
-        sourceText: card.confidence_note,
-        sourceLocale: "en" as const,
-        targetLocale,
-      },
-      ...wins.map((item, index) => ({
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: `wins.${index}.student_friendly_explanation`,
-        sourceText: item.student_friendly_explanation,
-        sourceLocale: "en" as const,
-        targetLocale,
-      })),
-      ...watchouts.map((item, index) => ({
-        entityType: "weekly_reflection" as const,
-        entityId: card.id,
-        fieldName: `watchouts.${index}.student_friendly_explanation`,
-        sourceText: item.student_friendly_explanation,
-        sourceLocale: "en" as const,
-        targetLocale,
-      })),
-      ...actions.flatMap((item, index) => [
-        {
-          entityType: "weekly_reflection" as const,
-          entityId: card.id,
-          fieldName: `next_week_actions.${index}.action`,
-          sourceText: item.action,
-          sourceLocale: "en" as const,
-          targetLocale,
-        },
-        {
-          entityType: "weekly_reflection" as const,
-          entityId: card.id,
-          fieldName: `next_week_actions.${index}.rationale`,
-          sourceText: item.rationale,
-          sourceLocale: "en" as const,
-          targetLocale,
-        },
-      ]),
-    ];
+        return [
+          {
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: "title",
+            sourceText: card.title,
+            sourceLocale: "en" as const,
+            targetLocale,
+          },
+          {
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: "summary",
+            sourceText: card.summary,
+            sourceLocale: "en" as const,
+            targetLocale,
+          },
+          {
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: "reflection_interpretation",
+            sourceText: card.reflection_interpretation,
+            sourceLocale: "en" as const,
+            targetLocale,
+          },
+          {
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: "confidence_note",
+            sourceText: card.confidence_note,
+            sourceLocale: "en" as const,
+            targetLocale,
+          },
+          ...wins.map((item, index) => ({
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: `wins.${index}.student_friendly_explanation`,
+            sourceText: item.student_friendly_explanation,
+            sourceLocale: "en" as const,
+            targetLocale,
+          })),
+          ...watchouts.map((item, index) => ({
+            entityType: "weekly_reflection" as const,
+            entityId: card.id,
+            fieldName: `watchouts.${index}.student_friendly_explanation`,
+            sourceText: item.student_friendly_explanation,
+            sourceLocale: "en" as const,
+            targetLocale,
+          })),
+          ...actions.flatMap((item, index) => [
+            {
+              entityType: "weekly_reflection" as const,
+              entityId: card.id,
+              fieldName: `next_week_actions.${index}.action`,
+              sourceText: item.action,
+              sourceLocale: "en" as const,
+              targetLocale,
+            },
+            {
+              entityType: "weekly_reflection" as const,
+              entityId: card.id,
+              fieldName: `next_week_actions.${index}.rationale`,
+              sourceText: item.rationale,
+              sourceLocale: "en" as const,
+              targetLocale,
+            },
+          ]),
+        ];
       });
 
       const translations = await translateAiContentBatch(translationItems);
@@ -113,14 +113,14 @@ export async function translateWeeklyReflectionCards(
       );
 
       return cards.map((card) => {
-    const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
-    const watchouts =
-      (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-    const actions =
-      (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+        const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
+        const watchouts =
+          (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
+        const actions =
+          (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
 
-    const getTranslation = (fieldName: string, fallback: string) =>
-      translatedTextByField.get(`${card.id}:${fieldName}`) ?? fallback;
+        const getTranslation = (fieldName: string, fallback: string) =>
+          translatedTextByField.get(`${card.id}:${fieldName}`) ?? fallback;
 
         return {
           ...card,
