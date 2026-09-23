@@ -53,33 +53,41 @@ export async function getMyRoadmaps() {
 export async function getMyRoadmapDetail(roadmapId: string) {
   const { supabase, user } = await requireUser();
 
-  const { data: roadmap, error: roadmapError } = await supabase
-    .from("learning_roadmaps")
-    .select("*")
-    .eq("id", roadmapId)
-    .eq("user_id", user.id)
-    .maybeSingle();
+  const [roadmapResult, nodesResult] = await Promise.all([
+    supabase
+      .from("learning_roadmaps")
+      .select("*")
+      .eq("id", roadmapId)
+      .eq("user_id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("learning_roadmap_nodes")
+      .select("*")
+      .eq("roadmap_id", roadmapId)
+      .eq("user_id", user.id)
+      .order("position_y", { ascending: true })
+      .order("position_x", { ascending: true })
+      .order("sort_order", { ascending: true }),
+  ]);
 
-  if (roadmapError) {
-    throw new Error(`Failed to load roadmap: ${roadmapError.message}`);
+  if (roadmapResult.error) {
+    throw new Error(
+      `Failed to load roadmap: ${roadmapResult.error.message}`,
+    );
   }
 
-  if (!roadmap) {
+  if (!roadmapResult.data) {
     notFound();
   }
 
-  const { data: nodes, error: nodesError } = await supabase
-    .from("learning_roadmap_nodes")
-    .select("*")
-    .eq("roadmap_id", roadmapId)
-    .eq("user_id", user.id)
-    .order("position_y", { ascending: true })
-    .order("position_x", { ascending: true })
-    .order("sort_order", { ascending: true });
-
-  if (nodesError) {
-    throw new Error(`Failed to load roadmap nodes: ${nodesError.message}`);
+  if (nodesResult.error) {
+    throw new Error(
+      `Failed to load roadmap nodes: ${nodesResult.error.message}`,
+    );
   }
+
+  const roadmap = roadmapResult.data;
+  const nodes = nodesResult.data;
 
   return {
     roadmap: roadmap as LearningRoadmap,
