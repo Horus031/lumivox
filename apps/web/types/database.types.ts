@@ -1998,6 +1998,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_cms_settings: {
+        Args: { p_keys: string[] }
+        Returns: Json
+      }
       find_user_id_by_auth_email_for_group: {
         Args: { p_email: string; p_group_id: string }
         Returns: string
