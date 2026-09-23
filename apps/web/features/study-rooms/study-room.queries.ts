@@ -13,9 +13,7 @@ export async function getMyStudyRooms() {
         title,
         description,
         visibility,
-        invite_code,
         max_participants,
-        created_at,
         profiles:owner_id (
           id,
           full_name
@@ -44,9 +42,7 @@ export async function getPublicStudyRooms() {
       title,
       description,
       visibility,
-      invite_code,
       max_participants,
-      created_at,
       profiles:owner_id (
         id,
         full_name
@@ -68,45 +64,55 @@ export async function getPublicStudyRooms() {
 export async function getStudyRoomPageData(roomId: string) {
   const { supabase, user } = await requireUser();
 
-  const { data: membership, error: membershipError } = await supabase
+  const { data, error } = await supabase
     .from("study_room_members")
-    .select("room_id, role, membership_status")
+    .select(
+      `
+      room_id,
+      role,
+      membership_status,
+      profiles:user_id (
+        id,
+        full_name
+      ),
+      study_rooms!inner (
+        id,
+        title,
+        description,
+        visibility,
+        max_participants,
+        owner_id,
+        invite_code,
+        profiles:owner_id (
+          id,
+          full_name
+        )
+      )
+      `,
+    )
     .eq("room_id", roomId)
     .eq("user_id", user.id)
     .eq("membership_status", "active")
     .maybeSingle();
 
-  if (membershipError) {
+  if (error) {
     throw new Error(
-      `Failed to verify study room membership: ${membershipError.message}`,
+      `Failed to load study room membership: ${error.message}`,
     );
   }
 
-  if (!membership) {
+  if (!data?.study_rooms) {
     return null;
   }
 
-  const { data: room, error: roomError } = await supabase
-    .from("study_rooms")
-    .select(
-      `
-      *,
-      profiles:owner_id (
-        id,
-        full_name
-      )
-    `,
-    )
-    .eq("id", roomId)
-    .single();
-
-  if (roomError) {
-    throw new Error(`Failed to fetch study room: ${roomError.message}`);
-  }
-
   return {
-    room,
-    membership,
+    room: data.study_rooms,
+    membership: {
+      room_id: data.room_id,
+      role: data.role,
+      membership_status: data.membership_status,
+      profiles: data.profiles,
+    },
   };
 }
 
@@ -117,7 +123,8 @@ export async function getStudyRoomMembers(roomId: string) {
     .from("study_room_members")
     .select(
       `
-      *,
+      id,
+      role,
       profiles:user_id (
         id,
         full_name

@@ -37,15 +37,15 @@ export default async function AdminNativeTaskRiskPage({
   const query = q ?? "";
   const riskBand = risk ?? "all";
 
-  const [metrics, models, predictions] = await Promise.all([
+  const [metrics, models, predictions, t] = await Promise.all([
     getAdminNativeTaskRiskMetrics(),
     getAdminNativeTaskRiskModelVersions(),
     searchAdminNativeTaskRiskPredictions({
       query,
       riskBand,
     }),
+    getTranslations("admin.nativeTaskRisk.page"),
   ]);
-  const t = await getTranslations("admin.nativeTaskRisk.page");
 
   const normalizedModels = models.map((model) => ({
     ...model,

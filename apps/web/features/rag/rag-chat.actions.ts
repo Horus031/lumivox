@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -90,8 +88,6 @@ export async function askRagQuestionAction(
       },
     });
 
-    revalidatePath("/focus");
-    revalidatePath("/dashboard");
 
     return {
       success: true,

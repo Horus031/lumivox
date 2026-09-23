@@ -1,85 +1,5 @@
 import type { TypedSupabaseClient } from "@/types/database.types";
 
-export async function getLatestPbiSnapshot(supabase: TypedSupabaseClient) {
-  const { data, error } = await supabase
-    .from("pbi_snapshots")
-    .select("*")
-    .order("period_end", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Failed to fetch latest PBI snapshot: ${error.message}`);
-  }
-
-  return data;
-}
-
-export async function getDashboardSummary(supabase: TypedSupabaseClient) {
-  const now = new Date();
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(now.getDate() - 6);
-
-  const sevenDaysAgoIso = sevenDaysAgo.toISOString();
-
-  const [
-    completedTasksResult,
-    completedSessionsResult,
-    distractionEventsResult,
-  ] = await Promise.all([
-    supabase
-      .from("tasks")
-      .select("id", { count: "exact", head: true })
-      .eq("status", "completed")
-      .gte("completed_at", sevenDaysAgoIso),
-
-    supabase
-      .from("focus_sessions")
-      .select("actual_focus_minutes")
-      .eq("status", "completed")
-      .gte("ended_at", sevenDaysAgoIso),
-
-    supabase
-      .from("distraction_events")
-      .select("id", { count: "exact", head: true })
-      .gte("occurred_at", sevenDaysAgoIso),
-  ]);
-
-  if (
-    completedTasksResult.error ||
-    completedSessionsResult.error ||
-    distractionEventsResult.error
-  ) {
-    throw new Error("Failed to fetch dashboard summary.");
-  }
-
-  const totalFocusMinutes = (completedSessionsResult.data ?? []).reduce(
-    (sum, session) => sum + (session.actual_focus_minutes ?? 0),
-    0,
-  );
-
-  return {
-    completedTasks: completedTasksResult.count ?? 0,
-    completedSessions: completedSessionsResult.data?.length ?? 0,
-    totalFocusMinutes,
-    distractionEvents: distractionEventsResult.count ?? 0,
-  };
-}
-
-function getRollingDateKeys(days = 7) {
-  const dates: string[] = [];
-  const now = new Date();
-
-  for (let i = days - 1; i >= 0; i -= 1) {
-    const date = new Date(now);
-    date.setDate(now.getDate() - i);
-
-    dates.push(date.toISOString().slice(0, 10));
-  }
-
-  return dates;
-}
-
 function formatDayLabel(dateKey: string) {
   const date = new Date(`${dateKey}T00:00:00`);
 
@@ -89,136 +9,93 @@ function formatDayLabel(dateKey: string) {
   }).format(date);
 }
 
-export async function getBehaviourTrend(
-  days = 7,
+type DashboardActivityRpc = {
+  summary: {
+    completedTasks: number;
+    completedSessions: number;
+    totalFocusMinutes: number;
+    distractionEvents: number;
+  };
+  behaviourTrend: Array<{
+    dateKey: string;
+    focusMinutes: number;
+    distractions: number;
+  }>;
+  taskStatusBreakdown: Array<{
+    status: string;
+    count: number;
+  }>;
+};
+
+export async function getDashboardActivityOverview(
   supabase: TypedSupabaseClient,
+  days = 7,
 ) {
-  const dateKeys = getRollingDateKeys(days);
+  const { data, error } = await supabase.rpc("get_my_dashboard_activity", {
+    p_days: days,
+  });
 
-  const firstDate = `${dateKeys[0]}T00:00:00.000Z`;
+  if (error || !data) {
+    throw new Error("Failed to fetch dashboard activity overview.");
+  }
 
-  const [sessionsResult, distractionsResult] = await Promise.all([
+  const overview = data as unknown as DashboardActivityRpc;
+
+  return {
+    ...overview,
+    behaviourTrend: overview.behaviourTrend.map((item) => ({
+      ...item,
+      label: formatDayLabel(item.dateKey),
+    })),
+  };
+}
+
+export async function getDashboardPbiOverview(
+  supabase: TypedSupabaseClient,
+  limit = 8,
+) {
+  const [latestResult, historyResult] = await Promise.all([
     supabase
-      .from("focus_sessions")
-      .select("actual_focus_minutes, ended_at")
-      .eq("status", "completed")
-      .gte("ended_at", firstDate),
-
+      .from("pbi_snapshots")
+      .select(
+        `
+          id,
+          standard_pbi,
+          personalized_pbi,
+          task_completion_rate,
+          focus_quality_score,
+          deadline_adherence_score,
+          goal_momentum_score,
+          consistency_score,
+          period_start,
+          period_end,
+          explanation_payload
+        `,
+      )
+      .order("period_end", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
     supabase
-      .from("distraction_events")
-      .select("occurred_at")
-      .gte("occurred_at", firstDate),
+      .from("pbi_snapshots")
+      .select("period_end,standard_pbi,personalized_pbi")
+      .order("period_end", { ascending: false })
+      .limit(limit),
   ]);
 
-  if (sessionsResult.error || distractionsResult.error) {
-    throw new Error("Failed to fetch behaviour trend.");
+  if (latestResult.error || historyResult.error) {
+    throw new Error("Failed to fetch PBI dashboard data.");
   }
 
-  const focusMap = new Map<string, number>();
-  const distractionMap = new Map<string, number>();
+  const pbiHistory = [...(historyResult.data ?? [])]
+    .reverse()
+    .map((snapshot) => ({
+      label: snapshot.period_end,
+      standardPbi: Number(snapshot.standard_pbi),
+      personalizedPbi: Number(snapshot.personalized_pbi),
+    }));
 
-  for (const key of dateKeys) {
-    focusMap.set(key, 0);
-    distractionMap.set(key, 0);
-  }
-
-  for (const session of sessionsResult.data ?? []) {
-    if (!session.ended_at) continue;
-
-    const key = session.ended_at.slice(0, 10);
-
-    if (focusMap.has(key)) {
-      focusMap.set(
-        key,
-        (focusMap.get(key) ?? 0) + (session.actual_focus_minutes ?? 0),
-      );
-    }
-  }
-
-  for (const distraction of distractionsResult.data ?? []) {
-    const key = distraction.occurred_at.slice(0, 10);
-
-    if (distractionMap.has(key)) {
-      distractionMap.set(key, (distractionMap.get(key) ?? 0) + 1);
-    }
-  }
-
-  return dateKeys.map((dateKey) => ({
-    dateKey,
-    label: formatDayLabel(dateKey),
-    focusMinutes: focusMap.get(dateKey) ?? 0,
-    distractions: distractionMap.get(dateKey) ?? 0,
-  }));
-}
-
-export async function getPbiSnapshotHistory(
-  limit = 8,
-  supabase: TypedSupabaseClient,
-) {
-  const { data, error } = await supabase
-    .from("pbi_snapshots")
-    .select(
-      `
-      period_start,
-      period_end,
-      standard_pbi,
-      personalized_pbi,
-      created_at
-      `,
-    )
-    .order("period_end", { ascending: true })
-    .limit(limit);
-
-  if (error) {
-    throw new Error(`Failed to fetch PBI history: ${error.message}`);
-  }
-
-  return data.map((snapshot) => ({
-    label: snapshot.period_end,
-    standardPbi: Number(snapshot.standard_pbi),
-    personalizedPbi: Number(snapshot.personalized_pbi),
-  }));
-}
-
-export async function getTaskStatusBreakdown(supabase: TypedSupabaseClient) {
-  const { data, error } = await supabase.from("tasks").select("status");
-
-  if (error) {
-    throw new Error(`Failed to fetch task status breakdown: ${error.message}`);
-  }
-
-  const counts = {
-    todo: 0,
-    in_progress: 0,
-    completed: 0,
-    overdue: 0,
-    cancelled: 0,
+  return {
+    latestSnapshot: latestResult.data,
+    pbiHistory,
   };
-
-  for (const task of data ?? []) {
-    counts[task.status] += 1;
-  }
-
-  return [
-    {
-      status: "Todo",
-      count: counts.todo,
-    },
-    {
-      status: "In Progress",
-      count: counts.in_progress,
-    },
-    {
-      status: "Completed",
-      count: counts.completed,
-    },
-    {
-      status: "Overdue",
-      count: counts.overdue,
-    },
-    {
-      status: "Cancelled",
-      count: counts.cancelled,
-    },
-  ];
 }

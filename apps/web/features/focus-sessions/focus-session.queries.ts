@@ -7,14 +7,17 @@ export async function getActiveFocusSession() {
     .from("focus_sessions")
     .select(
       `
-      *,
+      id,
+      planned_minutes,
+      started_at,
+      total_paused_seconds,
+      paused_at,
+      status,
       tasks (
         id,
-        title,
-        priority,
-        status
+        title
       )
-    `
+    `,
     )
     .in("status", ["ongoing", "paused"])
     .maybeSingle();
@@ -33,14 +36,15 @@ export async function getRecentFocusSessions(limit = 10) {
     .from("focus_sessions")
     .select(
       `
-      *,
+      id,
+      planned_minutes,
+      actual_focus_minutes,
+      status,
       tasks (
         id,
-        title,
-        priority,
-        status
+        title
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false })
     .limit(limit);
@@ -49,5 +53,5 @@ export async function getRecentFocusSessions(limit = 10) {
     throw new Error(`Failed to fetch focus sessions: ${error.message}`);
   }
 
-  return data;
+  return data ?? [];
 }

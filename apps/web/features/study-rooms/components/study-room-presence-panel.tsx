@@ -137,21 +137,9 @@ export function StudyRoomPresencePanel({
         setConnectionState("connecting");
         setConnectionMessage(t("messages.preparing"));
 
-        const {
-          data: { user },
-          error: userError,
-        } = await supabase.auth.getUser();
-
-        if (userError) {
-          throw userError;
-        }
-
-        if (!user) {
-          throw new Error(
-            "Browser Supabase client does not have an authenticated user.",
-          );
-        }
-
+        // The authenticated user was already verified on the server before this
+        // component rendered. Realtime can reuse the browser session directly,
+        // avoiding an extra auth network round-trip before subscribing.
         await supabase.realtime.setAuth();
 
         if (!mounted) return;

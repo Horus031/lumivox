@@ -11,6 +11,12 @@ class RecalculateEngagementRequest(BaseModel):
     persist_results: bool = True
 
 
+class ProcessEngagementActivityRequest(BaseModel):
+    user_id: UUID
+    activity_type: Literal["focus_session", "task"]
+    activity_id: UUID
+
+
 class RewardLedgerEntryPreview(BaseModel):
     event_type: Literal[
         "focus_session_completed",

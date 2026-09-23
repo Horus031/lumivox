@@ -2,14 +2,14 @@ import { useLocale, useTranslations } from "next-intl";
 
 import type {
   WeeklyReflectionAction,
-  WeeklyReflectionCardWithReflection,
+  WeeklyReflectionCardView,
   WeeklyReflectionMetrics,
   WeeklyReflectionWatchout,
   WeeklyReflectionWin,
 } from "@/features/weekly-reflections/weekly-reflection.types";
 
 type WeeklyReflectionCardProps = {
-  card: WeeklyReflectionCardWithReflection;
+  card: WeeklyReflectionCardView;
 };
 
 function directionBadgeClass(

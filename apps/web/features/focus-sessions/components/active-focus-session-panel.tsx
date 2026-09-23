@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { FocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
+import type { ActiveFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import {
   cancelFocusSessionAction,
   completeFocusSessionAction,
@@ -24,7 +24,6 @@ import { Button } from "@/components/ui/button";
 //   SelectValue,
 // } from "@/components/ui/select";
 // import { Input } from "@/components/ui/input";
-import { Task } from "@/features/tasks/task.types";
 import { Badge } from "@/components/ui/badge";
 import {
   Check,
@@ -39,8 +38,7 @@ import { cn } from "@/lib/utils";
 import { useTranslations } from "next-intl";
 
 type ActiveFocusSessionPanelProps = {
-  session: FocusSessionWithTask;
-  task: Task | null;
+  session: ActiveFocusSessionWithTask;
 };
 
 function formatClock(totalSeconds: number) {
@@ -55,7 +53,7 @@ function formatClock(totalSeconds: number) {
   )}`;
 }
 
-function calculateRemainingSeconds(session: FocusSessionWithTask) {
+function calculateRemainingSeconds(session: ActiveFocusSessionWithTask) {
   const plannedSeconds = session.planned_minutes * 60;
   const nowMs = Date.now();
   const startedMs = new Date(session.started_at).getTime();

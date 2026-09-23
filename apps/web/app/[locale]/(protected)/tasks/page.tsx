@@ -1,12 +1,12 @@
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import { getGoals } from "@/features/goals/goal.queries";
+import { getGoalOptions } from "@/features/goals/goal.queries";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import TasksClient from "@/features/tasks/components/tasks-client";
 import { getTasksPage } from "@/features/tasks/task.queries";
 import type { Task } from "@/features/tasks/task.types";
 import { getTranslations } from "next-intl/server";
-import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
-import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
+// import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
+// import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
 
 type TasksPageProps = {
   searchParams: Promise<{
@@ -64,9 +64,10 @@ function parseTaskPriority(
 }
 
 export default async function TasksPage({ searchParams }: TasksPageProps) {
-  const t = await getTranslations("tasks.page");
-  const params = await searchParams;
-  const goals = await getGoals();
+  const [t, params] = await Promise.all([
+    getTranslations("tasks.page"),
+    searchParams,
+  ]);
 
   const page = parsePage(params.page);
   const query = parseQueryValue(params.q);
@@ -74,20 +75,24 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const priority = parseTaskPriority(params.priority);
   const goalId = parseQueryValue(params.goalId);
 
-  const { tasks, totalCount, totalPages } = await getTasksPage({
-    page,
-    pageSize: 8,
-    search: query,
-    status,
-    priority,
-    goalId,
-  });
+  // nativeTaskRiskAlerts
 
-  const nativeTaskRiskAlerts = await getMyNativeTaskRiskAlerts(8);
+  const [goals, tasksResult] = await Promise.all([
+    getGoalOptions(),
+    getTasksPage({
+      page,
+      pageSize: 8,
+      search: query,
+      status,
+      priority,
+      goalId,
+    }),
+    // getMyNativeTaskRiskAlerts(8),
+  ]);
 
   return (
     <section>
-      <div className="mx-auto space-y-16">
+      <div className="mx-auto space-y-8">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}
@@ -95,14 +100,14 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
           action={<CreateTaskModal goals={goals} />}
         />
 
-        <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
+        {/* <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} /> */}
 
         <TasksClient
-          initialTasks={tasks}
+          initialTasks={tasksResult.tasks}
           goals={goals}
           page={page}
-          totalPages={totalPages}
-          totalCount={totalCount}
+          totalPages={tasksResult.totalPages}
+          totalCount={tasksResult.totalCount}
           initialFilters={{ q: query, status, priority, goalId }}
         />
       </div>

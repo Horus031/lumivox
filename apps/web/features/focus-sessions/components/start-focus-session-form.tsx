@@ -4,7 +4,6 @@ import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { Database } from "@/types/database.types";
 import { createFocusSessionAction } from "@/features/focus-sessions/focus-session.actions";
 import {
   Select,
@@ -19,10 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 
-type Task = Database["public"]["Tables"]["tasks"]["Row"];
+type FocusTaskOption = {
+  id: string;
+  title: string;
+};
 
 type StartFocusSessionFormProps = {
-  tasks: Task[];
+  tasks: FocusTaskOption[];
 };
 
 export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {

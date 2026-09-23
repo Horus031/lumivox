@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
@@ -73,8 +71,6 @@ export async function generateWeeklyReflectionAction(): Promise<
 
     const data = (await response.json()) as GenerateWeeklyReflectionApiResponse;
 
-    revalidatePath("/dashboard");
-    revalidatePath("/reflections");
 
     return {
       success: true,

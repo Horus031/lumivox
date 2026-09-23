@@ -8,3 +8,13 @@ export type LearningDocumentInsert =
 
 export type LearningDocumentVisibility =
   Database["public"]["Enums"]["learning_document_visibility"];
+
+export type LearningDocumentListItem = Pick<
+  LearningDocument,
+  | "id"
+  | "file_name"
+  | "mime_type"
+  | "file_size_bytes"
+  | "visibility"
+  | "extracted_text_status"
+>;

@@ -10,6 +10,7 @@ import { AccountDropdown } from "@/features/app-shell/components/account-dropdow
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeSwitcher } from "@/features/theme/theme-switcher";
 
 type AppShellFrameProps = {
   profile: Profile;
@@ -76,6 +77,8 @@ export function AppShellFrame({
         )}
       >
         <div className="flex items-center gap-4">
+          <ThemeSwitcher/>
+
           <LanguageSwitcher />
 
           <AccountDropdown profile={profile} align="end" />

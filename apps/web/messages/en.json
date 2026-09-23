@@ -8,7 +8,18 @@
     "loading": "Loading...",
     "search": "Search",
     "settings": "Settings",
-    "language": "Language"
+    "language": "Language",
+    "pagination": {
+      "ariaLabel": "Table pagination",
+      "showing": "Page {page} of {totalPages}",
+      "previous": "Previous page",
+      "next": "Next page",
+      "showPreviousPages": "Show previous pages",
+      "showNextPages": "Show next pages",
+      "jumpLabel": "Go to page",
+      "of": "of {totalPages}",
+      "go": "Go"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -49,6 +60,9 @@
       "button": "Generate / Refresh PBI",
       "calculating": "Calculating..."
     },
+    "welcome": {
+      "title": "Welcome back"
+    },
     "pbiScore": {
       "emptyTitle": "No PBI snapshot yet",
       "emptyDescription": "Generate your first PBI snapshot after creating tasks, goals, and focus sessions.",
@@ -59,6 +73,13 @@
       "personalized": {
         "title": "Personalized PBI",
         "description": "Uses the user's onboarding/calibration weights."
+      },
+      "components": {
+        "taskCompletion": "Task completion",
+        "focusQuality": "Focus quality",
+        "deadlineAdherence": "Deadline adherence",
+        "goalMomentum": "Goal momentum",
+        "consistency": "Consistency"
       },
       "period": "Snapshot period: {start} -> {end}"
     },

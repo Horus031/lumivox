@@ -1,13 +1,13 @@
 // import { Link } from "@/i18n/navigation";;
 import { useTranslations } from "next-intl";
 
-import type { WeeklyReflectionCardWithReflection } from "@/features/weekly-reflections/weekly-reflection.types";
+import type { WeeklyReflectionCardView } from "@/features/weekly-reflections/weekly-reflection.types";
 
 // import { GenerateWeeklyReflectionButton } from "@/features/weekly-reflections/components/generate-weekly-reflection-button";
 import { WeeklyReflectionCard } from "@/features/weekly-reflections/components/weekly-reflection-card";
 
 type WeeklyReflectionSectionProps = {
-  cards: WeeklyReflectionCardWithReflection[];
+  cards: WeeklyReflectionCardView[];
   compact?: boolean;
 };
 

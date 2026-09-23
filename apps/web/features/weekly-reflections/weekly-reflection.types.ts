@@ -37,3 +37,25 @@ export type WeeklyReflectionCardWithReflection =
       | WeeklyReflection
       | null;
   };
+
+export type WeeklyReflectionCardView = Pick<
+  WeeklyReflectionCard,
+  | "id"
+  | "title"
+  | "summary"
+  | "reflection_interpretation"
+  | "confidence_note"
+  | "wins"
+  | "watchouts"
+  | "next_week_actions"
+> & {
+  weekly_reflections:
+    | Pick<
+        WeeklyReflection,
+        | "reflection_direction"
+        | "current_window_start"
+        | "current_window_end"
+        | "current_metrics"
+      >
+    | null;
+};

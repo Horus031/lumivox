@@ -1,7 +1,6 @@
 "use server";
 
 import { redirect, unstable_rethrow } from "next/navigation";
-import { revalidatePath } from "next/cache";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -71,9 +70,6 @@ export async function completeOnboardingAction(
       };
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/onboarding");
-    revalidatePath("/settings");
 
     redirect("/dashboard");
   } catch (error) {

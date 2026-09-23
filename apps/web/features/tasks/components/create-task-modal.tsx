@@ -9,7 +9,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Goal } from "@/features/goals/goal.types";
+import type { GoalOption } from "@/features/goals/goal.types";
 import { createTaskAction } from "@/features/tasks/task.actions";
 
 import { TaskModalShell } from "./task-modal-shell";
@@ -27,7 +27,7 @@ import { TaskDatePicker } from "./task-date-picker";
 import { Label } from "@/components/ui/label";
 
 type CreateTaskModalProps = {
-  goals: Goal[];
+  goals: GoalOption[];
 };
 
 export function CreateTaskModal({ goals }: CreateTaskModalProps) {

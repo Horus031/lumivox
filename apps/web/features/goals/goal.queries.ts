@@ -2,6 +2,21 @@ import { requireUser } from "@/lib/auth/require-user";
 import { GoalWithProgress } from "./goal.types";
 import { calculateGoalProgress } from "./goal-progress.utils";
 
+export async function getGoalOptions() {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("goals")
+    .select("id, title")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    throw new Error(`Failed to fetch goal options: ${error.message}`);
+  }
+
+  return data ?? [];
+}
+
 export async function getGoals() {
   const { supabase } = await requireUser();
 
@@ -18,13 +33,14 @@ export async function getGoals() {
 }
 
 export async function getGoalById(goalId: string) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
 
   const { data, error } = await supabase
     .from("goals")
     .select("*")
     .eq("id", goalId)
-    .single();
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   if (error) {
     throw new Error(`Failed to fetch goal: ${error.message}`);
@@ -36,36 +52,36 @@ export async function getGoalById(goalId: string) {
 export async function getGoalsWithProgress(): Promise<GoalWithProgress[]> {
   const { supabase, user } = await requireUser();
 
-  const { data: goals, error: goalsError } = await supabase
-    .from("goals")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  const [goalsResult, tasksResult] = await Promise.all([
+    supabase
+      .from("goals")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("tasks")
+      .select("goal_id, status")
+      .eq("user_id", user.id)
+      .not("goal_id", "is", null),
+  ]);
 
-  if (goalsError) {
-    throw new Error(`Failed to fetch goals: ${goalsError.message}`);
+  if (goalsResult.error) {
+    throw new Error(`Failed to fetch goals: ${goalsResult.error.message}`);
   }
 
-  const goalRows = goals ?? [];
+  if (tasksResult.error) {
+    throw new Error(
+      `Failed to fetch goal tasks: ${tasksResult.error.message}`,
+    );
+  }
+
+  const goalRows = goalsResult.data ?? [];
 
   if (goalRows.length === 0) {
     return [];
   }
 
-  const goalIds = goalRows.map((goal) => goal.id);
-
-  const { data: tasks, error: tasksError } = await supabase
-    .from("tasks")
-    .select("id, goal_id, status")
-    .eq("user_id", user.id)
-    .in("goal_id", goalIds)
-    // .is("deleted_at", null);
-
-  if (tasksError) {
-    throw new Error(`Failed to fetch goal tasks: ${tasksError.message}`);
-  }
-
-  const taskRows = tasks ?? [];
+  const taskRows = tasksResult.data ?? [];
 
   const taskCountByGoalId = new Map<string, number>();
   const completedTaskCountByGoalId = new Map<string, number>();

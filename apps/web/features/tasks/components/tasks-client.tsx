@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import type { TaskWithSubtasks } from "@/features/tasks/task.types";
-import type { Goal } from "@/features/goals/goal.types";
+import type { GoalOption } from "@/features/goals/goal.types";
 import { TaskFiltersBar } from "./task-filters-bar";
 import { TasksTable } from "./tasks-table";
 import { TaskPagination } from "./task-pagination";
@@ -18,7 +18,7 @@ type Filters = {
 
 type TasksClientProps = {
   initialTasks: TaskWithSubtasks[];
-  goals: Goal[];
+  goals: GoalOption[];
   page: number;
   totalPages: number;
   totalCount: number;
@@ -101,7 +101,6 @@ export default function TasksClient({
       <TaskPagination
         page={page}
         totalPages={totalPages}
-        hasFilters={hasFilters}
         filters={{
           q: filters.q,
           status: filters.status,

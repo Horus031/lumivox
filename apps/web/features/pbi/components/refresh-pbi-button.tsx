@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
 import { generateCurrentPbiSnapshotAction } from "@/features/pbi/pbi.actions";
+import { Button } from "@/components/ui/button";
 
 export function RefreshPbiButton() {
   const t = useTranslations("dashboard.refreshPbi");
@@ -27,12 +28,11 @@ export function RefreshPbiButton() {
   }
 
   return (
-    <button
+    <Button
       onClick={handleRefresh}
       disabled={isPending}
-      className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
     >
       {isPending ? t("calculating") : t("button")}
-    </button>
+    </Button>
   );
 }
