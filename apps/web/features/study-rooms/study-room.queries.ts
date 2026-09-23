@@ -76,7 +76,13 @@ export async function getStudyRoomPageData(roomId: string) {
         full_name
       ),
       study_rooms!inner (
-        *,
+        id,
+        title,
+        description,
+        visibility,
+        max_participants,
+        owner_id,
+        invite_code,
         profiles:owner_id (
           id,
           full_name
@@ -117,7 +123,8 @@ export async function getStudyRoomMembers(roomId: string) {
     .from("study_room_members")
     .select(
       `
-      *,
+      id,
+      role,
       profiles:user_id (
         id,
         full_name
