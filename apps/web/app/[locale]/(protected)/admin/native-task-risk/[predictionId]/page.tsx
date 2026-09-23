@@ -50,11 +50,14 @@ export default async function AdminNativeTaskRiskPredictionDetailPage({
 }: PageProps) {
   const { predictionId } = await params;
 
-  const prediction = await getAdminNativeTaskRiskPredictionDetail(predictionId);
+  const [prediction, t] = await Promise.all([
+    getAdminNativeTaskRiskPredictionDetail(predictionId),
+    getTranslations("admin.nativeTaskRisk.detail"),
+  ]);
+
   const attributions = toArray<NativeTaskRiskAttribution>(
-    prediction.attributions
+    prediction.attributions,
   );
-  const t = await getTranslations("admin.nativeTaskRisk.detail");
 
   return (
     <main className="space-y-6">
