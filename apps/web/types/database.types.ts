@@ -1998,6 +1998,10 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_my_dashboard_activity: {
+        Args: { p_days?: number }
+        Returns: Json
+      }
       admin_clear_ai_entity_translations: {
         Args: { p_entity_id: string; p_entity_type: string };
         Returns: number;
