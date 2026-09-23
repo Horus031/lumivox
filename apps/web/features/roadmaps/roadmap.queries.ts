@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import type {
   LearningRoadmap,
+  LearningRoadmapListItem,
   LearningRoadmapNode,
   RoadmapTreeNode,
 } from "@/features/roadmaps/roadmap.types";
@@ -15,30 +16,16 @@ export async function getMyRoadmaps() {
     .select(
       [
         "id",
-        "user_id",
         "title",
         "topic",
         "subject_name",
         "description",
-        "current_level",
-        "target_level",
-        "custom_current_level",
-        "custom_target_level",
         "start_date",
         "end_date",
         "study_days_per_week",
-        "available_weekdays",
         "minutes_per_study_day",
-        "preferred_locale",
         "status",
-        "ai_provider",
-        "ai_model",
-        "ai_latency_ms",
-        "applied_at",
-        "archived_at",
-        "created_at",
-        "updated_at",
-      ].join(",")
+      ].join(","),
     )
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
@@ -47,7 +34,7 @@ export async function getMyRoadmaps() {
     throw new Error(`Failed to load roadmaps: ${error.message}`);
   }
 
-  return (data ?? []) as unknown as LearningRoadmap[];
+  return (data ?? []) as unknown as LearningRoadmapListItem[];
 }
 
 export async function getMyRoadmapDetail(roadmapId: string) {
