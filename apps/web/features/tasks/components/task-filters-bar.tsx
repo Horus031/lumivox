@@ -74,8 +74,8 @@ export function TaskFiltersBar({
       onSubmit={handleSubmit}
       className=""
     >
-      <div className="grid gap-3 lg:grid-cols-[minmax(0,1.5fr)_180px_180px_220px_auto]">
-        <Label className="relative block">
+      <div className="gap-3 flex items-center h-fit">
+        <Label className="relative mb-0 block w-full xl:max-w-md 2xl:max-w-2xl">
           <span className="sr-only">{t("searchLabel")}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -83,7 +83,7 @@ export function TaskFiltersBar({
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="pl-10 pr-3"
+            className="pl-10 pr-3 w-full max-w-2xl"
           />
         </Label>
 
@@ -91,7 +91,7 @@ export function TaskFiltersBar({
           value={status ?? ""}
           onValueChange={(value) => setStatus(value || undefined)}
         >
-          <SelectTrigger className="flex w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+          <SelectTrigger className="flex flex-1 border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
             <SelectValue placeholder={t("allStatuses")} />
           </SelectTrigger>
           <SelectContent>
@@ -118,7 +118,7 @@ export function TaskFiltersBar({
           value={priority ?? ""}
           onValueChange={(value) => setPriority(value || undefined)}
         >
-          <SelectTrigger className="flex h-11 w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+          <SelectTrigger className="flex h-11 flex-1 border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
             <SelectValue placeholder={t("allPriorities")} />
           </SelectTrigger>
           <SelectContent>
@@ -140,7 +140,7 @@ export function TaskFiltersBar({
           value={goalId ?? ""}
           onValueChange={(value) => setGoalId(value || undefined)}
         >
-          <SelectTrigger className="flex h-11 w-full border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+          <SelectTrigger className="flex h-11 flex-1 w-fit border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
             <SelectValue placeholder={t("allGoals")} />
           </SelectTrigger>
           <SelectContent>

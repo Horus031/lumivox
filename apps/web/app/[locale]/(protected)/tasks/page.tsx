@@ -5,8 +5,8 @@ import TasksClient from "@/features/tasks/components/tasks-client";
 import { getTasksPage } from "@/features/tasks/task.queries";
 import type { Task } from "@/features/tasks/task.types";
 import { getTranslations } from "next-intl/server";
-import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
-import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
+// import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
+// import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
 
 type TasksPageProps = {
   searchParams: Promise<{
@@ -75,7 +75,9 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
   const priority = parseTaskPriority(params.priority);
   const goalId = parseQueryValue(params.goalId);
 
-  const [goals, tasksResult, nativeTaskRiskAlerts] = await Promise.all([
+  // nativeTaskRiskAlerts
+
+  const [goals, tasksResult] = await Promise.all([
     getGoalOptions(),
     getTasksPage({
       page,
@@ -85,12 +87,12 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
       priority,
       goalId,
     }),
-    getMyNativeTaskRiskAlerts(8),
+    // getMyNativeTaskRiskAlerts(8),
   ]);
 
   return (
     <section>
-      <div className="mx-auto space-y-16">
+      <div className="mx-auto space-y-8">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}
@@ -98,7 +100,7 @@ export default async function TasksPage({ searchParams }: TasksPageProps) {
           action={<CreateTaskModal goals={goals} />}
         />
 
-        <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} />
+        {/* <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} /> */}
 
         <TasksClient
           initialTasks={tasksResult.tasks}

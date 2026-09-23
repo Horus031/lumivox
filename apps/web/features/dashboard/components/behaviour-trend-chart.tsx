@@ -5,6 +5,7 @@ import {
   Bar,
   CartesianGrid,
   ComposedChart,
+  Legend,
   Line,
   ResponsiveContainer,
   Tooltip,
@@ -27,18 +28,20 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
   const t = useTranslations("dashboard.behaviourTrend");
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
-      <div className="mb-5">
-        <h2 className="text-xl font-semibold">{t("title")}</h2>
-        <p className="mt-1 text-sm text-neutral-600">{t("description")}</p>
+    <section className="flex h-full min-h-120 flex-col rounded-2xl bg-card/90 p-4 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.55)] sm:p-5 xl:min-h-168">
+      <div className="mb-4">
+        <h2 className="text-lg font-semibold text-foreground">{t("title")}</h2>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          {t("description")}
+        </p>
       </div>
 
-      <div className="h-85 w-full">
+      <div className="min-h-80 w-full flex-1">
         <ResponsiveContainer
           width="100%"
           height="100%"
-          minWidth={320}
-          minHeight={340}
+          minWidth={0}
+          minHeight={320}
         >
           <ComposedChart
             data={data}
@@ -48,10 +51,15 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
               strokeDasharray="3 3"
               stroke="hsl(var(--chart-grid))"
             />
-            <XAxis dataKey="label" tick={{ fill: "hsl(var(--chart-axis))" }} />
+            <XAxis
+              dataKey="label"
+              tick={{ fill: "hsl(var(--chart-axis))", fontSize: 11 }}
+              tickLine={false}
+            />
             <YAxis
               yAxisId="left"
-              tick={{ fill: "hsl(var(--chart-axis))" }}
+              tick={{ fill: "hsl(var(--chart-axis))", fontSize: 11 }}
+              tickLine={false}
               label={{
                 value: t("focusMinutes"),
                 angle: -90,
@@ -62,7 +70,8 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
             <YAxis
               yAxisId="right"
               orientation="right"
-              tick={{ fill: "hsl(var(--chart-axis))" }}
+              tick={{ fill: "hsl(var(--chart-axis))", fontSize: 11 }}
+              tickLine={false}
               label={{
                 value: t("distractions"),
                 angle: 90,
@@ -70,7 +79,23 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
                 fill: "hsl(var(--chart-axis))",
               }}
             />
-            <Tooltip />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: "var(--surface)",
+                border: "1px solid var(--overlay)",
+                borderRadius: 10,
+                color: "var(--foreground)",
+                fontSize: 12,
+              }}
+              labelStyle={{ color: "var(--foreground)", fontWeight: 600 }}
+            />
+            <Legend
+              wrapperStyle={{
+                color: "var(--text-secondary)",
+                fontSize: 12,
+                paddingTop: 12,
+              }}
+            />
             <Bar
               yAxisId="left"
               dataKey="focusMinutes"

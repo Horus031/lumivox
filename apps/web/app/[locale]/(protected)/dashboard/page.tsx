@@ -10,8 +10,8 @@ import {
   getDashboardPbiOverview,
 } from "@/features/dashboard/dashboard.queries";
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
-import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
+// import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
+// import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
 import { PbiExplanationPanel } from "@/features/pbi/components/pbi-explaination-panel";
 import { RefreshPbiButton } from "@/features/pbi/components/refresh-pbi-button";
 import { PbiScoreCards } from "@/features/pbi/components/pbi-score-cards";
@@ -29,7 +29,7 @@ type ActivityOverview = Awaited<
   ReturnType<typeof getDashboardActivityOverview>
 >;
 type PbiOverview = Awaited<ReturnType<typeof getDashboardPbiOverview>>;
-type NativeRiskAlerts = Awaited<ReturnType<typeof getMyNativeTaskRiskAlerts>>;
+// type NativeRiskAlerts = Awaited<ReturnType<typeof getMyNativeTaskRiskAlerts>>;
 
 function normalizeAiLocale(locale: string) {
   return locale === "vi" ? "vi" : "en";
@@ -59,7 +59,13 @@ async function DashboardPbiScoreSection({
   pbiPromise: Promise<PbiOverview>;
 }) {
   const { latestSnapshot } = await pbiPromise;
-  return <PbiScoreCards snapshot={latestSnapshot} />;
+  const explanation =
+    latestSnapshot?.explanation_payload &&
+    typeof latestSnapshot.explanation_payload === "object"
+      ? (latestSnapshot.explanation_payload as PbiExplanationPayload)
+      : null;
+
+  return <PbiScoreCards explanation={explanation} snapshot={latestSnapshot} />;
 }
 
 async function DashboardPbiExplanationSection({
@@ -113,17 +119,17 @@ async function DashboardTaskStatusSection({
   return <TaskStatusChart data={taskStatusBreakdown} />;
 }
 
-async function DashboardRiskSection({
-  riskPromise,
-}: {
-  riskPromise: Promise<NativeRiskAlerts>;
-}) {
-  const alerts = await riskPromise;
-  return <NativeTaskRiskAlertsCard alerts={alerts} />;
-}
+// async function DashboardRiskSection({
+//   riskPromise,
+// }: {
+//   riskPromise: Promise<NativeRiskAlerts>;
+// }) {
+//   const alerts = await riskPromise;
+//   return <NativeTaskRiskAlertsCard alerts={alerts} />;
+// }
 
 export default async function DashboardPage({ params }: DashboardPageProps) {
-  const [{ locale }, t, { supabase }] = await Promise.all([
+  const [{ locale }, headerT, { supabase }] = await Promise.all([
     params,
     getTranslations("dashboard.header"),
     requireUser(),
@@ -133,15 +139,15 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   // by multiple streamed sections, so each dataset is fetched only once.
   const activityPromise = getDashboardActivityOverview(supabase);
   const pbiPromise = getDashboardPbiOverview(supabase);
-  const riskPromise = getMyNativeTaskRiskAlerts(6, supabase);
+  // const riskPromise = getMyNativeTaskRiskAlerts(6, supabase);
 
   return (
     <section>
       <div className="mx-auto max-w-full space-y-8">
         <PageHeader
-          eyebrow={t("eyebrow")}
-          title={t("title")}
-          description={t("description")}
+          eyebrow={headerT("eyebrow")}
+          title={headerT("title")}
+          description={headerT("description")}
           action={<RefreshPbiButton />}
         />
 
@@ -149,34 +155,43 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <DashboardSummarySection activityPromise={activityPromise} />
         </Suspense>
 
-        <Suspense fallback={<DashboardSectionSkeleton height="h-44" />}>
-          <DashboardPbiScoreSection pbiPromise={pbiPromise} />
-        </Suspense>
+        <div className="flex flex-col gap-4 lg:flex-row">
+          <div className="lg:w-[24%] xl:w-[40%]">
+            {/* <DashboardWelcomeCard title={welcomeT("title")} user={user} /> */}
+            <Suspense fallback={<DashboardSectionSkeleton height="h-52" />}>
+              <DashboardPbiExplanationSection
+                pbiPromise={pbiPromise}
+                locale={locale}
+              />
+            </Suspense>
+          </div>
 
-        <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
-          <DashboardPbiExplanationSection
-            pbiPromise={pbiPromise}
-            locale={locale}
-          />
-        </Suspense>
-
-        <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
-          <DashboardBehaviourSection activityPromise={activityPromise} />
-        </Suspense>
-
-        <div className="grid gap-6 xl:grid-cols-2">
-          <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
-            <DashboardPbiHistorySection pbiPromise={pbiPromise} />
-          </Suspense>
-
-          <Suspense fallback={<DashboardSectionSkeleton height="h-72" />}>
-            <DashboardTaskStatusSection activityPromise={activityPromise} />
-          </Suspense>
+          <div className="min-w-0 lg:flex-1">
+            <Suspense fallback={<DashboardSectionSkeleton height="h-44" />}>
+              <DashboardPbiScoreSection pbiPromise={pbiPromise} />
+            </Suspense>
+          </div>
         </div>
 
-        <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
+        <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.85fr)]">
+          <Suspense fallback={<DashboardSectionSkeleton height="h-[42rem]" />}>
+            <DashboardBehaviourSection activityPromise={activityPromise} />
+          </Suspense>
+
+          <div className="grid min-w-0 gap-4">
+            <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+              <DashboardPbiHistorySection pbiPromise={pbiPromise} />
+            </Suspense>
+
+            <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+              <DashboardTaskStatusSection activityPromise={activityPromise} />
+            </Suspense>
+          </div>
+        </div>
+
+        {/* <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
           <DashboardRiskSection riskPromise={riskPromise} />
-        </Suspense>
+        </Suspense> */}
       </div>
     </section>
   );

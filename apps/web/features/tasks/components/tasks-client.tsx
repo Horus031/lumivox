@@ -101,7 +101,6 @@ export default function TasksClient({
       <TaskPagination
         page={page}
         totalPages={totalPages}
-        hasFilters={hasFilters}
         filters={{
           q: filters.q,
           status: filters.status,

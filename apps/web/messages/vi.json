@@ -8,7 +8,18 @@
     "loading": "Đang tải...",
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "pagination": {
+      "ariaLabel": "Phân trang bảng dữ liệu",
+      "showing": "Trang {page} / {totalPages}",
+      "previous": "Trang trước",
+      "next": "Trang tiếp theo",
+      "showPreviousPages": "Hiện nhóm trang trước",
+      "showNextPages": "Hiện nhóm trang tiếp theo",
+      "jumpLabel": "Đi đến trang",
+      "of": "/ {totalPages}",
+      "go": "Đi"
+    }
   },
   "nav": {
     "dashboard": "Tổng quan",
@@ -49,6 +60,10 @@
       "button": "Tạo / làm mới PBI",
       "calculating": "Đang tính..."
     },
+
+    "welcome": {
+      "title": "Mừng bạn quay trở lại"
+    },
     "pbiScore": {
       "emptyTitle": "Chưa có snapshot PBI",
       "emptyDescription": "Tạo snapshot PBI đầu tiên sau khi bạn đã tạo nhiệm vụ, mục tiêu và phiên tập trung.",
@@ -59,6 +74,13 @@
       "personalized": {
         "title": "PBI cá nhân hóa",
         "description": "Dùng trọng số từ onboarding/hiệu chỉnh của người dùng."
+      },
+      "components": {
+        "taskCompletion": "Hoàn thành nhiệm vụ",
+        "focusQuality": "Chất lượng tập trung",
+        "deadlineAdherence": "Tuân thủ thời hạn",
+        "goalMomentum": "Tiến độ mục tiêu",
+        "consistency": "Tính nhất quán"
       },
       "period": "Khoảng snapshot: {start} -> {end}"
     },

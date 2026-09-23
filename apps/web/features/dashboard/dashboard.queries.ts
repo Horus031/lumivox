@@ -1,7 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@/types/database.types";
-
-type TypedSupabaseClient = SupabaseClient<Database>;
+import type { TypedSupabaseClient } from "@/types/database.types";
 
 function getRollingDateKeys(days = 7) {
   const dates: string[] = [];
@@ -135,19 +132,19 @@ export async function getDashboardPbiOverview(
     supabase
       .from("pbi_snapshots")
       .select(
-        [
-          "id",
-          "standard_pbi",
-          "personalized_pbi",
-          "task_completion_rate",
-          "focus_quality_score",
-          "deadline_adherence_score",
-          "goal_momentum_score",
-          "consistency_score",
-          "period_start",
-          "period_end",
-          "explanation_payload",
-        ].join(","),
+        `
+          id,
+          standard_pbi,
+          personalized_pbi,
+          task_completion_rate,
+          focus_quality_score,
+          deadline_adherence_score,
+          goal_momentum_score,
+          consistency_score,
+          period_start,
+          period_end,
+          explanation_payload
+        `,
       )
       .order("period_end", { ascending: false })
       .limit(1)
