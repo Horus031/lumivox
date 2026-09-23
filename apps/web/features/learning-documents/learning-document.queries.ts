@@ -7,7 +7,9 @@ export async function getGoalLearningDocuments(goalId: string) {
 
   const { data, error } = await supabase
     .from("learning_documents")
-    .select("*")
+    .select(
+      "id,file_name,mime_type,file_size_bytes,visibility,extracted_text_status",
+    )
     .eq("goal_id", goalId)
     .order("created_at", { ascending: false });
 
