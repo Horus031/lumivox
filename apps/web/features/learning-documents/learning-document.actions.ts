@@ -130,7 +130,6 @@ export async function uploadGoalLearningDocumentAction(
 
     revalidatePath("/goals");
     revalidatePath(`/goals/${goalId}`);
-    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -205,7 +204,6 @@ export async function deleteLearningDocumentAction(
       revalidatePath(`/goals/${document.goal_id}`);
     }
 
-    revalidatePath("/", "layout");
 
     return {
       success: true,

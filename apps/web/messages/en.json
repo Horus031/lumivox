@@ -8,7 +8,18 @@
     "loading": "Loading...",
     "search": "Search",
     "settings": "Settings",
-    "language": "Language"
+    "language": "Language",
+    "pagination": {
+      "ariaLabel": "Table pagination",
+      "showing": "Page {page} of {totalPages}",
+      "previous": "Previous page",
+      "next": "Next page",
+      "showPreviousPages": "Show previous pages",
+      "showNextPages": "Show next pages",
+      "jumpLabel": "Go to page",
+      "of": "of {totalPages}",
+      "go": "Go"
+    }
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -49,6 +60,9 @@
       "button": "Generate / Refresh PBI",
       "calculating": "Calculating..."
     },
+    "welcome": {
+      "title": "Welcome back"
+    },
     "pbiScore": {
       "emptyTitle": "No PBI snapshot yet",
       "emptyDescription": "Generate your first PBI snapshot after creating tasks, goals, and focus sessions.",
@@ -59,6 +73,13 @@
       "personalized": {
         "title": "Personalized PBI",
         "description": "Uses the user's onboarding/calibration weights."
+      },
+      "components": {
+        "taskCompletion": "Task completion",
+        "focusQuality": "Focus quality",
+        "deadlineAdherence": "Deadline adherence",
+        "goalMomentum": "Goal momentum",
+        "consistency": "Consistency"
       },
       "period": "Snapshot period: {start} -> {end}"
     },
@@ -549,7 +570,11 @@
       },
       "noDescription": "No description available",
       "open": "Open",
-      "minutesShort": "{minutes}m"
+      "minutesShort": "{minutes}m",
+      "subtask": "Subtask",
+      "subtaskProgress": "{completed}/{total} subtasks",
+      "expandSubtasks": "Expand subtasks",
+      "collapseSubtasks": "Collapse subtasks"
     },
     "details": {
       "fallbackDescription": "Task details",
@@ -688,6 +713,7 @@
       "chooseTask": "Choose your linked task",
       "noLinkedTask": "No linked task",
       "plannedDuration": "Planned duration",
+      "plannedDurationSub": "You can adjust this to your preference, beyond the duration listed below.",
       "minutes": "{value} min",
       "plannedMinutesPlaceholder": "Your desired planned minutes...",
       "starting": "Starting...",
@@ -1657,6 +1683,98 @@
         "delete": "Delete",
         "clearing": "Clearing...",
         "clearEntityCache": "Clear entity cache"
+      }
+    },
+    "nativeTaskRisk": {
+      "page": {
+        "eyebrow": "Admin CMS",
+        "title": "Native Task Risk Monitoring",
+        "description": "Monitor the native Lumivox task delay risk model, prediction logs, risk bands, and explanation metadata."
+      },
+      "metrics": {
+        "notAvailable": "N/A",
+        "nativePredictions": {
+          "label": "Native Predictions",
+          "description": "{count} in last 24h"
+        },
+        "avgRisk": {
+          "label": "Avg Risk",
+          "description": "Average score: {score}"
+        },
+        "highElevated": {
+          "label": "High / Elevated",
+          "description": "Risk distribution"
+        },
+        "activeModel": {
+          "label": "Active Model",
+          "empty": "No active model"
+        }
+      },
+      "models": {
+        "eyebrow": "Model Registry",
+        "title": "Native task risk model versions",
+        "empty": "No native model version registered.",
+        "active": "Active",
+        "artifact": "Artifact: {path}",
+        "notAvailable": "N/A",
+        "metricLabels": {
+          "recall": "Recall",
+          "precision": "Precision",
+          "f1": "F1",
+          "rocAuc": "ROC-AUC"
+        }
+      },
+      "search": {
+        "queryLabel": "Search predictions",
+        "queryPlaceholder": "Search by task, goal, user, email, model...",
+        "riskBandLabel": "Risk band",
+        "submit": "Search",
+        "riskBands": {
+          "all": "All",
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        }
+      },
+      "predictions": {
+        "eyebrow": "Prediction Logs",
+        "title": "Native task risk predictions",
+        "empty": "No native task risk predictions found.",
+        "riskBands": {
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        },
+        "threshold": "threshold {value}",
+        "daysLeft": "{count, plural, one {# day left} other {# days left}}",
+        "goal": "Goal: {title}",
+        "unknownOwner": "Unknown",
+        "owner": "Owner: {name} · {email}",
+        "model": "Model: {algorithm} · {version} · {mode}",
+        "created": "Created: {value}",
+        "viewDetail": "View detail",
+        "explanationSummary": "Explanation summary"
+      },
+      "detail": {
+        "eyebrow": "Native ML Prediction Detail",
+        "unknownOwner": "Unknown",
+        "owner": "Owner: {name} · {email}",
+        "back": "Back",
+        "riskBands": {
+          "low": "Low",
+          "moderate": "Moderate",
+          "elevated": "Elevated",
+          "high": "High"
+        },
+        "probability": "Probability: {value}%",
+        "threshold": "Threshold: {value}",
+        "attributionsTitle": "Top feature attributions",
+        "attributionMeta": "Value: {value} · Contribution: {contribution}",
+        "modelMetricsTitle": "Model metrics",
+        "featurePayloadTitle": "Feature payload",
+        "predictionMetadataTitle": "Prediction metadata"
       }
     },
     "settings": {

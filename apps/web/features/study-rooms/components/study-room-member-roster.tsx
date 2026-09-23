@@ -31,7 +31,8 @@ export function StudyRoomMemberRoster({
       .from("study_room_members")
       .select(
         `
-        *,
+        id,
+        role,
         profiles:user_id (
           id,
           full_name

@@ -2,6 +2,7 @@
 
 import { FormEvent, useMemo, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type {
@@ -41,6 +42,7 @@ const commonTimezones = [
 
 export function SettingsForm({ profile, weights }: OnboardingFormProps) {
   const t = useTranslations("settings.form");
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const [fullName, setFullName] = useState(profile.full_name ?? "");
@@ -100,6 +102,7 @@ export function SettingsForm({ profile, weights }: OnboardingFormProps) {
       }
 
       toast.success(result.message);
+      router.refresh();
     });
   }
 

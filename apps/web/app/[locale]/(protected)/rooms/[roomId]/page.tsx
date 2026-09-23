@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -37,17 +38,52 @@ type StudyRoomPageProps = {
   }>;
 };
 
+async function RoomMemberRosterSection({ roomId }: { roomId: string }) {
+  const members = await getStudyRoomMembers(roomId);
+
+  return (
+    <StudyRoomMemberRoster
+      roomId={roomId}
+      initialMembers={members as any}
+    />
+  );
+}
+
+async function RoomChatSection({
+  roomId,
+  currentUserId,
+}: {
+  roomId: string;
+  currentUserId: string;
+}) {
+  const initialMessages = await getRecentStudyRoomMessages(roomId);
+
+  return (
+    <StudyRoomChatPanel
+      roomId={roomId}
+      currentUserId={currentUserId}
+      initialMessages={initialMessages as any}
+    />
+  );
+}
+
+function RoomPanelFallback({ className }: { className: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`${className} animate-pulse rounded-2xl border border-border/60 bg-card/60`}
+    />
+  );
+}
+
 export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
   const { locale, roomId } = await params;
 
-  const [{ user }, roomPageData, members, initialMessages, t] =
-    await Promise.all([
-      requireUser(),
-      getStudyRoomPageData(roomId),
-      getStudyRoomMembers(roomId),
-      getRecentStudyRoomMessages(roomId),
-      getTranslations("rooms.detail"),
-    ]);
+  const [{ user }, roomPageData, t] = await Promise.all([
+    requireUser(),
+    getStudyRoomPageData(roomId),
+    getTranslations("rooms.detail"),
+  ]);
 
   if (!roomPageData) {
     redirect({ href: "/rooms", locale });
@@ -60,18 +96,21 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
     notFound();
   }
 
+  const currentUserName =
+    membership.profiles?.full_name ??
+    (room.owner_id === user.id ? room.profiles?.full_name : null) ??
+    t("lumivoxUser");
+
   return (
-    <section className="px-4 py-6 md:px-6 lg:px-8 lg:py-8">
+    <section>
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="flex flex-row items-center justify-between">
           <PageHeader
             eyebrow={t("eyebrow")}
             title={room.title}
-            description={
-              room.description ??
-              t("fallbackDescription")
-            }
+            description={room.description ?? t("fallbackDescription")}
           />
+
           <div className="flex flex-row gap-4">
             <Dialog>
               <DialogTrigger>
@@ -81,7 +120,8 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
                 <DialogHeader>
                   <DialogTitle>{t("roomDetails")}</DialogTitle>
                 </DialogHeader>
-                <section className="flex flex-col gap-5 -mx-4 no-scrollbar max-h-[50vh] overflow-y-auto px-4">
+
+                <section className="flex max-h-[50vh] flex-col gap-5 overflow-y-auto -mx-4 px-4 no-scrollbar">
                   <article className="rounded-2xl border bg-background p-6 shadow-sm">
                     <div className="grid gap-4 md:grid-cols-2">
                       <DetailCard
@@ -123,11 +163,11 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
                     ) : null}
                   </article>
 
-                  <StudyRoomMemberRoster
-                    roomId={room.id}
-                    initialMembers={members as any}
-                  />
+                  <Suspense fallback={<RoomPanelFallback className="h-64" />}>
+                    <RoomMemberRosterSection roomId={room.id} />
+                  </Suspense>
                 </section>
+
                 <DialogFooter>
                   <DialogClose asChild>
                     <Button variant="outline">{t("cancel")}</Button>
@@ -144,19 +184,15 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
           <StudyRoomPresencePanel
             roomId={room.id}
             currentUserId={user.id}
-            currentUserName={
-              room.owner_id === user.id
-                ? (room.profiles?.full_name ?? t("roomOwner"))
-                : (members.find((member) => member.user_id === user.id)
-                    ?.profiles?.full_name ?? t("lumivoxUser"))
-            }
+            currentUserName={currentUserName}
           />
 
-          <StudyRoomChatPanel
-            roomId={room.id}
-            currentUserId={user.id}
-            initialMessages={initialMessages as any}
-          />
+          <Suspense fallback={<RoomPanelFallback className="h-150 flex-1" />}>
+            <RoomChatSection
+              roomId={room.id}
+              currentUserId={user.id}
+            />
+          </Suspense>
         </div>
 
         <StudyRoomVoicePanel roomId={room.id} />

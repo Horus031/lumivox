@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { requireUser } from "@/lib/auth/require-user";
+import { getGoalById } from "@/features/goals/goal.queries";
 import { getGoalLearningDocuments } from "@/features/learning-documents/learning-document.queries";
 import { GoalDocumentUploadForm } from "@/features/learning-documents/components/goal-document-upload-form";
 import { GoalDocumentList } from "@/features/learning-documents/components/goal-document-list";
@@ -14,26 +14,16 @@ type GoalDetailPageProps = {
 
 export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { goalId } = await params;
-  const t = await getTranslations("goals.detail");
 
-  const { supabase, user } = await requireUser();
-
-  const { data: goal, error } = await supabase
-    .from("goals")
-    .select("*")
-    .eq("id", goalId)
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Failed to fetch goal: ${error.message}`);
-  }
+  const [t, goal, documents] = await Promise.all([
+    getTranslations("goals.detail"),
+    getGoalById(goalId),
+    getGoalLearningDocuments(goalId),
+  ]);
 
   if (!goal) {
     notFound();
   }
-
-  const documents = await getGoalLearningDocuments(goalId);
 
   return (
     <main className="space-y-6">

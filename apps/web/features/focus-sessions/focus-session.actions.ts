@@ -1,10 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-import {
-  invalidateEngagementCache,
-  recalculateEngagementForUser,
-} from "@/features/engagement-retention/engagement-retention.server";
+import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -30,14 +26,9 @@ function calculateElapsedFocusMinutes(
   );
 
   const activeSeconds = Math.max(0, rawElapsedSeconds - totalPausedSeconds);
-
   const activeMinutes = Math.floor(activeSeconds / 60);
 
-  if (activeMinutes > plannedMinutes) {
-    return plannedMinutes;
-  }
-
-  return activeMinutes;
+  return Math.min(activeMinutes, plannedMinutes);
 }
 
 export async function createFocusSessionAction(
@@ -55,7 +46,6 @@ export async function createFocusSessionAction(
 
   try {
     const { supabase, user } = await requireUser();
-
     const { taskId, plannedMinutes } = parsed.data;
 
     const { error } = await supabase.from("focus_sessions").insert({
@@ -73,8 +63,6 @@ export async function createFocusSessionAction(
         message: `Failed to start focus session: ${error.message}`,
       };
     }
-
-    revalidatePath("/focus");
 
     return {
       success: true,
@@ -98,10 +86,7 @@ export async function pauseFocusSessionAction(
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
-    return {
-      success: false,
-      message: "Invalid session id.",
-    };
+    return { success: false, message: "Invalid session id." };
   }
 
   try {
@@ -122,8 +107,6 @@ export async function pauseFocusSessionAction(
         message: `Failed to pause session: ${error.message}`,
       };
     }
-
-    revalidatePath("/focus");
 
     return {
       success: true,
@@ -147,10 +130,7 @@ export async function resumeFocusSessionAction(
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
-    return {
-      success: false,
-      message: "Invalid session id.",
-    };
+    return { success: false, message: "Invalid session id." };
   }
 
   try {
@@ -177,22 +157,18 @@ export async function resumeFocusSessionAction(
     }
 
     const pausedAtMs = new Date(session.paused_at).getTime();
-    const nowMs = Date.now();
-
     const newlyPausedSeconds = Math.max(
       0,
-      Math.floor((nowMs - pausedAtMs) / 1000),
+      Math.floor((Date.now() - pausedAtMs) / 1000),
     );
-
-    const updatedTotalPausedSeconds =
-      session.total_paused_seconds + newlyPausedSeconds;
 
     const { error: updateError } = await supabase
       .from("focus_sessions")
       .update({
         status: "ongoing",
         paused_at: null,
-        total_paused_seconds: updatedTotalPausedSeconds,
+        total_paused_seconds:
+          session.total_paused_seconds + newlyPausedSeconds,
       })
       .eq("id", parsed.data.sessionId);
 
@@ -202,8 +178,6 @@ export async function resumeFocusSessionAction(
         message: `Failed to resume session: ${updateError.message}`,
       };
     }
-
-    revalidatePath("/focus");
 
     return {
       success: true,
@@ -227,10 +201,7 @@ export async function completeFocusSessionAction(
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
-    return {
-      success: false,
-      message: "Invalid session id.",
-    };
+    return { success: false, message: "Invalid session id." };
   }
 
   try {
@@ -257,7 +228,6 @@ export async function completeFocusSessionAction(
     }
 
     const endedAt = new Date();
-
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
@@ -281,19 +251,14 @@ export async function completeFocusSessionAction(
       };
     }
 
-    try {
-      await invalidateEngagementCache(user.id);
-      await recalculateEngagementForUser(user.id);
-    } catch (error) {
-      console.error(
-        "Failed to auto refresh engagement after focus completion:",
-        error,
-      );
-    }
-
-    revalidatePath("/focus");
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
+    scheduleEngagementRecalculation({
+      userId: user.id,
+      source: "focus-completion",
+      activity: {
+        type: "focus_session",
+        id: parsed.data.sessionId,
+      },
+    });
 
     return {
       success: true,
@@ -317,10 +282,7 @@ export async function cancelFocusSessionAction(
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
-    return {
-      success: false,
-      message: "Invalid session id.",
-    };
+    return { success: false, message: "Invalid session id." };
   }
 
   try {
@@ -339,8 +301,14 @@ export async function cancelFocusSessionAction(
       };
     }
 
-    const endedAt = new Date();
+    if (session.status !== "ongoing" && session.status !== "paused") {
+      return {
+        success: false,
+        message: "Only active sessions can be cancelled.",
+      };
+    }
 
+    const endedAt = new Date();
     const actualFocusMinutes = calculateElapsedFocusMinutes(
       session.started_at,
       endedAt,
@@ -363,8 +331,6 @@ export async function cancelFocusSessionAction(
         message: `Failed to cancel session: ${updateError.message}`,
       };
     }
-
-    revalidatePath("/focus");
 
     return {
       success: true,

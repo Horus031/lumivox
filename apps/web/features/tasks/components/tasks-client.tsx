@@ -3,8 +3,8 @@
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import type { TaskWithGoal } from "@/features/tasks/task.types";
-import type { Goal } from "@/features/goals/goal.types";
+import type { TaskWithSubtasks } from "@/features/tasks/task.types";
+import type { GoalOption } from "@/features/goals/goal.types";
 import { TaskFiltersBar } from "./task-filters-bar";
 import { TasksTable } from "./tasks-table";
 import { TaskPagination } from "./task-pagination";
@@ -17,8 +17,8 @@ type Filters = {
 };
 
 type TasksClientProps = {
-  initialTasks: TaskWithGoal[];
-  goals: Goal[];
+  initialTasks: TaskWithSubtasks[];
+  goals: GoalOption[];
   page: number;
   totalPages: number;
   totalCount: number;
@@ -69,7 +69,7 @@ export default function TasksClient({
   );
 
   return (
-    <section className="space-y-4 border-0 border-none p-4 md:p-5">
+    <section className="space-y-4 border-0 border-none">
       <TaskFiltersBar
         goals={goals}
         initialFilters={initialFilters}
@@ -79,9 +79,9 @@ export default function TasksClient({
 
       <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
         <div>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground">
+          {/* <h2 className="text-xl font-semibold tracking-tight text-foreground">
             {t("title")}
-          </h2>
+          </h2> */}
           <p className="mt-1 text-sm text-muted-foreground">
             {t("shown", {
               shown: filteredTasks.length,
@@ -101,7 +101,6 @@ export default function TasksClient({
       <TaskPagination
         page={page}
         totalPages={totalPages}
-        hasFilters={hasFilters}
         filters={{
           q: filters.q,
           status: filters.status,

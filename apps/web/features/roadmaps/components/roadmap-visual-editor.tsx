@@ -15,8 +15,10 @@ import {
   type NodeChange,
   type NodeTypes,
   type OnConnect,
+  type OnInit,
   type OnReconnect,
 } from "@xyflow/react";
+import { Workflow } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -48,6 +50,11 @@ const nodeTypes = {
 const defaultEdgeOptions = {
   deletable: false,
 } satisfies Partial<Edge>;
+
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 220;
+const NODE_X_GAP = 96;
+const NODE_Y_GAP = 280;
 
 function isValidParentChild(
   parentType: RoadmapNodeType,
@@ -130,6 +137,115 @@ function computeSortOrders(
   }));
 }
 
+function compareRoadmapNodes(
+  a: RoadmapFlowNodeType,
+  b: RoadmapFlowNodeType,
+) {
+  if (a.data.sortOrder !== b.data.sortOrder) {
+    return a.data.sortOrder - b.data.sortOrder;
+  }
+
+  if (a.position.y !== b.position.y) {
+    return a.position.y - b.position.y;
+  }
+
+  if (a.position.x !== b.position.x) {
+    return a.position.x - b.position.x;
+  }
+
+  return a.data.title.localeCompare(b.data.title);
+}
+
+function layoutRoadmapNodes(
+  nodes: RoadmapFlowNodeType[],
+): RoadmapFlowNodeType[] {
+  const nodeById = new Map(nodes.map((node) => [node.id, node]));
+  const childrenByParent = new Map<string | null, RoadmapFlowNodeType[]>();
+
+  for (const node of nodes) {
+    const parentNodeId =
+      node.data.parentNodeId && nodeById.has(node.data.parentNodeId)
+        ? node.data.parentNodeId
+        : null;
+    const siblings = childrenByParent.get(parentNodeId) ?? [];
+
+    siblings.push(node);
+    childrenByParent.set(parentNodeId, siblings);
+  }
+
+  for (const siblings of childrenByParent.values()) {
+    siblings.sort(compareRoadmapNodes);
+  }
+
+  const positionedNodes = new Map<string, RoadmapFlowNodeType>();
+  let cursorX = 0;
+
+  function placeSubtree(node: RoadmapFlowNodeType, depth: number): number {
+    const children = childrenByParent.get(node.id) ?? [];
+    const y = depth * NODE_Y_GAP;
+
+    if (children.length === 0) {
+      const x = cursorX;
+      cursorX += NODE_WIDTH + NODE_X_GAP;
+
+      positionedNodes.set(node.id, {
+        ...node,
+        position: { x, y },
+      });
+
+      return x;
+    }
+
+    const childXs: number[] = children.map((child) =>
+      placeSubtree(child, depth + 1),
+    );
+    const x: number = (childXs[0] + childXs[childXs.length - 1]) / 2;
+
+    positionedNodes.set(node.id, {
+      ...node,
+      position: { x, y },
+    });
+
+    return x;
+  }
+
+  const rootNodes = childrenByParent.get(null) ?? [];
+  rootNodes.forEach((node) => placeSubtree(node, 0));
+
+  return computeSortOrders(
+    nodes.map((node) => positionedNodes.get(node.id) ?? node),
+  );
+}
+
+function hasOverlappingNodes(nodes: RoadmapFlowNodeType[]) {
+  for (let i = 0; i < nodes.length; i += 1) {
+    for (let j = i + 1; j < nodes.length; j += 1) {
+      const a = nodes[i];
+      const b = nodes[j];
+      const overlapsHorizontally =
+        Math.abs(a.position.x - b.position.x) < NODE_WIDTH;
+      const overlapsVertically =
+        Math.abs(a.position.y - b.position.y) < NODE_HEIGHT;
+
+      if (overlapsHorizontally && overlapsVertically) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function prepareInitialFlowNodes(nodes: LearningRoadmapNode[]) {
+  const flowNodes = toFlowNodes(nodes);
+
+  if (hasOverlappingNodes(flowNodes)) {
+    return layoutRoadmapNodes(flowNodes);
+  }
+
+  return flowNodes;
+}
+
 function makeEdgeId({ source, target }: Pick<Connection, "source" | "target">) {
   return `${source}-${target}`;
 }
@@ -152,15 +268,12 @@ function makeNewChildNode({
 }): RoadmapFlowNodeType {
   const id = crypto.randomUUID();
 
-  const childOffsetX = nodeType === "task" ? 180 : 120;
-  const childOffsetY = 260;
-
   return {
     id,
     type: "roadmapNode",
     position: {
-      x: parent.position.x + childOffsetX,
-      y: parent.position.y + childOffsetY,
+      x: parent.position.x,
+      y: parent.position.y + NODE_Y_GAP,
     },
     data: {
       nodeType,
@@ -183,9 +296,11 @@ export function RoadmapVisualEditor({
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [fitViewAfterLayout, setFitViewAfterLayout] =
+    useState<(() => void) | null>(null);
 
   const [nodes, setNodes, onNodesChangeBase] = useNodesState<RoadmapFlowNodeType>(
-    toFlowNodes(initialNodes),
+    prepareInitialFlowNodes(initialNodes),
   );
   const [edges, setEdges, onEdgesChange] = useEdgesState(
     toFlowEdges(initialNodes),
@@ -225,6 +340,24 @@ export function RoadmapVisualEditor({
     [onNodesChangeBase],
   );
 
+  const onInit = useCallback<OnInit<RoadmapFlowNodeType, Edge>>(
+    (instance) => {
+      setFitViewAfterLayout(
+        () => () =>
+          window.requestAnimationFrame(() => {
+            instance.fitView({ duration: 300, padding: 0.2 });
+          }),
+      );
+    },
+    [],
+  );
+
+  const handleAutoLayout = useCallback(() => {
+    setNodes((currentNodes) => layoutRoadmapNodes(currentNodes));
+    fitViewAfterLayout?.();
+    toast.success("Roadmap layout updated.");
+  }, [fitViewAfterLayout, setNodes]);
+
   const onConnect = useCallback<OnConnect>(
     (connection) => {
       if (!isValidConnection(connection)) {
@@ -243,16 +376,18 @@ export function RoadmapVisualEditor({
       ]);
 
       setNodes((currentNodes) =>
-        currentNodes.map((node) =>
-          node.id === target
-            ? {
-                ...node,
-                data: {
-                  ...node.data,
-                  parentNodeId: source,
-                },
-              }
-            : node,
+        layoutRoadmapNodes(
+          currentNodes.map((node) =>
+            node.id === target
+              ? {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    parentNodeId: source,
+                  },
+                }
+              : node,
+          ),
         ),
       );
 
@@ -290,17 +425,19 @@ export function RoadmapVisualEditor({
       );
 
       setNodes((currentNodes) =>
-        currentNodes.map((node) => {
-          if (node.id !== target) return node;
+        layoutRoadmapNodes(
+          currentNodes.map((node) => {
+            if (node.id !== target) return node;
 
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              parentNodeId: source,
-            },
-          };
-        }),
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                parentNodeId: source,
+              },
+            };
+          }),
+        ),
       );
 
       toast.success("Connection reconnected.");
@@ -335,7 +472,7 @@ export function RoadmapVisualEditor({
           makeEdge(parent.id, newNode.id),
         ]);
 
-        return [...currentNodes, newNode];
+        return layoutRoadmapNodes([...currentNodes, newNode]);
       });
     },
     [setEdges, setNodes],
@@ -497,6 +634,15 @@ export function RoadmapVisualEditor({
 
             <button
               type="button"
+              onClick={handleAutoLayout}
+              className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+            >
+              <Workflow className="size-4" aria-hidden="true" />
+              Auto layout
+            </button>
+
+            <button
+              type="button"
               onClick={handleSave}
               disabled={isPending}
               className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
@@ -516,6 +662,7 @@ export function RoadmapVisualEditor({
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onReconnect={onReconnect}
+            onInit={onInit}
             isValidConnection={isValidConnection}
             edgesReconnectable
             deleteKeyCode={null}

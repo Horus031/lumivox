@@ -1,7 +1,5 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
@@ -128,7 +126,6 @@ export async function generateDemoAiInsightAction(): Promise<
     const insightData =
       (await insightResponse.json()) as GeminiInsightApiResponse;
 
-    revalidatePath("/dashboard");
 
     return {
       success: true,

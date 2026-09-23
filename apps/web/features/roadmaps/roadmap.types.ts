@@ -43,6 +43,20 @@ export type LearningRoadmap = {
   updated_at: string;
 };
 
+export type LearningRoadmapListItem = Pick<
+  LearningRoadmap,
+  | "id"
+  | "title"
+  | "topic"
+  | "subject_name"
+  | "description"
+  | "start_date"
+  | "end_date"
+  | "study_days_per_week"
+  | "minutes_per_study_day"
+  | "status"
+>;
+
 export type LearningRoadmapNode = {
   id: string;
   roadmap_id: string;

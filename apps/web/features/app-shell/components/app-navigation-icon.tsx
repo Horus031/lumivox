@@ -1,5 +1,5 @@
 import type { AppNavigationItem } from "@/features/app-shell/app-shell.types";
-import { Map } from "lucide-react";
+import { BookOpenCheck, Goal, LayoutDashboard, Map, MessageSquare, Timer, TrendingUp, Trophy, Users } from "lucide-react";
 
 type AppNavigationIconProps = {
   icon: AppNavigationItem["icon"];
@@ -8,42 +8,19 @@ type AppNavigationIconProps = {
 export function AppNavigationIcon({ icon }: AppNavigationIconProps) {
   if (icon === "dashboard") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M4 4h6v6H4V4Zm10 0h6v10h-6V4ZM4 14h6v6H4v-6Zm10 4h6v2h-6v-2Z"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <LayoutDashboard size={"20"}/>
     );
   }
 
   if (icon === "goals") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.8" />
-        <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M12 4v8l5-5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
+      <Goal size={"20"}/>
     );
   }
 
   if (icon === "tasks") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M7 6h13M7 12h13M7 18h13M4 6h.01M4 12h.01M4 18h.01"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
+      <BookOpenCheck size={"20"}/>
     );
   }
 
@@ -55,43 +32,31 @@ export function AppNavigationIcon({ icon }: AppNavigationIconProps) {
 
   if (icon === "focus") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <circle cx="12" cy="13" r="7" stroke="currentColor" strokeWidth="1.8" />
-        <path
-          d="M12 13V9M9 3h6M16.5 5.5l1.5-1.5"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-        />
-      </svg>
+      <Timer size={"20"}/>
     );
   }
 
   if (icon === "rooms") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.5 19c0-2.2 2-4 4.5-4s4.5 1.8 4.5 4M12 19c0-1.8 1.6-3.3 4-3.3s4 1.5 4 3.3"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <Users size={"20"}/>
+    );
+  }
+
+  if (icon === "groups") {
+    return (
+      <MessageSquare size={"20"}/>
+    );
+  }
+
+  if (icon === "leaderboard") {
+    return (
+      <Trophy size={"20"}/>
     );
   }
 
   if (icon === "reflections") {
     return (
-      <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5">
-        <path
-          d="M8 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm8 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM3.5 19c0-2.2 2-4 4.5-4s4.5 1.8 4.5 4M12 19c0-1.8 1.6-3.3 4-3.3s4 1.5 4 3.3"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <TrendingUp size={"20"}/>
     );
   }
 

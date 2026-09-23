@@ -1,6 +1,5 @@
+import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 import { requireUser } from "@/lib/auth/require-user";
-import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
-import { unstable_noStore as noStore } from "next/cache";
 
 function isSameUtcDate(a: Date, b: Date) {
   return (
@@ -15,39 +14,19 @@ function shouldRecalculateEngagement(
     last_streak_evaluation_at: string | null;
   } | null,
 ) {
-  if (!stats) return true;
+  if (!stats?.last_streak_evaluation_at) return true;
 
-  if (!stats.last_streak_evaluation_at) return true;
-
-  const lastEvaluationDate = new Date(stats.last_streak_evaluation_at);
-  const today = new Date();
-
-  /*
-    Recalculate automatically once per UTC day.
-    This is enough to:
-    - create first engagement stats row
-    - detect missed days
-    - freeze/lost streak when needed
-    - avoid calling FastAPI on every page render
-  */
-  return !isSameUtcDate(lastEvaluationDate, today);
+  return !isSameUtcDate(new Date(stats.last_streak_evaluation_at), new Date());
 }
 
-async function fetchCurrentEngagementStats(options?: { freshRead?: boolean }) {
+async function fetchCurrentEngagementStats() {
   const { supabase, user } = await requireUser();
 
-  let query = supabase
+  const { data, error } = await supabase
     .from("user_engagement_stats")
     .select("*")
-    .eq("user_id", user.id);
-
-  if (options?.freshRead) {
-    // Use a distinct query signature after recalculation to avoid
-    // request-level memoization returning the first stale/null read.
-    query = query.order("updated_at", { ascending: false });
-  }
-
-  const { data, error } = await query.maybeSingle();
+    .eq("user_id", user.id)
+    .maybeSingle();
 
   if (error) {
     throw new Error(`Failed to fetch engagement stats: ${error.message}`);
@@ -60,35 +39,18 @@ async function fetchCurrentEngagementStats(options?: { freshRead?: boolean }) {
 }
 
 export async function getCurrentEngagementStats() {
-  noStore();
-
   const { user, stats } = await fetchCurrentEngagementStats();
 
-  if (!shouldRecalculateEngagement(stats)) {
-    return stats;
+  if (shouldRecalculateEngagement(stats)) {
+    scheduleEngagementRecalculation({
+      userId: user.id,
+      source: "stale-read",
+    });
   }
 
-  try {
-    console.log("[Engagement] Auto recalculating for user", user.id);
-    await recalculateEngagementForUser(user.id);
-  } catch (error) {
-    console.error(
-      "Failed to auto recalculate engagement on page access:",
-      error,
-    );
-
-    /*
-      If we already have old stats, show them instead of breaking layout.
-      If this is a brand-new user with no stats, return null.
-    */
-    return stats;
-  }
-
-  const { stats: refreshedStats } = await fetchCurrentEngagementStats({
-    freshRead: true,
-  });
-
-  return refreshedStats;
+  // Never make page rendering wait for FastAPI. Existing stats are rendered
+  // immediately and Supabase Realtime updates the client after recalculation.
+  return stats;
 }
 
 export async function getRecentRewardLedgerEntries(limit = 5) {

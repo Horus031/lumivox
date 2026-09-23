@@ -26,7 +26,7 @@ export function PublicRoomList({ rooms }: PublicRoomListProps) {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
           {rooms.map((room) => (
             <RoomCard key={room.id} room={room} mode="discover" />
           ))}

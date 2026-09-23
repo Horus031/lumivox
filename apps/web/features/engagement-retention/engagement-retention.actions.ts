@@ -1,10 +1,11 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
-import { recalculateEngagementForUser } from "@/features/engagement-retention/engagement-retention.server";
+import {
+  invalidateEngagementCache,
+  recalculateEngagementForUser,
+} from "@/features/engagement-retention/engagement-retention.server";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
@@ -24,11 +25,9 @@ export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
       };
     }
 
+    // An explicit refresh must bypass the short-lived response cache.
+    await invalidateEngagementCache(user.id);
     await recalculateEngagementForUser(user.id);
-
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
-    revalidatePath("/", "layout");
 
     return {
       success: true,
@@ -48,7 +47,7 @@ export async function refreshEngagementSummaryAction(): Promise<ActionResult> {
 
 export async function restoreStreakWithTokensAction(): Promise<ActionResult> {
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
     const { data, error } = await supabase.rpc("restore_my_streak_with_tokens");
 
@@ -59,9 +58,9 @@ export async function restoreStreakWithTokensAction(): Promise<ActionResult> {
       };
     }
 
-    revalidatePath("/dashboard");
-    revalidatePath("/settings");
-    revalidatePath("/", "layout");
+    // The restore RPC changes the aggregate engagement row directly, so any
+    // cached recalculation response must not survive this mutation.
+    await invalidateEngagementCache(user.id);
 
     return {
       success: true,

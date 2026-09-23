@@ -15,3 +15,7 @@ export type TaskWithGoal = Task & {
       }
     | null;
 };
+
+export type TaskWithSubtasks = TaskWithGoal & {
+  subtasks: TaskWithGoal[];
+};

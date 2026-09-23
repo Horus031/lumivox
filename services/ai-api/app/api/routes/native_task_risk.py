@@ -1,23 +1,47 @@
-from fastapi import APIRouter, Depends
+from __future__ import annotations
+import os
+from fastapi import APIRouter, Header, HTTPException
+
+from fastapi import APIRouter
 
 from app.schemas.native_task_risk import (
-    GenerateNativeTaskRiskScanRequest,
-    GenerateNativeTaskRiskScanResponse,
+    NativeTaskRiskBatchPredictRequest,
+    NativeTaskRiskBatchPredictResponse,
+    NativeTaskRiskPredictRequest,
+    NativeTaskRiskPredictResponse,
+    NativeTaskRiskCronRefreshRequest,
+    NativeTaskRiskCronRefreshResponse,
 )
-from app.security.internal_api_key import verify_internal_api_key
 from app.services.native_task_risk_service import (
-    generate_native_task_risk_scan,
+    predict_native_task_risk,
+    predict_native_task_risk_batch,
+    refresh_native_task_risk_for_cron,
 )
+
 
 router = APIRouter()
 
 
-@router.post(
-    "/scan",
-    response_model=GenerateNativeTaskRiskScanResponse,
-    dependencies=[Depends(verify_internal_api_key)],
-)
-def generate_native_task_risk_scan_endpoint(
-    payload: GenerateNativeTaskRiskScanRequest,
-):
-    return generate_native_task_risk_scan(payload)
+@router.post("/predict", response_model=NativeTaskRiskPredictResponse)
+def predict_task_risk(
+    request: NativeTaskRiskPredictRequest,
+) -> NativeTaskRiskPredictResponse:
+    return predict_native_task_risk(request)
+
+@router.post("/batch-predict", response_model=NativeTaskRiskBatchPredictResponse)
+def predict_task_risk_batch(
+    request: NativeTaskRiskBatchPredictRequest,
+) -> NativeTaskRiskBatchPredictResponse:
+    return predict_native_task_risk_batch(request)
+
+@router.post("/cron-refresh", response_model=NativeTaskRiskCronRefreshResponse)
+def cron_refresh_task_risk(
+    request: NativeTaskRiskCronRefreshRequest,
+    x_cron_secret: str | None = Header(default=None),
+) -> NativeTaskRiskCronRefreshResponse:
+    expected_secret = os.getenv("NATIVE_TASK_RISK_CRON_SECRET")
+
+    if not expected_secret or x_cron_secret != expected_secret:
+        raise HTTPException(status_code=401, detail="Unauthorized cron request.")
+
+    return refresh_native_task_risk_for_cron(request)

@@ -8,7 +8,18 @@
     "loading": "Đang tải...",
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
-    "language": "Ngôn ngữ"
+    "language": "Ngôn ngữ",
+    "pagination": {
+      "ariaLabel": "Phân trang bảng dữ liệu",
+      "showing": "Trang {page} / {totalPages}",
+      "previous": "Trang trước",
+      "next": "Trang tiếp theo",
+      "showPreviousPages": "Hiện nhóm trang trước",
+      "showNextPages": "Hiện nhóm trang tiếp theo",
+      "jumpLabel": "Đi đến trang",
+      "of": "/ {totalPages}",
+      "go": "Đi"
+    }
   },
   "nav": {
     "dashboard": "Tổng quan",
@@ -49,6 +60,10 @@
       "button": "Tạo / làm mới PBI",
       "calculating": "Đang tính..."
     },
+
+    "welcome": {
+      "title": "Mừng bạn quay trở lại"
+    },
     "pbiScore": {
       "emptyTitle": "Chưa có snapshot PBI",
       "emptyDescription": "Tạo snapshot PBI đầu tiên sau khi bạn đã tạo nhiệm vụ, mục tiêu và phiên tập trung.",
@@ -59,6 +74,13 @@
       "personalized": {
         "title": "PBI cá nhân hóa",
         "description": "Dùng trọng số từ onboarding/hiệu chỉnh của người dùng."
+      },
+      "components": {
+        "taskCompletion": "Hoàn thành nhiệm vụ",
+        "focusQuality": "Chất lượng tập trung",
+        "deadlineAdherence": "Tuân thủ thời hạn",
+        "goalMomentum": "Tiến độ mục tiêu",
+        "consistency": "Tính nhất quán"
       },
       "period": "Khoảng snapshot: {start} -> {end}"
     },
@@ -549,7 +571,11 @@
       },
       "noDescription": "Chưa có mô tả",
       "open": "Mở",
-      "minutesShort": "{minutes}p"
+      "minutesShort": "{minutes}p",
+      "subtask": "Nhiệm vụ con",
+      "subtaskProgress": "{completed}/{total} nhiệm vụ con",
+      "expandSubtasks": "Mở nhiệm vụ con",
+      "collapseSubtasks": "Thu gọn nhiệm vụ con"
     },
     "details": {
       "fallbackDescription": "Chi tiết nhiệm vụ",
@@ -688,6 +714,7 @@
       "chooseTask": "Chọn nhiệm vụ liên kết",
       "noLinkedTask": "Không liên kết nhiệm vụ",
       "plannedDuration": "Thời lượng dự kiến",
+      "plannedDurationSub": "Bạn có thể thay đổi theo ý thích ngoài các thời lượng bên dưới.",
       "minutes": "{value} phút",
       "plannedMinutesPlaceholder": "Nhập số phút bạn muốn...",
       "starting": "Đang bắt đầu...",
@@ -1657,6 +1684,98 @@
         "delete": "Xóa",
         "clearing": "Đang xóa cache...",
         "clearEntityCache": "Xóa cache entity"
+      }
+    },
+    "nativeTaskRisk": {
+      "page": {
+        "eyebrow": "CMS quản trị",
+        "title": "Theo dõi rủi ro nhiệm vụ native",
+        "description": "Theo dõi mô hình dự đoán rủi ro trễ nhiệm vụ native của Lumivox, log dự đoán, mức rủi ro và metadata giải thích."
+      },
+      "metrics": {
+        "notAvailable": "Không có",
+        "nativePredictions": {
+          "label": "Dự đoán native",
+          "description": "{count} trong 24 giờ qua"
+        },
+        "avgRisk": {
+          "label": "Rủi ro TB",
+          "description": "Điểm trung bình: {score}"
+        },
+        "highElevated": {
+          "label": "Cao / Tăng cao",
+          "description": "Phân bố rủi ro"
+        },
+        "activeModel": {
+          "label": "Mô hình active",
+          "empty": "Chưa có mô hình active"
+        }
+      },
+      "models": {
+        "eyebrow": "Sổ đăng ký mô hình",
+        "title": "Các phiên bản mô hình rủi ro nhiệm vụ native",
+        "empty": "Chưa đăng ký phiên bản mô hình native nào.",
+        "active": "Đang active",
+        "artifact": "Artifact: {path}",
+        "notAvailable": "Không có",
+        "metricLabels": {
+          "recall": "Recall",
+          "precision": "Precision",
+          "f1": "F1",
+          "rocAuc": "ROC-AUC"
+        }
+      },
+      "search": {
+        "queryLabel": "Tìm dự đoán",
+        "queryPlaceholder": "Tìm theo nhiệm vụ, mục tiêu, người dùng, email, mô hình...",
+        "riskBandLabel": "Mức rủi ro",
+        "submit": "Tìm kiếm",
+        "riskBands": {
+          "all": "Tất cả",
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        }
+      },
+      "predictions": {
+        "eyebrow": "Log dự đoán",
+        "title": "Dự đoán rủi ro nhiệm vụ native",
+        "empty": "Không tìm thấy dự đoán rủi ro nhiệm vụ native.",
+        "riskBands": {
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        },
+        "threshold": "ngưỡng {value}",
+        "daysLeft": "còn {count} ngày",
+        "goal": "Mục tiêu: {title}",
+        "unknownOwner": "Không rõ",
+        "owner": "Chủ sở hữu: {name} · {email}",
+        "model": "Mô hình: {algorithm} · {version} · {mode}",
+        "created": "Đã tạo: {value}",
+        "viewDetail": "Xem chi tiết",
+        "explanationSummary": "Tóm tắt giải thích"
+      },
+      "detail": {
+        "eyebrow": "Chi tiết dự đoán ML native",
+        "unknownOwner": "Không rõ",
+        "owner": "Chủ sở hữu: {name} · {email}",
+        "back": "Quay lại",
+        "riskBands": {
+          "low": "Thấp",
+          "moderate": "Vừa phải",
+          "elevated": "Tăng cao",
+          "high": "Cao"
+        },
+        "probability": "Xác suất: {value}%",
+        "threshold": "Ngưỡng: {value}",
+        "attributionsTitle": "Các feature attribution nổi bật",
+        "attributionMeta": "Giá trị: {value} · Đóng góp: {contribution}",
+        "modelMetricsTitle": "Chỉ số mô hình",
+        "featurePayloadTitle": "Feature payload",
+        "predictionMetadataTitle": "Metadata dự đoán"
       }
     },
     "settings": {

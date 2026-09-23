@@ -13,11 +13,36 @@ type AiTranslationBatchApiResponse = {
 };
 
 const AI_TRANSLATION_BATCH_SIZE = 30;
+const AI_TRANSLATION_MAX_CONCURRENT_BATCHES = 2;
 
 function normalizeSourceLocale(
   sourceLocale: "auto" | SupportedLocale | undefined
 ) {
   return sourceLocale ?? "auto";
+}
+
+function createFallbackTranslation(
+  item: AiTranslationRequestItem
+): AiTranslationResponseItem {
+  return {
+    entity_type: item.entityType,
+    entity_id: item.entityId,
+    field_name: item.fieldName,
+    source_locale: normalizeSourceLocale(item.sourceLocale),
+    target_locale: item.targetLocale,
+    source_hash: "",
+    translated_text: item.sourceText,
+    provider: null,
+    model_name: null,
+    cached: true,
+  };
+}
+
+function logTranslationFallback(error: unknown) {
+  console.error(
+    "AI translation failed; falling back to source text.",
+    error instanceof Error ? error.message : error
+  );
 }
 
 export async function translateAiContent(
@@ -26,47 +51,30 @@ export async function translateAiContent(
   const { user } = await requireUser();
 
   if (!item.sourceText.trim()) {
-    return {
-      entity_type: item.entityType,
-      entity_id: item.entityId,
-      field_name: item.fieldName,
-      source_locale: normalizeSourceLocale(item.sourceLocale),
-      target_locale: item.targetLocale,
-      source_hash: "",
-      translated_text: item.sourceText,
-      provider: null,
-      model_name: null,
-      cached: true,
-    };
+    return createFallbackTranslation(item);
   }
 
   if (item.sourceLocale === item.targetLocale) {
-    return {
-      entity_type: item.entityType,
-      entity_id: item.entityId,
-      field_name: item.fieldName,
-      source_locale: normalizeSourceLocale(item.sourceLocale),
-      target_locale: item.targetLocale,
-      source_hash: "",
-      translated_text: item.sourceText,
-      provider: null,
-      model_name: null,
-      cached: true,
-    };
+    return createFallbackTranslation(item);
   }
 
-  return fetchAiApi<AiTranslationApiResponse>({
-    path: "/api/v1/ai-translations/translate",
-    body: {
-      user_id: user.id,
-      entity_type: item.entityType,
-      entity_id: item.entityId,
-      field_name: item.fieldName,
-      source_text: item.sourceText,
-      source_locale: normalizeSourceLocale(item.sourceLocale),
-      target_locale: item.targetLocale,
-    },
-  });
+  try {
+    return await fetchAiApi<AiTranslationApiResponse>({
+      path: "/api/v1/ai-translations/translate",
+      body: {
+        user_id: user.id,
+        entity_type: item.entityType,
+        entity_id: item.entityId,
+        field_name: item.fieldName,
+        source_text: item.sourceText,
+        source_locale: normalizeSourceLocale(item.sourceLocale),
+        target_locale: item.targetLocale,
+      },
+    });
+  } catch (error) {
+    logTranslationFallback(error);
+    return createFallbackTranslation(item);
+  }
 }
 
 export async function translateAiContentBatch(
@@ -83,48 +91,62 @@ export async function translateAiContentBatch(
   });
 
   if (itemsToTranslate.length === 0) {
-    return items.map((item) => ({
-      entity_type: item.entityType,
-      entity_id: item.entityId,
-      field_name: item.fieldName,
-      source_locale: normalizeSourceLocale(item.sourceLocale),
-      target_locale: item.targetLocale,
-      source_hash: "",
-      translated_text: item.sourceText,
-      provider: null,
-      model_name: null,
-      cached: true,
-    }));
+    return items.map(createFallbackTranslation);
   }
 
   const translatedItems: AiTranslationResponseItem[] = [];
+  const chunks: AiTranslationRequestItem[][] = [];
 
   for (
     let startIndex = 0;
     startIndex < itemsToTranslate.length;
     startIndex += AI_TRANSLATION_BATCH_SIZE
   ) {
-    const chunk = itemsToTranslate.slice(
-      startIndex,
-      startIndex + AI_TRANSLATION_BATCH_SIZE
+    chunks.push(
+      itemsToTranslate.slice(
+        startIndex,
+        startIndex + AI_TRANSLATION_BATCH_SIZE,
+      ),
     );
+  }
 
-    const response = await fetchAiApi<AiTranslationBatchApiResponse>({
-      path: "/api/v1/ai-translations/batch",
-      body: {
-        items: chunk.map((item) => ({
-          user_id: user.id,
-          entity_type: item.entityType,
-          entity_id: item.entityId,
-          field_name: item.fieldName,
-          source_text: item.sourceText,
-          source_locale: normalizeSourceLocale(item.sourceLocale),
-          target_locale: item.targetLocale,
-        })),
-      },
-    });
+  try {
+    for (
+      let batchStart = 0;
+      batchStart < chunks.length;
+      batchStart += AI_TRANSLATION_MAX_CONCURRENT_BATCHES
+    ) {
+      const batchGroup = chunks.slice(
+        batchStart,
+        batchStart + AI_TRANSLATION_MAX_CONCURRENT_BATCHES,
+      );
 
-    translatedItems.push(...response.items);
+      const responses = await Promise.all(
+        batchGroup.map((chunk) =>
+          fetchAiApi<AiTranslationBatchApiResponse>({
+            path: "/api/v1/ai-translations/batch",
+            body: {
+              items: chunk.map((item) => ({
+                user_id: user.id,
+                entity_type: item.entityType,
+                entity_id: item.entityId,
+                field_name: item.fieldName,
+                source_text: item.sourceText,
+                source_locale: normalizeSourceLocale(item.sourceLocale),
+                target_locale: item.targetLocale,
+              })),
+            },
+          }),
+        ),
+      );
+
+      for (const response of responses) {
+        translatedItems.push(...response.items);
+      }
+    }
+  } catch (error) {
+    logTranslationFallback(error);
+    return items.map(createFallbackTranslation);
   }
 
   const translatedByKey = new Map(
@@ -142,17 +164,6 @@ export async function translateAiContentBatch(
       return translated;
     }
 
-    return {
-      entity_type: item.entityType,
-      entity_id: item.entityId,
-      field_name: item.fieldName,
-      source_locale: normalizeSourceLocale(item.sourceLocale),
-      target_locale: item.targetLocale,
-      source_hash: "",
-      translated_text: item.sourceText,
-      provider: null,
-      model_name: null,
-      cached: true,
-    };
+    return createFallbackTranslation(item);
   });
 }

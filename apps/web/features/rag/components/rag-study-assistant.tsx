@@ -8,7 +8,11 @@ import {
   type RagSourceChunk,
 } from "@/features/rag/rag-chat.actions";
 import { RagMarkdownMessage } from "@/features/rag/components/rag-markdown-message";
-import { LearningDocument } from "@/features/learning-documents/learning-document.types";
+type RagDocumentOption = {
+  id: string;
+  file_name: string;
+  visibility: "private" | "shared" | "public";
+};
 
 import {
   Popover,
@@ -47,7 +51,7 @@ type ChatMessage = {
 
 type RagStudyAssistantProps = {
   focusSessionId?: string | null;
-  documents: LearningDocument[];
+  documents: RagDocumentOption[];
   defaultTopK?: number;
   defaultPromptVariant?: "grounded_rule" | "no_rule";
 };

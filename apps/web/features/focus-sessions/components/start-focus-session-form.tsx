@@ -4,7 +4,6 @@ import { FormEvent, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import type { Database } from "@/types/database.types";
 import { createFocusSessionAction } from "@/features/focus-sessions/focus-session.actions";
 import {
   Select,
@@ -19,10 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
 
-type Task = Database["public"]["Tables"]["tasks"]["Row"];
+type FocusTaskOption = {
+  id: string;
+  title: string;
+};
 
 type StartFocusSessionFormProps = {
-  tasks: Task[];
+  tasks: FocusTaskOption[];
 };
 
 export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
@@ -104,10 +106,15 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
           </select> */}
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-sm font-medium">
-            {t("plannedDuration")}
-          </label>
+        <div className="space-y-2">
+          <div>
+            <label className="block text-sm font-medium">
+              {t("plannedDuration")}
+            </label>
+            <label className="mb-1.5 block text-xs text-muted-foreground ">
+              {t("plannedDurationSub")}
+            </label>
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {["25", "45", "60"].map((value) => (
@@ -116,10 +123,10 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                 key={value}
                 type="button"
                 onClick={() => setPlannedMinutes(value)}
-                className={`border bg-transparent text-foreground px-4 py-2 text-sm font-medium transition ${
+                className={`border bg-transparent text-primary-foreground px-4 py-2 text-sm font-medium transition ${
                   plannedMinutes === value
-                    ? "border-primary bg-primary text-foreground"
-                    : "text-foreground hover:text-foreground"
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "text-foreground hover:text-primary-foreground"
                 }`}
               >
                 {t("minutes", { value: Number(value) })}
