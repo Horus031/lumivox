@@ -68,45 +68,44 @@ export async function getPublicStudyRooms() {
 export async function getStudyRoomPageData(roomId: string) {
   const { supabase, user } = await requireUser();
 
-  const { data: membership, error: membershipError } = await supabase
+  const { data, error } = await supabase
     .from("study_room_members")
-    .select("room_id, role, membership_status")
+    .select(
+      `
+      room_id,
+      role,
+      membership_status,
+      study_rooms!inner (
+        *,
+        profiles:owner_id (
+          id,
+          full_name
+        )
+      )
+      `,
+    )
     .eq("room_id", roomId)
     .eq("user_id", user.id)
     .eq("membership_status", "active")
     .maybeSingle();
 
-  if (membershipError) {
+  if (error) {
     throw new Error(
-      `Failed to verify study room membership: ${membershipError.message}`,
+      `Failed to load study room membership: ${error.message}`,
     );
   }
 
-  if (!membership) {
+  if (!data?.study_rooms) {
     return null;
   }
 
-  const { data: room, error: roomError } = await supabase
-    .from("study_rooms")
-    .select(
-      `
-      *,
-      profiles:owner_id (
-        id,
-        full_name
-      )
-    `,
-    )
-    .eq("id", roomId)
-    .single();
-
-  if (roomError) {
-    throw new Error(`Failed to fetch study room: ${roomError.message}`);
-  }
-
   return {
-    room,
-    membership,
+    room: data.study_rooms,
+    membership: {
+      room_id: data.room_id,
+      role: data.role,
+      membership_status: data.membership_status,
+    },
   };
 }
 
