@@ -71,6 +71,10 @@ export async function getStudyRoomPageData(roomId: string) {
       room_id,
       role,
       membership_status,
+      profiles:user_id (
+        id,
+        full_name
+      ),
       study_rooms!inner (
         *,
         profiles:owner_id (
@@ -101,6 +105,7 @@ export async function getStudyRoomPageData(roomId: string) {
       room_id: data.room_id,
       role: data.role,
       membership_status: data.membership_status,
+      profiles: data.profiles,
     },
   };
 }
