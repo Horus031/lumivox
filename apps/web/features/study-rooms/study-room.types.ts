@@ -11,13 +11,7 @@ export type StudyRoomVisibility =
 
 export type StudyRoomWithOwnerPreview = Pick<
   StudyRoom,
-  | "id"
-  | "title"
-  | "description"
-  | "visibility"
-  | "invite_code"
-  | "max_participants"
-  | "created_at"
+  "id" | "title" | "description" | "visibility" | "max_participants"
 > & {
   profiles:
     | {
@@ -34,7 +28,10 @@ export type JoinedStudyRoom = {
     | null;
 };
 
-export type StudyRoomMemberWithProfile = StudyRoomMember & {
+export type StudyRoomMemberWithProfile = Pick<
+  StudyRoomMember,
+  "id" | "role"
+> & {
   profiles:
     | {
         id: string;
