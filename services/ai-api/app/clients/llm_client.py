@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from functools import lru_cache
 from dataclasses import dataclass
 from typing import Generic, TypeVar
 
@@ -40,6 +41,7 @@ def _split_model_chain(value: str) -> list[str]:
     ]
 
 
+@lru_cache(maxsize=1)
 def _get_groq_client():
     if not settings.groq_api_key:
         raise RuntimeError("GROQ_API_KEY must be configured.")
