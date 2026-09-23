@@ -1,8 +1,8 @@
 import { Link } from "@/i18n/navigation";
-import type { LearningRoadmap } from "@/features/roadmaps/roadmap.types";
+import type { LearningRoadmapListItem } from "@/features/roadmaps/roadmap.types";
 
 type RoadmapListProps = {
-  roadmaps: LearningRoadmap[];
+  roadmaps: LearningRoadmapListItem[];
 };
 
 function statusClass(status: string) {
