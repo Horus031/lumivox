@@ -1,11 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import type { LearningDocument } from "@/features/learning-documents/learning-document.types";
 import { useLocale, useTranslations } from "next-intl";
 
 type DocumentPreviewLinkProps = {
-  document: LearningDocument;
+  document: { id: string };
 };
 
 export function DocumentPreviewLink({ document }: DocumentPreviewLinkProps) {
