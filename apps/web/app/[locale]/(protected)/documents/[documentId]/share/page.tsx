@@ -20,13 +20,14 @@ export default async function DocumentSharePage({
 }: DocumentSharePageProps) {
   const { documentId } = await params;
 
-  const document = await getOwnedLearningDocumentById(documentId);
+  const [document, permissions] = await Promise.all([
+    getOwnedLearningDocumentById(documentId),
+    getLearningDocumentPermissions(documentId),
+  ]);
 
   if (!document) {
     notFound();
   }
-
-  const permissions = await getLearningDocumentPermissions(documentId);
 
   return (
     <main className="space-y-6">
