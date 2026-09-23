@@ -30,12 +30,11 @@ export default async function GroupDetailPage({
   params,
 }: GroupDetailPageProps) {
   const { groupId } = await params;
-  const [{ user }, t] = await Promise.all([
+  const [{ user }, t, membership] = await Promise.all([
     requireUser(),
     getTranslations("groups.detail"),
+    getStudyGroupById(groupId),
   ]);
-
-  const membership = await getStudyGroupById(groupId);
 
   if (!membership) {
     notFound();
