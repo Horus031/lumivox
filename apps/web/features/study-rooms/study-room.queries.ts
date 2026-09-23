@@ -13,9 +13,7 @@ export async function getMyStudyRooms() {
         title,
         description,
         visibility,
-        invite_code,
         max_participants,
-        created_at,
         profiles:owner_id (
           id,
           full_name
@@ -44,9 +42,7 @@ export async function getPublicStudyRooms() {
       title,
       description,
       visibility,
-      invite_code,
       max_participants,
-      created_at,
       profiles:owner_id (
         id,
         full_name
