@@ -1,4 +1,4 @@
-import type { LearningDocument } from "@/features/learning-documents/learning-document.types";
+import type { LearningDocumentListItem } from "@/features/learning-documents/learning-document.types";
 import { DeleteLearningDocumentButton } from "@/features/learning-documents/components/delete-learning-document-button";
 import { DocumentPreviewLink } from "@/features/learning-documents/components/document-preview-link";
 import { getTranslations } from "next-intl/server";
@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { ProcessLearningDocumentButton } from "./process-learning-document-button";
 
 type GoalDocumentListProps = {
-  documents: LearningDocument[];
+  documents: LearningDocumentListItem[];
 };
 
 function formatFileSize(bytes: number) {
