@@ -13,6 +13,7 @@ type AiTranslationBatchApiResponse = {
 };
 
 const AI_TRANSLATION_BATCH_SIZE = 30;
+const AI_TRANSLATION_MAX_CONCURRENT_BATCHES = 2;
 
 function normalizeSourceLocale(
   sourceLocale: "auto" | SupportedLocale | undefined
@@ -94,34 +95,54 @@ export async function translateAiContentBatch(
   }
 
   const translatedItems: AiTranslationResponseItem[] = [];
+  const chunks: AiTranslationRequestItem[][] = [];
+
+  for (
+    let startIndex = 0;
+    startIndex < itemsToTranslate.length;
+    startIndex += AI_TRANSLATION_BATCH_SIZE
+  ) {
+    chunks.push(
+      itemsToTranslate.slice(
+        startIndex,
+        startIndex + AI_TRANSLATION_BATCH_SIZE,
+      ),
+    );
+  }
 
   try {
     for (
-      let startIndex = 0;
-      startIndex < itemsToTranslate.length;
-      startIndex += AI_TRANSLATION_BATCH_SIZE
+      let batchStart = 0;
+      batchStart < chunks.length;
+      batchStart += AI_TRANSLATION_MAX_CONCURRENT_BATCHES
     ) {
-      const chunk = itemsToTranslate.slice(
-        startIndex,
-        startIndex + AI_TRANSLATION_BATCH_SIZE
+      const batchGroup = chunks.slice(
+        batchStart,
+        batchStart + AI_TRANSLATION_MAX_CONCURRENT_BATCHES,
       );
 
-      const response = await fetchAiApi<AiTranslationBatchApiResponse>({
-        path: "/api/v1/ai-translations/batch",
-        body: {
-          items: chunk.map((item) => ({
-            user_id: user.id,
-            entity_type: item.entityType,
-            entity_id: item.entityId,
-            field_name: item.fieldName,
-            source_text: item.sourceText,
-            source_locale: normalizeSourceLocale(item.sourceLocale),
-            target_locale: item.targetLocale,
-          })),
-        },
-      });
+      const responses = await Promise.all(
+        batchGroup.map((chunk) =>
+          fetchAiApi<AiTranslationBatchApiResponse>({
+            path: "/api/v1/ai-translations/batch",
+            body: {
+              items: chunk.map((item) => ({
+                user_id: user.id,
+                entity_type: item.entityType,
+                entity_id: item.entityId,
+                field_name: item.fieldName,
+                source_text: item.sourceText,
+                source_locale: normalizeSourceLocale(item.sourceLocale),
+                target_locale: item.targetLocale,
+              })),
+            },
+          }),
+        ),
+      );
 
-      translatedItems.push(...response.items);
+      for (const response of responses) {
+        translatedItems.push(...response.items);
+      }
     }
   } catch (error) {
     logTranslationFallback(error);
