@@ -87,7 +87,7 @@ class NativeTaskRiskRecommendedAction(BaseModel):
     payload: dict = {}
 
 class NativeTaskRiskCronRefreshRequest(BaseModel):
-    horizon_days: int = Field(default=14, ge=1, le=60)
+    horizon_days: int = Field(default=14, ge=1, le=14)
     max_users: int = Field(default=50, ge=1, le=200)
     max_tasks_per_user: int = Field(default=8, ge=1, le=20)
     skip_recent_hours: int = Field(default=6, ge=1, le=48)
