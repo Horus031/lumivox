@@ -47,6 +47,9 @@ const configDir = process.cwd();
 loadEnvFile(path.join(configDir, ".env.local"));
 loadEnvFile(path.join(configDir, ".env"));
 
+const remoteBaseUrl = process.env.PLAYWRIGHT_BASE_URL?.replace(/\/$/, "");
+const baseURL = remoteBaseUrl ?? "http://127.0.0.1:3000";
+
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: false,
@@ -56,7 +59,7 @@ export default defineConfig({
   reporter: [["html"], ["list"]],
 
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL,
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -69,10 +72,12 @@ export default defineConfig({
     },
   ],
 
-  webServer: {
-    command: "npm run dev",
-    url: "http://127.0.0.1:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  webServer: remoteBaseUrl
+    ? undefined
+    : {
+        command: "npm run dev",
+        url: "http://127.0.0.1:3000",
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+      },
 });
