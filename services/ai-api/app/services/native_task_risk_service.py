@@ -13,6 +13,11 @@ import numpy as np
 import pandas as pd
 from supabase import create_client
 
+from app.services.native_task_risk_features_v2 import (
+    FEATURE_COLUMNS_V2,
+    FEATURE_SCHEMA_VERSION,
+    build_live_features_v2,
+)
 from app.schemas.native_task_risk import (
     NativeTaskRiskBatchError,
     NativeTaskRiskBatchPredictRequest,
@@ -216,29 +221,9 @@ def _build_recommended_actions(
 
 
 MODEL_KEY = "native_task_delay_risk_classifier"
+AI_API_DIR = Path(__file__).resolve().parents[2]
 
-DEFAULT_FEATURE_COLUMNS = [
-    "days_until_due",
-    "task_age_days",
-    "estimated_minutes",
-    "priority",
-    "title_length",
-    "description_length",
-    "has_description",
-    "has_goal",
-    "is_subtask",
-    "task_depth",
-    "child_task_count",
-    "focus_minutes_last_7d",
-    "focus_minutes_last_14d",
-    "completed_tasks_last_7d",
-    "completed_tasks_last_14d",
-    "overdue_tasks_last_30d",
-    "goal_completion_ratio",
-    "snapshot_weekday",
-    "is_weekend_snapshot",
-    "snapshot_offset_days",
-]
+DEFAULT_FEATURE_COLUMNS = FEATURE_COLUMNS_V2
 
 PRIORITY_MAP = {
     "low": 1,
@@ -261,20 +246,24 @@ def _resolve_path(path_value: str) -> Path:
     if path.is_absolute():
         return path
 
-    # service root: services/ai-api
-    return Path.cwd() / path
+    # Resolve relative model paths from services/ai-api, not process cwd.
+    return AI_API_DIR / path
 
 
 def _get_supabase_admin():
     supabase_url = os.getenv("SUPABASE_URL")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    secret_key = (
+        os.getenv("SUPABASE_SECRET_KEY")
+        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+    )
 
-    if not supabase_url or not service_role_key:
+    if not supabase_url or not secret_key:
         raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured."
+            "SUPABASE_URL and SUPABASE_SECRET_KEY "
+            "(or SUPABASE_SERVICE_ROLE_KEY) must be configured."
         )
 
-    return create_client(supabase_url, service_role_key)
+    return create_client(supabase_url, secret_key)
 
 
 def _parse_datetime(value: str | None) -> datetime | None:
@@ -371,6 +360,9 @@ def _load_model_metadata() -> dict[str, Any]:
             "model_key": artifact.get("model_key", MODEL_KEY),
             "model_version": artifact.get("model_version", "unknown"),
             "selected_algorithm": artifact.get("selected_algorithm", "unknown"),
+            "feature_schema_version": artifact.get(
+                "feature_schema_version", FEATURE_SCHEMA_VERSION
+            ),
             "feature_columns": artifact.get("feature_columns", DEFAULT_FEATURE_COLUMNS),
             "threshold": artifact.get("threshold", 0.5),
         }
@@ -379,8 +371,78 @@ def _load_model_metadata() -> dict[str, Any]:
         "model_key": MODEL_KEY,
         "model_version": "deterministic-fallback-v1",
         "selected_algorithm": "deterministic_fallback",
+        "feature_schema_version": FEATURE_SCHEMA_VERSION,
         "feature_columns": DEFAULT_FEATURE_COLUMNS,
         "threshold": 0.5,
+    }
+
+
+def _native_model_required() -> bool:
+    explicit = str(os.getenv("NATIVE_TASK_RISK_REQUIRE_MODEL") or "").strip().lower()
+    if explicit in {"1", "true", "yes", "on"}:
+        return True
+    if explicit in {"0", "false", "no", "off"}:
+        return False
+    return str(os.getenv("APP_ENV") or "").strip().lower() in {"staging", "production"}
+
+
+def validate_native_task_risk_artifact() -> dict[str, Any]:
+    """Validate train/serve compatibility during application startup."""
+
+    artifact = _load_model_artifact()
+    metadata = _load_model_metadata()
+
+    if artifact is None:
+        if _native_model_required():
+            model_path = _resolve_path(
+                os.getenv(
+                    "NATIVE_TASK_RISK_MODEL_PATH",
+                    "ml/artifacts/native-task-risk/native_task_risk_best_model.joblib",
+                )
+            )
+            raise RuntimeError(
+                f"Native task risk model is required but missing: {model_path}"
+            )
+
+        return {
+            "status": "fallback",
+            "model_version": "deterministic-fallback-v1",
+            "feature_schema_version": FEATURE_SCHEMA_VERSION,
+        }
+
+    artifact_features = list(artifact.get("feature_columns") or [])
+    metadata_features = list(metadata.get("feature_columns") or [])
+    if artifact_features != DEFAULT_FEATURE_COLUMNS:
+        raise RuntimeError(
+            "Native task risk artifact feature schema does not match serving v2 contract."
+        )
+    if metadata_features != artifact_features:
+        raise RuntimeError("Native task risk metadata/artifact feature columns mismatch.")
+
+    artifact_schema = str(artifact.get("feature_schema_version") or "")
+    metadata_schema = str(metadata.get("feature_schema_version") or "")
+    if artifact_schema != FEATURE_SCHEMA_VERSION or metadata_schema != FEATURE_SCHEMA_VERSION:
+        raise RuntimeError(
+            f"Expected feature schema {FEATURE_SCHEMA_VERSION}, "
+            f"got artifact={artifact_schema!r}, metadata={metadata_schema!r}."
+        )
+
+    if str(artifact.get("model_version")) != str(metadata.get("model_version")):
+        raise RuntimeError("Native task risk metadata/artifact model version mismatch.")
+
+    if abs(float(artifact.get("threshold", 0.5)) - float(metadata.get("threshold", 0.5))) > 1e-9:
+        raise RuntimeError("Native task risk metadata/artifact threshold mismatch.")
+
+    model = artifact.get("model")
+    if model is None or not hasattr(model, "predict_proba"):
+        raise RuntimeError("Native task risk artifact model does not support predict_proba.")
+
+    return {
+        "status": "ready",
+        "model_version": str(metadata.get("model_version") or "unknown"),
+        "algorithm": str(metadata.get("selected_algorithm") or "unknown"),
+        "feature_schema_version": FEATURE_SCHEMA_VERSION,
+        "threshold": float(metadata.get("threshold") or 0.5),
     }
 
 
@@ -958,7 +1020,7 @@ def predict_native_task_risk(
         now=now,
     )
 
-    features, due_at = _build_live_features(
+    features, due_at = build_live_features_v2(
         task=task,
         user_tasks=user_tasks,
         focus_sessions=focus_sessions,
@@ -970,6 +1032,12 @@ def predict_native_task_risk(
 
     feature_columns = metadata.get("feature_columns") or DEFAULT_FEATURE_COLUMNS
     threshold = float(metadata.get("threshold") or 0.5)
+
+    missing_features = [column for column in feature_columns if column not in features]
+    if missing_features:
+        raise RuntimeError(
+            f"Serving features do not satisfy model contract: {missing_features}"
+        )
 
     if artifact:
         model = artifact["model"]
