@@ -1938,6 +1938,14 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      get_global_weekly_leaderboard_bundle: {
+        Args: {
+          p_limit?: number
+          p_week_end: string
+          p_week_start: string
+        }
+        Returns: Json
+      }
       get_cms_settings: {
         Args: { p_keys: string[] }
         Returns: Json
