@@ -10,6 +10,7 @@ playwright-report/
 test-results/
 
 services/ai-api/ml/artifacts/**/*.joblib
+!services/ai-api/ml/artifacts/native-task-risk/native_task_risk_best_model.joblib
 services/ai-api/ml/artifacts/**/*.pkl
 services/ai-api/ml/artifacts/**/*.pickle
 services/ai-api/ml/artifacts/**/*.onnx
