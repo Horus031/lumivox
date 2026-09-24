@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Staging · Database, Services, E2E
     if: >
+      vars.STAGING_CD_ENABLED == 'true' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'product-release' &&
       github.event.workflow_run.event == 'push'
