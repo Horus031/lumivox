@@ -1,0 +1,17 @@
+fastapi
+uvicorn[standard]
+supabase
+pydantic
+pydantic-settings
+python-dotenv
+google-genai
+groq
+numpy
+pandas
+scikit-learn
+joblib
+shap
+httpx
+matplotlib
+seaborn
+pypdf
