@@ -1570,72 +1570,6 @@ export type Database = {
           },
         ];
       };
-      task_risk_predictions: {
-        Row: {
-          created_at: string;
-          days_until_due: number | null;
-          due_date: string | null;
-          features: Json;
-          goal_id: string | null;
-          id: string;
-          model_name: string;
-          model_version: string;
-          predicted_at: string;
-          reasons: Json;
-          risk_level: Database["public"]["Enums"]["task_risk_level"];
-          risk_score: number;
-          task_id: string;
-          user_id: string;
-        };
-        Insert: {
-          created_at?: string;
-          days_until_due?: number | null;
-          due_date?: string | null;
-          features?: Json;
-          goal_id?: string | null;
-          id?: string;
-          model_name: string;
-          model_version: string;
-          predicted_at?: string;
-          reasons?: Json;
-          risk_level: Database["public"]["Enums"]["task_risk_level"];
-          risk_score: number;
-          task_id: string;
-          user_id: string;
-        };
-        Update: {
-          created_at?: string;
-          days_until_due?: number | null;
-          due_date?: string | null;
-          features?: Json;
-          goal_id?: string | null;
-          id?: string;
-          model_name?: string;
-          model_version?: string;
-          predicted_at?: string;
-          reasons?: Json;
-          risk_level?: Database["public"]["Enums"]["task_risk_level"];
-          risk_score?: number;
-          task_id?: string;
-          user_id?: string;
-        };
-        Relationships: [
-          {
-            foreignKeyName: "task_risk_predictions_goal_id_fkey";
-            columns: ["goal_id"];
-            isOneToOne: false;
-            referencedRelation: "goals";
-            referencedColumns: ["id"];
-          },
-          {
-            foreignKeyName: "task_risk_predictions_task_id_fkey";
-            columns: ["task_id"];
-            isOneToOne: false;
-            referencedRelation: "tasks";
-            referencedColumns: ["id"];
-          },
-        ];
-      };
       tasks: {
         Row: {
           completed_at: string | null;
@@ -2674,24 +2608,6 @@ export type Database = {
           top_attributions: Json;
         }[];
       };
-      get_my_latest_task_risk_predictions: {
-        Args: { p_limit?: number };
-        Returns: {
-          days_until_due: number;
-          due_date: string;
-          goal_id: string;
-          goal_title: string;
-          model_name: string;
-          model_version: string;
-          predicted_at: string;
-          prediction_id: string;
-          reasons: Json;
-          risk_level: string;
-          risk_score: number;
-          task_id: string;
-          task_title: string;
-        }[];
-      };
       get_my_native_task_risk_candidate_tasks: {
         Args: { p_horizon_days?: number; p_limit?: number };
         Returns: {
@@ -2864,7 +2780,6 @@ export type Database = {
       study_room_type: "room" | "group";
       study_room_visibility: "public" | "private";
       task_priority: "low" | "medium" | "high" | "critical";
-      task_risk_level: "low" | "medium" | "high";
       task_status:
         | "todo"
         | "in_progress"
