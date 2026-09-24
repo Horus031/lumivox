@@ -98,7 +98,10 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Compile Python source
-        run: python -m compileall -q app
+        run: python -m compileall -q app scripts
+
+      - name: Verify native task risk artifact
+        run: python scripts/verify_native_task_risk_artifact.py
 
       - name: Unit tests
         run: python -m pytest -q
