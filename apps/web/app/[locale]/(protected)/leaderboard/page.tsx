@@ -1,9 +1,6 @@
 import { GlobalLeaderboardTable } from "@/features/leaderboard/components/global-leaderboard-table";
 import { MyGlobalRankCard } from "@/features/leaderboard/components/my-global-rank-card";
-import {
-  getGlobalWeeklyLeaderboard,
-  getMyGlobalWeeklyRank,
-} from "@/features/leaderboard/leaderboard.queries";
+import { getGlobalWeeklyLeaderboardBundle } from "@/features/leaderboard/leaderboard.queries";
 import { getLeaderboardSettings } from "@/features/cms-settings/cms-settings.queries";
 import { getTranslations } from "next-intl/server";
 
@@ -33,10 +30,7 @@ export default async function LeaderboardPage() {
     );
   }
 
-  const [leaderboard, myRank] = await Promise.all([
-    getGlobalWeeklyLeaderboard(),
-    getMyGlobalWeeklyRank(),
-  ]);
+  const leaderboard = await getGlobalWeeklyLeaderboardBundle();
 
   return (
     <main className="space-y-6">
@@ -54,7 +48,7 @@ export default async function LeaderboardPage() {
         </p>
       </section>
 
-      <MyGlobalRankCard rank={myRank} />
+      <MyGlobalRankCard rank={leaderboard.myRank} />
 
       <GlobalLeaderboardTable
         weekStart={leaderboard.weekStart}
