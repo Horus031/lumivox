@@ -1,0 +1,110 @@
+name: Deploy Staging
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Staging · Database, Services, E2E
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'product-release' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      name: staging
+      url: ${{ vars.WEB_URL }}
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      WEB_URL: ${{ vars.WEB_URL }}
+      AI_API_URL: ${{ vars.AI_API_URL }}
+      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link staging Supabase project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Preview staging migrations
+        run: supabase db push --dry-run
+
+      - name: Apply staging migrations
+        run: supabase db push --yes
+
+      - name: Trigger Render staging deployment
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          delimiter='?'
+          if [[ "$DEPLOY_HOOK" == *"?"* ]]; then delimiter='&'; fi
+          curl --fail --silent --show-error --request POST             "${DEPLOY_HOOK}${delimiter}ref=${EXPECTED_SHA}"
+
+      - name: Trigger Vercel staging deployment
+        env:
+          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"
+
+      - name: Wait for AI API staging revision
+        run: |
+          bash scripts/ci/wait-for-revision.sh             "${AI_API_URL%/}/api/v1/health"             "$EXPECTED_SHA"             900
+
+      - name: Wait for web staging revision
+        run: |
+          bash scripts/ci/wait-for-revision.sh             "${WEB_URL%/}/api/health"             "$EXPECTED_SHA"             900
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: apps/web
+        run: npm ci
+
+      - name: Install Playwright Chromium
+        working-directory: apps/web
+        run: npx playwright install --with-deps chromium
+
+      - name: Run staging E2E tests
+        working-directory: apps/web
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ vars.WEB_URL }}
+          E2E_TEST_EMAIL: ${{ secrets.E2E_TEST_EMAIL }}
+          E2E_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: npx playwright test
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-playwright-report
+          path: apps/web/playwright-report
+          if-no-files-found: ignore
+          retention-days: 14
