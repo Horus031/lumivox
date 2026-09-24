@@ -111,6 +111,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Verify required migrations are committed
+        run: bash scripts/ci/check-migration-coverage.sh
+
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
