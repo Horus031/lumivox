@@ -53,7 +53,7 @@ jobs:
         run: supabase db push --dry-run
 
       - name: Apply production migrations
-        run: supabase db push --yes
+        run: supabase db push
 
       - name: Trigger Render production deployment
         env:
