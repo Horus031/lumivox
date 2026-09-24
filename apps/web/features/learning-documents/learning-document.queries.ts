@@ -20,22 +20,6 @@ export async function getGoalLearningDocuments(goalId: string) {
   return data ?? [];
 }
 
-export async function getLearningDocumentById(documentId: string) {
-  const { supabase } = await requireUser();
-
-  const { data, error } = await supabase
-    .from("learning_documents")
-    .select("*")
-    .eq("id", documentId)
-    .maybeSingle();
-
-  if (error) {
-    throw new Error(`Failed to fetch document: ${error.message}`);
-  }
-
-  return data;
-}
-
 export async function getOwnedLearningDocumentById(documentId: string) {
   const { supabase, user } = await requireUser();
 
