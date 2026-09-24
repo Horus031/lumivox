@@ -18,6 +18,7 @@ jobs:
   deploy:
     name: Production · Database and Services
     if: >
+      vars.PRODUCTION_CD_ENABLED == 'true' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main' &&
       github.event.workflow_run.event == 'push'
