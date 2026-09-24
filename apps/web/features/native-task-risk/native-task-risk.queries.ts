@@ -3,7 +3,7 @@ import type {
   NativeTaskRiskAlert,
   NativeTaskRiskCandidateTask,
 } from "@/features/native-task-risk/native-task-risk.types";
-import type { TypedSupabaseClient } from "@/types/database.types";
+import type { TypedSupabaseClient } from "@/types/supabase.types";
 
 export async function getMyNativeTaskRiskAlerts(
   limit = 8,

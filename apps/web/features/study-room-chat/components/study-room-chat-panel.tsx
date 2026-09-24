@@ -23,23 +23,6 @@ type StudyRoomChatPanelProps = {
   initialMessages: StudyRoomMessageWithSender[];
 };
 
-type BroadcastMessagePayload = {
-  record?: {
-    id?: string;
-    room_id?: string;
-    sender_id?: string;
-    content?: string;
-    created_at?: string;
-  };
-  new?: {
-    id?: string;
-    room_id?: string;
-    sender_id?: string;
-    content?: string;
-    created_at?: string;
-  };
-};
-
 function formatMessageTime(value: string, locale: string) {
   return new Intl.DateTimeFormat(locale, {
     hour: "2-digit",
@@ -82,33 +65,6 @@ export function StudyRoomChatPanel({
   useEffect(() => {
     let mounted = true;
 
-    async function fetchMessageWithSender(messageId: string) {
-      const { data, error } = await supabase
-        .from("study_room_messages")
-        .select(
-          `
-        id,
-        room_id,
-        sender_id,
-        content,
-        created_at,
-        profiles:sender_id (
-          id,
-          full_name
-        )
-      `,
-        )
-        .eq("id", messageId)
-        .single();
-
-      if (error) {
-        console.error("Failed to fetch realtime room message:", error);
-        return null;
-      }
-
-      return data as StudyRoomMessageWithSender;
-    }
-
     async function subscribeToRoomChat() {
       try {
         await supabase.realtime.setAuth();
@@ -121,18 +77,10 @@ export function StudyRoomChatPanel({
               private: true,
             },
           })
-          .on("broadcast", { event: "INSERT" }, async ({ payload }) => {
-            const typedPayload = payload as BroadcastMessagePayload;
+          .on("broadcast", { event: "INSERT" }, ({ payload }) => {
+            const freshMessage = payload as StudyRoomMessageWithSender;
 
-            const messageId = typedPayload.record?.id ?? typedPayload.new?.id;
-
-            if (!messageId) {
-              return;
-            }
-
-            const freshMessage = await fetchMessageWithSender(messageId);
-
-            if (!freshMessage) {
+            if (!freshMessage?.id || freshMessage.room_id !== roomId) {
               return;
             }
 

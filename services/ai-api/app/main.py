@@ -47,8 +47,6 @@ allowed_origins = [
 
 production_web_url = os.getenv("WEB_APP_URL")
 
-print(production_web_url)
-
 if production_web_url:
     allowed_origins.append(production_web_url)
 

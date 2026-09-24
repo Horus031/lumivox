@@ -28,27 +28,9 @@ function getDisplayName(message: Message) {
   return message.email || `User ${message.user_id.slice(0, 8)}`;
 }
 
-function normalizePostgresMessage(payload: {
-  id: string;
-  room_id: string;
-  user_id: string;
-  content: string;
-  created_at: string;
-}): Message {
-  return {
-    message_id: payload.id,
-    room_id: payload.room_id,
-    user_id: payload.user_id,
-    email: null,
-    content: payload.content,
-    created_at: payload.created_at,
-  };
-}
-
 export function StudyGroupChat({
   groupId,
   currentUserId,
-  currentUserEmail,
   initialMessages,
 }: StudyGroupChatProps) {
   const locale = useLocale();
@@ -101,34 +83,6 @@ export function StudyGroupChat({
           appendMessage(message);
         },
       )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "study_room_messages",
-          filter: `room_id=eq.${groupId}`,
-        },
-        (payload) => {
-          const row = payload.new as {
-            id: string;
-            room_id: string;
-            user_id: string;
-            content: string;
-            created_at: string;
-          };
-
-          const message = normalizePostgresMessage(row);
-
-          appendMessage({
-            ...message,
-            email:
-              message.user_id === currentUserId
-                ? currentUserEmail
-                : message.email,
-          });
-        },
-      )
       .subscribe((status) => {
         setConnectionStatus(status);
       });
@@ -139,7 +93,7 @@ export function StudyGroupChat({
       channelRef.current = null;
       supabase.removeChannel(channel);
     };
-  }, [currentUserEmail, currentUserId, groupId, supabase]);
+  }, [groupId, supabase]);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({

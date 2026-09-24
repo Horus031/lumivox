@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:00"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 5
+    target-branch: product-release
+    labels:
+      - dependencies
+      - web
+
+  - package-ecosystem: pip
+    directory: /services/ai-api
+    schedule:
+      interval: weekly
+      day: monday
+      time: "03:30"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 5
+    target-branch: product-release
+    labels:
+      - dependencies
+      - ai-api
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "04:00"
+      timezone: Asia/Ho_Chi_Minh
+    open-pull-requests-limit: 5
+    target-branch: product-release
+    labels:
+      - dependencies
+      - ci

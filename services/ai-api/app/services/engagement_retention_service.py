@@ -618,8 +618,10 @@ def persist_engagement_stats(
                 "total_tokens_spent": stats.total_tokens_spent,
                 "tokens_earned_last_7d": stats.tokens_earned_last_7d,
                 "completed_focus_sessions_total": stats.completed_focus_sessions_total,
+                "valid_focus_sessions_total": stats.valid_focus_sessions_total,
                 "completed_tasks_total": stats.completed_tasks_total,
-                "calculation_version": "engagement-v2-streak-restore",
+                "valid_completed_tasks_total": stats.valid_completed_tasks_total,
+                "calculation_version": "engagement-v3-reconcile",
             },
             on_conflict="user_id",
         )
