@@ -1,0 +1,84 @@
+name: Deploy Production
+
+on:
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Production · Database and Services
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    environment:
+      name: production
+      url: ${{ vars.WEB_URL }}
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+      WEB_URL: ${{ vars.WEB_URL }}
+      AI_API_URL: ${{ vars.AI_API_URL }}
+      EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link production Supabase project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
+
+      - name: Preview production migrations
+        run: supabase db push --dry-run
+
+      - name: Apply production migrations
+        run: supabase db push --yes
+
+      - name: Trigger Render production deployment
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          delimiter='?'
+          if [[ "$DEPLOY_HOOK" == *"?"* ]]; then delimiter='&'; fi
+          curl --fail --silent --show-error --request POST             "${DEPLOY_HOOK}${delimiter}ref=${EXPECTED_SHA}"
+
+      - name: Trigger Vercel production deployment
+        env:
+          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
+        run: |
+          curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"
+
+      - name: Wait for AI API production revision
+        run: |
+          bash scripts/ci/wait-for-revision.sh             "${AI_API_URL%/}/api/v1/health"             "$EXPECTED_SHA"             900
+
+      - name: Wait for web production revision
+        run: |
+          bash scripts/ci/wait-for-revision.sh             "${WEB_URL%/}/api/health"             "$EXPECTED_SHA"             900
+
+      - name: Production smoke checks
+        run: |
+          curl --fail --silent --show-error "${AI_API_URL%/}/api/v1/health" >/dev/null
+          curl --fail --silent --show-error "${WEB_URL%/}/api/health" >/dev/null
+          curl --fail --silent --show-error --location "${WEB_URL%/}/" >/dev/null
