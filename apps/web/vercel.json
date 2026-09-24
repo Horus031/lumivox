@@ -1,8 +1,9 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/native-task-risk",
-      "schedule": "0 1 * * *"
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "product-release": false
     }
-  ]
+  }
 }
