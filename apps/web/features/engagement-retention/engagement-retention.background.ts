@@ -22,10 +22,10 @@ type ScheduleEngagementRecalculationOptions = {
   activity?: EngagementActivity;
 };
 
-// Serialize engagement work for the same user within a warm server instance.
-// This prevents two near-simultaneous completions from racing on the same
-// aggregate row while keeping the user-facing request completely non-blocking.
-// Cross-instance atomicity is intentionally deferred to the database/RPC phase.
+// Preserve completion ordering within a warm server instance while keeping the
+// user-facing request non-blocking. Cross-instance correctness is enforced by
+// the atomic Postgres engagement RPC, so this queue is only a local ordering
+// optimization.
 const userEngagementQueues = new Map<string, Promise<void>>();
 
 function enqueueUserEngagementWork(
