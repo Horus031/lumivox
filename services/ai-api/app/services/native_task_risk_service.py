@@ -364,6 +364,7 @@ def _load_model_metadata() -> dict[str, Any]:
                 "feature_schema_version", FEATURE_SCHEMA_VERSION
             ),
             "feature_columns": artifact.get("feature_columns", DEFAULT_FEATURE_COLUMNS),
+            "prediction_horizon_days": artifact.get("prediction_horizon_days", 14),
             "threshold": artifact.get("threshold", 0.5),
         }
 
@@ -373,6 +374,7 @@ def _load_model_metadata() -> dict[str, Any]:
         "selected_algorithm": "deterministic_fallback",
         "feature_schema_version": FEATURE_SCHEMA_VERSION,
         "feature_columns": DEFAULT_FEATURE_COLUMNS,
+        "prediction_horizon_days": 14,
         "threshold": 0.5,
     }
 
@@ -1032,6 +1034,12 @@ def predict_native_task_risk(
 
     feature_columns = metadata.get("feature_columns") or DEFAULT_FEATURE_COLUMNS
     threshold = float(metadata.get("threshold") or 0.5)
+    max_horizon_days = int(metadata.get("prediction_horizon_days") or 14)
+
+    if int(features["days_until_due"]) > max_horizon_days:
+        raise ValueError(
+            f"Task is outside the trained prediction horizon ({max_horizon_days} days)."
+        )
 
     missing_features = [column for column in feature_columns if column not in features]
     if missing_features:
