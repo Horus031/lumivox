@@ -54,7 +54,7 @@ export async function getLearningDocumentPermissions(documentId: string) {
 }
 
 export async function getAccessibleLearningDocumentOrThrow(documentId: string) {
-  const document = await getLearningDocumentById(documentId);
+  const document = await getOwnedLearningDocumentById(documentId);
 
   if (!document) {
     notFound();

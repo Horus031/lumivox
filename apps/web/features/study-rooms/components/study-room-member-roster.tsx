@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
@@ -26,7 +26,7 @@ export function StudyRoomMemberRoster({
     "connecting" | "connected" | "error"
   >("connecting");
 
-  async function refreshMembers() {
+  const refreshMembers = useCallback(async () => {
     const { data, error } = await supabase
       .from("study_room_members")
       .select(
@@ -49,9 +49,9 @@ export function StudyRoomMemberRoster({
     }
 
     setMembers((data ?? []) as StudyRoomMemberWithProfile[]);
-  }
+  }, [roomId, supabase]);
 
-  function scheduleRefreshMembers() {
+  const scheduleRefreshMembers = useCallback(() => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
@@ -59,7 +59,7 @@ export function StudyRoomMemberRoster({
     refreshTimeoutRef.current = setTimeout(() => {
       void refreshMembers();
     }, 120);
-  }
+  }, [refreshMembers]);
 
   useEffect(() => {
     let mounted = true;
@@ -119,7 +119,7 @@ export function StudyRoomMemberRoster({
 
       cleanup?.();
     };
-  }, [roomId, supabase]);
+  }, [roomId, scheduleRefreshMembers, supabase]);
 
   return (
     <article className="rounded-2xl border bg-background p-6 shadow-sm">
