@@ -169,3 +169,26 @@ Database migrations should use forward-fix migrations. Avoid destructive schema
 changes in the same release that removes application compatibility.
 
 Prefer expand -> deploy -> contract migrations for production database changes.
+
+
+## Python development environment
+
+Keep production and test dependencies separate:
+
+- `requirements.in` -> production dependencies.
+- `requirements-dev.in` -> production dependencies plus pytest tooling.
+- `requirements.txt` and `requirements-dev.txt` are generated lock files.
+
+Generate both locks from `services/ai-api`:
+
+```powershell
+python -m pip install --upgrade pip pip-tools
+pip-compile requirements.in --output-file requirements.txt
+pip-compile requirements-dev.in --output-file requirements-dev.txt
+pip-sync requirements-dev.txt
+python -m pytest -q
+```
+
+Always use `python -m pytest` so the interpreter that owns the active virtual
+environment runs the tests. Calling `pytest` directly can accidentally invoke
+a globally installed launcher on Windows.
