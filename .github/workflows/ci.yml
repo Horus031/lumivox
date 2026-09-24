@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - product-release
+      - main
+  push:
+    branches:
+      - product-release
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  web:
+    name: Web · Lint, Unit Tests, Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: apps/web
+
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-placeholder
+      AI_API_BASE_URL: http://127.0.0.1:8000
+      AI_INTERNAL_API_KEY: ci-placeholder
+      UPSTASH_REDIS_REST_URL: https://example.upstash.io
+      UPSTASH_REDIS_REST_TOKEN: ci-placeholder
+      LIVEKIT_URL: wss://example.livekit.cloud
+      LIVEKIT_API_KEY: ci-placeholder
+      LIVEKIT_API_SECRET: ci-placeholder
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm run test:unit
+
+      - name: Production build
+        run: npm run build
+
+  ai-api:
+    name: AI API · Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    defaults:
+      run:
+        working-directory: services/ai-api
+
+    env:
+      APP_ENV: test
+      SUPABASE_URL: https://example.supabase.co
+      SUPABASE_SECRET_KEY: ci-placeholder
+      AI_INTERNAL_API_KEY: ci-placeholder
+      GEMINI_API_KEY: ci-placeholder
+      GROQ_API_KEY: ci-placeholder
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/ai-api/requirements.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest
+
+      - name: Compile Python source
+        run: python -m compileall -q app
+
+      - name: Unit tests
+        run: pytest -q
+
+  database:
+    name: Supabase · Migration Replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local database and apply migrations
+        run: supabase db start
+
+      - name: Replay migrations from a clean database
+        run: supabase db reset
+
+      - name: Stop local database
+        if: always()
+        run: supabase stop --no-backup
