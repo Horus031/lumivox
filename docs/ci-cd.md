@@ -52,6 +52,17 @@ Order:
 4. Wait until both deployed services report the tested SHA.
 5. Run production HTTP smoke checks.
 
+## Deployment kill switches
+
+Create these repository-level Actions variables before enabling CD:
+
+- `STAGING_CD_ENABLED=false`
+- `PRODUCTION_CD_ENABLED=false`
+
+The deployment workflows will not run until their corresponding variable is
+explicitly changed to `true`. This makes it safe to bootstrap the workflow
+files onto the default branch before the external environments are ready.
+
 ## GitHub environments
 
 Create two GitHub Environments:
