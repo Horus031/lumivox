@@ -23,15 +23,20 @@ from app.api.routes import (
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
 )
+from app.services.native_task_risk_service import (
+    validate_native_task_risk_artifact,
+)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     app.state.deadline_risk_runtime = load_deadline_risk_runtime()
+    app.state.native_task_risk_model = validate_native_task_risk_artifact()
 
     yield
 
     app.state.deadline_risk_runtime = None
+    app.state.native_task_risk_model = None
 
 
 app = FastAPI(
