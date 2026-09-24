@@ -59,8 +59,6 @@ to authenticated;
 -- 2. Realtime messages policies for private broadcast channel
 -- ============================================================
 
-alter table realtime.messages enable row level security;
-
 drop policy if exists "Active group members can read group realtime messages"
 on realtime.messages;
 

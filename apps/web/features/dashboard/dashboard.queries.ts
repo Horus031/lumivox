@@ -1,4 +1,4 @@
-import type { TypedSupabaseClient } from "@/types/database.types";
+import type { TypedSupabaseClient } from "@/types/supabase.types";
 
 function formatDayLabel(dateKey: string) {
   const date = new Date(`${dateKey}T00:00:00`);

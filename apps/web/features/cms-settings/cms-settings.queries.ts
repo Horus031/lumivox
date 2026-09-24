@@ -1,22 +1,5 @@
 import { requireUser } from "@/lib/auth/require-user";
 
-export async function getCmsSetting<T>(
-  key: string,
-  fallback: T,
-): Promise<T> {
-  const { supabase } = await requireUser();
-
-  const { data, error } = await supabase.rpc("get_cms_setting", {
-    p_key: key,
-  });
-
-  if (error || data === null || data === undefined) {
-    return fallback;
-  }
-
-  return data as T;
-}
-
 async function getCmsSettings<T extends Record<string, unknown>>(
   keys: string[],
   fallbacks: T,

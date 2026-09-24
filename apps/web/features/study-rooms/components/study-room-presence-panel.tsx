@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { createClient } from "@/lib/supabase/client";
@@ -83,7 +83,7 @@ export function StudyRoomPresencePanel({
 
   const [participants, setParticipants] = useState<PresencePayload[]>([]);
 
-  function pruneRecentlyLeaving() {
+  const pruneRecentlyLeaving = useCallback(() => {
     const now = Date.now();
 
     for (const [userId, expiresAt] of recentlyLeavingRef.current.entries()) {
@@ -91,19 +91,22 @@ export function StudyRoomPresencePanel({
         recentlyLeavingRef.current.delete(userId);
       }
     }
-  }
+  }, []);
 
-  function applyPresenceState(state: Record<string, PresencePayload[]>) {
-    pruneRecentlyLeaving();
+  const applyPresenceState = useCallback(
+    (state: Record<string, PresencePayload[]>) => {
+      pruneRecentlyLeaving();
 
-    const nextParticipants = flattenPresenceState(state).filter(
-      (participant) => !recentlyLeavingRef.current.has(participant.userId),
-    );
+      const nextParticipants = flattenPresenceState(state).filter(
+        (participant) => !recentlyLeavingRef.current.has(participant.userId),
+      );
 
-    setParticipants(nextParticipants);
-  }
+      setParticipants(nextParticipants);
+    },
+    [pruneRecentlyLeaving],
+  );
 
-  function upsertParticipant(payload: PresenceBroadcastPayload) {
+  const upsertParticipant = useCallback((payload: PresenceBroadcastPayload) => {
     recentlyLeavingRef.current.delete(payload.userId);
 
     setParticipants((current) => {
@@ -119,15 +122,15 @@ export function StudyRoomPresencePanel({
       next[index] = payload;
       return next;
     });
-  }
+  }, []);
 
-  function removeParticipant(userId: string) {
+  const removeParticipant = useCallback((userId: string) => {
     recentlyLeavingRef.current.set(userId, Date.now() + 10_000);
 
     setParticipants((current) =>
       current.filter((participant) => participant.userId !== userId),
     );
-  }
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -283,7 +286,16 @@ export function StudyRoomPresencePanel({
         })();
       }
     };
-  }, [currentUserId, currentUserName, roomId, supabase, t]);
+  }, [
+    applyPresenceState,
+    currentUserId,
+    currentUserName,
+    removeParticipant,
+    roomId,
+    supabase,
+    t,
+    upsertParticipant,
+  ]);
 
   useEffect(() => {
     async function handleLeaveRoom(event: Event) {
@@ -319,7 +331,7 @@ export function StudyRoomPresencePanel({
     return () => {
       window.removeEventListener("lumivox:leave-study-room", handleLeaveRoom);
     };
-  }, [currentUserId, roomId]);
+  }, [currentUserId, removeParticipant, roomId]);
 
   async function updateMyStatus(nextStatus: PresenceStatus) {
     setMyStatus(nextStatus);

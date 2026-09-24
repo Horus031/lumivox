@@ -1,6 +1,7 @@
 "use client";
 
 import type { UserEngagementStats } from "@/features/engagement-retention/engagement-retention.types";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/client";
 import { Coins, Flame } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -32,36 +33,51 @@ export function SidebarEngagementMiniStats({
   useEffect(() => {
     if (!userId) return;
 
-    const handleStatsChange = (payload: { new: unknown }) => {
-      setEngageStats(payload.new as UserEngagementStats);
-    };
+    let cancelled = false;
+    let channel: RealtimeChannel | null = null;
 
-    const channel = supabase
-      .channel(`stats-changes-${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "user_engagement_stats",
-          filter: `user_id=eq.${userId}`,
-        },
-        handleStatsChange,
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "user_engagement_stats",
-          filter: `user_id=eq.${userId}`,
-        },
-        handleStatsChange,
-      )
-      .subscribe();
+    void (async () => {
+      await supabase.realtime.setAuth();
+
+      if (cancelled) return;
+
+      channel = supabase
+        .channel(`engagement-stats:${userId}`, {
+          config: {
+            private: true,
+          },
+        })
+        .on("broadcast", { event: "stats_changed" }, ({ payload }) => {
+          const update = payload as {
+            user_id?: string;
+            current_streak_days?: number;
+            streak_status?: UserEngagementStats["streak_status"];
+            token_balance?: number;
+          };
+
+          if (update.user_id !== userId) return;
+
+          setEngageStats((current) => {
+            if (!current) return current;
+
+            return {
+              ...current,
+              current_streak_days:
+                update.current_streak_days ?? current.current_streak_days,
+              streak_status: update.streak_status ?? current.streak_status,
+              token_balance: update.token_balance ?? current.token_balance,
+            };
+          });
+        })
+        .subscribe();
+    })();
 
     return () => {
-      void supabase.removeChannel(channel);
+      cancelled = true;
+
+      if (channel) {
+        void supabase.removeChannel(channel);
+      }
     };
   }, [userId, supabase]);
 

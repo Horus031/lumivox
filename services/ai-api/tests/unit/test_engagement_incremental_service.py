@@ -1,98 +1,78 @@
 from uuid import uuid4
 
 from app.schemas.engagement_retention import (
+    EngagementStatsPayload,
     ProcessEngagementActivityRequest,
-    RewardLedgerEntryPreview,
+    RecalculateEngagementResponse,
 )
 from app.services import engagement_incremental_service as service
 
 
-def _previous_stats():
+class _RpcResponse:
+    def __init__(self, data):
+        self.data = data
+
+
+class _RpcCall:
+    def __init__(self, data):
+        self._data = data
+
+    def execute(self):
+        return _RpcResponse(self._data)
+
+
+class _SupabaseStub:
+    def __init__(self, data):
+        self.data = data
+        self.calls = []
+
+    def rpc(self, name, params):
+        self.calls.append((name, params))
+        return _RpcCall(self.data)
+
+
+def _stats_payload():
     return {
-        "current_streak_days": 2,
+        "current_streak_days": 3,
         "longest_streak_days": 4,
-        "last_valid_activity_date": "2026-09-21",
-        "token_balance": 100,
-        "total_tokens_earned": 140,
+        "latest_active_study_date": "2026-09-22",
+        "last_valid_activity_date": "2026-09-22",
+        "streak_status": "active",
+        "streak_freeze_started_at": None,
+        "streak_restore_deadline_at": None,
+        "can_restore_streak": False,
+        "restore_cost_tokens": 30,
+        "token_balance": 133,
+        "total_tokens_earned": 173,
         "total_tokens_spent": 40,
-        "tokens_earned_last_7d": 30,
+        "tokens_earned_last_7d": 63,
         "completed_focus_sessions_total": 8,
         "valid_focus_sessions_total": 7,
-        "completed_tasks_total": 12,
-        "valid_completed_tasks_total": 10,
-        "streak_status": "active",
+        "completed_tasks_total": 13,
+        "valid_completed_tasks_total": 11,
     }
 
 
-def test_process_task_completion_uses_incremental_fast_path(monkeypatch):
+def test_process_activity_uses_atomic_rpc(monkeypatch):
     user_id = uuid4()
     activity_id = uuid4()
-    persisted = {}
-
-    monkeypatch.setattr(
-        service,
-        "get_previous_engagement_stats",
-        lambda _user_id: _previous_stats(),
-    )
-    monkeypatch.setattr(
-        service,
-        "_fetch_activity",
-        lambda _payload: {
-            "id": str(activity_id),
-            "status": "completed",
-            "created_at": "2026-09-22T08:00:00+00:00",
-            "completed_at": "2026-09-22T09:00:00+00:00",
-            "estimated_minutes": 30,
-        },
-    )
-    monkeypatch.setattr(
-        service,
-        "_insert_only_missing_rewards",
-        lambda **_kwargs: (
-            [
-                RewardLedgerEntryPreview(
-                    event_type="task_completed",
-                    token_delta=10,
-                    source_key=f"task_completed:{activity_id}",
-                    reward_note="Completed a valid task.",
-                ),
-                RewardLedgerEntryPreview(
-                    event_type="daily_streak_continued",
-                    token_delta=8,
-                    source_key="daily_streak_continued:2026-09-22",
-                    reward_note="Continued the study streak into a new day.",
-                ),
-                RewardLedgerEntryPreview(
-                    event_type="streak_milestone_3",
-                    token_delta=15,
-                    source_key="streak_milestone_3:2026-09-22",
-                    reward_note="Reached a 3-day study streak.",
-                ),
+    stub = _SupabaseStub(
+        {
+            "status": "applied",
+            "source_was_new": True,
+            "stats": _stats_payload(),
+            "newly_created_rewards": [
+                {
+                    "event_type": "task_completed",
+                    "token_delta": 10,
+                    "source_key": f"task_completed:{activity_id}",
+                    "reward_note": "Completed a valid task.",
+                }
             ],
-            33,
-        ),
+        }
     )
-    monkeypatch.setattr(
-        service,
-        "determine_streak_status",
-        lambda **kwargs: {
-            "streak_status": "active",
-            "current_streak_days": kwargs["current_streak_days"],
-            "streak_freeze_started_at": None,
-            "streak_restore_deadline_at": None,
-            "can_restore_streak": False,
-        },
-    )
-    monkeypatch.setattr(
-        service,
-        "persist_engagement_stats",
-        lambda **kwargs: persisted.setdefault("stats", kwargs["stats"]),
-    )
-    monkeypatch.setattr(
-        service,
-        "persist_streak_transition_event",
-        lambda **_kwargs: None,
-    )
+
+    monkeypatch.setattr(service, "get_supabase_client", lambda: stub)
 
     result = service.process_engagement_activity(
         ProcessEngagementActivityRequest(
@@ -102,76 +82,69 @@ def test_process_task_completion_uses_incremental_fast_path(monkeypatch):
         )
     )
 
-    assert result.stats.current_streak_days == 3
-    assert result.stats.longest_streak_days == 4
     assert result.stats.token_balance == 133
-    assert result.stats.completed_tasks_total == 13
     assert result.stats.valid_completed_tasks_total == 11
-    assert persisted["stats"].current_streak_days == 3
+    assert len(result.newly_created_rewards) == 1
+    assert stub.calls == [
+        (
+            "process_engagement_activity_atomic",
+            {
+                "p_user_id": str(user_id),
+                "p_activity_type": "task",
+                "p_activity_id": str(activity_id),
+            },
+        )
+    ]
 
 
-def test_same_day_completion_does_not_increment_streak(monkeypatch):
-    previous = _previous_stats()
-    previous["last_valid_activity_date"] = "2026-09-22"
-    previous["current_streak_days"] = 3
-    activity_id = uuid4()
-
-    monkeypatch.setattr(
-        service,
-        "get_previous_engagement_stats",
-        lambda _user_id: previous,
+def test_duplicate_activity_returns_atomic_snapshot(monkeypatch):
+    stub = _SupabaseStub(
+        {
+            "status": "applied",
+            "source_was_new": False,
+            "stats": _stats_payload(),
+            "newly_created_rewards": [],
+        }
     )
-    monkeypatch.setattr(
-        service,
-        "_fetch_activity",
-        lambda _payload: {
-            "id": str(activity_id),
-            "status": "completed",
-            "ended_at": "2026-09-22T11:00:00+00:00",
-            "actual_focus_minutes": 25,
-        },
-    )
-    monkeypatch.setattr(
-        service,
-        "_insert_only_missing_rewards",
-        lambda **kwargs: (
-            [
-                RewardLedgerEntryPreview(
-                    event_type="focus_session_completed",
-                    token_delta=5,
-                    source_key=f"focus_session_completed:{activity_id}",
-                    reward_note="Completed a valid focus session.",
-                )
-            ],
-            5,
-        ),
-    )
-    monkeypatch.setattr(
-        service,
-        "determine_streak_status",
-        lambda **kwargs: {
-            "streak_status": "active",
-            "current_streak_days": kwargs["current_streak_days"],
-            "streak_freeze_started_at": None,
-            "streak_restore_deadline_at": None,
-            "can_restore_streak": False,
-        },
-    )
-    monkeypatch.setattr(service, "persist_engagement_stats", lambda **_kwargs: None)
-    monkeypatch.setattr(
-        service,
-        "persist_streak_transition_event",
-        lambda **_kwargs: None,
-    )
+    monkeypatch.setattr(service, "get_supabase_client", lambda: stub)
 
     result = service.process_engagement_activity(
         ProcessEngagementActivityRequest(
             user_id=uuid4(),
             activity_type="focus_session",
-            activity_id=activity_id,
+            activity_id=uuid4(),
         )
     )
 
     assert result.stats.current_streak_days == 3
-    assert result.stats.completed_focus_sessions_total == 9
-    assert result.stats.valid_focus_sessions_total == 8
+    assert result.newly_created_rewards == []
+
+
+def test_requires_reconcile_falls_back_to_canonical(monkeypatch):
+    expected = RecalculateEngagementResponse(
+        stats=EngagementStatsPayload(**_stats_payload()),
+        newly_created_rewards=[],
+    )
+    stub = _SupabaseStub(
+        {
+            "status": "requires_reconcile",
+            "reason": "out_of_order_activity",
+        }
+    )
+
+    monkeypatch.setattr(service, "get_supabase_client", lambda: stub)
+    monkeypatch.setattr(
+        service,
+        "recalculate_engagement",
+        lambda _payload: expected,
+    )
+
+    result = service.process_engagement_activity(
+        ProcessEngagementActivityRequest(
+            user_id=uuid4(),
+            activity_type="task",
+            activity_id=uuid4(),
+        )
+    )
+
+    assert result is expected
