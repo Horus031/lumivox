@@ -1734,6 +1734,8 @@ export type Database = {
           calculation_version: string;
           completed_focus_sessions_total: number;
           completed_tasks_total: number;
+          valid_completed_tasks_total: number;
+          valid_focus_sessions_total: number;
           created_at: string;
           current_streak_days: number;
           last_streak_evaluation_at: string | null;
@@ -1754,6 +1756,10 @@ export type Database = {
           calculation_version?: string;
           completed_focus_sessions_total?: number;
           completed_tasks_total?: number;
+          valid_completed_tasks_total?: number;
+          valid_focus_sessions_total?: number;
+          valid_completed_tasks_total?: number;
+          valid_focus_sessions_total?: number;
           created_at?: string;
           current_streak_days?: number;
           last_streak_evaluation_at?: string | null;
