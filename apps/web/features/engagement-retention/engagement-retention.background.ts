@@ -9,7 +9,6 @@ import {
 type EngagementRecalculationSource =
   | "focus-completion"
   | "task-update"
-  | "stale-read"
   | "manual-refresh";
 
 export type EngagementActivity = {
@@ -57,11 +56,7 @@ export function scheduleEngagementRecalculation({
   after(() =>
     enqueueUserEngagementWork(userId, async () => {
       try {
-        // Stale reads can share the short-lived recalculation cache. Mutations
-        // must invalidate it because they represent new activity.
-        if (source !== "stale-read") {
-          await invalidateEngagementCache(userId);
-        }
+        await invalidateEngagementCache(userId);
 
         if (activity) {
           await processEngagementActivityForUser(userId, activity);
