@@ -108,7 +108,7 @@ narwhals==2.26.0
     # via scikit-learn
 numba==0.67.0
     # via shap
-numpy==2.5.3
+numpy==2.4.6
     # via
     #   -r requirements.in
     #   contourpy
