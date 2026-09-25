@@ -8,7 +8,7 @@ on:
       - completed
 
 concurrency:
-  group: deploy-staging
+  group: deploy-staging-${{ github.event.workflow_run.event }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: true
 
 permissions:
@@ -70,13 +70,21 @@ jobs:
         run: |
           curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"
 
-      - name: Wait for AI API staging revision
+      - name: Wait for AI API staging revision and model
         run: |
-          bash scripts/ci/wait-for-revision.sh             "${AI_API_URL%/}/api/v1/health"             "$EXPECTED_SHA"             900
+          expected_model_version="$(jq -r '.model_version' services/ai-api/ml/artifacts/native-task-risk/logistic_regression_balanced_metadata.json)"
+          bash scripts/ci/wait-for-revision.sh \
+            "${AI_API_URL%/}/api/v1/health" \
+            "$EXPECTED_SHA" \
+            900 \
+            "$expected_model_version"
 
       - name: Wait for web staging revision
         run: |
-          bash scripts/ci/wait-for-revision.sh             "${WEB_URL%/}/api/health"             "$EXPECTED_SHA"             900
+          bash scripts/ci/wait-for-revision.sh \
+            "${WEB_URL%/}/api/health" \
+            "$EXPECTED_SHA" \
+            900
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
