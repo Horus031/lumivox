@@ -173,6 +173,10 @@ Prefer expand -> deploy -> contract migrations for production database changes.
 
 ## Python development environment
 
+The AI API runtime is pinned in `.python-version`. Use that same Python minor
+version locally, in GitHub Actions, and on Render before installing the
+generated lock files.
+
 Keep production and test dependencies separate:
 
 - `requirements.in` -> production dependencies.
