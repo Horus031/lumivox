@@ -1,14 +1,11 @@
 from __future__ import annotations
 
 import hashlib
-import os
 from concurrent.futures import ThreadPoolExecutor
-from functools import lru_cache
 from typing import Any
 
-from supabase import create_client
-
 from app.clients.llm_client import generate_text
+from app.clients.supabase_client import get_supabase_client
 from app.schemas.ai_translation import (
     AITranslationBatchRequest,
     AITranslationBatchResponse,
@@ -17,17 +14,8 @@ from app.schemas.ai_translation import (
 )
 
 
-@lru_cache(maxsize=1)
 def _get_supabase_admin():
-    supabase_url = os.getenv("SUPABASE_URL")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-    if not supabase_url or not service_role_key:
-        raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured."
-        )
-
-    return create_client(supabase_url, service_role_key)
+    return get_supabase_client()
 
 
 def _hash_source_text(text: str) -> str:
