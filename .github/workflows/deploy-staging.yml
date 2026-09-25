@@ -8,7 +8,7 @@ on:
       - completed
 
 concurrency:
-  group: deploy-staging
+  group: deploy-staging-${{ github.event.workflow_run.event }}-${{ github.event.workflow_run.head_branch }}
   cancel-in-progress: true
 
 permissions:
