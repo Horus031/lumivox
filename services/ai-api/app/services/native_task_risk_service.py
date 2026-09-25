@@ -11,8 +11,7 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
-from supabase import create_client
-
+from app.clients.supabase_client import get_supabase_client
 from app.services.native_task_risk_features_v2 import (
     FEATURE_COLUMNS_V2,
     FEATURE_SCHEMA_VERSION,
@@ -29,7 +28,6 @@ from app.schemas.native_task_risk import (
     NativeTaskRiskRecommendedAction,
     NativeTaskRiskCronRefreshRequest,
     NativeTaskRiskCronRefreshResponse,
-    NativeTaskRiskBatchError,
 )
 
 def _build_reason_summaries(
@@ -251,19 +249,7 @@ def _resolve_path(path_value: str) -> Path:
 
 
 def _get_supabase_admin():
-    supabase_url = os.getenv("SUPABASE_URL")
-    secret_key = (
-        os.getenv("SUPABASE_SECRET_KEY")
-        or os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-    )
-
-    if not supabase_url or not secret_key:
-        raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SECRET_KEY "
-            "(or SUPABASE_SERVICE_ROLE_KEY) must be configured."
-        )
-
-    return create_client(supabase_url, secret_key)
+    return get_supabase_client()
 
 
 def _parse_datetime(value: str | None) -> datetime | None:
