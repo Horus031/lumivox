@@ -22,7 +22,15 @@ while true; do
     exit 1
   fi
 
-  response="$(curl --silent --show-error --location --max-time 10 "$url" || true)"
+  response_file="$(mktemp)"
+  curl_meta="$(curl --silent --show-error --location --max-time 10 \
+    --output "$response_file" \
+    --write-out '%{http_code}|%{url_effective}|%{content_type}' \
+    "$url" || true)"
+  response="$(cat "$response_file")"
+  rm -f "$response_file"
+
+  IFS='|' read -r http_code effective_url content_type <<<"$curl_meta"
 
   if [[ -n "$response" ]]; then
     status="$(jq -r '.status // empty' <<<"$response" 2>/dev/null || true)"
@@ -44,10 +52,10 @@ while true; do
 
       echo "Revision is correct, but native model status=${model_status:-unknown}, model_version=${model_version:-unknown}"
     else
-      echo "Current status=${status:-unknown}, revision=${revision:-unknown}"
+      echo "Current status=${status:-unknown}, revision=${revision:-unknown}, http=${http_code:-unknown}, content_type=${content_type:-unknown}, effective_url=${effective_url:-unknown}"
     fi
   else
-    echo "Health endpoint is not reachable yet."
+    echo "Health endpoint is not reachable yet. http=${http_code:-unknown}, content_type=${content_type:-unknown}, effective_url=${effective_url:-unknown}"
   fi
 
   sleep "$sleep_seconds"
