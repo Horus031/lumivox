@@ -208,7 +208,7 @@ scipy==1.17.1
     #   shap
 seaborn==0.13.2
     # via -r requirements.in
-shap==0.52.0
+shap==0.51.0
     # via -r requirements.in
 six==1.17.0
     # via python-dateutil
