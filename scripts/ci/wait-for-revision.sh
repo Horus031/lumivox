@@ -22,7 +22,7 @@ while true; do
     exit 1
   fi
 
-  response="$(curl --silent --show-error --max-time 10 "$url" || true)"
+  response="$(curl --silent --show-error --location --max-time 10 "$url" || true)"
 
   if [[ -n "$response" ]]; then
     status="$(jq -r '.status // empty' <<<"$response" 2>/dev/null || true)"
