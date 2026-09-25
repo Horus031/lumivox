@@ -11,8 +11,7 @@ load_dotenv()
 from google import genai
 from google.genai import types
 from pypdf import PdfReader
-from supabase import create_client
-
+from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
 
 
@@ -29,15 +28,7 @@ class LearningDocument:
 
 
 def _get_supabase_admin():
-    supabase_url = os.getenv("SUPABASE_URL")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-        
-    if not supabase_url or not service_role_key:
-        raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured."
-        )
-
-    return create_client(supabase_url, service_role_key)
+    return get_supabase_client()
 
 
 def _configure_gemini():

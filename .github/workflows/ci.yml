@@ -86,7 +86,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version-file: .python-version
+          python-version-file: services/ai-api/.python-version
           cache: pip
           cache-dependency-path: |
             services/ai-api/requirements.txt

@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-import os
 import time
 from datetime import date
 from typing import Any
 from uuid import uuid4
 
-from supabase import create_client
-
 from app.clients.llm_client import generate_structured
+from app.clients.supabase_client import get_supabase_client
 from app.schemas.learning_roadmap import (
     AIRoadmapNode,
     AIRoadmapOutput,
@@ -19,15 +17,7 @@ from app.schemas.learning_roadmap import (
 
 
 def _get_supabase_admin():
-    supabase_url = os.getenv("SUPABASE_URL")
-    service_role_key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-
-    if not supabase_url or not service_role_key:
-        raise RuntimeError(
-            "SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be configured."
-        )
-
-    return create_client(supabase_url, service_role_key)
+    return get_supabase_client()
 
 
 def _language_instruction(locale: str) -> str:

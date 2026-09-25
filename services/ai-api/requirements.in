@@ -6,12 +6,15 @@ pydantic-settings
 python-dotenv
 google-genai
 groq
-numpy
+numpy<2.5
+scipy<1.18
 pandas
 scikit-learn==1.9.1
 joblib==1.6.0
-shap
+shap<0.52
 httpx
 matplotlib
+# Runtime is Python 3.11.9; contourpy 1.4+ requires Python 3.12+.
+contourpy<1.4
 seaborn
 pypdf
