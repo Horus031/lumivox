@@ -1,6 +1,6 @@
 {
   "model_key": "native_task_delay_risk_classifier",
-  "model_version": "native-task-risk-v2-20260924-100444",
+  "model_version": "native-task-risk-v2-20260925-021822",
   "selected_algorithm": "logistic_regression_balanced",
   "feature_schema_version": "native-task-risk-v2",
   "feature_columns": [
@@ -99,14 +99,15 @@
     "predicted_positive_rate": true
   },
   "dataset_sha256": "7655ba728e965d12fdf0171d69f00c15d0a9b0702cb88bac38123f3d7596b543",
-  "created_at": "2026-09-24T10:04:44.812836+00:00",
+  "created_at": "2026-09-25T02:18:22.293209+00:00",
   "runtime": {
     "python": "3.11.9",
     "scikit_learn": "1.9.1",
     "joblib": "1.6.0"
   },
   "artifact_filename": "logistic_regression_balanced.joblib",
-  "dataset_path": "C:\\Users\\Dell\\Downloads\\native_task_risk_v2_bundle\\native_task_risk_v2_bundle\\data\\native_task_risk_dataset.csv",
+  "metadata_filename": "logistic_regression_balanced_metadata.json",
+  "dataset_path": "C:\\Users\\Dell\\Downloads\\native_task_risk_v2_bundle (2)\\native_task_risk_v2_bundle\\data\\native_task_risk_dataset.csv",
   "dataset_summary": {
     "rows": 70379,
     "unique_tasks": 6643,
