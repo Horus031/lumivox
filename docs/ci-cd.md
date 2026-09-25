@@ -131,9 +131,30 @@ Recommended configuration:
   `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - Health path: `/api/v1/health`
 - Automatic deploys: disabled
+- Python version: the exact value in `services/ai-api/.python-version`
+  (currently `3.11.9`)
+
+Keep the same environment variable names in staging and production while using
+different values/secrets for each environment. The AI API backend uses
+`SUPABASE_SECRET_KEY` as its single privileged Supabase credential; do not add
+new runtime dependencies on the legacy `SUPABASE_SERVICE_ROLE_KEY` name.
+
+For the native task-risk model, configure:
+
+- `NATIVE_TASK_RISK_REQUIRE_MODEL=true`
+- `NATIVE_TASK_RISK_MODEL_PATH=ml/artifacts/native-task-risk/logistic_regression_balanced.joblib`
+- `NATIVE_TASK_RISK_METADATA_PATH=ml/artifacts/native-task-risk/logistic_regression_balanced_metadata.json`
+- `NATIVE_TASK_RISK_CRON_SECRET=<environment-specific secret>`
+
+The legacy OULAD deadline-risk artifact is a separate model. Keep its Storage
+object path at `deadline-risk/random_forest.joblib`; never point the legacy
+runtime at the native logistic-regression artifact.
 
 Create a Deploy Hook for each service. The workflow appends `ref=<commit SHA>`
-to Render's hook, so Render deploys the exact commit that passed CI.
+to Render's hook, so Render deploys the exact commit that passed CI. After the
+deploy, the workflow requires the health endpoint to report both the exact Git
+revision and the exact native model version from the committed metadata before
+E2E or production smoke checks continue.
 
 ## Supabase
 
