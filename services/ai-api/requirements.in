@@ -13,5 +13,7 @@ joblib==1.6.0
 shap
 httpx
 matplotlib
+# Runtime is Python 3.11.9; contourpy 1.4+ requires Python 3.12+.
+contourpy<1.4
 seaborn
 pypdf
