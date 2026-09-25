@@ -324,7 +324,7 @@ def _normalize_priority(value: Any) -> int:
 def _load_model_artifact() -> dict[str, Any] | None:
     model_path_value = os.getenv(
         "NATIVE_TASK_RISK_MODEL_PATH",
-        "ml/artifacts/native-task-risk/native_task_risk_best_model.joblib",
+        "ml/artifacts/native-task-risk/logistic_regression_balanced.joblib",
     )
 
     model_path = _resolve_path(model_path_value)
@@ -344,7 +344,7 @@ def _load_model_artifact() -> dict[str, Any] | None:
 def _load_model_metadata() -> dict[str, Any]:
     metadata_path_value = os.getenv(
         "NATIVE_TASK_RISK_METADATA_PATH",
-        "ml/artifacts/native-task-risk/native_task_risk_model_metadata.json",
+        "ml/artifacts/native-task-risk/logistic_regression_balanced_metadata.json",
     )
 
     metadata_path = _resolve_path(metadata_path_value)
@@ -399,7 +399,7 @@ def validate_native_task_risk_artifact() -> dict[str, Any]:
             model_path = _resolve_path(
                 os.getenv(
                     "NATIVE_TASK_RISK_MODEL_PATH",
-                    "ml/artifacts/native-task-risk/native_task_risk_best_model.joblib",
+                    "ml/artifacts/native-task-risk/logistic_regression_balanced.joblib",
                 )
             )
             raise RuntimeError(

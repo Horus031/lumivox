@@ -8,8 +8,8 @@ import joblib
 
 AI_API_DIR = Path(__file__).resolve().parents[1]
 ARTIFACT_DIR = AI_API_DIR / "ml" / "artifacts" / "native-task-risk"
-ARTIFACT_PATH = ARTIFACT_DIR / "native_task_risk_best_model.joblib"
-METADATA_PATH = ARTIFACT_DIR / "native_task_risk_model_metadata.json"
+ARTIFACT_PATH = ARTIFACT_DIR / "logistic_regression_balanced.joblib"
+METADATA_PATH = ARTIFACT_DIR / "logistic_regression_balanced_metadata.json"
 
 
 def main() -> None:
