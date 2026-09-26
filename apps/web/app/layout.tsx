@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { siteConfig } from "@/lib/seo/site-config";
+import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -18,6 +18,23 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
 
   category: "education",
+
+  robots: isSearchIndexingEnabled
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      }
+    : {
+        index: false,
+        follow: false,
+      },
 };
 
 export default function RootLayout({

@@ -1,8 +1,16 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 
 import { redirectToDashboardIfOnboardingCompleted } from "@/lib/auth/onboarding-guard";
 import { getCurrentProfileWithWeights } from "@/features/profiles/profile.queries";
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function OnboardingPage() {
   return (
