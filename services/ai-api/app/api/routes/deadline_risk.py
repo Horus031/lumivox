@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app.schemas.deadline_risk import (
     DeadlineRiskPredictionRequest,
@@ -20,6 +20,14 @@ def predict_deadline_risk_endpoint(
     request: Request,
 ):
     runtime = request.app.state.deadline_risk_runtime
+
+    if runtime is None:
+        detail = getattr(
+            request.app.state,
+            "deadline_risk_runtime_error",
+            "Legacy deadline-risk runtime is unavailable.",
+        )
+        raise HTTPException(status_code=503, detail=detail)
 
     return predict_deadline_risk(
         runtime=runtime,

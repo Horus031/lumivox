@@ -1,3 +1,4 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
@@ -23,15 +24,33 @@ from app.api.routes import (
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
 )
+from app.services.native_task_risk_service import (
+    validate_native_task_risk_artifact,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    app.state.deadline_risk_runtime = load_deadline_risk_runtime()
+    # The legacy OULAD deadline-risk model must not block the whole API.
+    # Native task-risk v2 remains the required production model.
+    try:
+        app.state.deadline_risk_runtime = load_deadline_risk_runtime()
+        app.state.deadline_risk_runtime_error = None
+    except Exception as error:
+        logger.exception("Legacy deadline-risk runtime is unavailable.")
+        app.state.deadline_risk_runtime = None
+        app.state.deadline_risk_runtime_error = str(error)
+
+    app.state.native_task_risk_model = validate_native_task_risk_artifact()
 
     yield
 
     app.state.deadline_risk_runtime = None
+    app.state.deadline_risk_runtime_error = None
+    app.state.native_task_risk_model = None
 
 
 app = FastAPI(

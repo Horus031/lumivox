@@ -26,6 +26,8 @@ export default async function proxy(request: NextRequest) {
 
 function isUnlocalizedAppRoute(pathname: string) {
   return (
+    pathname === "/api" ||
+    pathname.startsWith("/api/") ||
     pathname === "/auth/confirm" ||
     pathname.startsWith("/auth/confirm/") ||
     pathname === "/auth/signout" ||

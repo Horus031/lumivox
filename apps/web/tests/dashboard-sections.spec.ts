@@ -1,9 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { loginAsTestUser } from "./helpers/auth";
 
-test("dashboard renders core intelligence and retention sections", async ({
-  page,
-}) => {
+test("dashboard renders core analytics sections", async ({ page }) => {
   await loginAsTestUser(page);
 
   await expect(
@@ -11,14 +9,14 @@ test("dashboard renders core intelligence and retention sections", async ({
   ).toBeVisible();
 
   await expect(
-    page.getByRole("heading", { name: /upcoming task risk scan/i })
-  ).toBeVisible();
-
-  await expect(
-    page.getByRole("heading", { name: /task status overview/i })
+    page.getByRole("heading", { name: /behaviour trend - last 7 days/i })
   ).toBeVisible();
 
   await expect(
     page.getByRole("heading", { name: /pbi history/i })
+  ).toBeVisible();
+
+  await expect(
+    page.getByRole("heading", { name: /task status overview/i })
   ).toBeVisible();
 });

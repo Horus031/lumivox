@@ -86,7 +86,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version-file: services/ai-api/.python-version
           cache: pip
           cache-dependency-path: |
             services/ai-api/requirements.txt
@@ -98,7 +98,10 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Compile Python source
-        run: python -m compileall -q app
+        run: python -m compileall -q app scripts
+
+      - name: Verify native task risk artifact
+        run: python scripts/verify_native_task_risk_artifact.py
 
       - name: Unit tests
         run: python -m pytest -q
