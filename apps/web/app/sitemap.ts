@@ -11,7 +11,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     return [];
   }
 
-  return routing.locales.map((locale) => ({
-    url: `${siteConfig.url}/${locale}`,
-  }));
+  const publicRoutes = [
+    "",
+    "/about",
+    "/features",
+    "/research",
+    "/privacy",
+    "/terms",
+    "/contact",
+  ] as const;
+
+  return publicRoutes.flatMap((pathname) =>
+    routing.locales.map((locale) => ({
+      url: `${siteConfig.url}/${locale}${pathname}`,
+    })),
+  );
 }

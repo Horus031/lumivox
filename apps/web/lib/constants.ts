@@ -54,41 +54,6 @@ export const steps = [
   },
 ];
 
-export const stats = [
-  { v: "47k+", key: "sessions" },
-  { v: "92%", key: "focus" },
-  { v: "4.9*", key: "rating" },
-  { v: "12 min", key: "saved" },
-];
-
-export const testimonials = [
-  {
-    key: "linh",
-    name: "Linh Nguyen",
-  },
-  {
-    key: "marcus",
-    name: "Marcus Reid",
-  },
-  {
-    key: "trang",
-    name: "Trang Pham",
-  },
-];
-
-export const plans = [
-  {
-    key: "starter",
-  },
-  {
-    key: "pro",
-    highlighted: true,
-  },
-  {
-    key: "campus",
-  },
-];
-
 export const faqs = [
   {
     key: "free",

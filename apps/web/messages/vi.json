@@ -240,25 +240,25 @@
     "nav": {
       "features": "Tính năng",
       "howItWorks": "Cách hoạt động",
-      "analytics": "Phân tích",
-      "pricing": "Bảng giá",
+      "research": "Nghiên cứu",
+      "about": "Giới thiệu",
       "faq": "FAQ",
       "signIn": "Đăng nhập",
       "getStarted": "Bắt đầu"
     },
     "hero": {
-      "badge": "Mới - trợ lý AI hành vi đang beta",
+      "badge": "Trí tuệ hành vi dựa trên nghiên cứu",
       "title": {
         "before": "Học với",
         "accent": "trí tuệ dịu nhẹ",
         "after": "."
       },
-      "subtitle": "Lumivox biến các phiên tập trung, nhiệm vụ và thói quen hằng ngày của bạn thành tín hiệu học tập cá nhân - rồi âm thầm gợi ý bước tiếp theo phù hợp nhất. Dành cho học sinh, sinh viên muốn tiến bộ mà không kiệt sức.",
+      "subtitle": "Lumivox là nền tảng học tập và năng suất tích hợp AI, kết hợp quản lý nhiệm vụ, phiên tập trung, phân tích hành vi và gợi ý học tập cá nhân hóa trong một không gian duy nhất.",
       "primaryCta": "Bắt đầu tập trung miễn phí",
       "secondaryCta": "Xem cách hoạt động",
       "proof": {
-        "freePlan": "Gói miễn phí lâu dài",
-        "noCard": "Không cần thẻ",
+        "freePlan": "Miễn phí khám phá",
+        "noCard": "Song ngữ EN / VI",
         "private": "Riêng tư mặc định"
       },
       "floating": {
@@ -271,15 +271,23 @@
           "subtitle": "Đang tập trung"
         },
         "streak": {
-          "title": "Chuỗi 12 ngày",
-          "subtitle": "+3 token đã nhận"
+          "title": "Nhiệm vụ gắn mục tiêu",
+          "subtitle": "Lập kế hoạch có ngữ cảnh"
         },
         "consistency": {
-          "title": "+18% tuần này",
-          "subtitle": "Độ đều đặn"
+          "title": "Mô thức hành vi",
+          "subtitle": "Tín hiệu có thể giải thích"
         }
-      },
-      "trustedBy": "Được tin dùng bởi người học tò mò từ"
+      }
+    },
+    "evidenceStrip": {
+      "label": "Nguyên tắc sản phẩm Lumivox",
+      "items": {
+        "planning": "Lập kế hoạch có AI hỗ trợ",
+        "analytics": "Phân tích hành vi",
+        "privacy": "Thiết kế chú trọng riêng tư",
+        "languages": "Tiếng Anh và tiếng Việt"
+      }
     },
     "features": {
       "eyebrow": "Mọi thứ bạn cần",
@@ -338,7 +346,8 @@
       "analytics": {
         "eyebrow": "Phân tích",
         "title": "Những mô thức cuối cùng cũng hiện rõ",
-        "desc": "Bản đồ nhiệt độ đều đặn 12 tuần, phân bố tập trung theo loại nhiệm vụ và KPI hằng tuần - tất cả đều nhẹ nhàng, dễ đọc, không chạy theo số đẹp.",
+        "desc": "Xem xu hướng tập trung, hoàn thành nhiệm vụ, hành vi deadline và các thành phần PBI có thể giải thích mà không biến hoạt động thành điểm số phù phiếm.",
+        "imageAlt": "Bảng phân tích hành vi Lumivox hiển thị xu hướng tập trung và thói quen học tập",
         "items": {
           "peakHours": "Khám phá khung giờ tập trung tốt nhất",
           "energy": "Nhận ra môn học khiến bạn kiệt sức hoặc có năng lượng",
@@ -348,7 +357,8 @@
       "focus": {
         "eyebrow": "Phiên tập trung",
         "title": "Bộ đếm giờ tôn trọng sự chú ý của bạn",
-        "desc": "Chế độ tối nhập vai, vòng thở theo nhịp và tín hiệu mềm để bắt đầu và kết thúc không đột ngột.",
+        "desc": "Thực hiện phiên tập trung có chủ đích và ghi lại thời gian thực tế cùng xao nhãng tạo nên lịch sử hành vi.",
+        "imageAlt": "Giao diện phiên tập trung Lumivox với bộ đếm giờ và điều khiển phiên",
         "modes": {
           "pomodoro": "Pomodoro",
           "deepWork": "Tập trung sâu",
@@ -359,81 +369,33 @@
       "rooms": {
         "eyebrow": "Phòng học",
         "title": "Học yên tĩnh - cùng nhau",
-        "desc": "Vào Calm Forest, Midnight Mode hoặc Library Quiet. Thấy người khác đang tập trung theo thời gian thực, cổ vũ bằng phản ứng nhẹ và không còn cảm giác một mình lúc 2 giờ sáng."
+        "desc": "Tạo hoặc tham gia không gian học chung với hiện diện, chat, voice và thử thách nhóm.",
+        "imageAlt": "Phòng học Lumivox hiển thị điều khiển cộng tác và hiện diện trực tiếp"
       }
     },
-    "stats": {
+    "researchEvidence": {
+      "eyebrow": "Đánh giá mô hình",
+      "title": "Trí tuệ hành vi dựa trên nghiên cứu",
+      "description": "Lumivox đánh giá rủi ro trễ nhiệm vụ bằng bộ phân loại native có phiên bản. Mọi số liệu bên dưới đến từ tập test độc lập, không phải claim về kết quả người học.",
+      "metrics": {
+        "snapshots": { "label": "Snapshot nhiệm vụ", "description": "Mẫu trong dataset mô hình native." },
+        "tasks": { "label": "Nhiệm vụ duy nhất", "description": "Nhiệm vụ riêng biệt trong dataset." },
+        "recall": { "label": "Recall test", "description": "Nhiệm vụ trễ được nhận diện trên tập test." },
+        "rocAuc": { "label": "ROC-AUC", "description": "Khả năng phân biệt trên tập test độc lập." }
+      },
+      "source": "Mô hình rủi ro nhiệm vụ native v2 - đánh giá test độc lập",
+      "cta": "Xem phương pháp"
+    },
+    "trust": {
+      "eyebrow": "Quyền riêng tư và minh bạch AI",
+      "title": "Tín hiệu hữu ích, với giới hạn được trình bày rõ",
+      "description": "Dữ liệu hành vi hỗ trợ lập kế hoạch và phản tư. Lumivox ghi rõ dữ liệu được xử lý, AI tham gia ở đâu và vì sao dự đoán chỉ nên hỗ trợ quyết định.",
+      "cta": "Đọc chi tiết quyền riêng tư",
       "items": {
-        "sessions": "Phiên học đã hoàn thành",
-        "focus": "Cảm thấy tập trung tốt hơn",
-        "rating": "Đánh giá trung bình",
-        "saved": "Tiết kiệm mỗi ngày học"
-      }
-    },
-    "testimonials": {
-      "eyebrow": "Được học sinh, sinh viên yêu thích",
-      "title": "Tâm trí bình tĩnh hơn, kết quả sắc nét hơn",
-      "items": {
-        "linh": {
-          "quote": "Lumivox giống một bạn học thật sự chú ý đến mình. Các gợi ý AI rất đúng lúc mà không gây phiền.",
-          "role": "Khoa học máy tính, NUS"
-        },
-        "marcus": {
-          "quote": "Mình bớt lên kế hoạch quá mức và bắt đầu hoàn thành thật sự. Chỉ riêng bản đồ nhiệt đã thay đổi cách mình nhìn cả tuần.",
-          "role": "Dự bị y khoa, Stanford"
-        },
-        "trang": {
-          "quote": "Calm Forest lúc 11 giờ tối với ba người bạn cùng im lặng tập trung là mẹo năng suất hay nhất mình từng tìm được.",
-          "role": "Sinh viên thiết kế, RMIT"
-        }
-      }
-    },
-    "pricing": {
-      "eyebrow": "Bảng giá",
-      "title": "Đơn giản, thân thiện với người học",
-      "subtitle": "Bắt đầu miễn phí. Nâng cấp khi bạn sẵn sàng dùng trợ lý AI.",
-      "popular": "Phổ biến nhất",
-      "plans": {
-        "starter": {
-          "name": "Starter",
-          "price": "Miễn phí",
-          "period": "lâu dài",
-          "desc": "Đủ những gì bạn cần để xây dựng thói quen tập trung.",
-          "features": [
-            "Nhiệm vụ không giới hạn",
-            "Bộ đếm tập trung và 4 phòng",
-            "Phân tích hằng tuần",
-            "Chuỗi ngày và token"
-          ],
-          "cta": "Bắt đầu miễn phí"
-        },
-        "pro": {
-          "name": "Pro",
-          "price": "$6",
-          "period": "/ tháng",
-          "desc": "Mở khóa đầy đủ trợ lý AI và phân tích chuyên sâu.",
-          "features": [
-            "Tất cả trong Starter",
-            "Trợ lý AI hành vi",
-            "Bản đồ nhiệt và insight 12 tuần",
-            "Tất cả phòng nền",
-            "Khiên bảo vệ chuỗi"
-          ],
-          "cta": "Dùng thử Pro"
-        },
-        "campus": {
-          "name": "Campus",
-          "price": "Tùy chỉnh",
-          "period": "cho nhóm",
-          "desc": "Dành cho trường, nhóm học và câu lạc bộ.",
-          "features": [
-            "Tất cả trong Pro",
-            "Phòng nhóm và bảng xếp hạng",
-            "Phân tích cho tổ chức",
-            "Hỗ trợ ưu tiên"
-          ],
-          "cta": "Liên hệ"
-        }
+        "purpose": { "title": "Dữ liệu đúng mục đích", "description": "Nhiệm vụ, mục tiêu, phiên tập trung và ngữ cảnh được chọn hỗ trợ đúng tính năng sử dụng chúng." },
+        "assistance": { "title": "AI là công cụ hỗ trợ", "description": "Gợi ý và ước lượng rủi ro có thể sai và cần được người học xem xét." },
+        "transparency": { "title": "Bằng chứng có ngữ cảnh", "description": "Metric model, usability và nền tảng được ghi nhãn riêng cùng nguồn tương ứng." },
+        "control": { "title": "Truy cập được bảo vệ", "description": "Xác thực Supabase và row-level policy giới hạn quyền truy cập vào bản ghi phù hợp." }
       }
     },
     "faq": {
@@ -442,7 +404,7 @@
       "items": {
         "free": {
           "question": "Lumivox có miễn phí không?",
-          "answer": "Có - gói Starter miễn phí lâu dài và bao gồm nhiệm vụ, bộ đếm tập trung, bốn phòng nền và phân tích hằng tuần."
+          "answer": "Lumivox hiện miễn phí để khám phá trong khuôn khổ đồ án đại học. Website không quảng bá gói trả phí hay subscription."
         },
         "coach": {
           "question": "Trợ lý AI hoạt động như thế nào?",
@@ -450,23 +412,23 @@
         },
         "privacy": {
           "question": "Dữ liệu của tôi có riêng tư không?",
-          "answer": "Dữ liệu hành vi thuộc về bạn. Chúng tôi không bán dữ liệu, và bạn có thể xuất hoặc xóa mọi thứ trong phần cài đặt bất kỳ lúc nào."
+          "answer": "Quyền truy cập bản ghi ứng dụng được bảo vệ bằng xác thực và row-level policy. Một số tính năng AI gửi ngữ cảnh đã chọn đến provider model đã cấu hình; xem trang quyền riêng tư để biết implementation hiện tại."
         },
         "friends": {
           "question": "Tôi có thể học cùng bạn bè không?",
-          "answer": "Có - tham gia các phòng học theo chủ đề, xem hiện diện trực tiếp và dùng phản ứng nhẹ. Phòng nhóm nằm trong gói Campus."
+          "answer": "Có. Phòng học hỗ trợ hiện diện, chat, voice, reaction và thử thách nhóm."
         }
       }
     },
     "cta": {
-      "title": "Biến phiên học tiếp theo thành phiên tốt nhất của bạn.",
-      "subtitle": "Tham gia cùng hàng nghìn người học dùng Lumivox để tập trung sâu hơn, lập kế hoạch thông minh hơn và tự hào hơn về tuần của mình.",
+      "title": "Xây dựng thói quen học bình tĩnh và có thể đo lường hơn cùng Lumivox.",
+      "subtitle": "Lập kế hoạch, tập trung có chủ đích và học từ mô thức hành vi của chính bạn với gợi ý có AI hỗ trợ.",
       "primaryCta": "Bắt đầu miễn phí",
       "secondaryCta": "Khám phá tính năng",
       "proof": {
-        "setup": "Thiết lập trong 60 giây",
+        "explore": "Miễn phí khám phá",
         "privacy": "Ưu tiên quyền riêng tư",
-        "students": "Được 47k+ người học yêu thích"
+        "behavior": "AI dựa trên hành vi"
       }
     },
     "footer": {
@@ -474,12 +436,11 @@
       "product": {
         "title": "Sản phẩm",
         "features": "Tính năng",
-        "analytics": "Phân tích",
-        "pricing": "Bảng giá",
+        "research": "Nghiên cứu",
         "openApp": "Mở ứng dụng"
       },
-      "company": {
-        "title": "Công ty",
+      "project": {
+        "title": "Dự án",
         "about": "Giới thiệu",
         "privacy": "Quyền riêng tư",
         "terms": "Điều khoản",
