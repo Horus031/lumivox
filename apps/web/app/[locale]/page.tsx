@@ -17,6 +17,15 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { siteConfig } from "@/lib/seo/site-config";
 
+import { JsonLd } from "@/components/seo/json-ld";
+
+import {
+  getLandingStructuredData,
+  type SeoLocale,
+} from "@/lib/seo/structured-data";
+
+import { isSearchIndexingEnabled } from "@/lib/seo/site-config";
+
 type LandingPageProps = {
   params: Promise<{
     locale: string;
@@ -27,8 +36,7 @@ const landingSeo = {
   en: {
     title: "AI Study Planner & Focus Analytics",
 
-    fullTitle:
-      "Lumivox – AI Study Planner & Focus Analytics",
+    fullTitle: "Lumivox – AI Study Planner & Focus Analytics",
 
     description:
       "Plan tasks, improve focus, understand your study habits, and get personalized AI learning recommendations with Lumivox.",
@@ -39,8 +47,7 @@ const landingSeo = {
   vi: {
     title: "Ứng dụng học tập AI & quản lý tập trung",
 
-    fullTitle:
-      "Lumivox – Ứng dụng học tập AI & quản lý tập trung",
+    fullTitle: "Lumivox – Ứng dụng học tập AI & quản lý tập trung",
 
     description:
       "Lumivox giúp sinh viên quản lý nhiệm vụ, tập trung học tập, phân tích thói quen và nhận gợi ý học tập cá nhân hóa từ AI.",
@@ -88,10 +95,7 @@ export async function generateMetadata({
 
       locale: seo.openGraphLocale,
 
-      alternateLocale:
-        locale === "en"
-          ? ["vi_VN"]
-          : ["en_US"],
+      alternateLocale: locale === "en" ? ["vi_VN"] : ["en_US"],
     },
 
     twitter: {
@@ -104,22 +108,36 @@ export async function generateMetadata({
   };
 }
 
-export default function LandingPage() {
+export default async function LandingPage({ params }: LandingPageProps) {
+  const { locale } = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const structuredData = getLandingStructuredData(locale as SeoLocale);
+
   return (
-    <div className="min-h-screen bg-transparent text-foreground">
-      <NavBar />
-      <main>
-        <Hero />
-        <Features />
-        <HowItWorks />
-        <Showcase />
-        <Stats />
-        <Testimonials />
-        <Pricing />
-        <FAQ />
-        <CTA />
-      </main>
-      <Footer />
-    </div>
+    <>
+      {isSearchIndexingEnabled && <JsonLd data={structuredData} />}
+
+      <div className="min-h-screen bg-transparent text-foreground">
+        <NavBar />
+
+        <main>
+          <Hero />
+          <Features />
+          <HowItWorks />
+          <Showcase />
+          <Stats />
+          <Testimonials />
+          <Pricing />
+          <FAQ />
+          <CTA />
+        </main>
+
+        <Footer />
+      </div>
+    </>
   );
 }
