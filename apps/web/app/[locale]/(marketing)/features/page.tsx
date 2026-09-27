@@ -38,9 +38,9 @@ export default async function FeaturesPage({ params }: PageProps) {
           ))}
         </div>
         <p className="pt-10 text-[14px] text-secondary">
-          {locale === "en" ? "See how the task-risk capability is evaluated in " : "Xem cách năng lực dự đoán rủi ro nhiệm vụ được đánh giá tại "}
+          {locale === "en" ? "See how Lumivox evaluates task-delay prediction in " : "Xem cách Lumivox đánh giá dự đoán trễ nhiệm vụ tại "}
           <Link href="/research" className="font-medium text-primary underline underline-offset-4">
-            {locale === "en" ? "Research & Evaluation" : "Nghiên cứu & đánh giá"}
+            {locale === "en" ? "the task-delay model research" : "nghiên cứu mô hình trễ nhiệm vụ"}
           </Link>.
         </p>
       </PublicPageBody>

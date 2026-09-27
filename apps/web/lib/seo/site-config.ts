@@ -5,10 +5,10 @@ export const siteConfig = {
 
   url: (process.env.SITE_URL ?? productionUrl).replace(/\/+$/, ""),
 
-  defaultTitle: "Lumivox – AI Study Planner & Focus Analytics",
+  defaultTitle: "Lumivox – AI Study Planner for Students",
 
   defaultDescription:
-    "Lumivox is an AI-powered study and productivity platform that helps students plan tasks, improve focus, understand learning habits, and receive personalized recommendations.",
+    "Lumivox is an AI study planner for students that combines task planning, focus sessions, behavioral analytics, and personalized AI-assisted recommendations in one workspace.",
 } as const;
 
 export const isSearchIndexingEnabled =

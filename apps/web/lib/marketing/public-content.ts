@@ -3,9 +3,9 @@ export type MarketingLocale = "en" | "vi";
 export const publicPageSeo = {
   en: {
     home: {
-      title: "AI Study Planner & Focus Analytics",
+      title: "AI Study Planner for Students",
       description:
-        "Plan tasks, improve focus, understand study habits, and receive personalized AI-assisted learning recommendations with Lumivox.",
+        "Plan tasks, run focus sessions, understand study habits, and get AI-assisted recommendations with Lumivox, an AI study planner for students.",
     },
     about: {
       title: "About Lumivox",
@@ -13,12 +13,12 @@ export const publicPageSeo = {
         "Learn why Lumivox combines study planning, behavioral analytics, and explainable AI in a bilingual learning workspace.",
     },
     features: {
-      title: "Study Planning, Focus & AI Features",
+      title: "Study Planner, Focus Timer & AI Features",
       description:
-        "Explore Lumivox features for goals, tasks, focus sessions, behavioral analytics, task-risk prediction, study rooms, roadmaps, and document-grounded AI.",
+        "Explore Lumivox study planning, focus timer, behavioral analytics, task-risk prediction, AI recommendations, study rooms, and grounded AI tools.",
     },
     research: {
-      title: "Research & Model Evaluation",
+      title: "Task-Delay Risk Model & Study Behavior Research",
       description:
         "Review the Lumivox task-delay risk methodology, dataset, held-out test metrics, usability study, deployment checks, limitations, and privacy considerations.",
     },
@@ -40,9 +40,9 @@ export const publicPageSeo = {
   },
   vi: {
     home: {
-      title: "Ứng dụng học tập AI & quản lý tập trung",
+      title: "Ứng dụng học tập AI cho sinh viên",
       description:
-        "Quản lý nhiệm vụ, cải thiện tập trung, hiểu thói quen học tập và nhận gợi ý cá nhân hóa có AI hỗ trợ cùng Lumivox.",
+        "Lập kế hoạch, thực hiện phiên tập trung, hiểu thói quen học và nhận gợi ý từ AI với Lumivox, ứng dụng học tập AI dành cho sinh viên.",
     },
     about: {
       title: "Giới thiệu Lumivox",
@@ -50,12 +50,12 @@ export const publicPageSeo = {
         "Tìm hiểu vì sao Lumivox kết hợp lập kế hoạch học tập, phân tích hành vi và AI có thể giải thích trong một không gian song ngữ.",
     },
     features: {
-      title: "Tính năng lập kế hoạch, tập trung và AI",
+      title: "Lập kế hoạch học tập, tập trung & AI",
       description:
-        "Khám phá các tính năng mục tiêu, nhiệm vụ, phiên tập trung, phân tích hành vi, dự đoán rủi ro trễ hạn, phòng học, lộ trình và AI dựa trên tài liệu.",
+        "Khám phá tính năng lập kế hoạch học tập, bộ đếm tập trung, phân tích hành vi, dự đoán trễ nhiệm vụ, gợi ý AI, phòng học và AI có nguồn.",
     },
     research: {
-      title: "Nghiên cứu & đánh giá mô hình",
+      title: "Nghiên cứu hành vi học tập & mô hình rủi ro nhiệm vụ",
       description:
         "Xem phương pháp dự đoán rủi ro trễ nhiệm vụ, dữ liệu, chỉ số test độc lập, nghiên cứu usability, kiểm tra triển khai, giới hạn và quyền riêng tư của Lumivox.",
     },
@@ -169,36 +169,36 @@ export const aboutContent = {
 export const featureContent = {
   en: {
     eyebrow: "Product capabilities",
-    title: "One workflow from intention to reflection",
+    title: "Study planner, focus timer, and AI tools in one workflow",
     description:
-      "Each capability contributes to a shared behavioral picture. Features are designed to work together while keeping users in control of their study decisions.",
+      "Lumivox connects study planning, focused work, behavioral insights, and AI-assisted recommendations while keeping students in control of their decisions.",
     items: [
-      ["Goal and task planning", "Break learning objectives into dated, prioritized tasks. Link work to short- or long-term goals so progress retains its context."],
-      ["Focus sessions", "Run structured focus sessions, record actual focused time and distractions, and use that history to understand working patterns."],
-      ["Behavioral analytics", "Review task completion, deadline adherence, consistency, and focus quality through a Personal Behavior Index and interpretable component-level signals."],
-      ["AI recommendations", "Receive contextual suggestions and weekly reflections based on recorded activity. Recommendations are support for judgment, not guarantees or professional advice."],
-      ["Task-risk prediction", "Estimate whether an active task may be late within a 14-day horizon. The current native model uses a documented 0.4 decision threshold and exposes explanation metadata."],
+      ["Study planning and task management", "Break learning objectives into dated, prioritized tasks. Link work to short- or long-term goals so every study plan retains its context."],
+      ["Focus timer and study sessions", "Run structured focus sessions, record actual focused time and distractions, and use that history to understand working patterns."],
+      ["Study analytics and behavioral insights", "Review task completion, deadline adherence, consistency, and focus quality through a Personal Behavior Index and interpretable component-level signals."],
+      ["AI-assisted study recommendations", "Receive contextual suggestions and weekly reflections based on recorded activity. Recommendations support student judgment; they are not guarantees or professional advice."],
+      ["Task-delay risk prediction", "Estimate whether an active task may be late within a 14-day horizon. The current native model uses a documented 0.4 decision threshold and exposes explanation metadata."],
       ["Learning roadmaps", "Generate an editable study roadmap, review its goals and tasks, and decide whether to apply it to the workspace."],
       ["Study rooms", "Create or join study spaces with presence, text chat, voice participation, group membership, and shared weekly challenges."],
-      ["Documents and grounded AI", "Upload learning documents, process them into searchable chunks, and ask questions with retrieved sources when document context is selected."],
-      ["Reflections and engagement", "Use weekly reflection, streaks, tokens, and progress snapshots as feedback mechanisms. These signals encourage continuity without claiming academic outcomes."],
+      ["Document-grounded AI", "Upload learning documents, process them into searchable chunks, and ask questions with retrieved sources when document context is selected."],
+      ["Weekly reflection and study habits", "Use weekly reflection, streaks, tokens, and progress snapshots as feedback mechanisms. These signals support consistent study habits without claiming academic outcomes."],
     ],
   },
   vi: {
     eyebrow: "Năng lực sản phẩm",
-    title: "Một quy trình từ ý định đến phản tư",
+    title: "Lập kế hoạch, tập trung và công cụ AI trong một quy trình",
     description:
-      "Mỗi năng lực đóng góp vào một bức tranh hành vi chung. Các tính năng phối hợp với nhau nhưng vẫn để người dùng quyết định cách học của mình.",
+      "Lumivox kết nối lập kế hoạch học tập, quản lý thời gian tập trung, phân tích thói quen và gợi ý AI nhưng vẫn để sinh viên tự quyết định cách học.",
     items: [
-      ["Mục tiêu và nhiệm vụ", "Chia mục tiêu học tập thành nhiệm vụ có ngày, mức ưu tiên và liên kết với mục tiêu ngắn hoặc dài hạn để tiến độ luôn có ngữ cảnh."],
-      ["Phiên tập trung", "Thực hiện phiên tập trung có cấu trúc, ghi lại thời gian tập trung thực tế và xao nhãng, rồi dùng lịch sử đó để hiểu mô thức làm việc."],
-      ["Phân tích hành vi", "Xem mức hoàn thành nhiệm vụ, tuân thủ deadline, độ đều đặn và chất lượng tập trung qua Chỉ số Hành vi Cá nhân cùng các tín hiệu có thể giải thích."],
-      ["Gợi ý từ AI", "Nhận gợi ý theo ngữ cảnh và phản tư tuần dựa trên hoạt động đã ghi. Gợi ý hỗ trợ phán đoán, không phải bảo đảm hay tư vấn chuyên môn."],
-      ["Dự đoán rủi ro nhiệm vụ", "Ước lượng nhiệm vụ đang hoạt động có thể bị trễ trong 14 ngày hay không. Mô hình native hiện tại dùng ngưỡng 0.4 đã ghi tài liệu và cung cấp metadata giải thích."],
+      ["Lập kế hoạch học tập và quản lý nhiệm vụ", "Chia mục tiêu học tập thành nhiệm vụ có ngày, mức ưu tiên và liên kết với mục tiêu ngắn hoặc dài hạn để kế hoạch luôn có ngữ cảnh."],
+      ["Bộ đếm tập trung và phiên học", "Thực hiện phiên tập trung có cấu trúc, ghi lại thời gian tập trung thực tế và xao nhãng, rồi dùng lịch sử đó để hiểu mô thức làm việc."],
+      ["Phân tích thói quen và hành vi học tập", "Xem mức hoàn thành nhiệm vụ, tuân thủ deadline, độ đều đặn và chất lượng tập trung qua Chỉ số Hành vi Cá nhân cùng các tín hiệu có thể giải thích."],
+      ["Gợi ý học tập có AI hỗ trợ", "Nhận gợi ý theo ngữ cảnh và phản tư tuần dựa trên hoạt động đã ghi. Gợi ý hỗ trợ phán đoán của sinh viên, không phải bảo đảm hay tư vấn chuyên môn."],
+      ["Dự đoán rủi ro trễ nhiệm vụ", "Ước lượng nhiệm vụ đang hoạt động có thể bị trễ trong 14 ngày hay không. Mô hình native hiện tại dùng ngưỡng 0.4 đã ghi tài liệu và cung cấp metadata giải thích."],
       ["Lộ trình học tập", "Tạo lộ trình có thể chỉnh sửa, xem lại mục tiêu và nhiệm vụ, sau đó tự quyết định có áp dụng vào workspace hay không."],
       ["Phòng học", "Tạo hoặc tham gia không gian học với hiện diện, chat văn bản, voice, thành viên nhóm và thử thách tuần chung."],
-      ["Tài liệu và AI có nguồn", "Tải tài liệu học, xử lý thành các đoạn có thể tìm kiếm và đặt câu hỏi kèm nguồn truy xuất khi chọn ngữ cảnh tài liệu."],
-      ["Phản tư và duy trì", "Dùng phản tư tuần, streak, token và snapshot tiến độ như cơ chế phản hồi. Các tín hiệu khuyến khích tính liên tục nhưng không claim kết quả học tập."],
+      ["AI có nguồn từ tài liệu", "Tải tài liệu học, xử lý thành các đoạn có thể tìm kiếm và đặt câu hỏi kèm nguồn truy xuất khi chọn ngữ cảnh tài liệu."],
+      ["Phản tư tuần và thói quen học tập", "Dùng phản tư tuần, streak, token và snapshot tiến độ như cơ chế phản hồi. Các tín hiệu hỗ trợ duy trì thói quen mà không claim kết quả học tập."],
     ],
   },
 } as const;

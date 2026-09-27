@@ -27,8 +27,8 @@ const metricRows = [
 const copy = {
   en: {
     eyebrow: "Research and evaluation",
-    title: "Evidence with its source and limitations attached",
-    description: "Lumivox evaluates a native task-delay risk classifier and the usability of the wider product. Model metrics, usability outcomes, and platform records are reported separately because they answer different questions.",
+    title: "Research and evaluation of task-delay risk",
+    description: "Lumivox studies task-delay prediction using behavioral data and an interpretable machine-learning classifier. Model metrics, usability outcomes, and platform records are reported separately because they answer different questions.",
     sections: [
       ["Problem definition", "The model estimates whether an active task is likely to become late within a 14-day prediction horizon. It supports prioritization and reflection; it does not predict grades, personal ability, or academic success."],
       ["Behavioral data pipeline", "Versioned task snapshots are derived from Lumivox task and activity records. Features are prepared under the native-task-risk-v2 schema, split by unique task into training, validation, and held-out test groups, and evaluated without treating repeated snapshots of one task as independent tasks across splits."],
@@ -59,8 +59,8 @@ const copy = {
   },
   vi: {
     eyebrow: "Nghiên cứu và đánh giá",
-    title: "Bằng chứng luôn đi cùng nguồn và giới hạn",
-    description: "Lumivox đánh giá riêng bộ phân loại rủi ro trễ nhiệm vụ native và usability của toàn sản phẩm. Metric model, kết quả usability và bản ghi nền tảng được tách biệt vì chúng trả lời các câu hỏi khác nhau.",
+    title: "Nghiên cứu hành vi học tập và dự đoán trễ nhiệm vụ",
+    description: "Lumivox nghiên cứu dự đoán trễ nhiệm vụ từ dữ liệu hành vi học tập bằng một bộ phân loại machine learning có thể diễn giải. Metric model, kết quả usability và bản ghi nền tảng được tách biệt vì chúng trả lời các câu hỏi khác nhau.",
     sections: [
       ["Định nghĩa vấn đề", "Mô hình ước lượng một nhiệm vụ đang hoạt động có khả năng bị trễ trong 14 ngày hay không. Tín hiệu hỗ trợ ưu tiên và phản tư; nó không dự đoán điểm số, năng lực cá nhân hay thành công học tập."],
       ["Pipeline dữ liệu hành vi", "Các snapshot nhiệm vụ có phiên bản được tạo từ bản ghi nhiệm vụ và hoạt động Lumivox. Feature được chuẩn bị theo schema native-task-risk-v2, chia theo nhiệm vụ duy nhất thành train, validation và test độc lập, tránh coi các snapshot lặp của cùng nhiệm vụ là nhiệm vụ độc lập ở nhiều tập."],
@@ -121,7 +121,7 @@ export default async function ResearchPage({ params }: PageProps) {
 
         <p className="border-b border-border py-6 text-[13px] text-secondary">
           <Link href="/features" className="font-medium text-primary underline underline-offset-4">
-            {locale === "en" ? "See task-risk prediction in the product context" : "Xem dự đoán rủi ro nhiệm vụ trong ngữ cảnh sản phẩm"}
+            {locale === "en" ? "Explore task-delay risk prediction features" : "Khám phá tính năng dự đoán rủi ro trễ nhiệm vụ"}
           </Link>
         </p>
 

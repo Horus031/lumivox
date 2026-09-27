@@ -34,10 +34,10 @@ export default async function AboutPage({ params }: PageProps) {
         ))}
         <div className="flex flex-wrap gap-3 pt-10">
           <Link href="/features" className="rounded-lg bg-primary px-4 py-2.5 text-[13px] font-medium text-primary-foreground">
-            {locale === "en" ? "Explore the product" : "Khám phá sản phẩm"}
+            {locale === "en" ? "Explore Lumivox study features" : "Khám phá tính năng học tập Lumivox"}
           </Link>
           <Link href="/research" className="rounded-lg border border-border px-4 py-2.5 text-[13px] font-medium">
-            {locale === "en" ? "Read the methodology" : "Đọc phương pháp nghiên cứu"}
+            {locale === "en" ? "Read the task-delay model evaluation" : "Đọc đánh giá mô hình dự đoán trễ nhiệm vụ"}
           </Link>
         </div>
       </PublicPageBody>

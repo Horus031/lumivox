@@ -246,15 +246,15 @@
       "getStarted": "Get started"
     },
     "hero": {
-      "badge": "Research-driven behavioral intelligence",
+      "badge": "Study with calm intelligence",
       "title": {
-        "before": "Study with",
-        "accent": "calm intelligence",
+        "before": "An AI study planner for",
+        "accent": "calmer, more measurable learning",
         "after": "."
       },
-      "subtitle": "Lumivox is an AI-powered study and productivity platform that combines task planning, focus sessions, behavioral analytics, and personalized learning recommendations in one workspace.",
+      "subtitle": "Lumivox is an AI study planner for students that combines task planning, focus sessions, behavioral analytics, and personalized AI-assisted recommendations in one workspace.",
       "primaryCta": "Start focusing free",
-      "secondaryCta": "See how it works",
+      "secondaryCta": "See how AI study planning works",
       "proof": {
         "freePlan": "Free to explore",
         "noCard": "Bilingual EN / VI",
@@ -383,13 +383,13 @@
         "rocAuc": { "label": "ROC-AUC", "description": "Held-out discrimination performance." }
       },
       "source": "Native task-risk model v2 - held-out test evaluation",
-      "cta": "View methodology"
+      "cta": "View task-risk methodology"
     },
     "trust": {
       "eyebrow": "Privacy and AI transparency",
       "title": "Useful signals, with their limits visible",
       "description": "Behavioral data supports planning and reflection. Lumivox documents what is processed, where AI is involved, and why predictions should remain decision support.",
-      "cta": "Read privacy details",
+      "cta": "Read Lumivox privacy and data use",
       "items": {
         "purpose": { "title": "Purpose-limited data", "description": "Tasks, goals, focus records, and selected context support the features that use them." },
         "assistance": { "title": "AI as assistance", "description": "Recommendations and risk estimates may be wrong and should be reviewed by the learner." },
@@ -423,7 +423,7 @@
       "title": "Build a calmer, more measurable study routine with Lumivox.",
       "subtitle": "Plan your work, focus with intention, and learn from your own behavioral patterns with AI-assisted recommendations.",
       "primaryCta": "Get started free",
-      "secondaryCta": "Explore features",
+      "secondaryCta": "Explore Lumivox study features",
       "proof": {
         "explore": "Free to explore",
         "privacy": "Privacy-first",

@@ -7,12 +7,12 @@ const applicationId = `${siteConfig.url}/#application`;
 const localizedStructuredData = {
   en: {
     description:
-      "Lumivox is an AI-powered study and productivity platform that helps students plan tasks, improve focus, understand learning habits, and receive personalized learning recommendations.",
+      "Lumivox is an AI study planner for students that combines task planning, focus sessions, behavioral analytics, and personalized AI-assisted recommendations in one workspace.",
   },
 
   vi: {
     description:
-      "Lumivox là nền tảng học tập và năng suất tích hợp AI giúp sinh viên quản lý nhiệm vụ, cải thiện khả năng tập trung, phân tích thói quen học tập và nhận gợi ý cá nhân hóa.",
+      "Lumivox là ứng dụng học tập AI cho sinh viên, kết hợp lập kế hoạch nhiệm vụ, phiên tập trung, phân tích hành vi và gợi ý học tập cá nhân hóa trong một không gian duy nhất.",
   },
 } as const;
 

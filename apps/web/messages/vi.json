@@ -247,15 +247,15 @@
       "getStarted": "Bắt đầu"
     },
     "hero": {
-      "badge": "Trí tuệ hành vi dựa trên nghiên cứu",
+      "badge": "Học với trí tuệ dịu nhẹ",
       "title": {
-        "before": "Học với",
-        "accent": "trí tuệ dịu nhẹ",
+        "before": "Ứng dụng học tập AI cho",
+        "accent": "việc học bình tĩnh và có thể đo lường hơn",
         "after": "."
       },
-      "subtitle": "Lumivox là nền tảng học tập và năng suất tích hợp AI, kết hợp quản lý nhiệm vụ, phiên tập trung, phân tích hành vi và gợi ý học tập cá nhân hóa trong một không gian duy nhất.",
+      "subtitle": "Lumivox là ứng dụng học tập AI cho sinh viên, kết hợp lập kế hoạch nhiệm vụ, phiên tập trung, phân tích hành vi và gợi ý học tập cá nhân hóa trong một không gian duy nhất.",
       "primaryCta": "Bắt đầu tập trung miễn phí",
-      "secondaryCta": "Xem cách hoạt động",
+      "secondaryCta": "Xem cách lập kế hoạch học tập với AI",
       "proof": {
         "freePlan": "Miễn phí khám phá",
         "noCard": "Song ngữ EN / VI",
@@ -384,13 +384,13 @@
         "rocAuc": { "label": "ROC-AUC", "description": "Khả năng phân biệt trên tập test độc lập." }
       },
       "source": "Mô hình rủi ro nhiệm vụ native v2 - đánh giá test độc lập",
-      "cta": "Xem phương pháp"
+      "cta": "Xem phương pháp dự đoán rủi ro nhiệm vụ"
     },
     "trust": {
       "eyebrow": "Quyền riêng tư và minh bạch AI",
       "title": "Tín hiệu hữu ích, với giới hạn được trình bày rõ",
       "description": "Dữ liệu hành vi hỗ trợ lập kế hoạch và phản tư. Lumivox ghi rõ dữ liệu được xử lý, AI tham gia ở đâu và vì sao dự đoán chỉ nên hỗ trợ quyết định.",
-      "cta": "Đọc chi tiết quyền riêng tư",
+      "cta": "Đọc quyền riêng tư và sử dụng dữ liệu Lumivox",
       "items": {
         "purpose": { "title": "Dữ liệu đúng mục đích", "description": "Nhiệm vụ, mục tiêu, phiên tập trung và ngữ cảnh được chọn hỗ trợ đúng tính năng sử dụng chúng." },
         "assistance": { "title": "AI là công cụ hỗ trợ", "description": "Gợi ý và ước lượng rủi ro có thể sai và cần được người học xem xét." },
@@ -424,7 +424,7 @@
       "title": "Xây dựng thói quen học bình tĩnh và có thể đo lường hơn cùng Lumivox.",
       "subtitle": "Lập kế hoạch, tập trung có chủ đích và học từ mô thức hành vi của chính bạn với gợi ý có AI hỗ trợ.",
       "primaryCta": "Bắt đầu miễn phí",
-      "secondaryCta": "Khám phá tính năng",
+      "secondaryCta": "Khám phá tính năng học tập Lumivox",
       "proof": {
         "explore": "Miễn phí khám phá",
         "privacy": "Ưu tiên quyền riêng tư",
