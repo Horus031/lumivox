@@ -36,11 +36,11 @@ export default function NavBar() {
           <Link href="/research" className="hover:text-foreground transition-colors">
             {t("research")}
           </Link>
+          <Link href="/blog" className="hover:text-foreground transition-colors">
+            {t("blog")}
+          </Link>
           <Link href="/about" className="hover:text-foreground transition-colors">
             {t("about")}
-          </Link>
-          <Link href="/#faq" className="hover:text-foreground transition-colors">
-            {t("faq")}
           </Link>
         </nav>
         <div className="flex items-center gap-2">

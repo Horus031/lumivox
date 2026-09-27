@@ -1,10 +1,16 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
+const withMDX = createMDX();
+
 const nextConfig: NextConfig = {
+  pageExtensions: ["js", "jsx", "ts", "tsx", "md", "mdx"],
+
   allowedDevOrigins: ["127.0.0.1", "0.0.0.0"],
+
   experimental: {
     serverActions: {
       bodySizeLimit: "10mb",
@@ -12,4 +18,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withNextIntl(nextConfig);
+export default withNextIntl(withMDX(nextConfig));

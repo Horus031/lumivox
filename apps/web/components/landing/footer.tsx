@@ -39,6 +39,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link href="/blog" className="hover:text-foreground">
+                {t("product.blog")}
+              </Link>
+            </li>
+            <li>
               <Link href="/auth/login" className="hover:text-foreground">
                 {t("product.openApp")}
               </Link>

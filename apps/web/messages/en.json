@@ -240,6 +240,7 @@
       "features": "Features",
       "howItWorks": "How it works",
       "research": "Research",
+      "blog": "Blog",
       "about": "About",
       "faq": "FAQ",
       "signIn": "Sign in",
@@ -436,6 +437,7 @@
         "title": "Product",
         "features": "Features",
         "research": "Research",
+        "blog": "Blog",
         "openApp": "Open app"
       },
       "project": {
