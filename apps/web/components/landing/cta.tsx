@@ -1,4 +1,4 @@
-import { ArrowRight, Flame, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { ArrowRight, BrainCircuit, CircleDollarSign, ShieldCheck, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -9,7 +9,7 @@ export default function CTA() {
   return (
     <section className="py-24">
       <div className="max-w-310 mx-auto px-6">
-        <div className="relative overflow-hidden rounded-3xl border border-border bg-gradient-hero text-foreground p-10 md:p-16 text-center">
+        <div className="relative overflow-hidden rounded-lg border border-border bg-primary p-10 text-center text-primary-foreground md:p-16">
           <div
             className="pointer-events-none absolute inset-0 opacity-30 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)]"
             style={{
@@ -32,22 +32,22 @@ export default function CTA() {
             >
               {t("primaryCta")} <ArrowRight className="size-4" />
             </Link>
-            <a
-              href="#features"
+            <Link
+              href="/features"
               className="inline-flex items-center h-11 px-5 rounded-lg border border-white/30 text-[14px] font-medium hover:bg-white/10 transition-colors"
             >
               {t("secondaryCta")}
-            </a>
+            </Link>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[12.5px] opacity-85">
             <span className="flex items-center gap-1.5">
-              <Zap className="size-3.5" /> {t("proof.setup")}
+              <CircleDollarSign className="size-3.5" /> {t("proof.explore")}
             </span>
             <span className="flex items-center gap-1.5">
               <ShieldCheck className="size-3.5" /> {t("proof.privacy")}
             </span>
             <span className="flex items-center gap-1.5">
-              <Flame className="size-3.5" /> {t("proof.students")}
+              <BrainCircuit className="size-3.5" /> {t("proof.behavior")}
             </span>
           </div>
         </div>

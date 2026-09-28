@@ -1,11 +1,19 @@
 import { Suspense } from "react";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 
 import { redirectToOnboardingIfNeeded } from "@/lib/auth/onboarding-guard";
 import { ProtectedAppShell } from "@/features/app-shell/components/protected-app-shell";
 
 type ProtectedLayoutProps = {
   children: ReactNode;
+};
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function ProtectedLayout({

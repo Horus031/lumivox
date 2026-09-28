@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePathname, useRouter } from "@/i18n/navigation";
+import { getLocalizedBlogPath } from "@/lib/blog/slugs";
 import { Button } from "./ui/button";
 
 const languages = [
@@ -28,8 +29,11 @@ export function LanguageSwitcher() {
     languages.find((language) => language.value === locale) ?? languages[0];
 
   function handleChange(nextLocale: string) {
-    router.replace(pathname, {
-      locale: nextLocale,
+    const locale = nextLocale === "vi" ? "vi" : "en";
+    const localizedPathname = getLocalizedBlogPath(pathname, locale) ?? pathname;
+
+    router.replace(localizedPathname, {
+      locale,
     });
   }
 

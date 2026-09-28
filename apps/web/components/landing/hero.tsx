@@ -8,14 +8,6 @@ export default function Hero() {
   const t = useTranslations("landing.hero");
   const proofItems = ["freePlan", "noCard", "private"] as const;
   const floatingCards = ["aiSuggested", "focusTimer", "streak", "consistency"] as const;
-  const trustedBy = [
-    "Stanford",
-    "RMIT",
-    "MIT Media Lab",
-    "FPT University",
-    "NUS",
-    "ETH Zurich",
-  ];
 
   return (
     <section className="relative overflow-hidden isolate">
@@ -52,7 +44,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative max-w-310 mx-auto px-6 pt-28 pb-32 md:pt-40 md:pb-44 min-h-[88vh] flex flex-col items-center justify-center text-center">
+      <div className="relative mx-auto flex min-h-[78vh] max-w-310 flex-col items-center justify-center px-6 pt-28 pb-24 text-center md:pt-32 md:pb-28">
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl text-[12px] text-background/90 shadow-sm animate-fade-up">
           <span className="size-1.5 rounded-full bg-success animate-pulse-soft" />
           {t("badge")}
@@ -147,21 +139,6 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="relative max-w-310 mx-auto px-6 pb-16">
-        <p className="text-center text-[11.5px] font-medium tracking-[0.18em] text-muted-foreground uppercase mb-6">
-          {t("trustedBy")}
-        </p>
-        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 opacity-70">
-          {trustedBy.map((u) => (
-            <span
-              key={u}
-              className="text-[14px] font-semibold tracking-tight text-secondary"
-            >
-              {u}
-            </span>
-          ))}
-        </div>
-      </div>
     </section>
   );
 }

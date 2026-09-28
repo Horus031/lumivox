@@ -1,4 +1,4 @@
-import { Sparkles } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -14,9 +14,7 @@ export default function Footer() {
       <div className="max-w-310 mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2 mb-3">
-            <div className="size-7 rounded-md bg-gradient-hero flex items-center justify-center">
-              <Sparkles className="size-4 text-white" strokeWidth={2.5} />
-            </div>
+            <Image src="/logo.png" alt="" width={28} height={28} />
             <span className="font-semibold tracking-tight">
               {common("appName")}
             </span>
@@ -31,22 +29,22 @@ export default function Footer() {
           </p>
           <ul className="space-y-2 text-[13.5px] text-secondary">
             <li>
-              <a href="#features" className="hover:text-foreground">
+              <Link href="/features" className="hover:text-foreground">
                 {t("product.features")}
-              </a>
+              </Link>
             </li>
             <li>
-              <a href="#analytics" className="hover:text-foreground">
-                {t("product.analytics")}
-              </a>
+              <Link href="/research" className="hover:text-foreground">
+                {t("product.research")}
+              </Link>
             </li>
             <li>
-              <a href="#pricing" className="hover:text-foreground">
-                {t("product.pricing")}
-              </a>
+              <Link href="/blog" className="hover:text-foreground">
+                {t("product.blog")}
+              </Link>
             </li>
             <li>
-              <Link href="/app" className="hover:text-foreground">
+              <Link href="/auth/login" className="hover:text-foreground">
                 {t("product.openApp")}
               </Link>
             </li>
@@ -54,28 +52,28 @@ export default function Footer() {
         </div>
         <div>
           <p className="text-[12px] font-semibold tracking-wider uppercase text-muted-foreground mb-3">
-            {t("company.title")}
+            {t("project.title")}
           </p>
           <ul className="space-y-2 text-[13.5px] text-secondary">
             <li>
-              <a href="#" className="hover:text-foreground">
-                {t("company.about")}
-              </a>
+              <Link href="/about" className="hover:text-foreground">
+                {t("project.about")}
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-foreground">
-                {t("company.privacy")}
-              </a>
+              <Link href="/privacy" className="hover:text-foreground">
+                {t("project.privacy")}
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-foreground">
-                {t("company.terms")}
-              </a>
+              <Link href="/terms" className="hover:text-foreground">
+                {t("project.terms")}
+              </Link>
             </li>
             <li>
-              <a href="#" className="hover:text-foreground">
-                {t("company.contact")}
-              </a>
+              <Link href="/contact" className="hover:text-foreground">
+                {t("project.contact")}
+              </Link>
             </li>
           </ul>
         </div>

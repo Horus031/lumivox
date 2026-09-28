@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 export default function Showcase() {
@@ -38,9 +39,27 @@ export default function Showcase() {
               ))}
             </ul>
           </div>
+          <div className="relative aspect-4/3 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+            <Image
+              src="/landing-analytics.jpg"
+              alt={t("analytics.imageAlt")}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="relative aspect-4/3 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+            <Image
+              src="/landing-focus.jpg"
+              alt={t("focus.imageAlt")}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
+          </div>
           <div className="lg:order-2">
             <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
               {t("focus.eyebrow")}
@@ -75,6 +94,15 @@ export default function Showcase() {
             <p className="mt-4 text-secondary text-[15px] leading-relaxed">
               {t("rooms.desc")}
             </p>
+          </div>
+          <div className="relative aspect-4/3 overflow-hidden rounded-lg border border-border bg-surface shadow-lg">
+            <Image
+              src="/landing-room.jpg"
+              alt={t("rooms.imageAlt")}
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              className="object-cover"
+            />
           </div>
         </div>
       </div>
