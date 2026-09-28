@@ -11,7 +11,7 @@ export default function NavBar() {
   const common = useTranslations("common");
 
   return (
-    <header className="fixed w-full top-0 z-40 bg-transparent backdrop-blur-2xl">
+    <header className="fixed top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-2xl">
       <div className="max-w-310 mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="size-8 rounded-lg flex items-center justify-center">
@@ -27,30 +27,21 @@ export default function NavBar() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-[13.5px] text-secondary">
-          <a
-            href="#features"
-            className="hover:text-foreground transition-colors"
-          >
+          <Link href="/features" className="hover:text-foreground transition-colors">
             {t("features")}
-          </a>
-          <a href="#how" className="hover:text-foreground transition-colors">
+          </Link>
+          <Link href="/#how" className="hover:text-foreground transition-colors">
             {t("howItWorks")}
-          </a>
-          <a
-            href="#analytics"
-            className="hover:text-foreground transition-colors"
-          >
-            {t("analytics")}
-          </a>
-          <a
-            href="#pricing"
-            className="hover:text-foreground transition-colors"
-          >
-            {t("pricing")}
-          </a>
-          <a href="#faq" className="hover:text-foreground transition-colors">
-            {t("faq")}
-          </a>
+          </Link>
+          <Link href="/research" className="hover:text-foreground transition-colors">
+            {t("research")}
+          </Link>
+          <Link href="/blog" className="hover:text-foreground transition-colors">
+            {t("blog")}
+          </Link>
+          <Link href="/about" className="hover:text-foreground transition-colors">
+            {t("about")}
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           <Suspense fallback={null}>

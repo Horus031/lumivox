@@ -239,25 +239,26 @@
     "nav": {
       "features": "Features",
       "howItWorks": "How it works",
-      "analytics": "Analytics",
-      "pricing": "Pricing",
+      "research": "Research",
+      "blog": "Blog",
+      "about": "About",
       "faq": "FAQ",
       "signIn": "Sign in",
       "getStarted": "Get started"
     },
     "hero": {
-      "badge": "New - AI behavioral coach in beta",
+      "badge": "Study with calm intelligence",
       "title": {
-        "before": "Study with",
-        "accent": "calm intelligence",
+        "before": "An AI study planner for",
+        "accent": "calmer, more measurable learning",
         "after": "."
       },
-      "subtitle": "Lumivox turns your everyday focus, tasks and habits into a personal learning signal - then quietly recommends the next best step. Built for students who want to grow without burning out.",
+      "subtitle": "Lumivox is an AI study planner for students that combines task planning, focus sessions, behavioral analytics, and personalized AI-assisted recommendations in one workspace.",
       "primaryCta": "Start focusing free",
-      "secondaryCta": "See how it works",
+      "secondaryCta": "See how AI study planning works",
       "proof": {
-        "freePlan": "Free forever plan",
-        "noCard": "No card required",
+        "freePlan": "Free to explore",
+        "noCard": "Bilingual EN / VI",
         "private": "Private by default"
       },
       "floating": {
@@ -270,15 +271,23 @@
           "subtitle": "In focus"
         },
         "streak": {
-          "title": "12-day streak",
-          "subtitle": "+3 tokens earned"
+          "title": "Goal-linked tasks",
+          "subtitle": "Plan with context"
         },
         "consistency": {
-          "title": "+18% this week",
-          "subtitle": "Consistency"
+          "title": "Behavior patterns",
+          "subtitle": "Explainable signals"
         }
-      },
-      "trustedBy": "Trusted by curious learners from"
+      }
+    },
+    "evidenceStrip": {
+      "label": "Lumivox product principles",
+      "items": {
+        "planning": "AI-assisted planning",
+        "analytics": "Behavioral analytics",
+        "privacy": "Privacy-aware design",
+        "languages": "English and Vietnamese"
+      }
     },
     "features": {
       "eyebrow": "Everything you need",
@@ -337,7 +346,8 @@
       "analytics": {
         "eyebrow": "Analytics",
         "title": "Patterns you can finally see",
-        "desc": "A 12-week consistency heatmap, focus distribution by task type, and weekly KPIs - all calm, all readable. No vanity charts.",
+        "desc": "Review focus trends, task completion, deadline behavior, and interpretable PBI components without turning activity into a vanity score.",
+        "imageAlt": "Lumivox behavioral analytics dashboard showing focus trends and study patterns",
         "items": {
           "peakHours": "Discover your peak focus hours",
           "energy": "Spot subjects that drain or energize you",
@@ -347,7 +357,8 @@
       "focus": {
         "eyebrow": "Focus session",
         "title": "A timer that respects your attention",
-        "desc": "Immersive dark mode, breath-paced rings, and soft cues to start and end without shock.",
+        "desc": "Run intentional focus sessions and record the actual time and distractions that shape your behavioral history.",
+        "imageAlt": "Lumivox focus-session interface with timer and session controls",
         "modes": {
           "pomodoro": "Pomodoro",
           "deepWork": "Deep work",
@@ -358,81 +369,33 @@
       "rooms": {
         "eyebrow": "Study rooms",
         "title": "Quietly study - together",
-        "desc": "Drop into Calm Forest, Midnight Mode or Library Quiet. See others focusing in real time, cheer with reactions, never feel alone at 2 AM again."
+        "desc": "Create or join shared study spaces with presence, chat, voice participation, and group challenges.",
+        "imageAlt": "Lumivox study room showing collaborative study controls and live presence"
       }
     },
-    "stats": {
+    "researchEvidence": {
+      "eyebrow": "Model evaluation",
+      "title": "Research-backed behavioral intelligence",
+      "description": "Lumivox evaluates task-delay risk with a versioned native classifier. Every number below comes from the held-out test evaluation, not from a student-outcome claim.",
+      "metrics": {
+        "snapshots": { "label": "Task snapshots", "description": "Samples in the native modeling dataset." },
+        "tasks": { "label": "Unique tasks", "description": "Distinct tasks represented in the dataset." },
+        "recall": { "label": "Test recall", "description": "Late tasks identified on the held-out set." },
+        "rocAuc": { "label": "ROC-AUC", "description": "Held-out discrimination performance." }
+      },
+      "source": "Native task-risk model v2 - held-out test evaluation",
+      "cta": "View task-risk methodology"
+    },
+    "trust": {
+      "eyebrow": "Privacy and AI transparency",
+      "title": "Useful signals, with their limits visible",
+      "description": "Behavioral data supports planning and reflection. Lumivox documents what is processed, where AI is involved, and why predictions should remain decision support.",
+      "cta": "Read Lumivox privacy and data use",
       "items": {
-        "sessions": "Sessions completed",
-        "focus": "Report better focus",
-        "rating": "Average user rating",
-        "saved": "Saved per study day"
-      }
-    },
-    "testimonials": {
-      "eyebrow": "Loved by students",
-      "title": "Calmer minds, sharper results",
-      "items": {
-        "linh": {
-          "quote": "Lumivox feels like a study partner who actually pays attention. The AI nudges are scary-accurate without being annoying.",
-          "role": "Computer Science, NUS"
-        },
-        "marcus": {
-          "quote": "I stopped over-planning and started actually finishing. The heatmap alone changed how I think about my week.",
-          "role": "Pre-med, Stanford"
-        },
-        "trang": {
-          "quote": "Calm Forest at 11pm with three friends silently focusing is the best productivity trick I've ever found.",
-          "role": "Design student, RMIT"
-        }
-      }
-    },
-    "pricing": {
-      "eyebrow": "Pricing",
-      "title": "Simple, student-friendly",
-      "subtitle": "Start free. Upgrade when you're ready for the AI coach.",
-      "popular": "Most popular",
-      "plans": {
-        "starter": {
-          "name": "Starter",
-          "price": "Free",
-          "period": "forever",
-          "desc": "Everything you need to build a focused habit.",
-          "features": [
-            "Unlimited tasks",
-            "Focus timer and 4 rooms",
-            "Weekly analytics",
-            "Streaks and tokens"
-          ],
-          "cta": "Start free"
-        },
-        "pro": {
-          "name": "Pro",
-          "price": "$6",
-          "period": "/ month",
-          "desc": "Unlock the full AI coach and deep analytics.",
-          "features": [
-            "Everything in Starter",
-            "AI behavioral coach",
-            "12-week heatmap and insights",
-            "All ambient rooms",
-            "Streak shields"
-          ],
-          "cta": "Try Pro free"
-        },
-        "campus": {
-          "name": "Campus",
-          "price": "Custom",
-          "period": "for teams",
-          "desc": "For universities, study groups and clubs.",
-          "features": [
-            "Everything in Pro",
-            "Group rooms and leaderboards",
-            "Org analytics",
-            "Priority support"
-          ],
-          "cta": "Talk to us"
-        }
+        "purpose": { "title": "Purpose-limited data", "description": "Tasks, goals, focus records, and selected context support the features that use them." },
+        "assistance": { "title": "AI as assistance", "description": "Recommendations and risk estimates may be wrong and should be reviewed by the learner." },
+        "transparency": { "title": "Evidence in context", "description": "Model, usability, and platform metrics are labeled separately with their source." },
+        "control": { "title": "Protected access", "description": "Supabase authentication and row-level policies scope application access to relevant records." }
       }
     },
     "faq": {
@@ -441,7 +404,7 @@
       "items": {
         "free": {
           "question": "Is Lumivox free to use?",
-          "answer": "Yes - the Starter plan is free forever and includes tasks, the focus timer, four ambient rooms and weekly analytics."
+          "answer": "Lumivox is currently free to explore as a university project. No paid plan or subscription is advertised on this site."
         },
         "coach": {
           "question": "How does the AI coach work?",
@@ -449,23 +412,23 @@
         },
         "privacy": {
           "question": "Is my data private?",
-          "answer": "Your behavioral data is yours. We never sell it, and you can export or delete everything from settings at any time."
+          "answer": "Access to application records is protected by authentication and row-level policies. Some AI features send selected context to configured model providers; read the privacy page for the current implementation details."
         },
         "friends": {
           "question": "Can I study with friends?",
-          "answer": "Yes - join themed study rooms, see live presence, and use light reactions. Group rooms come with Campus plans."
+          "answer": "Yes. Study rooms support shared presence, chat, voice participation, reactions, and group challenges."
         }
       }
     },
     "cta": {
-      "title": "Make your next study session your best one.",
-      "subtitle": "Join thousands of students using Lumivox to focus deeper, plan smarter, and finally feel proud of their week.",
+      "title": "Build a calmer, more measurable study routine with Lumivox.",
+      "subtitle": "Plan your work, focus with intention, and learn from your own behavioral patterns with AI-assisted recommendations.",
       "primaryCta": "Get started free",
-      "secondaryCta": "Explore features",
+      "secondaryCta": "Explore Lumivox study features",
       "proof": {
-        "setup": "60-second setup",
+        "explore": "Free to explore",
         "privacy": "Privacy-first",
-        "students": "Loved by 47k+ students"
+        "behavior": "Behavior-informed AI"
       }
     },
     "footer": {
@@ -473,12 +436,12 @@
       "product": {
         "title": "Product",
         "features": "Features",
-        "analytics": "Analytics",
-        "pricing": "Pricing",
+        "research": "Research",
+        "blog": "Blog",
         "openApp": "Open app"
       },
-      "company": {
-        "title": "Company",
+      "project": {
+        "title": "Project",
         "about": "About",
         "privacy": "Privacy",
         "terms": "Terms",

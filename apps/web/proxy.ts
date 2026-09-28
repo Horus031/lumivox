@@ -28,6 +28,10 @@ function isUnlocalizedAppRoute(pathname: string) {
   return (
     pathname === "/api" ||
     pathname.startsWith("/api/") ||
+    pathname === "/robots.txt" ||
+    pathname.startsWith("/robots.txt/") ||
+    pathname === "/sitemap.xml" ||
+    pathname.startsWith("/sitemap.xml/") ||
     pathname === "/auth/confirm" ||
     pathname.startsWith("/auth/confirm/") ||
     pathname === "/auth/signout" ||

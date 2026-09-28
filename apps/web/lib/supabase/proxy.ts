@@ -16,6 +16,7 @@ const PROTECTED_PATH_PREFIXES = [
   "/leaderboard",
   "/onboarding",
   "/reflections",
+  "/roadmaps",
   "/rooms",
   "/settings",
   "/tasks",

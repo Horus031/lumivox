@@ -3,15 +3,38 @@ import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "sonner";
-
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(defaultUrl),
-  title: "Lumivox",
-  description: "Productivity Support Platform Using Behavioral Analysis and AI-Based Recommendations",
+  metadataBase: new URL(siteConfig.url),
+
+  title: {
+    default: siteConfig.defaultTitle,
+    template: "%s | Lumivox",
+  },
+
+  description: siteConfig.defaultDescription,
+
+  applicationName: siteConfig.name,
+
+  category: "education",
+
+  robots: isSearchIndexingEnabled
+    ? {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          "max-image-preview": "large",
+          "max-snippet": -1,
+          "max-video-preview": -1,
+        },
+      }
+    : {
+        index: false,
+        follow: false,
+      },
 };
 
 export default function RootLayout({
