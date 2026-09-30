@@ -4,6 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -37,6 +38,8 @@ export const metadata: Metadata = {
       },
 };
 
+const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -56,6 +59,8 @@ export default function RootLayout({
           <Toaster richColors position="top-right" closeButton />
         </ThemeProvider>
       </body>
+
+      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
     </html>
   );
 }

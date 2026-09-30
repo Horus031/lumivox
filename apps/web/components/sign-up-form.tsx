@@ -16,6 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { trackSignUp } from "@/lib/analytics/events";
 
 export function SignUpForm({
   className,
@@ -52,9 +53,14 @@ export function SignUpForm({
         },
       });
       if (error) throw error;
+
+      trackSignUp("email");
+
       router.push(`/${locale}/auth/sign-up-success`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : authT("errors.generic"));
+      setError(
+        error instanceof Error ? error.message : authT("errors.generic"),
+      );
     } finally {
       setIsLoading(false);
     }
