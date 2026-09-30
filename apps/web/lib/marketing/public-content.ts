@@ -216,10 +216,11 @@ export const privacyContent = {
       ["Uploaded documents", "Files that you upload are stored for document features. Extracted text can be divided into chunks and represented as embeddings so selected documents can be searched during grounded AI conversations. Only upload material you are permitted to use."],
       ["AI request context", "When you request an AI insight, roadmap, translation, reflection, or document-grounded answer, relevant prompt text and selected context may be sent through the Lumivox AI service to configured external model providers. The current service supports Google Gemini and Groq-backed generation paths; document embeddings use Google Gemini."],
       ["Storage and access controls", "Application records are stored in Supabase. Public-schema tables use row-level security so application requests are scoped by the relevant ownership and access policies. Secret backend credentials are not shipped to the browser; the web client uses a publishable key."],
+      ["Website analytics", "Lumivox uses Google Analytics to understand how the public website is discovered and used. Analytics may process information such as page views, session activity, browser and device characteristics, and approximate geographic information. Lumivox uses this information to evaluate website and SEO performance. Application passwords, task content, uploaded documents, and email addresses are not intentionally included in analytics event parameters."],
       ["Managing your information", "You can edit or remove many workspace records through their product controls. Account-level export and deletion are not currently presented as a self-service control in this codebase. For requests that cannot be completed in the interface, contact the project through the public repository and avoid posting private data in a public issue."],
       ["Research reporting", "Public research pages use aggregate metrics. Participant names and verbatim usability comments are not published without explicit consent. Model evaluation statistics describe classifier performance and do not represent improvements in student outcomes."],
     ],
-    updated: "Implementation reviewed: 27 September 2026",
+    updated: "Implementation reviewed: 30 September 2026",
   },
   vi: {
     eyebrow: "Quyền riêng tư và dữ liệu",
@@ -233,10 +234,11 @@ export const privacyContent = {
       ["Tài liệu tải lên", "Tệp người dùng tải lên được lưu cho tính năng tài liệu. Văn bản trích xuất có thể được chia thành chunk và biểu diễn bằng embedding để tìm kiếm trong hội thoại AI có nguồn. Chỉ tải lên nội dung bạn có quyền sử dụng."],
       ["Ngữ cảnh yêu cầu AI", "Khi yêu cầu insight, lộ trình, bản dịch, phản tư hoặc câu trả lời dựa trên tài liệu, prompt và ngữ cảnh liên quan có thể đi qua dịch vụ AI của Lumivox đến nhà cung cấp model bên ngoài đã cấu hình. Dịch vụ hiện hỗ trợ luồng tạo sinh Google Gemini và Groq; embedding tài liệu dùng Google Gemini."],
       ["Lưu trữ và kiểm soát truy cập", "Bản ghi ứng dụng được lưu trên Supabase. Các bảng trong public schema dùng row-level security để request ứng dụng bị giới hạn theo policy sở hữu và quyền truy cập tương ứng. Secret backend không được gửi đến trình duyệt; web client dùng publishable key."],
+      ["Phân tích website", "Lumivox sử dụng Google Analytics để hiểu cách website public được tìm thấy và sử dụng. Analytics có thể xử lý các thông tin như lượt xem trang, hoạt động phiên truy cập, đặc điểm trình duyệt và thiết bị, cùng thông tin vị trí gần đúng. Lumivox sử dụng dữ liệu này để đánh giá hiệu quả website và SEO. Mật khẩu, nội dung nhiệm vụ, tài liệu tải lên và địa chỉ email không được chủ ý gửi trong tham số sự kiện analytics."],
       ["Quản lý thông tin", "Bạn có thể sửa hoặc xóa nhiều bản ghi workspace qua control trong sản phẩm. Export và xóa toàn bộ tài khoản hiện chưa xuất hiện như control tự phục vụ trong codebase. Với yêu cầu không thể thực hiện trong giao diện, hãy liên hệ qua repository công khai và không đăng dữ liệu riêng tư trong issue public."],
       ["Báo cáo nghiên cứu", "Trang nghiên cứu public chỉ dùng chỉ số tổng hợp. Tên và nhận xét nguyên văn của participant không được công bố khi chưa có consent rõ ràng. Chỉ số model mô tả hiệu năng bộ phân loại, không đại diện cho mức cải thiện kết quả học tập."],
     ],
-    updated: "Rà soát implementation: 27 tháng 9 năm 2026",
+    updated: "Rà soát implementation: 30 tháng 9 năm 2026",
   },
 } as const;
 

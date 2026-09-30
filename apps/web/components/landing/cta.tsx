@@ -1,4 +1,4 @@
-import { ArrowRight, BrainCircuit, CircleDollarSign, ShieldCheck, Sparkles } from "lucide-react";
+import { ArrowRight, BrainCircuit, CircleDollarSign, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -9,7 +9,7 @@ export default function CTA() {
   return (
     <section className="py-24">
       <div className="max-w-310 mx-auto px-6">
-        <div className="relative overflow-hidden rounded-lg border border-border bg-primary p-10 text-center text-primary-foreground md:p-16">
+        <div className="relative overflow-hidden rounded-lg border border-border bg-primary/70 p-10 text-center text-primary-foreground md:p-16">
           <div
             className="pointer-events-none absolute inset-0 opacity-30 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)]"
             style={{
@@ -18,28 +18,28 @@ export default function CTA() {
               backgroundSize: "40px 40px, 60px 60px",
             }}
           />
-          <Sparkles className="size-7 mx-auto mb-4 opacity-90" />
-          <h2 className="text-[32px] md:text-[44px] font-semibold tracking-tight leading-tight max-w-2xl mx-auto">
+          {/* <Sparkles className="size-7 mx-auto mb-4 opacity-90" /> */}
+          <h2 className="text-[32px] md:text-[44px] text-foreground font-semibold tracking-tight leading-tight max-w-2xl mx-auto">
             {t("title")}
           </h2>
-          <p className="mt-3 text-[15px] opacity-90 max-w-xl mx-auto">
+          <p className="mt-3 text-[15px] text-foreground opacity-90 max-w-xl mx-auto">
             {t("subtitle")}
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <Link
               href="/auth/sign-up"
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-white text-primary text-[14px] font-semibold hover:bg-white/95 transition-colors"
+              className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-surface text-foreground text-[14px] font-semibold transition-colors"
             >
               {t("primaryCta")} <ArrowRight className="size-4" />
             </Link>
             <Link
               href="/features"
-              className="inline-flex items-center h-11 px-5 rounded-lg border border-white/30 text-[14px] font-medium hover:bg-white/10 transition-colors"
+              className="inline-flex items-center h-11 px-5 rounded-lg border text-[14px] text-foreground font-medium hover:bg-background/10 transition-colors"
             >
               {t("secondaryCta")}
             </Link>
           </div>
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-[12.5px] opacity-85">
+          <div className="mt-6 flex flex-wrap text-foreground items-center justify-center gap-5 text-[12.5px] opacity-85">
             <span className="flex items-center gap-1.5">
               <CircleDollarSign className="size-3.5" /> {t("proof.explore")}
             </span>
