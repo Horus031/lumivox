@@ -16,6 +16,7 @@ import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { trackLogin } from "@/lib/analytics/events";
 
 export function LoginForm({
   className,
@@ -42,6 +43,9 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
+
+      trackLogin("email");
+
       router.push(`/${locale}/dashboard`);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : authT("errors.generic"));
