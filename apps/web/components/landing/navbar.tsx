@@ -55,7 +55,7 @@ export default function NavBar() {
           </Link>
           <Link
             href="/auth/sign-up"
-            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md bg-primary text-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
           >
             {t("getStarted")} <ArrowRight className="size-3.5" />
           </Link>
