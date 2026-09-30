@@ -47,7 +47,7 @@
     "@eslint/eslintrc": "^3",
     "@playwright/test": "^1.60.0",
     "@swc/helpers": "^0.5.23",
-    "@tailwindcss/postcss": "^4.3.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/mdx": "^2.0.14",
     "@types/node": "^20",
     "@types/react": "^19",
