@@ -7,10 +7,15 @@ export default function Hero() {
   const locale = useLocale();
   const t = useTranslations("landing.hero");
   const proofItems = ["freePlan", "noCard", "private"] as const;
-  const floatingCards = ["aiSuggested", "focusTimer", "streak", "consistency"] as const;
+  const floatingCards = [
+    "aiSuggested",
+    "focusTimer",
+    "streak",
+    "consistency",
+  ] as const;
 
   return (
-    <section className="relative overflow-hidden isolate">
+    <section className="relative overflow-hidden isolate mt-16">
       <div className="absolute inset-0 -z-10 bg-background">
         <video
           src={`/${locale}/hero-brain-loop.mp4`}
@@ -44,7 +49,7 @@ export default function Hero() {
         />
       </div>
 
-      <div className="relative mx-auto flex min-h-[78vh] max-w-310 flex-col items-center justify-center px-6 pt-28 pb-24 text-center md:pt-32 md:pb-28">
+      <div className="relative mx-auto gap-4 flex min-h-[78vh] max-w-310 flex-col items-center justify-center px-6 pt-28 pb-24 text-center md:pt-32 md:pb-28">
         <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl text-[12px] text-background/90 shadow-sm animate-fade-up">
           <span className="size-1.5 rounded-full bg-success animate-pulse-soft" />
           {t("badge")}
@@ -59,11 +64,11 @@ export default function Hero() {
             </span>
             {t("title.after")}
           </h1>
-        </div>
 
-        <p className="relative mt-7 max-w-160 text-[16.5px] md:text-[18px] text-foreground/80 leading-relaxed animate-fade-up [animation-delay:160ms]">
-          {t("subtitle")}
-        </p>
+          <p className="relative mt-7 max-w-160 mx-auto text-[16.5px] md:text-[18px] text-foreground/80 leading-relaxed animate-fade-up [animation-delay:160ms]">
+            {t("subtitle")}
+          </p>
+        </div>
 
         <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3 animate-fade-up [animation-delay:240ms]">
           <Link
@@ -90,7 +95,7 @@ export default function Hero() {
         </div>
 
         <div className="pointer-events-none hidden md:block">
-          <div className="absolute left-4 lg:left-10 top-[28%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float">
+          <div className="absolute left-4 lg:left-10 top-[20%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float">
             <div className="size-7 rounded-lg bg-primary/20 flex items-center justify-center text-foreground text-[12px]">
               *
             </div>
@@ -103,7 +108,7 @@ export default function Hero() {
               </p>
             </div>
           </div>
-          <div className="absolute right-4 lg:right-10 top-[34%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-2s]">
+          <div className="absolute right-4 lg:right-10 top-[40%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-2s]">
             <Timer className="size-4" />
             <div className="text-left">
               <p className="font-medium leading-tight font-mono">
@@ -138,7 +143,6 @@ export default function Hero() {
           </div>
         </div>
       </div>
-
     </section>
   );
 }
