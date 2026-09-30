@@ -15,7 +15,10 @@ test("authenticated user can view landing but cannot stay on auth entry pages", 
   await page.goto("/en");
   await expect(page).toHaveURL(/\/en$/);
   await expect(
-    page.getByRole("heading", { name: /study with calm intelligence/i })
+    page.getByRole("heading", {
+      level: 1,
+      name: /an ai study planner for calmer, more measurable learning/i,
+    })
   ).toBeVisible();
 
   for (const pathname of ["/en/auth/login", "/en/auth/sign-up"]) {
