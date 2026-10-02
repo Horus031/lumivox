@@ -1,10 +1,9 @@
 import { ArrowRight, BarChart3, Check, Flame, Timer } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 
 export default function Hero() {
-  const locale = useLocale();
   const t = useTranslations("landing.hero");
   const proofItems = ["freePlan", "noCard", "private"] as const;
   const floatingCards = [
@@ -18,8 +17,8 @@ export default function Hero() {
     <section className="relative overflow-hidden isolate mt-16">
       <div className="absolute inset-0 -z-10 bg-background">
         <video
-          src={`/${locale}/hero-brain-loop.mp4`}
-          poster="/landing-hero.png"
+          src={`/hero-brain-loop.mp4`}
+          poster="/landing-hero.webp"
           autoPlay
           loop
           muted

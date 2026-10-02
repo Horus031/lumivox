@@ -5,6 +5,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -38,6 +39,12 @@ export const metadata: Metadata = {
       },
 };
 
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin", "vietnamese"],
+  display: "swap",
+  variable: "--font-plus-jakarta",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,7 +53,7 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className={plusJakarta.variable} suppressHydrationWarning>
       <body className="antialiased">
         <ThemeProvider
           attribute="class"
