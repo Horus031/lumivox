@@ -489,6 +489,7 @@
       "statuses": {
         "todo": "Cần làm",
         "in_progress": "Đang thực hiện",
+        "in_review": "Đang kiểm tra",
         "completed": "Hoàn thành",
         "overdue": "Quá hạn",
         "cancelled": "Đã hủy"
