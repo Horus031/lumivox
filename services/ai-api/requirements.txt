@@ -30,10 +30,10 @@ cloudpickle==3.1.2
     # via
     #   joblib
     #   shap
-colorama==0.4.6
-    # via tqdm
 contourpy==1.3.3
-    # via matplotlib
+    # via
+    #   -r requirements.in
+    #   matplotlib
 cryptography==50.0.1
     # via
     #   google-auth
@@ -48,7 +48,7 @@ distro==1.9.0
     # via
     #   google-genai
     #   groq
-fastapi==0.141.1
+fastapi==0.142.2
     # via -r requirements.in
 fonttools==4.66.0
     # via matplotlib
@@ -119,6 +119,8 @@ numpy==2.4.6
     #   scipy
     #   seaborn
     #   shap
+opentelemetry-api==1.45.0
+    # via fastapi
 packaging==26.3
     # via
     #   deprecation
@@ -185,6 +187,7 @@ scikit-learn==1.9.1
     #   shap
 scipy==1.17.1
     # via
+    #   -r requirements.in
     #   scikit-learn
     #   shap
 seaborn==0.13.2
@@ -223,9 +226,11 @@ typing-extensions==4.16.0
     #   fastapi
     #   google-genai
     #   groq
+    #   opentelemetry-api
     #   pydantic
     #   pydantic-core
     #   realtime
+    #   shap
     #   starlette
     #   typing-inspection
 typing-inspection==0.4.4
@@ -233,12 +238,12 @@ typing-inspection==0.4.4
     #   fastapi
     #   pydantic
     #   pydantic-settings
-tzdata==2026.4
-    # via pandas
 urllib3==2.8.0
     # via requests
 uvicorn[standard]==0.53.0
     # via -r requirements.in
+uvloop==0.23.0
+    # via uvicorn
 watchfiles==1.3.0
     # via uvicorn
 websockets==15.0.1
