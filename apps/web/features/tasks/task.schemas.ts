@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TASK_STATUS_VALUES } from "./task-status";
 
 export const createTaskSchema = z.object({
   title: z
@@ -32,12 +33,9 @@ export const createTaskSchema = z.object({
 export const updateTaskSchema = createTaskSchema.extend({
   taskId: z.string().uuid("Invalid task id."),
 
-  status: z.enum(
-    ["todo", "in_progress", "completed", "overdue", "cancelled"],
-    {
-      message: "Invalid task status.",
-    }
-  ),
+  status: z.enum(TASK_STATUS_VALUES, {
+    message: "Invalid task status.",
+  }),
 
   completedAt: z.string().optional().or(z.literal("")),
 });

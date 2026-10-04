@@ -378,10 +378,22 @@
       "title": "Research-backed behavioral intelligence",
       "description": "Lumivox evaluates task-delay risk with a versioned native classifier. Every number below comes from the held-out test evaluation, not from a student-outcome claim.",
       "metrics": {
-        "snapshots": { "label": "Task snapshots", "description": "Samples in the native modeling dataset." },
-        "tasks": { "label": "Unique tasks", "description": "Distinct tasks represented in the dataset." },
-        "recall": { "label": "Test recall", "description": "Late tasks identified on the held-out set." },
-        "rocAuc": { "label": "ROC-AUC", "description": "Held-out discrimination performance." }
+        "snapshots": {
+          "label": "Task snapshots",
+          "description": "Samples in the native modeling dataset."
+        },
+        "tasks": {
+          "label": "Unique tasks",
+          "description": "Distinct tasks represented in the dataset."
+        },
+        "recall": {
+          "label": "Test recall",
+          "description": "Late tasks identified on the held-out set."
+        },
+        "rocAuc": {
+          "label": "ROC-AUC",
+          "description": "Held-out discrimination performance."
+        }
       },
       "source": "Native task-risk model v2 - held-out test evaluation",
       "cta": "View task-risk methodology"
@@ -392,10 +404,22 @@
       "description": "Behavioral data supports planning and reflection. Lumivox documents what is processed, where AI is involved, and why predictions should remain decision support.",
       "cta": "Read Lumivox privacy and data use",
       "items": {
-        "purpose": { "title": "Purpose-limited data", "description": "Tasks, goals, focus records, and selected context support the features that use them." },
-        "assistance": { "title": "AI as assistance", "description": "Recommendations and risk estimates may be wrong and should be reviewed by the learner." },
-        "transparency": { "title": "Evidence in context", "description": "Model, usability, and platform metrics are labeled separately with their source." },
-        "control": { "title": "Protected access", "description": "Supabase authentication and row-level policies scope application access to relevant records." }
+        "purpose": {
+          "title": "Purpose-limited data",
+          "description": "Tasks, goals, focus records, and selected context support the features that use them."
+        },
+        "assistance": {
+          "title": "AI as assistance",
+          "description": "Recommendations and risk estimates may be wrong and should be reviewed by the learner."
+        },
+        "transparency": {
+          "title": "Evidence in context",
+          "description": "Model, usability, and platform metrics are labeled separately with their source."
+        },
+        "control": {
+          "title": "Protected access",
+          "description": "Supabase authentication and row-level policies scope application access to relevant records."
+        }
       }
     },
     "faq": {
@@ -488,6 +512,7 @@
       "statuses": {
         "todo": "Todo",
         "in_progress": "In progress",
+        "in_review": "In review",
         "completed": "Completed",
         "overdue": "Overdue",
         "cancelled": "Cancelled"
@@ -1316,14 +1341,14 @@
     "dashboard": {
       "eyebrow": "Admin CMS",
       "title": "Admin Dashboard",
-        "description": "Monitor users, learning activity, documents, groups, and AI usage across Lumivox.",
-        "actions": {
-          "overview": "Overview",
-          "users": "Manage Users",
-          "documents": "Manage Documents",
-          "groups": "Manage Groups",
-          "roadmaps": "Monitor Roadmaps",
-          "translations": "Monitor Translations",
+      "description": "Monitor users, learning activity, documents, groups, and AI usage across Lumivox.",
+      "actions": {
+        "overview": "Overview",
+        "users": "Manage Users",
+        "documents": "Manage Documents",
+        "groups": "Manage Groups",
+        "roadmaps": "Monitor Roadmaps",
+        "translations": "Monitor Translations",
         "ai": "Monitor AI",
         "settings": "CMS Settings"
       },

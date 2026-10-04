@@ -5,6 +5,7 @@ import TasksClient from "@/features/tasks/components/tasks-client";
 import { getTasksPage } from "@/features/tasks/task.queries";
 import type { Task } from "@/features/tasks/task.types";
 import { getTranslations } from "next-intl/server";
+import { isTaskStatus } from "@/features/tasks/task-status";
 // import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
 // import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
 
@@ -35,17 +36,11 @@ function parseQueryValue(value: string | undefined) {
 function parseTaskStatus(
   value: string | undefined,
 ): Task["status"] | undefined {
-  if (
-    value === "todo" ||
-    value === "in_progress" ||
-    value === "completed" ||
-    value === "overdue" ||
-    value === "cancelled"
-  ) {
-    return value;
+  if (!value) {
+    return undefined;
   }
 
-  return undefined;
+  return isTaskStatus(value) ? value : undefined;
 }
 
 function parseTaskPriority(
