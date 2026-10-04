@@ -110,7 +110,12 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
       "low" | "medium" | "high" | "critical"
     >(task.priority);
     const [status, setStatus] = useState<
-      "todo" | "in_progress" | "completed" | "overdue" | "cancelled"
+      | "todo"
+      | "in_progress"
+      | "in_review"
+      | "completed"
+      | "overdue"
+      | "cancelled"
     >(task.status);
     const [estimatedMinutes, setEstimatedMinutes] = useState(
       task.estimated_minutes?.toString() ?? "",
@@ -320,9 +325,7 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
     return (
       <>
         <td className="px-3 py-3 align-middle text-xs text-muted-foreground">
-          <p className="leading-4">
-            {task.goals?.title ?? formT("noGoal")}
-          </p>
+          <p className="leading-4">{task.goals?.title ?? formT("noGoal")}</p>
           {/* <p className="mt-1 text-xs capitalize tracking-[0.18em] text-muted-foreground">
             {goalCaption}
           </p> */}
