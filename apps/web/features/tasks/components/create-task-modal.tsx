@@ -28,9 +28,13 @@ import { Label } from "@/components/ui/label";
 
 type CreateTaskModalProps = {
   goals: GoalOption[];
+  defaultGoalId?: string;
 };
 
-export function CreateTaskModal({ goals }: CreateTaskModalProps) {
+export function CreateTaskModal({
+  goals,
+  defaultGoalId,
+}: CreateTaskModalProps) {
   const t = useTranslations("tasks.form");
   const commonT = useTranslations("common");
   const router = useRouter();
@@ -39,7 +43,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [goalId, setGoalId] = useState("");
+  const [goalId, setGoalId] = useState(defaultGoalId ?? "");
   const [priority, setPriority] = useState<
     "low" | "medium" | "high" | "critical"
   >("medium");
@@ -65,7 +69,7 @@ export function CreateTaskModal({ goals }: CreateTaskModalProps) {
   function resetForm() {
     setTitle("");
     setDescription("");
-    setGoalId("");
+    setGoalId(defaultGoalId ?? "");
     setPriority("medium");
     setEstimatedMinutes("");
     setDueAt(undefined);

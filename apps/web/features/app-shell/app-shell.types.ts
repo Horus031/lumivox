@@ -10,7 +10,8 @@ export type AppNavigationItem = {
     | "leaderboard"
     | "reflections"
     | "settings"
-    | "admin";
+    | "admin"
+    | "workspace";
   href: string;
   adminOnly?: boolean;
   icon:

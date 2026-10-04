@@ -7,6 +7,11 @@ export const appNavigationItems: AppNavigationItem[] = [
     icon: "dashboard",
   },
   {
+    key: "workspace",
+    href: "/workspace",
+    icon: "tasks",
+  },
+  {
     key: "goals",
     href: "/goals",
     icon: "goals",
