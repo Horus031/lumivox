@@ -140,6 +140,10 @@
         "label": "Dashboard",
         "description": "Behaviour analytics and insights"
       },
+      "workspace": {
+        "label": "Workspace",
+        "description": "Manage goals and tasks in one board."
+      },
       "goals": {
         "label": "Goals",
         "description": "Learning objectives"
@@ -1802,6 +1806,26 @@
           "defaultCompletedTasks": "Default completed tasks"
         }
       }
+    }
+  },
+  "workspace": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Learning Workspace",
+      "description": "Manage your goals and tasks from one place and see work progress across each stage.",
+      "newGoal": "New goal"
+    },
+    "rail": {
+      "title": "Goals",
+      "description": "Choose a goal to focus the board.",
+      "allTasks": "All tasks",
+      "unassigned": "No goal",
+      "createGoal": "Create goal",
+      "taskProgress": "{completed}/{total} tasks completed"
+    },
+    "board": {
+      "empty": "No tasks in this stage.",
+      "subtaskProgress": "{completed}/{total} subtasks"
     }
   }
 }

@@ -141,6 +141,10 @@
         "label": "Tổng quan",
         "description": "Phân tích và insight hành vi"
       },
+      "workspace": {
+        "label": "Không gian học tập",
+        "description": "Quản lý mục tiêu và nhiệm vụ trên cùng một bảng."
+      },
       "goals": {
         "label": "Mục tiêu",
         "description": "Mục tiêu học tập"
@@ -1779,6 +1783,26 @@
           "defaultCompletedTasks": "Nhiệm vụ hoàn thành mặc định"
         }
       }
+    }
+  },
+  "workspace": {
+    "page": {
+      "eyebrow": "Lumivox",
+      "title": "Không gian học tập",
+      "description": "Quản lý mục tiêu và nhiệm vụ ở cùng một nơi và theo dõi tiến độ qua từng giai đoạn.",
+      "newGoal": "Mục tiêu mới"
+    },
+    "rail": {
+      "title": "Mục tiêu",
+      "description": "Chọn một mục tiêu để tập trung bảng nhiệm vụ.",
+      "allTasks": "Tất cả nhiệm vụ",
+      "unassigned": "Không có mục tiêu",
+      "createGoal": "Tạo mục tiêu",
+      "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành"
+    },
+    "board": {
+      "empty": "Chưa có nhiệm vụ ở giai đoạn này.",
+      "subtaskProgress": "{completed}/{total} nhiệm vụ con"
     }
   }
 }
