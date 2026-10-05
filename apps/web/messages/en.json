@@ -578,7 +578,8 @@
       "tabs": {
         "overview": "Overview",
         "subtasks": "Subtasks ({count})",
-        "documents": "Documents ({count})"
+        "documents": "Documents ({count})",
+        "review": "AI Review"
       },
       "summary": {
         "goal": "Goal",
@@ -635,6 +636,75 @@
       "showing": "Showing page {page} of {totalPages}",
       "previous": "Previous",
       "next": "Next"
+    }
+  },
+
+  "taskReview": {
+    "loading": "Loading AI Review...",
+    "attempt": "Attempt {number}",
+    "threshold": "Pass at {value}%",
+    "generating": "Generating...",
+    "generate": "Generate AI Review",
+    "generateAgain": "Generate another review",
+    "retryGeneration": "Try generation again",
+    "refresh": "Refresh review",
+    "generateTitle": "Check your understanding",
+    "generateDescription": "Generate flashcards and a deterministic quiz for this task. Entering review locks the task until the quiz is submitted.",
+    "generatingTitle": "Generating your review",
+    "generatingDescription": "Lumivox is preparing flashcards and quiz questions for this task.",
+    "generationFailedTitle": "Review generation failed",
+    "generationFailedDescription": "The review could not be generated. The task remains active and can be retried.",
+    "retryTitle": "Review the weak areas and try again",
+    "retryDescription": "This attempt did not reach the pass threshold. The task has returned to active work so you can study and generate a new review.",
+    "subtaskUnavailable": "Subtasks are not reviewed independently. Review the parent task after its active subtasks are resolved.",
+    "blockedTitle": "Finish the active subtasks first",
+    "blockedDescription": "{count} active subtask(s) still need to be completed or cancelled before this task can enter review.",
+    "startTaskFirst": "Move this task into In Progress before requesting AI Review.",
+    "missingAttempt": "This task is marked In Review but no active review attempt was found. Refresh the review before continuing.",
+    "closedWithoutReview": "This task is already completed or cancelled and has no review attempt to display.",
+    "source": {
+      "documentGrounded": "This review used your task context plus processed learning documents ({documents} document(s), {chunks} retrieved chunk(s)).",
+      "topicInferred": "No processed document context was used. The review was generated from the inferred learning topic using stable domain knowledge."
+    },
+    "flashcards": {
+      "title": "Flashcards",
+      "progress": "Card {current} of {total}",
+      "front": "Question",
+      "back": "Answer",
+      "flipHint": "Tap the card to flip it",
+      "previous": "Previous",
+      "next": "Next",
+      "reset": "Front"
+    },
+    "quiz": {
+      "title": "Knowledge check",
+      "description": "Answer every question. Scoring is deterministic and is not performed by an AI model.",
+      "progress": "{answered} of {total} answered",
+      "question": "Question {number}",
+      "answerAll": "Answer every question before submitting.",
+      "submit": "Submit review",
+      "submitting": "Scoring...",
+      "kinds": {
+        "single_choice": "Single choice",
+        "multiple_select": "Select all that apply",
+        "true_false": "True / False"
+      }
+    },
+    "result": {
+      "passedTitle": "Review passed",
+      "failedTitle": "More study needed",
+      "passedDescription": "You reached the pass threshold. The task has been completed.",
+      "failedDescription": "You did not reach the pass threshold. The task has returned to active work.",
+      "score": "Score {score}%",
+      "threshold": "Pass threshold {threshold}%",
+      "correct": "{correct}/{total} correct",
+      "weakAreas": "Areas to revisit",
+      "noWeakAreas": "No specific weak area was identified.",
+      "question": "Question {number}",
+      "yourAnswer": "Your answer",
+      "correctAnswer": "Correct answer",
+      "explanation": "Explanation",
+      "reviewArea": "Review this concept"
     }
   },
   "goals": {

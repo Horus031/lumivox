@@ -10,6 +10,7 @@ type EngagementRecalculationSource =
   | "focus-completion"
   | "task-update"
   | "task-transition"
+  | "task-review"
   | "manual-refresh";
 
 export type EngagementActivity = {

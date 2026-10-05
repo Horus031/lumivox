@@ -32,6 +32,11 @@ ReviewAttemptStatus = Literal[
     "cancelled",
 ]
 
+ReviewSourceMode = Literal[
+    "document_grounded",
+    "topic_inferred",
+]
+
 
 class ReviewFlashcardDraft(BaseModel):
     front: str = Field(
@@ -84,13 +89,30 @@ class ReviewQuestionDraft(BaseModel):
     def validate_question(
         self,
     ):
+        normalized_options = [
+            option.strip()
+            for option
+            in self.options
+        ]
+
         if any(
-            not option.strip()
-            for option in self.options
+            not option
+            for option
+            in normalized_options
         ):
             raise ValueError(
-                "Question options "
-                "cannot be empty."
+                "Question options cannot be empty."
+            )
+
+        if len(
+            {
+                option.casefold()
+                for option
+                in normalized_options
+            }
+        ) != len(normalized_options):
+            raise ValueError(
+                "Question options must be unique."
             )
 
         unique_indices = set(
@@ -101,8 +123,7 @@ class ReviewQuestionDraft(BaseModel):
             self.correct_option_indices
         ):
             raise ValueError(
-                "Correct option indices "
-                "must be unique."
+                "Correct option indices must be unique."
             )
 
         for index in unique_indices:
@@ -111,8 +132,7 @@ class ReviewQuestionDraft(BaseModel):
                 or index >= len(self.options)
             ):
                 raise ValueError(
-                    "Correct option index "
-                    "is outside option range."
+                    "Correct option index is outside option range."
                 )
 
         if (
@@ -124,8 +144,7 @@ class ReviewQuestionDraft(BaseModel):
             and len(unique_indices) != 1
         ):
             raise ValueError(
-                f"{self.kind} requires "
-                "exactly one correct answer."
+                f"{self.kind} requires exactly one correct answer."
             )
 
         if (
@@ -134,8 +153,7 @@ class ReviewQuestionDraft(BaseModel):
             and len(unique_indices) < 2
         ):
             raise ValueError(
-                "multiple_select requires "
-                "at least two correct answers."
+                "multiple_select requires at least two correct answers."
             )
 
         if (
@@ -143,8 +161,7 @@ class ReviewQuestionDraft(BaseModel):
             and len(self.options) != 2
         ):
             raise ValueError(
-                "true_false requires "
-                "exactly two options."
+                "true_false requires exactly two options."
             )
 
         return self
@@ -208,6 +225,86 @@ class TaskReviewAssessmentPayload(
     ]
 
 
+class TaskReviewSourceSummary(
+    BaseModel
+):
+    mode: ReviewSourceMode
+    document_count: int
+    retrieved_chunk_count: int
+
+
+class TaskReviewAnswerSubmission(
+    BaseModel
+):
+    question_id: str = Field(
+        ...,
+        min_length=1,
+        max_length=80,
+    )
+
+    selected_option_indices: list[int] = Field(
+        ...,
+        min_length=1,
+        max_length=5,
+    )
+
+    @model_validator(mode="after")
+    def validate_selection(
+        self,
+    ):
+        if any(
+            index < 0
+            for index
+            in self.selected_option_indices
+        ):
+            raise ValueError(
+                "Selected option indices cannot be negative."
+            )
+
+        if len(
+            set(
+                self.selected_option_indices
+            )
+        ) != len(
+            self.selected_option_indices
+        ):
+            raise ValueError(
+                "Selected option indices must be unique."
+            )
+
+        return self
+
+
+class TaskReviewQuestionFeedback(
+    BaseModel
+):
+    question_id: str
+
+    correct: bool
+
+    selected_option_indices: list[int]
+
+    correct_option_indices: list[int]
+
+    explanation: str
+
+    weak_area: str | None
+
+
+class TaskReviewFeedbackPayload(
+    BaseModel
+):
+    correct_count: int
+    total_questions: int
+
+    score: float
+    passed: bool
+
+    questions: list[
+        TaskReviewQuestionFeedback
+    ]
+
+
 class GenerateTaskReviewRequest(
     BaseModel
 ):
@@ -240,6 +337,22 @@ class GenerateTaskReviewRequest(
     )
 
 
+class SubmitTaskReviewRequest(
+    BaseModel
+):
+    user_id: UUID
+    task_id: UUID
+    attempt_id: UUID
+
+    answers: list[
+        TaskReviewAnswerSubmission
+    ] = Field(
+        ...,
+        min_length=1,
+        max_length=12,
+    )
+
+
 class GetLatestTaskReviewRequest(
     BaseModel
 ):
@@ -265,6 +378,17 @@ class TaskReviewAttemptResponse(
         | None
     )
 
+    feedback: (
+        TaskReviewFeedbackPayload
+        | None
+    ) = None
+
+    weak_areas: list[str] = Field(
+        default_factory=list
+    )
+
+    source: TaskReviewSourceSummary
+
     provider: str | None
     model: str | None
     prompt_version: str | None
@@ -274,6 +398,8 @@ class TaskReviewAttemptResponse(
 
     created_at: datetime
     ready_at: datetime | None
+    submitted_at: datetime | None
+    completed_at: datetime | None
 
 
 class GetLatestTaskReviewResponse(

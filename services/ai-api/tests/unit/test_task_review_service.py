@@ -1,3 +1,5 @@
+import pytest
+
 from app.schemas.task_review import (
     ReviewFlashcardDraft,
     ReviewGenerationOutput,
@@ -9,6 +11,18 @@ from app.services.task_review_service import (
     _build_review_prompt,
 )
 
+from app.schemas.task_review import (
+    ReviewFlashcardDraft,
+    ReviewGenerationOutput,
+    ReviewQuestionDraft,
+    TaskReviewAnswerSubmission,
+)
+
+from app.services.task_review_service import (
+    _build_assessment_payloads,
+    _build_review_prompt,
+    _score_review_answers,
+)
 
 def build_generation():
     return ReviewGenerationOutput(
@@ -220,3 +234,188 @@ def test_review_prompt_rejects_task_metadata_questions():
         "do not turn those names into quiz answers"
         in prompt
     )
+
+
+def build_scoring_attempt():
+    return {
+        "pass_threshold": 70,
+        "assessment_payload": {
+            "title": "Networking review",
+            "summary": "Summary",
+            "flashcards": [],
+            "questions": [
+                {
+                    "id": "q_1",
+                    "kind": "single_choice",
+                    "prompt": "Single choice",
+                    "options": [
+                        "A",
+                        "B",
+                        "C",
+                    ],
+                },
+                {
+                    "id": "q_2",
+                    "kind": "multiple_select",
+                    "prompt": "Multiple select",
+                    "options": [
+                        "A",
+                        "B",
+                        "C",
+                    ],
+                },
+            ],
+        },
+    }
+
+
+def build_scoring_answer_key():
+    return {
+        "schema_version": "v1",
+        "questions": [
+            {
+                "id": "q_1",
+                "correct_option_indices": [
+                    1,
+                ],
+                "explanation": (
+                    "B is correct."
+                ),
+                "weak_area": (
+                    "Routing"
+                ),
+            },
+            {
+                "id": "q_2",
+                "correct_option_indices": [
+                    0,
+                    2,
+                ],
+                "explanation": (
+                    "A and C are correct."
+                ),
+                "weak_area": (
+                    "Subnet design"
+                ),
+            },
+        ],
+    }
+
+
+def test_scoring_is_deterministic():
+    feedback, weak_areas = (
+        _score_review_answers(
+            attempt=(
+                build_scoring_attempt()
+            ),
+            answer_key=(
+                build_scoring_answer_key()
+            ),
+            answers=[
+                TaskReviewAnswerSubmission(
+                    question_id="q_1",
+                    selected_option_indices=[
+                        1,
+                    ],
+                ),
+                TaskReviewAnswerSubmission(
+                    question_id="q_2",
+                    selected_option_indices=[
+                        0,
+                    ],
+                ),
+            ],
+        )
+    )
+
+    assert feedback.correct_count == 1
+    assert feedback.total_questions == 2
+    assert feedback.score == 50
+    assert feedback.passed is False
+
+    assert weak_areas == [
+        "Subnet design"
+    ]
+
+
+def test_multiple_select_order_does_not_matter():
+    feedback, weak_areas = (
+        _score_review_answers(
+            attempt=(
+                build_scoring_attempt()
+            ),
+            answer_key=(
+                build_scoring_answer_key()
+            ),
+            answers=[
+                TaskReviewAnswerSubmission(
+                    question_id="q_1",
+                    selected_option_indices=[
+                        1,
+                    ],
+                ),
+                TaskReviewAnswerSubmission(
+                    question_id="q_2",
+                    selected_option_indices=[
+                        2,
+                        0,
+                    ],
+                ),
+            ],
+        )
+    )
+
+    assert feedback.score == 100
+    assert feedback.passed is True
+    assert weak_areas == []
+
+
+def test_scoring_rejects_missing_question():
+    with pytest.raises(
+        ValueError
+    ):
+        _score_review_answers(
+            attempt=(
+                build_scoring_attempt()
+            ),
+            answer_key=(
+                build_scoring_answer_key()
+            ),
+            answers=[
+                TaskReviewAnswerSubmission(
+                    question_id="q_1",
+                    selected_option_indices=[
+                        1,
+                    ],
+                ),
+            ],
+        )
+
+
+def test_scoring_rejects_extra_option_index():
+    with pytest.raises(
+        ValueError
+    ):
+        _score_review_answers(
+            attempt=(
+                build_scoring_attempt()
+            ),
+            answer_key=(
+                build_scoring_answer_key()
+            ),
+            answers=[
+                TaskReviewAnswerSubmission(
+                    question_id="q_1",
+                    selected_option_indices=[
+                        9,
+                    ],
+                ),
+                TaskReviewAnswerSubmission(
+                    question_id="q_2",
+                    selected_option_indices=[
+                        0,
+                        2,
+                    ],
+                ),
+            ],
+        )
