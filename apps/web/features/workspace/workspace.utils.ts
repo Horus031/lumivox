@@ -1,4 +1,5 @@
 import { TASK_BOARD_LANES, TaskStatus } from "../tasks/task-status";
+import { getTaskBoardStatus } from "@/features/tasks/task-transition";
 import type { WorkspaceScope, WorkspaceTask } from "./workspace.types";
 
 export function resolveWorkspaceScope(
@@ -39,13 +40,14 @@ export function getWorkspaceScopeKey(scope: WorkspaceScope) {
 
 export function groupWorkspaceTasksByStatus(
   tasks: WorkspaceTask[],
+  referenceNow: Date,
 ): Record<TaskStatus, WorkspaceTask[]> {
   const groups = Object.fromEntries(
-      TASK_BOARD_LANES.map((status) => [status, []])
+    TASK_BOARD_LANES.map((status) => [status, []]),
   ) as unknown as Record<TaskStatus, WorkspaceTask[]>;
 
   for (const task of tasks) {
-    groups[task.status].push(task);
+    groups[getTaskBoardStatus(task, referenceNow)].push(task);
   }
 
   return groups;
