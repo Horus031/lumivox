@@ -570,9 +570,16 @@
     },
     "details": {
       "fallbackDescription": "Task details",
+      "loadingDetails": "Loading full task details...",
       "close": "Close",
       "deleteTask": "Delete task",
       "deleting": "Deleting...",
+      "deleteConfirm": "Delete this task? Its subtasks and task learning documents will also be deleted. This action cannot be undone.",
+      "tabs": {
+        "overview": "Overview",
+        "subtasks": "Subtasks ({count})",
+        "documents": "Documents ({count})"
+      },
       "summary": {
         "goal": "Goal",
         "due": "Due",
@@ -586,7 +593,43 @@
       "noDescription": "No description has been added for this task yet.",
       "systemFields": "System fields",
       "created": "Created",
-      "updated": "Updated"
+      "updated": "Updated",
+      "subtasks": {
+        "title": "Subtasks",
+        "description": "Break this task into smaller execution steps. Subtasks inherit the parent goal, priority, and deadline when created.",
+        "placeholder": "Add a smaller step...",
+        "add": "Add",
+        "adding": "Adding...",
+        "empty": "No subtasks yet.",
+        "start": "Start",
+        "complete": "Complete",
+        "reopen": "Reopen",
+        "restore": "Restore",
+        "moveToTodo": "Move to todo",
+        "cancel": "Cancel",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this subtask? This action cannot be undone.",
+        "createUnavailable": "New subtasks cannot be added to completed, cancelled, review-stage, or nested tasks.",
+        "invalidData": "Invalid subtask data.",
+        "parentNotFound": "Parent task was not found.",
+        "nestedNotSupported": "Nested subtasks are not supported in this workspace yet.",
+        "parentClosed": "Subtasks cannot be added while the parent task is completed, cancelled, or in review.",
+        "createFailed": "Failed to create subtask.",
+        "created": "Subtask created successfully."
+      },
+      "documents": {
+        "title": "Task learning documents",
+        "description": "Attach source material specifically for this task. Processed task documents will later be available to AI Review.",
+        "upload": "Upload document",
+        "uploading": "Uploading...",
+        "empty": "No learning documents are attached to this task yet.",
+        "process": "Process for AI",
+        "processing": "Processing...",
+        "reprocess": "Re-process",
+        "share": "Share",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this learning document? This action cannot be undone."
+      }
     },
     "pagination": {
       "showing": "Showing page {page} of {totalPages}",

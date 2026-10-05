@@ -6,14 +6,17 @@ import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
 import {
+  createSubtaskSchema,
   createTaskSchema,
   deleteTaskSchema,
   updateTaskSchema,
   transitionTaskStatusSchema,
+  type CreateSubtaskInput,
   type TransitionTaskStatusInput,
   type CreateTaskInput,
   type UpdateTaskInput,
 } from "./task.schemas";
+import type { TaskDetailsData } from "./task.types";
 import type { TaskStatus } from "./task-status";
 import {
   canDirectlyTransitionTask,
@@ -28,6 +31,229 @@ type TransitionTaskResult = {
   completedAt: string | null;
   updatedAt: string;
 };
+
+export async function getTaskDetailsAction(
+  taskId: string,
+): Promise<ActionResult<TaskDetailsData>> {
+  try {
+    const { supabase, user } = await requireUser();
+
+    const { data: task, error: taskError } = await supabase
+      .from("tasks")
+      .select(
+        `
+            *,
+            goals (
+              id,
+              title,
+              goal_type,
+              status
+            )
+          `,
+      )
+      .eq("id", taskId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (taskError) {
+      return {
+        success: false,
+        message: `Failed to load task: ${taskError.message}`,
+      };
+    }
+
+    if (!task) {
+      return {
+        success: false,
+        message: "Task not found.",
+      };
+    }
+
+    const [subtasksResult, documentsResult] = await Promise.all([
+      supabase
+        .from("tasks")
+        .select(
+          `
+            *,
+            goals (
+              id,
+              title,
+              goal_type,
+              status
+            )
+          `,
+        )
+        .eq("user_id", user.id)
+        .eq("parent_task_id", task.id)
+        .order("created_at", {
+          ascending: true,
+        }),
+
+      supabase
+        .from("learning_documents")
+        .select(
+          `
+            id,
+            file_name,
+            mime_type,
+            file_size_bytes,
+            visibility,
+            extracted_text_status
+          `,
+        )
+        .eq("owner_id", user.id)
+        .eq("task_id", task.id)
+        .order("created_at", {
+          ascending: false,
+        }),
+    ]);
+
+    if (subtasksResult.error) {
+      return {
+        success: false,
+        message: `Failed to load subtasks: ${subtasksResult.error.message}`,
+      };
+    }
+
+    if (documentsResult.error) {
+      return {
+        success: false,
+        message: `Failed to load task documents: ${documentsResult.error.message}`,
+      };
+    }
+
+    return {
+      success: true,
+      message: "Task details loaded.",
+      data: {
+        task,
+        subtasks: subtasksResult.data ?? [],
+        documents: documentsResult.data ?? [],
+      },
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Unexpected error while loading task details.",
+    };
+  }
+}
+
+export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
+  ActionResult<{
+    taskId: string;
+  }>
+> {
+  const t = await getTranslations("tasks.details.subtasks");
+
+  const parsed = createSubtaskSchema.safeParse(input);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      message: t("invalidData"),
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
+  }
+
+  try {
+    const { supabase, user } = await requireUser();
+
+    const { parentTaskId, title } = parsed.data;
+
+    const { data: parentTask, error: parentError } = await supabase
+      .from("tasks")
+      .select(
+        `
+          id,
+          user_id,
+          goal_id,
+          parent_task_id,
+          priority,
+          due_at,
+          status
+        `,
+      )
+      .eq("id", parentTaskId)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (parentError) {
+      return {
+        success: false,
+        message: t("createFailed"),
+      };
+    }
+
+    if (!parentTask) {
+      return {
+        success: false,
+        message: t("parentNotFound"),
+      };
+    }
+
+    if (parentTask.parent_task_id !== null) {
+      return {
+        success: false,
+        message: t("nestedNotSupported"),
+      };
+    }
+
+    if (
+      parentTask.status === "completed" ||
+      parentTask.status === "cancelled" ||
+      parentTask.status === "in_review"
+    ) {
+      return {
+        success: false,
+        message: t("parentClosed"),
+      };
+    }
+
+    const { data: createdTask, error: insertError } = await supabase
+      .from("tasks")
+      .insert({
+        user_id: user.id,
+
+        parent_task_id: parentTask.id,
+
+        goal_id: parentTask.goal_id,
+
+        title,
+
+        priority: parentTask.priority,
+
+        due_at: parentTask.due_at,
+
+        status: "todo",
+      })
+      .select("id")
+      .single();
+
+    if (insertError || !createdTask) {
+      return {
+        success: false,
+        message: t("createFailed"),
+      };
+    }
+
+    return {
+      success: true,
+      message: t("created"),
+      data: {
+        taskId: createdTask.id,
+      },
+    };
+  } catch {
+    return {
+      success: false,
+      message: t("createFailed"),
+    };
+  }
+}
 
 export async function transitionTaskStatusAction(
   input: TransitionTaskStatusInput,
