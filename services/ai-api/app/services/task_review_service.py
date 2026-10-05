@@ -16,10 +16,15 @@ from app.schemas.task_review import (
     GenerateTaskReviewRequest,
     GetLatestTaskReviewResponse,
     ReviewGenerationOutput,
+    SubmitTaskReviewRequest,
+    TaskReviewAnswerSubmission,
     TaskReviewAssessmentPayload,
     TaskReviewAttemptResponse,
+    TaskReviewFeedbackPayload,
     TaskReviewFlashcard,
     TaskReviewQuestion,
+    TaskReviewQuestionFeedback,
+    TaskReviewSourceSummary,
 )
 
 
@@ -1161,6 +1166,44 @@ def _mark_generation_failed(
         .execute()
     )
 
+def _review_source_summary(
+    row: dict[str, Any],
+) -> TaskReviewSourceSummary:
+    snapshot = (
+        row.get(
+            "source_snapshot"
+        )
+        or {}
+    )
+
+    documents = (
+        snapshot.get(
+            "documents"
+        )
+        or []
+    )
+
+    retrieved_chunks = (
+        snapshot.get(
+            "retrieved_chunks"
+        )
+        or []
+    )
+
+    return TaskReviewSourceSummary(
+        mode=(
+            "document_grounded"
+            if retrieved_chunks
+            else "topic_inferred"
+        ),
+        document_count=len(
+            documents
+        ),
+        retrieved_chunk_count=len(
+            retrieved_chunks
+        ),
+    )
+
 
 def _attempt_response(
     row: dict[str, Any],
@@ -1168,6 +1211,13 @@ def _attempt_response(
     assessment_raw = (
         row.get(
             "assessment_payload"
+        )
+        or {}
+    )
+
+    feedback_raw = (
+        row.get(
+            "feedback_payload"
         )
         or {}
     )
@@ -1182,50 +1232,405 @@ def _attempt_response(
             )
         )
 
-    return (
-        TaskReviewAttemptResponse(
-            attempt_id=row["id"],
-            task_id=row["task_id"],
-            attempt_number=int(
-                row[
-                    "attempt_number"
-                ]
+    feedback = None
+
+    if feedback_raw:
+        feedback = (
+            TaskReviewFeedbackPayload
+            .model_validate(
+                feedback_raw
+            )
+        )
+
+    weak_areas_raw = (
+        row.get(
+            "weak_areas"
+        )
+        or []
+    )
+
+    weak_areas = [
+        str(value)
+        for value
+        in weak_areas_raw
+        if isinstance(
+            value,
+            str,
+        )
+    ]
+
+    return TaskReviewAttemptResponse(
+        attempt_id=row["id"],
+        task_id=row["task_id"],
+
+        attempt_number=int(
+            row[
+                "attempt_number"
+            ]
+        ),
+
+        status=row["status"],
+
+        pass_threshold=float(
+            row[
+                "pass_threshold"
+            ]
+        ),
+
+        score=(
+            float(
+                row["score"]
+            )
+            if row.get(
+                "score"
+            )
+            is not None
+            else None
+        ),
+
+        assessment=assessment,
+
+        feedback=feedback,
+
+        weak_areas=(
+            weak_areas
+        ),
+
+        source=(
+            _review_source_summary(
+                row
+            )
+        ),
+
+        provider=row.get(
+            "provider"
+        ),
+
+        model=row.get(
+            "model"
+        ),
+
+        prompt_version=row.get(
+            "prompt_version"
+        ),
+
+        latency_ms=row.get(
+            "latency_ms"
+        ),
+
+        generation_error=row.get(
+            "generation_error"
+        ),
+
+        created_at=row[
+            "created_at"
+        ],
+
+        ready_at=row.get(
+            "ready_at"
+        ),
+
+        submitted_at=row.get(
+            "submitted_at"
+        ),
+
+        completed_at=row.get(
+            "completed_at"
+        ),
+    )
+
+
+def _score_review_answers(
+    *,
+    attempt: dict[str, Any],
+    answer_key: dict[str, Any],
+    answers: list[
+        TaskReviewAnswerSubmission
+    ],
+) -> tuple[
+    TaskReviewFeedbackPayload,
+    list[str],
+]:
+    assessment = (
+        TaskReviewAssessmentPayload
+        .model_validate(
+            attempt[
+                "assessment_payload"
+            ]
+        )
+    )
+
+    question_by_id = {
+        question.id:
+        question
+        for question
+        in assessment.questions
+    }
+
+    answer_by_id: dict[
+        str,
+        TaskReviewAnswerSubmission,
+    ] = {}
+
+    for answer in answers:
+        if (
+            answer.question_id
+            in answer_by_id
+        ):
+            raise ValueError(
+                "Each quiz question "
+                "may only be answered once."
+            )
+
+        answer_by_id[
+            answer.question_id
+        ] = answer
+
+    if (
+        set(answer_by_id.keys())
+        != set(
+            question_by_id.keys()
+        )
+    ):
+        raise ValueError(
+            "Every quiz question must "
+            "be answered exactly once."
+        )
+
+    private_questions = (
+        answer_key.get(
+            "questions"
+        )
+        or []
+    )
+
+    private_by_id: dict[
+        str,
+        dict[str, Any],
+    ] = {}
+
+    for item in private_questions:
+        question_id = (
+            item.get("id")
+        )
+
+        if (
+            not isinstance(
+                question_id,
+                str,
+            )
+            or not question_id
+        ):
+            raise RuntimeError(
+                "Review answer key "
+                "contains an invalid "
+                "question id."
+            )
+
+        private_by_id[
+            question_id
+        ] = item
+
+    if (
+        set(private_by_id.keys())
+        != set(
+            question_by_id.keys()
+        )
+    ):
+        raise RuntimeError(
+            "Review answer key does "
+            "not match assessment."
+        )
+
+    feedback_items: list[
+        TaskReviewQuestionFeedback
+    ] = []
+
+    weak_areas: list[str] = []
+
+    correct_count = 0
+
+    for question in (
+        assessment.questions
+    ):
+        submission = (
+            answer_by_id[
+                question.id
+            ]
+        )
+
+        selected = sorted(
+            submission
+            .selected_option_indices
+        )
+
+        for index in selected:
+            if (
+                index < 0
+                or index
+                >= len(
+                    question.options
+                )
+            ):
+                raise ValueError(
+                    "Selected answer "
+                    "is outside the "
+                    "available option range."
+                )
+
+        if (
+            question.kind
+            in {
+                "single_choice",
+                "true_false",
+            }
+            and len(selected) != 1
+        ):
+            raise ValueError(
+                f"{question.kind} requires "
+                "exactly one selected answer."
+            )
+
+        private_item = (
+            private_by_id[
+                question.id
+            ]
+        )
+
+        correct_indices_raw = (
+            private_item.get(
+                "correct_option_indices"
+            )
+        )
+
+        if not isinstance(
+            correct_indices_raw,
+            list,
+        ):
+            raise RuntimeError(
+                "Review answer key "
+                "is malformed."
+            )
+
+        correct_indices = sorted(
+            int(index)
+            for index
+            in correct_indices_raw
+        )
+
+        is_correct = (
+            selected
+            == correct_indices
+        )
+
+        if is_correct:
+            correct_count += 1
+
+        weak_area = str(
+            private_item.get(
+                "weak_area"
+            )
+            or ""
+        ).strip()
+
+        if (
+            not is_correct
+            and weak_area
+            and weak_area
+            not in weak_areas
+        ):
+            weak_areas.append(
+                weak_area
+            )
+
+        feedback_items.append(
+            TaskReviewQuestionFeedback(
+                question_id=(
+                    question.id
+                ),
+
+                correct=(
+                    is_correct
+                ),
+
+                selected_option_indices=(
+                    selected
+                ),
+
+                correct_option_indices=(
+                    correct_indices
+                ),
+
+                explanation=str(
+                    private_item.get(
+                        "explanation"
+                    )
+                    or ""
+                ),
+
+                weak_area=(
+                    weak_area
+                    if (
+                        not is_correct
+                        and weak_area
+                    )
+                    else None
+                ),
+            )
+        )
+
+    total_questions = len(
+        assessment.questions
+    )
+
+    if total_questions <= 0:
+        raise RuntimeError(
+            "Review assessment has "
+            "no quiz questions."
+        )
+
+    score = round(
+        (
+            correct_count
+            / total_questions
+        )
+        * 100,
+        2,
+    )
+
+    threshold = float(
+        attempt[
+            "pass_threshold"
+        ]
+    )
+
+    passed = (
+        score >= threshold
+    )
+
+    feedback = (
+        TaskReviewFeedbackPayload(
+            correct_count=(
+                correct_count
             ),
-            status=row["status"],
-            pass_threshold=float(
-                row[
-                    "pass_threshold"
-                ]
+
+            total_questions=(
+                total_questions
             ),
-            score=(
-                float(row["score"])
-                if row.get("score")
-                is not None
-                else None
-            ),
-            assessment=assessment,
-            provider=row.get(
-                "provider"
-            ),
-            model=row.get(
-                "model"
-            ),
-            prompt_version=row.get(
-                "prompt_version"
-            ),
-            latency_ms=row.get(
-                "latency_ms"
-            ),
-            generation_error=row.get(
-                "generation_error"
-            ),
-            created_at=row[
-                "created_at"
-            ],
-            ready_at=row.get(
-                "ready_at"
+
+            score=score,
+
+            passed=passed,
+
+            questions=(
+                feedback_items
             ),
         )
+    )
+
+    return (
+        feedback,
+        weak_areas,
     )
 
 
@@ -1577,4 +1982,209 @@ def get_latest_task_review(
                 )
             )
         )
+    )
+
+
+def submit_task_review(
+    payload: SubmitTaskReviewRequest,
+) -> TaskReviewAttemptResponse:
+    supabase = (
+        get_supabase_client()
+    )
+
+    user_id = str(
+        payload.user_id
+    )
+
+    task_id = str(
+        payload.task_id
+    )
+
+    attempt_id = str(
+        payload.attempt_id
+    )
+
+    task_response = (
+        supabase
+        .table("tasks")
+        .select(
+            "id,"
+            "user_id,"
+            "parent_task_id,"
+            "status"
+        )
+        .eq(
+            "id",
+            task_id,
+        )
+        .eq(
+            "user_id",
+            user_id,
+        )
+        .maybe_single()
+        .execute()
+    )
+
+    task = (
+        task_response.data
+    )
+
+    if not task:
+        raise PermissionError(
+            "Task not found or "
+            "not owned by this user."
+        )
+
+    if (
+        task.get(
+            "parent_task_id"
+        )
+        is not None
+    ):
+        raise ValueError(
+            "Subtasks cannot submit "
+            "AI Review."
+        )
+
+    if (
+        task["status"]
+        != "in_review"
+    ):
+        raise TaskReviewConflictError(
+            "Task is no longer "
+            "in review."
+        )
+
+    attempt_response = (
+        supabase
+        .table(
+            "task_review_attempts"
+        )
+        .select("*")
+        .eq(
+            "id",
+            attempt_id,
+        )
+        .eq(
+            "user_id",
+            user_id,
+        )
+        .eq(
+            "task_id",
+            task_id,
+        )
+        .maybe_single()
+        .execute()
+    )
+
+    attempt = (
+        attempt_response.data
+    )
+
+    if not attempt:
+        raise PermissionError(
+            "Review attempt not found."
+        )
+
+    if (
+        attempt["status"]
+        != "ready"
+    ):
+        raise TaskReviewConflictError(
+            "Review attempt has "
+            "already been submitted "
+            "or is not ready."
+        )
+
+    answer_key_response = (
+        supabase
+        .table(
+            "task_review_answer_keys"
+        )
+        .select(
+            "answer_key"
+        )
+        .eq(
+            "attempt_id",
+            attempt_id,
+        )
+        .eq(
+            "user_id",
+            user_id,
+        )
+        .maybe_single()
+        .execute()
+    )
+
+    answer_key_row = (
+        answer_key_response.data
+    )
+
+    if not answer_key_row:
+        raise RuntimeError(
+            "Review answer key "
+            "was not found."
+        )
+
+    (
+        feedback,
+        weak_areas,
+    ) = _score_review_answers(
+        attempt=attempt,
+
+        answer_key=(
+            answer_key_row[
+                "answer_key"
+            ]
+        ),
+
+        answers=(
+            payload.answers
+        ),
+    )
+
+    finalize_response = (
+        supabase.rpc(
+            "finalize_task_review_submission",
+            {
+                "p_attempt_id": (
+                    attempt_id
+                ),
+
+                "p_user_id": (
+                    user_id
+                ),
+
+                "p_task_id": (
+                    task_id
+                ),
+
+                "p_score": (
+                    feedback.score
+                ),
+
+                "p_feedback_payload": (
+                    feedback.model_dump(
+                        mode="json"
+                    )
+                ),
+
+                "p_weak_areas": (
+                    weak_areas
+                ),
+            },
+        )
+        .execute()
+    )
+
+    if not finalize_response.data:
+        raise TaskReviewConflictError(
+            "Review submission "
+            "could not be finalized."
+        )
+
+    return _load_attempt(
+        supabase,
+        user_id=user_id,
+        attempt_id=attempt_id,
     )

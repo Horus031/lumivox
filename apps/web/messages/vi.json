@@ -579,7 +579,8 @@
       "tabs": {
         "overview": "Tổng quan",
         "subtasks": "Nhiệm vụ con ({count})",
-        "documents": "Tài liệu ({count})"
+        "documents": "Tài liệu ({count})",
+        "review": "AI Review"
       },
       "summary": {
         "goal": "Mục tiêu",
@@ -636,6 +637,74 @@
       "showing": "Đang hiển thị trang {page} / {totalPages}",
       "previous": "Trước",
       "next": "Tiếp"
+    }
+  },
+  "taskReview": {
+    "loading": "Đang tải AI Review...",
+    "attempt": "Lần đánh giá {number}",
+    "threshold": "Đạt từ {value}%",
+    "generating": "Đang tạo...",
+    "generate": "Tạo AI Review",
+    "generateAgain": "Tạo bài review mới",
+    "retryGeneration": "Thử tạo lại",
+    "refresh": "Làm mới review",
+    "generateTitle": "Kiểm tra mức độ hiểu bài",
+    "generateDescription": "Tạo flashcard và bài quiz chấm điểm xác định cho nhiệm vụ này. Khi vào review, nhiệm vụ sẽ được khóa cho đến khi bài quiz được nộp.",
+    "generatingTitle": "Đang tạo bài review",
+    "generatingDescription": "Lumivox đang chuẩn bị flashcard và câu hỏi kiểm tra cho nhiệm vụ này.",
+    "generationFailedTitle": "Không thể tạo bài review",
+    "generationFailedDescription": "Quá trình tạo review thất bại. Nhiệm vụ vẫn ở trạng thái hoạt động và có thể thử lại.",
+    "retryTitle": "Ôn lại phần còn yếu và thử lại",
+    "retryDescription": "Lần đánh giá này chưa đạt ngưỡng. Nhiệm vụ đã quay lại trạng thái hoạt động để bạn có thể học thêm và tạo bài review mới.",
+    "subtaskUnavailable": "Nhiệm vụ con không được review độc lập. Hãy review nhiệm vụ cha sau khi các nhiệm vụ con đang hoạt động đã được xử lý.",
+    "blockedTitle": "Hãy hoàn thành các nhiệm vụ con trước",
+    "blockedDescription": "Còn {count} nhiệm vụ con đang hoạt động cần được hoàn thành hoặc hủy trước khi nhiệm vụ này có thể vào review.",
+    "startTaskFirst": "Hãy chuyển nhiệm vụ sang Đang thực hiện trước khi yêu cầu AI Review.",
+    "missingAttempt": "Nhiệm vụ đang ở trạng thái Review nhưng không tìm thấy lần review đang hoạt động. Hãy làm mới review trước khi tiếp tục.",
+    "closedWithoutReview": "Nhiệm vụ này đã hoàn thành hoặc bị hủy và không có bài review để hiển thị.",
+    "source": {
+      "documentGrounded": "Bài review sử dụng ngữ cảnh nhiệm vụ cùng tài liệu học tập đã xử lý ({documents} tài liệu, {chunks} đoạn được truy xuất).",
+      "topicInferred": "Không sử dụng ngữ cảnh từ tài liệu đã xử lý. Bài review được tạo từ chủ đề học tập suy ra bằng kiến thức miền ổn định."
+    },
+    "flashcards": {
+      "title": "Flashcard",
+      "progress": "Thẻ {current} / {total}",
+      "front": "Câu hỏi",
+      "back": "Đáp án",
+      "flipHint": "Nhấn vào thẻ để lật",
+      "previous": "Trước",
+      "next": "Tiếp",
+      "reset": "Mặt trước"
+    },
+    "quiz": {
+      "title": "Kiểm tra kiến thức",
+      "description": "Hãy trả lời tất cả câu hỏi. Việc chấm điểm hoàn toàn xác định và không được thực hiện bởi mô hình AI.",
+      "progress": "Đã trả lời {answered}/{total}",
+      "question": "Câu {number}",
+      "answerAll": "Hãy trả lời tất cả câu hỏi trước khi nộp.",
+      "submit": "Nộp bài review",
+      "submitting": "Đang chấm điểm...",
+      "kinds": {
+        "single_choice": "Chọn một đáp án",
+        "multiple_select": "Chọn tất cả đáp án đúng",
+        "true_false": "Đúng / Sai"
+      }
+    },
+    "result": {
+      "passedTitle": "Đã vượt qua review",
+      "failedTitle": "Cần học thêm",
+      "passedDescription": "Bạn đã đạt ngưỡng yêu cầu. Nhiệm vụ đã được hoàn thành.",
+      "failedDescription": "Bạn chưa đạt ngưỡng yêu cầu. Nhiệm vụ đã quay lại trạng thái đang thực hiện.",
+      "score": "Điểm {score}%",
+      "threshold": "Ngưỡng đạt {threshold}%",
+      "correct": "Đúng {correct}/{total}",
+      "weakAreas": "Nội dung cần ôn lại",
+      "noWeakAreas": "Không xác định được nội dung yếu cụ thể.",
+      "question": "Câu {number}",
+      "yourAnswer": "Câu trả lời của bạn",
+      "correctAnswer": "Đáp án đúng",
+      "explanation": "Giải thích",
+      "reviewArea": "Nên ôn lại"
     }
   },
   "goals": {

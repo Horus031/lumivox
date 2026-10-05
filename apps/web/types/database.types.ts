@@ -1004,6 +1004,11 @@ isOneToOne: false
               "attempt_id": string,"task_updated_at": string
             }[]
                            },
+"finalize_task_review_submission":
+{ Args: { "p_attempt_id": string,"p_feedback_payload": Json,"p_score": number,"p_task_id": string,"p_user_id": string,"p_weak_areas": Json }; Returns: {
+              "attempt_id": string,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"pass_threshold": number,"score": number,"task_status": Database["public"]['Enums']["task_status"],"task_updated_at": string
+            }[]
+                           },
 "find_user_id_by_auth_email":
 { Args: { "p_email": string }; Returns: string
                            },

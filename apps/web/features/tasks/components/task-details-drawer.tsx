@@ -31,6 +31,8 @@ import { TaskModalShell } from "./task-modal-shell";
 
 import { TaskSubtasksPanel } from "./task-subtasks-panel";
 
+import { TaskReviewPanel } from "@/features/task-review/components/task-review-panel";
+
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
 
@@ -206,7 +208,12 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
           </div>
         ) : null}
 
-        <Tabs defaultValue="overview" className="w-full">
+        <Tabs
+          defaultValue={
+            currentTask.status === "in_review" ? "review" : "overview"
+          }
+          className="w-full"
+        >
           <div className="overflow-x-auto pb-1">
             <TabsList>
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
@@ -222,6 +229,8 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
                   count: documents.length,
                 })}
               </TabsTrigger>
+
+              <TabsTrigger value="review">{t("tabs.review")}</TabsTrigger>
             </TabsList>
           </div>
 
@@ -295,6 +304,14 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
               taskId={currentTask.id}
               documents={documents}
               onChanged={refreshDetails}
+            />
+          </TabsContent>
+
+          <TabsContent value="review">
+            <TaskReviewPanel
+              task={currentTask}
+              subtasks={subtasks}
+              onTaskChanged={refreshDetails}
             />
           </TabsContent>
         </Tabs>
