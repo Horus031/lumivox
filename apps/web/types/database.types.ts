@@ -638,6 +638,56 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_review_answer_keys": {
+                  Row: {
+                    "answer_key": NonNullable<Json>,"attempt_id": string,"created_at": string,"updated_at": string,"user_id": string
+                  }
+                  Insert: {
+                    "answer_key": NonNullable<Json>,"attempt_id": string,"created_at"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "answer_key"?: NonNullable<Json>,"attempt_id"?: string,"created_at"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_review_answer_keys_attempt_id_fkey"
+      columns: ["attempt_id"]
+isOneToOne: true
+      referencedRelation: "task_review_attempts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_review_answer_keys_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_review_attempts": {
+                  Row: {
+                    "assessment_payload": NonNullable<Json>,"attempt_number": number,"completed_at": string | null,"created_at": string,"feedback_payload": NonNullable<Json>,"generation_error": string | null,"id": string,"latency_ms": number | null,"model": string | null,"pass_threshold": number,"prompt_version": string | null,"provider": string | null,"ready_at": string | null,"score": number | null,"source_snapshot": NonNullable<Json>,"status": Database["public"]['Enums']["task_review_attempt_status"],"submitted_at": string | null,"task_id": string,"task_snapshot": NonNullable<Json>,"updated_at": string,"user_id": string,"weak_areas": NonNullable<Json>
+                  }
+                  Insert: {
+                    "assessment_payload"?: NonNullable<Json>,"attempt_number": number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submitted_at"?: string | null,"task_id": string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id": string,"weak_areas"?: NonNullable<Json>
+                  }
+                  Update: {
+                    "assessment_payload"?: NonNullable<Json>,"attempt_number"?: number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submitted_at"?: string | null,"task_id"?: string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id"?: string,"weak_areas"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_review_attempts_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_review_attempts_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tasks": {
                   Row: {
                     "completed_at": string | null,"created_at": string,"description": string | null,"due_at": string | null,"due_date": string | null,"estimated_minutes": number | null,"goal_id": string | null,"id": string,"parent_task_id": string | null,"priority": Database["public"]['Enums']["task_priority"],"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"status": Database["public"]['Enums']["task_status"],"title": string,"updated_at": string,"user_id": string
@@ -949,6 +999,11 @@ isOneToOne: false
 "extract_learning_document_id_from_storage_path":
 { Args: { "p_object_name": string }; Returns: string
                            },
+"finalize_task_review_generation":
+{ Args: { "p_answer_key": Json,"p_assessment_payload": Json,"p_attempt_id": string,"p_expected_status": Database["public"]['Enums']["task_status"],"p_expected_updated_at": string,"p_latency_ms": number,"p_model": string,"p_prompt_version": string,"p_provider": string,"p_source_snapshot": Json,"p_task_id": string,"p_user_id": string }; Returns: {
+              "attempt_id": string,"task_updated_at": string
+            }[]
+                           },
 "find_user_id_by_auth_email":
 { Args: { "p_email": string }; Returns: string
                            },
@@ -1052,6 +1107,11 @@ isOneToOne: false
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
             }[]
                            },
+"match_task_review_document_chunks":
+{ Args: { "p_document_ids"?: (string)[],"p_embedding_model"?: string,"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
+              "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"embedding_model": string,"file_name": string,"similarity": number
+            }[]
+                           },
 "process_engagement_activity_atomic":
 { Args: { "p_activity_id": string,"p_activity_type": string,"p_user_id": string }; Returns: Json
                            },
@@ -1060,7 +1120,7 @@ isOneToOne: false
                            }
           }
           Enums: {
-            "ai_insight_type": "deadline_risk"|"native_task_risk","ai_translation_status": "completed"|"failed","app_role": "user"|"admin","deadline_risk_input_mode": "oulad_compatible_features"|"lumivox_native_features","distraction_type": "social_media"|"messaging"|"external_interrupt"|"fatigue"|"other","document_chunk_status": "pending"|"embedded"|"failed","engagement_streak_status": "active"|"frozen"|"lost","feature_attribution_effect": "increases_risk"|"decreases_risk"|"neutral","focus_session_status": "ongoing"|"paused"|"completed"|"cancelled","goal_status": "active"|"completed"|"paused"|"archived","goal_type": "short_term"|"long_term","learning_document_permission_role": "viewer"|"editor","learning_document_visibility": "private"|"shared"|"public","learning_roadmap_level": "beginner"|"intermediate"|"advanced"|"custom","learning_roadmap_node_type": "goal"|"task"|"subtask","learning_roadmap_status": "draft"|"applied"|"archived","native_task_risk_band": "low"|"moderate"|"elevated"|"high","rag_context_mode": "general"|"document_rag","rag_message_role": "user"|"assistant"|"system","rag_prompt_variant": "no_rule"|"grounded_rule","reward_event_type": "focus_session_completed"|"task_completed"|"daily_streak_continued"|"streak_milestone_3"|"streak_milestone_7"|"streak_restored_with_tokens","streak_event_type": "activity_detected"|"streak_started"|"streak_continued"|"streak_frozen"|"streak_restored"|"streak_lost","study_room_member_role": "owner"|"member","study_room_member_status": "active"|"left"|"removed","study_room_status": "active"|"archived","study_room_type": "room"|"group","study_room_visibility": "public"|"private","task_priority": "low"|"medium"|"high"|"critical","task_status": "todo"|"in_progress"|"in_review"|"completed"|"overdue"|"cancelled","weekly_reflection_direction": "improving"|"stable"|"mixed"|"needs_attention"
+            "ai_insight_type": "deadline_risk"|"native_task_risk","ai_translation_status": "completed"|"failed","app_role": "user"|"admin","deadline_risk_input_mode": "oulad_compatible_features"|"lumivox_native_features","distraction_type": "social_media"|"messaging"|"external_interrupt"|"fatigue"|"other","document_chunk_status": "pending"|"embedded"|"failed","engagement_streak_status": "active"|"frozen"|"lost","feature_attribution_effect": "increases_risk"|"decreases_risk"|"neutral","focus_session_status": "ongoing"|"paused"|"completed"|"cancelled","goal_status": "active"|"completed"|"paused"|"archived","goal_type": "short_term"|"long_term","learning_document_permission_role": "viewer"|"editor","learning_document_visibility": "private"|"shared"|"public","learning_roadmap_level": "beginner"|"intermediate"|"advanced"|"custom","learning_roadmap_node_type": "goal"|"task"|"subtask","learning_roadmap_status": "draft"|"applied"|"archived","native_task_risk_band": "low"|"moderate"|"elevated"|"high","rag_context_mode": "general"|"document_rag","rag_message_role": "user"|"assistant"|"system","rag_prompt_variant": "no_rule"|"grounded_rule","reward_event_type": "focus_session_completed"|"task_completed"|"daily_streak_continued"|"streak_milestone_3"|"streak_milestone_7"|"streak_restored_with_tokens","streak_event_type": "activity_detected"|"streak_started"|"streak_continued"|"streak_frozen"|"streak_restored"|"streak_lost","study_room_member_role": "owner"|"member","study_room_member_status": "active"|"left"|"removed","study_room_status": "active"|"archived","study_room_type": "room"|"group","study_room_visibility": "public"|"private","task_priority": "low"|"medium"|"high"|"critical","task_review_attempt_status": "generating"|"ready"|"passed"|"failed"|"generation_failed"|"cancelled","task_status": "todo"|"in_progress"|"in_review"|"completed"|"overdue"|"cancelled","weekly_reflection_direction": "improving"|"stable"|"mixed"|"needs_attention"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -1180,7 +1240,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "ai_insight_type": ["deadline_risk", "native_task_risk"],"ai_translation_status": ["completed", "failed"],"app_role": ["user", "admin"],"deadline_risk_input_mode": ["oulad_compatible_features", "lumivox_native_features"],"distraction_type": ["social_media", "messaging", "external_interrupt", "fatigue", "other"],"document_chunk_status": ["pending", "embedded", "failed"],"engagement_streak_status": ["active", "frozen", "lost"],"feature_attribution_effect": ["increases_risk", "decreases_risk", "neutral"],"focus_session_status": ["ongoing", "paused", "completed", "cancelled"],"goal_status": ["active", "completed", "paused", "archived"],"goal_type": ["short_term", "long_term"],"learning_document_permission_role": ["viewer", "editor"],"learning_document_visibility": ["private", "shared", "public"],"learning_roadmap_level": ["beginner", "intermediate", "advanced", "custom"],"learning_roadmap_node_type": ["goal", "task", "subtask"],"learning_roadmap_status": ["draft", "applied", "archived"],"native_task_risk_band": ["low", "moderate", "elevated", "high"],"rag_context_mode": ["general", "document_rag"],"rag_message_role": ["user", "assistant", "system"],"rag_prompt_variant": ["no_rule", "grounded_rule"],"reward_event_type": ["focus_session_completed", "task_completed", "daily_streak_continued", "streak_milestone_3", "streak_milestone_7", "streak_restored_with_tokens"],"streak_event_type": ["activity_detected", "streak_started", "streak_continued", "streak_frozen", "streak_restored", "streak_lost"],"study_room_member_role": ["owner", "member"],"study_room_member_status": ["active", "left", "removed"],"study_room_status": ["active", "archived"],"study_room_type": ["room", "group"],"study_room_visibility": ["public", "private"],"task_priority": ["low", "medium", "high", "critical"],"task_status": ["todo", "in_progress", "in_review", "completed", "overdue", "cancelled"],"weekly_reflection_direction": ["improving", "stable", "mixed", "needs_attention"]
+            "ai_insight_type": ["deadline_risk", "native_task_risk"],"ai_translation_status": ["completed", "failed"],"app_role": ["user", "admin"],"deadline_risk_input_mode": ["oulad_compatible_features", "lumivox_native_features"],"distraction_type": ["social_media", "messaging", "external_interrupt", "fatigue", "other"],"document_chunk_status": ["pending", "embedded", "failed"],"engagement_streak_status": ["active", "frozen", "lost"],"feature_attribution_effect": ["increases_risk", "decreases_risk", "neutral"],"focus_session_status": ["ongoing", "paused", "completed", "cancelled"],"goal_status": ["active", "completed", "paused", "archived"],"goal_type": ["short_term", "long_term"],"learning_document_permission_role": ["viewer", "editor"],"learning_document_visibility": ["private", "shared", "public"],"learning_roadmap_level": ["beginner", "intermediate", "advanced", "custom"],"learning_roadmap_node_type": ["goal", "task", "subtask"],"learning_roadmap_status": ["draft", "applied", "archived"],"native_task_risk_band": ["low", "moderate", "elevated", "high"],"rag_context_mode": ["general", "document_rag"],"rag_message_role": ["user", "assistant", "system"],"rag_prompt_variant": ["no_rule", "grounded_rule"],"reward_event_type": ["focus_session_completed", "task_completed", "daily_streak_continued", "streak_milestone_3", "streak_milestone_7", "streak_restored_with_tokens"],"streak_event_type": ["activity_detected", "streak_started", "streak_continued", "streak_frozen", "streak_restored", "streak_lost"],"study_room_member_role": ["owner", "member"],"study_room_member_status": ["active", "left", "removed"],"study_room_status": ["active", "archived"],"study_room_type": ["room", "group"],"study_room_visibility": ["public", "private"],"task_priority": ["low", "medium", "high", "critical"],"task_review_attempt_status": ["generating", "ready", "passed", "failed", "generation_failed", "cancelled"],"task_status": ["todo", "in_progress", "in_review", "completed", "overdue", "cancelled"],"weekly_reflection_direction": ["improving", "stable", "mixed", "needs_attention"]
           }
         }
 } as const
