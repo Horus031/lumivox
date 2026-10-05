@@ -383,10 +383,22 @@
       "title": "Trí tuệ hành vi dựa trên nghiên cứu",
       "description": "Lumivox đánh giá rủi ro trễ nhiệm vụ bằng bộ phân loại native có phiên bản. Mọi số liệu bên dưới đến từ tập test độc lập, không phải claim về kết quả người học.",
       "metrics": {
-        "snapshots": { "label": "Snapshot nhiệm vụ", "description": "Mẫu trong dataset mô hình native." },
-        "tasks": { "label": "Nhiệm vụ duy nhất", "description": "Nhiệm vụ riêng biệt trong dataset." },
-        "recall": { "label": "Recall test", "description": "Nhiệm vụ trễ được nhận diện trên tập test." },
-        "rocAuc": { "label": "ROC-AUC", "description": "Khả năng phân biệt trên tập test độc lập." }
+        "snapshots": {
+          "label": "Snapshot nhiệm vụ",
+          "description": "Mẫu trong dataset mô hình native."
+        },
+        "tasks": {
+          "label": "Nhiệm vụ duy nhất",
+          "description": "Nhiệm vụ riêng biệt trong dataset."
+        },
+        "recall": {
+          "label": "Recall test",
+          "description": "Nhiệm vụ trễ được nhận diện trên tập test."
+        },
+        "rocAuc": {
+          "label": "ROC-AUC",
+          "description": "Khả năng phân biệt trên tập test độc lập."
+        }
       },
       "source": "Mô hình rủi ro nhiệm vụ native v2 - đánh giá test độc lập",
       "cta": "Xem phương pháp dự đoán rủi ro nhiệm vụ"
@@ -397,10 +409,22 @@
       "description": "Dữ liệu hành vi hỗ trợ lập kế hoạch và phản tư. Lumivox ghi rõ dữ liệu được xử lý, AI tham gia ở đâu và vì sao dự đoán chỉ nên hỗ trợ quyết định.",
       "cta": "Đọc quyền riêng tư và sử dụng dữ liệu Lumivox",
       "items": {
-        "purpose": { "title": "Dữ liệu đúng mục đích", "description": "Nhiệm vụ, mục tiêu, phiên tập trung và ngữ cảnh được chọn hỗ trợ đúng tính năng sử dụng chúng." },
-        "assistance": { "title": "AI là công cụ hỗ trợ", "description": "Gợi ý và ước lượng rủi ro có thể sai và cần được người học xem xét." },
-        "transparency": { "title": "Bằng chứng có ngữ cảnh", "description": "Metric model, usability và nền tảng được ghi nhãn riêng cùng nguồn tương ứng." },
-        "control": { "title": "Truy cập được bảo vệ", "description": "Xác thực Supabase và row-level policy giới hạn quyền truy cập vào bản ghi phù hợp." }
+        "purpose": {
+          "title": "Dữ liệu đúng mục đích",
+          "description": "Nhiệm vụ, mục tiêu, phiên tập trung và ngữ cảnh được chọn hỗ trợ đúng tính năng sử dụng chúng."
+        },
+        "assistance": {
+          "title": "AI là công cụ hỗ trợ",
+          "description": "Gợi ý và ước lượng rủi ro có thể sai và cần được người học xem xét."
+        },
+        "transparency": {
+          "title": "Bằng chứng có ngữ cảnh",
+          "description": "Metric model, usability và nền tảng được ghi nhãn riêng cùng nguồn tương ứng."
+        },
+        "control": {
+          "title": "Truy cập được bảo vệ",
+          "description": "Xác thực Supabase và row-level policy giới hạn quyền truy cập vào bản ghi phù hợp."
+        }
       }
     },
     "faq": {
@@ -547,9 +571,16 @@
     },
     "details": {
       "fallbackDescription": "Chi tiết nhiệm vụ",
+      "loadingDetails": "Đang tải đầy đủ chi tiết nhiệm vụ...",
       "close": "Đóng",
       "deleteTask": "Xóa nhiệm vụ",
       "deleting": "Đang xóa...",
+      "deleteConfirm": "Xóa nhiệm vụ này? Các nhiệm vụ con và tài liệu học tập gắn với nhiệm vụ cũng sẽ bị xóa. Hành động này không thể hoàn tác.",
+      "tabs": {
+        "overview": "Tổng quan",
+        "subtasks": "Nhiệm vụ con ({count})",
+        "documents": "Tài liệu ({count})"
+      },
       "summary": {
         "goal": "Mục tiêu",
         "due": "Đến hạn",
@@ -563,7 +594,43 @@
       "noDescription": "Chưa thêm mô tả cho nhiệm vụ này.",
       "systemFields": "Trường hệ thống",
       "created": "Đã tạo",
-      "updated": "Đã cập nhật"
+      "updated": "Đã cập nhật",
+      "subtasks": {
+        "title": "Nhiệm vụ con",
+        "description": "Chia nhiệm vụ thành các bước thực hiện nhỏ hơn. Khi tạo, nhiệm vụ con kế thừa mục tiêu, độ ưu tiên và thời hạn của nhiệm vụ cha.",
+        "placeholder": "Thêm một bước nhỏ hơn...",
+        "add": "Thêm",
+        "adding": "Đang thêm...",
+        "empty": "Chưa có nhiệm vụ con.",
+        "start": "Bắt đầu",
+        "complete": "Hoàn thành",
+        "reopen": "Mở lại",
+        "restore": "Khôi phục",
+        "moveToTodo": "Chuyển về cần làm",
+        "cancel": "Hủy",
+        "delete": "Xóa",
+        "deleteConfirm": "Xóa nhiệm vụ con này? Hành động này không thể hoàn tác.",
+        "createUnavailable": "Không thể thêm nhiệm vụ con vào nhiệm vụ đã hoàn thành, đã hủy, đang review hoặc một nhiệm vụ con khác.",
+        "invalidData": "Dữ liệu nhiệm vụ con không hợp lệ.",
+        "parentNotFound": "Không tìm thấy nhiệm vụ cha.",
+        "nestedNotSupported": "Không gian làm việc hiện chưa hỗ trợ nhiệm vụ con nhiều tầng.",
+        "parentClosed": "Không thể thêm nhiệm vụ con khi nhiệm vụ cha đã hoàn thành, đã hủy hoặc đang review.",
+        "createFailed": "Không thể tạo nhiệm vụ con.",
+        "created": "Đã tạo nhiệm vụ con thành công."
+      },
+      "documents": {
+        "title": "Tài liệu học tập của nhiệm vụ",
+        "description": "Đính kèm tài liệu nguồn dành riêng cho nhiệm vụ này. Các tài liệu đã xử lý sẽ được AI Review sử dụng ở phase tiếp theo.",
+        "upload": "Tải tài liệu lên",
+        "uploading": "Đang tải lên...",
+        "empty": "Chưa có tài liệu học tập nào gắn với nhiệm vụ này.",
+        "process": "Xử lý cho AI",
+        "processing": "Đang xử lý...",
+        "reprocess": "Xử lý lại",
+        "share": "Chia sẻ",
+        "delete": "Xóa",
+        "deleteConfirm": "Xóa tài liệu học tập này? Hành động này không thể hoàn tác."
+      }
     },
     "pagination": {
       "showing": "Đang hiển thị trang {page} / {totalPages}",
@@ -1322,14 +1389,14 @@
     "dashboard": {
       "eyebrow": "CMS quản trị",
       "title": "Bảng điều khiển quản trị",
-        "description": "Theo dõi người dùng, hoạt động học tập, tài liệu, nhóm và mức sử dụng AI trên Lumivox.",
-        "actions": {
-          "overview": "Tổng quan",
-          "users": "Quản lý người dùng",
-          "documents": "Quản lý tài liệu",
-          "groups": "Quản lý nhóm",
-          "roadmaps": "Theo dõi lộ trình",
-          "translations": "Theo dõi phiên dịch",
+      "description": "Theo dõi người dùng, hoạt động học tập, tài liệu, nhóm và mức sử dụng AI trên Lumivox.",
+      "actions": {
+        "overview": "Tổng quan",
+        "users": "Quản lý người dùng",
+        "documents": "Quản lý tài liệu",
+        "groups": "Quản lý nhóm",
+        "roadmaps": "Theo dõi lộ trình",
+        "translations": "Theo dõi phiên dịch",
         "ai": "Theo dõi AI",
         "settings": "Cài đặt CMS"
       },
