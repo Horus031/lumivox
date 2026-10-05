@@ -1825,7 +1825,18 @@
     },
     "board": {
       "empty": "No tasks in this stage.",
-      "subtaskProgress": "{completed}/{total} subtasks"
+      "subtaskProgress": "{completed}/{total} subtasks",
+      "reviewManaged": "AI-managed stage",
+      "overdueManaged": "Automatically determined by deadline",
+      "dragTask": "Drag task",
+      "invalidTransition": "This task cannot move to that stage.",
+      "staleTask": "Task changed somewhere else. Refresh and try again.",
+      "transitionFailed": "Unable to move the task. Please try again.",
+      "transitionSucceeded": "Task moved successfully.",
+      "taskNotFound": "Task not found.",
+      "addTask": "Add task",
+      "taskTitle": "Task title",
+      "createFailed": "Unable to create the task. Please try again."
     }
   }
 }

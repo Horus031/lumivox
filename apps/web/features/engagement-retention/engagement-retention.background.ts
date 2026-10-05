@@ -9,6 +9,7 @@ import {
 type EngagementRecalculationSource =
   | "focus-completion"
   | "task-update"
+  | "task-transition"
   | "manual-refresh";
 
 export type EngagementActivity = {

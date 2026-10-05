@@ -1802,7 +1802,18 @@
     },
     "board": {
       "empty": "Chưa có nhiệm vụ ở giai đoạn này.",
-      "subtaskProgress": "{completed}/{total} nhiệm vụ con"
+      "subtaskProgress": "{completed}/{total} nhiệm vụ con",
+      "reviewManaged": "Giai đoạn do AI quản lý",
+      "overdueManaged": "Tự động xác định theo thời hạn",
+      "dragTask": "Kéo nhiệm vụ",
+      "invalidTransition": "Không thể chuyển nhiệm vụ sang giai đoạn này.",
+      "staleTask": "Nhiệm vụ đã thay đổi ở nơi khác. Hãy làm mới và thử lại.",
+      "transitionFailed": "Không thể chuyển nhiệm vụ. Vui lòng thử lại.",
+      "transitionSucceeded": "Đã chuyển nhiệm vụ thành công.",
+      "taskNotFound": "Không tìm thấy nhiệm vụ.",
+      "addTask": "Thêm nhiệm vụ",
+      "taskTitle": "Tên nhiệm vụ",
+      "createFailed": "Không thể tạo nhiệm vụ. Vui lòng thử lại."
     }
   }
 }

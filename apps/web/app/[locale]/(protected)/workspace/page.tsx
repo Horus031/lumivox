@@ -1,9 +1,7 @@
-import { Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
+import { WorkspaceCreateGoalButton } from "@/features/workspace/components/workspace-create-goal-button";
 import { getGoalsWithProgress } from "@/features/goals/goal.queries";
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { WorkspaceBoard } from "@/features/workspace/components/workspace-board";
@@ -39,6 +37,7 @@ export default async function WorkspacePage({
   const selectedKey = getWorkspaceScopeKey(scope);
 
   const defaultGoalId = scope.type === "goal" ? scope.goalId : undefined;
+  const referenceNow = new Date().toISOString();
 
   return (
     <section className="space-y-6">
@@ -48,14 +47,7 @@ export default async function WorkspacePage({
         description={t("description")}
         action={
           <div className="flex flex-wrap items-center gap-2">
-            <CreateGoalForm
-              trigger={
-                <Button type="button" variant="outline" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  {t("newGoal")}
-                </Button>
-              }
-            />
+            <WorkspaceCreateGoalButton />
 
             <CreateTaskModal
               key={defaultGoalId ?? selectedKey}
@@ -69,7 +61,12 @@ export default async function WorkspacePage({
       <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
         <WorkspaceGoalRail goals={goals} selectedKey={selectedKey} />
 
-        <WorkspaceBoard tasks={tasks} />
+        <WorkspaceBoard
+          key={selectedKey}
+          tasks={tasks}
+          scope={scope}
+          referenceNow={referenceNow}
+        />
       </div>
     </section>
   );
