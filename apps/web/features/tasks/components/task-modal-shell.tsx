@@ -53,7 +53,7 @@ export function TaskModalShell({
 
   const panelAlignment =
     align === "right"
-      ? "ml-auto h-full w-full max-w-full rounded-none border-l border-border/60 md:max-w-[32rem] md:rounded-l-[32px]"
+      ? "ml-auto h-full w-full max-w-full rounded-none border-l border-border/60 md:max-w-[44rem] md:rounded-l-[32px]"
       : "mx-auto w-full max-h-180 max-w-2xl rounded-[32px]";
 
   return (

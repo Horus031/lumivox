@@ -2,9 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 
+import type { ActionResult } from "@/lib/actions/action-result";
 import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
-import type { ActionResult } from "@/lib/actions/action-result";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 type ProcessLearningDocumentApiResponse = {
@@ -35,7 +35,14 @@ export async function processLearningDocumentAction(
 
     const { data: document, error } = await supabase
       .from("learning_documents")
-      .select("id,owner_id,goal_id")
+      .select(
+        `
+          id,
+          owner_id,
+          goal_id,
+          task_id
+        `,
+      )
       .eq("id", documentId)
       .eq("owner_id", user.id)
       .maybeSingle();
@@ -56,29 +63,41 @@ export async function processLearningDocumentAction(
 
     const result = await fetchAiApi<ProcessLearningDocumentApiResponse>({
       path: "/api/v1/rag/documents/process",
+
       body: {
         document_id: documentId,
+
         user_id: user.id,
       },
     });
 
-    revalidatePath("/goals");
-
     if (document.goal_id) {
+      revalidatePath("/goals");
+
       revalidatePath(`/goals/${document.goal_id}`);
     }
 
+    if (document.task_id) {
+      revalidatePath("/workspace");
+
+      revalidatePath("/tasks");
+    }
+
     revalidatePath(`/documents/${documentId}/share`);
+
     revalidatePath(`/documents/shared/${documentId}`);
 
     return {
       success: result.status === "completed",
+
       message: result.message,
+
       data: result,
     };
   } catch (error) {
     return {
       success: false,
+
       message:
         error instanceof Error
           ? error.message
