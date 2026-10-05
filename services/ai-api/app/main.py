@@ -1,117 +1,239 @@
 import logging
 import os
-from contextlib import asynccontextmanager
+from contextlib import (
+    asynccontextmanager,
+)
+
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
+
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import (
+    CORSMiddleware,
+)
 
 from app.api.routes import (
+    ai_translations,
     deadline_risk,
     deadline_risk_insight,
     engagement_retention,
     health,
+    learning_roadmaps,
     native_task_risk,
     native_task_risk_insight,
     pbi,
-    weekly_reflection,
     rag,
-    ai_translations,
-    learning_roadmaps
+    task_review,
+    weekly_reflection,
 )
+
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
 )
+
 from app.services.native_task_risk_service import (
     validate_native_task_risk_artifact,
 )
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(
+    __name__
+)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
-    # The legacy OULAD deadline-risk model must not block the whole API.
-    # Native task-risk v2 remains the required production model.
+async def lifespan(
+    app: FastAPI,
+):
+    # Legacy OULAD deadline-risk must
+    # not block the entire API.
     try:
-        app.state.deadline_risk_runtime = load_deadline_risk_runtime()
-        app.state.deadline_risk_runtime_error = None
-    except Exception as error:
-        logger.exception("Legacy deadline-risk runtime is unavailable.")
-        app.state.deadline_risk_runtime = None
-        app.state.deadline_risk_runtime_error = str(error)
+        app.state.deadline_risk_runtime = (
+            load_deadline_risk_runtime()
+        )
 
-    app.state.native_task_risk_model = validate_native_task_risk_artifact()
+        app.state.deadline_risk_runtime_error = (
+            None
+        )
+
+    except Exception as error:
+        logger.exception(
+            "Legacy deadline-risk "
+            "runtime is unavailable."
+        )
+
+        app.state.deadline_risk_runtime = (
+            None
+        )
+
+        app.state.deadline_risk_runtime_error = (
+            str(error)
+        )
+
+    app.state.native_task_risk_model = (
+        validate_native_task_risk_artifact()
+    )
 
     yield
 
-    app.state.deadline_risk_runtime = None
-    app.state.deadline_risk_runtime_error = None
-    app.state.native_task_risk_model = None
+    app.state.deadline_risk_runtime = (
+        None
+    )
+
+    app.state.deadline_risk_runtime_error = (
+        None
+    )
+
+    app.state.native_task_risk_model = (
+        None
+    )
 
 
 app = FastAPI(
     title="Lumivox AI API",
-    version="0.3.0",
-    description="AI and behavioural analytics microservice for Lumivox.",
+    version="0.4.0",
+    description=(
+        "AI and behavioural analytics "
+        "microservice for Lumivox."
+    ),
     lifespan=lifespan,
 )
+
 
 allowed_origins = [
     "http://localhost:3000",
 ]
 
-production_web_url = os.getenv("WEB_APP_URL")
+
+production_web_url = (
+    os.getenv("WEB_APP_URL")
+)
+
 
 if production_web_url:
-    allowed_origins.append(production_web_url)
+    allowed_origins.append(
+        production_web_url
+    )
+
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=(
+        allowed_origins
+    ),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 
-app.include_router(health.router, prefix="/api/v1", tags=["Health"])
-app.include_router(pbi.router, prefix="/api/v1/pbi", tags=["PBI"])
+app.include_router(
+    health.router,
+    prefix="/api/v1",
+    tags=["Health"],
+)
+
+app.include_router(
+    pbi.router,
+    prefix="/api/v1/pbi",
+    tags=["PBI"],
+)
+
 app.include_router(
     deadline_risk.router,
-    prefix="/api/v1/ml/deadline-risk",
-    tags=["Deadline Risk ML"],
+    prefix=(
+        "/api/v1/ml/deadline-risk"
+    ),
+    tags=[
+        "Deadline Risk ML"
+    ],
 )
+
 app.include_router(
     deadline_risk_insight.router,
-    prefix="/api/v1/ai/deadline-risk-insight",
-    tags=["Deadline Risk AI Insight"],
+    prefix=(
+        "/api/v1/ai/"
+        "deadline-risk-insight"
+    ),
+    tags=[
+        "Deadline Risk AI Insight"
+    ],
 )
+
 app.include_router(
     native_task_risk.router,
-    prefix="/api/v1/native-task-risk",
-    tags=["Native Task Risk"],
+    prefix=(
+        "/api/v1/native-task-risk"
+    ),
+    tags=[
+        "Native Task Risk"
+    ],
 )
+
 app.include_router(
     native_task_risk_insight.router,
-    prefix="/api/v1/ai/native-task-risk-insight",
-    tags=["Native Task Risk AI Insight"],
+    prefix=(
+        "/api/v1/ai/"
+        "native-task-risk-insight"
+    ),
+    tags=[
+        "Native Task Risk AI Insight"
+    ],
 )
+
 app.include_router(
     weekly_reflection.router,
-    prefix="/api/v1/reflections/weekly",
-    tags=["Weekly Reflection"],
+    prefix=(
+        "/api/v1/reflections/weekly"
+    ),
+    tags=[
+        "Weekly Reflection"
+    ],
 )
+
 app.include_router(
     engagement_retention.router,
-    prefix="/api/v1/engagement",
-    tags=["Engagement Retention"],
+    prefix=(
+        "/api/v1/engagement"
+    ),
+    tags=[
+        "Engagement Retention"
+    ],
 )
-app.include_router(ai_translations.router, prefix="/api/v1/ai-translations", tags=["ai-translations"])
 
-app.include_router(learning_roadmaps.router, prefix="/api/v1/learning-roadmaps", tags=["learning-roadmaps"])
+app.include_router(
+    ai_translations.router,
+    prefix=(
+        "/api/v1/ai-translations"
+    ),
+    tags=[
+        "ai-translations"
+    ],
+)
 
-app.include_router(rag.router)
+app.include_router(
+    learning_roadmaps.router,
+    prefix=(
+        "/api/v1/learning-roadmaps"
+    ),
+    tags=[
+        "learning-roadmaps"
+    ],
+)
+
+app.include_router(
+    task_review.router,
+    prefix=(
+        "/api/v1/task-reviews"
+    ),
+    tags=[
+        "Task Review"
+    ],
+)
+
+app.include_router(
+    rag.router
+)
