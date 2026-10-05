@@ -150,7 +150,8 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
               : Number(estimatedMinutes),
           dueAt: dueAt ? dueAt.toISOString() : "",
           status,
-          completedAt: "",
+          expectedStatus: task.status,
+          expectedUpdatedAt: task.updated_at,
         });
 
         if (!result.success) {
@@ -244,7 +245,6 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                         | "todo"
                         | "in_progress"
                         | "completed"
-                        | "overdue"
                         | "cancelled",
                     )
                   }
@@ -264,8 +264,11 @@ export function TasksTable({ tasks, goals }: TasksTableProps) {
                       <SelectItem value="completed">
                         {formT("statuses.completed")}
                       </SelectItem>
-                      <SelectItem value="overdue">
+                      <SelectItem value="overdue" disabled>
                         {formT("statuses.overdue")}
+                      </SelectItem>
+                      <SelectItem value="in_review" disabled>
+                        {formT("statuses.in_review")}
                       </SelectItem>
                       <SelectItem value="cancelled">
                         {formT("statuses.cancelled")}

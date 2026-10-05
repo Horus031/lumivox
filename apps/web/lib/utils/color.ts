@@ -7,6 +7,8 @@ export function getStatusTone(status: TaskWithGoal["status"]) {
     return "bg-rose-500/10 text-rose-700 border-rose-500/15";
   if (status === "in_progress")
     return "bg-sky-500/10 text-sky-700 border-sky-500/15";
+  if (status === "in_review")
+    return "bg-violet-500/10 text-violet-700 border-violet-500/15";
   if (status === "cancelled")
     return "bg-neutral-500/10 text-neutral-500 border-neutral-500/15";
   return "bg-amber-500/10 text-amber-700 border-amber-500/15 ring-amber-500/15";

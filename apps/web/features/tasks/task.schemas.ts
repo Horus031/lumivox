@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TASK_STATUS_VALUES } from "./task-status";
+import { DIRECT_TASK_STATUS_TARGETS } from "./task-transition";
 
 export const createTaskSchema = z.object({
   title: z
@@ -37,12 +38,27 @@ export const updateTaskSchema = createTaskSchema.extend({
     message: "Invalid task status.",
   }),
 
-  completedAt: z.string().optional().or(z.literal("")),
+  expectedStatus: z.enum(TASK_STATUS_VALUES),
+  expectedUpdatedAt: z.string().min(1),
 });
 
 export const deleteTaskSchema = z.object({
   taskId: z.string().uuid("Invalid task id."),
 });
+
+export const transitionTaskStatusSchema = z.object({
+  taskId: z.string().uuid("Invalid task id."),
+
+  targetStatus: z.enum(DIRECT_TASK_STATUS_TARGETS),
+
+  expectedStatus: z.enum(TASK_STATUS_VALUES),
+
+  expectedUpdatedAt: z.string().min(1),
+});
+
+export type TransitionTaskStatusInput = z.infer<
+  typeof transitionTaskStatusSchema
+>;
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

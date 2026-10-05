@@ -1,8 +1,6 @@
-import { Plus } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Button } from "@/components/ui/button";
-import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
+import { WorkspaceCreateGoalButton } from "./workspace-create-goal-button";
 import type { GoalWithProgress } from "@/features/goals/goal.types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -30,18 +28,7 @@ export async function WorkspaceGoalRail({
               {t("description")}
             </p>
           </div>
-          <CreateGoalForm
-            trigger={
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                aria-label={t("createGoal")}
-              >
-                <Plus className="h-4 w-4" />
-              </Button>
-            }
-          />
+          <WorkspaceCreateGoalButton iconOnly />
         </div>
         <nav className="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-1 lg:overflow-visible">
           <Link
