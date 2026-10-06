@@ -12,15 +12,7 @@ type ActionResult<T = null> =
 
 type SupabaseServerClient = Awaited<ReturnType<typeof requireUser>>["supabase"];
 
-const weekdaySchema = z.enum([
-  "mon",
-  "tue",
-  "wed",
-  "thu",
-  "fri",
-  "sat",
-  "sun",
-]);
+const weekdaySchema = z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
 
 const roadmapLevelSchema = z.enum([
   "beginner",
@@ -108,7 +100,7 @@ type GenerateRoadmapResponse = {
 };
 
 export async function generateLearningRoadmapAction(
-  input: z.infer<typeof generateRoadmapSchema>
+  input: z.infer<typeof generateRoadmapSchema>,
 ): Promise<ActionResult<{ roadmapId: string }>> {
   try {
     const { user } = await requireUser();
@@ -198,7 +190,7 @@ const deleteRoadmapNodeSchema = z.object({
 
 function isValidRoadmapConnection(
   parentType: "goal" | "task" | "subtask",
-  childType: "goal" | "task" | "subtask"
+  childType: "goal" | "task" | "subtask",
 ) {
   return (
     (parentType === "goal" && childType === "task") ||
@@ -207,7 +199,7 @@ function isValidRoadmapConnection(
 }
 
 function validateEditorTree(
-  nodes: z.infer<typeof roadmapEditorNodeSchema>[]
+  nodes: z.infer<typeof roadmapEditorNodeSchema>[],
 ): string | null {
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
 
@@ -266,7 +258,7 @@ async function ensureDraftRoadmap({
 }
 
 export async function saveRoadmapEditorStateAction(
-  input: z.infer<typeof saveRoadmapEditorStateSchema>
+  input: z.infer<typeof saveRoadmapEditorStateSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -276,7 +268,8 @@ export async function saveRoadmapEditorStateAction(
     if (!parsed.success) {
       return {
         success: false,
-        message: parsed.error.issues[0]?.message ?? "Invalid roadmap editor state.",
+        message:
+          parsed.error.issues[0]?.message ?? "Invalid roadmap editor state.",
       };
     }
 
@@ -346,7 +339,7 @@ export async function saveRoadmapEditorStateAction(
 }
 
 export async function deleteRoadmapNodeAction(
-  input: z.infer<typeof deleteRoadmapNodeSchema>
+  input: z.infer<typeof deleteRoadmapNodeSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -412,7 +405,7 @@ type ApplyRoadmapResult = {
 };
 
 export async function applyLearningRoadmapAction(
-  input: z.infer<typeof applyRoadmapSchema>
+  input: z.infer<typeof applyRoadmapSchema>,
 ): Promise<ActionResult<ApplyRoadmapResult>> {
   try {
     const { supabase } = await requireUser();
@@ -442,7 +435,7 @@ export async function applyLearningRoadmapAction(
     revalidatePath("/roadmaps");
     revalidatePath(`/roadmaps/${parsed.data.roadmapId}`);
     revalidatePath(`/roadmaps/${parsed.data.roadmapId}/edit`);
-    revalidatePath("/goals");
+    revalidatePath("/workspace");
     revalidatePath("/tasks");
 
     return {

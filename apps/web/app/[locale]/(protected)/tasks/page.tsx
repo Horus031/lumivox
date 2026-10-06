@@ -1,111 +1,22 @@
-import { PageHeader } from "@/features/app-shell/components/page-header";
-import { getGoalOptions } from "@/features/goals/goal.queries";
-import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
-import TasksClient from "@/features/tasks/components/tasks-client";
-import { getTasksPage } from "@/features/tasks/task.queries";
-import type { Task } from "@/features/tasks/task.types";
-import { getTranslations } from "next-intl/server";
-import { isTaskStatus } from "@/features/tasks/task-status";
-// import { NativeTaskRiskAlertsCard } from "@/features/native-task-risk/components/native-task-risk-alerts-card";
-// import { getMyNativeTaskRiskAlerts } from "@/features/native-task-risk/native-task-risk.queries";
+import { getLocale } from "next-intl/server";
+
+import { redirect } from "next/navigation";
+
+import { buildLegacyTaskWorkspaceUrl } from "@/features/workspace/workspace-legacy-redirect";
 
 type TasksPageProps = {
   searchParams: Promise<{
-    page?: string;
-    q?: string;
-    status?: string;
-    priority?: string;
     goalId?: string;
+    taskId?: string;
+    parentTaskId?: string;
+    action?: string;
   }>;
 };
 
-function parsePage(value: string | undefined) {
-  const parsed = Number(value ?? "1");
-
-  if (!Number.isFinite(parsed) || parsed < 1) {
-    return 1;
-  }
-
-  return Math.floor(parsed);
-}
-
-function parseQueryValue(value: string | undefined) {
-  return value?.trim() ?? "";
-}
-
-function parseTaskStatus(
-  value: string | undefined,
-): Task["status"] | undefined {
-  if (!value) {
-    return undefined;
-  }
-
-  return isTaskStatus(value) ? value : undefined;
-}
-
-function parseTaskPriority(
-  value: string | undefined,
-): Task["priority"] | undefined {
-  if (
-    value === "low" ||
-    value === "medium" ||
-    value === "high" ||
-    value === "critical"
-  ) {
-    return value;
-  }
-
-  return undefined;
-}
-
 export default async function TasksPage({ searchParams }: TasksPageProps) {
-  const [t, params] = await Promise.all([
-    getTranslations("tasks.page"),
-    searchParams,
-  ]);
+  const [locale, params] = await Promise.all([getLocale(), searchParams]);
 
-  const page = parsePage(params.page);
-  const query = parseQueryValue(params.q);
-  const status = parseTaskStatus(params.status);
-  const priority = parseTaskPriority(params.priority);
-  const goalId = parseQueryValue(params.goalId);
+  const target = buildLegacyTaskWorkspaceUrl(params);
 
-  // nativeTaskRiskAlerts
-
-  const [goals, tasksResult] = await Promise.all([
-    getGoalOptions(),
-    getTasksPage({
-      page,
-      pageSize: 8,
-      search: query,
-      status,
-      priority,
-      goalId,
-    }),
-    // getMyNativeTaskRiskAlerts(8),
-  ]);
-
-  return (
-    <section>
-      <div className="mx-auto space-y-8">
-        <PageHeader
-          eyebrow={t("eyebrow")}
-          title={t("title")}
-          description={t("description")}
-          action={<CreateTaskModal goals={goals} />}
-        />
-
-        {/* <NativeTaskRiskAlertsCard alerts={nativeTaskRiskAlerts} /> */}
-
-        <TasksClient
-          initialTasks={tasksResult.tasks}
-          goals={goals}
-          page={page}
-          totalPages={tasksResult.totalPages}
-          totalCount={tasksResult.totalCount}
-          initialFilters={{ q: query, status, priority, goalId }}
-        />
-      </div>
-    </section>
-  );
+  redirect(`/${locale}${target}`);
 }

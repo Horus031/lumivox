@@ -199,13 +199,11 @@ async function uploadLearningDocument(
     }
 
     if (context.kind === "goal") {
-      revalidatePath("/goals");
+      revalidatePath("/workspace");
 
       revalidatePath(`/goals/${context.id}`);
     } else {
       revalidatePath("/workspace");
-
-      revalidatePath("/tasks");
     }
 
     return {
@@ -296,15 +294,13 @@ export async function deleteLearningDocumentAction(
     }
 
     if (document.goal_id) {
-      revalidatePath("/goals");
+      revalidatePath("/workspace");
 
       revalidatePath(`/goals/${document.goal_id}`);
     }
 
     if (document.task_id) {
       revalidatePath("/workspace");
-
-      revalidatePath("/tasks");
     }
 
     return {

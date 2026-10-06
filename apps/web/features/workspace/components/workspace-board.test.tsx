@@ -39,8 +39,28 @@ vi.mock("@/features/tasks/task.actions", () => ({
   createTaskAction: mocks.create,
 }));
 vi.mock("@/features/tasks/components/task-details-drawer", () => ({
-  TaskDetailsDrawer: ({ task }: { task: { title: string } | null }) =>
-    task ? <div data-drawer>{task.title}</div> : null,
+  TaskDetailsDrawer: ({
+    task,
+    initialTab,
+    initialEditMode,
+  }: {
+    task: {
+      title: string;
+    } | null;
+
+    initialTab?: string;
+
+    initialEditMode?: boolean;
+  }) =>
+    task ? (
+      <div
+        data-drawer
+        data-tab={initialTab}
+        data-edit={String(Boolean(initialEditMode))}
+      >
+        {task.title}
+      </div>
+    ) : null,
 }));
 
 import { WorkspaceBoard } from "./workspace-board";
@@ -139,19 +159,42 @@ describe("workspace optimistic controller", () => {
     { scope: { type: "all" as const }, goalId: "" },
     { scope: { type: "unassigned" as const }, goalId: "" },
     { scope: { type: "goal" as const, goalId: task.id }, goalId: task.id },
-  ])("quick create uses the correct goal for $scope.type", async ({ scope, goalId }) => {
-    mocks.create.mockResolvedValue({ success: true, message: "created", data: null });
-    act(() => root.render(<WorkspaceBoard {...props} scope={scope} />));
-    act(() => (lane("todo").querySelector("button") as HTMLButtonElement).click());
-    const input = lane("todo").querySelector("input")!;
-    act(() => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "Quick task");
-      input.dispatchEvent(new Event("input", { bubbles: true }));
-    });
-    await act(async () => {
-      lane("todo").querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-    });
-    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ title: "Quick task", goalId, priority: "medium", dueAt: "" }));
-    expect(mocks.refresh).toHaveBeenCalledOnce();
-  });
+  ])(
+    "quick create uses the correct goal for $scope.type",
+    async ({ scope, goalId }) => {
+      mocks.create.mockResolvedValue({
+        success: true,
+        message: "created",
+        data: null,
+      });
+      act(() => root.render(<WorkspaceBoard {...props} scope={scope} />));
+      act(() =>
+        (lane("todo").querySelector("button") as HTMLButtonElement).click(),
+      );
+      const input = lane("todo").querySelector("input")!;
+      act(() => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )!.set!.call(input, "Quick task");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () => {
+        lane("todo")
+          .querySelector("form")!
+          .dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true }),
+          );
+      });
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Quick task",
+          goalId,
+          priority: "medium",
+          dueAt: "",
+        }),
+      );
+      expect(mocks.refresh).toHaveBeenCalledOnce();
+    },
+  );
 });
