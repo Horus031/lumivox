@@ -665,13 +665,13 @@ isOneToOne: false
                   ]
                 },"task_review_attempts": {
                   Row: {
-                    "assessment_payload": NonNullable<Json>,"attempt_number": number,"completed_at": string | null,"created_at": string,"feedback_payload": NonNullable<Json>,"generation_error": string | null,"id": string,"latency_ms": number | null,"model": string | null,"pass_threshold": number,"prompt_version": string | null,"provider": string | null,"ready_at": string | null,"score": number | null,"source_snapshot": NonNullable<Json>,"status": Database["public"]['Enums']["task_review_attempt_status"],"submitted_at": string | null,"task_id": string,"task_snapshot": NonNullable<Json>,"updated_at": string,"user_id": string,"weak_areas": NonNullable<Json>
+                    "assessment_payload": NonNullable<Json>,"attempt_number": number,"completed_at": string | null,"created_at": string,"feedback_payload": NonNullable<Json>,"generation_error": string | null,"generation_request_id": string | null,"id": string,"latency_ms": number | null,"model": string | null,"pass_threshold": number,"prompt_version": string | null,"provider": string | null,"ready_at": string | null,"score": number | null,"source_snapshot": NonNullable<Json>,"status": Database["public"]['Enums']["task_review_attempt_status"],"submission_fingerprint": string | null,"submitted_at": string | null,"task_id": string,"task_snapshot": NonNullable<Json>,"updated_at": string,"user_id": string,"weak_areas": NonNullable<Json>
                   }
                   Insert: {
-                    "assessment_payload"?: NonNullable<Json>,"attempt_number": number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submitted_at"?: string | null,"task_id": string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id": string,"weak_areas"?: NonNullable<Json>
+                    "assessment_payload"?: NonNullable<Json>,"attempt_number": number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"generation_request_id"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submission_fingerprint"?: string | null,"submitted_at"?: string | null,"task_id": string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id": string,"weak_areas"?: NonNullable<Json>
                   }
                   Update: {
-                    "assessment_payload"?: NonNullable<Json>,"attempt_number"?: number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submitted_at"?: string | null,"task_id"?: string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id"?: string,"weak_areas"?: NonNullable<Json>
+                    "assessment_payload"?: NonNullable<Json>,"attempt_number"?: number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"generation_request_id"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submission_fingerprint"?: string | null,"submitted_at"?: string | null,"task_id"?: string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id"?: string,"weak_areas"?: NonNullable<Json>
                   }
                   Relationships: [
                     {
@@ -682,6 +682,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "task_review_attempts_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_status_events": {
+                  Row: {
+                    "actor_role": string,"from_status": Database["public"]['Enums']["task_status"],"id": string,"occurred_at": string,"review_attempt_id": string | null,"source": string,"task_id": string,"to_status": Database["public"]['Enums']["task_status"],"user_id": string
+                  }
+                  Insert: {
+                    "actor_role": string,"from_status": Database["public"]['Enums']["task_status"],"id"?: string,"occurred_at"?: string,"review_attempt_id"?: string | null,"source": string,"task_id": string,"to_status": Database["public"]['Enums']["task_status"],"user_id": string
+                  }
+                  Update: {
+                    "actor_role"?: string,"from_status"?: Database["public"]['Enums']["task_status"],"id"?: string,"occurred_at"?: string,"review_attempt_id"?: string | null,"source"?: string,"task_id"?: string,"to_status"?: Database["public"]['Enums']["task_status"],"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_status_events_review_attempt_id_fkey"
+      columns: ["review_attempt_id"]
+isOneToOne: false
+      referencedRelation: "task_review_attempts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_status_events_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_status_events_user_id_fkey"
       columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
@@ -966,6 +997,11 @@ isOneToOne: false
               "created_goals": number,"created_subtasks": number,"created_tasks": number,"roadmap_id": string
             }[]
                            },
+"begin_task_review_generation":
+{ Args: { "p_expected_status": Database["public"]['Enums']["task_status"],"p_expected_updated_at": string,"p_generation_request_id": string,"p_pass_threshold": number,"p_source_snapshot": Json,"p_stale_after_seconds"?: number,"p_task_id": string,"p_task_snapshot": Json,"p_user_id": string }; Returns: {
+              "attempt_id": string,"attempt_number": number,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"reused": boolean
+            }[]
+                           },
 "can_access_engagement_realtime_topic":
 { Args: { "p_topic": string,"p_user_id": string }; Returns: boolean
                            },
@@ -1006,6 +1042,11 @@ isOneToOne: false
                            },
 "finalize_task_review_submission":
 { Args: { "p_attempt_id": string,"p_feedback_payload": Json,"p_score": number,"p_task_id": string,"p_user_id": string,"p_weak_areas": Json }; Returns: {
+              "attempt_id": string,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"pass_threshold": number,"score": number,"task_status": Database["public"]['Enums']["task_status"],"task_updated_at": string
+            }[]
+                           },
+"finalize_task_review_submission_v2":
+{ Args: { "p_attempt_id": string,"p_feedback_payload": Json,"p_score": number,"p_submission_fingerprint": string,"p_task_id": string,"p_user_id": string,"p_weak_areas": Json }; Returns: {
               "attempt_id": string,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"pass_threshold": number,"score": number,"task_status": Database["public"]['Enums']["task_status"],"task_updated_at": string
             }[]
                            },

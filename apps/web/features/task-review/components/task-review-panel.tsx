@@ -99,8 +99,12 @@ export function TaskReviewPanel({
     setIsGenerating(true);
 
     try {
+      const requestId = crypto.randomUUID();
+
       const result = await requestTaskReviewAction({
         taskId: task.id,
+
+        requestId,
 
         preferredLocale,
 
@@ -126,6 +130,20 @@ export function TaskReviewPanel({
       setIsGenerating(false);
     }
   }
+
+  useEffect(() => {
+    if (attempt?.status !== "generating") {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      void loadLatest();
+    }, 4_000);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [attempt?.status, attempt?.attempt_id, loadLatest]);
 
   function handleSubmitted(submittedAttempt: TaskReviewAttempt) {
     setAttempt(submittedAttempt);

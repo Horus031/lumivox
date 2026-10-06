@@ -23,6 +23,8 @@ import type {
 const requestTaskReviewSchema = z.object({
   taskId: z.string().uuid(),
 
+  requestId: z.string().uuid(),
+
   preferredLocale: z.enum(["auto", "en", "vi"]).default("auto"),
 
   passThreshold: z.number().int().min(50).max(100).default(70),
@@ -56,6 +58,8 @@ const submitTaskReviewSchema = z.object({
 export async function requestTaskReviewAction(input: {
   taskId: string;
 
+  requestId: string;
+
   preferredLocale?: "auto" | "en" | "vi";
 
   passThreshold?: number;
@@ -74,6 +78,8 @@ export async function requestTaskReviewAction(input: {
 
   try {
     const { supabase, user } = await requireUser();
+    const rateLimitMode =
+      process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
 
     const rateLimit = await checkRateLimit({
       key: `task-review-generate:${user.id}`,
@@ -81,13 +87,15 @@ export async function requestTaskReviewAction(input: {
       limit: 3,
 
       window: "10 m",
+
+      mode: rateLimitMode,
     });
 
     if (!rateLimit.success) {
       return {
         success: false,
 
-        message: formatRateLimitMessage(rateLimit.reset),
+        message: rateLimit.message ?? formatRateLimitMessage(rateLimit.reset),
       };
     }
 
@@ -133,6 +141,12 @@ export async function requestTaskReviewAction(input: {
     const response = await fetchAiApi<TaskReviewAttempt>({
       path: "/api/v1/task-reviews/generate",
 
+      requestId: parsed.data.requestId,
+
+      timeoutMs: 35_000,
+
+      retries: 1,
+
       body: {
         user_id: user.id,
 
@@ -149,6 +163,8 @@ export async function requestTaskReviewAction(input: {
         include_goal_documents: true,
 
         top_k: 8,
+
+        request_id: parsed.data.requestId,
       },
     });
 
@@ -260,6 +276,10 @@ export async function submitTaskReviewAction(input: {
 
     const response = await fetchAiApi<TaskReviewAttempt>({
       path: "/api/v1/task-reviews/submit",
+
+      timeoutMs: 15_000,
+
+      retries: 1,
 
       body: {
         user_id: user.id,

@@ -84,6 +84,8 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+    
+    review_generation_stale_seconds: int = 900
 
 
 settings = Settings()
