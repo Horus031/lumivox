@@ -18,7 +18,7 @@ const updateDocumentVisibilitySchema = z.object({
 });
 
 export async function shareLearningDocumentByEmailAction(
-  input: z.infer<typeof shareDocumentSchema>
+  input: z.infer<typeof shareDocumentSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -68,7 +68,7 @@ export async function shareLearningDocumentByEmailAction(
         },
         {
           onConflict: "document_id,user_email",
-        }
+        },
       );
 
     if (permissionError) {
@@ -95,7 +95,7 @@ export async function shareLearningDocumentByEmailAction(
       }
     }
 
-    revalidatePath("/goals");
+    revalidatePath("/workspace");
     revalidatePath("/settings");
     revalidatePath(`/documents/${documentId}/share`);
     revalidatePath(`/documents/shared/${documentId}`);
@@ -117,7 +117,7 @@ export async function shareLearningDocumentByEmailAction(
 }
 
 export async function removeLearningDocumentPermissionAction(
-  permissionId: string
+  permissionId: string,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -131,7 +131,7 @@ export async function removeLearningDocumentPermissionAction(
         learning_documents!inner (
           owner_id
         )
-        `
+        `,
       )
       .eq("id", permissionId)
       .maybeSingle();
@@ -191,7 +191,7 @@ export async function removeLearningDocumentPermissionAction(
 }
 
 export async function updateLearningDocumentVisibilityAction(
-  input: z.infer<typeof updateDocumentVisibilitySchema>
+  input: z.infer<typeof updateDocumentVisibilitySchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -224,7 +224,7 @@ export async function updateLearningDocumentVisibilityAction(
 
     revalidatePath(`/documents/${documentId}/share`);
     revalidatePath(`/documents/shared/${documentId}`);
-    revalidatePath("/goals");
+    revalidatePath("/workspace");
 
     return {
       success: true,

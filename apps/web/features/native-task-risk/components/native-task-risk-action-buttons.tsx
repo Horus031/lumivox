@@ -74,7 +74,7 @@ export function NativeTaskRiskActionButtons({
           return (
             <Link
               key={action.action_id}
-              href={`/tasks?parentTaskId=${taskId}&action=create-subtask`}
+              href={`/workspace?task=${taskId}&tab=subtasks`}
               className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
             >
               {action.label}
@@ -86,7 +86,7 @@ export function NativeTaskRiskActionButtons({
           return (
             <Link
               key={action.action_id}
-              href={`/tasks?taskId=${taskId}&action=edit`}
+              href={`/workspace?task=${taskId}&tab=overview&edit=1`}
               className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
             >
               {action.label}

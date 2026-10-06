@@ -20,6 +20,7 @@ const PROTECTED_PATH_PREFIXES = [
   "/rooms",
   "/settings",
   "/tasks",
+  "/workspace",
 ];
 
 function isProtectedPath(pathname: string) {

@@ -32,21 +32,45 @@ import { TaskModalShell } from "./task-modal-shell";
 import { TaskSubtasksPanel } from "./task-subtasks-panel";
 
 import { TaskReviewPanel } from "@/features/task-review/components/task-review-panel";
+import { GoalOption } from "@/features/goals/goal.types";
+import { TaskEditForm } from "./task-edit-form";
+
+export type TaskDrawerTab = "overview" | "subtasks" | "documents" | "review";
 
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
 
+  goals: GoalOption[];
+
   onClose: () => void;
+
+  initialTab?: TaskDrawerTab;
+
+  initialEditMode?: boolean;
 };
 
-export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
+export function TaskDetailsDrawer({
+  task,
+  goals,
+  onClose,
+  initialTab,
+  initialEditMode,
+}: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
 
   const formT = useTranslations("tasks.form");
 
+  const commonT = useTranslations("common");
+
   const router = useRouter();
 
   const [details, setDetails] = useState<TaskDetailsData | null>(null);
+
+  const [activeTab, setActiveTab] = useState<TaskDrawerTab>(
+    initialTab ?? "overview",
+  );
+
+  const [isEditing, setIsEditing] = useState(initialEditMode ?? false);
 
   const [isLoadingDetails, startDetailsTransition] = useTransition();
 
@@ -77,13 +101,20 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
   useEffect(() => {
     if (!taskId) {
       setDetails(null);
+
       return;
     }
 
     setDetails(null);
 
+    setActiveTab(
+      initialTab ?? (task?.status === "in_review" ? "review" : "overview"),
+    );
+
+    setIsEditing(initialEditMode ?? false);
+
     refreshDetails();
-  }, [taskId, taskUpdatedAt, refreshDetails]);
+  }, [taskId, taskUpdatedAt, initialTab, initialEditMode, refreshDetails]);
 
   if (!task) {
     return null;
@@ -209,9 +240,8 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
         ) : null}
 
         <Tabs
-          defaultValue={
-            currentTask.status === "in_review" ? "review" : "overview"
-          }
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as TaskDrawerTab)}
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
@@ -235,6 +265,33 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
           </div>
 
           <TabsContent value="overview">
+            <div className="flex items-center justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsEditing((current) => !current)}
+              >
+                {isEditing ? commonT("cancel") : commonT("edit")}
+              </Button>
+            </div>
+
+            {isEditing ? (
+              <div className="rounded-3xl border border-border/70 bg-muted/20 p-4">
+                <TaskEditForm
+                  key={currentTask.updated_at}
+                  task={currentTask}
+                  goals={goals}
+                  onCancel={() => setIsEditing(false)}
+                  onSaved={() => {
+                    setIsEditing(false);
+
+                    refreshDetails();
+                  }}
+                />
+              </div>
+            ) : null}
+
             <div className="space-y-5">
               <div className="grid gap-3 sm:grid-cols-2">
                 {summaryRows.map((row) => (
@@ -295,6 +352,7 @@ export function TaskDetailsDrawer({ task, onClose }: TaskDetailsDrawerProps) {
             <TaskSubtasksPanel
               parentTask={currentTask}
               subtasks={subtasks}
+              goals={goals}
               onChanged={refreshDetails}
             />
           </TabsContent>

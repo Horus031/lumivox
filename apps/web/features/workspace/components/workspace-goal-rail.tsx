@@ -5,6 +5,8 @@ import type { GoalWithProgress } from "@/features/goals/goal.types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+import { WorkspaceGoalActions } from "./workspace-goal-actions";
+
 type WorkspaceGoalRailProps = {
   goals: GoalWithProgress[];
   selectedKey: string;
@@ -53,38 +55,60 @@ export async function WorkspaceGoalRail({
           </Link>
           {goals.map((goal) => {
             const selected = selectedKey === goal.id;
+
             return (
-              <Link
+              <div
                 key={goal.id}
-                href={`/workspace?goal=${goal.id}`}
-                aria-current={selected ? "page" : undefined}
                 className={cn(
-                  linkClassName,
-                  "w-56 lg:w-full",
-                  selected && "bg-primary/10 text-primary",
+                  "flex w-64 shrink-0 items-start gap-1 rounded-lg lg:w-full",
+                  selected && "bg-primary/10",
                 )}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="truncate text-sm font-medium">{goal.title}</p>
-                    <span className="text-xs text-muted-foreground">
-                      {Math.round(goal.computed_progress)}%
-                    </span>
+                <Link
+                  href={`/workspace?goal=${goal.id}`}
+                  aria-current={selected ? "page" : undefined}
+                  className={cn(
+                    linkClassName,
+
+                    "min-w-0 flex-1",
+
+                    selected && "text-primary",
+                  )}
+                >
+                  <div className="min-w-0">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="truncate text-sm font-medium">
+                        {goal.title}
+                      </p>
+
+                      <span className="text-xs text-muted-foreground">
+                        {Math.round(goal.computed_progress)}%
+                      </span>
+                    </div>
+
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary transition-all"
+                        style={{
+                          width: `${goal.computed_progress}%`,
+                        }}
+                      />
+                    </div>
+
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {t("taskProgress", {
+                        completed: goal.completed_tasks,
+
+                        total: goal.total_tasks,
+                      })}
+                    </p>
                   </div>
-                  <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary transition-all"
-                      style={{ width: `${goal.computed_progress}%` }}
-                    />
-                  </div>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
-                    {t("taskProgress", {
-                      completed: goal.completed_tasks,
-                      total: goal.total_tasks,
-                    })}
-                  </p>
+                </Link>
+
+                <div className="pt-1">
+                  <WorkspaceGoalActions goal={goal} />
                 </div>
-              </Link>
+              </div>
             );
           })}
         </nav>

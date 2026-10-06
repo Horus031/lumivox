@@ -1,8 +1,7 @@
 export type AppNavigationItem = {
   key:
     | "dashboard"
-    | "goals"
-    | "tasks"
+    | "workspace"
     | "roadmaps"
     | "focus"
     | "rooms"
@@ -10,10 +9,12 @@ export type AppNavigationItem = {
     | "leaderboard"
     | "reflections"
     | "settings"
-    | "admin"
-    | "workspace";
+    | "admin";
+
   href: string;
+
   adminOnly?: boolean;
+
   icon:
     | "dashboard"
     | "goals"

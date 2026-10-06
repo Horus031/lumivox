@@ -1945,6 +1945,9 @@
       "allTasks": "Tất cả nhiệm vụ",
       "unassigned": "Không có mục tiêu",
       "createGoal": "Tạo mục tiêu",
+      "goalActions": "Thao tác mục tiêu",
+      "documents": "Tài liệu học tập",
+      "deleteGoalConfirm": "Xóa mục tiêu này? Các nhiệm vụ đang liên kết với mục tiêu có thể bị ảnh hưởng.",
       "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành"
     },
     "board": {

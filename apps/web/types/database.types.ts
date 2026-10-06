@@ -1040,11 +1040,6 @@ isOneToOne: false
               "attempt_id": string,"task_updated_at": string
             }[]
                            },
-"finalize_task_review_submission":
-{ Args: { "p_attempt_id": string,"p_feedback_payload": Json,"p_score": number,"p_task_id": string,"p_user_id": string,"p_weak_areas": Json }; Returns: {
-              "attempt_id": string,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"pass_threshold": number,"score": number,"task_status": Database["public"]['Enums']["task_status"],"task_updated_at": string
-            }[]
-                           },
 "finalize_task_review_submission_v2":
 { Args: { "p_attempt_id": string,"p_feedback_payload": Json,"p_score": number,"p_submission_fingerprint": string,"p_task_id": string,"p_user_id": string,"p_weak_areas": Json }; Returns: {
               "attempt_id": string,"attempt_status": Database["public"]['Enums']["task_review_attempt_status"],"pass_threshold": number,"score": number,"task_status": Database["public"]['Enums']["task_status"],"task_updated_at": string
@@ -1095,9 +1090,6 @@ isOneToOne: false
 { Args: { "p_horizon_days"?: number,"p_limit"?: number }; Returns: {
               "days_until_due": number,"due_at": string,"goal_id": string,"goal_title": string,"priority": string,"status": string,"task_id": string,"task_title": string
             }[]
-                           },
-"get_my_tasks_page":
-{ Args: { "p_goal_id"?: string,"p_page"?: number,"p_page_size"?: number,"p_priority"?: Database["public"]['Enums']["task_priority"],"p_search"?: string,"p_status"?: Database["public"]['Enums']["task_status"] }; Returns: Json
                            },
 "get_native_task_risk_system_candidates":
 { Args: { "p_horizon_days"?: number,"p_max_tasks_per_user"?: number,"p_max_users"?: number,"p_skip_recent_hours"?: number }; Returns: {

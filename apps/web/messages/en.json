@@ -1945,6 +1945,9 @@
       "allTasks": "All tasks",
       "unassigned": "No goal",
       "createGoal": "Create goal",
+      "goalActions": "Goal actions",
+      "documents": "Learning documents",
+      "deleteGoalConfirm": "Delete this goal? Tasks linked to it may be affected.",
       "taskProgress": "{completed}/{total} tasks completed"
     },
     "board": {

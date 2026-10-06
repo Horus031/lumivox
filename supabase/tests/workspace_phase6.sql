@@ -132,7 +132,7 @@ begin
 
   if has_function_privilege(
     'authenticated',
-    'public.finalize_task_review_submission(uuid,uuid,uuid,numeric,jsonb,jsonb)',
+    'public.finalize_task_review_submission_v2(uuid,uuid,uuid,numeric,jsonb,jsonb,text)',
     'EXECUTE'
   ) then
     raise exception
@@ -141,7 +141,7 @@ begin
 
   if not has_function_privilege(
     'service_role',
-    'public.finalize_task_review_submission(uuid,uuid,uuid,numeric,jsonb,jsonb)',
+    'public.finalize_task_review_submission_v2(uuid,uuid,uuid,numeric,jsonb,jsonb,text)',
     'EXECUTE'
   ) then
     raise exception
@@ -161,7 +161,7 @@ select pass('Submission finalization privileges');
 set local role service_role;
 
 select *
-from public.finalize_task_review_submission(
+from public.finalize_task_review_submission_v2(
   '00000000-0000-4000-8000-000000000611',
   '00000000-0000-4000-8000-000000000096',
   '00000000-0000-4000-8000-000000000601',
@@ -173,7 +173,8 @@ from public.finalize_task_review_submission(
     "passed":true,
     "questions":[]
   }'::jsonb,
-  '[]'::jsonb
+  '[]'::jsonb,
+  repeat('a', 64)
 );
 
 reset role;
@@ -230,7 +231,7 @@ select pass('Passing a review completes the attempt and task');
 set local role service_role;
 
 select *
-from public.finalize_task_review_submission(
+from public.finalize_task_review_submission_v2(
   '00000000-0000-4000-8000-000000000612',
   '00000000-0000-4000-8000-000000000096',
   '00000000-0000-4000-8000-000000000602',
@@ -242,7 +243,8 @@ from public.finalize_task_review_submission(
     "passed":false,
     "questions":[]
   }'::jsonb,
-  '["Subnet design"]'::jsonb
+  '["Subnet design"]'::jsonb,
+  repeat('b', 64)
 );
 
 reset role;
