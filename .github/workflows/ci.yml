@@ -129,6 +129,9 @@ jobs:
       - name: Replay migrations from a clean database
         run: supabase db reset
 
+      - name: Database tests
+        run: supabase test db
+
       - name: Stop local database
         if: always()
         run: supabase stop --no-backup

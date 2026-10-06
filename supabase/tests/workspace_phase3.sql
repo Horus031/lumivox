@@ -1,5 +1,9 @@
 BEGIN;
 
+CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
+SET LOCAL search_path = public, extensions;
+SELECT plan(2);
+
 -- Fixtures are isolated from existing accounts and rolled back after assertions.
 INSERT INTO auth.users (id, email)
 VALUES ('00000000-0000-4000-8000-000000000093', 'workspace-phase3-sql@example.test');
@@ -43,6 +47,7 @@ END;
 $$;
 
 RESET ROLE;
+SELECT pass('Dashboard grants, status distribution and completion summary');
 DO $$
 DECLARE
   task_id uuid;
@@ -63,4 +68,6 @@ BEGIN
 END;
 $$;
 
+SELECT pass('Conditional updates reject a stale task version');
+SELECT * FROM finish();
 ROLLBACK;

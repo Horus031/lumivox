@@ -310,6 +310,7 @@ class GenerateTaskReviewRequest(
 ):
     user_id: UUID
     task_id: UUID
+    request_id: UUID
 
     expected_status: Literal[
         "in_progress",

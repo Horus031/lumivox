@@ -4,17 +4,6 @@ from app.schemas.task_review import (
     ReviewFlashcardDraft,
     ReviewGenerationOutput,
     ReviewQuestionDraft,
-)
-
-from app.services.task_review_service import (
-    _build_assessment_payloads,
-    _build_review_prompt,
-)
-
-from app.schemas.task_review import (
-    ReviewFlashcardDraft,
-    ReviewGenerationOutput,
-    ReviewQuestionDraft,
     TaskReviewAnswerSubmission,
 )
 
@@ -22,6 +11,7 @@ from app.services.task_review_service import (
     _build_assessment_payloads,
     _build_review_prompt,
     _score_review_answers,
+    _submission_fingerprint,
 )
 
 def build_generation():
@@ -368,6 +358,72 @@ def test_multiple_select_order_does_not_matter():
     assert feedback.score == 100
     assert feedback.passed is True
     assert weak_areas == []
+
+
+def test_submission_fingerprint_ignores_answer_order():
+    first = _submission_fingerprint(
+        [
+            TaskReviewAnswerSubmission(
+                question_id="q_2",
+                selected_option_indices=[
+                    2,
+                    0,
+                ],
+            ),
+            TaskReviewAnswerSubmission(
+                question_id="q_1",
+                selected_option_indices=[
+                    1,
+                ],
+            ),
+        ]
+    )
+
+    second = _submission_fingerprint(
+        [
+            TaskReviewAnswerSubmission(
+                question_id="q_1",
+                selected_option_indices=[
+                    1,
+                ],
+            ),
+            TaskReviewAnswerSubmission(
+                question_id="q_2",
+                selected_option_indices=[
+                    0,
+                    2,
+                ],
+            ),
+        ]
+    )
+
+    assert first == second
+
+
+def test_submission_fingerprint_changes_with_answers():
+    first = _submission_fingerprint(
+        [
+            TaskReviewAnswerSubmission(
+                question_id="q_1",
+                selected_option_indices=[
+                    1,
+                ],
+            ),
+        ]
+    )
+
+    second = _submission_fingerprint(
+        [
+            TaskReviewAnswerSubmission(
+                question_id="q_1",
+                selected_option_indices=[
+                    0,
+                ],
+            ),
+        ]
+    )
+
+    assert first != second
 
 
 def test_scoring_rejects_missing_question():
