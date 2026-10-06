@@ -19,22 +19,41 @@ import {
 import type { WorkspaceScope, WorkspaceTask } from "../workspace.types";
 import { groupWorkspaceTasksByStatus } from "../workspace.utils";
 import { WorkspaceLane } from "./workspace-lane";
+import type { GoalOption } from "@/features/goals/goal.types";
+
+import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
 type WorkspaceBoardProps = {
   tasks: WorkspaceTask[];
+
+  goals: GoalOption[];
+
   scope: WorkspaceScope;
+
   referenceNow: string;
+
+  initialTaskId: string | null;
+
+  initialTaskTab: TaskDrawerTab;
+
+  initialEditMode: boolean;
 };
 
 export function WorkspaceBoard({
   tasks,
+  goals,
   scope,
   referenceNow,
+  initialTaskId,
+  initialTaskTab,
+  initialEditMode,
 }: WorkspaceBoardProps) {
   const taskT = useTranslations("tasks.form");
   const t = useTranslations("workspace.board");
   const router = useRouter();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
+    initialTaskId,
+  );
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
   const [isPending, startTransition] = useTransition();
@@ -145,6 +164,9 @@ export function WorkspaceBoard({
 
       <TaskDetailsDrawer
         task={selectedTask}
+        goals={goals}
+        initialTab={initialTaskTab}
+        initialEditMode={initialEditMode}
         onClose={() => setSelectedTaskId(null)}
       />
     </>

@@ -1,34 +1,65 @@
 import { getTranslations } from "next-intl/server";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
+
 import { WorkspaceCreateGoalButton } from "@/features/workspace/components/workspace-create-goal-button";
+
 import { getGoalsWithProgress } from "@/features/goals/goal.queries";
+
 import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
+
 import { WorkspaceBoard } from "@/features/workspace/components/workspace-board";
+
 import { WorkspaceGoalRail } from "@/features/workspace/components/workspace-goal-rail";
+
 import { getWorkspaceTasks } from "@/features/workspace/workspace.queries";
+
 import {
   getWorkspaceScopeKey,
   resolveWorkspaceScope,
 } from "@/features/workspace/workspace.utils";
 
+import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
+
 type WorkspacePageProps = {
   searchParams: Promise<{
     goal?: string;
+
+    task?: string;
+
+    tab?: string;
+
+    edit?: string;
   }>;
 };
+
+function resolveTaskTab(value: string | undefined): TaskDrawerTab {
+  if (
+    value === "overview" ||
+    value === "subtasks" ||
+    value === "documents" ||
+    value === "review"
+  ) {
+    return value;
+  }
+
+  return "overview";
+}
 
 export default async function WorkspacePage({
   searchParams,
 }: WorkspacePageProps) {
   const [t, params, goals] = await Promise.all([
     getTranslations("workspace.page"),
+
     searchParams,
+
     getGoalsWithProgress(),
   ]);
 
   const scope = resolveWorkspaceScope(
     params.goal,
+
     goals.map((goal) => goal.id),
   );
 
@@ -37,6 +68,16 @@ export default async function WorkspacePage({
   const selectedKey = getWorkspaceScopeKey(scope);
 
   const defaultGoalId = scope.type === "goal" ? scope.goalId : undefined;
+
+  const initialTaskId =
+    params.task && tasks.some((task) => task.id === params.task)
+      ? params.task
+      : null;
+
+  const initialTaskTab = resolveTaskTab(params.tab);
+
+  const initialEditMode = params.edit === "1";
+
   const referenceNow = new Date().toISOString();
 
   return (
@@ -64,8 +105,12 @@ export default async function WorkspacePage({
         <WorkspaceBoard
           key={selectedKey}
           tasks={tasks}
+          goals={goals}
           scope={scope}
           referenceNow={referenceNow}
+          initialTaskId={initialTaskId}
+          initialTaskTab={initialTaskTab}
+          initialEditMode={initialEditMode}
         />
       </div>
     </section>

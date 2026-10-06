@@ -26,10 +26,16 @@ import type { TaskWithGoal } from "@/features/tasks/task.types";
 
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
+import type { GoalOption } from "@/features/goals/goal.types";
+
+import { TaskEditForm } from "./task-edit-form";
+
 type TaskSubtasksPanelProps = {
   parentTask: TaskWithGoal;
 
   subtasks: TaskWithGoal[];
+
+  goals: GoalOption[];
 
   onChanged: () => void;
 };
@@ -37,17 +43,22 @@ type TaskSubtasksPanelProps = {
 export function TaskSubtasksPanel({
   parentTask,
   subtasks,
+  goals,
   onChanged,
 }: TaskSubtasksPanelProps) {
   const t = useTranslations("tasks.details.subtasks");
 
   const formT = useTranslations("tasks.form");
 
+  const commonT = useTranslations("common");
+
   const router = useRouter();
 
   const [title, setTitle] = useState("");
 
   const [isPending, startTransition] = useTransition();
+
+  const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
 
   const canCreate =
     parentTask.parent_task_id === null &&
@@ -263,24 +274,51 @@ export function TaskSubtasksPanel({
                   </Button>
                 </div>
 
-                {actions.length > 0 ? (
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {actions.map((action) => (
-                      <Button
-                        key={action.target}
-                        type="button"
-                        size="sm"
-                        variant={
-                          action.target === "completed" ? "default" : "outline"
-                        }
-                        disabled={isPending}
-                        onClick={() =>
-                          transitionSubtask(subtask, action.target)
-                        }
-                      >
-                        {action.label}
-                      </Button>
-                    ))}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {actions.map((action) => (
+                    <Button
+                      key={action.target}
+                      type="button"
+                      size="sm"
+                      variant={
+                        action.target === "completed" ? "default" : "outline"
+                      }
+                      disabled={isPending}
+                      onClick={() => transitionSubtask(subtask, action.target)}
+                    >
+                      {action.label}
+                    </Button>
+                  ))}
+
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    disabled={isPending}
+                    onClick={() =>
+                      setEditingSubtaskId((current) =>
+                        current === subtask.id ? null : subtask.id,
+                      )
+                    }
+                  >
+                    {commonT("edit")}
+                  </Button>
+                </div>
+
+                {editingSubtaskId === subtask.id ? (
+                  <div className="mt-4 border-t border-border/60 pt-4">
+                    <TaskEditForm
+                      key={subtask.updated_at}
+                      task={subtask}
+                      goals={goals}
+                      allowGoalChange={false}
+                      onCancel={() => setEditingSubtaskId(null)}
+                      onSaved={() => {
+                        setEditingSubtaskId(null);
+
+                        onChanged();
+                      }}
+                    />
                   </div>
                 ) : null}
               </article>

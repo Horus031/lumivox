@@ -170,8 +170,6 @@ export async function requestTaskReviewAction(input: {
 
     revalidatePath("/workspace");
 
-    revalidatePath("/tasks");
-
     return {
       success: true,
 
@@ -258,19 +256,24 @@ export async function submitTaskReviewAction(input: {
   try {
     const { user } = await requireUser();
 
+    const rateLimitMode =
+      process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
+
     const rateLimit = await checkRateLimit({
       key: `task-review-submit:${user.id}`,
 
       limit: 10,
 
       window: "10 m",
+
+      mode: rateLimitMode,
     });
 
     if (!rateLimit.success) {
       return {
         success: false,
 
-        message: formatRateLimitMessage(rateLimit.reset),
+        message: rateLimit.message ?? formatRateLimitMessage(rateLimit.reset),
       };
     }
 
@@ -311,8 +314,6 @@ export async function submitTaskReviewAction(input: {
     }
 
     revalidatePath("/workspace");
-
-    revalidatePath("/tasks");
 
     return {
       success: true,

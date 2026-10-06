@@ -72,15 +72,13 @@ export async function processLearningDocumentAction(
     });
 
     if (document.goal_id) {
-      revalidatePath("/goals");
+      revalidatePath("/workspace");
 
       revalidatePath(`/goals/${document.goal_id}`);
     }
 
     if (document.task_id) {
       revalidatePath("/workspace");
-
-      revalidatePath("/tasks");
     }
 
     revalidatePath(`/documents/${documentId}/share`);
