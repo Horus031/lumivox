@@ -1,4 +1,7 @@
-import { useLocale, useTranslations } from "next-intl";
+import {
+  useLocale,
+  useTranslations,
+} from "next-intl";
 
 import type {
   WeeklyReflectionAction,
@@ -8,9 +11,11 @@ import type {
   WeeklyReflectionWin,
 } from "@/features/weekly-reflections/weekly-reflection.types";
 
+
 type WeeklyReflectionCardProps = {
   card: WeeklyReflectionCardView;
 };
+
 
 function directionBadgeClass(
   direction:
@@ -20,47 +25,161 @@ function directionBadgeClass(
     | "needs_attention"
     | undefined,
 ) {
-  if (direction === "improving") {
-    return "bg-emerald-100 text-emerald-800";
+  if (
+    direction
+    === "improving"
+  ) {
+    return (
+      "bg-emerald-100 "
+      + "text-emerald-800"
+    );
   }
 
-  if (direction === "needs_attention") {
-    return "bg-red-100 text-red-800";
+  if (
+    direction
+    === "needs_attention"
+  ) {
+    return (
+      "bg-red-100 "
+      + "text-red-800"
+    );
   }
 
-  if (direction === "mixed") {
-    return "bg-amber-100 text-amber-800";
+  if (
+    direction
+    === "mixed"
+  ) {
+    return (
+      "bg-amber-100 "
+      + "text-amber-800"
+    );
   }
 
-  return "bg-secondary text-foreground";
+  return (
+    "bg-secondary "
+    + "text-foreground"
+  );
 }
 
-function formatWindow(value: string | undefined, locale: string) {
-  if (!value) return null;
 
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-  }).format(new Date(value));
+function formatWindow(
+  value:
+    string | undefined,
+
+  locale:
+    string,
+) {
+  if (!value) {
+    return null;
+  }
+
+  return (
+    new Intl.DateTimeFormat(
+      locale,
+      {
+        dateStyle:
+          "medium",
+      },
+    )
+    .format(
+      new Date(
+        value,
+      ),
+    )
+  );
 }
 
-export function WeeklyReflectionCard({ card }: WeeklyReflectionCardProps) {
-  const locale = useLocale();
-  const t = useTranslations("reflections.card");
-  const reflection = card.weekly_reflections;
+
+function formatPercent(
+  value: number,
+
+  locale: string,
+) {
+  return (
+    new Intl.NumberFormat(
+      locale,
+      {
+        maximumFractionDigits:
+          1,
+      },
+    )
+    .format(
+      value,
+    )
+  );
+}
+
+
+export function WeeklyReflectionCard({
+  card,
+}: WeeklyReflectionCardProps) {
+  const locale =
+    useLocale();
+
+  const t =
+    useTranslations(
+      "reflections.card",
+    );
+
+  const reflection =
+    card.weekly_reflections;
 
   const currentMetrics =
     (reflection?.current_metrics as WeeklyReflectionMetrics | null) ?? null;
 
   const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
-  const watchouts = (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-  const actions =
-    (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
 
-  const direction = reflection?.reflection_direction ?? "unknown";
+  const watchouts = (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
+
+  const actions = (card.next_week_actions as WeeklyReflectionAction[] | null)?? [];
+
+  const direction =
+    reflection
+      ?.reflection_direction
+    ?? "unknown";
+
   const windowStart =
-    formatWindow(reflection?.current_window_start, locale) ?? t("unknown");
+    formatWindow(
+      reflection
+        ?.current_window_start,
+
+      locale,
+    )
+    ?? t("unknown");
+
   const windowEnd =
-    formatWindow(reflection?.current_window_end, locale) ?? t("unknown");
+    formatWindow(
+      reflection
+        ?.current_window_end,
+
+      locale,
+    )
+    ?? t("unknown");
+
+  const reviewAttempts =
+    currentMetrics
+      ?.review_attempts
+    ?? 0;
+
+  const reviewedTasks =
+    currentMetrics
+      ?.reviewed_tasks
+    ?? 0;
+
+  const averageReviewScore =
+    currentMetrics
+      ?.average_review_score
+    ?? null;
+
+  const reviewPassRate =
+    currentMetrics
+      ?.review_pass_rate
+    ?? null;
+
+  const weakAreas =
+    currentMetrics
+      ?.top_review_weak_areas
+    ?? [];
 
   return (
     <article className="rounded-[28px] border border-border/70 bg-card/90 p-5 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
@@ -68,64 +187,118 @@ export function WeeklyReflectionCard({ card }: WeeklyReflectionCardProps) {
         <div className="max-w-4xl space-y-4">
           <div className="flex flex-wrap gap-2">
             <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              {t("badge")}
+              {t(
+                "badge",
+              )}
             </span>
 
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${directionBadgeClass(
-                reflection?.reflection_direction,
-              )}`}
+              className={[
+                "rounded-full px-3 py-1 text-xs font-semibold capitalize",
+                directionBadgeClass(
+                  reflection
+                    ?.reflection_direction,
+                ),
+              ].join(" ")}
             >
-              {t(`direction.${direction}`)}
+              {t(
+                `direction.${direction}`,
+              )}
             </span>
           </div>
 
           <div>
             <h3 className="text-2xl font-semibold tracking-tight text-foreground">
-              {card.title}
+              {
+                card.title
+              }
             </h3>
 
-            <p className="mt-2 text-foreground/75">{card.summary}</p>
+            <p className="mt-2 text-foreground/75">
+              {
+                card.summary
+              }
+            </p>
           </div>
 
           <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
             <p className="text-sm font-semibold text-muted-foreground">
-              {t("reflection")}
+              {t(
+                "reflection",
+              )}
             </p>
+
             <p className="mt-2 text-sm leading-6 text-foreground/75">
-              {card.reflection_interpretation}
+              {
+                card
+                  .reflection_interpretation
+              }
             </p>
           </div>
         </div>
 
         <div className="min-w-57.5 rounded-2xl border border-border/70 bg-secondary/35 p-4">
           <p className="text-sm font-semibold text-muted-foreground">
-            {t("currentWindow")}
+            {t(
+              "currentWindow",
+            )}
           </p>
 
-          <p className="mt-2 text-sm text-foreground">{windowStart}</p>
-          <p className="text-sm text-foreground">{"->"} {windowEnd}</p>
+          <p className="mt-2 text-sm text-foreground">
+            {
+              windowStart
+            }
+          </p>
+
+          <p className="text-sm text-foreground">
+            {"->"}{" "}
+            {
+              windowEnd
+            }
+          </p>
 
           {currentMetrics ? (
             <div className="mt-4 space-y-2 text-sm text-foreground/80">
               <p>
-                {t("metrics.focus")}{" "}
+                {t(
+                  "metrics.focus",
+                )}{" "}
+
                 <span className="font-semibold">
-                  {t("metrics.minutes", {
-                    count: currentMetrics.completed_focus_minutes,
-                  })}
+                  {t(
+                    "metrics.minutes",
+                    {
+                      count:
+                        currentMetrics
+                          .completed_focus_minutes,
+                    },
+                  )}
                 </span>
               </p>
+
               <p>
-                {t("metrics.tasksDone")}{" "}
+                {t(
+                  "metrics.tasksDone",
+                )}{" "}
+
                 <span className="font-semibold">
-                  {currentMetrics.completed_tasks}
+                  {
+                    currentMetrics
+                      .completed_tasks
+                  }
                 </span>
               </p>
+
               <p>
-                {t("metrics.activeDays")}{" "}
+                {t(
+                  "metrics.activeDays",
+                )}{" "}
+
                 <span className="font-semibold">
-                  {currentMetrics.active_focus_days}
+                  {
+                    currentMetrics
+                      .active_focus_days
+                  }
                 </span>
               </p>
             </div>
@@ -133,133 +306,407 @@ export function WeeklyReflectionCard({ card }: WeeklyReflectionCardProps) {
         </div>
       </div>
 
+      {reviewAttempts > 0 ? (
+        <section className="mt-5 rounded-3xl border border-border/70 bg-primary/[0.035] p-5">
+          <div>
+            <h4 className="text-lg font-semibold text-foreground">
+              {t(
+                "mastery.title",
+              )}
+            </h4>
+
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+              {t(
+                "mastery.description",
+              )}
+            </p>
+          </div>
+
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <MasteryMetric
+              label={t(
+                "mastery.attempts",
+              )}
+              value={
+                reviewAttempts
+              }
+            />
+
+            <MasteryMetric
+              label={t(
+                "mastery.reviewedTasks",
+              )}
+              value={
+                reviewedTasks
+              }
+            />
+
+            <MasteryMetric
+              label={t(
+                "mastery.averageScore",
+              )}
+              value={
+                averageReviewScore
+                  !== null
+                  ? t(
+                      "mastery.percent",
+                      {
+                        value:
+                          formatPercent(
+                            averageReviewScore,
+                            locale,
+                          ),
+                      },
+                    )
+                  : t(
+                      "mastery.notAvailable",
+                    )
+              }
+            />
+
+            <MasteryMetric
+              label={t(
+                "mastery.passRate",
+              )}
+              value={
+                reviewPassRate
+                  !== null
+                  ? t(
+                      "mastery.percent",
+                      {
+                        value:
+                          formatPercent(
+                            reviewPassRate,
+                            locale,
+                          ),
+                      },
+                    )
+                  : t(
+                      "mastery.notAvailable",
+                    )
+              }
+            />
+          </div>
+
+          {weakAreas.length > 0 ? (
+            <div className="mt-4">
+              <p className="text-sm font-semibold text-muted-foreground">
+                {t(
+                  "mastery.weakAreas",
+                )}
+              </p>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                {weakAreas.map(
+                  (
+                    area,
+                  ) => (
+                    <span
+                      key={
+                        area
+                      }
+                      className="rounded-full border border-border/70 bg-card px-3 py-1 text-xs font-medium text-foreground"
+                    >
+                      {
+                        area
+                      }
+                    </span>
+                  ),
+                )}
+              </div>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
       <div className="mt-5 grid gap-4 md:grid-cols-3">
-        <MiniSummary label={t("wins")} value={wins.length} tone="emerald" />
         <MiniSummary
-          label={t("watchouts")}
-          value={watchouts.length}
+          label={t(
+            "wins",
+          )}
+          value={
+            wins.length
+          }
+          tone="emerald"
+        />
+
+        <MiniSummary
+          label={t(
+            "watchouts",
+          )}
+          value={
+            watchouts.length
+          }
           tone="amber"
         />
-        <MiniSummary label={t("actions")} value={actions.length} tone="primary" />
+
+        <MiniSummary
+          label={t(
+            "actions",
+          )}
+          value={
+            actions.length
+          }
+          tone="primary"
+        />
       </div>
 
       <details className="group mt-5 rounded-2xl border border-border/70 bg-secondary/20 p-4">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none">
           <div>
             <h4 className="text-lg font-semibold text-foreground">
-              {t("detailsTitle")}
+              {t(
+                "detailsTitle",
+              )}
             </h4>
+
             <p className="mt-1 text-sm text-muted-foreground">
-              {t("detailsDescription")}
+              {t(
+                "detailsDescription",
+              )}
             </p>
           </div>
 
           <span className="rounded-full border border-border/70 bg-card/90 px-3 py-1 text-xs font-semibold text-muted-foreground transition group-open:bg-primary group-open:text-primary-foreground">
-            {t("toggle")}
+            {t(
+              "toggle",
+            )}
           </span>
         </summary>
 
         <div className="mt-4 space-y-4">
           <ReflectionList
-            title={t("wins")}
-            empty={t("emptyWins")}
-            items={wins.map((item) => ({
-              key: item.evidence_key,
-              body: item.student_friendly_explanation,
-            }))}
+            title={t(
+              "wins",
+            )}
+            empty={t(
+              "emptyWins",
+            )}
+            items={wins.map(
+              (
+                item,
+              ) => ({
+                key:
+                  item
+                    .evidence_key,
+
+                body:
+                  item
+                    .student_friendly_explanation,
+              }),
+            )}
           />
 
           <ReflectionList
-            title={t("watchouts")}
-            empty={t("emptyWatchouts")}
-            items={watchouts.map((item) => ({
-              key: item.evidence_key,
-              body: item.student_friendly_explanation,
-            }))}
+            title={t(
+              "watchouts",
+            )}
+            empty={t(
+              "emptyWatchouts",
+            )}
+            items={watchouts.map(
+              (
+                item,
+              ) => ({
+                key:
+                  item
+                    .evidence_key,
+
+                body:
+                  item
+                    .student_friendly_explanation,
+              }),
+            )}
           />
 
           <ReflectionList
-            title={t("nextWeekActions")}
-            empty={t("emptyActions")}
-            items={actions.map((item) => ({
-              key: item.action,
-              body: item.rationale,
-            }))}
+            title={t(
+              "nextWeekActions",
+            )}
+            empty={t(
+              "emptyActions",
+            )}
+            items={actions.map(
+              (
+                item,
+              ) => ({
+                key:
+                  item.action,
+
+                body:
+                  item.rationale,
+              }),
+            )}
           />
         </div>
       </details>
 
       <div className="mt-5 rounded-2xl border border-dashed border-border/70 p-4">
         <p className="text-sm font-semibold text-foreground">
-          {t("confidenceNote")}
+          {t(
+            "confidenceNote",
+          )}
         </p>
+
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {card.confidence_note}
+          {
+            card
+              .confidence_note
+          }
         </p>
       </div>
     </article>
   );
 }
 
+
 type MiniSummaryProps = {
   label: string;
+
   value: number;
-  tone: "emerald" | "amber" | "primary";
+
+  tone:
+    | "emerald"
+    | "amber"
+    | "primary";
 };
 
-function MiniSummary({ label, value, tone }: MiniSummaryProps) {
+
+function MiniSummary({
+  label,
+  value,
+  tone,
+}: MiniSummaryProps) {
   const toneClass =
     tone === "emerald"
-      ? "bg-emerald-100 text-emerald-800"
+      ? (
+          "bg-emerald-100 "
+          + "text-emerald-800"
+        )
       : tone === "amber"
-        ? "bg-amber-100 text-amber-800"
-        : "bg-primary/10 text-primary";
+        ? (
+            "bg-amber-100 "
+            + "text-amber-800"
+          )
+        : (
+            "bg-primary/10 "
+            + "text-primary"
+          );
 
   return (
     <div className="rounded-2xl border border-border/70 bg-secondary/25 p-4">
       <p
-        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${toneClass}`}
+        className={[
+          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+          toneClass,
+        ].join(" ")}
       >
-        {label}
+        {
+          label
+        }
       </p>
+
       <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
-        {value}
+        {
+          value
+        }
       </p>
     </div>
   );
 }
 
+
+type MasteryMetricProps = {
+  label: string;
+
+  value:
+    string
+    | number;
+};
+
+
+function MasteryMetric({
+  label,
+  value,
+}: MasteryMetricProps) {
+  return (
+    <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {
+          label
+        }
+      </p>
+
+      <p className="mt-2 text-xl font-semibold text-foreground">
+        {
+          value
+        }
+      </p>
+    </div>
+  );
+}
+
+
 type ReflectionListProps = {
   title: string;
+
   empty: string;
+
   items: Array<{
     key: string;
+
     body: string;
   }>;
 };
 
-function ReflectionList({ title, empty, items }: ReflectionListProps) {
+
+function ReflectionList({
+  title,
+  empty,
+  items,
+}: ReflectionListProps) {
   return (
     <section className="rounded-3xl border border-border/70 bg-card/90 p-4">
-      <h4 className="text-lg font-semibold text-foreground">{title}</h4>
+      <h4 className="text-lg font-semibold text-foreground">
+        {
+          title
+        }
+      </h4>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-3">
         {items.length === 0 ? (
-          <p className="text-sm leading-6 text-muted-foreground">{empty}</p>
+          <p className="text-sm leading-6 text-muted-foreground">
+            {
+              empty
+            }
+          </p>
         ) : (
-          items.map((item) => (
-            <div
-              key={item.key}
-              className="rounded-xl border border-border/70 bg-secondary/25 p-4"
-            >
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">
-                {item.key.replaceAll("_", " ")}
-              </p>
-              <p className="mt-2 text-sm leading-6 text-foreground/75">
-                {item.body}
-              </p>
-            </div>
-          ))
+          items.map(
+            (
+              item,
+            ) => (
+              <div
+                key={
+                  item.key
+                }
+                className="rounded-xl border border-border/70 bg-secondary/25 p-4"
+              >
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">
+                  {item.key
+                    .replaceAll(
+                      "_",
+                      " ",
+                    )}
+                </p>
+
+                <p className="mt-2 text-sm leading-6 text-foreground/75">
+                  {
+                    item.body
+                  }
+                </p>
+              </div>
+            ),
+          )
         )}
       </div>
     </section>
