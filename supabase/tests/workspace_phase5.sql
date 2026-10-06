@@ -1,5 +1,9 @@
 begin;
 
+create extension if not exists pgtap with schema extensions;
+set local search_path = public, extensions;
+select plan(3);
+
 
 -- ============================================================
 -- Fixtures
@@ -121,6 +125,8 @@ $$;
 -- RLS: user may read own review attempt
 -- ============================================================
 
+select pass('Review table and finalization privileges');
+
 set local role authenticated;
 
 select set_config(
@@ -151,6 +157,8 @@ $$;
 
 
 reset role;
+
+select pass('Authenticated user can read their own review attempt');
 
 
 -- ============================================================
@@ -195,4 +203,6 @@ $$;
 reset role;
 
 
+select pass('Authenticated user cannot directly enter In Review');
+select * from finish();
 rollback;

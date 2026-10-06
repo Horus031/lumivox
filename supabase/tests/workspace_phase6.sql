@@ -1,5 +1,9 @@
 begin;
 
+create extension if not exists pgtap with schema extensions;
+set local search_path = public, extensions;
+select plan(3);
+
 insert into auth.users (
   id,
   email
@@ -152,6 +156,8 @@ $$;
 -- PASS
 -- ============================================================
 
+select pass('Submission finalization privileges');
+
 set local role service_role;
 
 select *
@@ -219,6 +225,8 @@ $$;
 -- FAIL
 -- ============================================================
 
+select pass('Passing a review completes the attempt and task');
+
 set local role service_role;
 
 select *
@@ -282,4 +290,6 @@ end;
 $$;
 
 
+select pass('Failing a review returns the task to In Progress');
+select * from finish();
 rollback;

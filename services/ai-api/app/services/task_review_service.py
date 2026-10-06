@@ -1,10 +1,14 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from datetime import datetime
 from typing import Any
 from uuid import UUID
 
+from app.core.config import (
+    settings,
+)
 from app.clients.review_llm_client import (
     generate_review_embedding,
     generate_review_structured,
@@ -982,157 +986,254 @@ def _build_assessment_payloads(
     )
 
 
-def _check_active_attempt(
+# def _check_active_attempt(
+#     supabase: Any,
+#     *,
+#     user_id: str,
+#     task_id: str,
+# ) -> None:
+#     response = (
+#         supabase
+#         .table(
+#             "task_review_attempts"
+#         )
+#         .select(
+#             "id,status"
+#         )
+#         .eq(
+#             "user_id",
+#             user_id,
+#         )
+#         .eq(
+#             "task_id",
+#             task_id,
+#         )
+#         .in_(
+#             "status",
+#             [
+#                 "generating",
+#                 "ready",
+#             ],
+#         )
+#         .limit(1)
+#         .execute()
+#     )
+
+#     if response.data:
+#         status = (
+#             response.data[0][
+#                 "status"
+#             ]
+#         )
+
+#         raise TaskReviewConflictError(
+#             "This Task already has "
+#             f"an active review attempt "
+#             f"with status '{status}'."
+#         )
+
+
+# def _next_attempt_number(
+#     supabase: Any,
+#     *,
+#     task_id: str,
+# ) -> int:
+#     response = (
+#         supabase
+#         .table(
+#             "task_review_attempts"
+#         )
+#         .select(
+#             "attempt_number"
+#         )
+#         .eq(
+#             "task_id",
+#             task_id,
+#         )
+#         .order(
+#             "attempt_number",
+#             desc=True,
+#         )
+#         .limit(1)
+#         .execute()
+#     )
+
+#     if not response.data:
+#         return 1
+
+#     return (
+#         int(
+#             response.data[0][
+#                 "attempt_number"
+#             ]
+#         )
+#         + 1
+#     )
+
+
+# def _create_attempt(
+#     supabase: Any,
+#     *,
+#     user_id: str,
+#     task_id: str,
+#     pass_threshold: int,
+#     task_snapshot: dict[
+#         str,
+#         Any,
+#     ],
+#     source_snapshot: dict[
+#         str,
+#         Any,
+#     ],
+# ) -> dict[str, Any]:
+#     attempt_number = (
+#         _next_attempt_number(
+#             supabase,
+#             task_id=task_id,
+#         )
+#     )
+
+#     response = (
+#         supabase
+#         .table(
+#             "task_review_attempts"
+#         )
+#         .insert(
+#             {
+#                 "user_id": (
+#                     user_id
+#                 ),
+#                 "task_id": (
+#                     task_id
+#                 ),
+#                 "attempt_number": (
+#                     attempt_number
+#                 ),
+#                 "status": (
+#                     "generating"
+#                 ),
+#                 "pass_threshold": (
+#                     pass_threshold
+#                 ),
+#                 "task_snapshot": (
+#                     task_snapshot
+#                 ),
+#                 "source_snapshot": (
+#                     source_snapshot
+#                 ),
+#                 "prompt_version": (
+#                     PROMPT_VERSION
+#                 ),
+#             }
+#         )
+#         .execute()
+#     )
+
+#     if not response.data:
+#         raise RuntimeError(
+#             "Failed to create "
+#             "review attempt."
+#         )
+
+#     return response.data[0]
+
+
+def _submission_fingerprint(
+    answers: list[
+        TaskReviewAnswerSubmission
+    ],
+) -> str:
+    normalized = [
+        {
+            "question_id":
+                answer.question_id,
+
+            "selected_option_indices":
+                sorted(
+                    answer
+                    .selected_option_indices
+                ),
+        }
+        for answer
+        in sorted(
+            answers,
+            key=lambda item:
+                item.question_id,
+        )
+    ]
+
+    payload = json.dumps(
+        normalized,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(
+            ",",
+            ":",
+        ),
+    )
+
+    return hashlib.sha256(
+        payload.encode(
+            "utf-8"
+        )
+    ).hexdigest()
+
+def _begin_generation_attempt(
     supabase: Any,
     *,
     user_id: str,
     task_id: str,
-) -> None:
-    response = (
-        supabase
-        .table(
-            "task_review_attempts"
-        )
-        .select(
-            "id,status"
-        )
-        .eq(
-            "user_id",
-            user_id,
-        )
-        .eq(
-            "task_id",
-            task_id,
-        )
-        .in_(
-            "status",
-            [
-                "generating",
-                "ready",
-            ],
-        )
-        .limit(1)
-        .execute()
-    )
-
-    if response.data:
-        status = (
-            response.data[0][
-                "status"
-            ]
-        )
-
-        raise TaskReviewConflictError(
-            "This Task already has "
-            f"an active review attempt "
-            f"with status '{status}'."
-        )
-
-
-def _next_attempt_number(
-    supabase: Any,
-    *,
-    task_id: str,
-) -> int:
-    response = (
-        supabase
-        .table(
-            "task_review_attempts"
-        )
-        .select(
-            "attempt_number"
-        )
-        .eq(
-            "task_id",
-            task_id,
-        )
-        .order(
-            "attempt_number",
-            desc=True,
-        )
-        .limit(1)
-        .execute()
-    )
-
-    if not response.data:
-        return 1
-
-    return (
-        int(
-            response.data[0][
-                "attempt_number"
-            ]
-        )
-        + 1
-    )
-
-
-def _create_attempt(
-    supabase: Any,
-    *,
-    user_id: str,
-    task_id: str,
+    request_id: str,
+    expected_status: str,
+    expected_updated_at: datetime,
     pass_threshold: int,
-    task_snapshot: dict[
-        str,
-        Any,
-    ],
-    source_snapshot: dict[
-        str,
-        Any,
-    ],
+    task_snapshot: dict[str, Any],
+    source_snapshot: dict[str, Any],
 ) -> dict[str, Any]:
-    attempt_number = (
-        _next_attempt_number(
-            supabase,
-            task_id=task_id,
-        )
-    )
-
     response = (
         supabase
-        .table(
-            "task_review_attempts"
-        )
-        .insert(
+        .rpc(
+            "begin_task_review_generation",
             {
-                "user_id": (
-                    user_id
-                ),
-                "task_id": (
-                    task_id
-                ),
-                "attempt_number": (
-                    attempt_number
-                ),
-                "status": (
-                    "generating"
-                ),
-                "pass_threshold": (
-                    pass_threshold
-                ),
-                "task_snapshot": (
-                    task_snapshot
-                ),
-                "source_snapshot": (
-                    source_snapshot
-                ),
-                "prompt_version": (
-                    PROMPT_VERSION
-                ),
-            }
+                "p_user_id":
+                    user_id,
+
+                "p_task_id":
+                    task_id,
+
+                "p_expected_status":
+                    expected_status,
+
+                "p_expected_updated_at":
+                    expected_updated_at
+                    .isoformat(),
+
+                "p_generation_request_id":
+                    request_id,
+
+                "p_pass_threshold":
+                    pass_threshold,
+
+                "p_task_snapshot":
+                    task_snapshot,
+
+                "p_source_snapshot":
+                    source_snapshot,
+
+                "p_stale_after_seconds":
+                    settings.review_generation_stale_seconds,
+            },
         )
         .execute()
     )
 
     if not response.data:
         raise RuntimeError(
-            "Failed to create "
-            "review attempt."
+            "Review generation reservation "
+            "returned no result."
         )
 
     return response.data[0]
-
 
 def _mark_generation_failed(
     supabase: Any,
@@ -1151,7 +1252,8 @@ def _mark_generation_failed(
                     "generation_failed"
                 ),
                 "generation_error": (
-                    str(error)[:2000]
+                    "AI Review generation did not finish "
+                    "successfully. Please try again."
                 ),
             }
         )
@@ -1699,12 +1801,6 @@ def generate_task_review(
         payload=payload,
     )
 
-    _check_active_attempt(
-        supabase,
-        user_id=user_id,
-        task_id=task_id,
-    )
-
     documents = (
         _fetch_review_documents(
             supabase,
@@ -1751,22 +1847,45 @@ def generate_task_review(
         "retrieved_chunks": [],
     }
 
-    attempt = _create_attempt(
-        supabase,
-        user_id=user_id,
-        task_id=task_id,
-        pass_threshold=(
-            payload.pass_threshold
-        ),
-        task_snapshot=(
-            task_snapshot
-        ),
-        source_snapshot=(
-            preliminary_source_snapshot
-        ),
+
+    reservation = (
+        _begin_generation_attempt(
+            supabase,
+            user_id=user_id,
+            task_id=task_id,
+            request_id=str(
+                payload.request_id
+            ),
+            expected_status=(
+                payload.expected_status
+            ),
+            expected_updated_at=(
+                payload.expected_updated_at
+            ),
+            pass_threshold=(
+                payload.pass_threshold
+            ),
+            task_snapshot=(
+                task_snapshot
+            ),
+            source_snapshot=(
+                preliminary_source_snapshot
+            ),
+        )
     )
 
-    attempt_id = attempt["id"]
+    attempt_id = str(
+        reservation[
+            "attempt_id"
+        ]
+    )
+
+    if reservation["reused"]:
+        return _load_attempt(
+            supabase,
+            user_id=user_id,
+            attempt_id=attempt_id,
+        )
 
     try:
         query_text = (
@@ -2003,6 +2122,62 @@ def submit_task_review(
     attempt_id = str(
         payload.attempt_id
     )
+    
+    submission_fingerprint = (
+        _submission_fingerprint(
+            payload.answers
+        )
+    )
+
+    attempt_response = (
+        supabase
+        .table(
+            "task_review_attempts"
+        )
+        .select("*")
+        .eq(
+            "id",
+            attempt_id,
+        )
+        .eq(
+            "user_id",
+            user_id,
+        )
+        .eq(
+            "task_id",
+            task_id,
+        )
+        .maybe_single()
+        .execute()
+    )
+
+    attempt = (
+        attempt_response.data
+    )
+
+    if not attempt:
+        raise PermissionError(
+            "Review attempt not found."
+        )
+
+    if attempt["status"] in {
+        "passed",
+        "failed",
+    }:
+        if (
+            attempt.get(
+                "submission_fingerprint"
+            )
+            == submission_fingerprint
+        ):
+            return _attempt_response(
+                attempt
+            )
+
+        raise TaskReviewConflictError(
+            "This review was already "
+            "submitted with different answers."
+        )
 
     task_response = (
         supabase
@@ -2055,37 +2230,6 @@ def submit_task_review(
             "in review."
         )
 
-    attempt_response = (
-        supabase
-        .table(
-            "task_review_attempts"
-        )
-        .select("*")
-        .eq(
-            "id",
-            attempt_id,
-        )
-        .eq(
-            "user_id",
-            user_id,
-        )
-        .eq(
-            "task_id",
-            task_id,
-        )
-        .maybe_single()
-        .execute()
-    )
-
-    attempt = (
-        attempt_response.data
-    )
-
-    if not attempt:
-        raise PermissionError(
-            "Review attempt not found."
-        )
-
     if (
         attempt["status"]
         != "ready"
@@ -2095,6 +2239,7 @@ def submit_task_review(
             "already been submitted "
             "or is not ready."
         )
+        
 
     answer_key_response = (
         supabase
@@ -2145,7 +2290,7 @@ def submit_task_review(
 
     finalize_response = (
         supabase.rpc(
-            "finalize_task_review_submission",
+            "finalize_task_review_submission_v2",
             {
                 "p_attempt_id": (
                     attempt_id
@@ -2172,6 +2317,9 @@ def submit_task_review(
                 "p_weak_areas": (
                     weak_areas
                 ),
+                
+                "p_submission_fingerprint":
+                    submission_fingerprint,
             },
         )
         .execute()
@@ -2188,3 +2336,4 @@ def submit_task_review(
         user_id=user_id,
         attempt_id=attempt_id,
     )
+    
