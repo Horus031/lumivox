@@ -1046,6 +1046,17 @@
         "tasksDone": "Tasks done:",
         "activeDays": "Active days:",
         "minutes": "{count} min"
+      },
+      "mastery": {
+        "title": "AI Review mastery signals",
+        "description": "These signals come from task-specific AI Reviews and remain separate from your Personal Behavior Index.",
+        "attempts": "Review attempts",
+        "reviewedTasks": "Reviewed tasks",
+        "averageScore": "Average score",
+        "passRate": "Pass rate",
+        "weakAreas": "Topics that appeared in incorrect answers",
+        "percent": "{value}%",
+        "notAvailable": "Not available"
       }
     }
   },

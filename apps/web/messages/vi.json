@@ -1046,6 +1046,17 @@
         "tasksDone": "Nhiệm vụ xong:",
         "activeDays": "Ngày hoạt động:",
         "minutes": "{count} phút"
+      },
+      "mastery": {
+        "title": "Tín hiệu mức độ nắm vững từ AI Review",
+        "description": "Các tín hiệu này đến từ AI Review theo từng nhiệm vụ và được giữ tách biệt với Chỉ số Hành vi Cá nhân (PBI).",
+        "attempts": "Số lần review",
+        "reviewedTasks": "Nhiệm vụ đã review",
+        "averageScore": "Điểm review trung bình",
+        "passRate": "Tỷ lệ đạt",
+        "weakAreas": "Chủ đề xuất hiện trong các câu trả lời sai",
+        "percent": "{value}%",
+        "notAvailable": "Chưa có dữ liệu"
       }
     }
   },

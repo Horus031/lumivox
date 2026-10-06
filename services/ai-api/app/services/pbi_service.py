@@ -8,6 +8,9 @@ from zoneinfo import ZoneInfo
 
 from app.clients.supabase_client import get_supabase_client
 
+from app.services.task_behavior_analytics import (
+    filter_root_behavior_tasks,
+)
 
 STANDARD_WEIGHTS = {
     "task_completion_rate": 0.30,
@@ -16,6 +19,10 @@ STANDARD_WEIGHTS = {
     "goal_momentum_score": 0.10,
     "consistency_score": 0.10,
 }
+
+PBI_CALCULATION_VERSION = (
+    "v1.1-root-task-rolling-7-day"
+)
 
 PRIORITY_COMPLETION_WEIGHTS = {
     "low": 1,
@@ -98,31 +105,74 @@ def get_user_period_window(user_id: str):
     }
 
 
-def calculate_tcr(tasks: list[dict]) -> tuple[float, dict]:
-    if not tasks:
+def calculate_tcr(
+    tasks: list[dict],
+) -> tuple[float, dict]:
+    eligible_tasks = (
+        filter_root_behavior_tasks(
+            tasks
+        )
+    )
+
+    if not eligible_tasks:
         return 0.5, {
             "eligible_tasks": 0,
-            "reason": "No deadline-based tasks in the selected period.",
+            "reason": (
+                "No eligible root "
+                "deadline-based tasks "
+                "in the selected period."
+            ),
         }
 
     total_weight = 0.0
     completed_weight = 0.0
 
-    for task in tasks:
-        priority = task.get("priority", "medium")
-        weight = PRIORITY_COMPLETION_WEIGHTS.get(priority, 2)
+    for task in (
+        eligible_tasks
+    ):
+        priority = task.get(
+            "priority",
+            "medium",
+        )
+
+        weight = (
+            PRIORITY_COMPLETION_WEIGHTS
+            .get(
+                priority,
+                2,
+            )
+        )
 
         total_weight += weight
 
-        if task.get("status") == "completed":
-            completed_weight += weight
+        if (
+            task.get(
+                "status"
+            )
+            == "completed"
+        ):
+            completed_weight += (
+                weight
+            )
 
-    score = completed_weight / total_weight if total_weight > 0 else 0.5
+    score = (
+        completed_weight
+        / total_weight
+        if total_weight > 0
+        else 0.5
+    )
 
     return clamp(score), {
-        "eligible_tasks": len(tasks),
-        "completed_weight": completed_weight,
-        "total_weight": total_weight,
+        "eligible_tasks":
+            len(
+                eligible_tasks
+            ),
+
+        "completed_weight":
+            completed_weight,
+
+        "total_weight":
+            total_weight,
     }
 
 
@@ -183,59 +233,158 @@ def calculate_das(
     tasks: list[dict],
     period_end_exclusive_utc: datetime,
 ) -> tuple[float, dict]:
-    if not tasks:
+    eligible_tasks = (
+        filter_root_behavior_tasks(
+            tasks
+        )
+    )
+
+    if not eligible_tasks:
         return 0.5, {
             "eligible_tasks": 0,
-            "reason": "No deadline-based tasks in the selected period.",
+            "reason": (
+                "No eligible root "
+                "deadline-based tasks "
+                "in the selected period."
+            ),
         }
 
-    penalties: list[float] = []
+    penalties: list[
+        float
+    ] = []
 
-    for task in tasks:
-        due_at_raw = task.get("due_at")
+    for task in (
+        eligible_tasks
+    ):
+        due_at_raw = (
+            task.get(
+                "due_at"
+            )
+        )
+
         if not due_at_raw:
             continue
 
-        due_at = datetime.fromisoformat(due_at_raw.replace("Z", "+00:00"))
-        status = task.get("status")
-        completed_at_raw = task.get("completed_at")
+        due_at = (
+            datetime
+            .fromisoformat(
+                due_at_raw.replace(
+                    "Z",
+                    "+00:00",
+                )
+            )
+        )
 
-        if status == "completed" and completed_at_raw:
-            completed_at = datetime.fromisoformat(
-                completed_at_raw.replace("Z", "+00:00")
+        status = task.get(
+            "status"
+        )
+
+        completed_at_raw = (
+            task.get(
+                "completed_at"
+            )
+        )
+
+        if (
+            status
+            == "completed"
+            and completed_at_raw
+        ):
+            completed_at = (
+                datetime
+                .fromisoformat(
+                    completed_at_raw
+                    .replace(
+                        "Z",
+                        "+00:00",
+                    )
+                )
             )
 
-            if completed_at <= due_at:
-                days_late = 0.0
-            else:
-                days_late = (completed_at - due_at).total_seconds() / 86400
-        else:
-            if due_at >= period_end_exclusive_utc:
+            if (
+                completed_at
+                <= due_at
+            ):
                 days_late = 0.0
             else:
                 days_late = (
-                    period_end_exclusive_utc - due_at
-                ).total_seconds() / 86400
+                    (
+                        completed_at
+                        - due_at
+                    )
+                    .total_seconds()
+                    / 86400
+                )
 
-        overdue_days_normalized = clamp(days_late / 7)
+        else:
+            if (
+                due_at
+                >= period_end_exclusive_utc
+            ):
+                days_late = 0.0
 
-        priority = task.get("priority", "medium")
-        severity = PRIORITY_DEADLINE_SEVERITY.get(priority, 0.50)
+            else:
+                days_late = (
+                    (
+                        period_end_exclusive_utc
+                        - due_at
+                    )
+                    .total_seconds()
+                    / 86400
+                )
 
-        penalties.append(severity * overdue_days_normalized)
+        overdue_days_normalized = (
+            clamp(
+                days_late
+                / 7
+            )
+        )
+
+        priority = task.get(
+            "priority",
+            "medium",
+        )
+
+        severity = (
+            PRIORITY_DEADLINE_SEVERITY
+            .get(
+                priority,
+                0.50,
+            )
+        )
+
+        penalties.append(
+            severity
+            * overdue_days_normalized
+        )
 
     if not penalties:
         return 0.5, {
             "eligible_tasks": 0,
-            "reason": "No usable deadline data.",
+            "reason": (
+                "No usable root-task "
+                "deadline data."
+            ),
         }
 
-    average_penalty = sum(penalties) / len(penalties)
-    score = 1 - average_penalty
+    average_penalty = (
+        sum(penalties)
+        / len(penalties)
+    )
+
+    score = (
+        1
+        - average_penalty
+    )
 
     return clamp(score), {
-        "eligible_tasks": len(penalties),
-        "average_penalty": safe_round(average_penalty),
+        "eligible_tasks":
+            len(penalties),
+
+        "average_penalty":
+            safe_round(
+                average_penalty
+            ),
     }
 
 
@@ -663,16 +812,46 @@ def generate_pbi_snapshot(user_id: str) -> dict:
     # --------------------------------------------------------
 
     tasks_result = (
-        supabase.table("tasks")
-        .select("id, priority, status, due_at, completed_at")
-        .eq("user_id", user_id)
-        .gte("due_at", period_start_utc_iso)
-        .lt("due_at", period_end_exclusive_utc_iso)
-        .neq("status", "cancelled")
+        supabase
+        .table("tasks")
+        .select(
+            (
+                "id,"
+                "parent_task_id,"
+                "priority,"
+                "status,"
+                "due_at,"
+                "completed_at"
+            )
+        )
+        .eq(
+            "user_id",
+            user_id,
+        )
+        .filter(
+            "parent_task_id",
+            "is",
+            "null",
+        )
+        .gte(
+            "due_at",
+            period_start_utc_iso,
+        )
+        .lt(
+            "due_at",
+            period_end_exclusive_utc_iso,
+        )
+        .neq(
+            "status",
+            "cancelled",
+        )
         .execute()
     )
 
-    deadline_tasks = tasks_result.data or []
+    deadline_tasks = (
+        tasks_result.data
+        or []
+    )
 
     # --------------------------------------------------------
     # 2. Fetch completed focus sessions
@@ -818,7 +997,7 @@ def generate_pbi_snapshot(user_id: str) -> dict:
         "das": das_meta,
         "gms": gms_meta,
         "cs": cs_meta,
-        "calculation_version": "v1.0-rolling-7-day",
+        "calculation_version": PBI_CALCULATION_VERSION,
     }
     
     explanation_payload = build_rule_based_explanation_payload(
@@ -861,7 +1040,7 @@ def generate_pbi_snapshot(user_id: str) -> dict:
             ],
             "goal_momentum_score": components["goal_momentum_score"],
             "consistency_score": components["consistency_score"],
-            "calculation_version": "v1.0-rolling-7-day",
+            "calculation_version": PBI_CALCULATION_VERSION,
             "explanation_payload": explanation_payload,
         },
         on_conflict="user_id,period_start,period_end",
