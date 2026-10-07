@@ -6,7 +6,7 @@ export default function FAQ() {
   const t = useTranslations("landing.faq");
 
   return (
-    <section id="faq" className="py-24">
+    <section data-landing-scene="resolution" id="faq" className="py-24">
       <div className="max-w-215 mx-auto px-6">
         <div className="text-center mb-12">
           <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">

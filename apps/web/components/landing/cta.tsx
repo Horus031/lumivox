@@ -1,4 +1,9 @@
-import { ArrowRight, BrainCircuit, CircleDollarSign, ShieldCheck } from "lucide-react";
+import {
+  ArrowRight,
+  BrainCircuit,
+  CircleDollarSign,
+  ShieldCheck,
+} from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -7,7 +12,7 @@ export default function CTA() {
   const t = useTranslations("landing.cta");
 
   return (
-    <section className="py-24">
+    <section data-landing-scene="convergence" className="py-24">
       <div className="max-w-310 mx-auto px-6">
         <div className="relative overflow-hidden rounded-lg border border-border bg-primary/70 p-10 text-center text-primary-foreground md:p-16">
           <div

@@ -8,7 +8,11 @@ export default function ResearchEvidence() {
   const t = useTranslations("landing.researchEvidence");
 
   return (
-    <section id="evidence" className="border-y border-border bg-surface py-20">
+    <section
+      data-landing-scene="evidence"
+      id="evidence"
+      className="border-y border-border bg-surface py-20"
+    >
       <div className="mx-auto max-w-310 px-6">
         <div className="max-w-3xl">
           <p className="mb-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-primary">

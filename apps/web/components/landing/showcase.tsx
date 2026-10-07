@@ -4,15 +4,11 @@ import { useTranslations } from "next-intl";
 
 export default function Showcase() {
   const t = useTranslations("landing.showcase");
-  const analyticsItems = [
-    "peakHours",
-    "energy",
-    "rewards",
-  ] as const;
+  const analyticsItems = ["peakHours", "energy", "rewards"] as const;
   const focusModes = ["pomodoro", "deepWork", "custom", "reading"] as const;
 
   return (
-    <section id="analytics" className="py-24">
+    <section data-landing-scene="product" id="analytics" className="py-24">
       <div className="max-w-310 mx-auto px-6 space-y-24">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div>

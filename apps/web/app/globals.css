@@ -70,33 +70,42 @@
 
 :root {
   /* Minimal Studio Light Neutrals */
-  --background: #f4f6f5;           /* Nền xám nhạt studio sạch sẽ, dịu mát */
-  --surface: #ffffff;              /* Các thẻ card màu trắng tinh khiết tạo chiều sâu tương phản */
-  --elevated: #eaedea;             /* Vùng nổi hoặc trạng thái hover nhẹ */
-  --overlay: #dbe1dc;              /* Đường border mảnh thanh lịch */
+  --background: #f4f6f5; /* Nền xám nhạt studio sạch sẽ, dịu mát */
+  --surface: #ffffff; /* Các thẻ card màu trắng tinh khiết tạo chiều sâu tương phản */
+  --elevated: #eaedea; /* Vùng nổi hoặc trạng thái hover nhẹ */
+  --overlay: #dbe1dc; /* Đường border mảnh thanh lịch */
 
-  --foreground: #141c17;           /* Chữ chính màu graphite sẫm pha sắc lá sâu (mềm hơn đen thuần) */
-  --text-secondary: #47514a;       /* Chữ phụ phụ trách mô tả */
-  --text-muted: #76837a;           /* Trạng thái chữ disabled hoặc icon phụ */
+  --foreground: #141c17; /* Chữ chính màu graphite sẫm pha sắc lá sâu (mềm hơn đen thuần) */
+  --text-secondary: #47514a; /* Chữ phụ phụ trách mô tả */
+  --text-muted: #76837a; /* Trạng thái chữ disabled hoặc icon phụ */
 
   /* Elegant Premium Greens */
-  --primary: #194126;              /* Xanh Forest Deep - cực kỳ cao cấp, tối giản và uy tín */
+  --primary: #194126; /* Xanh Forest Deep - cực kỳ cao cấp, tối giản và uy tín */
   --primary-foreground: #f4f6f5;
   --primary-glow: #2d613d;
-  --accent-soft: #e3ece6;          /* Nền nhạt cho các vùng highlight tinh tế */
+  --accent-soft: #e3ece6; /* Nền nhạt cho các vùng highlight tinh tế */
 
   /* Semantics & Extras */
-  --success: oklch(0.65 0.14 160); 
-  --warning: oklch(0.75 0.12 75);  
-  --danger: oklch(0.62 0.18 28);   
-  --info: oklch(0.62 0.15 245);    
-  --token-gold: #c3a680;           /* Màu vàng champagne lì thay cho màu vàng chanh cũ */
-  --streak-fire: oklch(0.7 0.15 45); 
+  --success: oklch(0.65 0.14 160);
+  --warning: oklch(0.75 0.12 75);
+  --danger: oklch(0.62 0.18 28);
+  --info: oklch(0.62 0.15 245);
+  --token-gold: #c3a680; /* Màu vàng champagne lì thay cho màu vàng chanh cũ */
+  --streak-fire: oklch(0.7 0.15 45);
 
   --radius: 0.625rem;
 
-  --gradient-ai: linear-gradient(90deg, rgba(25, 65, 38, 0.08) 0%, rgba(227, 236, 230, 0.15) 100%);
-  --gradient-hero: linear-gradient(135deg, #194126 0%, #2d613d 52%, #568a67 100%);
+  --gradient-ai: linear-gradient(
+    90deg,
+    rgba(25, 65, 38, 0.08) 0%,
+    rgba(227, 236, 230, 0.15) 100%
+  );
+  --gradient-hero: linear-gradient(
+    135deg,
+    #194126 0%,
+    #2d613d 52%,
+    #568a67 100%
+  );
 
   --chart-1: 151 55% 28%;
   --chart-2: 153 49% 38%;
@@ -109,20 +118,20 @@
 
 .dark {
   /* Premium Obsidian Dark Neutrals */
-  --background: #0d110f;           /* Nền bóng đêm sâu thẳm pha sắc rêu cực nhẹ */
-  --surface: #151a17;              /* Card dark mode sang trọng, không bị xám xịt */
-  --elevated: #1f2622;             /* Khối nổi mượt mà */
-  --overlay: #2a332d;              /* Border tối giản tinh tế */
+  --background: #0d110f; /* Nền bóng đêm sâu thẳm pha sắc rêu cực nhẹ */
+  --surface: #151a17; /* Card dark mode sang trọng, không bị xám xịt */
+  --elevated: #1f2622; /* Khối nổi mượt mà */
+  --overlay: #2a332d; /* Border tối giản tinh tế */
 
-  --foreground: #ecf0ed;           /* Chữ sáng dịu mắt, tránh chói */
+  --foreground: #ecf0ed; /* Chữ sáng dịu mắt, tránh chói */
   --text-secondary: #9cb0a4;
   --text-muted: #6e8075;
 
   /* Frosted Modern Greens */
-  --primary: #337D4D;              /* Xanh Sage Mint hiện đại, phát sáng sang trọng trên nền tối */
+  --primary: #337d4d; /* Xanh Sage Mint hiện đại, phát sáng sang trọng trên nền tối */
   --primary-foreground: #0d110f;
   --primary-glow: #346b47;
-  --accent-soft: #1b2620;          /* Highlight chìm thanh lịch */
+  --accent-soft: #1b2620; /* Highlight chìm thanh lịch */
 
   /* Semantics & Extras */
   --success: oklch(0.7 0.14 160);
@@ -132,7 +141,11 @@
   --token-gold: #e1cfb3;
   --streak-fire: oklch(0.72 0.15 45);
 
-  --gradient-ai: linear-gradient(90deg, rgba(91, 163, 116, 0.15) 0%, rgba(25, 65, 38, 0) 100%);
+  --gradient-ai: linear-gradient(
+    90deg,
+    rgba(91, 163, 116, 0.15) 0%,
+    rgba(25, 65, 38, 0) 100%
+  );
 
   --chart-1: 154 58% 62%;
   --chart-2: 153 48% 54%;
@@ -143,11 +156,34 @@
   --chart-grid: 150 12% 25%;
 }
 
+.landing-story {
+  --landing-void: #07100b;
+  --landing-obsidian: #0d110f;
+  --landing-forest: #194126;
+  --landing-emerald: #337d4d;
+  --landing-mint: #83b895;
+  --landing-pearl: #ecf0ed;
+  --landing-champagne: #d6c1a1;
+
+  --landing-glow-soft: oklch(0.7 0.12 155 / 0.16);
+  --landing-glow-medium: oklch(0.67 0.14 155 / 0.28);
+  --landing-hairline: oklch(0.92 0.02 150 / 0.14);
+
+  --landing-scene-space: clamp(6rem, 10vw, 10rem);
+
+  --landing-content-width: 77.5rem;
+
+  --landing-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --landing-ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
   }
-  html, body {
+  html,
+  body {
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
@@ -163,36 +199,78 @@
 }
 
 @layer utilities {
-  .font-mono { font-family: var(--font-mono); }
-  .text-secondary { color: var(--text-secondary); }
-  .bg-gradient-ai { background-image: var(--gradient-ai); }
-  .bg-gradient-hero { background-image: var(--gradient-hero); }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
-  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--overlay); border-radius: 9999px; }
+  .font-mono {
+    font-family: var(--font-mono);
+  }
+  .text-secondary {
+    color: var(--text-secondary);
+  }
+  .bg-gradient-ai {
+    background-image: var(--gradient-ai);
+  }
+  .bg-gradient-hero {
+    background-image: var(--gradient-hero);
+  }
+  .shadow-glow {
+    box-shadow: var(--shadow-glow);
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: var(--overlay);
+    border-radius: 9999px;
+  }
 
   @keyframes flame-flicker {
-    0%, 100% { transform: rotate(-2deg) scale(1); }
-    50% { transform: rotate(2deg) scale(1.08); }
+    0%,
+    100% {
+      transform: rotate(-2deg) scale(1);
+    }
+    50% {
+      transform: rotate(2deg) scale(1.08);
+    }
   }
-  .animate-flicker:hover { animation: flame-flicker 0.6s var(--ease-spring) infinite; }
+  .animate-flicker:hover {
+    animation: flame-flicker 0.6s var(--ease-spring) infinite;
+  }
 
   @keyframes pulse-soft {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
   }
-  .animate-pulse-soft { animation: pulse-soft 2s ease-in-out infinite; }
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
 
   @keyframes fade-up {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
-  .animate-fade-up { animation: fade-up 0.3s var(--ease-out); }
+  .animate-fade-up {
+    animation: fade-up 0.3s var(--ease-out);
+  }
 
   @keyframes progress-fill {
-    from { width: 0; }
+    from {
+      width: 0;
+    }
   }
-  .animate-progress { animation: progress-fill 0.6s var(--ease-out); }
+  .animate-progress {
+    animation: progress-fill 0.6s var(--ease-out);
+  }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar {
     width: 5.5rem;
@@ -280,5 +358,12 @@
   .animate-shimmer-slow,
   .animate-pulse-soft {
     animation: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-story [data-landing-motion="decorative"] {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
   }
 }

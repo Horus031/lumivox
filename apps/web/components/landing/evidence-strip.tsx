@@ -12,7 +12,11 @@ export default function EvidenceStrip() {
   const t = useTranslations("landing.evidenceStrip");
 
   return (
-    <section aria-label={t("label")} className="border-y border-border bg-surface">
+    <section
+      data-landing-scene="principles"
+      aria-label={t("label")}
+      className="border-y border-border bg-surface"
+    >
       <div className="mx-auto grid max-w-310 grid-cols-2 px-6 md:grid-cols-4">
         {items.map(({ key, icon: Icon }) => (
           <div

@@ -14,7 +14,10 @@ export default function Hero() {
   ] as const;
 
   return (
-    <section className="relative overflow-hidden isolate mt-16">
+    <section
+      data-landing-scene="hero"
+      className="relative overflow-hidden isolate mt-16"
+    >
       <div className="absolute inset-0 -z-10 bg-background">
         <video
           src={`/hero-brain-loop.mp4`}

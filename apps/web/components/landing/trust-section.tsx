@@ -14,7 +14,10 @@ export default function TrustSection() {
   const t = useTranslations("landing.trust");
 
   return (
-    <section className="border-y border-border bg-elevated/40 py-24">
+    <section
+      data-landing-scene="trust"
+      className="border-y border-border bg-elevated/40 py-24"
+    >
       <div className="mx-auto max-w-310 px-6">
         <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
           <div>

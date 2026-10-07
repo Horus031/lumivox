@@ -8,6 +8,7 @@ export default function HowItWorks() {
   return (
     <section
       id="how"
+      data-landing-scene="workflow"
       className="relative py-24 bg-elevated/40 border-y border-border"
     >
       <div className="max-w-310 mx-auto px-6">
