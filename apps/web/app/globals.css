@@ -1153,6 +1153,312 @@
   color: var(--text-secondary);
 }
 
+.product-theater {
+  color: var(--landing-pearl);
+  background: linear-gradient(
+    180deg,
+    var(--background) 0%,
+    #08110b 8rem,
+    #07100b calc(100% - 8rem),
+    var(--background) 100%
+  );
+}
+
+.product-theater__story {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr;
+  max-width: 100%;
+}
+
+.product-theater__stage,
+.product-theater__chapters {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.product-theater__stage {
+  position: sticky;
+  top: 4rem;
+  align-self: start;
+  height: calc(100svh - 4rem);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.product-theater__chapters {
+  position: relative;
+  z-index: 10;
+  width: min(28rem, 38vw);
+  margin-left: max(2rem, calc((100vw - 77.5rem) / 2));
+  padding-block: 22vh;
+}
+
+.product-chapter {
+  min-height: 78vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0.22;
+  transform: translate3d(0, 24px, 0);
+  transition:
+    opacity 650ms var(--landing-ease-out),
+    transform 850ms var(--landing-ease-cinematic);
+}
+
+.product-chapter[data-active] {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+}
+
+.product-stage {
+  position: relative;
+  width: min(78rem, calc(100vw - 4rem));
+  aspect-ratio: 16 / 10;
+}
+
+.product-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    #07100b 0%,
+    rgb(7 16 11 / 0.94) 18%,
+    rgb(7 16 11 / 0.55) 37%,
+    transparent 62%
+  );
+}
+
+.product-stage__frame {
+  position: absolute;
+  inset: 6% 3%;
+  overflow: hidden;
+  border: 1px solid rgb(236 240 237 / 0.1);
+  border-radius: 18px;
+  background: #0a0e0c;
+  box-shadow:
+    0 50px 120px rgb(0 0 0 / 0.42),
+    0 0 0 1px rgb(255 255 255 / 0.02);
+}
+
+.product-stage__chrome {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-inline: 16px;
+  border-bottom: 1px solid rgb(236 240 237 / 0.07);
+  background: rgb(255 255 255 / 0.025);
+}
+
+.product-stage__traffic {
+  display: flex;
+  gap: 5px;
+}
+
+.product-stage__traffic span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgb(236 240 237 / 0.24);
+}
+
+.product-stage__address {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: rgb(236 240 237 / 0.38);
+}
+
+.product-stage__viewport {
+  position: relative;
+  height: calc(100% - 42px);
+  overflow: hidden;
+}
+
+.product-stage__visual {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  transform: scale(1.035) translate3d(0, 10px, 0);
+  transition:
+    opacity 650ms var(--landing-ease-out),
+    transform 1100ms var(--landing-ease-cinematic);
+}
+
+.product-stage__visual[data-active] {
+  z-index: 2;
+  opacity: 1;
+  transform: scale(1) translate3d(0, 0, 0);
+}
+
+.product-stage__aura {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 68%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(51 125 77 / 0.17), transparent 68%);
+  transform: translate(-50%, -50%);
+  filter: blur(48px);
+}
+
+.product-stage__index {
+  position: absolute;
+  right: 5%;
+  bottom: 2%;
+  z-index: 4;
+  display: flex;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: rgb(236 240 237 / 0.38);
+}
+
+.product-stage__index > span:not(.product-stage__index-total) {
+  display: none;
+  color: var(--landing-mint);
+}
+
+[data-product-story][data-active-product="analytics"] [data-product-index="analytics"],
+[data-product-story][data-active-product="focus"] [data-product-index="focus"],
+[data-product-story][data-active-product="rooms"] [data-product-index="rooms"] {
+  display: inline;
+}
+
+.product-chapter__index {
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--landing-mint);
+}
+
+.product-chapter h3 {
+  max-width: 26rem;
+  font-size: 3.6rem;
+  font-weight: 600;
+  line-height: 0.98;
+  letter-spacing: 0;
+}
+
+.product-chapter p {
+  max-width: 28rem;
+  margin-top: 1.25rem;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: rgb(236 240 237 / 0.58);
+}
+
+.product-chapter__signals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+.product-chapter__mobile-visual {
+  display: none;
+}
+
+.product-chapter__signals li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 12.5px;
+  line-height: 1.6;
+
+  color: rgb(236 240 237 / 0.55);
+}
+
+.product-chapter__signals li > span {
+  width: 4px;
+  height: 4px;
+
+  flex: none;
+
+  border-radius: 999px;
+
+  background: var(--landing-mint);
+
+  box-shadow: 0 0 12px rgb(131 184 149 / 0.45);
+}
+
+.product-chapter__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  margin-top: 1.75rem;
+
+  font-family: var(--font-mono);
+  font-size: 10px;
+
+  color: rgb(236 240 237 / 0.46);
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .product-chapter h3 {
+    font-size: 2.8rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .product-theater {
+    padding-block: 7rem;
+  }
+
+  .product-theater__stage {
+    display: none;
+  }
+
+  .product-theater__story {
+    display: block;
+  }
+
+  .product-theater__chapters {
+    width: auto;
+    margin-inline: auto;
+    max-width: 48rem;
+    padding: 0 1.5rem;
+  }
+
+  .product-chapter {
+    min-height: auto;
+    padding-block: 4rem;
+    opacity: 1;
+    transform: none;
+  }
+
+  .product-chapter h3 {
+    font-size: 2.2rem;
+  }
+
+  .product-chapter__mobile-visual {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 3;
+    margin-top: 2.25rem;
+    overflow: hidden;
+    border: 1px solid rgb(236 240 237 / 0.1);
+    border-radius: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-stage__visual,
+  .product-chapter {
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
 body:has([data-landing-story]) [data-marketing-navbar] {
   transition:
     background-color 500ms var(--landing-ease-out),
@@ -1437,7 +1743,11 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   height: 100%;
   transform: scaleY(var(--journey-progress));
   transform-origin: top;
-  background: linear-gradient(to bottom, var(--landing-mint), var(--landing-champagne));
+  background: linear-gradient(
+    to bottom,
+    var(--landing-mint),
+    var(--landing-champagne)
+  );
 }
 
 .journey-scene {
