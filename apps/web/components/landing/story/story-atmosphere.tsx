@@ -34,9 +34,7 @@ export default function StoryAtmosphere() {
 
         if (!visibleEntry) return;
 
-        const scene = (
-          visibleEntry.target as HTMLElement
-        ).dataset.landingScene;
+        const scene = (visibleEntry.target as HTMLElement).dataset.landingScene;
 
         if (!isLandingScene(scene)) return;
 
@@ -68,7 +66,28 @@ export default function StoryAtmosphere() {
       aria-hidden="true"
       data-landing-atmosphere
       data-active-scene={activeScene}
-      className="pointer-events-none fixed inset-0"
-    />
+      className="story-atmosphere pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+    >
+      <div className="story-atmosphere__base" />
+
+      <div
+        data-landing-motion="decorative"
+        className="story-atmosphere__orb story-atmosphere__orb--primary"
+      />
+
+      <div
+        data-landing-motion="decorative"
+        className="story-atmosphere__orb story-atmosphere__orb--secondary"
+      />
+
+      <div
+        data-landing-motion="decorative"
+        className="story-atmosphere__constellation"
+      />
+
+      <div className="story-atmosphere__grid" />
+
+      <div className="story-atmosphere__vignette" />
+    </div>
   );
 }

@@ -176,6 +176,273 @@
   --landing-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   --landing-ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --landing-atmosphere-transition: 1200ms var(--landing-ease-cinematic);
+
+  --landing-reveal-duration: 760ms;
+  --landing-reveal-distance: 28px;
+
+  --landing-glow-blur: 110px;
+  --landing-glow-opacity: 0.18;
+
+  --landing-grid-opacity: 0.025;
+  --landing-constellation-opacity: 0;
+
+  --landing-primary-x: -18vw;
+  --landing-primary-y: -12vh;
+  --landing-primary-scale: 1;
+
+  --landing-secondary-x: 20vw;
+  --landing-secondary-y: 24vh;
+  --landing-secondary-scale: 0.8;
+}
+
+.story-atmosphere {
+  color: var(--landing-pearl);
+}
+
+.story-atmosphere__base,
+.story-atmosphere__grid,
+.story-atmosphere__constellation,
+.story-atmosphere__vignette {
+  position: absolute;
+  inset: 0;
+}
+
+.story-atmosphere__base {
+  background: var(--background);
+  transition:
+    background-color var(--landing-atmosphere-transition),
+    opacity var(--landing-atmosphere-transition);
+}
+
+.story-atmosphere__orb {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(70rem, 80vmax);
+  aspect-ratio: 1;
+  border-radius: 9999px;
+  filter: blur(var(--landing-glow-blur));
+  will-change: transform, opacity;
+  transition:
+    transform var(--landing-atmosphere-transition),
+    opacity var(--landing-atmosphere-transition);
+}
+
+.story-atmosphere__orb--primary {
+  background: radial-gradient(
+    circle,
+    var(--landing-glow-medium) 0%,
+    transparent 68%
+  );
+
+  opacity: var(--landing-glow-opacity);
+
+  transform: translate3d(
+      calc(-50% + var(--landing-primary-x)),
+      calc(-50% + var(--landing-primary-y)),
+      0
+    )
+    scale(var(--landing-primary-scale));
+}
+
+.story-atmosphere__orb--secondary {
+  background: radial-gradient(
+    circle,
+    var(--landing-champagne) 0%,
+    transparent 70%
+  );
+
+  opacity: calc(var(--landing-glow-opacity) * 0.18);
+
+  transform: translate3d(
+      calc(-50% + var(--landing-secondary-x)),
+      calc(-50% + var(--landing-secondary-y)),
+      0
+    )
+    scale(var(--landing-secondary-scale));
+}
+
+.story-atmosphere__grid {
+  opacity: var(--landing-grid-opacity);
+
+  background-image:
+    linear-gradient(var(--foreground) 1px, transparent 1px),
+    linear-gradient(90deg, var(--foreground) 1px, transparent 1px);
+
+  background-size: 72px 72px;
+
+  mask-image: radial-gradient(ellipse at center, black, transparent 78%);
+
+  transition: opacity var(--landing-atmosphere-transition);
+}
+
+.story-atmosphere__constellation {
+  opacity: var(--landing-constellation-opacity);
+
+  background-image:
+    radial-gradient(
+      circle at 15% 30%,
+      var(--landing-pearl) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 72% 21%,
+      var(--landing-mint) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 82% 68%,
+      var(--landing-champagne) 0 1px,
+      transparent 1.5px
+    ),
+    radial-gradient(
+      circle at 36% 74%,
+      var(--landing-pearl) 0 1px,
+      transparent 1.5px
+    );
+
+  transition: opacity var(--landing-atmosphere-transition);
+}
+
+.story-atmosphere__vignette {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 30%,
+    color-mix(in oklab, var(--background) 22%, transparent) 100%
+  );
+}
+
+.story-atmosphere[data-active-scene="hero"] {
+  --landing-primary-x: 0vw;
+  --landing-primary-y: -12vh;
+  --landing-primary-scale: 1.12;
+
+  --landing-secondary-x: 20vw;
+  --landing-secondary-y: 16vh;
+
+  --landing-glow-opacity: 0.1;
+  --landing-grid-opacity: 0.02;
+}
+
+.story-atmosphere[data-active-scene="principles"] {
+  --landing-primary-x: -24vw;
+  --landing-primary-y: 4vh;
+
+  --landing-secondary-x: 22vw;
+  --landing-secondary-y: -12vh;
+
+  --landing-glow-opacity: 0.13;
+  --landing-constellation-opacity: 0.18;
+}
+
+.story-atmosphere[data-active-scene="intelligence"] {
+  --landing-primary-x: 0vw;
+  --landing-primary-y: 0vh;
+  --landing-primary-scale: 1.18;
+
+  --landing-secondary-x: 26vw;
+  --landing-secondary-y: 18vh;
+
+  --landing-glow-opacity: 0.16;
+  --landing-grid-opacity: 0.035;
+}
+
+.story-atmosphere[data-active-scene="workflow"] {
+  --landing-primary-x: -22vw;
+  --landing-primary-y: 12vh;
+
+  --landing-secondary-x: 26vw;
+  --landing-secondary-y: -16vh;
+
+  --landing-glow-opacity: 0.12;
+}
+
+.story-atmosphere[data-active-scene="product"] {
+  --landing-primary-x: 20vw;
+  --landing-primary-y: -4vh;
+  --landing-primary-scale: 1.15;
+
+  --landing-secondary-x: -24vw;
+  --landing-secondary-y: 18vh;
+
+  --landing-glow-opacity: 0.15;
+}
+
+.story-atmosphere[data-active-scene="evidence"] {
+  --landing-primary-x: -30vw;
+  --landing-primary-y: -6vh;
+
+  --landing-secondary-x: 18vw;
+  --landing-secondary-y: 10vh;
+
+  --landing-grid-opacity: 0.055;
+  --landing-glow-opacity: 0.08;
+}
+
+.story-atmosphere[data-active-scene="trust"] {
+  --landing-primary-x: 0vw;
+  --landing-primary-y: 5vh;
+  --landing-primary-scale: 0.88;
+
+  --landing-secondary-x: 0vw;
+  --landing-secondary-y: 4vh;
+
+  --landing-grid-opacity: 0.015;
+}
+
+.story-atmosphere[data-active-scene="resolution"] {
+  --landing-primary-x: -22vw;
+  --landing-primary-y: 16vh;
+
+  --landing-glow-opacity: 0.06;
+  --landing-grid-opacity: 0;
+}
+
+.story-atmosphere[data-active-scene="convergence"] {
+  --landing-primary-x: 0vw;
+  --landing-primary-y: 0vh;
+  --landing-primary-scale: 0.72;
+
+  --landing-secondary-x: 0vw;
+  --landing-secondary-y: 0vh;
+
+  --landing-glow-opacity: 0.2;
+  --landing-constellation-opacity: 0.12;
+}
+
+.story-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  opacity: 0.22;
+}
+
+.story-line__core {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--landing-mint) 12%,
+    var(--landing-hairline) 50%,
+    var(--landing-champagne) 85%,
+    transparent
+  );
+
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
 }
 
 @layer base {
@@ -359,11 +626,13 @@
   .animate-pulse-soft {
     animation: none !important;
   }
-}
 
-@media (prefers-reduced-motion: reduce) {
   .landing-story [data-landing-motion="decorative"] {
     animation: none !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .story-atmosphere__orb {
+    transform: translate3d(-50%, -50%, 0) !important;
   }
 }
