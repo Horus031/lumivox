@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import { modelEvidence } from "@/lib/marketing/evidence";
+import StoryReveal from "./story/story-reveal";
 
 export default function ResearchEvidence() {
   const t = useTranslations("landing.researchEvidence");
@@ -11,42 +12,55 @@ export default function ResearchEvidence() {
     <section
       data-landing-scene="evidence"
       id="evidence"
-      className="border-y border-border bg-surface py-20"
+      className="evidence-chamber relative isolate overflow-hidden"
     >
-      <div className="mx-auto max-w-310 px-6">
-        <div className="max-w-3xl">
-          <p className="mb-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-primary">
-            {t("eyebrow")}
-          </p>
-          <h2 className="text-[34px] font-semibold leading-tight tracking-tight md:text-[42px]">
-            {t("title")}
-          </h2>
-          <p className="mt-4 text-[15px] leading-relaxed text-secondary">
-            {t("description")}
-          </p>
-        </div>
+      <div className="evidence-chamber__inner mx-auto max-w-310 px-6">
+        <StoryReveal>
+          <header className="evidence-chamber__heading">
+            <p className="evidence-chamber__eyebrow">{t("eyebrow")}</p>
+            <h2>{t("title")}</h2>
+            <p className="evidence-chamber__description">{t("description")}</p>
+          </header>
+        </StoryReveal>
 
-        <dl className="mt-10 grid grid-cols-2 border-y border-border md:grid-cols-4">
-          {modelEvidence.map((item) => (
-            <div
-              key={item.key}
-              className="border-border px-4 py-7 first:pl-0 md:border-r md:last:border-r-0"
+        <StoryReveal>
+          <div className="evidence-orbit">
+            <div aria-hidden="true" className="evidence-orbit__field" />
+            <svg
+              aria-hidden="true"
+              className="evidence-orbit__connections"
+              viewBox="0 0 1000 560"
             >
-              <dd className="text-[30px] font-semibold tracking-tight text-primary md:text-[36px]">
-                {item.value}
-              </dd>
-              <dt className="mt-1 text-[13px] font-medium">
-                {t(`metrics.${item.key}.label`)}
-              </dt>
-              <p className="mt-2 text-[12px] leading-relaxed text-muted-foreground">
-                {t(`metrics.${item.key}.description`)}
-              </p>
+              <path d="M500 280 L145 160" />
+              <path d="M500 280 L855 160" />
+              <path d="M500 280 L185 420" />
+              <path d="M500 280 L815 420" />
+            </svg>
+            <dl className="evidence-orbit__metrics">
+              {modelEvidence.map((item, index) => (
+                <div
+                  key={item.key}
+                  data-evidence-position={index}
+                  className="evidence-metric"
+                >
+                  <dd>{item.value}</dd>
+                  <dt>{t(`metrics.${item.key}.label`)}</dt>
+                  <p>{t(`metrics.${item.key}.description`)}</p>
+                </div>
+              ))}
+            </dl>
+            <div aria-hidden="true" className="evidence-orbit__core">
+              <span>MODEL</span>
+              <strong>v2</strong>
             </div>
-          ))}
-        </dl>
+          </div>
+        </StoryReveal>
 
-        <div className="mt-6 flex flex-col gap-4 text-[13px] text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>{t("source")}</p>
+        <footer className="evidence-chamber__source">
+          <div>
+            <span aria-hidden="true" />
+            <p>{t("source")}</p>
+          </div>
           <Link
             href="/research"
             className="inline-flex items-center gap-1.5 font-medium text-primary hover:underline"
@@ -54,7 +68,7 @@ export default function ResearchEvidence() {
             {t("cta")}
             <ArrowRight className="size-4" />
           </Link>
-        </div>
+        </footer>
       </div>
     </section>
   );

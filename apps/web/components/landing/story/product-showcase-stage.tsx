@@ -54,6 +54,7 @@ export default function ProductShowcaseStage() {
               key={product.key}
               aria-hidden={product.key !== "analytics"}
               data-product-visual={product.key}
+              data-active={product.key === "analytics" ? "" : undefined}
               className="product-stage__visual"
             >
               <Image

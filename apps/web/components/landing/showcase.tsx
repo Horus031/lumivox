@@ -13,6 +13,7 @@ export default function Showcase() {
     <section
       data-landing-scene="product"
       data-product-story
+      data-active-product="analytics"
       id="analytics"
       className="product-theater relative isolate"
     >
@@ -24,7 +25,11 @@ export default function Showcase() {
         </div>
 
         <div className="product-theater__chapters">
-          <article data-product-chapter="analytics" className="product-chapter">
+          <article
+            data-product-chapter="analytics"
+            data-active
+            className="product-chapter"
+          >
             <span className="product-chapter__index">01 / Analytics</span>
 
             <h3>{t("analytics.title")}</h3>
