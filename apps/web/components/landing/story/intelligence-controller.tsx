@@ -20,7 +20,11 @@ export default function IntelligenceController() {
       root.querySelectorAll<HTMLElement>("[data-intelligence-node]"),
     );
 
+    const visible = new Map<Element, number>();
+
     const activate = (feature: string) => {
+      if (root.dataset.activeFeature === feature) return;
+
       root.dataset.activeFeature = feature;
 
       chapters.forEach((chapter) => {
@@ -50,18 +54,28 @@ export default function IntelligenceController() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const active = entries.find((entry) => entry.isIntersecting);
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visible.set(entry.target, entry.intersectionRatio);
+          } else {
+            visible.delete(entry.target);
+          }
+        });
 
-        if (!active) return;
+        const active = [...visible.entries()].sort(
+          (a, b) =>
+            b[1] - a[1] ||
+            chapters.indexOf(a[0] as HTMLElement) -
+              chapters.indexOf(b[0] as HTMLElement),
+        )[0]?.[0] as HTMLElement | undefined;
 
-        const feature = (active.target as HTMLElement).dataset
-          .intelligenceFeature;
+        const feature = active?.dataset.intelligenceFeature;
 
         if (feature) activate(feature);
       },
       {
         rootMargin: "-38% 0px -42% 0px",
-        threshold: 0,
+        threshold: [0, 0.25, 0.5, 0.75],
       },
     );
 
