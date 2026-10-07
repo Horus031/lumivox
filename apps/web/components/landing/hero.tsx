@@ -98,7 +98,7 @@ export default function Hero() {
         </StoryReveal>
       </div>
 
-      <div className="hero-signal hero-signal--ai">
+      <div aria-hidden="true" className="hero-signal hero-signal--ai">
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
@@ -111,7 +111,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-signal hero-signal--timer">
+      <div aria-hidden="true" className="hero-signal hero-signal--timer">
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
@@ -124,7 +124,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-signal hero-signal--streak">
+      <div aria-hidden="true" className="hero-signal hero-signal--streak">
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
@@ -137,7 +137,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <div className="hero-signal hero-signal--consistency">
+      <div aria-hidden="true" className="hero-signal hero-signal--consistency">
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
@@ -157,7 +157,6 @@ export default function Hero() {
       >
         <span className="hero-filament__origin" />
         <span className="hero-filament__beam" />
-        <span className="hero-filament__spark" />
       </div>
     </section>
   );
