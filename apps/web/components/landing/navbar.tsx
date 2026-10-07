@@ -11,9 +11,12 @@ export default function NavBar() {
   const common = useTranslations("common");
 
   return (
-    <header className="fixed top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-2xl">
+    <header
+      data-marketing-navbar
+      className="fixed top-0 z-40 w-full border-b border-border/60 bg-background/85 backdrop-blur-2xl"
+    >
       <div className="max-w-310 mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
+        <Link data-navbar-brand href="/" className="flex items-center gap-2">
           <div className="size-8 rounded-lg flex items-center justify-center">
             <Image
               src={"/logo.png"}
@@ -27,19 +30,39 @@ export default function NavBar() {
           </span>
         </Link>
         <nav className="hidden md:flex items-center gap-7 text-[13.5px] text-secondary">
-          <Link href="/features" className="hover:text-foreground transition-colors">
+          <Link
+            data-navbar-link
+            href="/features"
+            className="hover:text-foreground transition-colors"
+          >
             {t("features")}
           </Link>
-          <Link href="/#how" className="hover:text-foreground transition-colors">
+          <Link
+            data-navbar-link
+            href="/#how"
+            className="hover:text-foreground transition-colors"
+          >
             {t("howItWorks")}
           </Link>
-          <Link href="/research" className="hover:text-foreground transition-colors">
+          <Link
+            data-navbar-link
+            href="/research"
+            className="hover:text-foreground transition-colors"
+          >
             {t("research")}
           </Link>
-          <Link href="/blog" className="hover:text-foreground transition-colors">
+          <Link
+            data-navbar-link
+            href="/blog"
+            className="hover:text-foreground transition-colors"
+          >
             {t("blog")}
           </Link>
-          <Link href="/about" className="hover:text-foreground transition-colors">
+          <Link
+            data-navbar-link
+            href="/about"
+            className="hover:text-foreground transition-colors"
+          >
             {t("about")}
           </Link>
         </nav>
@@ -48,12 +71,14 @@ export default function NavBar() {
             <LanguageSwitcher />
           </Suspense>
           <Link
+            data-navbar-link
             href="/auth/login"
             className="hidden sm:inline-flex items-center h-9 px-3 rounded-md text-[13px] font-medium text-secondary hover:text-foreground transition-colors"
           >
             {t("signIn")}
           </Link>
           <Link
+            data-navbar-primary
             href="/auth/sign-up"
             className="inline-flex items-center gap-1.5 h-9 px-3.5 rounded-md bg-primary text-foreground text-[13px] font-medium hover:bg-primary/90 transition-colors"
           >
