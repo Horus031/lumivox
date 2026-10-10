@@ -53,7 +53,7 @@ export default function Hero() {
           </div>
         </StoryReveal>
 
-        <StoryReveal delay={0.08} distance={18}>
+        <StoryReveal>
           <h1 className="max-w-[980px] text-balance text-[clamp(3rem,7.2vw,6.6rem)] font-semibold leading-[0.98] tracking-[-0.055em] text-white drop-shadow-[0_12px_44px_rgba(0,0,0,.42)]">
             {t("title.before")}{" "}
             <span className="bg-linear-to-r from-white via-[#d9eee0] to-[#89bd9a] bg-clip-text text-transparent">
@@ -63,13 +63,13 @@ export default function Hero() {
           </h1>
         </StoryReveal>
 
-        <StoryReveal delay={0.16} distance={16}>
+        <StoryReveal>
           <p className="mx-auto mt-8 max-w-2xl text-[15.5px] leading-7 text-white/66 md:text-[17px]">
             {t("subtitle")}
           </p>
         </StoryReveal>
 
-        <StoryReveal delay={0.23}>
+        <StoryReveal>
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link
               href="/auth/sign-up"
@@ -87,7 +87,7 @@ export default function Hero() {
           </div>
         </StoryReveal>
 
-        <StoryReveal delay={0.3}>
+        <StoryReveal>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-white/48">
             {proofItems.map((item, index) => (
               <span key={item} className="flex items-center gap-1.5">

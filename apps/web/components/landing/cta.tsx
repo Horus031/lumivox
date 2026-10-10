@@ -22,7 +22,7 @@ export default function CTA() {
         <ConvergenceVisual />
       </div>
       <div className="final-convergence__content mx-auto max-w-310 px-6">
-        <StoryReveal distance={18}>
+        <StoryReveal>
           <div className="final-convergence__copy">
             <p className="final-convergence__eyebrow">Lumivox</p>
             <h2>{t("title")}</h2>
@@ -35,10 +35,7 @@ export default function CTA() {
                 {t("primaryCta")}
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>
-              <Link
-                href="/features"
-                className="final-convergence__secondary"
-              >
+              <Link href="/features" className="final-convergence__secondary">
                 {t("secondaryCta")}
               </Link>
             </div>

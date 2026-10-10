@@ -179,9 +179,6 @@
 
   --landing-atmosphere-transition: 1200ms var(--landing-ease-cinematic);
 
-  --landing-reveal-duration: 760ms;
-  --landing-reveal-distance: 28px;
-
   --landing-glow-blur: 110px;
   --landing-glow-opacity: 0.18;
 
@@ -1325,7 +1322,8 @@
   color: var(--landing-mint);
 }
 
-[data-product-story][data-active-product="analytics"] [data-product-index="analytics"],
+[data-product-story][data-active-product="analytics"]
+  [data-product-index="analytics"],
 [data-product-story][data-active-product="focus"] [data-product-index="focus"],
 [data-product-story][data-active-product="rooms"] [data-product-index="rooms"] {
   display: inline;
@@ -1954,7 +1952,8 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
 }
 
 .resolution-item {
-  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 .resolution-item__summary {
@@ -1978,7 +1977,8 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
 }
 
 .resolution-item__summary:focus-visible {
-  outline: 2px solid color-mix(in oklab, var(--landing-emerald) 45%, transparent);
+  outline: 2px solid
+    color-mix(in oklab, var(--landing-emerald) 45%, transparent);
   outline-offset: 6px;
 }
 
@@ -2133,7 +2133,12 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   top: 50%;
   width: 42%;
   height: 1px;
-  background: linear-gradient(to right, transparent, rgb(131 184 149 / 0.25), transparent);
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgb(131 184 149 / 0.25),
+    transparent
+  );
   transform-origin: left center;
 }
 
@@ -2553,7 +2558,12 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
 
 .transparent-core {
   padding-block: clamp(7rem, 11vw, 10rem);
-  background: linear-gradient(180deg, transparent, rgb(25 65 38 / 0.035), transparent);
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgb(25 65 38 / 0.035),
+    transparent
+  );
 }
 
 .transparent-core__heading {
@@ -2616,7 +2626,8 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   border-radius: 50%;
   background: var(--background);
   color: var(--landing-emerald);
-  box-shadow: 0 0 0 10px color-mix(in oklab, var(--landing-emerald) 3%, transparent);
+  box-shadow: 0 0 0 10px
+    color-mix(in oklab, var(--landing-emerald) 3%, transparent);
 }
 
 .trust-pipeline__node svg {
@@ -2653,7 +2664,8 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   grid-template-columns: 2rem 1fr;
   gap: 1.25rem;
   padding-block: 2rem;
-  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 
 .trust-principle__index {
@@ -2793,7 +2805,12 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
     height: 1px;
     bottom: auto;
     transform: none;
-    background: linear-gradient(to right, transparent, rgb(51 125 77 / 0.22), transparent);
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgb(51 125 77 / 0.22),
+      transparent
+    );
   }
 
   .trust-pipeline__node {
