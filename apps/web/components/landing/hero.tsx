@@ -19,15 +19,20 @@ export default function Hero() {
       <div className="absolute inset-0 -z-10 bg-background">
         <video
           data-hero-video
-          src="/hero-brain-loop.mp4"
           poster="/landing-hero.webp"
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
+          preload="metadata"
           className="landing-hero__video absolute inset-0 size-full object-cover"
-        />
+        >
+          <source
+            src="/hero-brain-loop.mp4"
+            type="video/mp4"
+            media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+          />
+        </video>
 
         <div className="landing-hero__veil absolute inset-0" />
         <div className="landing-hero__halo absolute inset-0" />

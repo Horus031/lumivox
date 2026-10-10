@@ -1487,6 +1487,20 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
 }
 
 @media (max-width: 767px) {
+  .story-atmosphere__orb {
+    filter: blur(56px);
+    will-change: auto;
+  }
+
+  .story-atmosphere__grid {
+    background-size: 56px 56px;
+  }
+
+  .product-stage__aura,
+  .convergence-visual__halo {
+    filter: blur(28px);
+  }
+
   .hero-signal {
     display: none;
   }

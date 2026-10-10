@@ -26,15 +26,26 @@ export default function StoryAtmosphere() {
 
     if (!sections.length) return;
 
+    const visible = new Map<Element, number>();
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            visible.set(entry.target, entry.intersectionRatio);
+          } else {
+            visible.delete(entry.target);
+          }
+        });
 
-        if (!visibleEntry) return;
+        const active = [...visible.entries()].sort(
+          (a, b) =>
+            b[1] - a[1] ||
+            sections.indexOf(a[0] as HTMLElement) -
+              sections.indexOf(b[0] as HTMLElement),
+        )[0]?.[0] as HTMLElement | undefined;
 
-        const scene = (visibleEntry.target as HTMLElement).dataset.landingScene;
+        const scene = active?.dataset.landingScene;
 
         if (!isLandingScene(scene)) return;
 

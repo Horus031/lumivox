@@ -3,8 +3,19 @@
 import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useEffect, useRef } from "react";
 
+function resetHeroMotion(root: HTMLElement) {
+  root.style.setProperty("--hero-content-y", "0px");
+  root.style.setProperty("--hero-content-opacity", "1");
+  root.style.setProperty("--hero-video-scale", "1.03");
+  root.style.setProperty("--hero-video-y", "0px");
+  root.style.setProperty("--hero-signals-opacity", "1");
+  root.style.setProperty("--hero-signals-y", "0px");
+  root.style.setProperty("--hero-filament-opacity", "1");
+}
+
 export default function HeroMotionController() {
   const targetRef = useRef<HTMLDivElement>(null);
+  const allowScrubRef = useRef(true);
   const reduceMotion = useReducedMotion();
 
   const { scrollYProgress } = useScroll({
@@ -18,18 +29,34 @@ export default function HeroMotionController() {
     if (!root) return;
 
     if (reduceMotion) {
-      root.style.setProperty("--hero-content-y", "0px");
-      root.style.setProperty("--hero-content-opacity", "1");
-      root.style.setProperty("--hero-video-scale", "1.05");
-      root.style.setProperty("--hero-video-y", "0px");
-      root.style.setProperty("--hero-signals-opacity", "1");
-      root.style.setProperty("--hero-signals-y", "0px");
-      root.style.setProperty("--hero-filament-opacity", "1");
+      resetHeroMotion(root);
     }
   }, [reduceMotion]);
 
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 768px)");
+
+    const sync = () => {
+      allowScrubRef.current = media.matches;
+
+      const root = targetRef.current?.parentElement;
+
+      if (root && !media.matches) {
+        resetHeroMotion(root);
+      }
+    };
+
+    sync();
+
+    media.addEventListener("change", sync);
+
+    return () => {
+      media.removeEventListener("change", sync);
+    };
+  }, []);
+
   useMotionValueEvent(scrollYProgress, "change", (value) => {
-    if (reduceMotion) return;
+    if (reduceMotion || !allowScrubRef.current) return;
 
     const root = targetRef.current?.parentElement;
 
@@ -64,7 +91,8 @@ export default function HeroMotionController() {
   useEffect(() => {
     if (!reduceMotion) return;
 
-    const video = document.querySelector<HTMLVideoElement>("[data-hero-video]");
+    const root = targetRef.current?.parentElement;
+    const video = root?.querySelector<HTMLVideoElement>("[data-hero-video]");
 
     video?.pause();
   }, [reduceMotion]);
