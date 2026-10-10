@@ -43,9 +43,13 @@ export default function ResearchEvidence() {
                   data-evidence-position={index}
                   className="evidence-metric"
                 >
-                  <dd>{item.value}</dd>
                   <dt>{t(`metrics.${item.key}.label`)}</dt>
-                  <p>{t(`metrics.${item.key}.description`)}</p>
+                  <dd>
+                    <span className="evidence-metric__value">{item.value}</span>
+                    <span className="evidence-metric__description">
+                      {t(`metrics.${item.key}.description`)}
+                    </span>
+                  </dd>
                 </div>
               ))}
             </dl>

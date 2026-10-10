@@ -6,30 +6,32 @@ export default function FAQ() {
   const t = useTranslations("landing.faq");
 
   return (
-    <section data-landing-scene="resolution" id="faq" className="py-24">
-      <div className="max-w-215 mx-auto px-6">
-        <div className="text-center mb-12">
-          <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
-            {t("eyebrow")}
-          </p>
-          <h2 className="text-[34px] md:text-[42px] font-semibold tracking-tight">
-            {t("title")}
-          </h2>
-        </div>
-        <div className="divide-y divide-border border-y border-border">
-          {faqs.map((f) => (
-            <details key={f.key} className="group py-5">
-              <summary className="flex items-center justify-between cursor-pointer list-none">
-                <h3 className="text-[15.5px] font-medium pr-6">
-                  {t(`items.${f.key}.question`)}
-                </h3>
-                <span className="size-7 rounded-full border border-border flex items-center justify-center text-secondary group-open:rotate-45 transition-transform">
-                  +
+    <section
+      data-landing-scene="resolution"
+      id="faq"
+      className="quiet-resolution relative isolate"
+    >
+      <div className="quiet-resolution__inner mx-auto max-w-310 px-6">
+        <header className="quiet-resolution__heading">
+          <p>{t("eyebrow")}</p>
+          <h2>{t("title")}</h2>
+        </header>
+        <div className="quiet-resolution__questions">
+          {faqs.map((f, index) => (
+            <details key={f.key} className="resolution-item">
+              <summary className="resolution-item__summary">
+                <span aria-hidden="true" className="resolution-item__index">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <h3>{t(`items.${f.key}.question`)}</h3>
+                <span aria-hidden="true" className="resolution-item__toggle">
+                  <i />
+                  <i />
                 </span>
               </summary>
-              <p className="mt-3 text-[14px] text-secondary leading-relaxed">
-                {t(`items.${f.key}.answer`)}
-              </p>
+              <div className="resolution-item__answer">
+                <p>{t(`items.${f.key}.answer`)}</p>
+              </div>
             </details>
           ))}
         </div>

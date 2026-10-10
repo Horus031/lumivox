@@ -7,55 +7,54 @@ import {
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import ConvergenceVisual from "./story/convergence-visual";
+import StoryReveal from "./story/story-reveal";
 
 export default function CTA() {
   const t = useTranslations("landing.cta");
 
   return (
-    <section data-landing-scene="convergence" className="py-24">
-      <div className="max-w-310 mx-auto px-6">
-        <div className="relative overflow-hidden rounded-lg border border-border bg-primary/70 p-10 text-center text-primary-foreground md:p-16">
-          <div
-            className="pointer-events-none absolute inset-0 opacity-30 mask-[radial-gradient(ellipse_at_center,black,transparent_70%)]"
-            style={{
-              backgroundImage:
-                "radial-gradient(circle at 20% 30%, white 1px, transparent 1px), radial-gradient(circle at 80% 70%, white 1px, transparent 1px)",
-              backgroundSize: "40px 40px, 60px 60px",
-            }}
-          />
-          {/* <Sparkles className="size-7 mx-auto mb-4 opacity-90" /> */}
-          <h2 className="text-[32px] md:text-[44px] text-foreground font-semibold tracking-tight leading-tight max-w-2xl mx-auto">
-            {t("title")}
-          </h2>
-          <p className="mt-3 text-[15px] text-foreground opacity-90 max-w-xl mx-auto">
-            {t("subtitle")}
-          </p>
-          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href="/auth/sign-up"
-              className="inline-flex items-center gap-2 h-11 px-6 rounded-lg bg-surface text-foreground text-[14px] font-semibold transition-colors"
-            >
-              {t("primaryCta")} <ArrowRight className="size-4" />
-            </Link>
-            <Link
-              href="/features"
-              className="inline-flex items-center h-11 px-5 rounded-lg border text-[14px] text-foreground font-medium hover:bg-background/10 transition-colors"
-            >
-              {t("secondaryCta")}
-            </Link>
+    <section
+      data-landing-scene="convergence"
+      className="final-convergence relative isolate overflow-hidden"
+    >
+      <div className="final-convergence__field">
+        <ConvergenceVisual />
+      </div>
+      <div className="final-convergence__content mx-auto max-w-310 px-6">
+        <StoryReveal distance={18}>
+          <div className="final-convergence__copy">
+            <p className="final-convergence__eyebrow">Lumivox</p>
+            <h2>{t("title")}</h2>
+            <p className="final-convergence__subtitle">{t("subtitle")}</p>
+            <div className="final-convergence__actions">
+              <Link
+                href="/auth/sign-up"
+                className="final-convergence__primary group"
+              >
+                {t("primaryCta")}
+                <ArrowRight className="size-4" aria-hidden="true" />
+              </Link>
+              <Link
+                href="/features"
+                className="final-convergence__secondary"
+              >
+                {t("secondaryCta")}
+              </Link>
+            </div>
+            <div className="final-convergence__proof">
+              <span>
+                <CircleDollarSign aria-hidden="true" /> {t("proof.explore")}
+              </span>
+              <span>
+                <ShieldCheck aria-hidden="true" /> {t("proof.privacy")}
+              </span>
+              <span>
+                <BrainCircuit aria-hidden="true" /> {t("proof.behavior")}
+              </span>
+            </div>
           </div>
-          <div className="mt-6 flex flex-wrap text-foreground items-center justify-center gap-5 text-[12.5px] opacity-85">
-            <span className="flex items-center gap-1.5">
-              <CircleDollarSign className="size-3.5" /> {t("proof.explore")}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5" /> {t("proof.privacy")}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <BrainCircuit className="size-3.5" /> {t("proof.behavior")}
-            </span>
-          </div>
-        </div>
+        </StoryReveal>
       </div>
     </section>
   );
