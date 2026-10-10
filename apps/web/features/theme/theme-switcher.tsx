@@ -30,7 +30,7 @@ const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="text-secondary border-border">
           {theme === "light" ? (
             <Sun
               key="light"

@@ -1,146 +1,168 @@
-import { ArrowRight, BarChart3, Check, Flame, Timer } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import HeroMotionController from "./story/hero-motion-controller";
+import StoryReveal from "./story/story-reveal";
 
 export default function Hero() {
   const t = useTranslations("landing.hero");
   const proofItems = ["freePlan", "noCard", "private"] as const;
-  const floatingCards = [
-    "aiSuggested",
-    "focusTimer",
-    "streak",
-    "consistency",
-  ] as const;
 
   return (
-    <section className="relative overflow-hidden isolate mt-16">
+    <section
+      data-landing-scene="hero"
+      data-landing-hero
+      className="landing-hero landing-hero--light relative isolate min-h-[calc(100svh-4rem)] overflow-hidden"
+    >
+      <HeroMotionController />
       <div className="absolute inset-0 -z-10 bg-background">
         <video
-          src={`/hero-brain-loop.mp4`}
+          data-hero-video
           poster="/landing-hero.webp"
           autoPlay
           loop
           muted
           playsInline
-          preload="auto"
-          className="absolute inset-0 w-full h-full object-cover scale-105"
-        />
-        <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-40">
-          <div className="absolute -inset-x-1/2 -top-1/2 h-[200%] w-[200%] bg-[conic-gradient(from_120deg_at_50%_50%,transparent_0%,oklch(0.88_0.16_120/0.25)_18%,transparent_38%,transparent_62%,oklch(0.92_0.14_105/0.22)_82%,transparent_100%)] animate-shimmer-slow" />
-        </div>
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_20%,oklch(0.62_0.15_125/0.18),transparent_60%)]" />
-        <div className="absolute inset-0 bg-linear-to-b from-background/35 via-background/10 to-background/85" />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              "radial-gradient(ellipse at center, transparent 35%, color-mix(in oklab, var(--background) 55%, transparent) 100%)",
-          }}
-        />
-        <div
-          className="absolute inset-0 opacity-[0.06] mask-[radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"
-          style={{
-            backgroundImage:
-              "linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)",
-            backgroundSize: "44px 44px",
-          }}
-        />
+          preload="metadata"
+          className="landing-hero__video absolute inset-0 size-full object-cover"
+        >
+          <source
+            src="/hero-brain-loop.mp4"
+            type="video/mp4"
+            media="(min-width: 768px) and (prefers-reduced-motion: no-preference)"
+          />
+        </video>
+
+        <div className="landing-hero__veil absolute inset-0" />
+        <div className="landing-hero__halo absolute inset-0" />
+        <div aria-hidden="true" className="landing-hero__readability absolute inset-0" />
+        <div className="landing-hero__grain absolute inset-0" />
+        <div className="landing-hero__edge absolute inset-0" />
       </div>
 
-      <div className="relative mx-auto gap-4 flex min-h-[78vh] max-w-310 flex-col items-center justify-center px-6 pt-28 pb-24 text-center md:pt-32 md:pb-28">
-        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/20 bg-white/10 backdrop-blur-xl text-[12px] text-background/90 shadow-sm animate-fade-up">
-          <span className="size-1.5 rounded-full bg-success animate-pulse-soft" />
-          {t("badge")}
-        </span>
+      <div className="landing-hero__content relative z-20 mx-auto flex min-h-[calc(100svh-4rem)] max-w-310 flex-col items-center justify-center px-6 pb-28 pt-24 text-center">
+        <StoryReveal>
+          <div className="landing-hero__badge mb-7 inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-white/68">
+            <span className="h-px w-7 bg-white/30" />
 
-        <div className="relative mt-6 animate-fade-up [animation-delay:80ms]">
-          <div className="absolute -inset-x-10 -inset-y-6 rounded-[40px] bg-white/10 backdrop-blur-2xl border border-white/15 shadow-[0_30px_80px_-20px_oklch(0_0_0/0.5)] mask-[linear-gradient(180deg,black_60%,transparent_100%)]" />
-          <h1 className="relative px-6 py-4 text-[44px] md:text-[78px] font-semibold tracking-tight leading-[1.02] text-white drop-shadow-[0_2px_24px_oklch(0_0_0/0.45)]">
+            <span className="size-1.5 rounded-full bg-[#83b895] shadow-[0_0_16px_rgba(131,184,149,.8)]" />
+
+            {t("badge")}
+
+            <span className="h-px w-7 bg-white/30" />
+          </div>
+        </StoryReveal>
+
+        <StoryReveal>
+          <h1 className="max-w-[980px] text-balance text-[clamp(3rem,7.2vw,6.6rem)] font-semibold leading-[0.98] tracking-[-0.055em] text-white drop-shadow-[0_12px_44px_rgba(0,0,0,.42)]">
             {t("title.before")}{" "}
-            <span className="bg-linear-to-r from-white to-primary bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-white via-[#d9eee0] to-[#89bd9a] bg-clip-text text-transparent">
               {t("title.accent")}
             </span>
             {t("title.after")}
           </h1>
+        </StoryReveal>
 
-          <p className="relative mt-7 max-w-160 mx-auto text-[16.5px] md:text-[18px] text-foreground/80 leading-relaxed animate-fade-up [animation-delay:160ms]">
+        <StoryReveal>
+          <p className="landing-hero__subtitle mx-auto mt-8 max-w-2xl text-[15.5px] font-medium leading-7 md:text-[17px]">
             {t("subtitle")}
           </p>
-        </div>
+        </StoryReveal>
 
-        <div className="relative mt-9 flex flex-wrap items-center justify-center gap-3 animate-fade-up [animation-delay:240ms]">
-          <Link
-            href="/auth/sign-up"
-            className="group inline-flex items-center gap-2 h-12 px-6 rounded-xl bg-white text-[oklch(0.145_0.01_270)] text-[14.5px] font-medium hover:bg-white/90 transition-all shadow-[0_10px_40px_-10px_oklch(0.7_0.18_277/0.6)]"
-          >
-            {t("primaryCta")}
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-          <a
-            href="#how"
-            className="inline-flex items-center gap-2 h-12 px-6 rounded-xl border border-white/20 bg-white/10 backdrop-blur-xl text-[14.5px] font-medium text-white hover:bg-white/15 transition-colors"
-          >
-            {t("secondaryCta")}
-          </a>
-        </div>
+        <StoryReveal>
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/auth/sign-up"
+              className="landing-hero__primary group inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white text-[#0d110f] text-[14.5px] font-medium hover:bg-white/90 transition-colors"
+            >
+              {t("primaryCta")}
+              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <a
+              href="#how"
+              className="landing-hero__secondary inline-flex items-center gap-2 h-12 px-6 rounded-full border border-white/16 bg-white/[0.045] backdrop-blur-md text-[14.5px] font-medium text-white hover:bg-white/15 transition-colors"
+            >
+              {t("secondaryCta")}
+            </a>
+          </div>
+        </StoryReveal>
 
-        <div className="relative mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-[12.5px] text-white/70 animate-fade-up [animation-delay:320ms]">
-          {proofItems.map((item) => (
-            <span key={item} className="flex items-center gap-1.5">
-              <Check className="size-3.5 text-success" /> {t(`proof.${item}`)}
-            </span>
-          ))}
-        </div>
+        <StoryReveal>
+          <div className="landing-hero__proof mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-white/48">
+            {proofItems.map((item, index) => (
+              <span key={item} className="flex items-center gap-1.5">
+                {index > 0 && (
+                  <span aria-hidden="true" className="mr-3.5">
+                    &middot;
+                  </span>
+                )}
+                <Check className="size-3" /> {t(`proof.${item}`)}
+              </span>
+            ))}
+          </div>
+        </StoryReveal>
+      </div>
 
-        <div className="pointer-events-none hidden md:block">
-          <div className="absolute left-4 lg:left-10 top-[20%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float">
-            <div className="size-7 rounded-lg bg-primary/20 flex items-center justify-center text-foreground text-[12px]">
-              *
-            </div>
-            <div className="text-left">
-              <p className="font-medium leading-tight">
-                {t(`floating.${floatingCards[0]}.title`)}
-              </p>
-              <p className="text-[10.5px] text-foreground/70">
-                {t(`floating.${floatingCards[0]}.subtitle`)}
-              </p>
-            </div>
-          </div>
-          <div className="absolute right-4 lg:right-10 top-[40%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-2s]">
-            <Timer className="size-4" />
-            <div className="text-left">
-              <p className="font-medium leading-tight font-mono">
-                {t(`floating.${floatingCards[1]}.title`)}
-              </p>
-              <p className="text-[10.5px] text-foreground/70">
-                {t(`floating.${floatingCards[1]}.subtitle`)}
-              </p>
-            </div>
-          </div>
-          <div className="absolute left-8 lg:left-16 bottom-[18%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-4s]">
-            <Flame className="size-4" style={{ color: "var(--streak-fire)" }} />
-            <div className="text-left">
-              <p className="font-medium leading-tight">
-                {t(`floating.${floatingCards[2]}.title`)}
-              </p>
-              <p className="text-[10.5px] text-foreground/70">
-                {t(`floating.${floatingCards[2]}.subtitle`)}
-              </p>
-            </div>
-          </div>
-          <div className="absolute right-8 lg:right-16 bottom-[20%] px-3.5 py-2.5 rounded-2xl bg-background/12 backdrop-blur-xl border border-background/20 shadow-lg text-[12px] flex items-center gap-2.5 text-foreground animate-float [animation-delay:-3s]">
-            <BarChart3 className="size-4" />
-            <div className="text-left">
-              <p className="font-medium leading-tight">
-                {t(`floating.${floatingCards[3]}.title`)}
-              </p>
-              <p className="text-[10.5px] text-foreground/70">
-                {t(`floating.${floatingCards[3]}.subtitle`)}
-              </p>
-            </div>
-          </div>
+      <div aria-hidden="true" className="hero-signal hero-signal--ai">
+        <span className="hero-signal__dot" />
+        <span className="hero-signal__line" />
+        <div className="hero-signal__content">
+          <span className="hero-signal__label">
+            {t("floating.aiSuggested.title")}
+          </span>
+          <span className="hero-signal__meta">
+            {t("floating.aiSuggested.subtitle")}
+          </span>
         </div>
+      </div>
+
+      <div aria-hidden="true" className="hero-signal hero-signal--timer">
+        <span className="hero-signal__dot" />
+        <span className="hero-signal__line" />
+        <div className="hero-signal__content">
+          <span className="hero-signal__label">
+            {t("floating.focusTimer.title")}
+          </span>
+          <span className="hero-signal__meta">
+            {t("floating.focusTimer.subtitle")}
+          </span>
+        </div>
+      </div>
+
+      <div aria-hidden="true" className="hero-signal hero-signal--streak">
+        <span className="hero-signal__dot" />
+        <span className="hero-signal__line" />
+        <div className="hero-signal__content">
+          <span className="hero-signal__label">
+            {t("floating.streak.title")}
+          </span>
+          <span className="hero-signal__meta">
+            {t("floating.streak.subtitle")}
+          </span>
+        </div>
+      </div>
+
+      <div aria-hidden="true" className="hero-signal hero-signal--consistency">
+        <span className="hero-signal__dot" />
+        <span className="hero-signal__line" />
+        <div className="hero-signal__content">
+          <span className="hero-signal__label">
+            {t("floating.consistency.title")}
+          </span>
+          <span className="hero-signal__meta">
+            {t("floating.consistency.subtitle")}
+          </span>
+        </div>
+      </div>
+
+      <div
+        aria-hidden="true"
+        data-landing-motion="decorative"
+        className="hero-filament"
+      >
+        <span className="hero-filament__origin" />
+        <span className="hero-filament__beam" />
       </div>
     </section>
   );

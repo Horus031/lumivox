@@ -1,12 +1,19 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { features } from "@/lib/constants";
+
+import IntelligenceController from "./story/intelligence-controller";
 
 export default function Features() {
   const t = useTranslations("landing.features");
 
   return (
-    <section id="features" className="relative py-24">
+    <section
+      data-landing-scene="intelligence"
+      id="features"
+      className="relative py-24"
+    >
       <div className="max-w-310 mx-auto px-6">
         <div className="max-w-2xl mx-auto text-center mb-14">
           <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
@@ -22,28 +29,54 @@ export default function Features() {
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((f, i) => {
-            const Icon = f.icon;
-            return (
-              <div
-                key={f.key}
-                className="group relative rounded-2xl border border-border bg-surface p-6 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-                style={{ animationDelay: `${i * 60}ms` }}
-              >
-                <div className="absolute inset-0 -z-10 bg-linear-to-br from-accent-soft/0 to-accent-soft/0 group-hover:from-accent-soft/60 group-hover:to-transparent transition-colors duration-500" />
-                <div className="size-10 rounded-xl bg-accent-soft flex items-center justify-center text-primary mb-4 group-hover:scale-110 transition-transform">
-                  <Icon className="size-5" strokeWidth={2} />
-                </div>
-                <h3 className="text-[16px] font-semibold tracking-tight mb-1.5">
-                  {t(`items.${f.key}.title`)}
-                </h3>
-                <p className="text-[13.5px] text-secondary leading-relaxed">
-                  {t(`items.${f.key}.desc`)}
-                </p>
+        <div data-intelligence-system className="intelligence-system">
+          <IntelligenceController />
+
+          <div className="intelligence-system__stage">
+            <div aria-hidden="true" className="intelligence-core">
+              <div className="intelligence-core__halo" />
+
+              <div className="intelligence-core__center">
+                <Image src="/logo.png" alt="" width={52} height={52} />
               </div>
-            );
-          })}
+
+              {features.map((feature, index) => {
+                const Icon = feature.icon;
+
+                return (
+                  <div
+                    key={feature.key}
+                    data-intelligence-node={feature.key}
+                    data-node-position={index}
+                    className="intelligence-node"
+                  >
+                    <Icon className="size-5" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="intelligence-system__chapters">
+            {features.map((feature, index) => (
+              <article
+                key={feature.key}
+                data-intelligence-feature={feature.key}
+                className="intelligence-chapter"
+              >
+                <span
+                  aria-hidden="true"
+                  className="intelligence-chapter__index"
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+
+                <h3>{t(`items.${feature.key}.title`)}</h3>
+
+                <p>{t(`items.${feature.key}.desc`)}</p>
+              </article>
+            ))}
+          </div>
         </div>
       </div>
     </section>

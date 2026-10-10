@@ -1,7 +1,9 @@
-import { BrainCircuit, Database, Eye, ShieldCheck } from "lucide-react";
+import { ArrowRight, BrainCircuit, Database, Eye, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
+import StoryReveal from "./story/story-reveal";
+import TrustPipeline from "./story/trust-pipeline";
 
 const items = [
   { key: "purpose", icon: Database },
@@ -14,41 +16,50 @@ export default function TrustSection() {
   const t = useTranslations("landing.trust");
 
   return (
-    <section className="border-y border-border bg-elevated/40 py-24">
-      <div className="mx-auto max-w-310 px-6">
-        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
-          <div>
+    <section
+      data-landing-scene="trust"
+      className="transparent-core relative isolate"
+    >
+      <div className="transparent-core__inner mx-auto max-w-310 px-6">
+        <StoryReveal>
+          <header className="transparent-core__heading">
             <p className="mb-3 text-[11.5px] font-medium uppercase tracking-[0.18em] text-primary">
               {t("eyebrow")}
             </p>
-            <h2 className="text-[34px] font-semibold leading-tight tracking-tight md:text-[42px]">
-              {t("title")}
-            </h2>
+            <h2>{t("title")}</h2>
             <p className="mt-4 text-[15px] leading-relaxed text-secondary">
               {t("description")}
             </p>
-            <Link
-              href="/privacy"
-              className="mt-6 inline-flex h-10 items-center justify-center rounded-lg border border-border px-4 text-[13px] font-medium hover:bg-surface"
-            >
-              {t("cta")}
-            </Link>
-          </div>
+          </header>
+        </StoryReveal>
 
-          <div className="grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
-            {items.map(({ key, icon: Icon }) => (
-              <article key={key} className="bg-surface p-6">
-                <Icon className="size-5 text-primary" aria-hidden="true" />
-                <h3 className="mt-4 text-[15px] font-semibold">
-                  {t(`items.${key}.title`)}
-                </h3>
-                <p className="mt-2 text-[13px] leading-relaxed text-secondary">
-                  {t(`items.${key}.description`)}
-                </p>
-              </article>
-            ))}
+        <div className="transparent-core__layout">
+          <div className="transparent-core__diagram">
+            <TrustPipeline />
           </div>
+          <StoryReveal>
+            <div className="transparent-core__principles">
+              {items.map(({ key, icon: Icon }, index) => (
+                <article key={key} className="trust-principle">
+                  <span aria-hidden="true" className="trust-principle__index">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <div>
+                    <div className="trust-principle__title">
+                      <Icon aria-hidden="true" />
+                      <h3>{t(`items.${key}.title`)}</h3>
+                    </div>
+                    <p>{t(`items.${key}.description`)}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </StoryReveal>
         </div>
+        <Link href="/privacy" className="transparent-core__cta group">
+          <span>{t("cta")}</span>
+          <ArrowRight aria-hidden="true" />
+        </Link>
       </div>
     </section>
   );

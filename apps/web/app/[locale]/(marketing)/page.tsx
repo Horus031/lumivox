@@ -13,12 +13,15 @@ import { publicPageSeo } from "@/lib/marketing/public-content";
 import { createLocalizedMetadata } from "@/lib/seo/localized-metadata";
 import { isSearchIndexingEnabled } from "@/lib/seo/site-config";
 import { getLandingStructuredData } from "@/lib/seo/structured-data";
+import LandingStoryShell from "@/components/landing/story/landing-story-shell";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { locale } = await params;
   if (!isMarketingLocale(locale)) notFound();
 
@@ -38,15 +41,18 @@ export default async function LandingPage({ params }: PageProps) {
       {isSearchIndexingEnabled && (
         <JsonLd data={getLandingStructuredData(locale)} />
       )}
-      <Hero />
-      <EvidenceStrip />
-      <Features />
-      <HowItWorks />
-      <Showcase />
-      <ResearchEvidence />
-      <TrustSection />
-      <FAQ />
-      <CTA />
+
+      <LandingStoryShell>
+        <Hero />
+        <EvidenceStrip />
+        <Features />
+        <HowItWorks />
+        <Showcase />
+        <ResearchEvidence />
+        <TrustSection />
+        <FAQ />
+        <CTA />
+      </LandingStoryShell>
     </>
   );
 }

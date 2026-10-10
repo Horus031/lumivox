@@ -2,46 +2,65 @@ import { useTranslations } from "next-intl";
 
 import { steps } from "@/lib/constants";
 
+import LearningJourneyController from "./story/learning-journey-controller";
+import JourneyVisualStage, {
+  JourneyIllustration,
+} from "./story/journey-visual-stage";
+
 export default function HowItWorks() {
   const t = useTranslations("landing.howItWorks");
 
   return (
     <section
       id="how"
-      className="relative py-24 bg-elevated/40 border-y border-border"
+      data-landing-scene="workflow"
+      data-learning-journey
+      className="learning-journey relative isolate overflow-hidden"
     >
-      <div className="max-w-310 mx-auto px-6">
-        <div className="max-w-2xl mb-14">
+      <LearningJourneyController />
+      <div className="mx-auto max-w-310 px-6">
+        <header className="learning-journey__heading">
           <p className="text-[11.5px] font-medium tracking-[0.18em] text-primary uppercase mb-3">
             {t("eyebrow")}
           </p>
+
           <h2 className="text-[34px] md:text-[42px] font-semibold tracking-tight leading-tight">
             {t("title")}
           </h2>
-        </div>
-        <div className="grid md:grid-cols-3 gap-5">
-          {steps.map((s) => {
-            const Icon = s.icon;
-            return (
-              <div
-                key={s.n}
-                className="relative rounded-2xl border border-border bg-surface p-7 hover:shadow-md transition-shadow"
-              >
-                <span className="font-mono text-[12px] text-muted-foreground">
-                  {s.n}
-                </span>
-                <div className="mt-3 size-11 rounded-xl bg-gradient-hero flex items-center justify-center text-white shadow-glow">
-                  <Icon className="size-5" />
-                </div>
-                <h3 className="mt-5 text-[18px] font-semibold tracking-tight">
-                  {t(`steps.${s.key}.title`)}
-                </h3>
-                <p className="mt-2 text-[14px] text-secondary leading-relaxed">
-                  {t(`steps.${s.key}.desc`)}
-                </p>
-              </div>
-            );
-          })}
+        </header>
+
+        <div className="learning-journey__layout">
+          <div className="learning-journey__chapters">
+            {steps.map((step) => {
+              const Icon = step.icon;
+
+              return (
+                <article
+                  key={step.key}
+                  data-journey-step={step.key}
+                  className="journey-chapter"
+                >
+                  <div className="journey-chapter__meta">
+                    <span>{step.n}</span>
+                    <span className="journey-chapter__rule" />
+                    <Icon aria-hidden="true" className="size-4" />
+                  </div>
+
+                  <h3>{t(`steps.${step.key}.title`)}</h3>
+
+                  <p>{t(`steps.${step.key}.desc`)}</p>
+                  <div
+                    aria-hidden="true"
+                    className={`journey-mobile-visual journey-mobile-visual--${step.key}`}
+                  >
+                    <JourneyIllustration step={step.key} />
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          <JourneyVisualStage />
         </div>
       </div>
     </section>
