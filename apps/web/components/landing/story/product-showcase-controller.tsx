@@ -12,6 +12,25 @@ export default function ProductShowcaseController() {
 
     if (!root) return;
 
+    const themeSources = Array.from(
+      root.querySelectorAll<HTMLSourceElement>("[data-showcase-theme-source]"),
+    );
+    const syncTheme = () => {
+      const media = document.documentElement.classList.contains("dark")
+        ? "all"
+        : "not all";
+      themeSources.forEach((source) => {
+        source.media = media;
+      });
+    };
+
+    syncTheme();
+    const themeObserver = new MutationObserver(syncTheme);
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     const chapters = Array.from(
       root.querySelectorAll<HTMLElement>("[data-product-chapter]"),
     );
@@ -81,7 +100,10 @@ export default function ProductShowcaseController() {
 
     chapters.forEach((chapter) => observer.observe(chapter));
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      themeObserver.disconnect();
+    };
   }, []);
 
   return (

@@ -10,7 +10,7 @@ export default function Footer() {
   const common = useTranslations("common");
 
   return (
-    <footer className="border-t border-border bg-surface">
+    <footer className="relative z-10 border-t border-border bg-surface text-foreground">
       <div className="max-w-310 mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
           <div className="flex items-center gap-2 mb-3">

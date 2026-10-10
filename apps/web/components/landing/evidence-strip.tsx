@@ -16,7 +16,7 @@ export default function EvidenceStrip() {
     <section
       data-landing-scene="principles"
       aria-label={t("label")}
-      className="principle-constellation relative isolate overflow-hidden"
+      className="principle-constellation principle-constellation--light relative isolate overflow-hidden"
     >
       <StoryLine />
       <div className="principle-constellation__field mx-auto max-w-310 px-6">

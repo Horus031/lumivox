@@ -16,7 +16,7 @@ export default function CTA() {
   return (
     <section
       data-landing-scene="convergence"
-      className="final-convergence relative isolate overflow-hidden"
+      className="final-convergence final-convergence--light relative isolate overflow-hidden"
     >
       <div className="final-convergence__field">
         <ConvergenceVisual />

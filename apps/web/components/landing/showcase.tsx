@@ -15,7 +15,7 @@ export default function Showcase() {
       data-product-story
       data-active-product="analytics"
       id="analytics"
-      className="product-theater relative isolate"
+      className="product-theater product-theater--light relative isolate"
     >
       <ProductShowcaseController />
 
@@ -45,7 +45,7 @@ export default function Showcase() {
               ))}
             </ul>
             <ProductShowcaseMobileVisual
-              src="/landing-analytics.jpg"
+              product="analytics"
               alt={t("analytics.imageAlt")}
             />
           </article>
@@ -63,7 +63,7 @@ export default function Showcase() {
               ))}
             </div>
             <ProductShowcaseMobileVisual
-              src="/landing-focus.jpg"
+              product="focus"
               alt={t("focus.imageAlt")}
             />
           </article>
@@ -73,7 +73,7 @@ export default function Showcase() {
             <h3>{t("rooms.title")}</h3>
             <p>{t("rooms.desc")}</p>
             <ProductShowcaseMobileVisual
-              src="/landing-room.jpg"
+              product="rooms"
               alt={t("rooms.imageAlt")}
             />
           </article>

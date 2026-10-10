@@ -1,31 +1,40 @@
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import ProductShowcaseImage, {
+  showcaseImages,
+  type ShowcaseProduct,
+} from "./product-showcase-image";
 
 const products = [
   {
     key: "analytics",
-    src: "/landing-analytics.jpg",
   },
   {
     key: "focus",
-    src: "/landing-focus.jpg",
   },
   {
     key: "rooms",
-    src: "/landing-room.jpg",
   },
 ] as const;
 
 export function ProductShowcaseMobileVisual({
-  src,
+  product,
   alt,
 }: {
-  src: string;
+  product: ShowcaseProduct;
   alt: string;
 }) {
+  const image = showcaseImages[product].light;
+
   return (
-    <div className="product-chapter__mobile-visual">
-      <Image src={src} alt={alt} fill sizes="100vw" className="object-cover" />
+    <div
+      className="product-chapter__mobile-visual"
+      style={{ aspectRatio: `${image.width} / ${image.height}` }}
+    >
+      <ProductShowcaseImage
+        product={product}
+        alt={alt}
+        sizes="(max-width: 767px) calc(100vw - 48px), 720px"
+      />
     </div>
   );
 }
@@ -57,12 +66,10 @@ export default function ProductShowcaseStage() {
               data-active={product.key === "analytics" ? "" : undefined}
               className="product-stage__visual"
             >
-              <Image
-                src={product.src}
+              <ProductShowcaseImage
+                product={product.key}
                 alt={t(`${product.key}.imageAlt`)}
-                fill
-                sizes="(min-width: 1024px) 64vw, 100vw"
-                className="object-cover"
+                sizes="(min-width: 1280px) 680px, 58vw"
               />
             </figure>
           ))}

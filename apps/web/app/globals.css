@@ -669,12 +669,101 @@
     27px 27px;
 }
 
+.landing-hero__readability {
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 65% at 50% 43%,
+    rgb(7 16 11 / 0.78) 0%,
+    rgb(7 16 11 / 0.68) 0%,
+    rgb(7 16 11 / 0.25) 22%,
+    transparent 100%
+  );
+}
+
+.landing-hero__subtitle {
+  color: var(--landing-pearl);
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__readability {
+  background: radial-gradient(
+    ellipse 70% 65% at 50% 43%,
+    color-mix(in oklab, var(--background) 0%, transparent) 0%,
+    color-mix(in oklab, var(--background) 65%, transparent) 45%,
+    color-mix(in oklab, var(--background) 25%, transparent) 72%,
+    transparent 100%
+  );
+}
+
 .landing-hero__edge {
   background: radial-gradient(
     ellipse at center,
     transparent 30%,
     rgb(3 9 5 / 0.52) 100%
   );
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__veil {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--background) 28%, transparent) 0%,
+    transparent 38%,
+    color-mix(in oklab, var(--background) 12%, transparent) 65%,
+    color-mix(in oklab, var(--background) 78%, transparent) 88%,
+    var(--background) 100%
+  );
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__halo {
+  background: radial-gradient(
+    ellipse at 50% 43%,
+    transparent 30%,
+    color-mix(in oklab, var(--background) 12%, transparent) 62%,
+    color-mix(in oklab, var(--background) 85%, transparent) 100%
+  );
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__edge {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 50%,
+    color-mix(in oklab, var(--background) 75%, transparent) 100%
+  );
+}
+
+:root:not(.dark) .landing-hero--light h1 {
+  color: var(--foreground);
+  filter: none;
+}
+
+:root:not(.dark) .landing-hero--light h1 > span {
+  background-image: linear-gradient(to right, var(--foreground), var(--primary));
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__badge,
+:root:not(.dark) .landing-hero--light .landing-hero__content p,
+:root:not(.dark) .landing-hero--light .landing-hero__proof,
+:root:not(.dark) .landing-hero--light .hero-signal,
+:root:not(.dark) .landing-hero--light .hero-signal__meta {
+  color: var(--text-secondary);
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__primary:hover {
+  background: var(--primary-glow);
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__secondary {
+  border-color: var(--overlay);
+  background: color-mix(in oklab, var(--surface) 80%, transparent);
+  color: var(--foreground);
+}
+
+:root:not(.dark) .landing-hero--light .landing-hero__secondary:hover {
+  background: var(--surface);
 }
 
 .landing-hero__content {
@@ -824,6 +913,32 @@
     #09150e 68%,
     var(--background) 100%
   );
+}
+
+:root:not(.dark) .principle-constellation--light {
+  --landing-pearl: var(--foreground);
+  --landing-mint: var(--primary);
+
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--background) 0%,
+    var(--accent-soft) 68%,
+    var(--background) 100%
+  );
+}
+
+:root:not(.dark) .principle-constellation--light .principle-node {
+  color: var(--text-secondary);
+}
+
+:root:not(.dark) .principle-constellation--light .principle-node__signal {
+  border-color: var(--overlay);
+  background: var(--surface);
+}
+
+:root:not(.dark) .principle-constellation--light .principle-constellation__connections {
+  stroke: color-mix(in oklab, var(--foreground) 14%, transparent);
 }
 
 .principle-constellation__field {
@@ -1161,6 +1276,60 @@
   );
 }
 
+:root:not(.dark) .product-theater--light {
+  --landing-pearl: var(--foreground);
+  --landing-mint: var(--primary);
+
+  color: var(--foreground);
+  background: linear-gradient(
+    180deg,
+    var(--background) 0%,
+    var(--elevated) 8rem,
+    var(--elevated) calc(100% - 8rem),
+    var(--background) 100%
+  );
+}
+
+:root:not(.dark) .product-theater--light .product-stage::after {
+  background: linear-gradient(
+    90deg,
+    var(--elevated) 0%,
+    color-mix(in oklab, var(--elevated) 96%, transparent) 18%,
+    color-mix(in oklab, var(--elevated) 75%, transparent) 37%,
+    transparent 62%
+  );
+}
+
+:root:not(.dark) .product-theater--light .product-stage__frame {
+  border-color: var(--overlay);
+  background: var(--surface);
+  box-shadow:
+    0 50px 120px color-mix(in oklab, var(--foreground) 12%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--foreground) 3%, transparent);
+}
+
+:root:not(.dark) .product-theater--light .product-stage__chrome {
+  border-color: var(--overlay);
+  background: var(--surface);
+}
+
+:root:not(.dark) .product-theater--light .product-stage__traffic span {
+  background: var(--text-muted);
+}
+
+:root:not(.dark) .product-theater--light .product-stage__address,
+:root:not(.dark) .product-theater--light .product-stage__index,
+:root:not(.dark) .product-theater--light .product-chapter p,
+:root:not(.dark) .product-theater--light .product-chapter__signals li,
+:root:not(.dark) .product-theater--light .product-chapter__modes {
+  color: var(--text-secondary);
+}
+
+:root:not(.dark) .product-theater--light .product-chapter__mobile-visual {
+  border-color: var(--overlay);
+  background: var(--surface);
+}
+
 .product-theater__story {
   position: relative;
   display: grid;
@@ -1219,6 +1388,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  right: 58%;
   z-index: 3;
   pointer-events: none;
   background: linear-gradient(
@@ -1291,6 +1461,15 @@
   z-index: 2;
   opacity: 1;
   transform: scale(1) translate3d(0, 0, 0);
+}
+
+.product-showcase-picture {
+  position: absolute;
+  inset: 0;
+}
+
+.product-stage__visual .product-showcase-picture {
+  left: 42%;
 }
 
 .product-stage__aura {
@@ -1457,7 +1636,59 @@
   }
 }
 
-body:has([data-landing-story]) [data-marketing-navbar] {
+.marketing-navbar {
+  color: var(--foreground);
+  background: color-mix(in oklab, var(--background) 92%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--overlay) 75%, transparent);
+}
+
+.marketing-navbar__link {
+  color: var(--text-secondary);
+}
+
+.marketing-navbar__link:hover {
+  color: var(--foreground);
+}
+
+.marketing-navbar__sign-in:hover {
+  background: var(--accent-soft);
+}
+
+.marketing-navbar__controls button[aria-haspopup="menu"] {
+  height: 2.25rem;
+  border-color: var(--overlay);
+  background: var(--surface);
+  color: var(--text-secondary);
+}
+
+.marketing-navbar__theme-control button[aria-haspopup="menu"] {
+  width: 2.25rem;
+  padding: 0;
+}
+
+.marketing-navbar__controls button[aria-haspopup="menu"]:hover,
+.marketing-navbar__controls button[aria-haspopup="menu"][data-state="open"] {
+  background: var(--accent-soft);
+  color: var(--foreground);
+  border-color: color-mix(in oklab, var(--primary) 35%, var(--overlay));
+}
+
+.marketing-navbar__primary {
+  background: var(--primary);
+  color: white;
+}
+
+.marketing-navbar__primary:hover {
+  background: var(--primary-glow);
+}
+
+.marketing-navbar a:focus-visible,
+.marketing-navbar button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* body:has([data-landing-story]) [data-marketing-navbar] {
   transition:
     background-color 500ms var(--landing-ease-out),
     border-color 500ms var(--landing-ease-out),
@@ -1470,19 +1701,19 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-marketing-navbar] {
   background: linear-gradient(to bottom, rgb(5 10 7 / 0.64), transparent);
 
   backdrop-filter: none;
-}
+} */
 
-body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-link] {
+/* body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-link] {
   color: rgb(255 255 255 / 0.62);
 }
 
 body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-link]:hover {
   color: white;
-}
+} */
 
-body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
+/* body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   color: white;
-}
+} */
 
 @media (max-width: 767px) {
   .story-atmosphere__orb {
@@ -2069,6 +2300,50 @@ body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
     #08140d 40%,
     var(--landing-void) 74%
   );
+}
+
+:root:not(.dark) .final-convergence--light {
+  --landing-pearl: var(--foreground);
+  --landing-mint: var(--primary);
+
+  color: var(--foreground);
+  background: radial-gradient(
+    ellipse at 50% 52%,
+    var(--accent-soft) 0%,
+    var(--background) 74%
+  );
+}
+
+:root:not(.dark) .final-convergence--light .final-convergence__subtitle,
+:root:not(.dark) .final-convergence--light .final-convergence__proof {
+  color: var(--text-secondary);
+}
+
+:root:not(.dark) .final-convergence--light .final-convergence__primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+:root:not(.dark) .final-convergence--light .final-convergence__primary:hover {
+  background: var(--primary-glow);
+}
+
+:root:not(.dark) .final-convergence--light .final-convergence__secondary {
+  border-color: var(--overlay);
+  color: var(--foreground);
+  background: var(--surface);
+}
+
+:root:not(.dark) .final-convergence--light .final-convergence__secondary:hover {
+  background: var(--elevated);
+}
+
+:root:not(.dark) .final-convergence--light .convergence-visual__ring {
+  border-color: color-mix(in oklab, var(--primary) 12%, transparent);
+}
+
+:root:not(.dark) .final-convergence--light .convergence-visual__star {
+  background: var(--token-gold);
 }
 
 .final-convergence__field {

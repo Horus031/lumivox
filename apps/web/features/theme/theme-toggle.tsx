@@ -53,12 +53,12 @@ export function ThemeToggle() {
             onClick={() => setTheme(option.value)}
             className={`flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-medium transition ${
               isActive
-                ? "bg-primary text-primary-foreground"
-                : "text-foreground hover:bg-foreground/10 border-foreground"
+                ? "bg-primary"
+                : "hover:bg-foreground/10 border-foreground"
             }`}
           >
-            <Icon className="h-4 w-4" />
-            <span className="hidden sm:inline">{option.label}</span>
+            <Icon className="h-4 w-4 text-secondary" />
+            <span className="hidden sm:inline text-secondary">{option.label}</span>
           </Button>
         );
       })}

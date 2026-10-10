@@ -13,7 +13,7 @@ export default function Hero() {
     <section
       data-landing-scene="hero"
       data-landing-hero
-      className="landing-hero relative isolate mt-16 min-h-[calc(100svh-4rem)] overflow-hidden"
+      className="landing-hero landing-hero--light relative isolate min-h-[calc(100svh-4rem)] overflow-hidden"
     >
       <HeroMotionController />
       <div className="absolute inset-0 -z-10 bg-background">
@@ -36,13 +36,14 @@ export default function Hero() {
 
         <div className="landing-hero__veil absolute inset-0" />
         <div className="landing-hero__halo absolute inset-0" />
+        <div aria-hidden="true" className="landing-hero__readability absolute inset-0" />
         <div className="landing-hero__grain absolute inset-0" />
         <div className="landing-hero__edge absolute inset-0" />
       </div>
 
       <div className="landing-hero__content relative z-20 mx-auto flex min-h-[calc(100svh-4rem)] max-w-310 flex-col items-center justify-center px-6 pb-28 pt-24 text-center">
         <StoryReveal>
-          <div className="mb-7 inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-white/68">
+          <div className="landing-hero__badge mb-7 inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-[0.22em] text-white/68">
             <span className="h-px w-7 bg-white/30" />
 
             <span className="size-1.5 rounded-full bg-[#83b895] shadow-[0_0_16px_rgba(131,184,149,.8)]" />
@@ -64,7 +65,7 @@ export default function Hero() {
         </StoryReveal>
 
         <StoryReveal>
-          <p className="mx-auto mt-8 max-w-2xl text-[15.5px] leading-7 text-white/66 md:text-[17px]">
+          <p className="landing-hero__subtitle mx-auto mt-8 max-w-2xl text-[15.5px] font-medium leading-7 md:text-[17px]">
             {t("subtitle")}
           </p>
         </StoryReveal>
@@ -73,14 +74,14 @@ export default function Hero() {
           <div className="mt-9 flex flex-wrap justify-center gap-3">
             <Link
               href="/auth/sign-up"
-              className="group inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white text-[#0d110f] text-[14.5px] font-medium hover:bg-white/90 transition-colors"
+              className="landing-hero__primary group inline-flex items-center gap-2 h-12 px-6 rounded-full bg-white text-[#0d110f] text-[14.5px] font-medium hover:bg-white/90 transition-colors"
             >
               {t("primaryCta")}
               <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <a
               href="#how"
-              className="inline-flex items-center gap-2 h-12 px-6 rounded-full border border-white/16 bg-white/[0.045] backdrop-blur-md text-[14.5px] font-medium text-white hover:bg-white/15 transition-colors"
+              className="landing-hero__secondary inline-flex items-center gap-2 h-12 px-6 rounded-full border border-white/16 bg-white/[0.045] backdrop-blur-md text-[14.5px] font-medium text-white hover:bg-white/15 transition-colors"
             >
               {t("secondaryCta")}
             </a>
@@ -88,7 +89,7 @@ export default function Hero() {
         </StoryReveal>
 
         <StoryReveal>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-white/48">
+          <div className="landing-hero__proof mt-8 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-[11.5px] text-white/48">
             {proofItems.map((item, index) => (
               <span key={item} className="flex items-center gap-1.5">
                 {index > 0 && (
