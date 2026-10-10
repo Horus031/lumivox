@@ -112,7 +112,12 @@ export function AccountDropdown({
         <DropdownMenuSeparator />
 
         <form action="/auth/signout" method="post">
-          <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2">
+          <DropdownMenuItem
+            asChild
+            className="cursor-pointer rounded-lg px-3 py-2"
+            // Keep the form mounted until the browser submits it.
+            onSelect={(event) => event.preventDefault()}
+          >
             <button type="submit" className="w-full">
               <LogOut />
               {sidebarT("signOut")}
