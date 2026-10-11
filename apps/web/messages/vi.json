@@ -201,19 +201,48 @@
     }
   },
   "auth": {
+    "backToLogin": "Quay lại đăng nhập",
+    "forgotPassword": {
+      "title": "Quên mật khẩu?",
+      "description": "Nhập email để nhận liên kết đặt lại mật khẩu.",
+      "submit": "Gửi liên kết đặt lại",
+      "submitting": "Đang gửi...",
+      "successTitle": "Kiểm tra email của bạn",
+      "successDescription": "Bước tiếp theo đang ở trong hộp thư.",
+      "successBody": "Nếu tài khoản sử dụng email này và đăng nhập bằng mật khẩu, bạn sẽ nhận được liên kết để đặt lại mật khẩu."
+    },
+    "updatePassword": {
+      "title": "Đặt mật khẩu mới",
+      "description": "Chọn mật khẩu mới cho tài khoản Lumivox của bạn.",
+      "newPassword": "Mật khẩu mới",
+      "submit": "Lưu mật khẩu mới",
+      "submitting": "Đang lưu..."
+    },
+    "shell": {
+      "home": "Trang chủ Lumivox",
+      "eyebrow": "Nuôi dưỡng những bước tiến bình tâm",
+      "statement": "Dành không gian cho sự tập trung.\nBắt đầu chương tiếp theo của bạn.",
+      "signature": "Nhịp riêng của bạn. Tiềm năng của bạn.",
+      "explore": "Khám phá Lumivox",
+      "toggleTheme": "Đổi giao diện sáng / tối",
+      "privacy": "Quyền riêng tư",
+      "terms": "Điều khoản"
+    },
     "signIn": "Đăng nhập",
     "signUp": "Đăng ký",
     "fields": {
       "email": "Email",
       "password": "Mật khẩu",
-      "repeatPassword": "Nhập lại mật khẩu"
+      "repeatPassword": "Nhập lại mật khẩu",
+      "showPassword": "Hiện mật khẩu",
+      "hidePassword": "Ẩn mật khẩu"
     },
     "errors": {
       "generic": "Đã xảy ra lỗi"
     },
     "login": {
-      "title": "Đăng nhập",
-      "description": "Nhập email bên dưới để đăng nhập vào tài khoản của bạn",
+      "title": "Chào mừng trở lại",
+      "description": "Tiếp tục hành trình từ nơi bạn đã dừng lại.",
       "forgotPassword": "Quên mật khẩu?",
       "submit": "Đăng nhập",
       "submitting": "Đang đăng nhập...",
@@ -221,8 +250,8 @@
       "signUpLink": "Đăng ký"
     },
     "register": {
-      "title": "Đăng ký",
-      "description": "Tạo tài khoản mới",
+      "title": "Tạo tài khoản của bạn",
+      "description": "Bắt đầu một nhịp học tập tập trung hơn.",
       "submit": "Đăng ký",
       "submitting": "Đang tạo tài khoản...",
       "hasAccount": "Đã có tài khoản?",

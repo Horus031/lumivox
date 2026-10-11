@@ -80,7 +80,7 @@ describe("workspace optimistic controller", () => {
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    act(() => root.render(<WorkspaceBoard {...props} />));
+    act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} />));
   });
   afterEach(() => {
     act(() => root.unmount());
@@ -138,9 +138,8 @@ describe("workspace optimistic controller", () => {
     act(() =>
       root.render(
         <WorkspaceBoard
-          {...props}
-          tasks={[{ ...task, status: "completed" }]}
-        />,
+        goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props}
+        tasks={[{ ...task, status: "completed" }]}        />,
       ),
     );
     expect(lane("completed").querySelector("article")).not.toBeNull();
@@ -167,7 +166,7 @@ describe("workspace optimistic controller", () => {
         message: "created",
         data: null,
       });
-      act(() => root.render(<WorkspaceBoard {...props} scope={scope} />));
+      act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} scope={scope} />));
       act(() =>
         (lane("todo").querySelector("button") as HTMLButtonElement).click(),
       );
