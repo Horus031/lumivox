@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { submitLoginForm } from "./helpers/auth";
 
 for (const theme of ["light", "dark"] as const) {
   for (const route of ["login", "sign-up", "forgot-password", "update-password", "sign-up-success", "error"] as const) {
@@ -80,16 +81,21 @@ test("reduced motion shows a static watercolor and readable form", async ({ page
   await expect(page.locator("h1")).toBeVisible();
 });
 
-test("login reports a rejected request and restores the form", async ({ page }) => {
+test("shared login helper handles the password toggle and restores a rejected form", async ({ page }) => {
+  let submitted = false;
   await page.route("**/auth/v1/token*", async (route) => {
+    const credentials = route.request().postDataJSON();
+    expect(credentials.email).toBe("test@example.com");
+    expect(credentials.password).toBe("example-password");
+    submitted = true;
     await route.fulfill({ status: 400, contentType: "application/json",
       body: JSON.stringify({ error_code: "invalid_credentials", msg: "Invalid login credentials" }) });
   });
   await page.goto("/en/auth/login");
-  await page.locator("#email").fill("test@example.com");
-  await page.locator("#password").fill("example-password");
-  await page.getByRole("button", { name: "Login", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Show password", exact: true })).toBeVisible();
+  await submitLoginForm(page, "test@example.com", "example-password");
   await expect(page.locator("form [role=alert]")).toHaveText("Invalid login credentials");
+  expect(submitted).toBe(true);
   await expect(page.locator("#email")).toBeEnabled();
   await expect(page.getByRole("button", { name: "Login", exact: true })).toBeEnabled();
 });
