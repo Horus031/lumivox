@@ -1,6 +1,7 @@
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import type { Metadata } from "next";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = {
   robots: {
@@ -19,7 +20,7 @@ export default async function AuthLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      {children}
+      <AuthShell>{children}</AuthShell>
     </NextIntlClientProvider>
   );
 }

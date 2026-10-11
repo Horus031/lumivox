@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test, type Page } from "@playwright/test";
+import { submitLoginForm } from "./helpers/auth";
 
 // Only run these mutation tests against an explicitly configured local instance.
 const localUrl = process.env.WORKSPACE_TEST_SUPABASE_URL;
@@ -59,9 +60,7 @@ test.afterAll(async () => {
 
 async function login(page: Page) {
   await page.goto("/en/auth/login");
-  await page.getByLabel(/email/i).fill(email);
-  await page.getByLabel(/password/i).fill(password);
-  await page.getByRole("button", { name: /login/i }).click();
+  await submitLoginForm(page, email, password);
   await page.waitForURL("**/en/dashboard");
 }
 
