@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = {
   robots: {
@@ -12,5 +13,5 @@ export default function LocalizedAuthLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  return <AuthShell>{children}</AuthShell>;
 }

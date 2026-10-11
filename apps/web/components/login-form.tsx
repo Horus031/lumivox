@@ -3,13 +3,8 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { ArrowRight, LoaderCircle } from "lucide-react";
+import { PasswordInput } from "@/components/auth/password-input";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
@@ -56,22 +51,21 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl">{t("title")}</CardTitle>
-          <CardDescription>
-            {t("description")}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleLogin}>
+      <header className="auth-form-heading">
+        <h1>{t("title")}</h1>
+        <p>{t("description")}</p>
+      </header>
+          <form onSubmit={handleLogin} aria-busy={isLoading}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
                 <Label htmlFor="email">{authT("fields.email")}</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  name="email"
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  disabled={isLoading}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -87,31 +81,32 @@ export function LoginForm({
                     {t("forgotPassword")}
                   </Link>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
+                  name="password"
+                  autoComplete="current-password"
+                  disabled={isLoading}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              {error && <p role="alert" className="auth-form-error">{error}</p>}
+              <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
                 {isLoading ? t("submitting") : t("submit")}
+                {isLoading ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <ArrowRight aria-hidden="true" />}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
+            <div className="auth-form-alternative">
               {t("noAccount")}{" "}
               <Link
                 href="/auth/sign-up"
-                className="underline underline-offset-4"
+                className="font-semibold underline-offset-4 hover:underline"
               >
                 {t("signUpLink")}
               </Link>
             </div>
           </form>
-        </CardContent>
-      </Card>
     </div>
   );
 }

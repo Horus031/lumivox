@@ -200,19 +200,48 @@
     }
   },
   "auth": {
+    "backToLogin": "Back to login",
+    "forgotPassword": {
+      "title": "Forgot your password?",
+      "description": "Enter your email and we'll send you a reset link.",
+      "submit": "Send reset link",
+      "submitting": "Sending...",
+      "successTitle": "Check your email",
+      "successDescription": "Your next step is in your inbox.",
+      "successBody": "If an account uses this email and password sign-in, you'll receive a link to reset your password."
+    },
+    "updatePassword": {
+      "title": "Set a new password",
+      "description": "Choose a new password for your Lumivox account.",
+      "newPassword": "New password",
+      "submit": "Save new password",
+      "submitting": "Saving..."
+    },
+    "shell": {
+      "home": "Lumivox home",
+      "eyebrow": "A quieter kind of ambition",
+      "statement": "Make space for focus.\nLet your next chapter begin.",
+      "signature": "Your pace. Your possibilities.",
+      "explore": "Discover Lumivox",
+      "toggleTheme": "Switch light / dark theme",
+      "privacy": "Privacy",
+      "terms": "Terms"
+    },
     "signIn": "Sign in",
     "signUp": "Sign up",
     "fields": {
       "email": "Email",
       "password": "Password",
-      "repeatPassword": "Repeat password"
+      "repeatPassword": "Repeat password",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
     },
     "errors": {
       "generic": "An error occurred"
     },
     "login": {
-      "title": "Login",
-      "description": "Enter your email below to login to your account",
+      "title": "Welcome back",
+      "description": "A fresh start, right where you left off.",
       "forgotPassword": "Forgot your password?",
       "submit": "Login",
       "submitting": "Logging in...",
@@ -220,8 +249,8 @@
       "signUpLink": "Sign up"
     },
     "register": {
-      "title": "Sign up",
-      "description": "Create a new account",
+      "title": "Create your account",
+      "description": "A little more focus starts here.",
       "submit": "Sign up",
       "submitting": "Creating an account...",
       "hasAccount": "Already have an account?",
