@@ -49,15 +49,12 @@ export default async function ReflectionsPage({
   return (
     <section>
       <div className="mx-auto space-y-8">
-        <div className="flex justify-between items-center">
-          <PageHeader
-            eyebrow={t("eyebrow")}
-            title={t("title")}
-            description={t("description")}
-          />
-
-          <GenerateWeeklyReflectionButton />
-        </div>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("description")}
+          action={<GenerateWeeklyReflectionButton />}
+        />
 
         <Suspense fallback={<ReflectionCardsFallback />}>
           <ReflectionCardsSection locale={locale} />

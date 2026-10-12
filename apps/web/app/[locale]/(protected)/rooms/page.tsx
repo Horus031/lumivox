@@ -27,16 +27,12 @@ export default async function RoomsPage() {
   return (
     <section>
       <div className="mx-auto space-y-8">
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between items-center">
-            <PageHeader
-              eyebrow={t("eyebrow")}
-              title={t("title")}
-              description={t("description")}
-            />
-            <CreateStudyRoomForm />
-          </div>
-        </div>
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={t("title")}
+          description={t("description")}
+          action={<CreateStudyRoomForm />}
+        />
 
         <RoomListTabs
           myRooms={myRooms}

@@ -9,7 +9,7 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 - [x] 1. Foundation tokens: colors, typography, radius, spacing, elevation.
 - [x] 2. Core primitives: button, card, input, select, tabs, badge, form states.
 - [x] 3. App shell: desktop sidebar, topbar, mobile header and bottom nav.
-- [ ] 4. PageHeader: consistent title, description and action alignment.
+- [x] 4. PageHeader: consistent title, description and action alignment.
 - [ ] 5. Dashboard: summary metrics, charts and information hierarchy.
 - [ ] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
   belong to this workflow.
@@ -156,3 +156,31 @@ Next phase: app shell (sidebar, topbar and mobile navigation).
   the existing process was left running.
 
 Next phase: PageHeader. Individual page layouts remain for their own phases.
+
+## Phase 4: PageHeader
+
+- Removed card-like framing, ring and shadow. Headers are left-aligned and use
+  page-title (24px/32px), body-description (14px/22px) and caption tokens.
+- Eyebrow is rendered as an optional, subdued context label. Description and
+  action are optional, without empty placeholders.
+- The text column and action group wrap according to available container width,
+  including the narrower content area beside the desktop sidebar. Long titles
+  and unbroken description text can wrap without horizontal overflow.
+- Rooms, room details and Reflections now pass their actions to PageHeader
+  instead of independently positioning them beside it. Room details use
+  DialogTrigger asChild to avoid nested buttons.
+- Roadmaps uses the shared Button for its header link and a section-gap token
+  between the header and list. Its page content/localization remains for phase 7.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Browser fixture rendered the actual PageHeader, Button and Dialog with compiled
+  global CSS. Tests passed at 1440, 768, 528, 390 and 320px in light/dark, with
+  page padding: 24px titles, optional content, multiple actions, long unbroken
+  text, no overlap/overflow, dialog open/close and no runtime errors.
+- Reviewed desktop dark and mobile light screenshots. The fixture uses a
+  sans-serif fallback; production font and authenticated page verification are
+  still limited by the existing dev server returning HTTP 500.
+
+Next phase: Dashboard (summary metrics, charts and information hierarchy).

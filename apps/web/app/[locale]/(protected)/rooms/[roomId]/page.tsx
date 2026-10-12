@@ -104,81 +104,80 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
   return (
     <section>
       <div className="mx-auto max-w-6xl space-y-8">
-        <div className="flex flex-row items-center justify-between">
-          <PageHeader
-            eyebrow={t("eyebrow")}
-            title={room.title}
-            description={room.description ?? t("fallbackDescription")}
-          />
+        <PageHeader
+          eyebrow={t("eyebrow")}
+          title={room.title}
+          description={room.description ?? t("fallbackDescription")}
+          action={
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button>{t("viewDetails")}</Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-4xl!">
+                  <DialogHeader>
+                    <DialogTitle>{t("roomDetails")}</DialogTitle>
+                  </DialogHeader>
 
-          <div className="flex flex-row gap-4">
-            <Dialog>
-              <DialogTrigger>
-                <Button>{t("viewDetails")}</Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-4xl!">
-                <DialogHeader>
-                  <DialogTitle>{t("roomDetails")}</DialogTitle>
-                </DialogHeader>
+                  <section className="flex max-h-[50vh] flex-col gap-5 overflow-y-auto -mx-4 px-4 no-scrollbar">
+                    <article className="rounded-2xl border bg-background p-6 shadow-sm">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <DetailCard
+                          label={t("labels.visibility")}
+                          value={t(`visibility.${room.visibility}`)}
+                        />
 
-                <section className="flex max-h-[50vh] flex-col gap-5 overflow-y-auto -mx-4 px-4 no-scrollbar">
-                  <article className="rounded-2xl border bg-background p-6 shadow-sm">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <DetailCard
-                        label={t("labels.visibility")}
-                        value={t(`visibility.${room.visibility}`)}
-                      />
+                        <DetailCard
+                          label={t("labels.maxParticipants")}
+                          value={t("maxParticipants", {
+                            count: room.max_participants,
+                          })}
+                        />
 
-                      <DetailCard
-                        label={t("labels.maxParticipants")}
-                        value={t("maxParticipants", {
-                          count: room.max_participants,
-                        })}
-                      />
+                        <DetailCard
+                          label={t("labels.owner")}
+                          value={room.profiles?.full_name ?? t("unknownUser")}
+                        />
 
-                      <DetailCard
-                        label={t("labels.owner")}
-                        value={room.profiles?.full_name ?? t("unknownUser")}
-                      />
-
-                      <DetailCard
-                        label={t("labels.yourRole")}
-                        value={t(`roles.${membership.role}`)}
-                      />
-                    </div>
-
-                    {room.visibility === "private" &&
-                    membership.role === "owner" ? (
-                      <div className="mt-5 rounded-2xl border border-dashed p-4">
-                        <p className="text-sm font-semibold">
-                          {t("privateInviteCode")}
-                        </p>
-                        <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
-                          {room.invite_code}
-                        </p>
-                        <p className="mt-2 text-sm text-neutral-600">
-                          {t("privateInviteDescription")}
-                        </p>
+                        <DetailCard
+                          label={t("labels.yourRole")}
+                          value={t(`roles.${membership.role}`)}
+                        />
                       </div>
-                    ) : null}
-                  </article>
 
-                  <Suspense fallback={<RoomPanelFallback className="h-64" />}>
-                    <RoomMemberRosterSection roomId={room.id} />
-                  </Suspense>
-                </section>
+                      {room.visibility === "private" &&
+                      membership.role === "owner" ? (
+                        <div className="mt-5 rounded-2xl border border-dashed p-4">
+                          <p className="text-sm font-semibold">
+                            {t("privateInviteCode")}
+                          </p>
+                          <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
+                            {room.invite_code}
+                          </p>
+                          <p className="mt-2 text-sm text-neutral-600">
+                            {t("privateInviteDescription")}
+                          </p>
+                        </div>
+                      ) : null}
+                    </article>
 
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <Button variant="outline">{t("cancel")}</Button>
-                  </DialogClose>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+                    <Suspense fallback={<RoomPanelFallback className="h-64" />}>
+                      <RoomMemberRosterSection roomId={room.id} />
+                    </Suspense>
+                  </section>
 
-            <LeaveRoomButton roomId={room.id} />
-          </div>
-        </div>
+                  <DialogFooter>
+                    <DialogClose asChild>
+                      <Button variant="outline">{t("cancel")}</Button>
+                    </DialogClose>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
+              <LeaveRoomButton roomId={room.id} />
+            </div>
+          }
+        />
 
         <div className="flex flex-row gap-3">
           <StudyRoomPresencePanel
