@@ -102,6 +102,7 @@
       }
     },
     "behaviourTrend": {
+      "empty": "No study activity recorded yet.",
       "title": "Behaviour trend - last 7 days",
       "description": "Compare focused time and distraction events across recent days.",
       "focusMinutes": "Focus minutes",
@@ -115,6 +116,7 @@
       "personalizedPbi": "Personalized PBI"
     },
     "taskStatus": {
+      "empty": "No tasks recorded yet.",
       "title": "Task status overview",
       "description": "Current distribution of task states across the system.",
       "tasks": "Tasks"

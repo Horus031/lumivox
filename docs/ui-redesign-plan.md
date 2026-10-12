@@ -10,7 +10,7 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 - [x] 2. Core primitives: button, card, input, select, tabs, badge, form states.
 - [x] 3. App shell: desktop sidebar, topbar, mobile header and bottom nav.
 - [x] 4. PageHeader: consistent title, description and action alignment.
-- [ ] 5. Dashboard: summary metrics, charts and information hierarchy.
+- [x] 5. Dashboard: summary metrics, charts and information hierarchy.
 - [ ] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
   belong to this workflow.
 - [ ] 7. Focus, Roadmaps, Rooms/Groups and form-heavy screens.
@@ -184,3 +184,45 @@ Next phase: PageHeader. Individual page layouts remain for their own phases.
   still limited by the existing dev server returning HTTP 500.
 
 Next phase: Dashboard (summary metrics, charts and information hierarchy).
+
+## Phase 5: Dashboard
+
+- Reordered the dashboard: activity summary, PBI scores/explanation, behaviour
+  trend, then history/task status. Mobile follows the same reading order.
+  Replaced percentage-based columns and the 672px trend panel with responsive
+  grids and 256px chart plotting regions.
+- Summary cards use 8px radius, 16px padding, 28px metrics, localized number
+  formatting and existing period/context subtitles. Decorative hover movement
+  and colored icon blocks are removed; mobile labels have more available space.
+- Replaced glowing PBI gauges with two main scores and five comparable meters.
+  Snapshot fractions are still converted to percentages; supplied explanations
+  take precedence, with the original fallback components and score levels.
+  Both standard/personalized scores, period and accessible meter values remain.
+- Explanation uses a flat divided insight list with semantic badges. Restored
+  the overall summary; removed nested cards, fixed minimum height and wide tracking.
+- Charts share typography, surfaces and tooltip styling. Green/blue series are
+  distinguishable; the standard PBI series is also dashed. Legend/tooltip text
+  remains readable in both themes. Task colors are keyed by status, not order,
+  and status labels use the existing locale translations.
+- Added localized empty states for activity/task charts. Empty PBI/history states
+  use the same panel styling; summary and chart skeletons match the new layout.
+  Refresh includes a labeled text action, icon and busy state.
+- Independent shared query promises, streaming Suspense boundaries, authentication,
+  translation and refresh behavior are preserved. No database/query changes.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Nine targeted unit tests passed across PBI scores, shell navigation and token
+  merging. New PBI tests cover locale formatting, percentage conversion, fallback
+  components, explanation precedence, clamped meter bounds and absent snapshots.
+- Browser fixture rendered actual dashboard components with Recharts and compiled
+  global CSS. Populated/empty states passed at 1440, 1024, 768, 390 and 320px in
+  light/dark. Checks cover nonblank chart paths, tooltips, five meters, fitting
+  text, horizontal overflow and runtime errors. Desktop width accounts for the
+  sidebar. Reviewed desktop light and mobile dark screenshots.
+- Fixture uses sample data and a sans-serif fallback. Live authenticated dashboard
+  verification remains limited by the existing dev server returning HTTP 500;
+  full Supabase reads/refresh were not exercised by this visual fixture.
+
+Next phase: Workspace (goal rail, lanes and task cards).

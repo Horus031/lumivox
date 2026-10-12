@@ -103,6 +103,7 @@
       }
     },
     "behaviourTrend": {
+      "empty": "Chưa ghi nhận hoạt động học tập.",
       "title": "Xu hướng hành vi - 7 ngày gần đây",
       "description": "So sánh thời gian tập trung và các lần xao nhãng trong những ngày gần đây.",
       "focusMinutes": "Phút tập trung",
@@ -116,6 +117,7 @@
       "personalizedPbi": "PBI cá nhân hóa"
     },
     "taskStatus": {
+      "empty": "Chưa có nhiệm vụ nào.",
       "title": "Tổng quan trạng thái nhiệm vụ",
       "description": "Phân bố hiện tại của các trạng thái nhiệm vụ trong hệ thống.",
       "tasks": "Nhiệm vụ"
