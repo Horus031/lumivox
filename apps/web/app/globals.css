@@ -933,6 +933,30 @@
   padding: 0;
 }
 
+.roadmap-editor-flow {
+  --xy-background-color: var(--background);
+  --xy-edge-stroke: var(--text-muted);
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--elevated);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-color-hover: var(--foreground);
+  --xy-controls-button-border-color: var(--overlay);
+  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-mask-background-color: color-mix(in srgb, var(--background) 70%, transparent);
+}
+
+.roadmap-editor-flow .react-flow__controls-button {
+  width: var(--spacing-control);
+  height: var(--spacing-control);
+}
+
+@media (max-width: 1023px) {
+  .roadmap-editor-flow .react-flow__controls-button {
+    width: var(--spacing-touch);
+    height: var(--spacing-touch);
+  }
+}
+
 .react-flow__handle {
   width: 10px;
   height: 10px;

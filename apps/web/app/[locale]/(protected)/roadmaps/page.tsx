@@ -3,21 +3,21 @@ import { RoadmapList } from "@/features/roadmaps/components/roadmap-list";
 import { getMyRoadmaps } from "@/features/roadmaps/roadmap.queries";
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { Button } from "@/components/ui/button";
-// import { getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
+import { Plus } from "lucide-react";
 
 export default async function RoadmapsPage() {
-  // const t = await getTranslations("tasks.page");
-  const roadmaps = await getMyRoadmaps();
+  const [roadmaps, t] = await Promise.all([getMyRoadmaps(), getTranslations("roadmaps")]);
 
   return (
     <section className="mx-auto space-y-section">
       <PageHeader
         eyebrow="Lumivox"
-        title="Learning Roadmaps"
-        description="Generate AI-powered learning roadmaps and later apply them into your goals, tasks, and subtasks."
+        title={t("title")}
+        description={t("description")}
         action={
           <Button asChild>
-            <Link href="/roadmaps/new">Create roadmap</Link>
+            <Link href="/roadmaps/new"><Plus aria-hidden="true" />{t("create")}</Link>
           </Button>
         }
       />

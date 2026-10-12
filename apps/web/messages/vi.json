@@ -842,6 +842,105 @@
       }
     }
   },
+  "roadmaps": {
+    "title": "Lộ trình học tập",
+    "description": "Các kế hoạch học tập và trạng thái áp dụng.",
+    "create": "Tạo lộ trình",
+    "newTitle": "Tạo lộ trình học tập",
+    "newDescription": "Chủ đề, mục tiêu và lịch học.",
+    "emptyTitle": "Chưa có lộ trình",
+    "emptyDescription": "Các lộ trình học tập của bạn sẽ xuất hiện tại đây.",
+    "fallbackTitle": "Lộ trình học tập",
+    "back": "Quay lại",
+    "edit": "Chỉnh sửa cây",
+    "apply": "Áp dụng lộ trình",
+    "applying": "Đang áp dụng...",
+    "viewGoals": "Xem mục tiêu",
+    "nodes": "{count} nội dung",
+    "studyTime": "{days} ngày/tuần · {minutes} phút/ngày",
+    "treeTitle": "Mục tiêu, nhiệm vụ và nhiệm vụ con",
+    "treeEmpty": "Chưa có nội dung trong lộ trình.",
+    "priority": "Ưu tiên {value}",
+    "hours": "{value} giờ",
+    "noStart": "Chưa có ngày bắt đầu",
+    "noEnd": "Chưa có ngày kết thúc",
+    "editorTitle": "Chỉnh sửa lộ trình",
+    "autoLayout": "Sắp xếp tự động",
+    "save": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "nodeEditor": "Chi tiết nội dung",
+    "noSelection": "Chưa chọn nội dung",
+    "editNode": "Chỉnh sửa {type}",
+    "deleteNode": "Xóa nội dung",
+    "addChild": "Thêm {type}",
+    "newNode": "{type} mới",
+    "generate": "Tạo lộ trình",
+    "generating": "Đang tạo lộ trình...",
+    "generateFailed": "Không thể tạo lộ trình. Vui lòng thử lại.",
+    "applyConfirm": "Áp dụng lộ trình này? Các mục tiêu, nhiệm vụ và nhiệm vụ con sẽ được tạo. Thao tác này không thể lặp lại.",
+    "applied": "Đã tạo {goals} mục tiêu, {tasks} nhiệm vụ và {subtasks} nhiệm vụ con.",
+    "inputTitle": "Mục tiêu học tập",
+    "levelTitle": "Trình độ và mục tiêu",
+    "scheduleTitle": "Lịch học",
+    "weeklyHours": "Thời gian học dự kiến: {hours} giờ/tuần",
+    "statuses": {
+      "draft": "Bản nháp",
+      "applied": "Đã áp dụng",
+      "archived": "Đã lưu trữ"
+    },
+    "types": {
+      "goal": "Mục tiêu",
+      "task": "Nhiệm vụ",
+      "subtask": "Nhiệm vụ con"
+    },
+    "levels": {
+      "beginner": "Cơ bản",
+      "intermediate": "Trung cấp",
+      "advanced": "Nâng cao",
+      "custom": "Tùy chỉnh"
+    },
+    "fields": {
+      "topic": "Chủ đề / khóa học",
+      "subject": "Tên môn học",
+      "language": "Ngôn ngữ đầu ra",
+      "description": "Mô tả / bối cảnh",
+      "currentLevel": "Trình độ hiện tại",
+      "targetLevel": "Trình độ mục tiêu",
+      "customCurrent": "Trình độ hiện tại tùy chỉnh",
+      "customTarget": "Trình độ mục tiêu tùy chỉnh",
+      "startDate": "Ngày bắt đầu",
+      "endDate": "Ngày kết thúc",
+      "days": "Số ngày học mỗi tuần",
+      "minutes": "Số phút học mỗi ngày",
+      "weekdays": "Ngày có thể học",
+      "title": "Tiêu đề",
+      "hours": "Số giờ dự kiến",
+      "priority": "Mức ưu tiên",
+      "dateRange": "Khoảng thời gian",
+      "studyTime": "Thời gian học",
+      "level": "Trình độ"
+    },
+    "placeholders": {
+      "topic": "Python cho phân tích dữ liệu",
+      "subject": "Phân tích dữ liệu",
+      "description": "Mục tiêu học tập và kiến thức nền",
+      "current": "Kỹ năng hiện tại",
+      "target": "Kết quả mong muốn"
+    },
+    "weekdays": {
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7",
+      "sun": "CN"
+    },
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh"
+    }
+  },
   "focus": {
     "page": {
       "eyebrow": "Lumivox",

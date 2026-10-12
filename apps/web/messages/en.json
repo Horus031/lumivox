@@ -842,6 +842,105 @@
       }
     }
   },
+  "roadmaps": {
+    "title": "Learning Roadmaps",
+    "description": "Your learning plans and application status.",
+    "create": "Create roadmap",
+    "newTitle": "Create a learning roadmap",
+    "newDescription": "Subject, learning objectives and study schedule.",
+    "emptyTitle": "No roadmaps yet",
+    "emptyDescription": "Your learning roadmaps will appear here.",
+    "fallbackTitle": "Learning roadmap",
+    "back": "Back",
+    "edit": "Edit tree",
+    "apply": "Apply roadmap",
+    "applying": "Applying...",
+    "viewGoals": "View goals",
+    "nodes": "{count} nodes",
+    "studyTime": "{days} days/week · {minutes} min/day",
+    "treeTitle": "Goals, tasks and subtasks",
+    "treeEmpty": "No roadmap nodes available.",
+    "priority": "Priority {value}",
+    "hours": "{value} hours",
+    "noStart": "No start date",
+    "noEnd": "No end date",
+    "editorTitle": "Roadmap editor",
+    "autoLayout": "Auto layout",
+    "save": "Save changes",
+    "saving": "Saving...",
+    "nodeEditor": "Node details",
+    "noSelection": "No node selected",
+    "editNode": "Edit {type}",
+    "deleteNode": "Delete node",
+    "addChild": "Add {type}",
+    "newNode": "New {type}",
+    "generate": "Generate roadmap",
+    "generating": "Generating...",
+    "generateFailed": "Unable to generate the roadmap. Please try again.",
+    "applyConfirm": "Apply this roadmap? Goals, tasks and subtasks will be created. This action cannot be repeated.",
+    "applied": "Created {goals} goals, {tasks} tasks and {subtasks} subtasks.",
+    "inputTitle": "Learning objectives",
+    "levelTitle": "Starting point and target",
+    "scheduleTitle": "Study schedule",
+    "weeklyHours": "Estimated study time: {hours} hours/week",
+    "statuses": {
+      "draft": "Draft",
+      "applied": "Applied",
+      "archived": "Archived"
+    },
+    "types": {
+      "goal": "Goal",
+      "task": "Task",
+      "subtask": "Subtask"
+    },
+    "levels": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced",
+      "custom": "Custom"
+    },
+    "fields": {
+      "topic": "Topic / course",
+      "subject": "Subject name",
+      "language": "Output language",
+      "description": "Description / context",
+      "currentLevel": "Current level",
+      "targetLevel": "Target level",
+      "customCurrent": "Custom current level",
+      "customTarget": "Custom target level",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "days": "Study days per week",
+      "minutes": "Minutes per study day",
+      "weekdays": "Available weekdays",
+      "title": "Title",
+      "hours": "Estimated hours",
+      "priority": "Priority",
+      "dateRange": "Date range",
+      "studyTime": "Study time",
+      "level": "Level"
+    },
+    "placeholders": {
+      "topic": "Python for data analytics",
+      "subject": "Data analytics",
+      "description": "Learning goals and relevant background",
+      "current": "Current skills",
+      "target": "Target outcome"
+    },
+    "weekdays": {
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat",
+      "sun": "Sun"
+    },
+    "languages": {
+      "vi": "Vietnamese",
+      "en": "English"
+    }
+  },
   "focus": {
     "page": {
       "eyebrow": "Lumivox",

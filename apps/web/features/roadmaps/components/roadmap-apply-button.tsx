@@ -5,6 +5,9 @@ import { toast } from "sonner";
 
 import { applyLearningRoadmapAction } from "@/features/roadmaps/roadmap.actions";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { Check } from "lucide-react";
 
 type RoadmapApplyButtonProps = {
   roadmapId: string;
@@ -16,11 +19,12 @@ export function RoadmapApplyButton({
   disabled = false,
 }: RoadmapApplyButtonProps) {
   const router = useRouter();
+  const t = useTranslations("roadmaps");
   const [isPending, startTransition] = useTransition();
 
   function handleApply() {
     const confirmed = window.confirm(
-      "Apply this roadmap? Lumivox will create goals, tasks, and subtasks from the current roadmap tree. This action cannot be repeated."
+      t("applyConfirm")
     );
 
     if (!confirmed) return;
@@ -36,7 +40,7 @@ export function RoadmapApplyButton({
       }
 
       toast.success(
-        `Roadmap applied: ${result.data.created_goals} goals, ${result.data.created_tasks} tasks, ${result.data.created_subtasks} subtasks created.`
+        t("applied", { goals: result.data.created_goals, tasks: result.data.created_tasks, subtasks: result.data.created_subtasks })
       );
 
       router.refresh();
@@ -44,13 +48,14 @@ export function RoadmapApplyButton({
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleApply}
       disabled={disabled || isPending}
-      className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+      aria-busy={isPending}
     >
-      {isPending ? "Applying..." : "Apply roadmap"}
-    </button>
+      <Check aria-hidden="true" />
+      {isPending ? t("applying") : t("apply")}
+    </Button>
   );
 }

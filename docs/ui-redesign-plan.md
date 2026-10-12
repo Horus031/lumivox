@@ -23,7 +23,7 @@ Do not migrate unrelated screens while working on a foundation phase.
 ### Phase 7 Deliveries
 
 - [x] 7a. Focus.
-- [ ] 7b. Roadmaps.
+- [x] 7b. Roadmaps.
 - [ ] 7c. Rooms/Groups.
 - [ ] 7d. Remaining form-heavy screens.
 
@@ -315,3 +315,44 @@ then 7d remaining form-heavy screens. Next delivery: Focus only.
   persistence and real model/document retrieval were not exercised by the fixture.
 
 Next delivery: phase 7b, Roadmaps only.
+
+## Phase 7b: Roadmaps
+
+- List, creation and detail pages use shared PageHeader, compact typography,
+  semantic tokens and shared controls. Repeated list items retain one frame;
+  metadata and tree previews use flat divided rows instead of nested cards.
+- Generation form has three separated sections with consistent labels, inputs,
+  native selects and weekday pressed states. Existing generation fields and
+  payload are preserved. Controls disable while pending; thrown requests show
+  localized feedback without clearing the entered values.
+- Detail actions follow roadmap status: drafts offer edit/apply, applied roadmaps
+  link to goals. Confirmation and existing apply behavior remain unchanged.
+- Visual editor uses 240px nodes, a smaller responsive canvas and an unframed
+  node panel. Header actions use icons with accessible names; canvas controls
+  have 36px desktop/44px mobile targets. Minimap is hidden on small screens;
+  reduced minimum zoom allows fitting the tree on narrow viewports.
+- Real XYFlow selection, dragging, connections, auto-layout, child creation,
+  deletion and saved node payloads are retained. Adding a child refits the view.
+  Node action buttons do not start dragging. Canvas theme overrides are scoped
+  to Roadmaps, leaving other graph consumers unchanged.
+- Main page, form, metadata, node and action labels now use English/Vietnamese
+  messages. Existing server-provided feedback is not rewritten in this phase.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Seven targeted unit tests passed across roadmap presentation and token merging.
+  Four new roadmap tests cover status-specific actions, localized list metadata,
+  flat tree order and empty-state creation links.
+- Browser fixture exercised actual components and XYFlow at 1440, 1024, 768,
+  390 and 320px in light/dark. Checks cover custom-level generation payloads,
+  node selection/edit/save, child relationships, auto-layout, apply confirmation,
+  applied-state navigation, empty lists, canvas control sizes and editor overflow.
+  Actual pointer node dragging passed on desktop in both themes. Reviewed desktop
+  dark editor and mobile light form/editor screenshots.
+- Fixture uses mock server actions/router and a sans-serif fallback; no real
+  database writes or model calls were made. The existing localhost:3000 server
+  now redirects unauthenticated Roadmaps requests to a working login page (200).
+  Full authenticated application verification remains pending.
+
+Next delivery: phase 7c, Rooms/Groups only.
