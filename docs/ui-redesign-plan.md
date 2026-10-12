@@ -11,7 +11,7 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 - [x] 3. App shell: desktop sidebar, topbar, mobile header and bottom nav.
 - [x] 4. PageHeader: consistent title, description and action alignment.
 - [x] 5. Dashboard: summary metrics, charts and information hierarchy.
-- [ ] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
+- [x] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
   belong to this workflow.
 - [ ] 7. Focus, Roadmaps, Rooms/Groups and form-heavy screens.
 - [ ] 8. Admin and remaining secondary pages; remove remaining hard-coded
@@ -226,3 +226,44 @@ Next phase: Dashboard (summary metrics, charts and information hierarchy).
   full Supabase reads/refresh were not exercised by this visual fixture.
 
 Next phase: Workspace (goal rail, lanes and task cards).
+
+## Phase 6: Workspace
+
+- Desktop goal rail is 224px and unframed, with compact navigation, neutral
+  selected states, readable progress metadata and accessible progress meters.
+  Its divider replaces the large rounded panel.
+- Mobile/tablet uses a goal selector for all tasks, unassigned tasks and individual
+  goals. The selected goal retains its actions and completion metadata; navigation
+  uses the existing locale-aware workspace query route. Desktop keeps the list.
+- Six board lanes remain, now 256px wide with simple headings/counts and no
+  decorative enclosing cards. Horizontal scrolling stays inside the board,
+  which is focusable and labeled for keyboard access. Empty lanes are unframed.
+- Task cards use 8px radius and 12px padding. Priority/goal metadata sits below
+  the title, away from the drag handle. Long titles wrap/clamp with hover titles;
+  date/subtask metadata is only rendered when available.
+- Priority badges use semantic tokens with readable text in light/dark. Drag
+  and goal-action controls retain 44px mobile touch targets and compact desktop
+  sizes. Goal creation/menu icon controls have hover titles.
+- Status-transition rules, optimistic updates/rollback, review/deadline-managed
+  lanes, goal-scoped quick creation, drawer state and legacy redirects are retained.
+  Full drawer/editor redesign remains outside this phase.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- All 24 existing Workspace unit tests passed: scope/grouping, legacy redirects,
+  quick-create scope, optimistic transitions, rollback and details selection.
+- Browser fixture used actual goal rail/selector, WorkspaceBoard, lanes/cards,
+  Radix controls and dnd-kit. Server actions/router/form/drawer boundaries used
+  controlled adapters and sample data. Checks passed at 1440, 1024, 768, 390 and
+  320px in light/dark: all six lanes, opening a card, scoped quick-create requests,
+  locked review handles, goal selection, keyboard horizontal scrolling, empty
+  boards and absence of page-wide overflow/runtime errors. Actual pointer dragging
+  from Todo to In Progress passed on desktop in both themes.
+- Reviewed settled desktop and mobile screenshots, including long task/goal titles.
+  Fixture uses a sans-serif fallback. Live authenticated verification is still
+  limited by the existing localhost:3000 server returning HTTP 500; database
+  persistence and full drawer/form behavior were not verified in the fixture.
+
+Phase 7 will be delivered separately: 7a Focus, 7b Roadmaps, 7c Rooms/Groups,
+then 7d remaining form-heavy screens. Next delivery: Focus only.

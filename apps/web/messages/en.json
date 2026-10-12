@@ -1989,6 +1989,7 @@
     "board": {
       "empty": "No tasks in this stage.",
       "subtaskProgress": "{completed}/{total} subtasks",
+      "title": "Task board",
       "reviewManaged": "AI-managed stage",
       "overdueManaged": "Automatically determined by deadline",
       "dragTask": "Drag task",
