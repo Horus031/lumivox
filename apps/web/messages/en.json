@@ -566,7 +566,8 @@
       "unlinked": "Unlinked",
       "selectDate": "Select date",
       "creating": "Creating...",
-      "createSubmit": "Create task"
+      "createSubmit": "Create task",
+      "saving": "Saving..."
     },
     "filters": {
       "searchLabel": "Search tasks",

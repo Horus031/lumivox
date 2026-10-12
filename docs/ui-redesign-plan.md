@@ -27,6 +27,14 @@ Do not migrate unrelated screens while working on a foundation phase.
 - [x] 7c. Rooms/Groups.
 - [ ] 7d. Remaining form-heavy screens.
 
+### Phase 7d Deliveries
+
+- [x] 7d.1. Goal/Task create-edit forms and Task Details shell/overview.
+- [ ] 7d.2. Task subtabs (Subtasks/Review) and document forms/screens.
+- [ ] 7d.3. Settings and onboarding forms.
+
+Keep phase 7d open until all three deliveries are complete.
+
 ## Phase 1: Token Contract
 
 Source of truth: `apps/web/app/globals.css`, using Tailwind v4 `@theme inline`.
@@ -411,3 +419,55 @@ Next delivery: phase 7c, Rooms/Groups only.
   exercised; no real rooms/groups/messages were created.
 
 Next delivery: phase 7d, remaining form-heavy screens only.
+
+## Phase 7d.1: Goal/Task Forms
+
+- Goal create/edit uses a compact responsive dialog, two-column desktop field
+  layout, shared controls and associated unique labels. Description uses three
+  rows; title/description limits match server schemas. Pending fields disable.
+  Existing goal types, editable statuses, date payloads and reset behavior remain.
+- The legacy CreateGoalModal now delegates to the existing CreateGoalForm instead
+  of nesting a second dialog/content inside a trigger.
+- Task creation/editing uses consistent spacing, three-row descriptions, labels,
+  token-sized selects and disabled pending controls. The unassigned-goal default
+  is displayed correctly while still submitting an empty goal id. Task status
+  remains outside metadata editing, including expectedStatus/expectedUpdatedAt
+  optimistic guards. Blank estimates and absent due dates retain their semantics.
+- Goal/Task date pickers use unique trigger/time ids, localized date/month labels
+  and bounded popovers. Date/time controls stack on narrow screens; the existing
+  date selection, optional clearing and local-date/ISO serialization are retained.
+- TaskModalShell now uses the existing Radix Dialog for focus trapping, nested
+  popover dismissal and scroll locking. Center dialogs use 8px radius; details
+  use a 576px desktop side drawer and full-width mobile drawer with fixed header
+  and footer. Scrollable content fits short viewports. Close controls have hover
+  titles, accessible names and token-sized targets. Focus returns to the opener.
+- Task overview metadata is a flat definition list, with divided notes/system
+  fields, localized dates, compact badges and line tabs. The redundant read-only
+  overview hides while editing. Existing detail fetches, tab routing, deletion
+  confirmation and child-panel callbacks remain. Shared badge tones now use
+  semantic tokens for readable labels in both themes, also benefiting subtasks.
+- Added the missing Task saving translation in English/Vietnamese. No backend,
+  query, status-transition rule, database or authentication changes are included.
+  Subtasks/Review/document panel interiors remain for 7d.2.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Thirty-four targeted unit tests passed across the new Goal/Task form tests,
+  existing Workspace tests and token merging. Seven new tests cover task status
+  guards, locked goal linkage, optional estimates, date/time combination/clearing,
+  rejected saves, unassigned creation, goal creation and goal edit status/dates.
+- Browser fixture used real forms, shell, overview, Radix selects/dialogs/popovers
+  and react-day-picker. Action/router responses and the three drawer child panels
+  used controlled adapters. Checks passed at 1440/1024/768 x 900, 390 x 844 and
+  320 x 640 in light/dark: create/edit payloads, calendar dates/time, rejected save
+  recovery, tab navigation, drawer sizing, internal scrolling, dialog/page bounds,
+  focus trap/restoration, nested Escape dismissal and confirmed task deletion.
+- Reviewed desktop creation/drawer, mobile goal edit, and 320px task/calendar
+  screenshots. Fixture uses a sans-serif fallback; production font rendering and
+  child-panel workflows were not verified in this fixture.
+- The existing localhost:3000 server redirects unauthenticated Workspace requests
+  to a working Vietnamese login page (200). Authenticated persistence was not
+  exercised and no real goals/tasks were created, updated or deleted.
+
+Next delivery: phase 7d.2, Task subtabs and document forms/screens only.

@@ -567,7 +567,8 @@
       "unlinked": "Chưa liên kết",
       "selectDate": "Chọn ngày",
       "creating": "Đang tạo...",
-      "createSubmit": "Tạo nhiệm vụ"
+      "createSubmit": "Tạo nhiệm vụ",
+      "saving": "Đang lưu..."
     },
     "filters": {
       "searchLabel": "Tìm nhiệm vụ",
