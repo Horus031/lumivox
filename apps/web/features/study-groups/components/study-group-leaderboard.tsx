@@ -21,9 +21,6 @@ function displayUser(row: LeaderboardRow) {
 }
 
 function getRankLabel(rank: number) {
-  if (rank === 1) return "\u{1f947}";
-  if (rank === 2) return "\u{1f948}";
-  if (rank === 3) return "\u{1f949}";
   return `#${rank}`;
 }
 
@@ -40,82 +37,82 @@ export function StudyGroupLeaderboard({
   });
 
   return (
-    <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="min-w-0 border-t border-border pt-card">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          <p className="text-caption font-medium text-muted-foreground">
             {t("eyebrow")}
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+          <h2 className="mt-2 text-section font-semibold text-foreground">
             {t("title")}
           </h2>
 
-          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          <p className="mt-2 text-body text-secondary-text">
             {dateFormatter.format(new Date(weekStart))} -{" "}
             {dateFormatter.format(new Date(weekEnd))}
           </p>
         </div>
 
-        <p className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+        <p className="text-caption text-muted-foreground">
           {t("scoreFormula")}
         </p>
       </div>
 
       {rows.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed p-8 text-center dark:border-neutral-800">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <div className="mt-5 border-t border-border py-card text-center">
+          <p className="text-body text-secondary-text">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div className="mt-5 overflow-hidden rounded-2xl border dark:border-neutral-800">
-          <table className="w-full text-sm">
-            <thead className="bg-neutral-50 text-left dark:bg-neutral-900">
+        <div className="mt-card min-w-0 overflow-x-auto" tabIndex={0} aria-label={t("title")}>
+          <table className="w-full min-w-120 text-body">
+            <thead className="bg-muted text-left">
               <tr>
-                <th className="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-300">
+                <th className="px-3 py-2 text-label font-medium text-secondary-text">
                   {t("columns.rank")}
                 </th>
-                <th className="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-300">
+                <th className="px-3 py-2 text-label font-medium text-secondary-text">
                   {t("columns.member")}
                 </th>
-                <th className="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-300">
+                <th className="px-3 py-2 text-label font-medium text-secondary-text">
                   {t("columns.focus")}
                 </th>
-                <th className="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-300">
+                <th className="px-3 py-2 text-label font-medium text-secondary-text">
                   {t("columns.tasks")}
                 </th>
-                <th className="px-4 py-3 font-semibold text-neutral-700 dark:text-neutral-300">
+                <th className="px-3 py-2 text-label font-medium text-secondary-text">
                   {t("columns.score")}
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {rows.map((row) => (
                 <tr key={row.user_id}>
-                  <td className="px-4 py-3 font-semibold text-neutral-950 dark:text-neutral-50">
+                  <td className="px-3 py-3 font-medium text-foreground">
                     {getRankLabel(row.rank_position)}
                   </td>
 
-                  <td className="px-4 py-3">
-                    <p className="font-medium text-neutral-950 dark:text-neutral-50">
+                  <td className="px-3 py-3">
+                    <p className="max-w-48 font-medium text-foreground [overflow-wrap:anywhere]">
                       {displayUser(row)}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                    <p className="text-caption text-muted-foreground">
                       {t(`roles.${row.role}`)}
                     </p>
                   </td>
 
-                  <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                  <td className="px-3 py-3 text-secondary-text">
                     {t("minutes", { count: row.focus_minutes })}
                   </td>
 
-                  <td className="px-4 py-3 text-neutral-700 dark:text-neutral-300">
+                  <td className="px-3 py-3 text-secondary-text">
                     {row.completed_tasks}
                   </td>
 
-                  <td className="px-4 py-3 font-bold text-neutral-950 dark:text-neutral-50">
+                  <td className="px-3 py-3 font-semibold text-foreground">
                     {row.score}
                   </td>
                 </tr>

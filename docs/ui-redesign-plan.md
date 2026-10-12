@@ -24,7 +24,7 @@ Do not migrate unrelated screens while working on a foundation phase.
 
 - [x] 7a. Focus.
 - [x] 7b. Roadmaps.
-- [ ] 7c. Rooms/Groups.
+- [x] 7c. Rooms/Groups.
 - [ ] 7d. Remaining form-heavy screens.
 
 ## Phase 1: Token Contract
@@ -356,3 +356,58 @@ Next delivery: phase 7b, Roadmaps only.
   Full authenticated application verification remains pending.
 
 Next delivery: phase 7c, Rooms/Groups only.
+
+## Phase 7c: Rooms/Groups
+
+- Rooms and Groups use shared PageHeader, section-sized headings, semantic
+  colors and compact repeated cards. Group creation moves to a header dialog;
+  list sections are no longer enclosing cards. Room tabs use a locally scrollable
+  line treatment; empty lists have simple dividers rather than nested frames.
+- Room detail uses a responsive presence/chat grid instead of a fixed horizontal
+  flex row. Room metadata in the details dialog is unframed; private invite codes
+  remain restricted to owners. Group detail retains management/leaderboard gates
+  and existing Suspense/query boundaries, with compact challenge and member areas.
+- Presence and member lists use divided rows, readable identity wrapping and
+  semantic connection/status colors in both themes. Presence status controls
+  expose their selected state and disable before connection. Re-subscription
+  resets the selected status to match the existing available tracking payload.
+- Both chats have one bounded, scrollable tool surface, compact message bubbles,
+  wrapping long content, named composers and icon send controls with hover titles.
+  Pending composers disable; existing room Enter/Shift+Enter behavior, group
+  broadcasts, message deduplication and room-leave events are retained.
+- Creation dialogs use associated labels, native validation matching server
+  limits, disabled pending fields and scrollable mobile content. Cancel controls
+  do not submit forms. The duplicate group description input bound to the title
+  is removed; the actual description textarea keeps its independent payload.
+- Invite/challenge forms use shared controls and flatter layouts. Challenge
+  meters are named and bounded for assistive technology. Leaderboard retains
+  rank, identity, role, focus, tasks and score in a focusable local scroll region.
+- Voice UI uses flat sections and shared controls. LiveKit font, control colors
+  and sizes inherit tokens through scoped overrides, without changing credentials,
+  token requests, audio connection options or other LiveKit consumers.
+- No database, RLS, authentication, realtime subscription protocol, backend action
+  or admin screen changes are included.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Fifteen targeted unit tests passed across social-study presentation, existing
+  room/chat schemas and token merging. Six new tests cover deduplicated room
+  navigation, bounded challenge meters, leaderboard scrolling, member metadata,
+  independent group name/description payloads and rejected-creation recovery.
+- Browser fixture used real UI components, Radix dialogs/tabs and compiled global
+  CSS with mock actions/router/realtime and a LiveKit UI adapter. Checks passed at
+  1440, 1024, 768, 390 and 320px in light/dark: room/group creation, public/code
+  joining, confirmed leaving, presence status/broadcast payloads, room-message
+  deduplication, group chat/broadcast, invite/challenge payloads, voice UI joining,
+  microphone toggle/leaving, empty states and absence of page-wide overflow or
+  runtime errors. Dialog close controls use 36px desktop/44px mobile targets.
+- Reviewed desktop dark group, mobile dark room and 320px light creation-dialog
+  screenshots. Fixture accounts for shell padding/sidebar and uses a sans-serif
+  fallback. It does not verify the full RSC detail-dialog/query composition.
+- The existing localhost:3000 server redirects unauthenticated Rooms requests
+  to the Vietnamese login page (200). Authenticated persistence, multi-client
+  Supabase realtime, actual LiveKit audio and microphone permissions were not
+  exercised; no real rooms/groups/messages were created.
+
+Next delivery: phase 7d, remaining form-heavy screens only.

@@ -1244,6 +1244,7 @@
       "description": "Tạo nhóm riêng cho trò chuyện học tập và cộng tác dài hạn.",
       "creating": "Đang tạo...",
       "create": "Tạo nhóm",
+      "cancel": "Hủy",
       "fields": {
         "name": "Tên nhóm",
         "description": "Mô tả"
@@ -1255,6 +1256,7 @@
     },
     "inviteForm": {
       "title": "Mời thành viên",
+      "emailLabel": "Email thành viên",
       "description": "Thêm người dùng Lumivox vào nhóm học riêng này bằng email.",
       "placeholder": "friend@example.com",
       "inviting": "Đang mời...",
@@ -1264,6 +1266,10 @@
       "title": "Trò chuyện nhóm",
       "description": "Tin nhắn xuất hiện theo thời gian thực cho các thành viên đang hoạt động.",
       "realtime": "Thời gian thực",
+      "connection": {
+        "connecting": "Đang kết nối",
+        "error": "Mất kết nối"
+      },
       "empty": "Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện nhóm.",
       "you": "Bạn",
       "placeholder": "Viết tin nhắn...",

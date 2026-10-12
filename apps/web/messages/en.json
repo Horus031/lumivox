@@ -1244,6 +1244,7 @@
       "description": "Create a private group for long-term study chat and collaboration.",
       "creating": "Creating...",
       "create": "Create Group",
+      "cancel": "Cancel",
       "fields": {
         "name": "Group name",
         "description": "Description"
@@ -1255,6 +1256,7 @@
     },
     "inviteForm": {
       "title": "Invite member",
+      "emailLabel": "Member email",
       "description": "Add a Lumivox user to this private study group by email.",
       "placeholder": "friend@example.com",
       "inviting": "Inviting...",
@@ -1264,6 +1266,10 @@
       "title": "Group Chat",
       "description": "Messages appear in real time for active group members.",
       "realtime": "Realtime",
+      "connection": {
+        "connecting": "Connecting",
+        "error": "Disconnected"
+      },
       "empty": "No messages yet. Start the group conversation.",
       "you": "You",
       "placeholder": "Write a message...",

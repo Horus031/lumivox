@@ -30,6 +30,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 
 type StudyRoomPageProps = {
   params: Promise<{
@@ -71,7 +72,7 @@ function RoomPanelFallback({ className }: { className: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`${className} animate-pulse rounded-2xl border border-border/60 bg-card/60`}
+      className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`}
     />
   );
 }
@@ -103,7 +104,7 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
 
   return (
     <section>
-      <div className="mx-auto max-w-6xl space-y-8">
+      <div className="min-w-0 space-y-section">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={room.title}
@@ -112,15 +113,15 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button>{t("viewDetails")}</Button>
+                  <Button variant="outline"><Info aria-hidden="true" />{t("viewDetails")}</Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-4xl!">
-                  <DialogHeader>
-                    <DialogTitle>{t("roomDetails")}</DialogTitle>
+                <DialogContent aria-describedby={undefined} className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-2xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
+                  <DialogHeader className="pr-10 text-left">
+                    <DialogTitle className="text-section">{t("roomDetails")}</DialogTitle>
                   </DialogHeader>
 
-                  <section className="flex max-h-[50vh] flex-col gap-5 overflow-y-auto -mx-4 px-4 no-scrollbar">
-                    <article className="rounded-2xl border bg-background p-6 shadow-sm">
+                  <section className="flex min-w-0 flex-col gap-section">
+                    <div className="min-w-0">
                       <div className="grid gap-4 md:grid-cols-2">
                         <DetailCard
                           label={t("labels.visibility")}
@@ -147,19 +148,19 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
 
                       {room.visibility === "private" &&
                       membership.role === "owner" ? (
-                        <div className="mt-5 rounded-2xl border border-dashed p-4">
-                          <p className="text-sm font-semibold">
+                        <div className="mt-card border-t border-border pt-card">
+                          <p className="text-label font-medium">
                             {t("privateInviteCode")}
                           </p>
-                          <p className="mt-2 font-mono text-2xl font-bold tracking-[0.25em]">
+                          <p className="mt-1 font-mono text-section font-semibold tracking-normal [overflow-wrap:anywhere]">
                             {room.invite_code}
                           </p>
-                          <p className="mt-2 text-sm text-neutral-600">
+                          <p className="mt-1 text-body text-secondary-text">
                             {t("privateInviteDescription")}
                           </p>
                         </div>
                       ) : null}
-                    </article>
+                    </div>
 
                     <Suspense fallback={<RoomPanelFallback className="h-64" />}>
                       <RoomMemberRosterSection roomId={room.id} />
@@ -179,14 +180,14 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
           }
         />
 
-        <div className="flex flex-row gap-3">
+        <div className="grid min-w-0 gap-section xl:grid-cols-[20rem_minmax(0,1fr)]">
           <StudyRoomPresencePanel
             roomId={room.id}
             currentUserId={user.id}
             currentUserName={currentUserName}
           />
 
-          <Suspense fallback={<RoomPanelFallback className="h-150 flex-1" />}>
+          <Suspense fallback={<RoomPanelFallback className="h-112" />}>
             <RoomChatSection
               roomId={room.id}
               currentUserId={user.id}
@@ -207,11 +208,11 @@ type DetailCardProps = {
 
 function DetailCard({ label, value }: DetailCardProps) {
   return (
-    <div className="rounded-2xl bg-surface p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
+    <div className="min-w-0">
+      <p className="text-label font-medium text-muted-foreground">
         {label}
       </p>
-      <p className="mt-2 text-sm font-semibold capitalize">{value}</p>
+      <p className="mt-1 text-body font-medium [overflow-wrap:anywhere]">{value}</p>
     </div>
   );
 }

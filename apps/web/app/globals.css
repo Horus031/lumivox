@@ -3,6 +3,33 @@
 
 @custom-variant dark (&:is(.dark *));
 
+[data-lk-theme].study-room-voice {
+  color-scheme: inherit;
+  --lk-font-family: var(--font-sans);
+  --lk-font-size: 0.875rem;
+  --lk-fg: var(--foreground);
+  --lk-bg: var(--background);
+  --lk-control-fg: var(--foreground);
+  --lk-control-bg: var(--surface);
+  --lk-control-hover-bg: var(--elevated);
+  --lk-control-active-bg: var(--elevated);
+  --lk-control-active-hover-bg: var(--surface);
+  --lk-border-color: var(--border);
+  --lk-border-radius: var(--radius);
+}
+
+.study-room-voice .lk-button {
+  height: var(--spacing-control);
+  padding: 0 0.75rem;
+  border: 1px solid var(--border);
+}
+
+@media (max-width: 639px) {
+  .study-room-voice .lk-button {
+    height: var(--spacing-touch);
+  }
+}
+
 @theme inline {
   --radius-sm: calc(var(--radius) - 2px);
   --radius-md: var(--radius);
