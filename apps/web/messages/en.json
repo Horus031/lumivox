@@ -857,6 +857,7 @@
       "plannedDurationSub": "You can adjust this to your preference, beyond the duration listed below.",
       "minutes": "{value} min",
       "plannedMinutesPlaceholder": "Your desired planned minutes...",
+      "failed": "Unable to start the focus session. Please try again.",
       "starting": "Starting...",
       "start": "Start focus session"
     },
@@ -864,6 +865,8 @@
       "eyebrow": "Active focus session",
       "generalSession": "General focus session",
       "remainingTime": "Remaining time",
+      "progress": "Session progress",
+      "requestFailed": "Unable to update the focus session. Please try again.",
       "compactProgress": "{remaining} remaining / {minutes} min planned",
       "plannedBadge": "Planned: {minutes} min",
       "durationReached": "Planned duration reached. You may complete the session.",

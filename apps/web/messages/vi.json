@@ -857,6 +857,7 @@
       "plannedDurationSub": "Bạn có thể thay đổi theo ý thích ngoài các thời lượng bên dưới.",
       "minutes": "{value} phút",
       "plannedMinutesPlaceholder": "Nhập số phút bạn muốn...",
+      "failed": "Không thể bắt đầu phiên tập trung. Vui lòng thử lại.",
       "starting": "Đang bắt đầu...",
       "start": "Bắt đầu phiên tập trung"
     },
@@ -864,6 +865,8 @@
       "eyebrow": "Phiên tập trung đang diễn ra",
       "generalSession": "Phiên tập trung chung",
       "remainingTime": "Thời gian còn lại",
+      "progress": "Tiến độ phiên",
+      "requestFailed": "Không thể cập nhật phiên tập trung. Vui lòng thử lại.",
       "compactProgress": "Còn {remaining} / dự kiến {minutes} phút",
       "plannedBadge": "Dự kiến: {minutes} phút",
       "durationReached": "Đã đạt thời lượng dự kiến. Bạn có thể hoàn thành phiên này.",

@@ -20,6 +20,13 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 Deliver one phase at a time. Record implementation and verification here.
 Do not migrate unrelated screens while working on a foundation phase.
 
+### Phase 7 Deliveries
+
+- [x] 7a. Focus.
+- [ ] 7b. Roadmaps.
+- [ ] 7c. Rooms/Groups.
+- [ ] 7d. Remaining form-heavy screens.
+
 ## Phase 1: Token Contract
 
 Source of truth: `apps/web/app/globals.css`, using Tailwind v4 `@theme inline`.
@@ -267,3 +274,44 @@ Next phase: Workspace (goal rail, lanes and task cards).
 
 Phase 7 will be delivered separately: 7a Focus, 7b Roadmaps, 7c Rooms/Groups,
 then 7d remaining form-heavy screens. Next delivery: Focus only.
+
+## Phase 7a: Focus
+
+- Focus uses a responsive main/history grid. Session controls and the assistant
+  are primary; recent sessions sit beside them on wide desktops and below on
+  smaller screens. Panels use the established radius, padding and typography.
+- Start form uses linked labels, a correctly selected unlinked-task default,
+  duration presets with pressed states, a labeled custom duration input and
+  native required/integer/1-240 validation. Controls disable while submitting;
+  rejected requests retain the form, and thrown errors show localized feedback.
+- Active session has one compact toolbar with 44px mobile/36px desktop icon
+  targets, accessible names and hover titles. Timer remains visible when compact;
+  expanded mode adds elapsed progress without a nested timer card. Collapse is
+  linked to its controlled region; timer announcements are off between ticks.
+- Existing elapsed/paused-time calculations, pause/resume, completion eligibility,
+  cancel confirmation and optimistic completion remain. A thrown completion
+  request now resets the optimistic state so the user can retry.
+- Recent sessions use divided rows, semantic badges and readable metadata rather
+  than nested framed items, tiny text and hard-coded neutral colors.
+- Shared study assistant accepts className and an opt-in compact appearance used
+  by Focus. Compact mode reduces empty/chat height and display text, and aligns
+  composer controls with tokens. Other consumers keep the default appearance;
+  question payloads, sources, document selection and conversation logic are intact.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- 17 targeted unit tests passed across Focus UI, Workspace controller and token
+  merging. Six new Focus tests cover countdown, paused clock, expired duration,
+  expansion/progress, completion failures (including thrown requests), presets
+  and unlinked-task creation payloads.
+- Browser fixture used actual Focus form, timer, history and assistant with mock
+  server actions/router responses. Checks passed at 1440, 1024, 768, 390 and 320px
+  in light/dark: invalid duration blocking, custom duration/task linkage, timer
+  ticking, pause/resume, failure recovery, chat focus-session scope, collapse,
+  cancellation, empty history, touch targets and text/page overflow. Reviewed
+  desktop start and mobile active screenshots; fixture uses a sans-serif fallback.
+- Live application still returns HTTP 500 from the existing dev server. Database
+  persistence and real model/document retrieval were not exercised by the fixture.
+
+Next delivery: phase 7b, Roadmaps only.

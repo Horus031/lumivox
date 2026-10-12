@@ -23,6 +23,8 @@ async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
 
   return (
     <RagStudyAssistant
+      compact
+      className="min-w-0 rounded-lg border-border bg-card p-card shadow-none"
       focusSessionId={focusSessionId}
       documents={documents}
       defaultTopK={ragDefaults.defaultTopK}
@@ -33,7 +35,7 @@ async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
 
 function RagLoadingFallback() {
   return (
-    <div className="h-64 animate-pulse rounded-2xl border border-border/60 bg-card/60" />
+    <div aria-hidden="true" className="h-64 animate-pulse rounded-lg border border-border bg-muted" />
   );
 }
 
@@ -47,26 +49,29 @@ export default async function FocusPage() {
 
   return (
     <section>
-      <div className="mx-auto space-y-8">
+      <div className="mx-auto min-w-0 space-y-section">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}
           description={t("description")}
         />
 
-        {activeSession ? (
-          <div className="flex flex-col gap-4">
-            <ActiveFocusSessionPanel session={activeSession} />
-
-            <Suspense fallback={<RagLoadingFallback />}>
-              <FocusRagSection focusSessionId={activeSession.id} />
-            </Suspense>
+        <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1fr)_20rem]">
+          <div className="min-w-0 space-y-card">
+            {activeSession ? (
+              <>
+                <ActiveFocusSessionPanel session={activeSession} />
+                <Suspense fallback={<RagLoadingFallback />}>
+                  <FocusRagSection focusSessionId={activeSession.id} />
+                </Suspense>
+              </>
+            ) : (
+              <StartFocusSessionForm tasks={tasks} />
+            )}
           </div>
-        ) : (
-          <StartFocusSessionForm tasks={tasks} />
-        )}
 
-        <RecentFocusSessions sessions={recentSessions} />
+          <RecentFocusSessions sessions={recentSessions} />
+        </div>
       </div>
     </section>
   );
