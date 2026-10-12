@@ -8,7 +8,7 @@ const twMerge = extendTailwindMerge({
       text: ["caption", "label", "body", "section", "page", "metric"],
       spacing: [
         "control-sm", "control", "control-lg", "touch", "card", "section",
-        "page", "sidebar", "topbar", "icon-sm", "icon", "icon-lg",
+        "page", "sidebar", "sidebar-collapsed", "topbar", "icon-sm", "icon", "icon-lg",
       ],
     },
   },

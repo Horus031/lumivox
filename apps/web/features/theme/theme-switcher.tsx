@@ -11,10 +11,13 @@ import {
 import { Laptop, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
-const ThemeSwitcher = () => {
+const ThemeSwitcher = ({ compact = false }: { compact?: boolean }) => {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
+  const t = useTranslations("settings.theme");
+  const commonT = useTranslations("common");
 
   // useEffect only runs on the client, so now we can safely show the UI
   useEffect(() => {
@@ -22,7 +25,7 @@ const ThemeSwitcher = () => {
   }, []);
 
   if (!mounted) {
-    return null;
+    return <span aria-hidden="true" className={compact ? "inline-block size-touch lg:size-control" : "inline-block size-touch sm:size-control"} />;
   }
 
   const ICON_SIZE = 16;
@@ -30,7 +33,7 @@ const ThemeSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" className="text-secondary border-border">
+        <Button variant={compact ? "ghost" : "outline"} size="icon" aria-label={commonT("theme")} title={commonT("theme")} className={compact ? "sm:size-touch lg:size-control" : undefined}>
           {theme === "light" ? (
             <Sun
               key="light"
@@ -46,22 +49,22 @@ const ThemeSwitcher = () => {
           )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-content" align="start">
+      <DropdownMenuContent className="w-40" align="end">
         <DropdownMenuRadioGroup
           value={theme}
           onValueChange={(e) => setTheme(e)}
         >
-          <DropdownMenuRadioItem className="flex gap-2" value="light">
+          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="light">
             <Sun size={ICON_SIZE} />{" "}
-            <span>Light</span>
+            <span>{t("light")}</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className="flex gap-2" value="dark">
+          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="dark">
             <Moon size={ICON_SIZE} />{" "}
-            <span>Dark</span>
+            <span>{t("dark")}</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className="flex gap-2" value="system">
+          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="system">
             <Laptop size={ICON_SIZE} />{" "}
-            <span>System</span>
+            <span>{t("system")}</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

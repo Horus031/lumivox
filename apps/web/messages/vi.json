@@ -9,6 +9,7 @@
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
     "language": "Ngôn ngữ",
+    "theme": "Giao diện",
     "pagination": {
       "ariaLabel": "Phân trang bảng dữ liệu",
       "showing": "Trang {page} / {totalPages}",
@@ -133,15 +134,19 @@
       "title": "Trí tuệ hành vi",
       "fallbackUser": "Người dùng Lumivox",
       "signOut": "Đăng xuất",
+      "account": "Menu tài khoản",
       "collapseSidebar": "Thu gọn thanh bên",
       "expandSidebar": "Mở rộng thanh bên"
     },
     "navigation": {
+      "more": "Thêm",
       "dashboard": {
+        "mobileLabel": "Tổng quan",
         "label": "Tổng quan",
         "description": "Phân tích và insight hành vi"
       },
       "workspace": {
+        "mobileLabel": "Học tập",
         "label": "Không gian học tập",
         "description": "Quản lý mục tiêu và nhiệm vụ trên cùng một bảng."
       },

@@ -84,6 +84,7 @@
   --spacing-section: 1.5rem;
   --spacing-page: 1.5rem;
   --spacing-sidebar: 15rem;
+  --spacing-sidebar-collapsed: 4rem;
   --spacing-topbar: 3.5rem;
   --spacing-icon-sm: 0.875rem;
   --spacing-icon: 1rem;
@@ -866,13 +867,7 @@
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar {
-    width: 5.5rem;
-    padding-inline: 0.75rem;
-  }
-
-  [data-sidebar-collapsed="true"] .desktop-sidebar-panel {
-    align-items: center;
-    padding-inline: 0.5rem;
+    width: var(--spacing-sidebar-collapsed);
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar-brand-copy,
@@ -889,8 +884,8 @@
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar-nav-link {
-    width: 3.5rem;
-    height: 3.5rem;
+    width: var(--spacing-control);
+    height: var(--spacing-control);
     align-items: center;
     justify-content: center;
     margin-inline: auto;
@@ -898,15 +893,13 @@
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar-nav-icon {
-    margin-top: 0;
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
+    width: var(--spacing-icon-lg);
+    height: var(--spacing-icon-lg);
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar-nav-scroll {
     width: 100%;
-    padding-right: 0;
+    padding-inline: 0;
   }
 
   [data-sidebar-collapsed="true"] .desktop-sidebar-brand-mark {

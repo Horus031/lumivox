@@ -8,7 +8,7 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 
 - [x] 1. Foundation tokens: colors, typography, radius, spacing, elevation.
 - [x] 2. Core primitives: button, card, input, select, tabs, badge, form states.
-- [ ] 3. App shell: desktop sidebar, topbar, mobile header and bottom nav.
+- [x] 3. App shell: desktop sidebar, topbar, mobile header and bottom nav.
 - [ ] 4. PageHeader: consistent title, description and action alignment.
 - [ ] 5. Dashboard: summary metrics, charts and information hierarchy.
 - [ ] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
@@ -117,3 +117,42 @@ are preserved.
 Page-level classes such as `h-11!`, `rounded-xl` and custom padding can still
 override these defaults. Migrate them in their owning screen phase.
 Next phase: app shell (sidebar, topbar and mobile navigation).
+
+## Phase 3: App Shell
+
+- Desktop sidebar uses the 240px token; the collapsed rail uses a new 64px
+  token. Neutral surfaces and a dividing border replace decorative framing.
+  Navigation labels use 13px text without descriptions; collapsed links keep
+  accessible labels and hover titles.
+- The 56px desktop topbar contains the sidebar toggle, compact theme/language
+  controls and a smaller single-line account trigger. Main content padding and
+  topbar positioning share the sidebar tokens; reduced motion is respected.
+- Mobile header uses a 56px bar with the brand, theme, language and account.
+  Bottom navigation has four primary destinations and a More menu containing
+  Rooms, Groups, Leaderboard and Reflections. All eight routes remain available.
+- Mobile labels have English/Vietnamese translations. Nested routes use
+  aria-current; secondary destinations highlight More. Bottom navigation and
+  page padding account for the device safe area.
+- Mobile menu actions keep 44px touch targets. Theme controls have accessible
+  labels and localized choices; their loading placeholder preserves space.
+- Existing sidebar persistence, account role checks and POST sign-out behavior
+  are retained. Engagement fetching/realtime behavior was not changed.
+
+### Verification
+
+- Nine targeted tests passed across shell navigation, account sign-out and
+  token class merging. New tests cover nested routes, mobile secondary links
+  and restoring/toggling the saved collapsed state.
+- ESLint and TypeScript passed.
+- An isolated browser fixture used the actual shell components, compiled global
+  CSS, Vietnamese labels and controlled routing/server-data adapters. Checks
+  passed at 1440, 1024, 768, 390 and 320px in light and dark: sidebar offsets,
+  collapse/expand, More navigation, horizontal overflow, unobscured last content
+  and runtime errors. Screenshots were reviewed for expanded/collapsed desktop
+  and mobile states. Font and engagement data use fixture fallbacks.
+- Live application verification is still limited by the existing localhost:3000
+  server returning HTTP 500 from its Turbopack cache. An isolated dev-server
+  attempt was also refused by Next.js because this checkout already has a server;
+  the existing process was left running.
+
+Next phase: PageHeader. Individual page layouts remain for their own phases.

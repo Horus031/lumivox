@@ -9,6 +9,7 @@
     "search": "Search",
     "settings": "Settings",
     "language": "Language",
+    "theme": "Theme",
     "pagination": {
       "ariaLabel": "Table pagination",
       "showing": "Page {page} of {totalPages}",
@@ -132,15 +133,19 @@
       "title": "Behaviour Intelligence",
       "fallbackUser": "Lumivox User",
       "signOut": "Sign out",
+      "account": "Account menu",
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar"
     },
     "navigation": {
+      "more": "More",
       "dashboard": {
+        "mobileLabel": "Home",
         "label": "Dashboard",
         "description": "Behaviour analytics and insights"
       },
       "workspace": {
+        "mobileLabel": "Workspace",
         "label": "Workspace",
         "description": "Manage goals and tasks in one board."
       },
