@@ -676,6 +676,39 @@
     }
   },
 
+  "documentUi": {
+    "shareEyebrow": "Document Sharing",
+    "shareDescription": "Manage access to this learning document.",
+    "sharedEyebrow": "Shared Document",
+    "visibilityTitle": "Document access",
+    "visibilityDescription": "Private: owner only. Shared: users granted access by email. Public: signed-in users with the link.",
+    "visibilityField": "Visibility",
+    "visibility": {
+      "private": "Private",
+      "shared": "Shared by email",
+      "public": "Public link"
+    },
+    "shareTitle": "Grant access",
+    "email": "Email",
+    "role": "Role",
+    "roles": {
+      "viewer": "Viewer",
+      "editor": "Editor"
+    },
+    "share": "Share document",
+    "sharing": "Sharing...",
+    "linkTitle": "Document link",
+    "linkDescription": "The link does not replace access permissions.",
+    "copy": "Copy link",
+    "copied": "Link copied.",
+    "copyFailed": "Could not copy the link. Please try again.",
+    "permissionsTitle": "Shared users",
+    "permissionsEmpty": "No users have been granted access yet.",
+    "remove": "Remove access",
+    "removing": "Removing...",
+    "original": "Open original file",
+    "unsupported": "This file type cannot be previewed inline."
+  },
   "taskReview": {
     "loading": "Loading AI Review...",
     "attempt": "Attempt {number}",

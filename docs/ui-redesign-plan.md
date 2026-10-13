@@ -30,7 +30,7 @@ Do not migrate unrelated screens while working on a foundation phase.
 ### Phase 7d Deliveries
 
 - [x] 7d.1. Goal/Task create-edit forms and Task Details shell/overview.
-- [ ] 7d.2. Task subtabs (Subtasks/Review) and document forms/screens.
+- [x] 7d.2. Task subtabs (Subtasks/Review) and document forms/screens.
 - [ ] 7d.3. Settings and onboarding forms.
 
 Keep phase 7d open until all three deliveries are complete.
@@ -471,3 +471,66 @@ Next delivery: phase 7d, remaining form-heavy screens only.
   exercised and no real goals/tasks were created, updated or deleted.
 
 Next delivery: phase 7d.2, Task subtabs and document forms/screens only.
+
+## Phase 7d.2: Task Subtabs And Documents
+
+- Subtasks use divided rows, compact semantic badges, wrapping titles and icon
+  actions. Creation stacks on narrow screens. Existing parent-state creation
+  restrictions, normalization, transition guards, confirmations and scoped
+  metadata editing are retained.
+- Review states, assessment summaries, feedback and question rows are unframed
+  or divided instead of large rounded cards. Flashcards remain a genuine framed
+  tool with 8px radius and a stable 208px height; long content scrolls internally.
+  Navigation/reset controls have accessible names and hover titles, and the flip
+  control exposes its side and content. Selection, wraparound and reset remain.
+- Quiz questions use named fieldsets, radio/checkbox options with selected states
+  and readable wrapping. Answer indices, ordering, all-answered gating, attempt
+  identity, generation rules, locale, threshold and polling are preserved.
+  No grading/model logic or task-status rules are changed.
+- Task/Goal document upload forms use shared file controls, pending states and
+  scoped hidden identifiers. Goal uploads now require a file, matching the existing
+  action contract. Accepted file types remain unchanged. Lists use flat divided
+  rows, consistent process/preview/share/delete buttons and wrapping file names.
+- Sharing and shared-preview pages use PageHeader and unframed sections. Access
+  mode, email/role form, user permissions and copy controls use compact tokens
+  and English/Vietnamese labels. Viewer/editor and private/shared/public payloads
+  and owner/access query boundaries remain unchanged.
+- Copied document links include the locale, hydrate consistently and report
+  clipboard failures. Permission identities wrap on narrow screens; removal keeps
+  its existing action. Links do not bypass access permissions.
+- Text previews remain escaped and scrollable. Image previews now have a bounded
+  container and valid Next Image fill/sizes properties; signed images bypass the
+  optimization loader. PDF/Office iframe source construction is retained. Original
+  file links use shared controls and safe external-link attributes.
+- No backend actions, database, storage policy, permission rule, signed-URL query,
+  extraction pipeline or AI generation changes are included. Settings/onboarding
+  remain outside this delivery.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed.
+- Fifty-five targeted unit tests passed across new Review/document tests, previous
+  Goal/Task form tests, Workspace tests and token merging. Twenty-one new cases
+  cover quiz gating/payloads/failure retention, flashcard controls, subtask creation
+  restrictions/transitions, sharing defaults, clipboard failure, feedback, wrapping
+  permission identities, text/image/PDF/Office preview markup, review-generation
+  restrictions and request locale/threshold/identity.
+- Browser fixture used actual Task drawer/subtabs, review components, document
+  forms/list components and preview output with compiled CSS, Radix controls and
+  controlled action/router/translation adapters. Checks passed at 1440/1024/768
+  x 900, 390 x 844 and 320 x 640 in light/dark: subtask creation/transition/delete,
+  scoped Task/Goal uploads, processing/deletion, review generation/submission,
+  failure recovery, sorted answers, stable flashcard dimensions, copy, visibility,
+  editor-role sharing, access removal, text escaping, image loading and absence
+  of page/dialog overflow or runtime errors. Mobile screenshots were rechecked
+  after fixing long file names and permission emails.
+- Reviewed desktop sharing/review and mobile sharing, Task documents, flashcards
+  and image preview screenshots. Fixtures use a sans-serif fallback, a Next Image
+  adapter and an existing local image asset. Native PDF/Office viewer rendering
+  and the complete authenticated RSC page/query composition were not exercised.
+- The existing localhost:3000 server redirects unauthenticated Workspace requests
+  to the Vietnamese login page (200). Real storage uploads, persistence, access
+  enforcement, extraction and AI requests were not exercised; no production
+  documents, permissions, tasks or assessments were changed.
+
+Next delivery: phase 7d.3, Settings and onboarding forms only.

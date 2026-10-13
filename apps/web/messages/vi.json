@@ -676,6 +676,39 @@
       "next": "Tiếp"
     }
   },
+  "documentUi": {
+    "shareEyebrow": "Chia sẻ tài liệu",
+    "shareDescription": "Quản lý quyền truy cập tài liệu học tập.",
+    "sharedEyebrow": "Tài liệu được chia sẻ",
+    "visibilityTitle": "Quyền truy cập tài liệu",
+    "visibilityDescription": "Riêng tư: chỉ chủ sở hữu. Chia sẻ: người được cấp quyền qua email. Công khai: người đã đăng nhập có liên kết.",
+    "visibilityField": "Chế độ truy cập",
+    "visibility": {
+      "private": "Riêng tư",
+      "shared": "Chia sẻ qua email",
+      "public": "Liên kết công khai"
+    },
+    "shareTitle": "Cấp quyền truy cập",
+    "email": "Email",
+    "role": "Vai trò",
+    "roles": {
+      "viewer": "Người xem",
+      "editor": "Người chỉnh sửa"
+    },
+    "share": "Chia sẻ tài liệu",
+    "sharing": "Đang chia sẻ...",
+    "linkTitle": "Liên kết tài liệu",
+    "linkDescription": "Liên kết không thay thế quyền truy cập.",
+    "copy": "Sao chép liên kết",
+    "copied": "Đã sao chép liên kết.",
+    "copyFailed": "Không thể sao chép liên kết. Vui lòng thử lại.",
+    "permissionsTitle": "Người được chia sẻ",
+    "permissionsEmpty": "Chưa cấp quyền truy cập cho người dùng nào.",
+    "remove": "Gỡ quyền truy cập",
+    "removing": "Đang gỡ...",
+    "original": "Mở tệp gốc",
+    "unsupported": "Định dạng tệp này không hỗ trợ xem trực tiếp."
+  },
   "taskReview": {
     "loading": "Đang tải AI Review...",
     "attempt": "Lần đánh giá {number}",

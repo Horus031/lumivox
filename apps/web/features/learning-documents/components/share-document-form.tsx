@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { UserPlus } from "lucide-react";
 
 import { shareLearningDocumentByEmailAction } from "@/features/learning-documents/learning-document-sharing.actions";
 import { Label } from "@/components/ui/label";
@@ -10,9 +12,7 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -24,6 +24,8 @@ type ShareDocumentFormProps = {
 
 export function ShareDocumentForm({ documentId }: ShareDocumentFormProps) {
   const router = useRouter();
+  const t = useTranslations("documentUi");
+  const id = useId();
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<"viewer" | "editor">("viewer");
   const [isPending, startTransition] = useTransition();
@@ -51,62 +53,25 @@ export function ShareDocumentForm({ documentId }: ShareDocumentFormProps) {
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border bg-background p-6 shadow-sm space-y-4"
-    >
-      <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Share by Email
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-          Grant document access
-        </h2>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          Add the email address of a Lumivox user who should be allowed to
-          access this document.
-        </p>
-      </div>
-
-      <div className="mt-5 grid gap-4 md:grid-cols-[1fr_180px]">
-        <div>
-          <Label>Email</Label>
-
-          <Input
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            type="email"
-            required
-            placeholder="friend@example.com"
-          />
+    <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 border-t border-border pt-card">
+      <h2 className="text-section font-semibold">{t("shareTitle")}</h2>
+      <fieldset disabled={isPending} className="mt-card grid min-w-0 gap-card sm:grid-cols-[minmax(0,1fr)_10rem] lg:grid-cols-[minmax(0,1fr)_10rem_auto] lg:items-end">
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor={`${id}-email`}>{t("email")}</Label>
+          <Input id={`${id}-email`} value={email} onChange={(event) => setEmail(event.target.value)} type="email" required placeholder="friend@example.com" />
         </div>
-
-        <div>
-          <Label>Role</Label>
-
-          <Select
-            value={role}
-            onValueChange={(value) => setRole(value as "viewer" | "editor")}
-          >
-            <SelectTrigger className="w-full max-w-48">
-              <SelectValue />
-            </SelectTrigger>
+        <div className="min-w-0 space-y-2">
+          <Label htmlFor={`${id}-role`}>{t("role")}</Label>
+          <Select value={role} disabled={isPending} onValueChange={(value) => setRole(value as "viewer" | "editor")}>
+            <SelectTrigger id={`${id}-role`} className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Roles</SelectLabel>
-                <SelectItem value="viewer">Viewer</SelectItem>
-                <SelectItem value="editor">Editor</SelectItem>
-              </SelectGroup>
+              <SelectItem value="viewer">{t("roles.viewer")}</SelectItem>
+              <SelectItem value="editor">{t("roles.editor")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <Button type="submit" disabled={isPending}>
-        {isPending ? "Sharing..." : "Share Document"}
-      </Button>
+        <Button type="submit" disabled={isPending} className="justify-self-start"><UserPlus aria-hidden="true" />{isPending ? t("sharing") : t("share")}</Button>
+      </fieldset>
     </form>
   );
 }
