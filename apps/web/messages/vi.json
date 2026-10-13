@@ -1810,7 +1810,8 @@
         "delete": "Xóa"
       },
       "members": {
-        "title": "Thành viên"
+        "title": "Thành viên",
+        "empty": "Không tìm thấy thành viên."
       },
       "messages": {
         "eyebrow": "Kiểm duyệt",
@@ -2100,6 +2101,8 @@
         "description": "Quản lý cờ tính năng, mặc định RAG, mặc định thử thách tuần và cài đặt vận hành nền tảng."
       },
       "form": {
+        "label": "Cấu hình CMS",
+        "invalidNumber": "Nhập số nguyên lớn hơn hoặc bằng 0.",
         "featureFlags": {
           "title": "Cờ tính năng",
           "globalLeaderboard": {

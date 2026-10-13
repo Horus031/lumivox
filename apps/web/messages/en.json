@@ -1810,7 +1810,8 @@
         "delete": "Delete"
       },
       "members": {
-        "title": "Members"
+        "title": "Members",
+        "empty": "No members found."
       },
       "messages": {
         "eyebrow": "Moderation",
@@ -2100,6 +2101,8 @@
         "description": "Manage feature flags, RAG defaults, weekly challenge defaults, and operational platform settings."
       },
       "form": {
+        "label": "CMS configuration",
+        "invalidNumber": "Enter a whole number greater than or equal to zero.",
         "featureFlags": {
           "title": "Feature Flags",
           "globalLeaderboard": {

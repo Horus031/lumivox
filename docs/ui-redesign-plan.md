@@ -39,13 +39,21 @@ Keep phase 7d open until all three deliveries are complete.
 
 - [x] 8a. Admin navigation, overview and shared metric cards.
 - [x] 8b. Admin Users/Documents lists, filters and detail screens.
-- [ ] 8c. Admin Groups and CMS Settings.
+- [x] 8c. Admin Groups and CMS Settings.
 - [ ] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
 - [ ] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
 - [ ] 8f. Auth and public secondary-page audit/migration, followed by final consistency QA.
 
 Keep phase 8 open until all deliveries are complete. Large deliveries may be
 split into smaller scoped parts; do not migrate all Admin screens in one turn.
+
+### Phase 8d Deliveries
+
+- [ ] 8d.1. AI/RAG monitoring and session details.
+- [ ] 8d.2. Roadmap and Translation monitoring.
+- [ ] 8d.3. Native Task Risk monitoring and prediction details.
+
+Keep 8d open until all three monitoring deliveries are complete.
 
 ## Phase 1: Token Contract
 
@@ -692,3 +700,61 @@ Next delivery: phase 8b, Admin Users/Documents lists, filters and detail screens
   settings, documents or chunks were changed in a real database.
 
 Next delivery: phase 8c, Admin Groups and CMS Settings.
+
+## Phase 8c: Admin Groups And CMS Settings
+
+- Groups list/detail and CMS Settings use PageHeader and unframed sections.
+  Group metadata keeps all six values in a flat definition list. Description,
+  owner identity and saved admin note wrap naturally; detail has a localized
+  back-to-list link. No query/filter or not-found contract changes are included.
+- Groups reuse the bounded Admin table section, compact semantic badges,
+  wrapping identities and named icon actions. Search query/status controls align
+  on desktop and stack on mobile with associated labels and localized menus.
+  Existing trimming, URLSearchParams encoding and all-status omission remain.
+- Archive/restore controls keep native confirmation, group identity, archived
+  polarity, note payload, failure retention and success-only refresh. Note has
+  an associated label, existing action's 500-character limit and pending disable.
+  List controls fit inline with icon tooltips; detail retains full labels.
+- Members/messages are divided rows, not nested cards. Members now have an
+  explicit empty state. Name precedence, identity fallbacks, role/membership
+  labels and message timestamps remain. Messages stay escaped, wrap long tokens
+  and scroll internally; named delete icons retain confirmation, group/message
+  payloads, failure feedback and success-only refresh.
+- CMS uses three unframed sections, shared checkboxes with named/described 44px
+  label targets, associated select/number labels and localized option headings.
+  All seven setting keys, default values, top-k choices 3/5/7, prompt choices,
+  immediate per-control save and success/failure refresh/toasts are retained.
+- Numeric targets keep blur-save and the original native min=0 / step=1 behavior.
+  Empty/non-finite/invalid drafts do not submit or become zero; unchanged blur is
+  skipped. Failed saves restore the persisted value; server value updates refresh
+  the displayed draft. A pending fieldset disables other edits/duplicate saves.
+- Backend actions/queries, RPCs, permissions, auth, feature interpretation, RAG
+  engine and database schema are unchanged. No real settings were updated.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Fifty-eight targeted tests passed:
+  twenty-five new Groups/CMS cases, thirty prior Admin cases and three token
+  cases. Coverage includes filter URLs, canceled/confirmed archive/restore/delete,
+  note identity/retention/limit, pending controls, success-only moderation refresh,
+  localized links/table semantics, empty collections, escaped messages, detail
+  queries/not-found, all seven setting payloads/defaults, invalid/zero/unchanged
+  numeric blur, failure rollback and prop-driven numeric refresh.
+- Unit tests use a select adapter; browser fixture uses actual Radix controls,
+  actual three pages/components and compiled CSS with controlled query/action/
+  router/server-translation adapters. Checks passed at 1440/1024/768 x 900,
+  390 x 844 and 320 x 640 in light/dark and English/Vietnamese: aligned filters,
+  scoped moderation payloads/confirmations/failure recovery, table keyboard scroll,
+  detail/back links, empty states, all seven final CMS values, numeric rollback,
+  escaped content and no horizontal page overflow/runtime errors.
+- Reviewed desktop Groups/detail/Settings and 320px dark detail/Settings images.
+  Reduced list row height with inline archive controls and reran the matrix.
+  Fixture waits for aria-busy=false before asserting persisted CMS values.
+  It uses a sans-serif fallback and simplified shell insets; production fonts
+  and complete authenticated RSC/shell composition were not exercised.
+- Existing localhost:3000 Groups/Settings requests redirect unauthenticated
+  visitors to working Vietnamese login pages (200). Real permission enforcement,
+  group moderation, database persistence and operational flag behavior were not
+  exercised; no real groups, messages or CMS settings were modified.
+
+Next delivery: phase 8d.1, AI/RAG monitoring and session details only.
