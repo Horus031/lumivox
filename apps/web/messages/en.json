@@ -1651,7 +1651,20 @@
       "sources": "Sources",
       "latency": "Latency"
     },
+    "navigation": {
+      "label": "Admin sections",
+      "overview": "Overview",
+      "users": "Users",
+      "documents": "Documents",
+      "groups": "Groups",
+      "ai": "AI",
+      "roadmaps": "Roadmaps",
+      "nativeTaskRisk": "Task risk",
+      "translations": "Translations",
+      "settings": "Settings"
+    },
     "dashboard": {
+      "metricsLabel": "Platform metrics",
       "eyebrow": "Admin CMS",
       "title": "Admin Dashboard",
       "description": "Monitor users, learning activity, documents, groups, and AI usage across Lumivox.",

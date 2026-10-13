@@ -1651,7 +1651,20 @@
       "sources": "Nguồn",
       "latency": "Độ trễ"
     },
+    "navigation": {
+      "label": "Các mục quản trị",
+      "overview": "Tổng quan",
+      "users": "Người dùng",
+      "documents": "Tài liệu",
+      "groups": "Nhóm",
+      "ai": "AI",
+      "roadmaps": "Lộ trình",
+      "nativeTaskRisk": "Rủi ro nhiệm vụ",
+      "translations": "Phiên dịch",
+      "settings": "Cài đặt"
+    },
     "dashboard": {
+      "metricsLabel": "Số liệu nền tảng",
       "eyebrow": "CMS quản trị",
       "title": "Bảng điều khiển quản trị",
       "description": "Theo dõi người dùng, hoạt động học tập, tài liệu, nhóm và mức sử dụng AI trên Lumivox.",

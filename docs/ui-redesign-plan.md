@@ -35,6 +35,18 @@ Do not migrate unrelated screens while working on a foundation phase.
 
 Keep phase 7d open until all three deliveries are complete.
 
+### Phase 8 Deliveries
+
+- [x] 8a. Admin navigation, overview and shared metric cards.
+- [ ] 8b. Admin Users/Documents lists, filters and detail screens.
+- [ ] 8c. Admin Groups and CMS Settings.
+- [ ] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
+- [ ] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
+- [ ] 8f. Auth and public secondary-page audit/migration, followed by final consistency QA.
+
+Keep phase 8 open until all deliveries are complete. Large deliveries may be
+split into smaller scoped parts; do not migrate all Admin screens in one turn.
+
 ## Phase 1: Token Contract
 
 Source of truth: `apps/web/app/globals.css`, using Tailwind v4 `@theme inline`.
@@ -578,3 +590,46 @@ Next delivery: phase 7d.3, Settings and onboarding forms only.
   server onboarding redirect were not exercised; no user records were changed.
 
 Next delivery: phase 8, Admin and remaining secondary pages.
+
+## Phase 8a: Admin Navigation And Overview
+
+- Admin navigation uses real page links with aria-current instead of panel-tab
+  semantics. All nine destinations and locale-aware routing are retained, with
+  compact English/Vietnamese labels including the previously missing risk label.
+  Longest matching route remains active for details and nested translation pages.
+- Navigation is a flat, horizontally scrollable row with 36px desktop / 44px
+  mobile targets. The current link scrolls into the row's visible area without
+  moving the page. Sticky placement uses the 56px topbar token at every width;
+  extra inset padding, blur and oversized floating tab containers are removed.
+- Overview uses PageHeader and an unframed metric grid. Shared AdminMetricCard
+  uses 8px radius, 16px padding, label/caption/metric tokens and wrapping numbers.
+  Existing metric consumers in monitoring pages inherit this compact primitive;
+  their grids, queries and other content are not migrated in this delivery.
+- Recent users use a section heading, compact semantic table, neutral dividers,
+  role badges and localized detail links. The bounded table scroll region has a
+  name, keyboard focus, caption and scoped column headers. Empty state, display
+  name precedence, visibility, timestamps and null-date fallback are retained.
+- No query, action, auth/permission rule, database or monitoring-engine changes
+  are included. Phase 8 remains open; management/monitoring interiors are pending.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Fourteen targeted tests passed:
+  eleven new Admin cases and three token-merging cases. Coverage includes nine
+  navigation links, current nested/detail routes in both locales, all ten metrics,
+  query calls, localized number/null fallback, table identity/role/visibility,
+  accessible scroll region, detail links and empty state.
+- Browser fixture rendered actual Admin layout/overview/components and compiled
+  CSS, with controlled read-only query, navigation and server-translation adapters.
+  Checks passed at 1440/1024/768 x 900, 390 x 844 and 320 x 640 in light/dark and
+  English/Vietnamese: active-link visibility, link keyboard activation, table
+  keyboard scrolling, sticky offset, metric bounds, empty state and no page
+  overflow/runtime errors. Reviewed desktop and 320px dark screenshots.
+- Fixture uses a sans-serif fallback and a simplified shell topbar/sidebar inset;
+  production font rendering, actual Admin queries and complete authenticated
+  RSC/shell composition were not exercised. No real user records were modified.
+- Existing localhost:3000 Admin routes in both locales redirect unauthenticated
+  visitors to working localized login pages (200); authenticated access was not
+  exercised.
+
+Next delivery: phase 8b, Admin Users/Documents lists, filters and detail screens.
