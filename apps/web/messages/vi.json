@@ -1087,6 +1087,12 @@
       }
     }
   },
+  "onboarding": {
+    "title": "Thiết lập hồ sơ học tập",
+    "description": "Chọn múi giờ và trọng số PBI cá nhân. PBI chuẩn giữ nguyên các trọng số học thuật.",
+    "complete": "Hoàn tất thiết lập",
+    "completing": "Đang hoàn tất..."
+  },
   "settings": {
     "page": {
       "eyebrow": "Lumivox",
@@ -1105,7 +1111,7 @@
         "description": "Điều chỉnh mức độ tác động của từng chiều hành vi đến Chỉ số Hành vi Năng suất Cá nhân hóa.",
         "reset": "Đặt lại theo mặc định học thuật",
         "totalWeight": "Tổng trọng số hiện tại",
-        "totalHelp": "Tổng phải bằng chính xác 1.00 trước khi có thể hoàn tất onboarding."
+        "totalHelp": "Tổng trọng số phải bằng 1,00 trước khi lưu."
       },
       "weights": {
         "weight": "Trọng số",
@@ -1139,6 +1145,7 @@
       "save": "Lưu cài đặt"
     },
     "theme": {
+      "label": "Giao diện",
       "light": "Sáng",
       "dark": "Tối",
       "system": "Hệ thống"

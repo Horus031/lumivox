@@ -1087,6 +1087,12 @@
       }
     }
   },
+  "onboarding": {
+    "title": "Set up your learning profile",
+    "description": "Choose your timezone and Personalized PBI weights. Standard PBI keeps its academic defaults.",
+    "complete": "Complete setup",
+    "completing": "Completing setup..."
+  },
   "settings": {
     "page": {
       "eyebrow": "Lumivox",
@@ -1105,7 +1111,7 @@
         "description": "Adjust how strongly each behavioural dimension contributes to your Personalized Productive Behaviour Index.",
         "reset": "Reset to academic default",
         "totalWeight": "Current total weight",
-        "totalHelp": "The total must equal exactly 1.00 before onboarding can be completed."
+        "totalHelp": "The total must equal 1.00 before saving."
       },
       "weights": {
         "weight": "Weight",
@@ -1139,6 +1145,7 @@
       "save": "Save settings"
     },
     "theme": {
+      "label": "Theme",
       "light": "Light",
       "dark": "Dark",
       "system": "System"

@@ -13,7 +13,7 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 - [x] 5. Dashboard: summary metrics, charts and information hierarchy.
 - [x] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
   belong to this workflow.
-- [ ] 7. Focus, Roadmaps, Rooms/Groups and form-heavy screens.
+- [x] 7. Focus, Roadmaps, Rooms/Groups and form-heavy screens.
 - [ ] 8. Admin and remaining secondary pages; remove remaining hard-coded
   visual values as each screen is migrated.
 
@@ -25,13 +25,13 @@ Do not migrate unrelated screens while working on a foundation phase.
 - [x] 7a. Focus.
 - [x] 7b. Roadmaps.
 - [x] 7c. Rooms/Groups.
-- [ ] 7d. Remaining form-heavy screens.
+- [x] 7d. Remaining form-heavy screens.
 
 ### Phase 7d Deliveries
 
 - [x] 7d.1. Goal/Task create-edit forms and Task Details shell/overview.
 - [x] 7d.2. Task subtabs (Subtasks/Review) and document forms/screens.
-- [ ] 7d.3. Settings and onboarding forms.
+- [x] 7d.3. Settings and onboarding forms.
 
 Keep phase 7d open until all three deliveries are complete.
 
@@ -534,3 +534,47 @@ Next delivery: phase 7d.2, Task subtabs and document forms/screens only.
   documents, permissions, tasks or assessments were changed.
 
 Next delivery: phase 7d.3, Settings and onboarding forms only.
+
+## Phase 7d.3: Settings And Onboarding
+
+- Settings and onboarding share profile/PBI fields and initialization. Flat
+  sections and divided weight rows replace oversized nested cards. Typography,
+  spacing, input dimensions and submit controls use existing compact tokens.
+- Profile names retain required/max-length semantics and autocomplete. Timezone
+  choices preserve a saved timezone outside the common list. Reset only changes
+  weights, not the profile. Totals use locale formatting and semantic feedback.
+- Client validation rejects non-finite/out-of-range weights and preserves the
+  server's total tolerance. Pending fieldsets disable edits and duplicate submits;
+  rejected saves retain input. Existing eight-field payloads, Settings refresh,
+  server onboarding redirect and backend validation are unchanged.
+- Theme choices use named native radios, visible mobile labels, consistent touch
+  targets and focus states. Selected hover retains readable contrast. Real
+  next-themes preference storage and system-following behavior are retained.
+- The unlocalized onboarding route gets an Intl provider using the validated
+  NEXT_LOCALE cookie or routing default. English/Vietnamese headings and submit
+  states are translated. PageHeader, bounded content and loading dimensions are
+  consistent with the migrated pages. Auth guards and metadata remain unchanged.
+- No backend actions, database, authentication, routing rules or PBI calculation
+  changes are included. Phase 7 is complete; Admin is outside this delivery.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Fourteen targeted unit tests passed
+  across profile calibration and token merging, covering shared payloads, total
+  tolerance, invalid numbers, reset, saved timezone, failure retention and theme
+  labels. Server schema agreement is checked for default values and tolerance.
+- Browser fixture used actual forms, Radix Select, Intl and next-themes with
+  compiled CSS. Checks passed at 1440/1024/768 x 900, 390 x 844 and 320 x 640 in
+  light/dark and English/Vietnamese: reset, invalid totals, timezone selection,
+  payloads, rejected-save recovery, theme storage/system changes, radio keyboard
+  navigation and no horizontal overflow/runtime errors. Action/router responses
+  are controlled adapters, not real authenticated requests.
+- Reviewed desktop Settings and 320px dark onboarding screenshots; corrected
+  selected-theme hover contrast and reran the matrix. Fixture uses a sans-serif
+  fallback; production font rendering and full authenticated RSC composition
+  were not exercised.
+- Existing localhost:3000 Settings/onboarding routes redirect unauthenticated
+  visitors to working login pages (200). Real profile persistence and successful
+  server onboarding redirect were not exercised; no user records were changed.
+
+Next delivery: phase 8, Admin and remaining secondary pages.
