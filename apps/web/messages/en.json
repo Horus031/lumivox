@@ -1570,6 +1570,7 @@
   "admin": {
     "common": {
       "adminCms": "Admin CMS",
+      "backToList": "Back to list",
       "search": "Search",
       "all": "All",
       "view": "View",
@@ -1761,6 +1762,7 @@
       "detail": {
         "eyebrow": "Admin CMS",
         "embeddedChunksDescription": "Embedded chunks / total chunks",
+        "metadata": "Document details",
         "failedChunks": "Failed Chunks",
         "fileSize": "File Size",
         "mimeType": "MIME Type",

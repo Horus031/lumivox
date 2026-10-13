@@ -2,6 +2,7 @@ import { AdminDocumentSearchForm } from "@/features/admin/components/admin-docum
 import { AdminDocumentsTable } from "@/features/admin/components/admin-documents-table";
 import { searchAdminLearningDocuments } from "@/features/admin/admin-documents.queries";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 
 type AdminDocumentsPageProps = {
   searchParams: Promise<{
@@ -27,20 +28,8 @@ export default async function AdminDocumentsPage({
   ]);
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-surface p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
-
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </section>
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
       <AdminDocumentSearchForm
         initialQuery={query}
@@ -48,6 +37,6 @@ export default async function AdminDocumentsPage({
       />
 
       <AdminDocumentsTable documents={documents} />
-    </main>
+    </div>
   );
 }

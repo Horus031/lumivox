@@ -1570,6 +1570,7 @@
   "admin": {
     "common": {
       "adminCms": "CMS quản trị",
+      "backToList": "Quay lại danh sách",
       "search": "Tìm kiếm",
       "all": "Tất cả",
       "view": "Xem",
@@ -1761,6 +1762,7 @@
       "detail": {
         "eyebrow": "Admin CMS",
         "embeddedChunksDescription": "Chunk đã nhúng / tổng số chunk",
+        "metadata": "Thông tin tài liệu",
         "failedChunks": "Chunk lỗi",
         "fileSize": "Kích thước tệp",
         "mimeType": "Loại MIME",

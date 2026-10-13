@@ -38,7 +38,7 @@ Keep phase 7d open until all three deliveries are complete.
 ### Phase 8 Deliveries
 
 - [x] 8a. Admin navigation, overview and shared metric cards.
-- [ ] 8b. Admin Users/Documents lists, filters and detail screens.
+- [x] 8b. Admin Users/Documents lists, filters and detail screens.
 - [ ] 8c. Admin Groups and CMS Settings.
 - [ ] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
 - [ ] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
@@ -633,3 +633,62 @@ Next delivery: phase 8, Admin and remaining secondary pages.
   exercised.
 
 Next delivery: phase 8b, Admin Users/Documents lists, filters and detail screens.
+
+## Phase 8b: Admin Users And Documents
+
+- Both lists and details use PageHeader, compact tokens and unframed sections.
+  Detail pages include locale-aware back-to-list links. User detail keeps eight
+  activity metrics and flattens its timeline; document detail presents all eight
+  metadata values in a definition list instead of oversized metric cards.
+- Search controls have associated labels and icon submit buttons. Document query,
+  status and submit stack on narrow screens and align on desktop. Existing query
+  trimming, URLSearchParams encoding, all-status omission and query arguments are
+  retained. Status/role menu headings are localized.
+- User/Document tables share a bounded, keyboard-focusable table section with a
+  named region, caption and scoped column headers. Dense rows use compact text,
+  neutral dividers, locale-aware detail links, wrapping names/emails, semantic
+  status badges and named icon actions. Long MIME values truncate only in lists
+  with a full-value tooltip; detail metadata retains the full string. Table minimum
+  widths allow internal scrolling instead of page overflow.
+- Role controls have readable widths and per-user accessible names. Leaderboard
+  visibility uses the shared checkbox with a 44px mobile label target instead of
+  text-input styling. Existing role/visibility payloads, controlled server values,
+  toast feedback and refresh-on-success/failure remain. Pending changes disable
+  controls; redundant/pending changes are guarded.
+- Document process/reprocess keeps document/owner identity, status-dependent
+  labels, processing restriction, failure feedback and refresh. List actions use
+  named icons; detail actions keep text labels. Delete retains native confirmation,
+  document/file-path payload, failure retention and success-only list navigation.
+- Chunk disclosure remains native details/summary, now divided rather than nested
+  cards. Preview/chunk text stays escaped, wraps long tokens and scrolls internally
+  when long. Chunk identity/order, embedding metadata/fallbacks and raw status
+  output remain unchanged.
+- No backend action/query, permission, auth, storage, extraction, embedding or AI
+  engine changes are included. Groups, CMS Settings and monitoring remain pending.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Thirty-three targeted tests passed:
+  nineteen new management cases, eleven prior Admin overview cases and three
+  token-merging cases. Coverage includes URL filters/encoding, scoped mutation
+  payloads, pending role save, success/failure feedback and refresh, processing
+  guard, canceled/confirmed deletion, localized links/table semantics, empty
+  states, escaped content, detail queries/metadata and not-found behavior.
+- Unit tests use a controlled select adapter; browser checks use actual Radix
+  Select/Checkbox, actual four pages/components and compiled CSS with controlled
+  query/action/router/server-translation adapters. Checks passed at 1440/1024/768
+  x 900, 390 x 844 and 320 x 640 in light/dark and English/Vietnamese: filters,
+  role/visibility saves and failure recovery, processing guard, delete confirmation
+  and payload, detail/back navigation, native chunk keyboard disclosure, table
+  keyboard scrolling, control alignment and no page overflow/runtime errors.
+- Reviewed desktop Users/Documents and document detail, plus 320px dark document
+  detail screenshots. Corrected filter alignment, long MIME row height and status
+  label contrast, then reran browser checks. Fixtures use a sans-serif fallback
+  and simplified shell insets; production font rendering and full authenticated
+  RSC composition were not exercised.
+- Existing localhost:3000 Users/Documents routes redirect unauthenticated visitors
+  to working Vietnamese login pages (200). Real admin permissions, persistence,
+  storage deletion and reprocessing were not exercised; no user roles, visibility
+  settings, documents or chunks were changed in a real database.
+
+Next delivery: phase 8c, Admin Groups and CMS Settings.
