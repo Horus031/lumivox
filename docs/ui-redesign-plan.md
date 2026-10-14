@@ -49,7 +49,7 @@ split into smaller scoped parts; do not migrate all Admin screens in one turn.
 
 ### Phase 8d Deliveries
 
-- [ ] 8d.1. AI/RAG monitoring and session details.
+- [x] 8d.1. AI/RAG monitoring and session details.
 - [ ] 8d.2. Roadmap and Translation monitoring.
 - [ ] 8d.3. Native Task Risk monitoring and prediction details.
 
@@ -758,3 +758,60 @@ Next delivery: phase 8c, Admin Groups and CMS Settings.
   exercised; no real groups, messages or CMS settings were modified.
 
 Next delivery: phase 8d.1, AI/RAG monitoring and session details only.
+
+## Phase 8d.1: AI/RAG Monitoring And Session Details
+
+- Monitoring uses PageHeader, compact metric grid and labeled query/mode controls.
+  Twelve metric items, values, descriptions, latency/null fallbacks and top-k
+  counts remain. Top-k usage is three compact definition rows, not a hero-sized
+  concatenated string, keeping long counts readable without splitting digits.
+- Session list reuses the bounded Admin table section with scoped headers,
+  caption and keyboard-focusable scroll region. Context badges use semantic
+  tokens; user identities wrap, dates retain their existing updated/created
+  fallback and named icon links retain locale-aware session destinations.
+- Query trimming, URLSearchParams encoding, all-mode omission, query arguments
+  and all monitoring reads are unchanged. Context-mode menu heading is localized.
+- Session detail uses PageHeader and seven unframed metadata values, retaining
+  selected-document count/IDs, top-k, prompt variant, message count, dates and
+  null fallbacks. A localized back-to-list link is added. Selected IDs remain
+  read-only, with wrapping rather than oversized pills.
+- Conversation uses divided articles, role headings, timestamps and compact
+  metadata instead of nested cards/badge strips. Original message order/content
+  and role labels remain. Long text has a named keyboard-focusable scroll region.
+  Source disclosure remains native details/summary and retains the assistant +
+  truthy-sources condition, including empty arrays/objects. JSON.stringify output
+  remains escaped and uses a bounded keyboard-scrollable neutral pre region.
+- Empty-source answers use divided rows, wrapping owner/metadata, a restrained
+  warning marker, clamped escaped preview and named session-review icon link.
+  Empty-state handling and original review destinations/fallbacks remain.
+- No backend query/action, database, authorization, retrieval, prompt, source
+  selection, AI generation or monitoring calculation changes are included.
+  Roadmap/Translation and Native Task Risk monitoring remain pending; 8d is open.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Seventy-three targeted tests passed:
+  fifteen new AI/RAG cases, fifty-five prior Admin cases and three token cases.
+  Coverage includes encoded filters, twelve metric/null states, all three top-k
+  counts, localized table/link semantics, date/user fallbacks, escaped message/JSON
+  content, source-visibility guards, empty collections, selected IDs, query calls,
+  detail metadata, back link and not-found behavior.
+- Unit tests use a select adapter; browser fixture uses actual Radix Select,
+  actual two pages/components and compiled CSS with controlled read-only query,
+  router and server-translation adapters. Checks passed at 1440/1024/768 x 900,
+  390 x 844 and 320 x 640 in light/dark and English/Vietnamese: aligned filters
+  and query reads, metric bounds, session/review/back navigation, selected IDs,
+  role/source guards, JSON escaping/disclosure, table/content/JSON keyboard scroll,
+  empty/null states and no horizontal page overflow/runtime errors.
+- Reviewed desktop monitoring and 320px dark session screenshots. Changed top-k
+  counts from narrow columns to definition rows after inspecting very large
+  values, then reran the matrix. Fixtures use a sans-serif fallback and simplified
+  shell insets; production fonts and full authenticated RSC composition were not
+  exercised.
+- Live localhost:3000 AI monitoring/detail requests returned HTTP 500. Dev logs
+  report missing generated .next/dev runtime and routes-manifest artifacts. The
+  existing server was not stopped/restarted and its generated files were not
+  deleted or repaired in this delivery. Real Admin query/auth flows could not
+  be verified; no real conversations, sources or AI requests were modified/run.
+
+Next delivery: phase 8d.2, Roadmap and Translation monitoring only.
