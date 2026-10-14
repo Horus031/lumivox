@@ -23,7 +23,7 @@ export function AdminTranslationMetricsOverview({
   const t = useTranslations("admin.translations.metrics");
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+    <section className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-5">
       <AdminMetricCard
         label={t("totalTranslations")}
         value={value(metrics?.total_translations)}

@@ -50,7 +50,7 @@ split into smaller scoped parts; do not migrate all Admin screens in one turn.
 ### Phase 8d Deliveries
 
 - [x] 8d.1. AI/RAG monitoring and session details.
-- [ ] 8d.2. Roadmap and Translation monitoring.
+- [x] 8d.2. Roadmap and Translation monitoring.
 - [ ] 8d.3. Native Task Risk monitoring and prediction details.
 
 Keep 8d open until all three monitoring deliveries are complete.
@@ -815,3 +815,62 @@ Next delivery: phase 8d.1, AI/RAG monitoring and session details only.
   be verified; no real conversations, sources or AI requests were modified/run.
 
 Next delivery: phase 8d.2, Roadmap and Translation monitoring only.
+
+## Phase 8d.2: Roadmap And Translation Monitoring
+
+- Both pages use PageHeader, compact metric grids and unframed sections.
+  All four Roadmap/five Translation metrics, descriptions and zero fallbacks
+  remain; no new calculation or monitoring query is introduced.
+- Filters use shared Input/Select/Button primitives with associated labels and
+  named search icons. Roadmap status and Translation target-locale/status choices
+  are preserved. Translation filters use multiple rows at narrower widths rather
+  than compressing three inputs into a small desktop content area. Query trimming,
+  URLSearchParams encoding, all-value omission and page query contracts remain.
+- Roadmap records are divided rows with compact semantic status badges, normal
+  locale/node labels, section-sized titles and wrapping owner/study/AI metadata.
+  Original node breakdown, date strings, provider/model and latency fallback are
+  retained. No large nested cards or hard-coded neutral theme colors remain in
+  this screen's migrated components.
+- Archive/restore uses shared named icon buttons with tooltips and pending states.
+  Applied roadmaps still expose neither operation. Native confirmations, roadmap
+  identity/archived polarity, failure retention and success-only refresh/toasts
+  remain; pending clicks are guarded.
+- Translation records are divided rows with semantic status badges and wrapping
+  locale/entity/owner/provider/date fields. Native details/summary disclosure keeps
+  the original text escaped in a named keyboard-scrollable region bounded to
+  320px. Error text remains escaped and uses a restrained danger border instead
+  of another card; original error visibility and record identity are retained.
+- Delete and clear-entity-cache remain distinct actions with named icon controls.
+  Each retains its confirmation, scoped translation or entity type/id payload,
+  pending disable, failure feedback and success-only refresh. Translation target
+  locale remains independent of the current interface locale.
+- Backend actions/queries, authorization, database/cache rules, AI generation and
+  translation semantics are unchanged. Native Task Risk is outside this delivery;
+  phase 8d remains open.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. Ninety-five targeted tests passed:
+  twenty-two new monitoring cases, seventy prior Admin cases and three token
+  cases. Coverage includes filter encoding/omission, applied-roadmap restriction,
+  archive/restore/delete/clear confirmations and scoped payloads, pending duplicate
+  prevention, failure recovery/success-only refresh, metric/null/empty states,
+  locale labels, metadata fallbacks, escaped translation/errors, disclosure region
+  identity and both page query contracts.
+- Unit tests use a select adapter; browser checks use actual Radix Select,
+  both actual pages/components and compiled CSS with controlled query/action/
+  router/server-translation adapters. Checks passed at 1440/1024/768 x 900,
+  390 x 844 and 320 x 640 in light/dark and English/Vietnamese: filter/query reads,
+  control alignment, mutation confirmations/guards/payloads/failure recovery,
+  metrics and null/empty states, escaped content, native keyboard disclosure,
+  translated-text keyboard scroll and no horizontal page overflow/runtime errors.
+- Reviewed desktop and 320px dark Roadmap/Translation screenshots. Fixtures use a
+  sans-serif fallback and simplified shell insets; production font rendering and
+  full authenticated RSC composition were not exercised.
+- Live localhost:3000 Roadmaps/Translations requests returned HTTP 500. Current
+  dev logs report Turbopack failing to restore cache data because a referenced SST
+  file under .next/dev/cache/turbopack is missing. The existing server/cache was
+  not stopped, deleted or repaired. Real Admin persistence and cache invalidation
+  were not exercised; no real roadmaps/translations/cache entries were modified.
+
+Next delivery: phase 8d.3, Native Task Risk monitoring and prediction details.

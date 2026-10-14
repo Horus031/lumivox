@@ -26,7 +26,7 @@ export function AdminRoadmapMetricsOverview({
   const t = useTranslations("admin.roadmaps.metrics");
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <AdminMetricCard
         label={t("totalRoadmaps")}
         value={value(metrics?.total_roadmaps)}

@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { Badge } from "@/components/ui/badge";
 
 import { AdminRoadmapArchiveButton } from "@/features/admin/components/admin-roadmap-archive-button";
 
@@ -43,14 +44,14 @@ type AdminRoadmapsTableProps = {
 
 function statusClass(status: string) {
   if (status === "applied") {
-    return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
+    return "border-success/25 bg-success/10 text-foreground";
   }
 
   if (status === "archived") {
-    return "bg-neutral-100 text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300";
+    return "border-border bg-muted text-foreground";
   }
 
-  return "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300";
+  return "border-warning/25 bg-warning/10 text-foreground";
 }
 
 export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
@@ -58,66 +59,62 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
   const commonT = useTranslations("admin.common");
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+        <p className="text-caption text-muted-foreground">
           {t("eyebrow")}
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+        <h2 className="mt-1 text-section font-semibold text-foreground">
           {t("title")}
         </h2>
       </div>
 
       {roadmaps.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center dark:border-neutral-800">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <div className="py-section">
+          <p className="text-body text-secondary-text">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-4">
+        <div className="divide-y divide-border">
           {roadmaps.map((roadmap) => (
             <article
               key={roadmap.roadmap_id}
-              className="rounded-2xl border p-4 dark:border-neutral-800"
+              className="min-w-0 py-card"
             >
-              <div className="flex flex-col justify-between gap-4 xl:flex-row xl:items-start">
-                <div className="min-w-0 flex-1">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${statusClass(
-                        roadmap.status
-                      )}`}
-                    >
+                    <Badge variant="outline" className={statusClass(roadmap.status)}>
                       {t(`statuses.${roadmap.status}`)}
-                    </span>
+                    </Badge>
 
-                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                    <span className="text-caption text-muted-foreground">
                       {roadmap.preferred_locale.toUpperCase()}
                     </span>
 
-                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                    <span className="text-caption text-muted-foreground">
                       {t("nodesCount", { count: roadmap.total_nodes })}
                     </span>
                   </div>
 
-                  <h3 className="mt-3 text-lg font-bold text-neutral-950 dark:text-neutral-50">
+                  <h3 className="mt-2 text-section font-semibold text-foreground">
                     {roadmap.title}
                   </h3>
 
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-1 text-body text-secondary-text">
                     {roadmap.topic}
                   </p>
 
-                  <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-3 text-caption text-muted-foreground">
                     {t("owner", {
                       name: roadmap.owner_name ?? commonT("unknownOwner"),
                     })} ·{" "}
                     {roadmap.owner_email ?? roadmap.user_id}
                   </p>
 
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1 text-caption text-muted-foreground">
                     {t("nodeBreakdown", {
                       goals: roadmap.goal_nodes,
                       tasks: roadmap.task_nodes,
@@ -125,7 +122,7 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
                     })}
                   </p>
 
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1 text-caption text-muted-foreground">
                     {t("studyPlan", {
                       start: roadmap.start_date,
                       end: roadmap.end_date,
@@ -134,7 +131,7 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
                     })}
                   </p>
 
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1 text-caption text-muted-foreground">
                     {t("aiMeta", {
                       provider: roadmap.ai_provider ?? commonT("na"),
                       model: roadmap.ai_model ?? commonT("na"),
