@@ -1183,6 +1183,14 @@
       "restore": "Restore Streak"
     }
   },
+  "pageStates": {
+    "error": {
+      "title": "Unable to load this page",
+      "description": "Something went wrong. Please try again.",
+      "retry": "Try again",
+      "dashboard": "Dashboard"
+    }
+  },
   "reflections": {
     "page": {
       "eyebrow": "Lumivox",

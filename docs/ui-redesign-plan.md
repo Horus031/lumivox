@@ -41,7 +41,7 @@ Keep phase 7d open until all three deliveries are complete.
 - [x] 8b. Admin Users/Documents lists, filters and detail screens.
 - [x] 8c. Admin Groups and CMS Settings.
 - [x] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
-- [ ] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
+- [x] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
 - [ ] 8f. Auth and public secondary-page audit/migration, followed by final consistency QA.
 
 Keep phase 8 open until all deliveries are complete. Large deliveries may be
@@ -928,3 +928,45 @@ Next delivery: phase 8d.3, Native Task Risk monitoring and prediction details.
   predictions, model versions, attributions or user records were modified.
 
 Next delivery: phase 8e, Leaderboard, Reflections and shared loading/error states.
+
+## Phase 8e: Leaderboard, Reflections and Shared States
+
+- Both learning pages use PageHeader and compact spacing/type tokens. Rank
+  summaries are unframed, responsive metrics; the leaderboard uses a semantic
+  table in a named keyboard-scrollable region instead of clipping mobile data.
+  Numeric rank labels replace medal emojis. Avatar dimensions are explicit.
+  Server-provided rank, order, scores and the disabled-setting query guard remain.
+- Reflection cards use section-sized headings, semantic direction colors and
+  flat divided content instead of nested large cards. Responsive minmax columns
+  and wrapping support long names/content. Native details disclosure has a named
+  focusable summary. Percentage formatting, review-attempt mastery gating,
+  legacy/null fallbacks and reflection query arguments remain unchanged.
+- Generation has an icon/pending state and duplicate-click guard; the existing
+  action payload, feedback and success-only refresh are preserved.
+- Protected loading, layout fallback and reflection Suspense fallback share a
+  restrained accessible skeleton. A localized protected-route error boundary
+  provides retry and Dashboard navigation without exposing raw diagnostics.
+  It handles child render errors, not errors in its own layout or build/runtime
+  infrastructure. Authentication, backend queries and generation logic are unchanged.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. All 128 targeted tests passed:
+  nineteen new learning/state cases, 106 prior Admin cases and three token cases.
+  Coverage includes disabled reads, rank/order/avatar semantics, both locales,
+  direction/legacy/empty states, percentage formatting, escaped content,
+  generation pending/failure/success and retry/navigation behavior.
+- Browser fixture rendered actual pages/components and compiled CSS with controlled
+  query/action/router/server-translation/Image adapters. Checks passed at
+  1440/1024/768 x 900, 390 x 844 and 320 x 640 in light/dark and both locales:
+  data contracts, real avatar asset, keyboard table scroll/disclosure, generation
+  failure/success, loading/error/empty states and no page overflow/runtime errors.
+  Desktop reflection, mobile dark leaderboard and error screenshots were reviewed.
+- Fixtures use a sans-serif fallback and simplified shell insets; production font
+  rendering, full authenticated RSC composition and real error recovery were not
+  exercised. Live localhost:3000 Leaderboard/Reflections still return HTTP 500.
+  The existing server/cache was not stopped, deleted or repaired. No real user
+  records, rankings or generated reflections were modified.
+
+Next delivery: phase 8f, Auth and public secondary-page audit/migration, followed
+by final consistency QA. Parent phase 8 remains open.

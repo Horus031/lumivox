@@ -1183,6 +1183,14 @@
       "restore": "Khôi phục chuỗi"
     }
   },
+  "pageStates": {
+    "error": {
+      "title": "Không thể tải trang",
+      "description": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "dashboard": "Tổng quan"
+    }
+  },
   "reflections": {
     "page": {
       "eyebrow": "Lumivox",

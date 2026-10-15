@@ -1,4 +1,6 @@
 import { Suspense } from "react";
+import { useTranslations } from "next-intl";
+import { PageLoading } from "@/features/app-shell/components/page-loading";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getLatestWeeklyReflectionCards } from "@/features/weekly-reflections/weekly-reflection.queries";
@@ -26,16 +28,8 @@ async function ReflectionCardsSection({ locale }: { locale: string }) {
 }
 
 function ReflectionCardsFallback() {
-  return (
-    <div className="space-y-5" aria-hidden="true">
-      {Array.from({ length: 3 }).map((_, index) => (
-        <div
-          key={index}
-          className="h-56 animate-pulse rounded-[28px] border border-border/60 bg-card/60"
-        />
-      ))}
-    </div>
-  );
+  const t = useTranslations("common");
+  return <PageLoading label={t("loading")} />;
 }
 
 export default async function ReflectionsPage({
@@ -48,7 +42,7 @@ export default async function ReflectionsPage({
 
   return (
     <section>
-      <div className="mx-auto space-y-8">
+      <div className="min-w-0 space-y-section">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}

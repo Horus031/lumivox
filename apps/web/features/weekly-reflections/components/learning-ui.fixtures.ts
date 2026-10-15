@@ -1,0 +1,6 @@
+import type { WeeklyReflectionCardView } from "../weekly-reflection.types";
+export const learner = { user_id: "user-1", display_name: "LearnerNameWithoutSpacesForResponsiveTesting".repeat(2), avatar_url: "/logo.png", focus_minutes: 300, completed_tasks: 7, focus_sessions: 12, current_streak: 5, score: 370, rank_position: 1 };
+export const reflection: WeeklyReflectionCardView = {
+  id: "reflection-1", title: "WeeklyReflectionTitleWithoutSpacesForTesting", summary: "Summary of the week", reflection_interpretation: "<script>unsafe</script> " + "LongInterpretationWithoutSpaces".repeat(8), confidence_note: "Confidence note", wins: [{ evidence_key: "focus_minutes", student_friendly_explanation: "More focused work" }], watchouts: [{ evidence_key: "late_tasks", student_friendly_explanation: "Watch deadlines" }], next_week_actions: [{ action: "plan_next_week", rationale: "Plan ahead" }],
+  weekly_reflections: { reflection_direction: "improving", current_window_start: "2026-10-01", current_window_end: "2026-10-07", current_metrics: { completed_focus_minutes: 300, completed_tasks: 7, active_focus_days: 5, review_attempts: 4, reviewed_tasks: 2, average_review_score: 88.25, review_pass_rate: 75, top_review_weak_areas: ["LongWeakAreaWithoutSpaces".repeat(6)] } },
+};
