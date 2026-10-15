@@ -33,92 +33,92 @@ export function AdminNativeTaskRiskModelsCard({ models }: Props) {
   const t = useTranslations("admin.nativeTaskRisk.models");
 
   return (
-    <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+        <p className="text-caption text-muted-foreground">
           {t("eyebrow")}
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+        <h2 className="mt-1 text-section font-semibold text-foreground">
           {t("title")}
         </h2>
       </div>
 
       {models.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center dark:border-neutral-800">
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">
+        <div className="py-section">
+          <p className="text-body text-secondary-text">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div className="mt-6 space-y-4">
+        <div className="divide-y divide-border">
           {models.map((model) => (
             <article
               key={model.model_version_id}
-              className="rounded-2xl border p-4 dark:border-neutral-800"
+              className="min-w-0 py-card"
             >
-              <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-start">
-                <div>
+              <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                <div className="min-w-0 [overflow-wrap:anywhere]">
                   <div className="flex flex-wrap items-center gap-2">
                     {model.is_active ? (
-                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      <span className="rounded-sm border border-success/25 bg-success/10 px-2 py-0.5 text-caption font-medium text-foreground">
                         {t("active")}
                       </span>
                     ) : null}
 
-                    <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                    <span className="text-caption text-secondary-text">
                       {model.algorithm}
                     </span>
                   </div>
 
-                  <h3 className="mt-3 text-lg font-bold text-neutral-950 dark:text-neutral-50">
+                  <h3 className="mt-2 text-section font-semibold text-foreground">
                     {model.version}
                   </h3>
 
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-1 text-body text-secondary-text">
                     {model.training_dataset}
                   </p>
 
-                  <p className="mt-2 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-2 text-caption text-muted-foreground">
                     {t("artifact", { path: model.artifact_path })}
                   </p>
                 </div>
 
-                <div className="grid min-w-[280px] grid-cols-2 gap-2 text-sm">
-                  <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-                    <p className="text-xs text-neutral-500">
+                <div className="grid min-w-0 grid-cols-2 gap-x-4 gap-y-3">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
+                    <p className="text-caption text-muted-foreground">
                       {t("metricLabels.recall")}
                     </p>
-                    <p className="font-semibold">
+                    <p className="mt-1 text-body font-medium tabular-nums text-foreground">
                       {metricValue(model.metrics, "recall") ?? t("notAvailable")}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-                    <p className="text-xs text-neutral-500">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
+                    <p className="text-caption text-muted-foreground">
                       {t("metricLabels.precision")}
                     </p>
-                    <p className="font-semibold">
+                    <p className="mt-1 text-body font-medium tabular-nums text-foreground">
                       {metricValue(model.metrics, "precision") ??
                         t("notAvailable")}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-                    <p className="text-xs text-neutral-500">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
+                    <p className="text-caption text-muted-foreground">
                       {t("metricLabels.f1")}
                     </p>
-                    <p className="font-semibold">
+                    <p className="mt-1 text-body font-medium tabular-nums text-foreground">
                       {metricValue(model.metrics, "f1_score") ??
                         t("notAvailable")}
                     </p>
                   </div>
 
-                  <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
-                    <p className="text-xs text-neutral-500">
+                  <div className="min-w-0 [overflow-wrap:anywhere]">
+                    <p className="text-caption text-muted-foreground">
                       {t("metricLabels.rocAuc")}
                     </p>
-                    <p className="font-semibold">
+                    <p className="mt-1 text-body font-medium tabular-nums text-foreground">
                       {metricValue(model.metrics, "roc_auc") ??
                         t("notAvailable")}
                     </p>

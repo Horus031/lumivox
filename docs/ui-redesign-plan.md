@@ -40,7 +40,7 @@ Keep phase 7d open until all three deliveries are complete.
 - [x] 8a. Admin navigation, overview and shared metric cards.
 - [x] 8b. Admin Users/Documents lists, filters and detail screens.
 - [x] 8c. Admin Groups and CMS Settings.
-- [ ] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
+- [x] 8d. Admin monitoring: AI/RAG, Roadmaps, Translations and Native Task Risk.
 - [ ] 8e. Remaining learning pages: Leaderboard, Reflections and shared loading/error states.
 - [ ] 8f. Auth and public secondary-page audit/migration, followed by final consistency QA.
 
@@ -51,7 +51,7 @@ split into smaller scoped parts; do not migrate all Admin screens in one turn.
 
 - [x] 8d.1. AI/RAG monitoring and session details.
 - [x] 8d.2. Roadmap and Translation monitoring.
-- [ ] 8d.3. Native Task Risk monitoring and prediction details.
+- [x] 8d.3. Native Task Risk monitoring and prediction details.
 
 Keep 8d open until all three monitoring deliveries are complete.
 
@@ -874,3 +874,57 @@ Next delivery: phase 8d.2, Roadmap and Translation monitoring only.
   were not exercised; no real roadmaps/translations/cache entries were modified.
 
 Next delivery: phase 8d.3, Native Task Risk monitoring and prediction details.
+
+## Phase 8d.3: Native Task Risk Monitoring
+
+- Monitoring/detail pages use PageHeader, compact tokens and unframed sections.
+  Four overview metrics retain their numbers, percent rounding, risk-score/null
+  fallbacks and high/elevated distribution. Algorithm identity uses section-sized
+  text instead of oversized numeric typography, avoiding awkward word breaks.
+- Search uses shared labeled Input/Select and a named search icon. All five
+  all/low/moderate/elevated/high choices, query trimming, URLSearchParams encoding,
+  all-risk omission and existing query arguments remain unchanged.
+- Model versions use divided rows and responsive minmax grid columns rather
+  than a 280px minimum panel with nested cards. Active marker, algorithm, version,
+  training dataset, artifact path and recall/precision/F1/ROC-AUC are preserved.
+  Numeric metrics still use four decimals; string/zero/missing fallbacks remain.
+- Prediction rows use semantic risk badges, compact probability/threshold/days
+  labels, wrapping task/goal/owner/model metadata and named locale-aware detail
+  icons. Explanation summaries remain the first two reasons, now divided and
+  unframed. Zero/null deadline behavior, title/owner/mode fallbacks and percent
+  rounding remain. Dates now follow the interface locale; raw timestamps do not
+  change.
+- Detail retains risk band, probability, threshold, algorithm and attribution
+  order/rank/value/contribution/effect. Attribution rows are flat and wrapping.
+  All three JSON outputs retain JSON.stringify content, now in named, bounded,
+  focusable regions supporting horizontal/vertical keyboard scroll in both themes.
+  Back navigation stays locale-aware; detail-query failure behavior is unchanged.
+- Existing JSON object/array normalization on the overview and attribution array
+  fallback on detail remain. No query/action, database, auth/permission, model,
+  feature, threshold, prediction or explainability computation changes are made.
+  This closes 8d.3 and Admin monitoring phase 8d; phase 8 remains open.
+
+### Verification
+
+- ESLint, TypeScript and diff checks passed. One hundred nine targeted tests
+  passed: fourteen new Native Risk cases, ninety-two prior Admin cases and three
+  token cases. Coverage includes filter encoding/omission, four bands, percent
+  rounding, model formatting/fallbacks, reason limits, zero/null deadlines, dates,
+  identity/mode fallbacks, localized links, empty states, query contracts/JSON
+  normalization, attribution order, JSON escaping/region labels and query failure.
+- Browser fixture rendered both actual pages/components, actual Radix Select and
+  compiled CSS with read-only query/router/server-translation adapters. Checks
+  passed at 1440/1024/768 x 900, 390 x 844 and 320 x 640 in light/dark and
+  English/Vietnamese: filter alignment/read contracts, metric/model/prediction
+  bounds, reason limit, detail/back navigation, named JSON keyboard scrolling,
+  escaped payloads, empty/null states and no page overflow/runtime errors.
+- Reviewed desktop overview and 320px dark detail images. Reduced algorithm
+  typography after inspecting wrapping and reran the browser matrix. Fixtures use
+  a sans-serif fallback and simplified shell insets; production font rendering
+  and full authenticated RSC composition were not exercised.
+- Existing localhost:3000 monitoring/detail and login requests still return HTTP
+  500. The existing server/generated cache was not stopped, deleted or repaired.
+  Real Admin access/query flows and model execution were not exercised; no real
+  predictions, model versions, attributions or user records were modified.
+
+Next delivery: phase 8e, Leaderboard, Reflections and shared loading/error states.
