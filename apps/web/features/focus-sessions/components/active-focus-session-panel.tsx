@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -11,27 +11,14 @@ import {
   pauseFocusSessionAction,
   resumeFocusSessionAction,
 } from "@/features/focus-sessions/focus-session.actions";
-// import { logDistractionAction } from "@/features/distractions/distraction.actions";
-import { Button } from "@/components/ui/button";
-// import { Label } from "@/components/ui/label";
-// import {
-//   Select,
-//   SelectContent,
-//   SelectGroup,
-//   SelectItem,
-//   SelectLabel,
-//   SelectTrigger,
-//   SelectValue,
-// } from "@/components/ui/select";
-// import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Check,
   ChevronDown,
   ChevronUp,
   Pause,
   Play,
-  Timer,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -79,6 +66,7 @@ function calculateRemainingSeconds(session: ActiveFocusSessionWithTask) {
 export function ActiveFocusSessionPanel({
   session,
 }: ActiveFocusSessionPanelProps) {
+  const panelId = useId();
   const router = useRouter();
   const t = useTranslations("focus.active");
   const [isPending, startTransition] = useTransition();
@@ -89,12 +77,6 @@ export function ActiveFocusSessionPanel({
   const [remainingSeconds, setRemainingSeconds] = useState(() =>
     calculateRemainingSeconds(session),
   );
-
-  // const [distractionType, setDistractionType] = useState<
-  //   "social_media" | "messaging" | "external_interrupt" | "fatigue" | "other"
-  // >("other");
-  // const [durationSeconds, setDurationSeconds] = useState("60");
-  // const [note, setNote] = useState("");
 
   useEffect(() => {
     setRemainingSeconds(calculateRemainingSeconds(session));
@@ -150,16 +132,19 @@ export function ActiveFocusSessionPanel({
     setIsCompletingOptimistically(true);
 
     startTransition(async () => {
-      const result = await completeFocusSessionAction(session.id);
-
-      if (!result.success) {
+      try {
+        const result = await completeFocusSessionAction(session.id);
+        if (!result.success) {
+          setIsCompletingOptimistically(false);
+          toast.error(result.message);
+          return;
+        }
+        toast.success(result.message);
+        router.refresh();
+      } catch {
         setIsCompletingOptimistically(false);
-        toast.error(result.message);
-        return;
+        toast.error(t("requestFailed"));
       }
-
-      toast.success(result.message);
-      router.refresh();
     });
   }
 
@@ -181,281 +166,74 @@ export function ActiveFocusSessionPanel({
     });
   }
 
-  // function handleLogDistraction(event: FormEvent<HTMLFormElement>) {
-  //   event.preventDefault();
-
-  //   startTransition(async () => {
-  //     const result = await logDistractionAction({
-  //       sessionId: session.id,
-  //       distractionType,
-  //       durationSeconds: Number(durationSeconds),
-  //       note,
-  //     });
-
-  //     if (!result.success) {
-  //       toast.error(result.message);
-  //       return;
-  //     }
-
-  //     toast.success(result.message);
-  //     setDistractionType("other");
-  //     setDurationSeconds("60");
-  //     setNote("");
-  //     router.refresh();
-  //   });
-  // }
-
   const actionButtons = (
-    <div className="flex shrink-0 items-center gap-1 rounded-full border bg-background/80 p-1 shadow-sm">
-      {isOngoing ? (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={t("actions.pause")}
-          title={t("actions.pause")}
-          onClick={handlePause}
-          disabled={areActionsDisabled}
-          className="size-8 rounded-full"
-        >
-          <Pause />
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          aria-label={t("actions.resume")}
-          title={t("actions.resume")}
-          onClick={handleResume}
-          disabled={areActionsDisabled}
-          className="size-8 rounded-full"
-        >
-          <Play />
-        </Button>
-      )}
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t("actions.complete")}
-        title={t("actions.complete")}
-        onClick={handleComplete}
-        disabled={areActionsDisabled || !isOngoing}
-        className="size-8 rounded-full text-success hover:bg-success/10 hover:text-success"
-      >
-        <Check />
+    <div className="flex shrink-0 items-center gap-1">
+      <Button type="button" variant="ghost" size="icon"
+        aria-label={t(isOngoing ? "actions.pause" : "actions.resume")}
+        title={t(isOngoing ? "actions.pause" : "actions.resume")}
+        onClick={isOngoing ? handlePause : handleResume}
+        disabled={areActionsDisabled} className="sm:size-touch lg:size-control">
+        {isOngoing ? <Pause aria-hidden="true" /> : <Play aria-hidden="true" />}
       </Button>
-
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        aria-label={t("actions.cancel")}
-        title={t("actions.cancel")}
-        onClick={handleCancel}
-        disabled={areActionsDisabled}
-        className="size-8 rounded-full text-danger/70 hover:bg-danger/10 hover:text-danger"
-      >
-        <X />
+      <Button type="button" size="icon" aria-label={t("actions.complete")}
+        title={t("actions.complete")} onClick={handleComplete}
+        disabled={areActionsDisabled || !isOngoing} className="sm:size-touch lg:size-control">
+        <Check aria-hidden="true" />
+      </Button>
+      <Button type="button" variant="ghost" size="icon" aria-label={t("actions.cancel")}
+        title={t("actions.cancel")} onClick={handleCancel}
+        disabled={areActionsDisabled} className="sm:size-touch lg:size-control hover:bg-danger/10">
+        <X aria-hidden="true" />
       </Button>
     </div>
   );
 
+  const progress = Math.min(100, Math.max(0, (1 - remainingSeconds / (session.planned_minutes * 60)) * 100));
+
   return (
-    <section className="space-y-6">
-      <article
-        className={cn(
-          "overflow-hidden rounded-2xl border bg-background shadow-sm transition-all duration-300",
-          isCollapsed ? "p-3" : "p-6",
-        )}
-      >
-        {isCollapsed ? (
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="flex min-w-0 items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full border bg-muted/40">
-                <Timer className="size-4 text-muted-foreground" />
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-center gap-2">
-                  <h2 className="truncate text-sm font-semibold text-foreground">
-                   {session.tasks?.title ?? t("generalSession")}
-                  </h2>
-                  <Badge className="shrink-0 capitalize">
-                    {t(`status.${displayedStatus}`)}
-                  </Badge>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {t("compactProgress", {
-                    remaining: timerText,
-                    minutes: session.planned_minutes,
-                  })}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between gap-2 md:justify-end">
-              {actionButtons}
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("actions.expand")}
-                aria-expanded={!isCollapsed}
-                title={t("actions.expand")}
-                onClick={() => setIsCollapsed(false)}
-                className="size-9 rounded-full"
-              >
-                <ChevronDown />
-              </Button>
-            </div>
+    <section aria-busy={isPending} className="min-w-0 rounded-lg border border-border bg-card p-card">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-caption text-muted-foreground">{t("eyebrow")}</p>
+          <h2 title={session.tasks?.title ?? t("generalSession")}
+            className="text-section font-semibold [overflow-wrap:anywhere]">
+            {session.tasks?.title ?? t("generalSession")}
+          </h2>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">{t(`status.${displayedStatus}`)}</Badge>
+            <span className="text-caption text-muted-foreground">
+              {t("plannedBadge", { minutes: session.planned_minutes })}
+            </span>
           </div>
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
-                  {t("eyebrow")}
-                </p>
-
-                <h2 className="mt-2 truncate text-xl font-bold text-foreground">
-                  {session.tasks?.title ?? t("generalSession")}
-                </h2>
-
-                <div className="mt-3 flex flex-wrap gap-2 text-primary-foreground">
-                  <Badge className="capitalize">
-                    {t(`status.${displayedStatus}`)}
-                  </Badge>
-                  <Badge>
-                    {t("plannedBadge", { minutes: session.planned_minutes })}
-                  </Badge>
-                </div>
-              </div>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                aria-label={t("actions.collapse")}
-                aria-expanded={!isCollapsed}
-                title={t("actions.collapse")}
-                onClick={() => setIsCollapsed(true)}
-                className="size-9 shrink-0 rounded-full"
-              >
-                <ChevronUp />
-              </Button>
-            </div>
-
-            <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-              <div className="rounded-2xl border bg-muted/20 px-5 py-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  {t("remainingTime")}
-                </p>
-
-                <p
-                  className={`mt-1 text-5xl font-bold tracking-tight ${
-                    remainingSeconds <= 0 ? "text-success" : "text-foreground"
-                  }`}
-                >
-                  {timerText}
-                </p>
-
-                {remainingSeconds <= 0 && (
-                  <p className="mt-2 text-xs font-medium text-success">
-                    {t("durationReached")}
-                  </p>
-                )}
-              </div>
-
-              {actionButtons}
-            </div>
-          </div>
-        )}
-      </article>
-
-      {/* <article className="rounded-2xl border bg-background p-6 shadow-sm">
-        <div className="mb-5">
-          <h3 className="text-xl font-semibold">Log a distraction</h3>
-          <p className="mt-1 text-sm text-neutral-600">
-            Record interruptions during this session for future behavioural
-            analytics.
+        </div>
+        <Button type="button" variant="ghost" size="icon" className="shrink-0 sm:size-touch lg:size-control"
+          aria-label={t(isCollapsed ? "actions.expand" : "actions.collapse")}
+          title={t(isCollapsed ? "actions.expand" : "actions.collapse")}
+          aria-expanded={!isCollapsed} aria-controls={panelId}
+          onClick={() => setIsCollapsed((value) => !value)}>
+          {isCollapsed ? <ChevronDown aria-hidden="true" /> : <ChevronUp aria-hidden="true" />}
+        </Button>
+      </div>
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-card">
+        <div className="min-w-0">
+          <p className="mb-1 text-caption text-muted-foreground">{t("remainingTime")}</p>
+          <p role="timer" aria-label={t("remainingTime")} aria-live="off" suppressHydrationWarning
+            className={cn("font-semibold tabular-nums", isCollapsed ? "text-metric" : "text-4xl", remainingSeconds <= 0 ? "text-success" : "text-foreground")}>
+            {timerText}
           </p>
         </div>
-
-        <form onSubmit={handleLogDistraction} className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-3">
-            <div className="space-y-3">
-              <Label>Type</Label>
-
-              <Select
-                value={distractionType ?? ""}
-                onValueChange={(value) =>
-                  setDistractionType(
-                    value as
-                      | "social_media"
-                      | "messaging"
-                      | "external_interrupt"
-                      | "fatigue"
-                      | "other",
-                  )
-                }
-              >
-                <SelectTrigger className="flex w-full h-11! border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                  <SelectValue placeholder="Distraction type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectLabel>Distraction type</SelectLabel>
-                    <SelectItem value="social_media">Social media</SelectItem>
-                    <SelectItem value="messaging">Messaging</SelectItem>
-                    <SelectItem value="external_interrupt">
-                      External interrupt
-                    </SelectItem>
-                    <SelectItem value="fatigue">Fatigue</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-3">
-              <Label>Duration in seconds</Label>
-
-              <Input
-                type="number"
-                min={0}
-                value={durationSeconds}
-                onChange={(event) => setDurationSeconds(event.target.value)}
-                className="h-11"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <Label>Optional note</Label>
-
-              <Input
-                type="text"
-                value={note}
-                onChange={(event) => setNote(event.target.value)}
-                placeholder="Notification, phone call..."
-                className="h-11"
-              />
-            </div>
-          </div>
-
-          <Button
-            variant={"outline"}
-            type="submit"
-            disabled={isPending}
-            className="border px-4 py-2.5 text-sm font-medium transition hover:bg-primary hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {isPending ? "Logging..." : "Log distraction"}
-          </Button>
-        </form>
-      </article> */}
+        {actionButtons}
+      </div>
+      <div id={panelId} hidden={isCollapsed} className="mt-4">
+        <div role="progressbar" aria-label={t("progress")} aria-valuemin={0} aria-valuemax={100}
+          aria-valuenow={Math.round(progress)} aria-valuetext={t("compactProgress", { remaining: timerText, minutes: session.planned_minutes })}
+          className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div className="h-full rounded-full bg-primary dark:bg-success" style={{ width: `${progress}%` }} />
+        </div>
+      </div>
+      {remainingSeconds <= 0 ? (
+        <p className="mt-3 text-body text-secondary-text">{t("durationReached")}</p>
+      ) : null}
     </section>
   );
 }

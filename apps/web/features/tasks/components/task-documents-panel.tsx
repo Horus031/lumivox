@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Upload, Sparkles, Share2, Trash2 } from "lucide-react";
 
 import type { LearningDocumentListItem } from "@/features/learning-documents/learning-document.types";
 
@@ -136,13 +138,13 @@ export function TaskDocumentsPanel({
   }
 
   return (
-    <div className="space-y-5">
+    <div className="min-w-0 space-y-card">
       <div>
         <h3 className="text-base font-semibold text-foreground">
           {t("title")}
         </h3>
 
-        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-body text-secondary-text">
           {t("description")}
         </p>
       </div>
@@ -150,30 +152,31 @@ export function TaskDocumentsPanel({
       <form
         ref={formRef}
         action={handleUpload}
-        className="rounded-[22px] border border-border/60 bg-muted/20 p-4"
+        aria-busy={isPending} className="min-w-0 border-y border-border py-card"
       >
         <input type="hidden" name="taskId" value={taskId} />
 
-        <input
+        <Input
+          aria-label={t("title")}
           name="file"
           type="file"
           required
           accept=".pdf,.txt,.md,application/pdf,text/plain,text/markdown"
           disabled={isPending}
-          className="block w-full rounded-xl border bg-background px-3 py-2.5 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-muted file:px-4 file:py-2 file:text-sm file:font-medium"
+          className="h-auto min-h-touch py-2 file:mr-3 file:rounded-sm file:bg-muted file:px-2 file:py-1"
         />
 
         <Button type="submit" className="mt-3" disabled={isPending}>
-          {isPending ? t("uploading") : t("upload")}
+          <Upload aria-hidden="true" />{isPending ? t("uploading") : t("upload")}
         </Button>
       </form>
 
       {documents.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border/70 p-7 text-center">
+        <div className="border-y border-border py-section text-center">
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="divide-y divide-border">
           {documents.map((document) => {
             const processing =
               pendingDocumentId === document.id ||
@@ -182,20 +185,20 @@ export function TaskDocumentsPanel({
             return (
               <article
                 key={document.id}
-                className="rounded-[22px] border border-border/60 p-4"
+                className="min-w-0 py-card"
               >
                 <div>
-                  <p className="font-medium text-foreground">
+                  <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
                     {document.file_name}
                   </p>
 
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-caption text-muted-foreground">
                     {document.mime_type}
                     {" · "}
                     {formatFileSize(Number(document.file_size_bytes))}
                   </p>
 
-                  <p className="mt-1 text-xs text-muted-foreground">
+                  <p className="mt-1 text-caption text-muted-foreground">
                     {documentT("metadata", {
                       visibility: documentT(
                         `visibility.${document.visibility}`,
@@ -208,7 +211,7 @@ export function TaskDocumentsPanel({
                   </p>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="mt-3 flex flex-wrap gap-2">
                   <Button
                     type="button"
                     size="sm"
@@ -216,7 +219,7 @@ export function TaskDocumentsPanel({
                     disabled={processing || isPending}
                     onClick={() => handleProcess(document.id)}
                   >
-                    {processing
+                    <Sparkles aria-hidden="true" />{processing
                       ? t("processing")
                       : document.extracted_text_status === "completed"
                         ? t("reprocess")
@@ -227,7 +230,7 @@ export function TaskDocumentsPanel({
 
                   <Button asChild type="button" size="sm" variant="outline">
                     <Link href={`/documents/${document.id}/share`}>
-                      {t("share")}
+                      <Share2 aria-hidden="true" />{t("share")}
                     </Link>
                   </Button>
 
@@ -238,7 +241,7 @@ export function TaskDocumentsPanel({
                     disabled={isPending}
                     onClick={() => handleDelete(document.id)}
                   >
-                    {t("delete")}
+                    <Trash2 aria-hidden="true" />{t("delete")}
                   </Button>
                 </div>
               </article>

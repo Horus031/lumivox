@@ -20,16 +20,16 @@ export function MyGlobalRankCard({ rank }: MyGlobalRankCardProps) {
 
   if (!rank) {
     return (
-      <section className="rounded-2xl border bg-background p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+      <section className="min-w-0 space-y-3 border-t border-border pt-card">
+        <p className="text-caption text-muted-foreground">
           {t("eyebrow")}
         </p>
 
-        <h2 className="mt-2 text-2xl font-bold text-foreground">
+        <h2 className="mt-1 text-section font-semibold text-foreground">
           {t("notRanked")}
         </h2>
 
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-1 text-body text-secondary-text">
           {t("notRankedDescription")}
         </p>
       </section>
@@ -37,53 +37,53 @@ export function MyGlobalRankCard({ rank }: MyGlobalRankCardProps) {
   }
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
-      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
+      <p className="text-caption text-muted-foreground">
         {t("eyebrow")}
       </p>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-5">
+      <div className="grid min-w-0 grid-cols-2 gap-4 lg:grid-cols-5 [&>div]:min-w-0 [&>div]:[overflow-wrap:anywhere]">
         <div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-caption text-muted-foreground">
             {t("labels.rank")}
           </p>
-          <p className="mt-1 text-3xl font-bold text-neutral-950 dark:text-neutral-50">
+          <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
             #{rank.rank_position}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-caption text-muted-foreground">
             {t("labels.score")}
           </p>
-          <p className="mt-1 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+          <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
             {rank.score}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-caption text-muted-foreground">
             {t("labels.focus")}
           </p>
-          <p className="mt-1 text-lg font-semibold text-neutral-950 dark:text-neutral-50">
+          <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
             {t("minutes", { count: rank.focus_minutes })}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-caption text-muted-foreground">
             {t("labels.tasks")}
           </p>
-          <p className="mt-1 text-lg font-semibold text-neutral-950 dark:text-neutral-50">
+          <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
             {rank.completed_tasks}
           </p>
         </div>
 
         <div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-caption text-muted-foreground">
             {t("labels.sessions")}
           </p>
-          <p className="mt-1 text-lg font-semibold text-neutral-950 dark:text-neutral-50">
+          <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
             {rank.focus_sessions}
           </p>
         </div>

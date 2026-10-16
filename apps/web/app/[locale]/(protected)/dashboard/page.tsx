@@ -39,7 +39,7 @@ function DashboardSectionSkeleton({ height = "h-56" }: { height?: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`${height} animate-pulse rounded-[28px] border border-border/60 bg-card/60`}
+      className={`${height} animate-pulse rounded-lg border border-border bg-muted`}
     />
   );
 }
@@ -143,7 +143,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   return (
     <section>
-      <div className="mx-auto max-w-full space-y-8">
+      <div className="mx-auto min-w-0 max-w-full space-y-section">
         <PageHeader
           eyebrow={headerT("eyebrow")}
           title={headerT("title")}
@@ -151,42 +151,40 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           action={<RefreshPbiButton />}
         />
 
-        <Suspense fallback={<DashboardSectionSkeleton height="h-36" />}>
+        <Suspense fallback={
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }, (_, index) => (
+              <DashboardSectionSkeleton key={index} height="h-36" />
+            ))}
+          </div>
+        }>
           <DashboardSummarySection activityPromise={activityPromise} />
         </Suspense>
 
-        <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="lg:w-[24%] xl:w-[40%]">
-            {/* <DashboardWelcomeCard title={welcomeT("title")} user={user} /> */}
-            <Suspense fallback={<DashboardSectionSkeleton height="h-52" />}>
-              <DashboardPbiExplanationSection
-                pbiPromise={pbiPromise}
-                locale={locale}
-              />
-            </Suspense>
-          </div>
-
-          <div className="min-w-0 lg:flex-1">
-            <Suspense fallback={<DashboardSectionSkeleton height="h-44" />}>
-              <DashboardPbiScoreSection pbiPromise={pbiPromise} />
-            </Suspense>
-          </div>
+        <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <Suspense fallback={<DashboardSectionSkeleton height="h-96" />}>
+            <DashboardPbiScoreSection pbiPromise={pbiPromise} />
+          </Suspense>
+          <Suspense fallback={<DashboardSectionSkeleton height="h-52" />}>
+            <DashboardPbiExplanationSection
+              pbiPromise={pbiPromise}
+              locale={locale}
+            />
+          </Suspense>
         </div>
 
-        <div className="grid items-stretch gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(360px,0.85fr)]">
-          <Suspense fallback={<DashboardSectionSkeleton height="h-[42rem]" />}>
-            <DashboardBehaviourSection activityPromise={activityPromise} />
+        <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+          <DashboardBehaviourSection activityPromise={activityPromise} />
+        </Suspense>
+
+        <div className="grid min-w-0 items-start gap-card xl:grid-cols-2">
+          <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+            <DashboardPbiHistorySection pbiPromise={pbiPromise} />
           </Suspense>
 
-          <div className="grid min-w-0 gap-4">
-            <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
-              <DashboardPbiHistorySection pbiPromise={pbiPromise} />
-            </Suspense>
-
-            <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
-              <DashboardTaskStatusSection activityPromise={activityPromise} />
-            </Suspense>
-          </div>
+          <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+            <DashboardTaskStatusSection activityPromise={activityPromise} />
+          </Suspense>
         </div>
 
         {/* <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>

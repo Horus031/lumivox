@@ -11,7 +11,7 @@ export default async function SettingsPage() {
 
   return (
     <section>
-      <div className="mx-auto max-w-full space-y-8">
+      <div className="min-w-0 max-w-4xl space-y-section">
         <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}

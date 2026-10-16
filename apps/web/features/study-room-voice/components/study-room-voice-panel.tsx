@@ -13,6 +13,7 @@ import { toast } from "sonner";
 
 import type { StudyRoomVoiceTokenResponse } from "@/features/study-room-voice/study-room-voice.types";
 import { Button } from "@/components/ui/button";
+import { Headphones, LogOut } from "lucide-react";
 
 type StudyRoomVoicePanelProps = {
   roomId: string;
@@ -64,18 +65,18 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
   }
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
+    <section className="min-w-0 border-t border-border pt-card">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-foreground">
+          <p className="text-caption font-medium text-muted-foreground">
             {t("eyebrow")}
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold tracking-tight">
+          <h2 className="mt-2 text-section font-semibold text-foreground">
             {t("title")}
           </h2>
 
-          <p className="mt-2 max-w-2xl text-neutral-600">
+          <p className="mt-1 max-w-2xl text-body text-secondary-text">
             {t("description")}
           </p>
         </div>
@@ -84,31 +85,32 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
           <Button
             onClick={handleJoinVoice}
             disabled={isJoining}
-            className="rounded-xl px-4 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60"
+            aria-busy={isJoining}
           >
+            <Headphones aria-hidden="true" />
             {isJoining ? t("joining") : t("join")}
           </Button>
         ) : (
           <Button
             variant={"outline"}
             onClick={handleLeaveVoice}
-            className="rounded-xl border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/40"
+            className="text-danger hover:bg-danger/10 hover:text-danger"
           >
-            {t("leave")}
+            <LogOut aria-hidden="true" />{t("leave")}
           </Button>
         )}
       </div>
 
       {!credentials ? (
-        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
-          <p className="text-sm text-neutral-600">
+        <div className="mt-6 border-t border-border py-card">
+          <p className="text-body text-secondary-text">
             {t("inactive")}
           </p>
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border p-4">
+        <div className="mt-card border-t border-border pt-card">
           <LiveKitRoom
-            className="bg-background"
+            className="study-room-voice min-w-0"
             token={credentials.participant_token}
             serverUrl={credentials.server_url}
             connect={true}
@@ -138,45 +140,45 @@ function VoiceRoomContent() {
   const participants = useParticipants();
 
   return (
-    <div className="space-y-5 bg-background">
+    <div className="min-w-0 space-y-card">
       <RoomAudioRenderer />
 
-      <div className="flex flex-col justify-between gap-4 rounded-2xl bg-surface p-4 md:flex-row md:items-center">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-card">
         <div>
-          <p className="text-sm font-semibold">{t("microphoneTitle")}</p>
-          <p className="mt-1 text-sm text-neutral-600">
+          <p className="text-label font-medium">{t("microphoneTitle")}</p>
+          <p className="mt-1 text-body text-secondary-text">
             {t("microphoneDescription")}
           </p>
         </div>
 
-        <TrackToggle source={Track.Source.Microphone} />
+        <TrackToggle source={Track.Source.Microphone} aria-label={t("microphoneTitle")} title={t("microphoneTitle")} className="min-h-touch rounded-md border border-border px-3 text-body sm:min-h-control" />
       </div>
 
       <div>
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{t("participantsTitle")}</h3>
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-label font-medium">{t("participantsTitle")}</h3>
 
-          <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold text-foreground">
+          <span className="text-caption text-muted-foreground">
             {t("participantsCount", { count: participants.length })}
           </span>
         </div>
 
         {participants.length === 0 ? (
-          <div className="rounded-2xl border border-dashed p-6 text-sm text-surface">
+          <div className="py-card text-body text-muted-foreground">
             {t("empty")}
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="grid gap-x-card divide-y divide-border md:grid-cols-2">
             {participants.map((participant) => (
               <article
                 key={participant.identity}
-                className="rounded-2xl border bg-background p-4"
+                className="min-w-0 py-3"
               >
-                <p className="font-semibold">
+                <p className="text-body font-medium [overflow-wrap:anywhere]">
                   {participant.name ?? participant.identity}
                 </p>
 
-                <p className="mt-1 text-sm text-neutral-500">
+                <p className="mt-1 text-caption text-muted-foreground">
                   {participant.isLocal ? t("you") : t("roomParticipant")}
                 </p>
               </article>

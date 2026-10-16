@@ -1,8 +1,13 @@
 import { expect, test } from "@playwright/test";
+import en from "../messages/en.json";
+import vi from "../messages/vi.json";
 
-for (const width of [390, 1440]) {
+for (const { locale, messages, width } of [
+  { locale: "vi", messages: vi },
+  { locale: "en", messages: en },
+].flatMap((translation) => [390, 1440].map((width) => ({ ...translation, width })))) {
   for (const theme of ["light", "dark"] as const) {
-    test(`Showcase ${theme} images at ${width}px`, async ({ page }) => {
+    test(`Showcase ${locale} ${theme} images at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.addInitScript((value) => localStorage.setItem("theme", value), theme);
       const imageRequests: string[] = [];
@@ -12,7 +17,7 @@ for (const width of [390, 1440]) {
           imageRequests.push(url);
         }
       });
-      await page.goto(width === 390 ? "/vi" : "/en");
+      await page.goto(`/${locale}`);
       const source = page.locator("[data-showcase-theme-source]").first();
       await expect(source).toHaveAttribute("media", theme === "dark" ? "all" : "not all");
 
@@ -45,11 +50,17 @@ for (const width of [390, 1440]) {
         width: element.offsetWidth,
         height: element.offsetHeight,
       }));
-      await page.locator(".marketing-navbar__theme-control button").click();
-      await page.getByRole("menuitemradio", {
-        name: opposite === "dark" ? "Dark" : "Light",
+      await page.locator(".marketing-navbar__theme-control").getByRole("button", {
+        name: messages.common.theme,
         exact: true,
       }).click();
+      const targetTheme = page.getByRole("menuitemradio", {
+        name: messages.settings.theme[opposite],
+        exact: true,
+      });
+      await expect(targetTheme).toBeVisible();
+      await targetTheme.click();
+      await expect(page.locator("html")).toHaveClass(new RegExp(`\\b${opposite}\\b`));
       await expect.poll(() => visibleImage.evaluate((element: HTMLImageElement) =>
         decodeURIComponent(element.currentSrc),
       )).toContain(`landing-room-${opposite}.`);

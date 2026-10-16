@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useMemo, useState, useTransition } from "react";
+import { FormEvent, ReactNode, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -16,9 +16,7 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -33,9 +31,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Field, FieldGroup } from "@/components/ui/field";
+import { Plus, Save } from "lucide-react";
 import { Label } from "@/components/ui/label";
-// import { Slider } from "@/components/ui/slider";
+
 
 type CreateGoalFormProps = {
   mode?: "create" | "edit";
@@ -65,6 +63,7 @@ export function CreateGoalForm({
   const t = useTranslations("goals.form");
   const commonT = useTranslations("common");
   const router = useRouter();
+  const id = useId();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
 
@@ -164,261 +163,56 @@ export function CreateGoalForm({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        {trigger ?? <Button type="button">{t("trigger")}</Button>}
+        {trigger ?? <Button type="button"><Plus aria-hidden="true" />{t("trigger")}</Button>}
       </DialogTrigger>
-      <DialogContent className="text-foreground max-w-2xl!">
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <DialogTitle>
-            {isEditMode ? t("editTitle") : t("createTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {isEditMode ? t("editDescription") : t("createDescription")}
-          </DialogDescription>
-          <FieldGroup>
-            <Field>
-              <Label htmlFor="title">{t("fields.title")}</Label>
-              <Input
-                id="title"
-                type="text"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder={t("placeholders.title")}
-                required
-              />
-            </Field>
-            <Field>
-              <Label>{t("fields.description")}</Label>
-              <Textarea
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                placeholder={t("placeholders.description")}
-                className="resize-none"
-                rows={3}
-              />
-            </Field>
-
-            <FieldGroup className="w-full flex-row">
-              <Field className="h-full">
-                <div className="flex flex-col justify-between h-full">
-                  <Label className="mb-4">{t("fields.goalType")}</Label>
-
-                  <Select
-                    value={goalType ?? ""}
-                    onValueChange={(value) =>
-                      setGoalType(value as "short_term" | "long_term")
-                    }
-                  >
-                    <SelectTrigger className="flex w-full h-11! border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                      <SelectValue placeholder={t("fields.goalType")} />
-                    </SelectTrigger>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
+        <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
+          <DialogTitle className="pr-10 text-section">{isEditMode ? t("editTitle") : t("createTitle")}</DialogTitle>
+          <DialogDescription>{isEditMode ? t("editDescription") : t("createDescription")}</DialogDescription>
+          <fieldset disabled={isPending} className="min-w-0 space-y-card">
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
+              <Input id={`${id}-title`} value={title} onChange={(event) => setTitle(event.target.value)} placeholder={t("placeholders.title")} required maxLength={160} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
+              <Textarea id={`${id}-description`} value={description} onChange={(event) => setDescription(event.target.value)} placeholder={t("placeholders.description")} rows={3} maxLength={1000} />
+            </div>
+            <div className="grid min-w-0 gap-card sm:grid-cols-2">
+              <div className="min-w-0 space-y-2">
+                <Label htmlFor={`${id}-type`}>{t("fields.goalType")}</Label>
+                <Select value={goalType} disabled={isPending} onValueChange={(value) => setGoalType(value as "short_term" | "long_term")}>
+                  <SelectTrigger id={`${id}-type`} className="w-full"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short_term">{t("goalTypes.short_term")}</SelectItem>
+                    <SelectItem value="long_term">{t("goalTypes.long_term")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {isEditMode ? (
+                <div className="min-w-0 space-y-2">
+                  <Label htmlFor={`${id}-status`}>{t("fields.status")}</Label>
+                  <Select value={status} disabled={isPending} onValueChange={(value) => setStatus(value as typeof status)}>
+                    <SelectTrigger id={`${id}-status`} className="w-full"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectGroup>
-                        <SelectLabel>{t("fields.goalType")}</SelectLabel>
-                        <SelectItem value="short_term">
-                          {t("goalTypes.short_term")}
-                        </SelectItem>
-                        <SelectItem value="long_term">
-                          {t("goalTypes.long_term")}
-                        </SelectItem>
-                      </SelectGroup>
+                      {(["active", "completed", "paused", "archived"] as const).map((value) => <SelectItem key={value} value={value}>{t(`statuses.${value}`)}</SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
-              </Field>
-
-              {isEditMode && (
-                <Field>
-                  <div className="gap-3">
-                    <Label className="mb-2">{t("fields.status")}</Label>
-
-                    <Select
-                      value={status}
-                      onValueChange={(value) =>
-                        setStatus(
-                          value as
-                            | "active"
-                            | "completed"
-                            | "paused"
-                            | "archived",
-                        )
-                      }
-                    >
-                      <SelectTrigger className="flex w-full h-11! border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-                        <SelectValue placeholder={t("fields.status")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>{t("fields.status")}</SelectLabel>
-                          <SelectItem value="active">
-                            {t("statuses.active")}
-                          </SelectItem>
-                          <SelectItem value="completed">
-                            {t("statuses.completed")}
-                          </SelectItem>
-                          <SelectItem value="paused">
-                            {t("statuses.paused")}
-                          </SelectItem>
-                          <SelectItem value="archived">
-                            {t("statuses.archived")}
-                          </SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </Field>
-              )}
-
-              <Field>
-                <div>
-                  <GoalDatePicker
-                    type="start"
-                    startDate={startDate}
-                    setStartDate={setStartDate}
-                  />
-                </div>
-              </Field>
-
-              <Field>
-                <div>
-                  <GoalDatePicker
-                    type="target"
-                    targetDate={targetDate}
-                    setTargetDate={setTargetDate}
-                  />
-                </div>
-              </Field>
-            </FieldGroup>
-
-            {/* {isEditMode && (
-              <Field>
-                <Label className="mb-2 block">
-                  Progress: {progressPercent}%
-                </Label>
-                <Slider
-                  value={[progressPercent]}
-                  onValueChange={(value) =>
-                    setProgressPercent(Number(value[0] ?? 0))
-                  }
-                  min={0}
-                  max={100}
-                  step={1}
-                  className="mx-auto w-full"
-                />
-              </Field>
-            )} */}
-          </FieldGroup>
+              ) : null}
+              <GoalDatePicker type="start" startDate={startDate} setStartDate={setStartDate} disabled={isPending} />
+              <GoalDatePicker type="target" targetDate={targetDate} setTargetDate={setTargetDate} disabled={isPending} />
+            </div>
+          </fieldset>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button
-                type="button"
-                variant="outline"
-                className="hover:bg-foreground/10"
-              >
-                {commonT("cancel")}
-              </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              disabled={isPending}
-              className="px-4 py-2.5 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {isPending
-                ? isEditMode
-                  ? t("saving")
-                  : t("creating")
-                : isEditMode
-                  ? t("saveChanges")
-                  : t("createSubmit")}
+            <DialogClose asChild><Button type="button" variant="outline" disabled={isPending}>{commonT("cancel")}</Button></DialogClose>
+            <Button type="submit" disabled={isPending}>
+              {isEditMode ? <Save aria-hidden="true" /> : <Plus aria-hidden="true" />}
+              {isPending ? isEditMode ? t("saving") : t("creating") : isEditMode ? t("saveChanges") : t("createSubmit")}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-    // <section className="rounded-2xl border bg-white p-6 shadow-sm">
-    //   <div className="mb-5">
-    //     <h2 className="text-xl font-semibold">Create a new goal</h2>
-    //     <p className="mt-1 text-sm text-neutral-600">
-    //       Define a short-term or long-term learning objective.
-    //     </p>
-    //   </div>
-
-    //   <form onSubmit={handleSubmit} className="space-y-4">
-    //     <div>
-    //       <label className="mb-1.5 block text-sm font-medium">Goal title</label>
-    //       <Input
-    //         type="text"
-    //         value={title}
-    //         onChange={(event) => setTitle(event.target.value)}
-    //         placeholder="Complete AWS Cloud Practitioner revision"
-    //         required
-    //       />
-    //     </div>
-
-    //     <div>
-    //       <label className="mb-1.5 block text-sm font-medium">
-    //         Description
-    //       </label>
-    //       <Textarea
-    //         value={description}
-    //         onChange={(event) => setDescription(event.target.value)}
-    //         placeholder="What does success look like for this goal?"
-    //         rows={3}
-    //       />
-    //     </div>
-
-    //     <div className="grid gap-4 md:grid-cols-3">
-    //       <div>
-    //         <label className="mb-1.5 block text-sm font-medium">
-    //           Goal type
-    //         </label>
-
-    //         <Select
-    //           value={goalType ?? ""}
-    //           onValueChange={(value) =>
-    //             setGoalType(value as "short_term" | "long_term")
-    //           }
-    //         >
-    //           <SelectTrigger className="flex w-full h-11! rounded-xl border border-input bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
-    //             <SelectValue placeholder="Goal type" />
-    //           </SelectTrigger>
-    //           <SelectContent>
-    //             <SelectGroup>
-    //               <SelectLabel>Goal type</SelectLabel>
-    //               <SelectItem value="short_term">Short term</SelectItem>
-    //               <SelectItem value="long_term">Long term</SelectItem>
-    //             </SelectGroup>
-    //           </SelectContent>
-    //         </Select>
-    //       </div>
-
-    //       <div>
-    //         {/* <label className="mb-1.5 block text-sm font-medium">
-    //           Start date
-    //         </label> */}
-    //         <GoalDatePicker
-    //           type="start"
-    //           startDate={startDate}
-    //           setStartDate={setStartDate}
-    //         />
-    //       </div>
-
-    //       <div>
-    //         <GoalDatePicker
-    //           type="target"
-    //           targetDate={targetDate}
-    //           setTargetDate={setTargetDate}
-    //         />
-    //       </div>
-    //     </div>
-
-    //     <Button
-    //       type="submit"
-    //       disabled={isPending}
-    //       className="rounded-xl px-4 py-2.5 text-sm font-medium text-white transition disabled:cursor-not-allowed disabled:opacity-60"
-    //     >
-    //       {isPending ? "Creating..." : "Create goal"}
-    //     </Button>
-    //   </form>
-    // </section>
   );
 }
