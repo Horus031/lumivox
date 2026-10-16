@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import {
   useLocale,
   useTranslations,
@@ -30,8 +31,7 @@ function directionBadgeClass(
     === "improving"
   ) {
     return (
-      "bg-emerald-100 "
-      + "text-emerald-800"
+      "border-success/25 bg-success/10 text-foreground"
     );
   }
 
@@ -40,8 +40,7 @@ function directionBadgeClass(
     === "needs_attention"
   ) {
     return (
-      "bg-red-100 "
-      + "text-red-800"
+      "border-danger/25 bg-danger/10 text-foreground"
     );
   }
 
@@ -50,14 +49,12 @@ function directionBadgeClass(
     === "mixed"
   ) {
     return (
-      "bg-amber-100 "
-      + "text-amber-800"
+      "border-warning/25 bg-warning/10 text-foreground"
     );
   }
 
   return (
-    "bg-secondary "
-    + "text-foreground"
+    "border-border bg-muted text-foreground"
   );
 }
 
@@ -182,11 +179,11 @@ export function WeeklyReflectionCard({
     ?? [];
 
   return (
-    <article className="rounded-[28px] border border-border/70 bg-card/90 p-5 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
-      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
-        <div className="max-w-4xl space-y-4">
+    <article className="min-w-0 rounded-lg border border-border bg-card p-card [overflow-wrap:anywhere]">
+      <div className="grid min-w-0 gap-section lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-3">
           <div className="flex flex-wrap gap-2">
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <span className="rounded-sm border border-border bg-muted px-2 py-0.5 text-caption font-medium text-foreground">
               {t(
                 "badge",
               )}
@@ -194,7 +191,7 @@ export function WeeklyReflectionCard({
 
             <span
               className={[
-                "rounded-full px-3 py-1 text-xs font-semibold capitalize",
+                "rounded-sm border px-2 py-0.5 text-caption font-medium",
                 directionBadgeClass(
                   reflection
                     ?.reflection_direction,
@@ -208,27 +205,27 @@ export function WeeklyReflectionCard({
           </div>
 
           <div>
-            <h3 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h3 className="text-section font-semibold text-foreground">
               {
                 card.title
               }
             </h3>
 
-            <p className="mt-2 text-foreground/75">
+            <p className="mt-1 text-body text-secondary-text">
               {
                 card.summary
               }
             </p>
           </div>
 
-          <div className="rounded-2xl border border-border/70 bg-secondary/35 p-4">
-            <p className="text-sm font-semibold text-muted-foreground">
+          <div className="min-w-0 border-t border-border pt-3">
+            <p className="text-label font-medium text-foreground">
               {t(
                 "reflection",
               )}
             </p>
 
-            <p className="mt-2 text-sm leading-6 text-foreground/75">
+            <p className="mt-2 text-body text-secondary-text">
               {
                 card
                   .reflection_interpretation
@@ -237,20 +234,20 @@ export function WeeklyReflectionCard({
           </div>
         </div>
 
-        <div className="min-w-57.5 rounded-2xl border border-border/70 bg-secondary/35 p-4">
-          <p className="text-sm font-semibold text-muted-foreground">
+        <div className="min-w-0 border-t border-border pt-3">
+          <p className="text-label font-medium text-foreground">
             {t(
               "currentWindow",
             )}
           </p>
 
-          <p className="mt-2 text-sm text-foreground">
+          <p className="mt-2 text-body text-foreground">
             {
               windowStart
             }
           </p>
 
-          <p className="text-sm text-foreground">
+          <p className="text-body text-foreground">
             {"->"}{" "}
             {
               windowEnd
@@ -258,7 +255,7 @@ export function WeeklyReflectionCard({
           </p>
 
           {currentMetrics ? (
-            <div className="mt-4 space-y-2 text-sm text-foreground/80">
+            <div className="mt-3 space-y-2 text-label text-secondary-text">
               <p>
                 {t(
                   "metrics.focus",
@@ -307,15 +304,15 @@ export function WeeklyReflectionCard({
       </div>
 
       {reviewAttempts > 0 ? (
-        <section className="mt-5 rounded-3xl border border-border/70 bg-primary/[0.035] p-5">
+        <section className="mt-section min-w-0 border-t border-border pt-card">
           <div>
-            <h4 className="text-lg font-semibold text-foreground">
+            <h4 className="text-section font-semibold text-foreground">
               {t(
                 "mastery.title",
               )}
             </h4>
 
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-muted-foreground">
+            <p className="mt-1 max-w-3xl text-caption text-muted-foreground">
               {t(
                 "mastery.description",
               )}
@@ -390,7 +387,7 @@ export function WeeklyReflectionCard({
 
           {weakAreas.length > 0 ? (
             <div className="mt-4">
-              <p className="text-sm font-semibold text-muted-foreground">
+              <p className="text-label font-medium text-foreground">
                 {t(
                   "mastery.weakAreas",
                 )}
@@ -405,7 +402,7 @@ export function WeeklyReflectionCard({
                       key={
                         area
                       }
-                      className="rounded-full border border-border/70 bg-card px-3 py-1 text-xs font-medium text-foreground"
+                      className="max-w-full rounded-sm border border-border px-2 py-0.5 text-caption text-foreground [overflow-wrap:anywhere]"
                     >
                       {
                         area
@@ -419,7 +416,7 @@ export function WeeklyReflectionCard({
         </section>
       ) : null}
 
-      <div className="mt-5 grid gap-4 md:grid-cols-3">
+      <div className="mt-section grid min-w-0 grid-cols-3 gap-3 border-t border-border pt-card">
         <MiniSummary
           label={t(
             "wins",
@@ -451,27 +448,23 @@ export function WeeklyReflectionCard({
         />
       </div>
 
-      <details className="group mt-5 rounded-2xl border border-border/70 bg-secondary/20 p-4">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none">
+      <details className="group mt-section min-w-0 border-t border-border pt-card">
+        <summary className="flex min-h-touch cursor-pointer list-none items-center justify-between gap-3 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
           <div>
-            <h4 className="text-lg font-semibold text-foreground">
+            <h4 className="text-section font-semibold text-foreground">
               {t(
                 "detailsTitle",
               )}
             </h4>
 
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-caption text-muted-foreground">
               {t(
                 "detailsDescription",
               )}
             </p>
           </div>
 
-          <span className="rounded-full border border-border/70 bg-card/90 px-3 py-1 text-xs font-semibold text-muted-foreground transition group-open:bg-primary group-open:text-primary-foreground">
-            {t(
-              "toggle",
-            )}
-          </span>
+          <ChevronDown className="size-icon shrink-0 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
 
         <div className="mt-4 space-y-4">
@@ -541,14 +534,14 @@ export function WeeklyReflectionCard({
         </div>
       </details>
 
-      <div className="mt-5 rounded-2xl border border-dashed border-border/70 p-4">
-        <p className="text-sm font-semibold text-foreground">
+      <div className="mt-section border-t border-border pt-card">
+        <p className="text-label font-medium text-foreground">
           {t(
             "confidenceNote",
           )}
         </p>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-1 text-body text-muted-foreground">
           {
             card
               .confidence_note
@@ -580,24 +573,21 @@ function MiniSummary({
   const toneClass =
     tone === "emerald"
       ? (
-          "bg-emerald-100 "
-          + "text-emerald-800"
+          "border-success/25 bg-success/10 text-foreground"
         )
       : tone === "amber"
         ? (
-            "bg-amber-100 "
-            + "text-amber-800"
+            "border-warning/25 bg-warning/10 text-foreground"
           )
         : (
-            "bg-primary/10 "
-            + "text-primary"
+            "border-border bg-muted text-foreground"
           );
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-secondary/25 p-4">
+    <div className="min-w-0">
       <p
         className={[
-          "inline-flex rounded-full px-2.5 py-1 text-xs font-semibold",
+          "inline-flex max-w-full rounded-sm border px-2 py-0.5 text-caption font-medium",
           toneClass,
         ].join(" ")}
       >
@@ -606,7 +596,7 @@ function MiniSummary({
         }
       </p>
 
-      <p className="mt-3 text-2xl font-semibold tracking-tight text-foreground">
+      <p className="mt-2 text-section font-semibold tabular-nums text-foreground">
         {
           value
         }
@@ -630,14 +620,14 @@ function MasteryMetric({
   value,
 }: MasteryMetricProps) {
   return (
-    <div className="rounded-2xl border border-border/60 bg-card/80 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+    <div className="min-w-0 [overflow-wrap:anywhere]">
+      <p className="text-caption text-muted-foreground">
         {
           label
         }
       </p>
 
-      <p className="mt-2 text-xl font-semibold text-foreground">
+      <p className="mt-1 text-section font-semibold tabular-nums text-foreground">
         {
           value
         }
@@ -666,16 +656,16 @@ function ReflectionList({
   items,
 }: ReflectionListProps) {
   return (
-    <section className="rounded-3xl border border-border/70 bg-card/90 p-4">
-      <h4 className="text-lg font-semibold text-foreground">
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
+      <h4 className="text-section font-semibold text-foreground">
         {
           title
         }
       </h4>
 
-      <div className="mt-4 grid gap-4 xl:grid-cols-3">
+      <div className="divide-y divide-border">
         {items.length === 0 ? (
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-body text-muted-foreground">
             {
               empty
             }
@@ -689,9 +679,9 @@ function ReflectionList({
                 key={
                   item.key
                 }
-                className="rounded-xl border border-border/70 bg-secondary/25 p-4"
+                className="min-w-0 py-3"
               >
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/70">
+                <p className="text-caption font-medium text-muted-foreground">
                   {item.key
                     .replaceAll(
                       "_",
@@ -699,7 +689,7 @@ function ReflectionList({
                     )}
                 </p>
 
-                <p className="mt-2 text-sm leading-6 text-foreground/75">
+                <p className="mt-2 text-body text-secondary-text">
                   {
                     item.body
                   }

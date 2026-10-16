@@ -47,21 +47,20 @@ export function AccountDropdown({
       <DropdownMenuTrigger asChild>
         <button
           type="button"
+          aria-label={`${sidebarT("account")}: ${displayName}`}
+          title={displayName}
           className={cn(
-            "flex items-center gap-3 rounded-full bg-surface p-1.5 pr-3 text-left shadow-sm transition hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-            compact && "pr-1.5",
+            "flex h-control items-center gap-2 rounded-md px-2 text-left text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            compact && "size-touch justify-center px-0",
           )}
         >
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/12 text-xs font-bold text-primary">
+          <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-caption font-semibold text-foreground">
             {getInitials(profile.full_name)}
           </span>
           {!compact ? (
             <span className="hidden min-w-0 sm:block">
-              <span className="block max-w-42 truncate text-sm font-semibold text-foreground">
+              <span className="block max-w-40 truncate text-label font-medium text-foreground">
                 {displayName}
-              </span>
-              <span className="block max-w-42 truncate text-xs text-muted-foreground">
-                {profile.timezone}
               </span>
             </span>
           ) : null}
@@ -70,7 +69,7 @@ export function AccountDropdown({
 
       <DropdownMenuContent
         align={align}
-        className="w-64 rounded-xl border-border/70 p-2 shadow-[0_18px_50px_-32px_hsl(var(--primary)/0.35)]"
+        className="w-60 max-w-[calc(100vw-1rem)] rounded-lg border-border p-1 shadow-md"
       >
         <DropdownMenuLabel className="px-3 py-2">
           <span className="flex items-center gap-3">
@@ -90,7 +89,7 @@ export function AccountDropdown({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild className="cursor-pointer rounded-lg px-3 py-2">
+        <DropdownMenuItem asChild className="min-h-touch cursor-pointer rounded-md px-3 py-2 lg:min-h-control">
           <Link href="/settings">
             <Settings />
             {navigationT("settings.label")}
@@ -100,7 +99,7 @@ export function AccountDropdown({
         {profile.role === "admin" ? (
           <DropdownMenuItem
             asChild
-            className="cursor-pointer rounded-lg px-3 py-2"
+            className="min-h-touch cursor-pointer rounded-md px-3 py-2 lg:min-h-control"
           >
             <Link href="/admin">
               <Shield />
@@ -114,7 +113,7 @@ export function AccountDropdown({
         <form action="/auth/signout" method="post">
           <DropdownMenuItem
             asChild
-            className="cursor-pointer rounded-lg px-3 py-2"
+            className="min-h-touch cursor-pointer rounded-md px-3 py-2 lg:min-h-control"
             // Keep the form mounted until the browser submits it.
             onSelect={(event) => event.preventDefault()}
           >

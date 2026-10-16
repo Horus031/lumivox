@@ -10,17 +10,17 @@ export function AdminMetricCard({
   description,
 }: AdminMetricCardProps) {
   return (
-    <article className="rounded-2xl border bg-surface p-5 shadow-sm">
-      <p className="text-sm font-medium text-muted-foreground">
+    <article className="min-w-0 rounded-lg border border-border bg-card p-card [overflow-wrap:anywhere]">
+      <p className="text-label font-medium text-secondary-text">
         {label}
       </p>
 
-      <p className="mt-3 text-3xl font-bold text-foreground">
+      <p className="mt-2 text-metric font-semibold tabular-nums text-foreground">
         {value}
       </p>
 
       {description ? (
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-1 text-caption text-muted-foreground">
           {description}
         </p>
       ) : null}

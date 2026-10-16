@@ -38,7 +38,7 @@ export function AdminNativeTaskRiskMetricsOverview({ metrics }: Props) {
   const t = useTranslations("admin.nativeTaskRisk.metrics");
 
   return (
-    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+    <section className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <AdminMetricCard
         label={t("nativePredictions.label")}
         value={value(metrics?.total_predictions)}
@@ -63,11 +63,11 @@ export function AdminNativeTaskRiskMetricsOverview({ metrics }: Props) {
         description={t("highElevated.description")}
       />
 
-      <AdminMetricCard
-        label={t("activeModel.label")}
-        value={metrics?.active_algorithm ?? t("notAvailable")}
-        description={metrics?.active_model_version ?? t("activeModel.empty")}
-      />
+      <article className="min-w-0 rounded-lg border border-border bg-card p-card [overflow-wrap:anywhere]">
+        <p className="text-label font-medium text-secondary-text">{t("activeModel.label")}</p>
+        <p className="mt-2 text-section font-semibold text-foreground">{metrics?.active_algorithm ?? t("notAvailable")}</p>
+        <p className="mt-1 text-caption text-muted-foreground">{metrics?.active_model_version ?? t("activeModel.empty")}</p>
+      </article>
     </section>
   );
 }

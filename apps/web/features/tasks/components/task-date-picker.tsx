@@ -2,19 +2,20 @@
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { ChevronDownIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Dispatch, SetStateAction, useState } from "react";
+import { vi, enUS } from "date-fns/locale";
+import { CalendarDays } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Dispatch, SetStateAction, useId, useState } from "react";
 
 type TaskDatePickerProps = {
+  disabled?: boolean;
   dueAt: Date | undefined;
   setDueAt: Dispatch<SetStateAction<Date | undefined>>;
   dueTime: string;
@@ -23,7 +24,9 @@ type TaskDatePickerProps = {
 
 export function TaskDatePicker(props: TaskDatePickerProps) {
   const t = useTranslations("tasks.form");
-  const { dueAt, setDueAt, dueTime, setDueTime } = props;
+  const { dueAt, setDueAt, dueTime, setDueTime, disabled } = props;
+  const id = useId();
+  const locale = useLocale();
   const [open, setOpen] = useState(false);
 
   function handleDateSelect(date: Date | undefined) {
@@ -59,46 +62,29 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
   }
 
   return (
-    <FieldGroup className="mx-auto max-w-xs flex-row">
-      <Field className="gap-1">
-        <FieldLabel htmlFor="date-picker-optional">
-          {t("fields.dueDate")}
-        </FieldLabel>
+    <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
+      <div className="min-w-0 space-y-2">
+        <Label htmlFor={`${id}-date`}>{t("fields.dueDate")}</Label>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              id="date-picker-optional"
-              className="w-32 h-11 font-normal hover:text-primary-foreground"
-            >
-              {dueAt ? format(dueAt, "PPP") : t("selectDate")}
-              <ChevronDownIcon />
+            <Button type="button" variant="outline" id={`${id}-date`} disabled={disabled} className="w-full justify-start font-normal">
+              <CalendarDays aria-hidden="true" />
+              <span className="min-w-0 truncate">{dueAt ? new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(dueAt) : t("selectDate")}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={dueAt}
-              captionLayout="dropdown"
-              defaultMonth={dueAt}
-              onSelect={handleDateSelect}
-            />
+          <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start">
+            <Calendar mode="single" selected={dueAt} defaultMonth={dueAt} locale={locale === "vi" ? vi : enUS}
+              formatters={{ formatMonthDropdown: (month) => new Intl.DateTimeFormat(locale, { month: "short" }).format(month) }}
+              captionLayout="dropdown" onSelect={handleDateSelect} />
           </PopoverContent>
         </Popover>
-      </Field>
-      <Field className="w-32 gap-1">
-        <FieldLabel htmlFor="time-picker-optional">
-          {t("fields.dueTime")}
-        </FieldLabel>
-        <Input
-          type="time"
-          id="time-picker-optional"
-          step={1}
-          value={dueTime}
+      </div>
+      <div className="min-w-0 space-y-2">
+        <Label htmlFor={`${id}-time`}>{t("fields.dueTime")}</Label>
+        <Input type="time" id={`${id}-time`} step={1} value={dueTime} disabled={disabled}
           onChange={(event) => handleTimeChange(event.target.value)}
-          className="appearance-none bg-background [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
-        />
-      </Field>
-    </FieldGroup>
+          className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden" />
+      </div>
+    </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
+import { Eraser, Loader2, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
@@ -22,6 +24,7 @@ export function AdminTranslationDeleteButton({
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
+    if (isPending) return;
     const confirmed = window.confirm(t("deleteConfirm"));
 
     if (!confirmed) return;
@@ -42,14 +45,19 @@ export function AdminTranslationDeleteButton({
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-700 transition hover:bg-red-50 disabled:opacity-60 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30"
+      variant="ghost"
+      size="icon"
+      className="hover:bg-danger/10"
+      aria-label={isPending ? t("deleting") : t("delete")}
+      title={isPending ? t("deleting") : t("delete")}
+      aria-busy={isPending}
     >
-      {isPending ? t("deleting") : t("delete")}
-    </button>
+      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
+    </Button>
   );
 }
 
@@ -67,6 +75,7 @@ export function AdminClearEntityTranslationsButton({
   const [isPending, startTransition] = useTransition();
 
   function handleClear() {
+    if (isPending) return;
     const confirmed = window.confirm(t("clearEntityConfirm"));
 
     if (!confirmed) return;
@@ -88,13 +97,17 @@ export function AdminClearEntityTranslationsButton({
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClear}
       disabled={isPending}
-      className="rounded-xl border px-3 py-2 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-800 dark:hover:bg-neutral-900"
+      variant="outline"
+      size="icon"
+      aria-label={isPending ? t("clearing") : t("clearEntityCache")}
+      title={isPending ? t("clearing") : t("clearEntityCache")}
+      aria-busy={isPending}
     >
-      {isPending ? t("clearing") : t("clearEntityCache")}
-    </button>
+      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Eraser aria-hidden="true" />}
+    </Button>
   );
 }

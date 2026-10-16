@@ -7,6 +7,9 @@ import { toast } from "sonner";
 
 import { sendStudyGroupMessageAction } from "@/features/study-groups/study-group.actions";
 import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { Send } from "lucide-react";
 
 type Message = {
   message_id: string;
@@ -141,89 +144,45 @@ export function StudyGroupChat({
   const isConnected = connectionStatus === "SUBSCRIBED";
 
   return (
-    <section className="rounded-2xl border bg-background p-5 shadow-sm">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-bold text-foreground">{t("title")}</h2>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("description")}
-          </p>
-        </div>
-
-        <span
-          className={`rounded-full px-3 py-1 text-xs font-medium ${
-            isConnected
-              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
-              : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
-          }`}
-        >
-          {isConnected ? t("realtime") : connectionStatus}
+    <section className="min-w-0">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
+        <span role="status" className={`rounded-sm px-2 py-0.5 text-caption font-medium ${isConnected ? "bg-success/10 text-success" : connectionStatus === "CHANNEL_ERROR" || connectionStatus === "TIMED_OUT" || connectionStatus === "CLOSED" ? "bg-danger/10 text-danger" : "bg-muted text-muted-foreground"}`}>
+          {isConnected ? t("realtime") : t(`connection.${connectionStatus === "CHANNEL_ERROR" || connectionStatus === "TIMED_OUT" || connectionStatus === "CLOSED" ? "error" : "connecting"}`)}
         </span>
       </div>
-
-      <div
-        ref={scrollRef}
-        className="mt-5 h-130 space-y-3 overflow-y-auto rounded-2xl border bg-surface p-4 "
-      >
-        {messages.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-center">
-            <p className="max-w-sm text-sm text-muted-foreground">
-              {t("empty")}
-            </p>
-          </div>
-        ) : (
-          messages.map((message) => {
+      <div className="flex h-96 min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card md:h-112">
+        <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3" tabIndex={0} aria-label={t("title")}>
+          {messages.length === 0 ? (
+            <div className="flex h-full items-center justify-center text-center">
+              <p className="max-w-sm text-body text-muted-foreground">{t("empty")}</p>
+            </div>
+          ) : messages.map((message) => {
             const isMine = message.user_id === currentUserId;
-
             return (
-              <article
-                key={message.message_id}
-                className={`rounded-2xl border p-4 dark:border-neutral-800 ${
-                  isMine
-                    ? "bg-white dark:bg-neutral-950"
-                    : "bg-neutral-100 dark:bg-neutral-800"
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-neutral-950 dark:text-neutral-50">
-                    {isMine ? t("you") : getDisplayName(message)}
-                  </p>
-
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
+              <article key={message.message_id} className={`w-fit max-w-[92%] rounded-lg px-3 py-2 ${isMine ? "ml-auto bg-primary/10" : "bg-muted"}`}>
+                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+                  <p className="min-w-0 text-label font-medium text-foreground [overflow-wrap:anywhere]">{isMine ? t("you") : getDisplayName(message)}</p>
+                  <time dateTime={message.created_at} className="text-caption text-muted-foreground">
                     {new Date(message.created_at).toLocaleString(locale)}
-                  </p>
+                  </time>
                 </div>
-
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-neutral-700 dark:text-neutral-300">
-                  {message.content}
-                </p>
+                <p className="mt-1 whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">{message.content}</p>
               </article>
             );
-          })
-        )}
+          })}
+        </div>
+        <form onSubmit={handleSubmit} aria-busy={isPending} className="flex items-end gap-2 border-t border-border p-3">
+          <Textarea value={content} onChange={(event) => setContent(event.target.value)}
+            maxLength={2000} disabled={isPending} rows={2}
+            aria-label={t("placeholder")} placeholder={t("placeholder")}
+            className="max-h-32 min-h-touch min-w-0 flex-1 resize-none" />
+          <Button type="submit" size="icon" disabled={isPending || !content.trim()}
+            aria-label={isPending ? t("sending") : t("send")} title={isPending ? t("sending") : t("send")}>
+            <Send aria-hidden="true" />
+          </Button>
+        </form>
       </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="mt-4 flex flex-col gap-3 md:flex-row"
-      >
-        <textarea
-          value={content}
-          onChange={(event) => setContent(event.target.value)}
-          rows={2}
-          placeholder={t("placeholder")}
-          className="min-h-13 flex-1 rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
-        />
-
-        <button
-          type="submit"
-          disabled={isPending || !content.trim()}
-          className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-        >
-          {isPending ? t("sending") : t("send")}
-        </button>
-      </form>
     </section>
   );
 }

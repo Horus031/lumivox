@@ -7,14 +7,14 @@ type PbiExplanationPanelProps = {
 
 function getInsightBadgeClass(type: "positive" | "warning" | "neutral") {
   if (type === "positive") {
-    return "bg-emerald-100 text-emerald-800";
+    return "border-success/30 bg-success/10 text-foreground";
   }
 
   if (type === "warning") {
-    return "bg-amber-100 text-amber-800";
+    return "border-warning/30 bg-warning/10 text-foreground";
   }
 
-  return "bg-secondary text-foreground";
+  return "border-border bg-muted text-foreground";
 }
 
 export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
@@ -22,11 +22,11 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
 
   if (!explanation) {
     return (
-      <section className="rounded-2xl border border-dashed border-border/70 bg-card/80 p-5 text-center">
-        <h2 className="text-lg font-semibold text-foreground">
+      <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+        <h2 className="text-section font-semibold text-foreground">
           {t("emptyTitle")}
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-1 text-body text-secondary-text">
           {t("emptyDescription")}
         </p>
       </section>
@@ -34,47 +34,44 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
   }
 
   return (
-    <section className="rounded-2xl min-h-[310px] bg-card/90 p-4 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.55)]">
+    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-caption font-medium text-muted-foreground">
             {t("eyebrow")}
           </p>
 
-          <h2 className="mt-1 text-xl font-semibold tracking-tight text-foreground">
+          <h2 className="mt-1 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
             {explanation.pbi_band}
           </h2>
 
-          {/* <p className="mt-1 max-w-3xl text-sm leading-6 text-foreground/75">
+          <p className="mt-1 text-body text-secondary-text [overflow-wrap:anywhere]">
             {explanation.overall_summary}
-          </p> */}
+          </p>
         </div>
       </div>
 
       <div className="mt-4">
-        <div className="space-y-3">
+        <div className="divide-y divide-border">
           {explanation.actionable_insights.map((insight) => (
             <article
               key={`${insight.linked_component}-${insight.title}`}
-              className="rounded-xl flex items-center justify-between border border-border/70 bg-background/45 p-3 h-full"
+              className="min-w-0 py-3 first:pt-0 last:pb-0"
             >
-              <div>
-                <h3 className="mt-2 text-sm font-semibold text-foreground">
+              <div className="flex flex-wrap items-start justify-between gap-2">
+                <h3 className="min-w-0 flex-1 basis-40 text-label font-medium text-foreground [overflow-wrap:anywhere]">
                   {insight.title}
                 </h3>
 
-                <p className="mt-1 text-xs max-w-xl leading-5 text-foreground/70">
-                  {insight.body}
-                </p>
+                <span
+                  className={`inline-flex shrink-0 rounded-sm border px-2 py-0.5 text-caption font-medium ${getInsightBadgeClass(
+                    insight.type,
+                  )}`}
+                >
+                  {t(`insightTypes.${insight.type}`)}
+                </span>
               </div>
-
-              <span
-                className={`inline-flex text-nowrap rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${getInsightBadgeClass(
-                  insight.type,
-                )}`}
-              >
-                {t(`insightTypes.${insight.type}`)}
-              </span>
+              <p className="mt-1 text-body text-secondary-text [overflow-wrap:anywhere]">{insight.body}</p>
             </article>
           ))}
         </div>

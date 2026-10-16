@@ -1,6 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
+import { Archive, ArchiveRestore, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -27,6 +29,7 @@ export function AdminRoadmapArchiveButton({
   const archived = status === "archived";
 
   function handleClick() {
+    if (isPending) return;
     const confirmed = window.confirm(
       archived
         ? t("restoreConfirm")
@@ -51,14 +54,19 @@ export function AdminRoadmapArchiveButton({
     });
   }
 
+  const label = isPending ? t("updating") : archived ? t("restore") : t("archive");
   return (
-    <button
+    <Button
       type="button"
       onClick={handleClick}
       disabled={isPending}
-      className="rounded-xl border px-3 py-2 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-800 dark:hover:bg-neutral-900"
+      variant="outline"
+      size="icon"
+      aria-label={label}
+      title={label}
+      aria-busy={isPending}
     >
-      {isPending ? t("updating") : archived ? t("restore") : t("archive")}
-    </button>
+      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+    </Button>
   );
 }

@@ -1,33 +1,41 @@
 import type { ReactNode } from "react";
 
 type PageHeaderProps = {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   action?: ReactNode;
 };
 
-export function PageHeader({ title, description, action }: PageHeaderProps) {
+export function PageHeader({
+  eyebrow,
+  title,
+  description,
+  action,
+}: PageHeaderProps) {
   return (
-    <header className="rounded-[30px] ring-1 ring-border/60 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.22)]">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col justify-between items-center gap-4 md:flex-row">
-          <div className="max-w-4xl">
-            {/* <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary/70">
-              {eyebrow}
-            </p> */}
-
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
-              {title}
-            </h1>
-
-            <p className="mt-2 max-w-3xl text-sm leading-7 text-muted-foreground">
+    <header data-slot="page-header" className="min-w-0">
+      {eyebrow ? (
+        <p className="mb-1 text-caption font-medium text-muted-foreground [overflow-wrap:anywhere]">
+          {eyebrow}
+        </p>
+      ) : null}
+      <div className="flex flex-wrap items-start gap-x-section gap-y-3">
+        <div className="min-w-0 flex-1 basis-80">
+          <h1 className="text-page font-semibold tracking-normal text-foreground [overflow-wrap:anywhere]">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-1 max-w-3xl text-body text-secondary-text [overflow-wrap:anywhere]">
               {description}
             </p>
-          </div>
-
-          {action ? <div>{action}</div> : null}
+          ) : null}
         </div>
+        {action ? (
+          <div data-slot="page-header-actions" className="flex min-w-0 max-w-full flex-wrap items-center gap-2 [&>*]:max-w-full">
+            {action}
+          </div>
+        ) : null}
       </div>
     </header>
   );

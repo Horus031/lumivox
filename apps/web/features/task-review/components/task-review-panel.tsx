@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Sparkles } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
 
 import { useLocale, useTranslations } from "next-intl";
 
@@ -167,7 +167,7 @@ export function TaskReviewPanel({
 
   if (isLoading && !attempt) {
     return (
-      <div className="rounded-[24px] border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
+      <div className="border-y border-border py-card text-body text-muted-foreground">
         {t("loading")}
       </div>
     );
@@ -175,14 +175,14 @@ export function TaskReviewPanel({
 
   if (attempt?.status === "generating") {
     return (
-      <div className="rounded-[24px] border border-border/60 bg-muted/25 p-6">
+      <div className="border-y border-border py-card">
         <Sparkles className="h-5 w-5 text-primary" />
 
-        <h3 className="mt-3 font-semibold text-foreground">
+        <h3 className="mt-3 text-section font-semibold text-foreground">
           {t("generatingTitle")}
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-body text-secondary-text">
           {t("generatingDescription")}
         </p>
 
@@ -192,7 +192,7 @@ export function TaskReviewPanel({
           className="mt-4"
           onClick={() => void loadLatest()}
         >
-          {t("refresh")}
+          <RefreshCw aria-hidden="true" />{t("refresh")}
         </Button>
       </div>
     );
@@ -200,7 +200,7 @@ export function TaskReviewPanel({
 
   if (attempt?.status === "ready" && attempt.assessment) {
     return (
-      <div className="space-y-7">
+      <div className="min-w-0 space-y-section">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant="secondary">
@@ -216,15 +216,15 @@ export function TaskReviewPanel({
             </Badge>
           </div>
 
-          <h3 className="mt-4 text-lg font-semibold text-foreground">
+          <h3 className="mt-4 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
             {attempt.assessment.title}
           </h3>
 
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">
+          <p className="mt-2 text-body text-secondary-text">
             {attempt.assessment.summary}
           </p>
 
-          <p className="mt-3 rounded-2xl bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
+          <p className="mt-3 text-caption text-muted-foreground">
             {sourceLabel(attempt)}
           </p>
         </div>
@@ -238,8 +238,8 @@ export function TaskReviewPanel({
 
   if (attempt?.status === "passed" || attempt?.status === "failed") {
     return (
-      <div className="space-y-7">
-        <p className="rounded-2xl bg-muted/40 px-4 py-3 text-xs leading-5 text-muted-foreground">
+      <div className="min-w-0 space-y-section">
+        <p className="text-caption text-muted-foreground">
           {sourceLabel(attempt)}
         </p>
 
@@ -250,10 +250,10 @@ export function TaskReviewPanel({
         <TaskReviewResult attempt={attempt} />
 
         {attempt.status === "failed" && taskCanGenerate ? (
-          <div className="rounded-[24px] border border-border/60 p-5">
-            <h3 className="font-semibold text-foreground">{t("retryTitle")}</h3>
+          <div className="border-t border-border pt-card">
+            <h3 className="text-section font-semibold text-foreground">{t("retryTitle")}</h3>
 
-            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+            <p className="mt-2 text-body text-secondary-text">
               {t("retryDescription")}
             </p>
 
@@ -263,7 +263,7 @@ export function TaskReviewPanel({
               disabled={isGenerating}
               onClick={handleGenerate}
             >
-              <Sparkles />
+              <Sparkles aria-hidden="true" />
 
               {isGenerating ? t("generating") : t("generateAgain")}
             </Button>
@@ -278,12 +278,12 @@ export function TaskReviewPanel({
     attempt?.status === "cancelled"
   ) {
     return (
-      <div className="rounded-[24px] border border-border/60 p-6">
-        <h3 className="font-semibold text-foreground">
+      <div className="border-y border-border py-card">
+        <h3 className="text-section font-semibold text-foreground">
           {t("generationFailedTitle")}
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-body text-secondary-text">
           {attempt.generation_error || t("generationFailedDescription")}
         </p>
 
@@ -305,7 +305,7 @@ export function TaskReviewPanel({
 
   if (task.parent_task_id !== null) {
     return (
-      <div className="rounded-[24px] border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
+      <div className="border-y border-border py-card text-body text-muted-foreground">
         {t("subtaskUnavailable")}
       </div>
     );
@@ -313,10 +313,10 @@ export function TaskReviewPanel({
 
   if (blockingSubtasks.length > 0) {
     return (
-      <div className="rounded-[24px] border border-border/60 p-6">
-        <h3 className="font-semibold text-foreground">{t("blockedTitle")}</h3>
+      <div className="border-y border-border py-card">
+        <h3 className="text-section font-semibold text-foreground">{t("blockedTitle")}</h3>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-body text-secondary-text">
           {t("blockedDescription", {
             count: blockingSubtasks.length,
           })}
@@ -327,7 +327,7 @@ export function TaskReviewPanel({
 
   if (task.status === "todo") {
     return (
-      <div className="rounded-[24px] border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
+      <div className="border-y border-border py-card text-body text-muted-foreground">
         {t("startTaskFirst")}
       </div>
     );
@@ -335,8 +335,8 @@ export function TaskReviewPanel({
 
   if (task.status === "in_review") {
     return (
-      <div className="rounded-[24px] border border-border/60 p-6">
-        <p className="text-sm text-muted-foreground">{t("missingAttempt")}</p>
+      <div className="border-y border-border py-card">
+        <p className="text-body text-muted-foreground">{t("missingAttempt")}</p>
 
         <Button
           type="button"
@@ -352,18 +352,18 @@ export function TaskReviewPanel({
 
   if (task.status === "completed" || task.status === "cancelled") {
     return (
-      <div className="rounded-[24px] border border-dashed border-border/70 p-6 text-sm text-muted-foreground">
+      <div className="border-y border-border py-card text-body text-muted-foreground">
         {t("closedWithoutReview")}
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-w-0 space-y-card">
       <div>
-        <h3 className="font-semibold text-foreground">{t("generateTitle")}</h3>
+        <h3 className="text-section font-semibold text-foreground">{t("generateTitle")}</h3>
 
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p className="mt-2 text-body text-secondary-text">
           {t("generateDescription")}
         </p>
       </div>

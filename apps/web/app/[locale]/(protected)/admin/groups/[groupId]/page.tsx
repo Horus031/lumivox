@@ -1,124 +1,41 @@
 import { notFound } from "next/navigation";
 import { getLocale, getTranslations } from "next-intl/server";
-
-import { AdminMetricCard } from "@/features/admin/components/admin-metric-card";
+import { ArrowLeft } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 import { AdminGroupArchiveButton } from "@/features/admin/components/admin-group-archive-button";
 import { AdminGroupMembersTable } from "@/features/admin/components/admin-group-members-table";
 import { AdminGroupMessagesTable } from "@/features/admin/components/admin-group-messages-table";
-import {
-  getAdminStudyGroupDetail,
-  getAdminStudyGroupMembers,
-  getAdminStudyGroupMessages,
-} from "@/features/admin/admin-groups.queries";
+import { getAdminStudyGroupDetail, getAdminStudyGroupMembers, getAdminStudyGroupMessages } from "@/features/admin/admin-groups.queries";
 
-type AdminGroupDetailPageProps = {
-  params: Promise<{
-    groupId: string;
-  }>;
-};
-
-export default async function AdminGroupDetailPage({
-  params,
-}: AdminGroupDetailPageProps) {
+export default async function AdminGroupDetailPage({ params }: { params: Promise<{ groupId: string }> }) {
   const { groupId } = await params;
-  const [t, commonT, locale] = await Promise.all([
-    getTranslations("admin.groups.detail"),
-    getTranslations("admin.common"),
-    getLocale(),
-  ]);
-
-  const [group, members, messages] = await Promise.all([
-    getAdminStudyGroupDetail(groupId),
-    getAdminStudyGroupMembers(groupId),
-    getAdminStudyGroupMessages(groupId),
-  ]);
-
-  if (!group) {
-    notFound();
-  }
-
+  const [t, commonT, locale] = await Promise.all([getTranslations("admin.groups.detail"), getTranslations("admin.common"), getLocale()]);
+  const [group, members, messages] = await Promise.all([getAdminStudyGroupDetail(groupId), getAdminStudyGroupMembers(groupId), getAdminStudyGroupMessages(groupId)]);
+  if (!group) notFound();
+  const metadata = [
+    [t("members"), group.member_count], [commonT("messages"), group.message_count],
+    [commonT("status"), commonT(`groupStatus.${group.archived_at ? "archived" : "active"}`)],
+    [t("private"), group.is_private ? commonT("yes") : commonT("no")],
+    [commonT("created"), new Intl.DateTimeFormat(locale).format(new Date(group.created_at))],
+    [commonT("updated"), new Intl.DateTimeFormat(locale).format(new Date(group.updated_at))],
+  ];
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-surface p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
-
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {group.name}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {commonT("owner")}: {group.owner_name ?? commonT("unknownOwner")} -{" "}
-          {group.owner_email ?? group.owner_id}
-        </p>
-
-        {group.description ? (
-          <p className="mt-3 max-w-3xl text-muted-foreground">
-            {group.description}
-          </p>
-        ) : null}
-
-        {group.admin_note ? (
-          <p className="mt-4 rounded-2xl bg-amber-50 p-4 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-200">
-            {t("adminNote")}: {group.admin_note}
-          </p>
-        ) : null}
-
-        <div className="mt-5">
-          <AdminGroupArchiveButton
-            groupId={group.group_id}
-            archived={Boolean(group.archived_at)}
-          />
-        </div>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <AdminMetricCard
-          label={t("members")}
-          value={group.member_count}
-        />
-
-        <AdminMetricCard
-          label={commonT("messages")}
-          value={group.message_count}
-        />
-
-        <AdminMetricCard
-          label={commonT("status")}
-          value={commonT(
-            `groupStatus.${group.archived_at ? "archived" : "active"}`
-          )}
-        />
-
-        <AdminMetricCard
-          label={t("private")}
-          value={group.is_private ? commonT("yes") : commonT("no")}
-        />
-
-        <AdminMetricCard
-          label={commonT("created")}
-          value={new Intl.DateTimeFormat(locale).format(
-            new Date(group.created_at)
-          )}
-        />
-
-        <AdminMetricCard
-          label={commonT("updated")}
-          value={new Intl.DateTimeFormat(locale).format(
-            new Date(group.updated_at)
-          )}
-        />
-      </section>
-
-      <div className="grid gap-6 xl:grid-cols-[360px_1fr]">
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={group.name} description={`${commonT("owner")}: ${group.owner_name ?? commonT("unknownOwner")} - ${group.owner_email ?? group.owner_id}`} action={
+        <Button asChild variant="outline"><Link href="/admin/groups"><ArrowLeft aria-hidden="true" />{commonT("backToList")}</Link></Button>
+      } />
+      {group.description && <p className="text-body text-secondary-text [overflow-wrap:anywhere]">{group.description}</p>}
+      {group.admin_note && <div className="border-l-2 border-warning pl-3"><p className="text-label font-medium text-foreground">{t("adminNote")}</p><p className="mt-1 whitespace-pre-wrap text-body text-secondary-text [overflow-wrap:anywhere]">{group.admin_note}</p></div>}
+      <div className="border-y border-border py-card"><div className="max-w-md"><AdminGroupArchiveButton groupId={group.group_id} archived={Boolean(group.archived_at)} /></div></div>
+      <dl className="grid min-w-0 gap-x-section gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+        {metadata.map(([label, value]) => <div key={label} className="min-w-0"><dt className="text-label text-muted-foreground">{label}</dt><dd className="mt-1 text-body font-medium tabular-nums text-foreground [overflow-wrap:anywhere]">{value}</dd></div>)}
+      </dl>
+      <div className="grid min-w-0 gap-section xl:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <AdminGroupMembersTable members={members} />
-
-        <AdminGroupMessagesTable
-          groupId={groupId}
-          messages={messages}
-        />
+        <AdminGroupMessagesTable groupId={groupId} messages={messages} />
       </div>
-    </main>
+    </div>
   );
 }

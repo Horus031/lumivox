@@ -2,6 +2,7 @@ import { AdminUserSearchForm } from "@/features/admin/components/admin-user-sear
 import { AdminUsersTable } from "@/features/admin/components/admin-users-table";
 import { searchAdminUsers } from "@/features/admin/admin-users.queries";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 
 type AdminUsersPageProps = {
   searchParams: Promise<{
@@ -21,24 +22,12 @@ export default async function AdminUsersPage({
   ]);
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-surface p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
-
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </section>
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
       <AdminUserSearchForm initialQuery={query} />
 
       <AdminUsersTable users={users} />
-    </main>
+    </div>
   );
 }

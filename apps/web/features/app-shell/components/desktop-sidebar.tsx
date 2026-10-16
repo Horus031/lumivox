@@ -5,6 +5,7 @@ import { AppNavigation } from "@/features/app-shell/components/app-navigation";
 import { SidebarEngagementMiniStats } from "@/features/engagement-retention/components/sidebar-engagement-mini-stats";
 import { getCurrentEngagementStats } from "@/features/engagement-retention/engagement-retention.queries";
 import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 
 type DesktopSidebarProps = {
   profile: Profile;
@@ -25,7 +26,7 @@ function SidebarEngagementFallback() {
   return (
     <div
       aria-hidden="true"
-      className="mt-3 h-24 animate-pulse rounded-xl border border-border/60 bg-muted/40"
+      className="h-24 animate-pulse rounded-lg bg-muted"
     />
   );
 }
@@ -34,33 +35,21 @@ export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
   const t = await getTranslations("appShell.sidebar");
 
   return (
-    <aside className="desktop-sidebar z-2 hidden transition-all duration-300 ease-out lg:fixed lg:inset-y-0 lg:block lg:w-68 lg:p-4 xl:p-0">
-      <div className="desktop-sidebar-panel flex h-full flex-col gap-4 rounded-tr-2xl rounded-br-2xl bg-sidebar/95 px-4 py-5 shadow-[0_20px_70px_-55px_hsl(var(--primary)/0.28)] ring-1 ring-border/70 backdrop-blur-xl transition-all duration-300 ease-out">
-        <div className="rounded-[28px] bg-sidebar px-1 py-1">
-          <div className="rounded-3xl">
-            <div className="desktop-sidebar-brand-mark hidden h-10 w-10 items-center justify-center rounded-2xl bg-primary/12 text-sm font-bold text-primary">
-              L
-            </div>
-            <p className="desktop-sidebar-brand-copy text-[0.72rem] font-semibold uppercase tracking-[0.28em] text-muted-foreground transition-all duration-200">
-              {t("eyebrow")}
-            </p>
+    <aside id="desktop-sidebar" aria-label={t("title")} className="desktop-sidebar z-20 hidden overflow-hidden border-r border-sidebar-border transition-[width] duration-200 ease-out motion-reduce:transition-none lg:fixed lg:inset-y-0 lg:block lg:w-sidebar">
+      <div className="desktop-sidebar-panel flex h-full min-h-0 flex-col bg-sidebar">
+        <Link href="/dashboard" aria-label={t("eyebrow")} title={t("eyebrow")} className="flex h-topbar shrink-0 items-center gap-3 border-b border-sidebar-border px-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          <span aria-hidden="true" className="desktop-sidebar-brand-mark flex size-control-sm shrink-0 items-center justify-center rounded-md bg-primary text-body font-semibold text-primary-foreground">L</span>
+          <span className="desktop-sidebar-brand-copy text-section font-semibold">{t("eyebrow")}</span>
+        </Link>
 
-            <h4 className="desktop-sidebar-brand-copy mt-3 font-semibold tracking-tight text-foreground transition-all duration-200">
-              {t("title")}
-            </h4>
-          </div>
-        </div>
-
-        <div className="w-fit mt-4 flex-1 overflow-y-auto lg:h-full">
+        <div className="desktop-sidebar-nav-scroll min-h-0 w-full flex-1 overflow-y-auto px-2 py-3">
           <AppNavigation profile={profile} />
         </div>
 
-        <div className="space-y-4">
-          <div className="desktop-sidebar-engagement transition-all duration-200">
-            <Suspense fallback={<SidebarEngagementFallback />}>
-              <SidebarEngagement userId={profile.id} />
-            </Suspense>
-          </div>
+        <div className="desktop-sidebar-engagement shrink-0 border-t border-sidebar-border px-3 pb-3">
+          <Suspense fallback={<SidebarEngagementFallback />}>
+            <SidebarEngagement userId={profile.id} />
+          </Suspense>
         </div>
       </div>
     </aside>

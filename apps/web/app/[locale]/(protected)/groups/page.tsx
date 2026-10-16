@@ -3,6 +3,10 @@ import { Link } from "@/i18n/navigation";
 
 import { getMyStudyGroups } from "@/features/study-groups/study-group.queries";
 import { CreateStudyGroupForm } from "@/features/study-groups/components/create-study-group-form";
+import { PageHeader } from "@/features/app-shell/components/page-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
 
 export default async function GroupsPage() {
   const [memberships, t] = await Promise.all([
@@ -11,70 +15,55 @@ export default async function GroupsPage() {
   ]);
 
   return (
-    <main className="space-y-6 py-4">
-      <section className="rounded-2xl border bg-background p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+    <section className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} action={<CreateStudyGroupForm />} />
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </section>
-
-      <CreateStudyGroupForm />
-
-      <section className="rounded-2xl border bg-background p-6 shadow-sm">
-        <h2 className="text-2xl font-bold text-foreground">
+      <section className="min-w-0">
+        <h2 className="text-section font-semibold text-foreground">
           {t("myGroups")}
         </h2>
 
         {memberships.length === 0 ? (
-          <div className="mt-5 rounded-2xl border border-dashed p-8 text-center">
-            <p className="text-sm text-gray-500">
+          <div className="mt-card border-y border-border py-section text-center">
+            <p className="text-body text-muted-foreground">
               {t("empty")}
             </p>
           </div>
         ) : (
-          <div className="mt-5 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="mt-card grid gap-card md:grid-cols-2 xl:grid-cols-3">
             {memberships.map((membership) => {
               const group = membership.study_rooms;
 
               return (
                 <article
                   key={membership.id}
-                  className="rounded-2xl border p-5 dark:border-neutral-800"
+                  className="flex min-w-0 flex-col items-start rounded-lg border border-border bg-card p-card"
                 >
-                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  <Badge variant="secondary">
                     {t(`roles.${membership.role}`)}
-                  </p>
+                  </Badge>
 
-                  <h3 className="mt-2 text-lg font-bold text-foreground">
+                  <h3 className="mt-2 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
                     {group.title}
                   </h3>
 
                   {group.description ? (
-                    <p className="mt-2 text-sm text-muted-foreground">
+                    <p className="mt-1 line-clamp-3 text-body text-secondary-text [overflow-wrap:anywhere]" title={group.description}>
                       {group.description}
                     </p>
                   ) : null}
 
-                  <Link
-                    href={`/groups/${group.id}`}
-                    className="mt-4 inline-flex rounded-xl bg-background px-4 py-2 text-sm font-medium text-foreground transition"
-                  >
-                    {t("openGroup")}
-                  </Link>
+                  <div className="mt-auto pt-card">
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={`/groups/${group.id}`}><ArrowRight aria-hidden="true" />{t("openGroup")}</Link>
+                    </Button>
+                  </div>
                 </article>
               );
             })}
           </div>
         )}
       </section>
-    </main>
+    </section>
   );
 }

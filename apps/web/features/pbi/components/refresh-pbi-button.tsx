@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 
 import { generateCurrentPbiSnapshotAction } from "@/features/pbi/pbi.actions";
 import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 
 export function RefreshPbiButton() {
   const t = useTranslations("dashboard.refreshPbi");
@@ -31,7 +32,9 @@ export function RefreshPbiButton() {
     <Button
       onClick={handleRefresh}
       disabled={isPending}
+      aria-busy={isPending}
     >
+      <RefreshCw aria-hidden="true" className={isPending ? "animate-spin motion-reduce:animate-none" : undefined} />
       {isPending ? t("calculating") : t("button")}
     </Button>
   );

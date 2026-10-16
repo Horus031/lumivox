@@ -1,5 +1,6 @@
 import { AdminMetricCard } from "@/features/admin/components/admin-metric-card";
 import { AdminRecentUsersTable } from "@/features/admin/components/admin-recent-users-table";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 import {
   getAdminDashboardMetrics,
   getAdminRecentUsers,
@@ -19,22 +20,10 @@ export default async function AdminDashboardPage() {
   ]);
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-surface p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </section>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+      <section aria-label={t("metricsLabel")} className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <AdminMetricCard
           label={t("metrics.totalUsers")}
           value={formatNumber(metrics?.total_users, locale)}
@@ -109,6 +98,6 @@ export default async function AdminDashboardPage() {
       </section>
 
       <AdminRecentUsersTable users={recentUsers} />
-    </main>
+    </div>
   );
 }
