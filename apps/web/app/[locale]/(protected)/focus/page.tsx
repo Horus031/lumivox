@@ -13,7 +13,9 @@ import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getAccessibleProcessedLearningDocuments } from "@/features/learning-documents/learning-document.queries";
 import { RagStudyAssistant } from "@/features/rag/components/rag-study-assistant";
 import { getRagDefaultSettings } from "@/features/cms-settings/cms-settings.queries";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { getActiveFocusV2Snapshot } from "@/features/focus-sessions/focus-v2.queries";
 
 async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   const [documents, ragDefaults] = await Promise.all([
@@ -40,6 +42,10 @@ function RagLoadingFallback() {
 }
 
 export default async function FocusPage() {
+  if (process.env.FOCUS_V2_ENABLED === "true") {
+    const activeV2 = await getActiveFocusV2Snapshot();
+    if (activeV2) redirect(`/${await getLocale()}/focus-v2-lab`);
+  }
   const [tasks, activeSession, recentSessions, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
