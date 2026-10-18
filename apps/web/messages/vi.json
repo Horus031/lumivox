@@ -976,6 +976,56 @@
     }
   },
   "focus": {
+    "builder": {
+      "title": "Thiết lập phiên tập trung",
+      "description": "Tùy chỉnh số vòng học, thời gian nghỉ và cách chuyển tiếp giữa các vòng.",
+      "presetsTitle": "Cấu hình có sẵn",
+      "presets": {
+        "classic": "Cổ điển 25/5",
+        "balanced": "Cân bằng 50/10",
+        "deepWork": "Học sâu 90/15",
+        "custom": "Tùy chỉnh"
+      },
+      "task": "Nhiệm vụ liên kết",
+      "chooseTask": "Chọn nhiệm vụ",
+      "noTask": "Học không liên kết nhiệm vụ",
+      "fields": {
+        "focusMinutes": "Phút học mỗi vòng",
+        "shortBreakMinutes": "Phút nghỉ ngắn",
+        "longBreakMinutes": "Phút nghỉ dài",
+        "roundCount": "Số vòng học",
+        "longBreakEvery": "Nghỉ dài sau mỗi N vòng học"
+      },
+      "range": "Khoảng hợp lệ: {min}–{max}",
+      "toggles": {
+        "autoStartBreaks": "Tự bắt đầu giờ nghỉ",
+        "autoStartFocus": "Tự bắt đầu vòng học tiếp theo"
+      },
+      "toggleHelp": {
+        "autoStartBreaks": "Nếu tắt, đồng hồ sẽ chờ bạn bắt đầu giờ nghỉ.",
+        "autoStartFocus": "Nếu tắt, đồng hồ sẽ chờ bạn bắt đầu vòng học tiếp theo."
+      },
+      "scheduleTitle": "Lịch trình dự kiến",
+      "focusSegment": "Học",
+      "shortBreakSegment": "Nghỉ ngắn",
+      "longBreakSegment": "Nghỉ dài",
+      "round": "Vòng {number}",
+      "minuteUnit": "phút",
+      "totalFocus": "Tổng thời gian học",
+      "totalBreak": "Tổng thời gian nghỉ",
+      "totalDuration": "Tổng thời lượng",
+      "noFinalBreak": "Không có giờ nghỉ sau vòng học cuối cùng.",
+      "invalidConfig": "Vui lòng nhập các giá trị hợp lệ cho toàn bộ cấu hình phiên học.",
+      "saveDefaults": "Lưu làm mặc định",
+      "saved": "Đã lưu cấu hình mặc định.",
+      "saveFailed": "Không lưu được cấu hình mặc định.",
+      "saving": "Đang lưu…",
+      "start": "Bắt đầu phiên tập trung",
+      "starting": "Đang bắt đầu…",
+      "created": "Đã bắt đầu phiên tập trung.",
+      "startFailed": "Không thể bắt đầu phiên tập trung.",
+      "savedHint": "Lưu mặc định không bắt đầu phiên học. Phiên mới sẽ sử dụng cấu hình hiện tại của bạn."
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Phiên tập trung",

@@ -16,6 +16,8 @@ import { getRagDefaultSettings } from "@/features/cms-settings/cms-settings.quer
 import { getLocale, getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import { getActiveFocusV2Snapshot } from "@/features/focus-sessions/focus-v2.queries";
+import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-preferences.queries";
+import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
 
 async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   const [documents, ragDefaults] = await Promise.all([
@@ -52,6 +54,9 @@ export default async function FocusPage() {
     getRecentFocusSessions(),
     getTranslations("focus.page"),
   ]);
+  const initialPreferences = process.env.FOCUS_V2_ENABLED === "true" && !activeSession
+    ? await getFocusV2Preferences()
+    : null;
 
   return (
     <section>
@@ -72,7 +77,9 @@ export default async function FocusPage() {
                 </Suspense>
               </>
             ) : (
-              <StartFocusSessionForm tasks={tasks} />
+              initialPreferences
+                ? <FocusV2SessionBuilder tasks={tasks} initialPreferences={initialPreferences} />
+                : <StartFocusSessionForm tasks={tasks} />
             )}
           </div>
 

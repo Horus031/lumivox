@@ -976,6 +976,56 @@
     }
   },
   "focus": {
+    "builder": {
+      "title": "Build your focus session",
+      "description": "Set study rounds, breaks, and an automatic or manual study rhythm.",
+      "presetsTitle": "Study presets",
+      "presets": {
+        "classic": "Classic 25/5",
+        "balanced": "Balanced 50/10",
+        "deepWork": "Deep Work 90/15",
+        "custom": "Custom"
+      },
+      "task": "Linked task",
+      "chooseTask": "Choose a task",
+      "noTask": "Study without a linked task",
+      "fields": {
+        "focusMinutes": "Study minutes per round",
+        "shortBreakMinutes": "Short break minutes",
+        "longBreakMinutes": "Long break minutes",
+        "roundCount": "Number of rounds",
+        "longBreakEvery": "Take a long break after every N rounds"
+      },
+      "range": "Allowed range: {min}–{max}",
+      "toggles": {
+        "autoStartBreaks": "Automatically start breaks",
+        "autoStartFocus": "Automatically start the next study round"
+      },
+      "toggleHelp": {
+        "autoStartBreaks": "Otherwise, the timer waits for you to start the break.",
+        "autoStartFocus": "Otherwise, the timer waits for you to start the next study round."
+      },
+      "scheduleTitle": "Your planned timeline",
+      "focusSegment": "Study",
+      "shortBreakSegment": "Short break",
+      "longBreakSegment": "Long break",
+      "round": "Round {number}",
+      "minuteUnit": "min",
+      "totalFocus": "Study time",
+      "totalBreak": "Break time",
+      "totalDuration": "Total duration",
+      "noFinalBreak": "No break is scheduled after the final study round.",
+      "invalidConfig": "Please enter valid values for all session settings.",
+      "saveDefaults": "Save as my defaults",
+      "saved": "Default settings saved.",
+      "saveFailed": "Unable to save default settings.",
+      "saving": "Saving…",
+      "start": "Start focus session",
+      "starting": "Starting…",
+      "created": "Focus session started.",
+      "startFailed": "Unable to start this focus session.",
+      "savedHint": "Saving defaults does not start a session. A new session uses your current settings."
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Focus Sessions",
