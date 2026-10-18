@@ -13,11 +13,11 @@ import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getAccessibleProcessedLearningDocuments } from "@/features/learning-documents/learning-document.queries";
 import { RagStudyAssistant } from "@/features/rag/components/rag-study-assistant";
 import { getRagDefaultSettings } from "@/features/cms-settings/cms-settings.queries";
-import { getLocale, getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { getActiveFocusV2Snapshot } from "@/features/focus-sessions/focus-v2.queries";
 import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-preferences.queries";
 import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
+import { FocusV2LifecycleView } from "@/features/focus-sessions/components/focus-v2-lifecycle-view";
 
 async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   const [documents, ragDefaults] = await Promise.all([
@@ -44,17 +44,16 @@ function RagLoadingFallback() {
 }
 
 export default async function FocusPage() {
-  if (process.env.FOCUS_V2_ENABLED === "true") {
-    const activeV2 = await getActiveFocusV2Snapshot();
-    if (activeV2) redirect(`/${await getLocale()}/focus-v2-lab`);
-  }
+  const activeV2 = process.env.FOCUS_V2_ENABLED === "true"
+    ? await getActiveFocusV2Snapshot()
+    : null;
   const [tasks, activeSession, recentSessions, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
     getRecentFocusSessions(),
     getTranslations("focus.page"),
   ]);
-  const initialPreferences = process.env.FOCUS_V2_ENABLED === "true" && !activeSession
+  const initialPreferences = process.env.FOCUS_V2_ENABLED === "true" && !activeSession && !activeV2
     ? await getFocusV2Preferences()
     : null;
 
@@ -69,7 +68,17 @@ export default async function FocusPage() {
 
         <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="min-w-0 space-y-card">
-            {activeSession ? (
+            {activeV2 ? (
+              <>
+                <FocusV2LifecycleView
+                  initialSnapshot={activeV2}
+                  taskTitle={tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null}
+                />
+                <Suspense fallback={<RagLoadingFallback />}>
+                  <FocusRagSection focusSessionId={activeV2.session.id} />
+                </Suspense>
+              </>
+            ) : activeSession ? (
               <>
                 <ActiveFocusSessionPanel session={activeSession} />
                 <Suspense fallback={<RagLoadingFallback />}>
