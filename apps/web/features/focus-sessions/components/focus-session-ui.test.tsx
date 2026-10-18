@@ -3,16 +3,16 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActiveFocusSessionWithTask } from "../focus-session.types";
 
-const mocks = vi.hoisted(() => ({ create: vi.fn(), complete: vi.fn(), refresh: vi.fn(), error: vi.fn() }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), complete: vi.fn(), pause: vi.fn(), resume: vi.fn(), cancel: vi.fn(), success: vi.fn(), refresh: vi.fn(), error: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
-vi.mock("sonner", () => ({ toast: { error: mocks.error, success: vi.fn() } }));
+vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock("../focus-session.actions", () => ({
   createFocusSessionAction: mocks.create,
   completeFocusSessionAction: mocks.complete,
-  pauseFocusSessionAction: vi.fn(),
-  resumeFocusSessionAction: vi.fn(),
-  cancelFocusSessionAction: vi.fn(),
+  pauseFocusSessionAction: mocks.pause,
+  resumeFocusSessionAction: mocks.resume,
+  cancelFocusSessionAction: mocks.cancel,
 }));
 
 import { ActiveFocusSessionPanel } from "./active-focus-session-panel";
@@ -38,6 +38,7 @@ describe("focus session UI", () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+    vi.restoreAllMocks();
     vi.useRealTimers();
   });
   const timer = () => container.querySelector('[role="timer"]')!;
@@ -69,6 +70,7 @@ describe("focus session UI", () => {
     act(() => button("actions.expand").click());
     expect(container.querySelector('[role="progressbar"]')?.getAttribute("aria-valuenow")).toBe("100");
     expect(container.textContent).toContain("durationReached");
+    expect(mocks.complete).not.toHaveBeenCalled();
   });
 
   it.each([false, true])("restores completion controls after failure (throws=%s)", async (throws) => {
@@ -79,6 +81,40 @@ describe("focus session UI", () => {
     expect(button("actions.complete").disabled).toBe(false);
     expect(mocks.error).toHaveBeenCalledWith(throws ? "requestFailed" : "Rejected");
     expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+
+  it.each(["pause", "resume", "cancel"] as const)("handles rejected %s without success feedback", async action => {
+    mocks[action].mockRejectedValue(new Error("network"));
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const value = action === "resume" ? { ...session, status: "paused" as const, paused_at: "2026-10-12T12:01:00Z" } : session;
+    act(() => root.render(<ActiveFocusSessionPanel session={value} />));
+    await act(async () => button(`actions.${action}`).click());
+    expect(mocks.error).toHaveBeenCalledWith("requestFailed");
+    expect(mocks.success).not.toHaveBeenCalled();
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(button(`actions.${action}`).disabled).toBe(false);
+  });
+
+  it.each(["pause", "resume", "cancel", "complete"] as const)("refreshes stale %s failures without success feedback", async action => {
+    mocks[action].mockResolvedValue({ success: false, message: "Session state changed. Please refresh." });
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    const value = action === "resume" ? { ...session, status: "paused" as const, paused_at: "2026-10-12T12:01:00Z" } : session;
+    act(() => root.render(<ActiveFocusSessionPanel session={value} />));
+    await act(async () => button(`actions.${action}`).click());
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+    expect(mocks.error).toHaveBeenCalledWith("Session state changed. Please refresh.");
+    expect(mocks.success).not.toHaveBeenCalled();
+    expect(button(`actions.${action}`).disabled).toBe(false);
+  });
+
+  it.each(["pause", "resume", "cancel"] as const)("does not refresh ordinary %s failures", async action => {
+    mocks[action].mockResolvedValue({ success: false, message: "Rejected" });
+    vi.spyOn(window, "confirm").mockReturnValue(true);
+    act(() => root.render(<ActiveFocusSessionPanel session={action === "resume" ? { ...session, status: "paused", paused_at: "2026-10-12T12:01:00Z" } : session} />));
+    await act(async () => button(`actions.${action}`).click());
+    expect(mocks.error).toHaveBeenCalledWith("Rejected");
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    expect(mocks.success).not.toHaveBeenCalled();
   });
 
   it("uses the duration preset and preserves unlinked task semantics", async () => {
