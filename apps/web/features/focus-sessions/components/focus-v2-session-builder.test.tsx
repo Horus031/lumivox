@@ -76,7 +76,8 @@ describe("Focus V2 Session Builder UI", () => {
     expect(mocks.create).toHaveBeenCalledWith({
       taskId: "", ...DEFAULT_FOCUS_V2_PREFERENCES,
     });
-    expect(mocks.push).toHaveBeenCalledWith("/vi/focus-v2-lab");
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(mocks.refresh).toHaveBeenCalledOnce();
   });
 
   it("never navigates when the backend rejects creation", async () => {

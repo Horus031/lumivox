@@ -976,6 +976,55 @@
     }
   },
   "focus": {
+    "live": {
+      "eyebrow": "Phiên tập trung 2.0",
+      "generalStudy": "Phiên học tự do",
+      "roundOf": "Vòng {current} / {total}",
+      "kinds": {
+        "focus": "Đang học",
+        "shortBreak": "Nghỉ ngắn",
+        "longBreak": "Nghỉ dài"
+      },
+      "statuses": {
+        "pending": "Chưa bắt đầu",
+        "running": "Đang diễn ra",
+        "paused": "Tạm dừng",
+        "completed": "Hoàn thành",
+        "skipped": "Đã bỏ qua",
+        "interrupted": "Dừng giữa chừng"
+      },
+      "remaining": "Thời gian còn lại",
+      "segmentProgress": "Tiến độ giai đoạn",
+      "waitingTitle": "Sẵn sàng cho giai đoạn tiếp theo",
+      "readyForNext": "Bắt đầu khi bạn sẵn sàng",
+      "invalidState": "Không xác định được trạng thái hiện tại. Vui lòng đồng bộ phiên học.",
+      "pausedHelp": "Đồng hồ học đang được tạm dừng.",
+      "finishing": "Đã hết giờ — đang lưu giai đoạn này…",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "startNext": "Bắt đầu {phase}",
+      "finishSegment": "Hoàn thành giai đoạn",
+      "skipBreak": "Bỏ qua nghỉ",
+      "cancel": "Kết thúc sớm",
+      "cancelConfirm": "Kết thúc phiên học sớm? Thời gian đã học sẽ được lưu lại.",
+      "newSession": "Phiên học mới",
+      "sync": "Đồng bộ",
+      "offline": "Bạn đang ngoại tuyến. Đồng hồ hiển thị dữ liệu đồng bộ gần nhất.",
+      "completedRounds": "Số vòng học đã hoàn thành",
+      "focusTime": "Thời gian học",
+      "breakTime": "Thời gian nghỉ",
+      "timeline": "Lịch trình phiên học",
+      "round": "Vòng {number}",
+      "plannedDuration": "Dự kiến: {minutes} phút",
+      "immersive": "Bật chế độ tập trung toàn màn hình",
+      "exitImmersive": "Thoát chế độ tập trung toàn màn hình",
+      "terminal": {
+        "completed": "Đã hoàn thành phiên học",
+        "cancelled": "Đã kết thúc phiên học"
+      },
+      "terminalSummary": "Phiên tập trung đã được lưu.",
+      "noAutoSound": "Âm thanh báo giờ và nhạc tập trung sẽ có trong phase tiếp theo. Hiện chỉ có thông báo trực quan."
+    },
     "builder": {
       "title": "Thiết lập phiên tập trung",
       "description": "Tùy chỉnh số vòng học, thời gian nghỉ và cách chuyển tiếp giữa các vòng.",

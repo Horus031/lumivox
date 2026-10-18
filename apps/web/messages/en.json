@@ -976,6 +976,55 @@
     }
   },
   "focus": {
+    "live": {
+      "eyebrow": "Focus Session 2.0",
+      "generalStudy": "General study session",
+      "roundOf": "Round {current} of {total}",
+      "kinds": {
+        "focus": "Study time",
+        "shortBreak": "Short break",
+        "longBreak": "Long break"
+      },
+      "statuses": {
+        "pending": "Upcoming",
+        "running": "In progress",
+        "paused": "Paused",
+        "completed": "Completed",
+        "skipped": "Skipped",
+        "interrupted": "Interrupted"
+      },
+      "remaining": "Remaining time",
+      "segmentProgress": "Current phase progress",
+      "waitingTitle": "Ready for the next phase",
+      "readyForNext": "Start whenever you're ready",
+      "invalidState": "Unable to determine the active phase. Refresh your session.",
+      "pausedHelp": "Your study timer is paused.",
+      "finishing": "Time is up — saving this phase to your session…",
+      "pause": "Pause",
+      "resume": "Resume",
+      "startNext": "Start {phase}",
+      "finishSegment": "Finish phase",
+      "skipBreak": "Skip break",
+      "cancel": "End session early",
+      "cancelConfirm": "End this focus session early? Your completed study time will be saved.",
+      "newSession": "New focus session",
+      "sync": "Sync",
+      "offline": "You're offline. The timer is displaying the last synchronized data.",
+      "completedRounds": "Completed study rounds",
+      "focusTime": "Study time",
+      "breakTime": "Break time",
+      "timeline": "Session timeline",
+      "round": "Round {number}",
+      "plannedDuration": "Planned: {minutes} min",
+      "immersive": "Enter distraction-free view",
+      "exitImmersive": "Exit distraction-free view",
+      "terminal": {
+        "completed": "Session completed",
+        "cancelled": "Session ended"
+      },
+      "terminalSummary": "Your focus session is saved.",
+      "noAutoSound": "Audio and focus music will be added in the next phase. Time notifications are visual for now."
+    },
     "builder": {
       "title": "Build your focus session",
       "description": "Set study rounds, breaks, and an automatic or manual study rhythm.",

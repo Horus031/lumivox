@@ -2,7 +2,7 @@
 
 import { useId, useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Play, Save } from "lucide-react";
 
@@ -55,7 +55,6 @@ const numericSettings: Array<{
 
 export function FocusV2SessionBuilder({ tasks, initialPreferences }: Props) {
   const t = useTranslations("focus.builder");
-  const locale = useLocale();
   const router = useRouter();
   const uniqueId = useId();
   const [preferences, setPreferences] = useState<FocusV2Preferences>(initialPreferences);
@@ -141,9 +140,7 @@ export function FocusV2SessionBuilder({ tasks, initialPreferences }: Props) {
         return;
       }
       toast.success(t("created"));
-      // Phase 4 intentionally keeps the Phase 3 QA timer screen. Phase 5
-      // replaces this destination with the production study/break experience.
-      router.push(`/${locale}/focus-v2-lab`);
+      // Phase 5: session appears on /focus without navigating to the QA Lab.
       router.refresh();
     } catch {
       toast.error(t("startFailed"));
