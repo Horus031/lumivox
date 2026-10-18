@@ -17,6 +17,7 @@ from fastapi.middleware.cors import (
 
 from app.api.routes import (
     ai_translations,
+    focus_v2,
     deadline_risk,
     deadline_risk_insight,
     engagement_retention,
@@ -202,6 +203,12 @@ app.include_router(
     tags=[
         "Engagement Retention"
     ],
+)
+
+app.include_router(
+    focus_v2.router,
+    prefix="/api/v1/focus-v2",
+    tags=["Focus V2"],
 )
 
 app.include_router(
