@@ -114,6 +114,16 @@ export function useFocusV2Audio(sessionId: string, projection: FocusV2Projection
     engineRef.current?.playCue(cue);
   }, [projection.phase, currentId, currentKind]);
 
+  // Phase 7: play a distraction cue ONLY after the user explicitly saved a log.
+  useEffect(() => {
+    function onManualSave() {
+      if (!enabledRef.current || !settingsRef.current.cuesEnabled || document.hidden) return;
+      engineRef.current?.playCue("distraction");
+    }
+    window.addEventListener("lumivox:focus-v2-distraction-saved", onManualSave);
+    return () => window.removeEventListener("lumivox:focus-v2-distraction-saved", onManualSave);
+  }, []);
+
   const previewCue = useCallback((cue: FocusV2Cue = "focus_start") => {
     if (enabledRef.current && settingsRef.current.cuesEnabled) engineRef.current?.playCue(cue);
   }, []);
