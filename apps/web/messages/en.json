@@ -976,6 +976,31 @@
     }
   },
   "focus": {
+    "audio": {
+      "title": "Focus sounds",
+      "description": "Ambient sound and transition tones",
+      "enable": "Enable audio",
+      "disable": "Turn audio off",
+      "sound": "Background sound",
+      "volume": "Ambient volume: {value}%",
+      "mute": "Mute background",
+      "duringBreak": "Continue ambient sound during breaks",
+      "cues": "Enable transition tones",
+      "cuesVolume": "Cue volume: {value}%",
+      "previewCue": "Preview tone",
+      "ready": "Audio ready for this tab",
+      "optIn": "Audio starts only after you select Enable audio.",
+      "unavailable": "Audio is blocked or unavailable. Check browser permissions and try again.",
+      "privacy": "Generated locally; no streaming, uploads or microphone access. Saved choices stay in this browser.",
+      "sounds": {
+        "white": "White noise",
+        "pink": "Pink noise",
+        "brown": "Brown noise",
+        "rain": "Rain ambience",
+        "ocean": "Ocean waves",
+        "ambient_pad": "Gentle ambient tones"
+      }
+    },
     "live": {
       "eyebrow": "Focus Session 2.0",
       "generalStudy": "General study session",

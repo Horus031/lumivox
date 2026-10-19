@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AlertCircle, ArrowRight, BookOpen, Check, CirclePause, CirclePlay, Expand, Minimize2, RotateCcw, SkipForward, X } from "lucide-react";
 import { useFocusV2Timer } from "../use-focus-v2-timer";
+import { FocusV2AudioPanel } from "./focus-v2-audio-panel";
 import { formatFocusV2Clock, getFocusV2LifecycleStats } from "../focus-v2-lifecycle.model";
 import type { FocusV2Action, FocusV2Segment, FocusV2Snapshot } from "../focus-v2.types";
 
@@ -149,6 +150,8 @@ export function FocusV2LifecycleView({ initialSnapshot, taskTitle }: Props) {
         {projection.isDue && <p role="status" className="text-caption text-muted-foreground">{t("finishing")}</p>}
       </div>
 
+      <FocusV2AudioPanel sessionId={snapshot.session.id} projection={projection} />
+
       <div className="flex flex-wrap items-center justify-center gap-2">
         {running && live && !projection.isDue && (
           <Button type="button" disabled={disable} variant="outline" onClick={() => void perform("pause", activeId)}>
@@ -221,7 +224,6 @@ export function FocusV2LifecycleView({ initialSnapshot, taskTitle }: Props) {
           })}
         </ol>
       </div>
-      <p className="text-caption text-muted-foreground">{t("noAutoSound")}</p>
     </section>
   );
 }
