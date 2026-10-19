@@ -18,6 +18,7 @@ import { getActiveFocusV2Snapshot } from "@/features/focus-sessions/focus-v2.que
 import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-preferences.queries";
 import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
 import { FocusV2LifecycleView } from "@/features/focus-sessions/components/focus-v2-lifecycle-view";
+import { FocusV2AnalyticsDashboard } from "@/features/focus-sessions/components/focus-v2-analytics-dashboard";
 
 async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   const [documents, ragDefaults] = await Promise.all([
@@ -43,7 +44,9 @@ function RagLoadingFallback() {
   );
 }
 
-export default async function FocusPage() {
+export default async function FocusPage({ searchParams }: { searchParams: Promise<{ focusPeriod?: string }> }) {
+  const { focusPeriod } = await searchParams;
+  const analyticsDays: 7 | 30 = focusPeriod === "7" ? 7 : 30;
   const activeV2 = process.env.FOCUS_V2_ENABLED === "true"
     ? await getActiveFocusV2Snapshot()
     : null;
@@ -94,6 +97,11 @@ export default async function FocusPage() {
 
           <RecentFocusSessions sessions={recentSessions} />
         </div>
+        {process.env.FOCUS_V2_ENABLED === "true" && (
+          <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" aria-hidden="true" />}>
+            <FocusV2AnalyticsDashboard days={analyticsDays} />
+          </Suspense>
+        )}
       </div>
     </section>
   );
