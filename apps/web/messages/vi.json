@@ -976,6 +976,50 @@
     }
   },
   "focus": {
+    "attention": {
+      "title": "Thông báo & quản lý xao nhãng",
+      "description": "Điều khiển nhắc nhở và ghi nhận gián đoạn trong các vòng học.",
+      "notificationsTitle": "Thông báo từ trình duyệt",
+      "notificationsHelp": "Thông báo tùy chọn khi Lumivox ghi nhận giai đoạn bắt đầu/kết thúc. Trang cần còn hoạt động hoặc được mở lại; đây không phải báo thức nền.",
+      "enableNotifications": "Bật thông báo",
+      "disableNotifications": "Tắt thông báo",
+      "permissionUnavailable": "Thông báo yêu cầu trình duyệt hỗ trợ và trang HTTPS an toàn.",
+      "permissionDenied": "Chưa được cấp quyền thông báo. Hãy kiểm tra thiết lập website của trình duyệt.",
+      "browserBlocked": "Trình duyệt đã chặn thông báo của website này.",
+      "notificationTitle": "Lumivox Focus",
+      "notifications": {
+        "focusStarted": "Vòng học tiếp theo đã bắt đầu.",
+        "breakStarted": "Giờ nghỉ đã bắt đầu.",
+        "focusFinished": "Đã hoàn thành vòng học. Chuẩn bị nghỉ ngơi nhé.",
+        "breakFinished": "Giờ nghỉ đã kết thúc. Chuẩn bị học tiếp nhé.",
+        "sessionCompleted": "Bạn đã hoàn thành phiên tập trung!"
+      },
+      "awayTitle": "Nhắc tôi khi quay lại trang Lumivox",
+      "awayHelp": "Tùy chọn. Chỉ xem trang Lumivox này bị ẩn khi đang học hay không. Không đọc tab khác, URL hoặc ảnh màn hình; không tự động lưu xao nhãng.",
+      "minimumAway": "Thời gian rời trang tối thiểu trước khi gợi ý",
+      "seconds": "{count} giây",
+      "awayCandidate": "Tab Lumivox này đã bị ẩn khoảng {seconds} giây. Nếu thực sự xao nhãng, bạn có thể dùng thời lượng này. Chưa có dữ liệu nào được lưu.",
+      "useAwayDuration": "Dùng thời lượng này",
+      "dismiss": "Bỏ qua",
+      "manualTitle": "Ghi nhận gián đoạn",
+      "manualHelp": "Chỉ lưu sau khi bạn bấm nút xác nhận. Nhập 0 nếu không rõ thời gian.",
+      "category": "Loại xao nhãng",
+      "duration": "Thời lượng (giây)",
+      "note": "Ghi chú (tùy chọn, tối đa 500 ký tự)",
+      "save": "Lưu xao nhãng",
+      "saving": "Đang lưu…",
+      "saved": "Đã lưu xao nhãng.",
+      "saveFailed": "Không thể lưu xao nhãng.",
+      "focusOnly": "Chỉ có thể ghi nhận khi đang trong vòng học (đang chạy hoặc tạm dừng), không phải giờ nghỉ.",
+      "privacy": "Các lựa chọn trình duyệt lưu trên thiết bị. Chỉ dữ liệu xao nhãng bạn chủ động gửi mới được lưu vào tài khoản Lumivox.",
+      "categories": {
+        "social_media": "Mạng xã hội",
+        "messaging": "Tin nhắn",
+        "external_interrupt": "Gián đoạn bên ngoài",
+        "fatigue": "Mệt mỏi",
+        "other": "Khác"
+      }
+    },
     "audio": {
       "title": "Âm thanh tập trung",
       "description": "Âm thanh nền và tín hiệu chuyển vòng",

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { AlertCircle, ArrowRight, BookOpen, Check, CirclePause, CirclePlay, Expand, Minimize2, RotateCcw, SkipForward, X } from "lucide-react";
 import { useFocusV2Timer } from "../use-focus-v2-timer";
 import { FocusV2AudioPanel } from "./focus-v2-audio-panel";
+import { FocusV2AttentionPanel } from "./focus-v2-attention-panel";
 import { formatFocusV2Clock, getFocusV2LifecycleStats } from "../focus-v2-lifecycle.model";
 import type { FocusV2Action, FocusV2Segment, FocusV2Snapshot } from "../focus-v2.types";
 
@@ -151,6 +152,7 @@ export function FocusV2LifecycleView({ initialSnapshot, taskTitle }: Props) {
       </div>
 
       <FocusV2AudioPanel sessionId={snapshot.session.id} projection={projection} />
+      <FocusV2AttentionPanel sessionId={snapshot.session.id} projection={projection} />
 
       <div className="flex flex-wrap items-center justify-center gap-2">
         {running && live && !projection.isDue && (

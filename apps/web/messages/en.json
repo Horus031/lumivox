@@ -976,6 +976,50 @@
     }
   },
   "focus": {
+    "attention": {
+      "title": "Notifications & attention",
+      "description": "Control reminders and record interruptions during focus rounds.",
+      "notificationsTitle": "Browser notifications",
+      "notificationsHelp": "Optional reminders when Lumivox observes a completed or started segment. The page must be active or restored; this is not a background alarm.",
+      "enableNotifications": "Enable notifications",
+      "disableNotifications": "Disable notifications",
+      "permissionUnavailable": "Notifications require a supported browser and secure HTTPS page.",
+      "permissionDenied": "Notification permission was not granted. Check your browser's site settings.",
+      "browserBlocked": "Your browser has blocked notifications for this site.",
+      "notificationTitle": "Lumivox Focus",
+      "notifications": {
+        "focusStarted": "Your next focus round has started.",
+        "breakStarted": "Your break has started.",
+        "focusFinished": "Focus round finished. Get ready for a break.",
+        "breakFinished": "Break finished. Get ready to focus.",
+        "sessionCompleted": "You completed your focus session. Nice work!"
+      },
+      "awayTitle": "Offer a reminder when I return to Lumivox",
+      "awayHelp": "Optional. Uses only whether this Lumivox page becomes hidden during an active focus round. It never reads other tabs, URLs, or screenshots and never saves a distraction automatically.",
+      "minimumAway": "Minimum time away before suggesting a log",
+      "seconds": "{count} seconds",
+      "awayCandidate": "This Lumivox tab was hidden for about {seconds} seconds. If that was a distraction, you can use this duration. Nothing has been saved.",
+      "useAwayDuration": "Use this duration",
+      "dismiss": "Dismiss",
+      "manualTitle": "Log an interruption",
+      "manualHelp": "Only saved when you press the button. Duration is optional: enter 0 if unknown.",
+      "category": "Category",
+      "duration": "Duration (seconds)",
+      "note": "Note (optional, up to 500 characters)",
+      "save": "Save distraction",
+      "saving": "Saving…",
+      "saved": "Distraction saved.",
+      "saveFailed": "Could not save the distraction.",
+      "focusOnly": "Logging is available only during a focus round (running or paused), not during breaks.",
+      "privacy": "Browser settings are stored on this device. Only distractions you explicitly submit are stored in your Lumivox account.",
+      "categories": {
+        "social_media": "Social media",
+        "messaging": "Messaging",
+        "external_interrupt": "External interruption",
+        "fatigue": "Fatigue",
+        "other": "Other"
+      }
+    },
     "audio": {
       "title": "Focus sounds",
       "description": "Ambient sound and transition tones",
