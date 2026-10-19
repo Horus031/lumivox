@@ -60,7 +60,9 @@ jobs:
         run: npm run test:unit
 
       - name: TypeScript typecheck
-        run: npx tsc --noEmit
+        run: |
+          npx next typegen
+          npx tsc --noEmit
 
       - name: Production build
         run: npm run build
