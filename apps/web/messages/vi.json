@@ -976,6 +976,31 @@
     }
   },
   "focus": {
+    "audio": {
+      "title": "Âm thanh tập trung",
+      "description": "Âm thanh nền và tín hiệu chuyển vòng",
+      "enable": "Bật âm thanh",
+      "disable": "Tắt âm thanh",
+      "sound": "Âm thanh nền",
+      "volume": "Âm lượng nền: {value}%",
+      "mute": "Tắt tiếng nền",
+      "duringBreak": "Tiếp tục âm thanh nền trong giờ nghỉ",
+      "cues": "Bật âm báo chuyển vòng",
+      "cuesVolume": "Âm lượng thông báo: {value}%",
+      "previewCue": "Nghe thử âm báo",
+      "ready": "Âm thanh đã sẵn sàng ở tab này",
+      "optIn": "Chỉ phát âm thanh sau khi bạn nhấn Bật âm thanh.",
+      "unavailable": "Trình duyệt đang chặn hoặc không hỗ trợ âm thanh. Kiểm tra quyền và thử lại.",
+      "privacy": "Âm thanh được tạo trên thiết bị; không stream, upload hay dùng micro. Lựa chọn chỉ lưu trên trình duyệt.",
+      "sounds": {
+        "white": "Tiếng ồn trắng",
+        "pink": "Tiếng ồn hồng",
+        "brown": "Tiếng ồn nâu",
+        "rain": "Âm thanh mưa",
+        "ocean": "Tiếng sóng biển",
+        "ambient_pad": "Giai điệu nền dịu nhẹ"
+      }
+    },
     "live": {
       "eyebrow": "Phiên tập trung 2.0",
       "generalStudy": "Phiên học tự do",
