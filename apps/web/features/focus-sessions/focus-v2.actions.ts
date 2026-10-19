@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 import { focusV2ConfigSchema, type FocusV2Config } from "./focus-v2-config.schemas";
+import { isFocusV2CreationEnabled } from "./focus-v2-release";
 import { getFocusV2Snapshot } from "./focus-v2.queries";
 import type { FocusV2Action, FocusV2Snapshot, FocusV2TransitionResult } from "./focus-v2.types";
 
@@ -33,7 +34,7 @@ function errorMessage(error: unknown): string {
 export async function createFocusV2SessionAction(
   input: FocusV2Config,
 ): Promise<ActionResult<{ sessionId: string }>> {
-  if (!isEnabled()) return { success: false, message: "Focus V2 is not enabled." };
+  if (!isFocusV2CreationEnabled()) return { success: false, message: "Focus V2 is not accepting new sessions." };
   const parsed = focusV2ConfigSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, message: "Invalid Focus V2 configuration.", fieldErrors: parsed.error.flatten().fieldErrors };

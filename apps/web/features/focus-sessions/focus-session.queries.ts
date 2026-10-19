@@ -19,6 +19,7 @@ export async function getActiveFocusSession() {
       )
     `,
     )
+    .eq("session_mode", "legacy")
     .in("status", ["ongoing", "paused"])
     .maybeSingle();
 

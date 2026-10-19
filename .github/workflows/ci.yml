@@ -59,6 +59,11 @@ jobs:
       - name: Unit tests
         run: npm run test:unit
 
+      - name: TypeScript typecheck
+        run: |
+          npx next typegen
+          npx tsc --noEmit
+
       - name: Production build
         run: npm run build
 

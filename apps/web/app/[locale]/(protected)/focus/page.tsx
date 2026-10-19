@@ -19,6 +19,7 @@ import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-prefer
 import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
 import { FocusV2LifecycleView } from "@/features/focus-sessions/components/focus-v2-lifecycle-view";
 import { FocusV2AnalyticsDashboard } from "@/features/focus-sessions/components/focus-v2-analytics-dashboard";
+import { isFocusV2CreationEnabled } from "@/features/focus-sessions/focus-v2-release";
 
 async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   const [documents, ragDefaults] = await Promise.all([
@@ -56,7 +57,7 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
     getRecentFocusSessions(),
     getTranslations("focus.page"),
   ]);
-  const initialPreferences = process.env.FOCUS_V2_ENABLED === "true" && !activeSession && !activeV2
+  const initialPreferences = isFocusV2CreationEnabled() && !activeSession && !activeV2
     ? await getFocusV2Preferences()
     : null;
 
