@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumivox Companion</title>
+    <link rel="stylesheet" href="popup.css" />
+    <script src="popup.js" defer></script>
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <p class="eyebrow">LUMIVOX</p>
+        <h1>Focus Companion</h1>
+        <p class="description">Kết nối tiện ích với website Lumivox.</p>
+      </header>
+
+      <section class="status-card" aria-live="polite">
+        <p class="label">Trạng thái kết nối</p>
+        <p id="site-status" role="status">Đang kiểm tra...</p>
+        <p id="site-detail" class="detail"></p>
+      </section>
+
+      <div class="actions">
+        <button id="refresh" type="button">Kiểm tra lại</button>
+        <button id="open-site" type="button">Mở Lumivox</button>
+      </div>
+
+      <footer>
+        <p>
+          Phase 10: Kiểm tra kết nối website. Chưa truy cập dữ liệu tài khoản.
+        </p>
+      </footer>
+    </main>
+  </body>
+</html>

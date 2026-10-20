@@ -1,0 +1,112 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 340px;
+  margin: 0;
+  background: #101522;
+  color: #f3f6fc;
+}
+
+.app {
+  display: grid;
+  gap: 20px;
+  padding: 22px;
+}
+
+h1,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: 22px;
+  line-height: 1.3;
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  color: #a7b9e5;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.description,
+.detail,
+footer {
+  color: #b8c2d6;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.description {
+  margin-top: 8px;
+}
+
+.status-card {
+  display: grid;
+  gap: 8px;
+  min-height: 110px;
+  padding: 16px;
+  border: 1px solid #354057;
+  border-radius: 12px;
+  background: #1c2537;
+}
+
+.label {
+  color: #b8c2d6;
+  font-size: 12px;
+}
+
+#site-status {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+button {
+  min-height: 42px;
+  border: 1px solid #667797;
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:first-child {
+  background: transparent;
+  color: #f3f6fc;
+}
+
+button:last-child {
+  background: #dce7ff;
+  color: #10203c;
+}
+
+button:hover {
+  filter: brightness(1.12);
+}
+
+button:focus-visible {
+  outline: 2px solid #a9c4ff;
+  outline-offset: 3px;
+}
+
+footer {
+  border-top: 1px solid #354057;
+  padding-top: 14px;
+}
