@@ -11,6 +11,8 @@ import {
   type AuthResponse,
 } from "./shared/auth-protocol";
 
+import { initializeFocusPopup } from "./focus-popup";
+
 declare const __LUMIVOX_API_ORIGIN__: string;
 
 function element<T extends HTMLElement>(id: string): T {
@@ -103,6 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
       loginForm.hidden = true;
       accountView.hidden = false;
       passwordInput.value = "";
+      window.dispatchEvent(new Event("lumivox-auth-changed"));
       return;
     }
 
@@ -230,6 +233,8 @@ document.addEventListener("DOMContentLoaded", () => {
       url: `${__LUMIVOX_API_ORIGIN__}/en/focus`,
     });
   });
+
+  initializeFocusPopup();
 
   void Promise.all([refreshSite(), refreshAuth()]);
 });
