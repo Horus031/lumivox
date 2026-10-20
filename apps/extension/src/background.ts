@@ -9,9 +9,17 @@ import {
   type SiteConnectionState,
 } from "./shared/protocol";
 
-declare const __LUMIVOX_ALLOWED_ORIGINS__: readonly string[];
+import {
+  authResult,
+  isAuthRequest,
+} from "./shared/auth-protocol";
 
-function result(
+import { handleAuthRequest } from "./auth-service";
+
+declare const __LUMIVOX_ALLOWED_ORIGINS__:
+  readonly string[];
+
+function siteResult(
   state: SiteConnectionState,
   origin?: string,
 ): CheckSiteResponse {
@@ -24,7 +32,8 @@ function result(
   };
 }
 
-async function checkActiveWebsite(): Promise<CheckSiteResponse> {
+async function checkActiveWebsite():
+  Promise<CheckSiteResponse> {
   const tabs = await chrome.tabs.query({
     active: true,
     currentWindow: true,
@@ -33,15 +42,18 @@ async function checkActiveWebsite(): Promise<CheckSiteResponse> {
   const tab = tabs[0];
 
   if (!tab || tab.id === undefined) {
-    return result("no_active_tab");
+    return siteResult("no_active_tab");
   }
 
   const origin = tab.url
-    ? getApprovedSiteOrigin(tab.url, __LUMIVOX_ALLOWED_ORIGINS__)
+    ? getApprovedSiteOrigin(
+        tab.url,
+        __LUMIVOX_ALLOWED_ORIGINS__,
+      )
     : null;
 
   if (!origin) {
-    return result("not_lumivox");
+    return siteResult("not_lumivox");
   }
 
   const request: SiteHelloRequest = {
@@ -51,34 +63,59 @@ async function checkActiveWebsite(): Promise<CheckSiteResponse> {
   };
 
   try {
-    const response: unknown = await chrome.tabs.sendMessage(tab.id, request);
+    const response: unknown =
+      await chrome.tabs.sendMessage(tab.id, request);
 
-    if (!isSiteReadyResponse(response) || response.origin !== origin) {
-      return result("unavailable");
+    if (
+      !isSiteReadyResponse(response) ||
+      response.origin !== origin
+    ) {
+      return siteResult("unavailable");
     }
 
-    return result("ready", origin);
+    return siteResult("ready", origin);
   } catch {
-    return result("unavailable");
+    return siteResult("unavailable");
   }
 }
 
 chrome.runtime.onMessage.addListener(
   (message: unknown, sender, sendResponse) => {
-    if (
-      sender.id !== chrome.runtime.id ||
-      sender.url !== chrome.runtime.getURL("popup.html") ||
-      !isCheckSiteRequest(message)
-    ) {
+    const isPopup =
+      sender.id === chrome.runtime.id &&
+      sender.url ===
+        chrome.runtime.getURL("popup.html");
+
+    if (!isPopup) {
       return false;
     }
 
-    void checkActiveWebsite()
-      .then(sendResponse)
-      .catch(() => {
-        sendResponse(result("unavailable"));
-      });
+    if (isCheckSiteRequest(message)) {
+      void checkActiveWebsite()
+        .then(sendResponse)
+        .catch(() => {
+          sendResponse(siteResult("unavailable"));
+        });
 
-    return true;
+      return true;
+    }
+
+    if (isAuthRequest(message)) {
+      void handleAuthRequest(message)
+        .then(sendResponse)
+        .catch(() => {
+          sendResponse(
+            authResult(
+              "unavailable",
+              undefined,
+              "Lỗi xác thực.",
+            ),
+          );
+        });
+
+      return true;
+    }
+
+    return false;
   },
 );

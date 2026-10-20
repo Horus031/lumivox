@@ -15,8 +15,11 @@
   },
   "devDependencies": {
     "@types/chrome": "^0.1.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "0.28.2",
     "typescript": "^5.9.0",
     "vitest": "^4.1.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4"
   }
 }

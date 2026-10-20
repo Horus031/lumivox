@@ -110,3 +110,51 @@ footer {
   border-top: 1px solid #354057;
   padding-top: 14px;
 }
+
+#login-form,
+#account-view {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+#login-form label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+#login-form input {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px;
+  border: 1px solid #667797;
+  border-radius: 8px;
+  background: #101522;
+  color: #f3f6fc;
+  font: inherit;
+}
+
+#login-form input:focus-visible {
+  outline: 2px solid #a9c4ff;
+  outline-offset: 2px;
+}
+
+#login,
+#logout {
+  width: 100%;
+  margin-top: 6px;
+}
+
+#login {
+  background: #dce7ff;
+  color: #10203c;
+}
+
+#logout {
+  background: transparent;
+  color: #f3f6fc;
+}
