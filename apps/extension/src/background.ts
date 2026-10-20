@@ -9,15 +9,13 @@ import {
   type SiteConnectionState,
 } from "./shared/protocol";
 
-import {
-  authResult,
-  isAuthRequest,
-} from "./shared/auth-protocol";
+import { authResult, isAuthRequest } from "./shared/auth-protocol";
 
 import { handleAuthRequest } from "./auth-service";
+import { isFocusRequest, focusResult } from "./shared/focus-protocol";
+import { handleFocusRequest } from "./focus-service";
 
-declare const __LUMIVOX_ALLOWED_ORIGINS__:
-  readonly string[];
+declare const __LUMIVOX_ALLOWED_ORIGINS__: readonly string[];
 
 function siteResult(
   state: SiteConnectionState,
@@ -32,8 +30,7 @@ function siteResult(
   };
 }
 
-async function checkActiveWebsite():
-  Promise<CheckSiteResponse> {
+async function checkActiveWebsite(): Promise<CheckSiteResponse> {
   const tabs = await chrome.tabs.query({
     active: true,
     currentWindow: true,
@@ -46,10 +43,7 @@ async function checkActiveWebsite():
   }
 
   const origin = tab.url
-    ? getApprovedSiteOrigin(
-        tab.url,
-        __LUMIVOX_ALLOWED_ORIGINS__,
-      )
+    ? getApprovedSiteOrigin(tab.url, __LUMIVOX_ALLOWED_ORIGINS__)
     : null;
 
   if (!origin) {
@@ -63,13 +57,9 @@ async function checkActiveWebsite():
   };
 
   try {
-    const response: unknown =
-      await chrome.tabs.sendMessage(tab.id, request);
+    const response: unknown = await chrome.tabs.sendMessage(tab.id, request);
 
-    if (
-      !isSiteReadyResponse(response) ||
-      response.origin !== origin
-    ) {
+    if (!isSiteReadyResponse(response) || response.origin !== origin) {
       return siteResult("unavailable");
     }
 
@@ -83,8 +73,7 @@ chrome.runtime.onMessage.addListener(
   (message: unknown, sender, sendResponse) => {
     const isPopup =
       sender.id === chrome.runtime.id &&
-      sender.url ===
-        chrome.runtime.getURL("popup.html");
+      sender.url === chrome.runtime.getURL("popup.html");
 
     if (!isPopup) {
       return false;
@@ -104,11 +93,21 @@ chrome.runtime.onMessage.addListener(
       void handleAuthRequest(message)
         .then(sendResponse)
         .catch(() => {
+          sendResponse(authResult("unavailable", undefined, "Lỗi xác thực."));
+        });
+
+      return true;
+    }
+
+    if (isFocusRequest(message)) {
+      void handleFocusRequest(message)
+        .then(sendResponse)
+        .catch(() => {
           sendResponse(
-            authResult(
+            focusResult(
               "unavailable",
               undefined,
-              "Lỗi xác thực.",
+              "Không thể kết nối Focus Service.",
             ),
           );
         });
