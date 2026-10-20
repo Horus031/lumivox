@@ -2,33 +2,89 @@
 <html lang="vi">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
     <title>Lumivox Companion</title>
     <link rel="stylesheet" href="popup.css" />
     <script src="popup.js" defer></script>
   </head>
+
   <body>
     <main class="app">
       <header>
         <p class="eyebrow">LUMIVOX</p>
         <h1>Focus Companion</h1>
-        <p class="description">Kết nối tiện ích với website Lumivox.</p>
+        <p class="description">
+          Kết nối với tài khoản Lumivox của bạn.
+        </p>
       </header>
 
       <section class="status-card" aria-live="polite">
-        <p class="label">Trạng thái kết nối</p>
-        <p id="site-status" role="status">Đang kiểm tra...</p>
+        <p class="label">Kết nối website</p>
+        <p id="site-status" role="status">
+          Đang kiểm tra...
+        </p>
         <p id="site-detail" class="detail"></p>
       </section>
 
+      <section class="status-card">
+        <p class="label">Tài khoản Extension</p>
+        <p id="auth-status" role="status">
+          Đang kiểm tra đăng nhập...
+        </p>
+
+        <form id="login-form" hidden>
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength="320"
+            required
+          />
+
+          <label for="password">Mật khẩu</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            minlength="6"
+            maxlength="128"
+            required
+          />
+
+          <button id="login" type="submit">
+            Đăng nhập
+          </button>
+        </form>
+
+        <div id="account-view" hidden>
+          <p id="account-email" class="detail"></p>
+          <button id="logout" type="button">
+            Đăng xuất Extension
+          </button>
+        </div>
+
+        <p id="auth-message" class="detail" role="alert"></p>
+      </section>
+
       <div class="actions">
-        <button id="refresh" type="button">Kiểm tra lại</button>
-        <button id="open-site" type="button">Mở Lumivox</button>
+        <button id="refresh" type="button">
+          Kiểm tra lại
+        </button>
+        <button id="open-site" type="button">
+          Mở Lumivox
+        </button>
       </div>
 
       <footer>
         <p>
-          Phase 10: Kiểm tra kết nối website. Chưa truy cập dữ liệu tài khoản.
+          Phase 11: Xác thực tài khoản.
+          Chưa điều khiển Focus Session.
         </p>
       </footer>
     </main>
