@@ -88,6 +88,40 @@
         <button id="focus-refresh" type="button">Đồng bộ Pomodoro</button>
       </section>
 
+      <section id="attention-panel" class="status-card">
+        <p class="label">Distraction Awareness</p>
+
+        <p class="detail">
+          Khi bật, Lumivox có thể đọc URL tab đang hoạt động để phân loại một số
+          website trong giờ Focus. Không lưu URL, tiêu đề trang hoặc lịch sử
+          duyệt web. Không tự ghi dữ liệu lên tài khoản.
+        </p>
+
+        <p id="attention-status" role="status">Đang kiểm tra quyền...</p>
+
+        <div class="attention-actions">
+          <button id="attention-enable" type="button">Bật theo dõi</button>
+          <button id="attention-disable" type="button" hidden>
+            Tắt và thu hồi quyền
+          </button>
+          <button id="attention-refresh" type="button">Kiểm tra gợi ý</button>
+        </div>
+
+        <section id="attention-candidate" hidden>
+          <p class="label">Gợi ý cần xác nhận</p>
+          <p id="attention-candidate-text" class="detail"></p>
+
+          <div class="attention-actions">
+            <button id="attention-open-focus" type="button">
+              Mở Lumivox để ghi nhận
+            </button>
+            <button id="attention-dismiss" type="button">Bỏ qua gợi ý</button>
+          </div>
+        </section>
+
+        <p id="attention-error" class="detail" role="alert"></p>
+      </section>
+
       <div class="actions">
         <button id="refresh" type="button">Kiểm tra lại</button>
         <button id="open-site" type="button">Mở Lumivox</button>

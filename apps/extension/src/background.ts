@@ -15,6 +15,19 @@ import { handleAuthRequest } from "./auth-service";
 import { isFocusRequest, focusResult } from "./shared/focus-protocol";
 import { handleFocusRequest } from "./focus-service";
 
+import {
+  attentionResult,
+  isAttentionRequest,
+} from "./shared/attention-protocol";
+
+import {
+  handleAttentionRequest,
+  registerAttentionListeners,
+  disableAttention,
+} from "./attention-service";
+
+registerAttentionListeners();
+
 declare const __LUMIVOX_ALLOWED_ORIGINS__: readonly string[];
 
 function siteResult(
@@ -91,7 +104,25 @@ chrome.runtime.onMessage.addListener(
 
     if (isAuthRequest(message)) {
       void handleAuthRequest(message)
-        .then(sendResponse)
+        .then(async (response) => {
+          const identityChanged =
+            (message.type === "AUTH_LOGIN" && response.state === "signed_in") ||
+            (message.type === "AUTH_LOGOUT" && response.state === "signed_out");
+
+          if (identityChanged) {
+            try {
+              await disableAttention();
+              await chrome.permissions.remove({
+                permissions: ["tabs"],
+              });
+            } catch {
+              // The feature is disabled locally even if
+              // Chrome cannot revoke the optional permission.
+            }
+          }
+
+          sendResponse(response);
+        })
         .catch(() => {
           sendResponse(authResult("unavailable", undefined, "Lỗi xác thực."));
         });
@@ -108,6 +139,23 @@ chrome.runtime.onMessage.addListener(
               "unavailable",
               undefined,
               "Không thể kết nối Focus Service.",
+            ),
+          );
+        });
+
+      return true;
+    }
+
+    if (isAttentionRequest(message)) {
+      void handleAttentionRequest(message)
+        .then(sendResponse)
+        .catch(() => {
+          sendResponse(
+            attentionResult(
+              false,
+              false,
+              null,
+              "Không thể truy cập Attention Service.",
             ),
           );
         });

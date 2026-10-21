@@ -114,6 +114,7 @@ export function initializeFocusPopup(): void {
     if (response.state === "unauthorized") {
       snapshot = null;
       panel.hidden = true;
+      connectionHealthy = false;
       return;
     }
 
@@ -126,13 +127,16 @@ export function initializeFocusPopup(): void {
       clock.textContent = "--:--";
       round.textContent = "";
       for (const button of buttons) button.hidden = true;
+      connectionHealthy = true;
       return;
     }
 
     if (response.state === "active" && response.snapshot) {
       snapshot = response.snapshot;
-      // Server timestamp is authoritative, not a local countdown counter.
+      connectionHealthy = true;
+
       serverOffsetMs = Date.parse(snapshot.serverTime) - Date.now();
+
       display();
       return;
     }

@@ -32,4 +32,16 @@ if (!manifest.background?.service_worker) {
   throw new Error("Missing service worker");
 }
 
+if (
+  !Array.isArray(manifest.optional_permissions) ||
+  manifest.optional_permissions.length !== 1 ||
+  manifest.optional_permissions[0] !== "tabs"
+) {
+  throw new Error("Expected only the optional tabs permission");
+}
+
+if (manifest.permissions.includes("tabs")) {
+  throw new Error("tabs must not be a required permission");
+}
+
 console.log("Extension manifest verified");
