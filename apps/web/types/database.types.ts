@@ -27,6 +27,7 @@ export type Database = {
                   Row: {
                     "created_at": string,"entity_id": string,"entity_type": string,"error_message": string | null,"field_name": string,"id": string,"model_name": string | null,"owner_id": string,"provider": string | null,"source_hash": string,"source_locale": string,"status": Database["public"]['Enums']["ai_translation_status"],"target_locale": string,"translated_text": string,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"entity_id": string,"entity_type": string,"error_message"?: string | null,"field_name": string,"id"?: string,"model_name"?: string | null,"owner_id": string,"provider"?: string | null,"source_hash": string,"source_locale"?: string,"status"?: Database["public"]['Enums']["ai_translation_status"],"target_locale": string,"translated_text": string,"updated_at"?: string
                   }
@@ -40,6 +41,7 @@ export type Database = {
                   Row: {
                     "confidence_note": string,"created_at": string,"deadline_risk_prediction_id": string | null,"evidence": NonNullable<Json>,"generation_metadata": NonNullable<Json>,"id": string,"insight_type": Database["public"]['Enums']["ai_insight_type"],"llm_model": string,"llm_provider": string,"native_task_risk_assessment_id": string | null,"prompt_version": string,"recommended_actions": NonNullable<Json>,"risk_interpretation": string,"structured_output_schema_version": string,"summary": string,"title": string,"updated_at": string,"user_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "confidence_note": string,"created_at"?: string,"deadline_risk_prediction_id"?: string | null,"evidence"?: NonNullable<Json>,"generation_metadata"?: NonNullable<Json>,"id"?: string,"insight_type": Database["public"]['Enums']["ai_insight_type"],"llm_model": string,"llm_provider"?: string,"native_task_risk_assessment_id"?: string | null,"prompt_version"?: string,"recommended_actions"?: NonNullable<Json>,"risk_interpretation": string,"structured_output_schema_version"?: string,"summary": string,"title": string,"updated_at"?: string,"user_id"?: string | null
                   }
@@ -71,6 +73,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"description": string | null,"key": string,"updated_at": string,"updated_by": string | null,"value": NonNullable<Json>
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"description"?: string | null,"key": string,"updated_at"?: string,"updated_by"?: string | null,"value": NonNullable<Json>
                   }
@@ -84,6 +87,7 @@ isOneToOne: false
                   Row: {
                     "absolute_rank": number,"created_at": string,"effect": Database["public"]['Enums']["feature_attribution_effect"],"feature_name": string,"feature_value": number,"id": string,"prediction_id": string,"shap_value": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "absolute_rank": number,"created_at"?: string,"effect": Database["public"]['Enums']["feature_attribution_effect"],"feature_name": string,"feature_value": number,"id"?: string,"prediction_id": string,"shap_value": number
                   }
@@ -103,6 +107,7 @@ isOneToOne: false
                   Row: {
                     "baseline_expected_value": number,"created_at": string,"explanation_method": string,"explanation_version": string,"id": string,"prediction_id": string,"top_negative_contributors": NonNullable<Json>,"top_positive_contributors": NonNullable<Json>
                   }
+                  ComputedFields: never
                   Insert: {
                     "baseline_expected_value": number,"created_at"?: string,"explanation_method"?: string,"explanation_version"?: string,"id"?: string,"prediction_id": string,"top_negative_contributors"?: NonNullable<Json>,"top_positive_contributors"?: NonNullable<Json>
                   }
@@ -122,6 +127,7 @@ isOneToOne: true
                   Row: {
                     "created_at": string,"decision_threshold": number,"feature_payload": NonNullable<Json>,"id": string,"input_mode": Database["public"]['Enums']["deadline_risk_input_mode"],"model_version_id": string,"predicted_label": boolean,"prediction_metadata": NonNullable<Json>,"risk_probability": number,"task_id": string | null,"user_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"decision_threshold"?: number,"feature_payload": NonNullable<Json>,"id"?: string,"input_mode": Database["public"]['Enums']["deadline_risk_input_mode"],"model_version_id": string,"predicted_label": boolean,"prediction_metadata"?: NonNullable<Json>,"risk_probability": number,"task_id"?: string | null,"user_id"?: string | null
                   }
@@ -151,16 +157,23 @@ isOneToOne: false
                   ]
                 },"distraction_events": {
                   Row: {
-                    "created_at": string,"distraction_type": Database["public"]['Enums']["distraction_type"],"duration_seconds": number,"id": string,"note": string | null,"occurred_at": string,"session_id": string,"user_id": string
+                    "created_at": string,"distraction_type": Database["public"]['Enums']["distraction_type"],"duration_seconds": number,"extension_event_id": string | null,"extension_segment_id": string | null,"id": string,"note": string | null,"occurred_at": string,"session_id": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id": string,"user_id": string
+                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"extension_event_id"?: string | null,"extension_segment_id"?: string | null,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id": string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id"?: string,"user_id"?: string
+                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"extension_event_id"?: string | null,"extension_segment_id"?: string | null,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "distraction_events_extension_segment_id_fkey"
+      columns: ["extension_segment_id"]
+isOneToOne: false
+      referencedRelation: "focus_session_segments"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "distraction_events_session_id_fkey"
       columns: ["session_id"]
 isOneToOne: false
@@ -178,6 +191,7 @@ isOneToOne: false
                   Row: {
                     "chunk_index": number,"content": string,"content_char_count": number,"created_at": string,"document_id": string,"embedding": string | null,"embedding_model": string | null,"id": string,"metadata": NonNullable<Json>,"owner_id": string,"status": Database["public"]['Enums']["document_chunk_status"],"token_estimate": number,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "chunk_index": number,"content": string,"content_char_count": number,"created_at"?: string,"document_id": string,"embedding"?: string | null,"embedding_model"?: string | null,"id"?: string,"metadata"?: NonNullable<Json>,"owner_id": string,"status"?: Database["public"]['Enums']["document_chunk_status"],"token_estimate"?: number,"updated_at"?: string
                   }
@@ -199,15 +213,56 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"focus_sessions": {
+                },"focus_session_plans": {
                   Row: {
-                    "actual_focus_minutes": number,"created_at": string,"ended_at": string | null,"id": string,"notes": string | null,"paused_at": string | null,"planned_minutes": number,"self_focus_rating": number | null,"started_at": string,"status": Database["public"]['Enums']["focus_session_status"],"task_id": string | null,"total_paused_seconds": number,"updated_at": string,"user_id": string
+                    "auto_start_breaks": boolean,"auto_start_focus": boolean,"config_version": number,"created_at": string,"focus_minutes": number,"long_break_every": number,"long_break_minutes": number,"round_count": number,"session_id": string,"short_break_minutes": number
                   }
+                  ComputedFields: never
                   Insert: {
-                    "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes": number,"self_focus_rating"?: number | null,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id": string
+                    "auto_start_breaks": boolean,"auto_start_focus": boolean,"config_version"?: number,"created_at"?: string,"focus_minutes": number,"long_break_every": number,"long_break_minutes": number,"round_count": number,"session_id": string,"short_break_minutes": number
                   }
                   Update: {
-                    "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes"?: number,"self_focus_rating"?: number | null,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id"?: string
+                    "auto_start_breaks"?: boolean,"auto_start_focus"?: boolean,"config_version"?: number,"created_at"?: string,"focus_minutes"?: number,"long_break_every"?: number,"long_break_minutes"?: number,"round_count"?: number,"session_id"?: string,"short_break_minutes"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "focus_session_plans_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: true
+      referencedRelation: "focus_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"focus_session_segments": {
+                  Row: {
+                    "actual_seconds": number,"created_at": string,"ended_at": string | null,"id": string,"paused_at": string | null,"planned_seconds": number,"position": number,"round_number": number,"segment_kind": string,"session_id": string,"started_at": string | null,"status": string,"total_paused_seconds": number,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actual_seconds"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"paused_at"?: string | null,"planned_seconds": number,"position": number,"round_number": number,"segment_kind": string,"session_id": string,"started_at"?: string | null,"status"?: string,"total_paused_seconds"?: number,"updated_at"?: string
+                  }
+                  Update: {
+                    "actual_seconds"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"paused_at"?: string | null,"planned_seconds"?: number,"position"?: number,"round_number"?: number,"segment_kind"?: string,"session_id"?: string,"started_at"?: string | null,"status"?: string,"total_paused_seconds"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "focus_session_segments_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "focus_session_plans"
+      referencedColumns: ["session_id"]
+    }
+                  ]
+                },"focus_sessions": {
+                  Row: {
+                    "actual_focus_minutes": number,"created_at": string,"ended_at": string | null,"id": string,"notes": string | null,"paused_at": string | null,"planned_minutes": number,"self_focus_rating": number | null,"session_mode": string,"started_at": string,"status": Database["public"]['Enums']["focus_session_status"],"task_id": string | null,"total_paused_seconds": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes": number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes"?: number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -224,10 +279,31 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"focus_user_preferences": {
+                  Row: {
+                    "auto_start_breaks": boolean,"auto_start_focus": boolean,"created_at": string,"focus_minutes": number,"long_break_every": number,"long_break_minutes": number,"round_count": number,"short_break_minutes": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auto_start_breaks"?: boolean,"auto_start_focus"?: boolean,"created_at"?: string,"focus_minutes"?: number,"long_break_every"?: number,"long_break_minutes"?: number,"round_count"?: number,"short_break_minutes"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "auto_start_breaks"?: boolean,"auto_start_focus"?: boolean,"created_at"?: string,"focus_minutes"?: number,"long_break_every"?: number,"long_break_minutes"?: number,"round_count"?: number,"short_break_minutes"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "focus_user_preferences_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"goal_progress_snapshots": {
                   Row: {
                     "average_progress_percent": number,"created_at": string,"id": string,"period_end": string,"period_start": string,"tracked_goal_count": number,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "average_progress_percent": number,"created_at"?: string,"id"?: string,"period_end": string,"period_start": string,"tracked_goal_count"?: number,"user_id": string
                   }
@@ -247,6 +323,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"description": string | null,"goal_type": Database["public"]['Enums']["goal_type"],"id": string,"progress_percent": number,"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"start_date": string | null,"status": Database["public"]['Enums']["goal_status"],"target_date": string | null,"title": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"description"?: string | null,"goal_type"?: Database["public"]['Enums']["goal_type"],"id"?: string,"progress_percent"?: number,"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"start_date"?: string | null,"status"?: Database["public"]['Enums']["goal_status"],"target_date"?: string | null,"title": string,"updated_at"?: string,"user_id": string
                   }
@@ -278,6 +355,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"created_by": string,"document_id": string,"id": string,"role": Database["public"]['Enums']["learning_document_permission_role"],"user_email": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"created_by": string,"document_id": string,"id"?: string,"role"?: Database["public"]['Enums']["learning_document_permission_role"],"user_email": string
                   }
@@ -303,6 +381,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"extracted_text_preview": string | null,"extracted_text_status": string,"file_name": string,"file_path": string,"file_size_bytes": number,"goal_id": string | null,"id": string,"mime_type": string,"owner_id": string,"task_id": string | null,"updated_at": string,"visibility": Database["public"]['Enums']["learning_document_visibility"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"extracted_text_preview"?: string | null,"extracted_text_status"?: string,"file_name": string,"file_path": string,"file_size_bytes": number,"goal_id"?: string | null,"id"?: string,"mime_type": string,"owner_id": string,"task_id"?: string | null,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["learning_document_visibility"]
                   }
@@ -334,6 +413,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"description": string | null,"estimated_hours": number,"id": string,"linked_goal_id": string | null,"linked_task_id": string | null,"metadata": NonNullable<Json>,"node_type": Database["public"]['Enums']["learning_roadmap_node_type"],"parent_node_id": string | null,"position_x": number,"position_y": number,"priority": number,"roadmap_id": string,"sort_order": number,"suggested_end_date": string | null,"suggested_start_date": string | null,"title": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"description"?: string | null,"estimated_hours"?: number,"id"?: string,"linked_goal_id"?: string | null,"linked_task_id"?: string | null,"metadata"?: NonNullable<Json>,"node_type": Database["public"]['Enums']["learning_roadmap_node_type"],"parent_node_id"?: string | null,"position_x"?: number,"position_y"?: number,"priority"?: number,"roadmap_id": string,"sort_order"?: number,"suggested_end_date"?: string | null,"suggested_start_date"?: string | null,"title": string,"updated_at"?: string,"user_id": string
                   }
@@ -371,6 +451,7 @@ isOneToOne: false
                   Row: {
                     "ai_latency_ms": number | null,"ai_model": string | null,"ai_provider": string | null,"applied_at": string | null,"archived_at": string | null,"available_weekdays": (string)[],"created_at": string,"current_level": Database["public"]['Enums']["learning_roadmap_level"],"custom_current_level": string | null,"custom_target_level": string | null,"description": string | null,"end_date": string,"generation_input": NonNullable<Json>,"id": string,"minutes_per_study_day": number,"preferred_locale": string,"source_prompt": string | null,"start_date": string,"status": Database["public"]['Enums']["learning_roadmap_status"],"study_days_per_week": number,"subject_name": string | null,"target_level": Database["public"]['Enums']["learning_roadmap_level"],"title": string,"topic": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "ai_latency_ms"?: number | null,"ai_model"?: string | null,"ai_provider"?: string | null,"applied_at"?: string | null,"archived_at"?: string | null,"available_weekdays"?: (string)[],"created_at"?: string,"current_level"?: Database["public"]['Enums']["learning_roadmap_level"],"custom_current_level"?: string | null,"custom_target_level"?: string | null,"description"?: string | null,"end_date": string,"generation_input"?: NonNullable<Json>,"id"?: string,"minutes_per_study_day"?: number,"preferred_locale"?: string,"source_prompt"?: string | null,"start_date": string,"status"?: Database["public"]['Enums']["learning_roadmap_status"],"study_days_per_week"?: number,"subject_name"?: string | null,"target_level"?: Database["public"]['Enums']["learning_roadmap_level"],"title": string,"topic": string,"updated_at"?: string,"user_id": string
                   }
@@ -384,6 +465,7 @@ isOneToOne: false
                   Row: {
                     "algorithm": string,"artifact_path": string,"created_at": string,"explainability_metadata": NonNullable<Json>,"feature_schema": NonNullable<Json>,"id": string,"is_active": boolean,"metrics": NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at": string,"version": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "algorithm": string,"artifact_path": string,"created_at"?: string,"explainability_metadata"?: NonNullable<Json>,"feature_schema"?: NonNullable<Json>,"id"?: string,"is_active"?: boolean,"metrics"?: NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at"?: string,"version": string
                   }
@@ -397,6 +479,7 @@ isOneToOne: false
                   Row: {
                     "calculation_version": string,"component_payload": NonNullable<Json>,"created_at": string,"deadline_pressure_score": number,"deadline_reliability_risk_score": number,"evidence_payload": NonNullable<Json>,"focus_neglect_score": number,"focus_window_days": number,"history_window_days": number,"horizon_days": number,"id": string,"priority_pressure_score": number,"risk_band": Database["public"]['Enums']["native_task_risk_band"],"risk_score": number,"task_id": string,"user_id": string,"workload_pressure_score": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "calculation_version"?: string,"component_payload"?: NonNullable<Json>,"created_at"?: string,"deadline_pressure_score": number,"deadline_reliability_risk_score": number,"evidence_payload"?: NonNullable<Json>,"focus_neglect_score": number,"focus_window_days"?: number,"history_window_days"?: number,"horizon_days"?: number,"id"?: string,"priority_pressure_score": number,"risk_band": Database["public"]['Enums']["native_task_risk_band"],"risk_score": number,"task_id": string,"user_id": string,"workload_pressure_score": number
                   }
@@ -422,6 +505,7 @@ isOneToOne: false
                   Row: {
                     "calculation_version": string,"consistency_score": number,"created_at": string,"deadline_adherence_score": number,"explanation_payload": NonNullable<Json>,"focus_quality_score": number,"goal_momentum_score": number,"id": string,"period_end": string,"period_start": string,"personalized_pbi": number,"standard_pbi": number,"task_completion_rate": number,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "calculation_version"?: string,"consistency_score": number,"created_at"?: string,"deadline_adherence_score": number,"explanation_payload"?: NonNullable<Json>,"focus_quality_score": number,"goal_momentum_score": number,"id"?: string,"period_end": string,"period_start": string,"personalized_pbi": number,"standard_pbi": number,"task_completion_rate": number,"user_id": string
                   }
@@ -441,6 +525,7 @@ isOneToOne: false
                   Row: {
                     "consistency_weight": number,"created_at": string,"deadline_adherence_weight": number,"focus_quality_weight": number,"goal_momentum_weight": number,"id": string,"task_completion_weight": number,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "consistency_weight"?: number,"created_at"?: string,"deadline_adherence_weight"?: number,"focus_quality_weight"?: number,"goal_momentum_weight"?: number,"id"?: string,"task_completion_weight"?: number,"updated_at"?: string,"user_id": string
                   }
@@ -460,6 +545,7 @@ isOneToOne: true
                   Row: {
                     "avatar_url": string | null,"created_at": string,"display_name": string | null,"full_name": string | null,"id": string,"leaderboard_opt_in": boolean,"onboarding_completed": boolean,"role": Database["public"]['Enums']["app_role"],"timezone": string,"updated_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "avatar_url"?: string | null,"created_at"?: string,"display_name"?: string | null,"full_name"?: string | null,"id": string,"leaderboard_opt_in"?: boolean,"onboarding_completed"?: boolean,"role"?: Database["public"]['Enums']["app_role"],"timezone"?: string,"updated_at"?: string
                   }
@@ -473,6 +559,7 @@ isOneToOne: true
                   Row: {
                     "content": string,"content_locale": string | null,"context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"id": string,"latency_ms": number | null,"model_name": string | null,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids": (string)[],"retrieved_context": NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids": (string)[],"session_id": string,"top_k": number | null,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "content": string,"content_locale"?: string | null,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids"?: (string)[],"retrieved_context"?: NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids"?: (string)[],"session_id": string,"top_k"?: number | null,"user_id": string
                   }
@@ -498,6 +585,7 @@ isOneToOne: false
                   Row: {
                     "context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id": string
                   }
@@ -535,6 +623,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"event_type": Database["public"]['Enums']["reward_event_type"],"id": string,"occurred_at": string,"reward_note": string,"source_key": string,"source_payload": NonNullable<Json>,"token_delta": number,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"event_type": Database["public"]['Enums']["reward_event_type"],"id"?: string,"occurred_at": string,"reward_note": string,"source_key": string,"source_payload"?: NonNullable<Json>,"token_delta": number,"user_id": string
                   }
@@ -554,6 +643,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"created_by": string,"group_id": string,"id": string,"target_completed_tasks": number,"target_focus_minutes": number,"title": string,"updated_at": string,"week_end": string,"week_start": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"created_by": string,"group_id": string,"id"?: string,"target_completed_tasks"?: number,"target_focus_minutes"?: number,"title"?: string,"updated_at"?: string,"week_end": string,"week_start": string
                   }
@@ -573,6 +663,7 @@ isOneToOne: false
                   Row: {
                     "created_at": string,"id": string,"joined_at": string,"left_at": string | null,"membership_status": Database["public"]['Enums']["study_room_member_status"],"role": Database["public"]['Enums']["study_room_member_role"],"room_id": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"id"?: string,"joined_at"?: string,"left_at"?: string | null,"membership_status"?: Database["public"]['Enums']["study_room_member_status"],"role"?: Database["public"]['Enums']["study_room_member_role"],"room_id": string,"updated_at"?: string,"user_id": string
                   }
@@ -598,6 +689,7 @@ isOneToOne: false
                   Row: {
                     "content": string,"created_at": string,"id": string,"room_id": string,"sender_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "content": string,"created_at"?: string,"id"?: string,"room_id": string,"sender_id": string
                   }
@@ -623,6 +715,7 @@ isOneToOne: false
                   Row: {
                     "admin_note": string | null,"archived_at": string | null,"archived_by": string | null,"created_at": string,"description": string | null,"id": string,"invite_code": string,"is_private": boolean,"max_participants": number,"owner_id": string,"realtime_topic": string | null,"room_type": Database["public"]['Enums']["study_room_type"],"status": Database["public"]['Enums']["study_room_status"],"title": string,"updated_at": string,"visibility": Database["public"]['Enums']["study_room_visibility"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_note"?: string | null,"archived_at"?: string | null,"archived_by"?: string | null,"created_at"?: string,"description"?: string | null,"id"?: string,"invite_code"?: string,"is_private"?: boolean,"max_participants"?: number,"owner_id": string,"realtime_topic"?: never,"room_type"?: Database["public"]['Enums']["study_room_type"],"status"?: Database["public"]['Enums']["study_room_status"],"title": string,"updated_at"?: string,"visibility"?: Database["public"]['Enums']["study_room_visibility"]
                   }
@@ -642,6 +735,7 @@ isOneToOne: false
                   Row: {
                     "answer_key": NonNullable<Json>,"attempt_id": string,"created_at": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "answer_key": NonNullable<Json>,"attempt_id": string,"created_at"?: string,"updated_at"?: string,"user_id": string
                   }
@@ -667,6 +761,7 @@ isOneToOne: false
                   Row: {
                     "assessment_payload": NonNullable<Json>,"attempt_number": number,"completed_at": string | null,"created_at": string,"feedback_payload": NonNullable<Json>,"generation_error": string | null,"generation_request_id": string | null,"id": string,"latency_ms": number | null,"model": string | null,"pass_threshold": number,"prompt_version": string | null,"provider": string | null,"ready_at": string | null,"score": number | null,"source_snapshot": NonNullable<Json>,"status": Database["public"]['Enums']["task_review_attempt_status"],"submission_fingerprint": string | null,"submitted_at": string | null,"task_id": string,"task_snapshot": NonNullable<Json>,"updated_at": string,"user_id": string,"weak_areas": NonNullable<Json>
                   }
+                  ComputedFields: never
                   Insert: {
                     "assessment_payload"?: NonNullable<Json>,"attempt_number": number,"completed_at"?: string | null,"created_at"?: string,"feedback_payload"?: NonNullable<Json>,"generation_error"?: string | null,"generation_request_id"?: string | null,"id"?: string,"latency_ms"?: number | null,"model"?: string | null,"pass_threshold"?: number,"prompt_version"?: string | null,"provider"?: string | null,"ready_at"?: string | null,"score"?: number | null,"source_snapshot"?: NonNullable<Json>,"status"?: Database["public"]['Enums']["task_review_attempt_status"],"submission_fingerprint"?: string | null,"submitted_at"?: string | null,"task_id": string,"task_snapshot"?: NonNullable<Json>,"updated_at"?: string,"user_id": string,"weak_areas"?: NonNullable<Json>
                   }
@@ -692,6 +787,7 @@ isOneToOne: false
                   Row: {
                     "actor_role": string,"from_status": Database["public"]['Enums']["task_status"],"id": string,"occurred_at": string,"review_attempt_id": string | null,"source": string,"task_id": string,"to_status": Database["public"]['Enums']["task_status"],"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor_role": string,"from_status": Database["public"]['Enums']["task_status"],"id"?: string,"occurred_at"?: string,"review_attempt_id"?: string | null,"source": string,"task_id": string,"to_status": Database["public"]['Enums']["task_status"],"user_id": string
                   }
@@ -723,6 +819,7 @@ isOneToOne: false
                   Row: {
                     "completed_at": string | null,"created_at": string,"description": string | null,"due_at": string | null,"due_date": string | null,"estimated_minutes": number | null,"goal_id": string | null,"id": string,"parent_task_id": string | null,"priority": Database["public"]['Enums']["task_priority"],"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"status": Database["public"]['Enums']["task_status"],"title": string,"updated_at": string,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "completed_at"?: string | null,"created_at"?: string,"description"?: string | null,"due_at"?: string | null,"due_date"?: string | null,"estimated_minutes"?: number | null,"goal_id"?: string | null,"id"?: string,"parent_task_id"?: string | null,"priority"?: Database["public"]['Enums']["task_priority"],"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"status"?: Database["public"]['Enums']["task_status"],"title": string,"updated_at"?: string,"user_id": string
                   }
@@ -766,6 +863,7 @@ isOneToOne: false
                   Row: {
                     "calculation_version": string,"completed_focus_sessions_total": number,"completed_tasks_total": number,"created_at": string,"current_streak_days": number,"last_streak_evaluation_at": string | null,"last_valid_activity_date": string | null,"latest_active_study_date": string | null,"longest_streak_days": number,"streak_freeze_started_at": string | null,"streak_restore_deadline_at": string | null,"streak_status": Database["public"]['Enums']["engagement_streak_status"],"token_balance": number,"tokens_earned_last_7d": number,"total_tokens_earned": number,"total_tokens_spent": number,"updated_at": string,"user_id": string,"valid_completed_tasks_total": number,"valid_focus_sessions_total": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "calculation_version"?: string,"completed_focus_sessions_total"?: number,"completed_tasks_total"?: number,"created_at"?: string,"current_streak_days"?: number,"last_streak_evaluation_at"?: string | null,"last_valid_activity_date"?: string | null,"latest_active_study_date"?: string | null,"longest_streak_days"?: number,"streak_freeze_started_at"?: string | null,"streak_restore_deadline_at"?: string | null,"streak_status"?: Database["public"]['Enums']["engagement_streak_status"],"token_balance"?: number,"tokens_earned_last_7d"?: number,"total_tokens_earned"?: number,"total_tokens_spent"?: number,"updated_at"?: string,"user_id": string,"valid_completed_tasks_total"?: number,"valid_focus_sessions_total"?: number
                   }
@@ -785,6 +883,7 @@ isOneToOne: true
                   Row: {
                     "created_at": string,"event_date": string,"event_type": Database["public"]['Enums']["streak_event_type"],"id": string,"metadata": NonNullable<Json>,"next_status": Database["public"]['Enums']["engagement_streak_status"] | null,"occurred_at": string,"previous_status": Database["public"]['Enums']["engagement_streak_status"] | null,"source_key": string,"token_delta": number,"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "created_at"?: string,"event_date"?: string,"event_type": Database["public"]['Enums']["streak_event_type"],"id"?: string,"metadata"?: NonNullable<Json>,"next_status"?: Database["public"]['Enums']["engagement_streak_status"] | null,"occurred_at"?: string,"previous_status"?: Database["public"]['Enums']["engagement_streak_status"] | null,"source_key": string,"token_delta"?: number,"user_id": string
                   }
@@ -804,6 +903,7 @@ isOneToOne: false
                   Row: {
                     "confidence_note": string,"created_at": string,"generation_metadata": NonNullable<Json>,"id": string,"llm_model": string,"llm_provider": string,"next_week_actions": NonNullable<Json>,"prompt_version": string,"reflection_id": string,"reflection_interpretation": string,"structured_output_schema_version": string,"summary": string,"title": string,"updated_at": string,"user_id": string,"watchouts": NonNullable<Json>,"wins": NonNullable<Json>
                   }
+                  ComputedFields: never
                   Insert: {
                     "confidence_note": string,"created_at"?: string,"generation_metadata"?: NonNullable<Json>,"id"?: string,"llm_model": string,"llm_provider"?: string,"next_week_actions"?: NonNullable<Json>,"prompt_version"?: string,"reflection_id": string,"reflection_interpretation": string,"structured_output_schema_version"?: string,"summary": string,"title": string,"updated_at"?: string,"user_id": string,"watchouts"?: NonNullable<Json>,"wins"?: NonNullable<Json>
                   }
@@ -829,6 +929,7 @@ isOneToOne: false
                   Row: {
                     "calculation_version": string,"comparison_payload": NonNullable<Json>,"created_at": string,"current_metrics": NonNullable<Json>,"current_window_end": string,"current_window_start": string,"evidence_payload": NonNullable<Json>,"id": string,"previous_metrics": NonNullable<Json>,"previous_window_end": string,"previous_window_start": string,"reflection_direction": Database["public"]['Enums']["weekly_reflection_direction"],"user_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "calculation_version"?: string,"comparison_payload"?: NonNullable<Json>,"created_at"?: string,"current_metrics"?: NonNullable<Json>,"current_window_end": string,"current_window_start": string,"evidence_payload"?: NonNullable<Json>,"id"?: string,"previous_metrics"?: NonNullable<Json>,"previous_window_end": string,"previous_window_start": string,"reflection_direction": Database["public"]['Enums']["weekly_reflection_direction"],"user_id": string
                   }
@@ -1050,6 +1151,12 @@ isOneToOne: false
                            },
 "find_user_id_by_auth_email_for_group":
 { Args: { "p_email": string,"p_group_id": string }; Returns: string
+                           },
+"focus_v2_create_session":
+{ Args: { "p_auto_start_breaks": boolean,"p_auto_start_focus": boolean,"p_focus_minutes": number,"p_long_break_every": number,"p_long_break_minutes": number,"p_round_count": number,"p_short_break_minutes": number,"p_task_id": string,"p_user_id": string }; Returns: string
+                           },
+"focus_v2_transition":
+{ Args: { "p_action": string,"p_expected_segment_id"?: string,"p_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "get_admin_dashboard_metrics":
 { Args: Record<PropertyKey, never>; Returns: {

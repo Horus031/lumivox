@@ -1,0 +1,60 @@
+name: Extension CI
+
+on:
+  pull_request:
+    branches:
+      - product-release
+      - main
+    paths:
+      - "apps/extension/**"
+      - ".github/workflows/extension-ci.yml"
+
+  push:
+    branches:
+      - product-release
+      - main
+    paths:
+      - "apps/extension/**"
+      - ".github/workflows/extension-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  extension:
+    name: Extension Typecheck, Tests and Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      LUMIVOX_EXTENSION_SUPABASE_URL: https://example.supabase.co
+      LUMIVOX_EXTENSION_SUPABASE_PUBLISHABLE_KEY: ci-public-placeholder
+
+    defaults:
+      run:
+        working-directory: apps/extension
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/extension/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test
+
+      - name: Build production extension
+        run: npm run build
+
+      - name: Verify Manifest V3
+        run: node scripts/verify-manifest.mjs

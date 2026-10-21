@@ -11,25 +11,9 @@ import {
   type CreateFocusSessionInput,
 } from "./focus-session.schemas";
 
-function calculateElapsedFocusMinutes(
-  startedAt: string,
-  endedAt: Date,
-  plannedMinutes: number,
-  totalPausedSeconds: number,
-) {
-  const startedMs = new Date(startedAt).getTime();
-  const endedMs = endedAt.getTime();
+import { getActualFocusMinutes } from "./focus-session-clock";
 
-  const rawElapsedSeconds = Math.max(
-    0,
-    Math.floor((endedMs - startedMs) / 1000),
-  );
-
-  const activeSeconds = Math.max(0, rawElapsedSeconds - totalPausedSeconds);
-  const activeMinutes = Math.floor(activeSeconds / 60);
-
-  return Math.min(activeMinutes, plannedMinutes);
-}
+const staleSessionMessage = "Session state changed. Please refresh.";
 
 export async function createFocusSessionAction(
   input: CreateFocusSessionInput,
@@ -60,7 +44,9 @@ export async function createFocusSessionAction(
     if (error) {
       return {
         success: false,
-        message: `Failed to start focus session: ${error.message}`,
+        message: error.code === "23505"
+          ? "You already have an active focus session."
+          : `Failed to start focus session: ${error.message}`,
       };
     }
 
@@ -90,16 +76,19 @@ export async function pauseFocusSessionAction(
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
-    const { error } = await supabase
+    const { data: updated, error } = await supabase
       .from("focus_sessions")
       .update({
         status: "paused",
         paused_at: new Date().toISOString(),
       })
       .eq("id", parsed.data.sessionId)
-      .eq("status", "ongoing");
+      .eq("user_id", user.id)
+      .eq("status", "ongoing")
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       return {
@@ -107,6 +96,8 @@ export async function pauseFocusSessionAction(
         message: `Failed to pause session: ${error.message}`,
       };
     }
+
+    if (!updated) return { success: false, message: staleSessionMessage };
 
     return {
       success: true,
@@ -134,12 +125,13 @@ export async function resumeFocusSessionAction(
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
       .select("id, paused_at, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
       .single();
 
     if (fetchError || !session) {
@@ -162,7 +154,7 @@ export async function resumeFocusSessionAction(
       Math.floor((Date.now() - pausedAtMs) / 1000),
     );
 
-    const { error: updateError } = await supabase
+    let updateQuery = supabase
       .from("focus_sessions")
       .update({
         status: "ongoing",
@@ -170,7 +162,18 @@ export async function resumeFocusSessionAction(
         total_paused_seconds:
           session.total_paused_seconds + newlyPausedSeconds,
       })
-      .eq("id", parsed.data.sessionId);
+      .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
+      .eq("status", session.status)
+      .eq("total_paused_seconds", session.total_paused_seconds);
+
+    updateQuery =
+      session.paused_at === null
+        ? updateQuery.is("paused_at", null)
+        : updateQuery.eq("paused_at", session.paused_at);
+    const { data: updated, error: updateError } = await updateQuery
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       return {
@@ -178,6 +181,8 @@ export async function resumeFocusSessionAction(
         message: `Failed to resume session: ${updateError.message}`,
       };
     }
+
+    if (!updated) return { success: false, message: staleSessionMessage };
 
     return {
       success: true,
@@ -209,8 +214,11 @@ export async function completeFocusSessionAction(
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select("id, started_at, planned_minutes, total_paused_seconds, status")
+      .select(
+        "id, started_at, planned_minutes, paused_at, total_paused_seconds, status",
+      )
       .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
       .single();
 
     if (fetchError || !session) {
@@ -228,21 +236,27 @@ export async function completeFocusSessionAction(
     }
 
     const endedAt = new Date();
-    const actualFocusMinutes = calculateElapsedFocusMinutes(
-      session.started_at,
-      endedAt,
-      session.planned_minutes,
-      session.total_paused_seconds,
-    );
+    const actualFocusMinutes = getActualFocusMinutes(session, endedAt);
 
-    const { error: updateError } = await supabase
+    let updateQuery = supabase
       .from("focus_sessions")
       .update({
         status: "completed",
         ended_at: endedAt.toISOString(),
         actual_focus_minutes: actualFocusMinutes,
       })
-      .eq("id", parsed.data.sessionId);
+      .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
+      .eq("status", session.status)
+      .eq("total_paused_seconds", session.total_paused_seconds);
+
+    updateQuery =
+      session.paused_at === null
+        ? updateQuery.is("paused_at", null)
+        : updateQuery.eq("paused_at", session.paused_at);
+    const { data: updated, error: updateError } = await updateQuery
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       return {
@@ -250,6 +264,8 @@ export async function completeFocusSessionAction(
         message: `Failed to complete session: ${updateError.message}`,
       };
     }
+
+    if (!updated) return { success: false, message: staleSessionMessage };
 
     scheduleEngagementRecalculation({
       userId: user.id,
@@ -286,12 +302,15 @@ export async function cancelFocusSessionAction(
   }
 
   try {
-    const { supabase } = await requireUser();
+    const { supabase, user } = await requireUser();
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select("id, started_at, planned_minutes, total_paused_seconds, status")
+      .select(
+        "id, started_at, planned_minutes, paused_at, total_paused_seconds, status",
+      )
       .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
       .single();
 
     if (fetchError || !session) {
@@ -309,21 +328,38 @@ export async function cancelFocusSessionAction(
     }
 
     const endedAt = new Date();
-    const actualFocusMinutes = calculateElapsedFocusMinutes(
-      session.started_at,
-      endedAt,
-      session.planned_minutes,
-      session.total_paused_seconds,
-    );
+    const actualFocusMinutes = getActualFocusMinutes(session, endedAt);
 
-    const { error: updateError } = await supabase
+    let updateQuery = supabase
       .from("focus_sessions")
       .update({
         status: "cancelled",
+        paused_at: null,
+        total_paused_seconds:
+          session.total_paused_seconds +
+          (session.status === "paused" && session.paused_at
+            ? Math.max(
+                0,
+                Math.floor(
+                  (endedAt.getTime() - new Date(session.paused_at).getTime()) / 1000,
+                ),
+              )
+            : 0),
         ended_at: endedAt.toISOString(),
         actual_focus_minutes: actualFocusMinutes,
       })
-      .eq("id", parsed.data.sessionId);
+      .eq("id", parsed.data.sessionId)
+      .eq("user_id", user.id)
+      .eq("status", session.status)
+      .eq("total_paused_seconds", session.total_paused_seconds);
+
+    updateQuery =
+      session.paused_at === null
+        ? updateQuery.is("paused_at", null)
+        : updateQuery.eq("paused_at", session.paused_at);
+    const { data: updated, error: updateError } = await updateQuery
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       return {
@@ -331,6 +367,8 @@ export async function cancelFocusSessionAction(
         message: `Failed to cancel session: ${updateError.message}`,
       };
     }
+
+    if (!updated) return { success: false, message: staleSessionMessage };
 
     return {
       success: true,

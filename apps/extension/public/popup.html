@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lumivox Companion</title>
+    <link rel="stylesheet" href="popup.css" />
+    <script src="popup.js" defer></script>
+  </head>
+
+  <body>
+    <main class="app">
+      <header>
+        <p class="eyebrow">LUMIVOX</p>
+        <h1>Focus Companion</h1>
+        <p class="description">Kết nối với tài khoản Lumivox của bạn.</p>
+      </header>
+
+      <section class="status-card" aria-live="polite">
+        <p class="label">Kết nối website</p>
+        <p id="site-status" role="status">Đang kiểm tra...</p>
+        <p id="site-detail" class="detail"></p>
+      </section>
+
+      <section class="status-card">
+        <p class="label">Tài khoản Extension</p>
+        <p id="auth-status" role="status">Đang kiểm tra đăng nhập...</p>
+
+        <form id="login-form" hidden>
+          <label for="email">Email</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            autocomplete="email"
+            maxlength="320"
+            required
+          />
+
+          <label for="password">Mật khẩu</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            autocomplete="current-password"
+            minlength="6"
+            maxlength="128"
+            required
+          />
+
+          <button id="login" type="submit">Đăng nhập</button>
+        </form>
+
+        <div id="account-view" hidden>
+          <p id="account-email" class="detail"></p>
+          <button id="logout" type="button">Đăng xuất Extension</button>
+        </div>
+
+        <p id="auth-message" class="detail" role="alert"></p>
+      </section>
+
+      <section id="focus-panel" class="status-card" hidden>
+        <p class="label">Pomodoro · Đồng bộ với Lumivox</p>
+        <p id="focus-state" role="status">Đang đồng bộ...</p>
+
+        <p id="focus-time" class="focus-clock">--:--</p>
+        <p id="focus-round" class="detail"></p>
+        <p id="focus-message" class="detail" role="status"></p>
+
+        <div class="focus-controls">
+          <button type="button" data-focus-action="pause" hidden>
+            Tạm dừng
+          </button>
+          <button type="button" data-focus-action="resume" hidden>
+            Tiếp tục
+          </button>
+          <button type="button" data-focus-action="complete" hidden>
+            Hoàn thành giai đoạn
+          </button>
+          <button type="button" data-focus-action="start_next" hidden>
+            Bắt đầu giai đoạn tiếp theo
+          </button>
+          <button type="button" data-focus-action="skip_break" hidden>
+            Bỏ qua giờ nghỉ
+          </button>
+        </div>
+
+        <button id="focus-refresh" type="button">Đồng bộ Pomodoro</button>
+      </section>
+
+      <section id="attention-panel" class="status-card">
+        <p class="label">Distraction Awareness</p>
+
+        <p class="detail">
+          Khi bật, Lumivox có thể đọc URL tab đang hoạt động để phân loại một số
+          website trong giờ Focus. Không lưu URL, tiêu đề trang hoặc lịch sử
+          duyệt web. Không tự ghi dữ liệu lên tài khoản.
+        </p>
+
+        <p id="attention-status" role="status">Đang kiểm tra quyền...</p>
+
+        <div class="attention-actions">
+          <button id="attention-enable" type="button">Bật theo dõi</button>
+          <button id="attention-disable" type="button" hidden>
+            Tắt và thu hồi quyền
+          </button>
+          <button id="attention-refresh" type="button">Kiểm tra gợi ý</button>
+        </div>
+
+        <section id="attention-candidate" hidden>
+          <p class="label">Gợi ý cần xác nhận</p>
+          <p id="attention-candidate-text" class="detail"></p>
+
+          <div class="attention-actions">
+            <button id="attention-confirm" type="button">
+              Xác nhận và lưu vào Lumivox
+            </button>
+            <button id="attention-open-focus" type="button">
+              Mở Lumivox để ghi nhận
+            </button>
+            <button id="attention-dismiss" type="button">Bỏ qua gợi ý</button>
+          </div>
+        </section>
+
+        <p id="attention-error" class="detail" role="alert"></p>
+      </section>
+
+      <div class="actions">
+        <button id="refresh" type="button">Kiểm tra lại</button>
+        <button id="open-site" type="button">Mở Lumivox</button>
+      </div>
+
+      <footer>
+        <p>Phase 11: Xác thực tài khoản. Chưa điều khiển Focus Session.</p>
+      </footer>
+    </main>
+  </body>
+</html>

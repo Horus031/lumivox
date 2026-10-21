@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { getRemainingFocusSeconds } from "../focus-session-clock";
 import type { ActiveFocusSessionWithTask } from "@/features/focus-sessions/focus-session.types";
 import {
   cancelFocusSessionAction,
@@ -40,29 +41,6 @@ function formatClock(totalSeconds: number) {
   )}`;
 }
 
-function calculateRemainingSeconds(session: ActiveFocusSessionWithTask) {
-  const plannedSeconds = session.planned_minutes * 60;
-  const nowMs = Date.now();
-  const startedMs = new Date(session.started_at).getTime();
-
-  const rawElapsedSeconds = Math.max(0, Math.floor((nowMs - startedMs) / 1000));
-
-  let pausedSeconds = session.total_paused_seconds;
-
-  if (session.status === "paused" && session.paused_at) {
-    const currentPauseSeconds = Math.max(
-      0,
-      Math.floor((nowMs - new Date(session.paused_at).getTime()) / 1000),
-    );
-
-    pausedSeconds += currentPauseSeconds;
-  }
-
-  const activeElapsedSeconds = Math.max(0, rawElapsedSeconds - pausedSeconds);
-
-  return plannedSeconds - activeElapsedSeconds;
-}
-
 export function ActiveFocusSessionPanel({
   session,
 }: ActiveFocusSessionPanelProps) {
@@ -75,16 +53,16 @@ export function ActiveFocusSessionPanel({
     useState(false);
 
   const [remainingSeconds, setRemainingSeconds] = useState(() =>
-    calculateRemainingSeconds(session),
+    getRemainingFocusSeconds(session),
   );
 
   useEffect(() => {
-    setRemainingSeconds(calculateRemainingSeconds(session));
+    setRemainingSeconds(getRemainingFocusSeconds(session));
 
     if (session.status === "paused") return;
 
     const interval = window.setInterval(() => {
-      setRemainingSeconds(calculateRemainingSeconds(session));
+      setRemainingSeconds(getRemainingFocusSeconds(session));
     }, 1000);
 
     return () => window.clearInterval(interval);
@@ -102,29 +80,39 @@ export function ActiveFocusSessionPanel({
 
   function handlePause() {
     startTransition(async () => {
-      const result = await pauseFocusSessionAction(session.id);
+      try {
+        const result = await pauseFocusSessionAction(session.id);
 
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+        if (!result.success) {
+          toast.error(result.message);
+          if (result.message === "Session state changed. Please refresh.") router.refresh();
+          return;
+        }
+
+        toast.success(result.message);
+        router.refresh();
+      } catch {
+        toast.error(t("requestFailed"));
       }
-
-      toast.success(result.message);
-      router.refresh();
     });
   }
 
   function handleResume() {
     startTransition(async () => {
-      const result = await resumeFocusSessionAction(session.id);
+      try {
+        const result = await resumeFocusSessionAction(session.id);
 
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+        if (!result.success) {
+          toast.error(result.message);
+          if (result.message === "Session state changed. Please refresh.") router.refresh();
+          return;
+        }
+
+        toast.success(result.message);
+        router.refresh();
+      } catch {
+        toast.error(t("requestFailed"));
       }
-
-      toast.success(result.message);
-      router.refresh();
     });
   }
 
@@ -137,6 +125,7 @@ export function ActiveFocusSessionPanel({
         if (!result.success) {
           setIsCompletingOptimistically(false);
           toast.error(result.message);
+          if (result.message === "Session state changed. Please refresh.") router.refresh();
           return;
         }
         toast.success(result.message);
@@ -154,15 +143,20 @@ export function ActiveFocusSessionPanel({
     if (!confirmed) return;
 
     startTransition(async () => {
-      const result = await cancelFocusSessionAction(session.id);
+      try {
+        const result = await cancelFocusSessionAction(session.id);
 
-      if (!result.success) {
-        toast.error(result.message);
-        return;
+        if (!result.success) {
+          toast.error(result.message);
+          if (result.message === "Session state changed. Please refresh.") router.refresh();
+          return;
+        }
+
+        toast.success(result.message);
+        router.refresh();
+      } catch {
+        toast.error(t("requestFailed"));
       }
-
-      toast.success(result.message);
-      router.refresh();
     });
   }
 
