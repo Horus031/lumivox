@@ -20,7 +20,7 @@ const languages = [
   { value: "vi", flag: "\u{1F1FB}\u{1F1F3}", label: "Ti\u1EBFng Vi\u1EC7t" },
 ] as const;
 
-export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
+export function LanguageSwitcher() {
   const locale = useLocale();
   const t = useTranslations("common");
   const router = useRouter();
@@ -40,8 +40,8 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild aria-label={t("language")}>
-        <Button variant={compact ? "ghost" : "outline"} size={compact ? "icon" : "default"} title={`${t("language")}: ${currentLanguage.label}`} className={compact ? "sm:size-touch lg:size-control" : undefined}>
-          <Languages /> {!compact && currentLanguage.flag}
+        <Button variant={"outline"}>
+          <Languages /> {currentLanguage.flag}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-48">
@@ -51,7 +51,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           <DropdownMenuItem
             key={language.value}
             onClick={() => handleChange(language.value)}
-            className={compact ? "min-h-touch rounded-md py-2 lg:min-h-control" : "rounded-lg py-2"}
+            className="rounded-lg py-2"
           >
             <span className="text-base leading-none">{language.flag}</span>
             <span>{language.label}</span>

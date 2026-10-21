@@ -1,10 +1,6 @@
-import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { AdminDocumentReprocessButton } from "./admin-document-reprocess-button";
-import { AdminTableSection } from "./admin-table-section";
 
 type AdminDocument = {
   document_id: string;
@@ -21,47 +17,166 @@ type AdminDocument = {
   created_at: string;
 };
 
-function statusTone(status: string | null) {
-  if (status === "completed") return "border-success/25 bg-success/10 text-foreground";
-  if (status === "failed") return "border-danger/25 bg-danger/10 text-foreground";
-  if (status === "processing") return "border-info/25 bg-info/10 text-foreground";
-  if (status === "unsupported") return "border-warning/25 bg-warning/10 text-foreground";
-  return "border-border bg-muted text-secondary-text";
+type AdminDocumentsTableProps = {
+  documents: AdminDocument[];
+};
+
+function formatBytes(bytes: number | null) {
+  if (!bytes) return "N/A";
+
+  const mb = bytes / 1024 / 1024;
+
+  return `${mb.toFixed(2)} MB`;
 }
 
-export function AdminDocumentsTable({ documents }: { documents: AdminDocument[] }) {
+function statusBadgeClass(status: string | null) {
+  if (status === "completed") {
+    return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
+  }
+
+  if (status === "failed") {
+    return "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300";
+  }
+
+  if (status === "processing") {
+    return "bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300";
+  }
+
+  if (status === "unsupported") {
+    return "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300";
+  }
+
+  return "bg-neutral-100 text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300";
+}
+
+export function AdminDocumentsTable({
+  documents,
+}: AdminDocumentsTableProps) {
   const locale = useLocale();
   const t = useTranslations("admin.documents.table");
   const commonT = useTranslations("admin.common");
 
   return (
-    <AdminTableSection title={t("title")} empty={documents.length === 0} emptyMessage={t("empty")} className="min-w-260">
-      <thead className="border-b border-border bg-muted text-label text-secondary-text">
-        <tr>{["file", "owner", "aiStatus", "chunks", "visibilityLabel", "size", "created", "actions"].map((key) => <th key={key} scope="col">{commonT(key)}</th>)}</tr>
-      </thead>
-      <tbody className="divide-y divide-border">
-        {documents.map((document) => (
-          <tr key={document.document_id} className="hover:bg-muted/50">
-            <td className="max-w-60 [overflow-wrap:anywhere]">
-              <Link href={`/admin/documents/${document.document_id}`} className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{document.file_name}</Link>
-              <p title={document.mime_type} className="mt-1 max-w-60 truncate text-caption text-muted-foreground">{document.mime_type}</p>
-            </td>
-            <td className="max-w-52 [overflow-wrap:anywhere]">
-              <p className="text-label font-medium text-foreground">{document.owner_name ?? commonT("unknownOwner")}</p>
-              <p className="mt-1 text-caption text-muted-foreground">{document.owner_email ?? document.owner_id}</p>
-            </td>
-            <td><Badge variant="outline" className={statusTone(document.extracted_text_status)}>{commonT(`aiStatuses.${document.extracted_text_status ?? "pending"}`)}</Badge></td>
-            <td className="text-label tabular-nums text-secondary-text">{document.embedded_chunk_count}/{document.chunk_count}</td>
-            <td className="text-label text-secondary-text">{commonT(`documentVisibility.${document.visibility}`)}</td>
-            <td className="text-caption tabular-nums text-secondary-text">{document.file_size_bytes ? `${(document.file_size_bytes / 1024 / 1024).toFixed(2)} MB` : commonT("na")}</td>
-            <td className="text-caption tabular-nums text-secondary-text">{new Date(document.created_at).toLocaleString(locale)}</td>
-            <td><div className="flex items-center gap-1">
-              <Button asChild variant="ghost" size="icon"><Link href={`/admin/documents/${document.document_id}`} aria-label={`${commonT("view")}: ${document.file_name}`} title={commonT("view")}><ArrowUpRight aria-hidden="true" /></Link></Button>
-              <AdminDocumentReprocessButton documentId={document.document_id} ownerId={document.owner_id} status={document.extracted_text_status} compact />
-            </div></td>
-          </tr>
-        ))}
-      </tbody>
-    </AdminTableSection>
+    <section className="rounded-2xl shadow-sm">
+      <div>
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {t("eyebrow")}
+        </p>
+
+        <h2 className="mt-2 text-2xl font-bold text-foreground">
+          {t("title")}
+        </h2>
+      </div>
+
+      {documents.length === 0 ? (
+        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-sm text-muted-foreground">
+            {t("empty")}
+          </p>
+        </div>
+      ) : (
+        <div className="mt-6 overflow-x-auto rounded-2xl border">
+          <table className="min-w-312.5 w-full text-sm">
+            <thead className="bg-surface text-left">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("file")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("owner")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("aiStatus")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("chunks")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("visibilityLabel")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("size")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("created")}
+                </th>
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
+                  {commonT("actions")}
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y dark:divide-neutral-800">
+              {documents.map((document) => (
+                <tr key={document.document_id}>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-foreground">
+                      {document.file_name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {document.mime_type}
+                    </p>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-foreground">
+                      {document.owner_name ?? commonT("unknownOwner")}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {document.owner_email ?? document.owner_id}
+                    </p>
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${statusBadgeClass(
+                        document.extracted_text_status
+                      )}`}
+                    >
+                      {commonT(
+                        `aiStatuses.${document.extracted_text_status ?? "pending"}`,
+                      )}
+                    </span>
+                  </td>
+
+                  <td className="px-4 py-3 text-foreground">
+                    {document.embedded_chunk_count}/{document.chunk_count}
+                  </td>
+
+                  <td className="px-4 py-3 capitalize text-foreground">
+                    {commonT(`documentVisibility.${document.visibility}`)}
+                  </td>
+
+                  <td className="px-4 py-3 text-foreground">
+                    {formatBytes(document.file_size_bytes)}
+                  </td>
+
+                  <td className="px-4 py-3 text-foreground">
+                    {new Date(document.created_at).toLocaleString(locale)}
+                  </td>
+
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Link
+                        href={`/admin/documents/${document.document_id}`}
+                        className="rounded-xl border px-3 py-2 text-sm font-medium transition"
+                      >
+                        {commonT("view")}
+                      </Link>
+
+                      <AdminDocumentReprocessButton
+                        documentId={document.document_id}
+                        ownerId={document.owner_id}
+                        status={document.extracted_text_status}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   );
 }

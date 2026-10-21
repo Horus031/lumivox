@@ -1,13 +1,13 @@
 "use client";
 
-import { useId, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { updateAdminUserLeaderboardVisibilityAction } from "@/features/admin/admin-users.actions";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 
 type AdminUserLeaderboardToggleProps = {
   userId: string;
@@ -20,12 +20,9 @@ export function AdminUserLeaderboardToggle({
 }: AdminUserLeaderboardToggleProps) {
   const router = useRouter();
   const t = useTranslations("admin.common.visibility");
-  const commonT = useTranslations("admin.common");
-  const id = useId();
   const [isPending, startTransition] = useTransition();
 
   function handleChange(nextValue: boolean) {
-    if (isPending || nextValue === currentValue) return;
     startTransition(async () => {
       const result = await updateAdminUserLeaderboardVisibilityAction({
         userId,
@@ -44,14 +41,13 @@ export function AdminUserLeaderboardToggle({
   }
 
   return (
-    <Label htmlFor={id} className="flex min-h-touch cursor-pointer items-center gap-2 text-label text-foreground sm:min-h-control">
-      <Checkbox
-        id={id}
-        aria-label={`${commonT("leaderboardVisibility")}: ${userId}`}
-        aria-busy={isPending}
+    <Label className="flex items-center gap-2 text-sm text-foreground">
+      <Input
+        type="checkbox"
         checked={currentValue}
         disabled={isPending}
-        onCheckedChange={(checked) => handleChange(checked === true)}
+        onChange={(event) => handleChange(event.target.checked)}
+        className="h-4 w-4"
       />
 
       <span>{currentValue ? t("visible") : t("hidden")}</span>

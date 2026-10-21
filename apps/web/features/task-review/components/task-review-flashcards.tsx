@@ -53,10 +53,10 @@ export function TaskReviewFlashcards({
   }
 
   return (
-    <section className="min-w-0 space-y-card">
+    <section className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-section font-semibold text-foreground">{t("title")}</h3>
+          <h3 className="font-semibold text-foreground">{t("title")}</h3>
 
           <p className="mt-1 text-sm text-muted-foreground">
             {t("progress", {
@@ -69,41 +69,43 @@ export function TaskReviewFlashcards({
 
         <Button
           type="button"
-          size="icon"
+          size="sm"
           variant="ghost"
           onClick={() => setFlipped(false)}
-          aria-label={t("reset")} title={t("reset")}
         >
           <RotateCcw />
 
+          {t("reset")}
         </Button>
       </div>
 
       <button
         type="button"
         onClick={() => setFlipped((value) => !value)}
-        aria-pressed={flipped}
-        aria-label={`${flipped ? t("back") : t("front")}: ${flipped ? card.back : card.front}`}
-        title={t("flipHint")}
-        className="flex h-52 w-full flex-col items-center justify-center overflow-y-auto rounded-lg border border-border bg-card p-card text-center transition hover:bg-muted/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="flex min-h-56 w-full flex-col items-center justify-center rounded-[28px] border border-border/70 bg-muted/25 p-7 text-center transition hover:bg-muted/40"
       >
-        <span className="text-caption font-medium text-muted-foreground">
+        <span className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
           {flipped ? t("back") : t("front")}
         </span>
 
-        <span className="mt-3 min-h-0 overflow-y-auto text-section font-medium text-foreground [overflow-wrap:anywhere]">
+        <span className="mt-5 text-lg font-semibold leading-8 text-foreground">
           {flipped ? card.back : card.front}
         </span>
 
+        <span className="mt-6 text-xs text-muted-foreground">
+          {t("flipHint")}
+        </span>
       </button>
 
       <div className="flex items-center justify-between gap-3">
-        <Button type="button" size="icon" variant="outline" onClick={() => move(-1)} aria-label={t("previous")} title={t("previous")}>
+        <Button type="button" variant="outline" onClick={() => move(-1)}>
           <ChevronLeft />
 
+          {t("previous")}
         </Button>
 
-        <Button type="button" size="icon" variant="outline" onClick={() => move(1)} aria-label={t("next")} title={t("next")}>
+        <Button type="button" variant="outline" onClick={() => move(1)}>
+          {t("next")}
 
           <ChevronRight />
         </Button>

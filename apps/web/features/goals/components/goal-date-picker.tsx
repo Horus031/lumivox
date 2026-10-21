@@ -1,48 +1,83 @@
 "use client";
 
-import { useId, useState, type Dispatch, type SetStateAction } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { CalendarDays } from "lucide-react";
-import { vi, enUS } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Field, FieldLabel } from "@/components/ui/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { formatDateValue } from "@/lib/utils/date";
+import { ChevronDownIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Dispatch, SetStateAction, useState } from "react";
 
 type GoalDatePickerProps = {
   type: string;
-  startDate?: Date;
+  startDate?: Date | undefined;
   setStartDate?: Dispatch<SetStateAction<Date | undefined>>;
-  targetDate?: Date;
+  targetDate?: Date | undefined;
   setTargetDate?: Dispatch<SetStateAction<Date | undefined>>;
-  disabled?: boolean;
 };
 
-export function GoalDatePicker({ type, startDate, setStartDate, targetDate, setTargetDate, disabled }: GoalDatePickerProps) {
+export function GoalDatePicker(props: GoalDatePickerProps) {
   const t = useTranslations("goals.form");
-  const locale = useLocale();
-  const id = useId();
-  const [open, setOpen] = useState(false);
-  const date = type === "start" ? startDate : targetDate;
-  const setDate = type === "start" ? setStartDate : type === "target" ? setTargetDate : undefined;
-  if (!setDate) return null;
+  const { type, startDate, setStartDate, targetDate, setTargetDate } = props;
+  const [startDateOpen, setStartDateOpen] = useState(false);
+  const [endDateOpen, setEndDateOpen] = useState(false);
 
-  return (
-    <div className="min-w-0 space-y-2">
-      <Label htmlFor={id}>{t(type === "start" ? "fields.startDate" : "fields.targetDate")}</Label>
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button id={id} type="button" variant="outline" disabled={disabled} className="w-full justify-start font-normal">
-            <CalendarDays aria-hidden="true" />
-            <span className="min-w-0 truncate">{date ? new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(date) : t("selectDate")}</span>
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto max-w-[calc(100vw-2rem)] overflow-hidden p-0" align="start">
-          <Calendar mode="single" selected={date} defaultMonth={date} locale={locale === "vi" ? vi : enUS} captionLayout="dropdown"
-            formatters={{ formatMonthDropdown: (month) => new Intl.DateTimeFormat(locale, { month: "short" }).format(month) }}
-            onSelect={(nextDate) => { setDate(nextDate); setOpen(false); }} />
-        </PopoverContent>
-      </Popover>
-    </div>
-  );
+  if (type === "start" && setStartDate)
+    return (
+      <Field>
+        <FieldLabel htmlFor="date">{t("fields.startDate")}</FieldLabel>
+        <Popover open={startDateOpen} onOpenChange={setStartDateOpen}>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="outline" className="text-left! h-11 hover:bg-foreground/10">
+              {formatDateValue(startDate) || t("selectDate")}
+              <ChevronDownIcon />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={startDate}
+              defaultMonth={startDate}
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                setStartDate(date);
+                setStartDateOpen(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </Field>
+    );
+
+  if (type === "target" && setTargetDate)
+    return (
+      <Field>
+        <FieldLabel htmlFor="date">{t("fields.targetDate")}</FieldLabel>
+        <Popover open={endDateOpen} onOpenChange={setEndDateOpen}>
+          <PopoverTrigger asChild>
+            <Button type="button" variant="outline" className="h-11 hover:bg-foreground/10">
+              {formatDateValue(targetDate) || t("selectDate")}
+              <ChevronDownIcon />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto overflow-hidden p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={targetDate}
+              defaultMonth={targetDate}
+              captionLayout="dropdown"
+              onSelect={(date) => {
+                setTargetDate(date);
+                setEndDateOpen(false);
+              }}
+            />
+          </PopoverContent>
+        </Popover>
+      </Field>
+    );
 }

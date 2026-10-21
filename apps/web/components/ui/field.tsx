@@ -12,7 +12,7 @@ function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
     <fieldset
       data-slot="field-set"
       className={cn(
-        "flex flex-col gap-section",
+        "flex flex-col gap-6",
         "has-[>[data-slot=checkbox-group]]:gap-3 has-[>[data-slot=radio-group]]:gap-3",
         className
       )}
@@ -32,8 +32,8 @@ function FieldLegend({
       data-variant={variant}
       className={cn(
         "mb-3 font-medium",
-        "data-[variant=legend]:text-section",
-        "data-[variant=label]:text-label",
+        "data-[variant=legend]:text-base",
+        "data-[variant=label]:text-sm",
         className
       )}
       {...props}
@@ -46,7 +46,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="field-group"
       className={cn(
-        "group/field-group @container/field-group flex w-full flex-col gap-card data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-card",
+        "group/field-group @container/field-group flex w-full flex-col gap-7 data-[slot=checkbox-group]:gap-3 [&>[data-slot=field-group]]:gap-4",
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const fieldVariants = cva(
-  "group/field flex w-full gap-2 data-[invalid=true]:text-destructive",
+  "group/field flex w-full gap-3 data-[invalid=true]:text-destructive",
   {
     variants: {
       orientation: {
@@ -130,7 +130,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="field-label"
       className={cn(
-        "flex w-fit items-center gap-2 text-label font-medium group-data-[disabled=true]/field:opacity-50",
+        "flex w-fit items-center gap-2 text-sm leading-snug font-medium group-data-[disabled=true]/field:opacity-50",
         className
       )}
       {...props}
@@ -143,7 +143,7 @@ function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
     <p
       data-slot="field-description"
       className={cn(
-        "text-body font-normal text-secondary-text group-has-[[data-orientation=horizontal]]/field:text-balance",
+        "text-sm leading-normal font-normal text-muted-foreground group-has-[[data-orientation=horizontal]]/field:text-balance",
         "last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5",
         "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className
@@ -226,7 +226,7 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-body font-normal text-destructive", className)}
+      className={cn("text-sm font-normal text-destructive", className)}
       {...props}
     >
       {content}

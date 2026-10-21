@@ -1,10 +1,9 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { useEffect } from "react";
 import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 
 type TaskModalShellProps = {
   open: boolean;
@@ -16,38 +15,89 @@ type TaskModalShellProps = {
   align?: "center" | "right";
 };
 
-export function TaskModalShell({ open, title, description, onClose, children, footer, align = "center" }: TaskModalShellProps) {
+export function TaskModalShell({
+  open,
+  title,
+  onClose,
+  children,
+  footer,
+  align = "center",
+}: TaskModalShellProps) {
   const t = useTranslations("tasks.modalShell");
-  const returnFocus = useRef<HTMLElement | null>(null);
-  const alignment = align === "right"
-    ? "top-0 right-0 left-auto h-dvh max-h-dvh max-w-full translate-x-0 translate-y-0 rounded-none border-y-0 border-r-0 sm:max-w-[36rem]"
-    : "max-h-[calc(100dvh-2rem)] rounded-lg sm:max-w-2xl";
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [onClose, open]);
+
+  if (!open) {
+    return null;
+  }
+
+  const panelAlignment =
+    align === "right"
+      ? "ml-auto h-full w-full max-w-full rounded-none border-l border-border/60 md:max-w-[44rem] md:rounded-l-[32px]"
+      : "mx-auto w-full max-h-180 max-w-2xl rounded-[32px]";
 
   return (
-    <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>
-      <DialogContent
-        showCloseButton={false}
-        {...(!description ? { "aria-describedby": undefined } : {})}
-        onOpenAutoFocus={() => { returnFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; }}
-        onCloseAutoFocus={(event) => {
-          if (returnFocus.current?.isConnected) {
-            event.preventDefault();
-            returnFocus.current.focus();
-          }
-        }}
-        className={`flex flex-col gap-0 overflow-hidden p-0 ${alignment}`}>
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border p-card">
-          <div className="min-w-0">
-            <DialogTitle className="text-section font-semibold leading-6 [overflow-wrap:anywhere]">{title}</DialogTitle>
-            {description ? <DialogDescription className="sr-only">{description}</DialogDescription> : null}
+    <div
+      className="fixed m-0 h-screen inset-0 z-50 flex items-start justify-center bg-background/80 backdrop-blur-md md:items-center"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        aria-modal="true"
+        className={`relative flex h-fit flex-col bg-background shadow-[0_28px_90px_-50px_hsl(var(--primary)/0.36)] ring-1 ring-border/60 ${panelAlignment}`}
+        onClick={(event) => event.stopPropagation()}
+        role="dialog"
+      >
+        <div className="flex items-start justify-between gap-4 border-b border-border/50 px-5 pt-4 md:px-6">
+          <div>
+            <p className="text-[0.7rem] font-semibold uppercase tracking-[0.3em] text-muted-foreground">
+              {t("eyebrow")}
+            </p>
+            <h2 className="mt-1 text-lg font-semibold tracking-tight text-foreground">
+              {title}
+            </h2>
           </div>
-          <Button type="button" variant="ghost" size="icon" onClick={onClose} aria-label={t("close")} title={t("close")}>
-            <X aria-hidden="true" />
-          </Button>
+
+          <button
+            type="button"
+            className="rounded-full p-2 text-muted-foreground transition hover:bg-muted/70 hover:text-foreground"
+            onClick={onClose}
+            aria-label={t("close")}
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-card">{children}</div>
-        {footer ? <div className="shrink-0 border-t border-border p-card">{footer}</div> : null}
-      </DialogContent>
-    </Dialog>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 md:px-6">
+          {children}
+        </div>
+
+        {footer ? (
+          <div className="border-t border-border/50 px-5 py-4 md:px-6">
+            {footer}
+          </div>
+        ) : null}
+      </div>
+    </div>
   );
 }

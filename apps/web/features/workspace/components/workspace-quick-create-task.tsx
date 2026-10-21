@@ -66,7 +66,7 @@ export function WorkspaceQuickCreateTask({
             placeholder={t("taskTitle")}
             onChange={(event) => setTitle(event.target.value)}
           />
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2">
             <Button
               type="submit"
               size="sm"
@@ -92,7 +92,7 @@ export function WorkspaceQuickCreateTask({
         <Button
           type="button"
           variant="ghost"
-          className="w-full justify-start gap-2 text-secondary-text"
+          className="w-full justify-start gap-2"
           onClick={() => setOpen(true)}
         >
           <Plus className="h-4 w-4" />

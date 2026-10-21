@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 
 import { useTranslations } from "next-intl";
 
@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 import { Checkbox } from "@/components/ui/checkbox";
-import { Send } from "lucide-react";
 
 import { submitTaskReviewAction } from "../task-review.actions";
 
@@ -32,7 +31,12 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
 
   const questions = assessment?.questions ?? [];
 
-  const answeredCount = questions.filter((question) => (answers[question.id]?.length ?? 0) > 0).length;
+  const answeredCount = useMemo(
+    () =>
+      questions.filter((question) => (answers[question.id]?.length ?? 0) > 0)
+        .length,
+    [answers, questions],
+  );
 
   const allAnswered =
     questions.length > 0 && answeredCount === questions.length;
@@ -100,15 +104,15 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
   }
 
   return (
-    <section className="min-w-0 space-y-card">
+    <section className="space-y-5">
       <div>
-        <h3 className="text-section font-semibold text-foreground">{t("title")}</h3>
+        <h3 className="font-semibold text-foreground">{t("title")}</h3>
 
-        <p className="mt-1 text-body text-muted-foreground">
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {t("description")}
         </p>
 
-        <p className="mt-2 text-caption font-medium text-muted-foreground">
+        <p className="mt-2 text-xs font-medium text-muted-foreground">
           {t("progress", {
             answered: answeredCount,
 
@@ -117,31 +121,30 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
         </p>
       </div>
 
-      <div className="min-w-0 space-y-card">
+      <div className="space-y-5">
         {questions.map((question, questionIndex) => {
           const selected = answers[question.id] ?? [];
 
           const isMultiple = question.kind === "multiple_select";
 
           return (
-            <fieldset disabled={isPending}
+            <article
               key={question.id}
-              className="min-w-0 border-t border-border pt-card"
+              className="rounded-[24px] border border-border/60 p-5"
             >
-              <legend className="sr-only">{question.prompt}</legend>
               <div className="flex flex-wrap items-start justify-between gap-3">
-                <p className="text-label font-medium text-muted-foreground">
+                <p className="text-sm font-semibold text-muted-foreground">
                   {t("question", {
                     number: questionIndex + 1,
                   })}
                 </p>
 
-                <span className="rounded-sm bg-muted px-2 py-0.5 text-caption font-medium text-muted-foreground">
+                <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
                   {t(`kinds.${question.kind}`)}
                 </span>
               </div>
 
-              <p className="mt-2 text-body font-medium text-foreground [overflow-wrap:anywhere]">
+              <p className="mt-3 font-medium leading-7 text-foreground">
                 {question.prompt}
               </p>
 
@@ -161,7 +164,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
                       <label
                         key={inputId}
                         htmlFor={inputId}
-                        className={`flex min-h-touch cursor-pointer items-start gap-3 rounded-md border px-3 py-2 transition hover:bg-muted/35 ${checked ? "border-primary/40 bg-primary/5" : "border-border"}`}
+                        className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/50 px-4 py-3 transition hover:bg-muted/35"
                       >
                         <Checkbox
                           id={inputId}
@@ -177,7 +180,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
                           className="mt-0.5"
                         />
 
-                        <span className="min-w-0 text-body text-foreground [overflow-wrap:anywhere]">
+                        <span className="text-sm leading-6 text-foreground">
                           {option}
                         </span>
                       </label>
@@ -188,26 +191,26 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
                     <label
                       key={inputId}
                       htmlFor={inputId}
-                      className={`flex min-h-touch cursor-pointer items-start gap-3 rounded-md border px-3 py-2 transition hover:bg-muted/35 ${checked ? "border-primary/40 bg-primary/5" : "border-border"}`}
+                      className="flex cursor-pointer items-start gap-3 rounded-2xl border border-border/50 px-4 py-3 transition hover:bg-muted/35"
                     >
                       <input
                         id={inputId}
                         type="radio"
-                        name={`${attempt.attempt_id}-${question.id}`}
+                        name={question.id}
                         checked={checked}
                         disabled={isPending}
                         onChange={() => selectSingle(question.id, optionIndex)}
-                        className="mt-1 size-4 shrink-0 accent-primary"
+                        className="mt-1 h-4 w-4"
                       />
 
-                      <span className="min-w-0 text-body text-foreground [overflow-wrap:anywhere]">
+                      <span className="text-sm leading-6 text-foreground">
                         {option}
                       </span>
                     </label>
                   );
                 })}
               </div>
-            </fieldset>
+            </article>
           );
         })}
       </div>
@@ -222,7 +225,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
         disabled={!allAnswered || isPending}
         onClick={handleSubmit}
       >
-        <Send aria-hidden="true" />{isPending ? t("submitting") : t("submit")}
+        {isPending ? t("submitting") : t("submit")}
       </Button>
     </section>
   );

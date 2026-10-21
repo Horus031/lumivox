@@ -9,7 +9,6 @@
     "search": "Search",
     "settings": "Settings",
     "language": "Language",
-    "theme": "Theme",
     "pagination": {
       "ariaLabel": "Table pagination",
       "showing": "Page {page} of {totalPages}",
@@ -102,7 +101,6 @@
       }
     },
     "behaviourTrend": {
-      "empty": "No study activity recorded yet.",
       "title": "Behaviour trend - last 7 days",
       "description": "Compare focused time and distraction events across recent days.",
       "focusMinutes": "Focus minutes",
@@ -116,7 +114,6 @@
       "personalizedPbi": "Personalized PBI"
     },
     "taskStatus": {
-      "empty": "No tasks recorded yet.",
       "title": "Task status overview",
       "description": "Current distribution of task states across the system.",
       "tasks": "Tasks"
@@ -135,19 +132,15 @@
       "title": "Behaviour Intelligence",
       "fallbackUser": "Lumivox User",
       "signOut": "Sign out",
-      "account": "Account menu",
       "collapseSidebar": "Collapse sidebar",
       "expandSidebar": "Expand sidebar"
     },
     "navigation": {
-      "more": "More",
       "dashboard": {
-        "mobileLabel": "Home",
         "label": "Dashboard",
         "description": "Behaviour analytics and insights"
       },
       "workspace": {
-        "mobileLabel": "Workspace",
         "label": "Workspace",
         "description": "Manage goals and tasks in one board."
       },
@@ -566,8 +559,7 @@
       "unlinked": "Unlinked",
       "selectDate": "Select date",
       "creating": "Creating...",
-      "createSubmit": "Create task",
-      "saving": "Saving..."
+      "createSubmit": "Create task"
     },
     "filters": {
       "searchLabel": "Search tasks",
@@ -676,39 +668,6 @@
     }
   },
 
-  "documentUi": {
-    "shareEyebrow": "Document Sharing",
-    "shareDescription": "Manage access to this learning document.",
-    "sharedEyebrow": "Shared Document",
-    "visibilityTitle": "Document access",
-    "visibilityDescription": "Private: owner only. Shared: users granted access by email. Public: signed-in users with the link.",
-    "visibilityField": "Visibility",
-    "visibility": {
-      "private": "Private",
-      "shared": "Shared by email",
-      "public": "Public link"
-    },
-    "shareTitle": "Grant access",
-    "email": "Email",
-    "role": "Role",
-    "roles": {
-      "viewer": "Viewer",
-      "editor": "Editor"
-    },
-    "share": "Share document",
-    "sharing": "Sharing...",
-    "linkTitle": "Document link",
-    "linkDescription": "The link does not replace access permissions.",
-    "copy": "Copy link",
-    "copied": "Link copied.",
-    "copyFailed": "Could not copy the link. Please try again.",
-    "permissionsTitle": "Shared users",
-    "permissionsEmpty": "No users have been granted access yet.",
-    "remove": "Remove access",
-    "removing": "Removing...",
-    "original": "Open original file",
-    "unsupported": "This file type cannot be previewed inline."
-  },
   "taskReview": {
     "loading": "Loading AI Review...",
     "attempt": "Attempt {number}",
@@ -874,105 +833,6 @@
         "reprocess": "Re-process",
         "process": "Process for AI"
       }
-    }
-  },
-  "roadmaps": {
-    "title": "Learning Roadmaps",
-    "description": "Your learning plans and application status.",
-    "create": "Create roadmap",
-    "newTitle": "Create a learning roadmap",
-    "newDescription": "Subject, learning objectives and study schedule.",
-    "emptyTitle": "No roadmaps yet",
-    "emptyDescription": "Your learning roadmaps will appear here.",
-    "fallbackTitle": "Learning roadmap",
-    "back": "Back",
-    "edit": "Edit tree",
-    "apply": "Apply roadmap",
-    "applying": "Applying...",
-    "viewGoals": "View goals",
-    "nodes": "{count} nodes",
-    "studyTime": "{days} days/week · {minutes} min/day",
-    "treeTitle": "Goals, tasks and subtasks",
-    "treeEmpty": "No roadmap nodes available.",
-    "priority": "Priority {value}",
-    "hours": "{value} hours",
-    "noStart": "No start date",
-    "noEnd": "No end date",
-    "editorTitle": "Roadmap editor",
-    "autoLayout": "Auto layout",
-    "save": "Save changes",
-    "saving": "Saving...",
-    "nodeEditor": "Node details",
-    "noSelection": "No node selected",
-    "editNode": "Edit {type}",
-    "deleteNode": "Delete node",
-    "addChild": "Add {type}",
-    "newNode": "New {type}",
-    "generate": "Generate roadmap",
-    "generating": "Generating...",
-    "generateFailed": "Unable to generate the roadmap. Please try again.",
-    "applyConfirm": "Apply this roadmap? Goals, tasks and subtasks will be created. This action cannot be repeated.",
-    "applied": "Created {goals} goals, {tasks} tasks and {subtasks} subtasks.",
-    "inputTitle": "Learning objectives",
-    "levelTitle": "Starting point and target",
-    "scheduleTitle": "Study schedule",
-    "weeklyHours": "Estimated study time: {hours} hours/week",
-    "statuses": {
-      "draft": "Draft",
-      "applied": "Applied",
-      "archived": "Archived"
-    },
-    "types": {
-      "goal": "Goal",
-      "task": "Task",
-      "subtask": "Subtask"
-    },
-    "levels": {
-      "beginner": "Beginner",
-      "intermediate": "Intermediate",
-      "advanced": "Advanced",
-      "custom": "Custom"
-    },
-    "fields": {
-      "topic": "Topic / course",
-      "subject": "Subject name",
-      "language": "Output language",
-      "description": "Description / context",
-      "currentLevel": "Current level",
-      "targetLevel": "Target level",
-      "customCurrent": "Custom current level",
-      "customTarget": "Custom target level",
-      "startDate": "Start date",
-      "endDate": "End date",
-      "days": "Study days per week",
-      "minutes": "Minutes per study day",
-      "weekdays": "Available weekdays",
-      "title": "Title",
-      "hours": "Estimated hours",
-      "priority": "Priority",
-      "dateRange": "Date range",
-      "studyTime": "Study time",
-      "level": "Level"
-    },
-    "placeholders": {
-      "topic": "Python for data analytics",
-      "subject": "Data analytics",
-      "description": "Learning goals and relevant background",
-      "current": "Current skills",
-      "target": "Target outcome"
-    },
-    "weekdays": {
-      "mon": "Mon",
-      "tue": "Tue",
-      "wed": "Wed",
-      "thu": "Thu",
-      "fri": "Fri",
-      "sat": "Sat",
-      "sun": "Sun"
-    },
-    "languages": {
-      "vi": "Vietnamese",
-      "en": "English"
     }
   },
   "focus": {
@@ -1200,7 +1060,6 @@
       "plannedDurationSub": "You can adjust this to your preference, beyond the duration listed below.",
       "minutes": "{value} min",
       "plannedMinutesPlaceholder": "Your desired planned minutes...",
-      "failed": "Unable to start the focus session. Please try again.",
       "starting": "Starting...",
       "start": "Start focus session"
     },
@@ -1208,8 +1067,6 @@
       "eyebrow": "Active focus session",
       "generalSession": "General focus session",
       "remainingTime": "Remaining time",
-      "progress": "Session progress",
-      "requestFailed": "Unable to update the focus session. Please try again.",
       "compactProgress": "{remaining} remaining / {minutes} min planned",
       "plannedBadge": "Planned: {minutes} min",
       "durationReached": "Planned duration reached. You may complete the session.",
@@ -1297,12 +1154,6 @@
       }
     }
   },
-  "onboarding": {
-    "title": "Set up your learning profile",
-    "description": "Choose your timezone and Personalized PBI weights. Standard PBI keeps its academic defaults.",
-    "complete": "Complete setup",
-    "completing": "Completing setup..."
-  },
   "settings": {
     "page": {
       "eyebrow": "Lumivox",
@@ -1321,7 +1172,7 @@
         "description": "Adjust how strongly each behavioural dimension contributes to your Personalized Productive Behaviour Index.",
         "reset": "Reset to academic default",
         "totalWeight": "Current total weight",
-        "totalHelp": "The total must equal 1.00 before saving."
+        "totalHelp": "The total must equal exactly 1.00 before onboarding can be completed."
       },
       "weights": {
         "weight": "Weight",
@@ -1355,7 +1206,6 @@
       "save": "Save settings"
     },
     "theme": {
-      "label": "Theme",
       "light": "Light",
       "dark": "Dark",
       "system": "System"
@@ -1391,14 +1241,6 @@
     "restoreButton": {
       "restoring": "Restoring...",
       "restore": "Restore Streak"
-    }
-  },
-  "pageStates": {
-    "error": {
-      "title": "Unable to load this page",
-      "description": "Something went wrong. Please try again.",
-      "retry": "Try again",
-      "dashboard": "Dashboard"
     }
   },
   "reflections": {
@@ -1503,7 +1345,6 @@
       "description": "Create a private group for long-term study chat and collaboration.",
       "creating": "Creating...",
       "create": "Create Group",
-      "cancel": "Cancel",
       "fields": {
         "name": "Group name",
         "description": "Description"
@@ -1515,7 +1356,6 @@
     },
     "inviteForm": {
       "title": "Invite member",
-      "emailLabel": "Member email",
       "description": "Add a Lumivox user to this private study group by email.",
       "placeholder": "friend@example.com",
       "inviting": "Inviting...",
@@ -1525,10 +1365,6 @@
       "title": "Group Chat",
       "description": "Messages appear in real time for active group members.",
       "realtime": "Realtime",
-      "connection": {
-        "connecting": "Connecting",
-        "error": "Disconnected"
-      },
       "empty": "No messages yet. Start the group conversation.",
       "you": "You",
       "placeholder": "Write a message...",
@@ -1788,7 +1624,6 @@
   "admin": {
     "common": {
       "adminCms": "Admin CMS",
-      "backToList": "Back to list",
       "search": "Search",
       "all": "All",
       "view": "View",
@@ -1870,20 +1705,7 @@
       "sources": "Sources",
       "latency": "Latency"
     },
-    "navigation": {
-      "label": "Admin sections",
-      "overview": "Overview",
-      "users": "Users",
-      "documents": "Documents",
-      "groups": "Groups",
-      "ai": "AI",
-      "roadmaps": "Roadmaps",
-      "nativeTaskRisk": "Task risk",
-      "translations": "Translations",
-      "settings": "Settings"
-    },
     "dashboard": {
-      "metricsLabel": "Platform metrics",
       "eyebrow": "Admin CMS",
       "title": "Admin Dashboard",
       "description": "Monitor users, learning activity, documents, groups, and AI usage across Lumivox.",
@@ -1980,7 +1802,6 @@
       "detail": {
         "eyebrow": "Admin CMS",
         "embeddedChunksDescription": "Embedded chunks / total chunks",
-        "metadata": "Document details",
         "failedChunks": "Failed Chunks",
         "fileSize": "File Size",
         "mimeType": "MIME Type",
@@ -2028,8 +1849,7 @@
         "delete": "Delete"
       },
       "members": {
-        "title": "Members",
-        "empty": "No members found."
+        "title": "Members"
       },
       "messages": {
         "eyebrow": "Moderation",
@@ -2319,8 +2139,6 @@
         "description": "Manage feature flags, RAG defaults, weekly challenge defaults, and operational platform settings."
       },
       "form": {
-        "label": "CMS configuration",
-        "invalidNumber": "Enter a whole number greater than or equal to zero.",
         "featureFlags": {
           "title": "Feature Flags",
           "globalLeaderboard": {
@@ -2374,7 +2192,6 @@
     "board": {
       "empty": "No tasks in this stage.",
       "subtaskProgress": "{completed}/{total} subtasks",
-      "title": "Task board",
       "reviewManaged": "AI-managed stage",
       "overdueManaged": "Automatically determined by deadline",
       "dragTask": "Drag task",

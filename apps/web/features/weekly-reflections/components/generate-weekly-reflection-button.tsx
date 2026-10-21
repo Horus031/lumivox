@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { Loader2, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -15,7 +14,6 @@ export function GenerateWeeklyReflectionButton() {
   const [isPending, startTransition] = useTransition();
 
   function handleGenerate() {
-    if (isPending) return;
     startTransition(async () => {
       const result = await generateWeeklyReflectionAction();
 
@@ -31,12 +29,9 @@ export function GenerateWeeklyReflectionButton() {
 
   return (
     <Button
-      type="button"
       onClick={handleGenerate}
       disabled={isPending}
-      aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <RefreshCw aria-hidden="true" />}
       {isPending ? t("generating") : t("generate")}
     </Button>
   );

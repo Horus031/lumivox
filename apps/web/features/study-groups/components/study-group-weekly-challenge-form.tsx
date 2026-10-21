@@ -6,9 +6,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { upsertStudyGroupWeeklyChallengeAction } from "@/features/study-groups/study-group.actions";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 
 type StudyGroupWeeklyChallengeFormProps = {
   groupId: string;
@@ -56,76 +53,69 @@ export function StudyGroupWeeklyChallengeForm({
   return (
     <form
       onSubmit={handleSubmit}
-      aria-busy={isPending}
-      className="min-w-0 border-t border-border pt-card"
+      className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
     >
-      <h2 className="text-section font-semibold text-foreground">
+      <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
         {t("title")}
       </h2>
 
-      <p className="mt-1 text-body text-secondary-text">
+      <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
         {t("description")}
       </p>
 
-      <fieldset disabled={isPending} className="mt-card grid min-w-0 gap-card sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-end">
-        <label className="min-w-0 space-y-2 sm:col-span-2 lg:col-span-1">
-          <span className="text-label font-medium text-foreground">
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <label className="space-y-2 md:col-span-3">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {t("fields.title")}
           </span>
 
-          <Input
+          <input
             value={title}
-            required
-            minLength={2}
-            maxLength={120}
             onChange={(event) => setTitle(event.target.value)}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
           />
         </label>
 
-        <label className="min-w-0 space-y-2">
-          <span className="text-label font-medium text-foreground">
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {t("fields.focusMinutes")}
           </span>
 
-          <Input
+          <input
             value={targetFocusMinutes}
             onChange={(event) =>
               setTargetFocusMinutes(Number(event.target.value))
             }
             type="number"
             min={0}
-            max={10000}
-            required
-            step={1}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
           />
         </label>
 
-        <label className="min-w-0 space-y-2">
-          <span className="text-label font-medium text-foreground">
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
             {t("fields.completedTasks")}
           </span>
 
-          <Input
+          <input
             value={targetCompletedTasks}
             onChange={(event) =>
               setTargetCompletedTasks(Number(event.target.value))
             }
             type="number"
             min={0}
-            max={1000}
-            required
-            step={1}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
           />
         </label>
-        <Button
-          type="submit"
-          disabled={isPending}
-          className="justify-self-start lg:justify-self-end"
-        >
-          <Save aria-hidden="true" />
-          {isPending ? t("saving") : t("save")}
-        </Button>
-      </fieldset>
+      </div>
+
+      <button
+        type="submit"
+        disabled={isPending}
+        className="mt-5 rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+      >
+        {isPending ? t("saving") : t("save")}
+      </button>
     </form>
   );
 }

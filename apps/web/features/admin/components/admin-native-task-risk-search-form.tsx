@@ -1,11 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
@@ -21,7 +16,6 @@ export function AdminNativeTaskRiskSearchForm({
 }: Props) {
   const t = useTranslations("admin.nativeTaskRisk.search");
   const router = useRouter();
-  const id = useId();
 
   const [query, setQuery] = useState(initialQuery);
   const [riskBand, setRiskBand] = useState(initialRiskBand);
@@ -45,20 +39,48 @@ export function AdminNativeTaskRiskSearchForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="min-w-0">
-      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
-        <div className="col-span-2 grid min-w-0 gap-2 md:col-span-1">
-          <Label htmlFor={`${id}-query`}>{t("queryLabel")}</Label>
-          <Input id={`${id}-query`} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("queryPlaceholder")} />
-        </div>
-        <div className="grid min-w-0 gap-2">
-          <Label htmlFor={`${id}-risk`}>{t("riskBandLabel")}</Label>
-          <Select value={riskBand} onValueChange={setRiskBand}>
-            <SelectTrigger id={`${id}-risk`} className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>{["all", "low", "moderate", "elevated", "high"].map((value) => <SelectItem key={value} value={value}>{t(`riskBands.${value}`)}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-        <Button type="submit" size="icon" aria-label={t("submit")} title={t("submit")}><Search aria-hidden="true" /></Button>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
+    >
+      <div className="grid gap-4 md:grid-cols-[1fr_180px_auto] md:items-end">
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            {t("queryLabel")}
+          </span>
+
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("queryPlaceholder")}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+          />
+        </label>
+
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            {t("riskBandLabel")}
+          </span>
+
+          <select
+            value={riskBand}
+            onChange={(event) => setRiskBand(event.target.value)}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+          >
+            <option value="all">{t("riskBands.all")}</option>
+            <option value="low">{t("riskBands.low")}</option>
+            <option value="moderate">{t("riskBands.moderate")}</option>
+            <option value="elevated">{t("riskBands.elevated")}</option>
+            <option value="high">{t("riskBands.high")}</option>
+          </select>
+        </label>
+
+        <button
+          type="submit"
+          className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+        >
+          {t("submit")}
+        </button>
       </div>
     </form>
   );

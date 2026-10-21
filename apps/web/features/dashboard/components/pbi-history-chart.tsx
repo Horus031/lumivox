@@ -26,28 +26,27 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
   const t = useTranslations("dashboard.pbiHistory");
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+    <section className="flex h-full min-h-80 flex-col rounded-2xl bg-card/90 p-4 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.55)]">
       <div className="mb-3">
-        <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-        <p className="mt-1 text-body text-secondary-text">
+        <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
           {t("description")}
         </p>
       </div>
 
       {data.length === 0 ? (
-        <div className="flex h-64 items-center justify-center text-center">
-          <p className="text-body text-muted-foreground">{t("empty")}</p>
+        <div className="rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-sm text-neutral-600">{t("empty")}</p>
         </div>
       ) : (
-        <div className="h-64 min-w-0 w-full">
+        <div className="min-h-52 w-full flex-1">
           <ResponsiveContainer
             width="100%"
             height="100%"
             minWidth={0}
-            minHeight={256}
+            minHeight={208}
           >
             <LineChart
-              accessibilityLayer
               data={data}
               margin={{ top: 10, right: 18, left: 0, bottom: 0 }}
             >
@@ -57,31 +56,29 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
               />
               <XAxis
                 dataKey="label"
-                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+                tick={{ fill: "hsl(var(--chart-axis))", fontSize: 10 }}
                 tickLine={false}
               />
               <YAxis
                 domain={[0, 100]}
-                tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+                tick={{ fill: "hsl(var(--chart-axis))", fontSize: 10 }}
                 tickLine={false}
-                width={36}
+                width={30}
               />
               <Tooltip
-                itemStyle={{ color: "var(--foreground)" }}
                 contentStyle={{
                   backgroundColor: "var(--surface)",
                   border: "1px solid var(--overlay)",
-                  borderRadius: "var(--radius-lg)",
+                  borderRadius: 10,
                   color: "var(--foreground)",
                   fontSize: 12,
                 }}
                 labelStyle={{ color: "var(--foreground)", fontWeight: 600 }}
               />
               <Legend
-                formatter={(value) => <span style={{ color: "var(--text-secondary)" }}>{value}</span>}
                 wrapperStyle={{
                   color: "var(--text-secondary)",
-                  fontSize: 12,
+                  fontSize: 11,
                   paddingTop: 8,
                 }}
               />
@@ -89,10 +86,9 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
                 type="monotone"
                 dataKey="standardPbi"
                 name={t("standardPbi")}
-                stroke="var(--info)"
-                strokeDasharray="4 3"
+                stroke="hsl(var(--chart-2))"
                 strokeWidth={2.5}
-                dot={{ r: 3, fill: "var(--info)" }}
+                dot={{ r: 3, fill: "hsl(var(--chart-2))" }}
               />
               <Line
                 type="monotone"

@@ -7,7 +7,6 @@ import { toast } from "sonner";
 
 import { leaveStudyRoomAction } from "@/features/study-rooms/study-room.actions";
 import { Button } from "@/components/ui/button";
-import { LogOut } from "lucide-react";
 
 type LeaveRoomButtonProps = {
   roomId: string;
@@ -55,10 +54,8 @@ export function LeaveRoomButton({ roomId }: LeaveRoomButtonProps) {
       variant={"outline"}
       onClick={handleLeave}
       disabled={isPending}
-      aria-busy={isPending}
-      className="text-danger hover:bg-danger/10 hover:text-danger"
+      className="border border-danger/20 px-4 py-2.5 text-sm font-medium text-danger/60 transition hover:bg-danger/40 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      <LogOut aria-hidden="true" />
       {isPending ? t("leaving") : t("leave")}
     </Button>
   );

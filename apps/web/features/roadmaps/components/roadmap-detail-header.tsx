@@ -1,40 +1,121 @@
 import { Link } from "@/i18n/navigation";
-import { useTranslations } from "next-intl";
-import { ArrowLeft, Pencil, Target } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { PageHeader } from "@/features/app-shell/components/page-header";
 import type { LearningRoadmap } from "@/features/roadmaps/roadmap.types";
-import { RoadmapApplyButton } from "./roadmap-apply-button";
+import { RoadmapApplyButton } from "@/features/roadmaps/components/roadmap-apply-button";
 
-export function RoadmapDetailHeader({ roadmap, nodeCount }: { roadmap: LearningRoadmap; nodeCount: number }) {
-  const t = useTranslations("roadmaps");
-  const metadata = [
-    { label: t("fields.topic"), value: roadmap.topic },
-    { label: t("fields.level"), value: `${t(`levels.${roadmap.current_level}`)} - ${t(`levels.${roadmap.target_level}`)}` },
-    { label: t("fields.dateRange"), value: `${roadmap.start_date} - ${roadmap.end_date}` },
-    { label: t("fields.studyTime"), value: t("studyTime", { days: roadmap.study_days_per_week, minutes: roadmap.minutes_per_study_day }) },
-  ];
-  return <section className="min-w-0 space-y-card">
-    <PageHeader eyebrow={roadmap.subject_name ?? t("title")} title={roadmap.title} description={roadmap.description ?? roadmap.topic}
-      action={<>
-        <Button variant="outline" size="icon" asChild><Link href="/roadmaps" aria-label={t("back")} title={t("back")}><ArrowLeft aria-hidden="true" /></Link></Button>
-        {roadmap.status === "draft" ? <>
-          <Button variant="outline" asChild><Link href={`/roadmaps/${roadmap.id}/edit`}><Pencil aria-hidden="true" />{t("edit")}</Link></Button>
-          <RoadmapApplyButton roadmapId={roadmap.id} />
-        </> : null}
-        {roadmap.status === "applied" ? <Button asChild><Link href="/goals"><Target aria-hidden="true" />{t("viewGoals")}</Link></Button> : null}
-      </>} />
-    <div className="flex flex-wrap items-center gap-2 text-caption text-muted-foreground">
-      <Badge variant="secondary">{t(`statuses.${roadmap.status}`)}</Badge>
-      <span>{t("nodes", { count: nodeCount })}</span><span>{roadmap.preferred_locale.toUpperCase()}</span>
-      {roadmap.ai_model ? <span className="min-w-0 [overflow-wrap:anywhere]">{roadmap.ai_provider ?? "AI"} · {roadmap.ai_model}</span> : null}
-    </div>
-    <dl className="grid min-w-0 grid-cols-2 gap-card border-y border-border py-card lg:grid-cols-4">
-      {metadata.map((item) => <div key={item.label} className="min-w-0">
-        <dt className="text-caption text-muted-foreground">{item.label}</dt>
-        <dd className="mt-1 text-body [overflow-wrap:anywhere]">{item.value}</dd>
-      </div>)}
-    </dl>
-  </section>;
+type RoadmapDetailHeaderProps = {
+  roadmap: LearningRoadmap;
+  nodeCount: number;
+};
+
+export function RoadmapDetailHeader({
+  roadmap,
+  nodeCount,
+}: RoadmapDetailHeaderProps) {
+  return (
+    <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+      <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-start">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            AI Learning Roadmap
+          </p>
+
+          <h1 className="mt-2 text-3xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
+            {roadmap.title}
+          </h1>
+
+          <p className="mt-3 max-w-3xl text-neutral-600 dark:text-neutral-400">
+            {roadmap.description ?? roadmap.topic}
+          </p>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+              {roadmap.status}
+            </span>
+
+            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+              {nodeCount} nodes
+            </span>
+
+            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+              {roadmap.preferred_locale.toUpperCase()}
+            </span>
+
+            {roadmap.ai_model ? (
+              <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                {roadmap.ai_provider ?? "AI"} · {roadmap.ai_model}
+              </span>
+            ) : null}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/roadmaps"
+            className="rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+          >
+            Back
+          </Link>
+
+          <Link
+            href={`/roadmaps/${roadmap.id}/edit`}
+            className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+          >
+            Edit visual tree
+          </Link>
+
+          {roadmap.status === "draft" ? (
+            <RoadmapApplyButton roadmapId={roadmap.id} />
+          ) : null}
+
+          {roadmap.status === "applied" ? (
+            <Link
+              href="/goals"
+              className="rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-emerald-700"
+            >
+              View generated goals
+            </Link>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-6 grid gap-3 md:grid-cols-4">
+        <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Topic
+          </p>
+          <p className="mt-1 text-sm font-medium text-neutral-950 dark:text-neutral-50">
+            {roadmap.topic}
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Level
+          </p>
+          <p className="mt-1 text-sm font-medium text-neutral-950 dark:text-neutral-50">
+            {roadmap.current_level} → {roadmap.target_level}
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Date range
+          </p>
+          <p className="mt-1 text-sm font-medium text-neutral-950 dark:text-neutral-50">
+            {roadmap.start_date} → {roadmap.end_date}
+          </p>
+        </div>
+
+        <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-900">
+          <p className="text-xs text-neutral-500 dark:text-neutral-400">
+            Study time
+          </p>
+          <p className="mt-1 text-sm font-medium text-neutral-950 dark:text-neutral-50">
+            {roadmap.study_days_per_week}d/week ·{" "}
+            {roadmap.minutes_per_study_day}m/day
+          </p>
+        </div>
+      </div>
+    </section>
+  );
 }

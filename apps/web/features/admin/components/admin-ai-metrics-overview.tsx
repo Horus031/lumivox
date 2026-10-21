@@ -39,7 +39,7 @@ export function AdminAiMetricsOverview({
   const t = useTranslations("admin.ai.metrics");
 
   return (
-    <section className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <AdminMetricCard
         label={t("ragSessions")}
         value={value(metrics?.total_rag_sessions)}
@@ -112,14 +112,12 @@ export function AdminAiMetricsOverview({
         })}
       />
 
-      <article className="min-w-0 rounded-lg border border-border bg-card p-card">
-        <p className="text-label font-medium text-secondary-text">{t("topKUsage")}</p>
-        <dl className="mt-2 space-y-1">
-          {[[3, value(metrics?.top_k_3_messages)], [5, value(metrics?.top_k_5_messages)], [7, value(metrics?.top_k_7_messages)]].map(([k, count]) => (
-            <div key={k} className="flex min-w-0 items-baseline justify-between gap-2"><dt className="shrink-0 text-caption text-muted-foreground">k={k}</dt><dd className="min-w-0 text-label font-semibold tabular-nums text-foreground [overflow-wrap:anywhere]">{count}</dd></div>
-          ))}
-        </dl>
-      </article>
+      <AdminMetricCard
+        label={t("topKUsage")}
+        value={`3:${value(metrics?.top_k_3_messages)} / 5:${value(
+          metrics?.top_k_5_messages
+        )} / 7:${value(metrics?.top_k_7_messages)}`}
+      />
     </section>
   );
 }

@@ -7,7 +7,7 @@ type MobileBottomNavProps = {
 
 export function MobileBottomNav({ profile }: MobileBottomNavProps) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-sidebar-border lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 p-3 lg:hidden">
       <AppNavigation variant="mobile" profile={profile} />
     </div>
   );

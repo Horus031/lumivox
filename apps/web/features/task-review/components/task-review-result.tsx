@@ -43,23 +43,23 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
   }
 
   return (
-    <section className="min-w-0 space-y-card">
-      <div className="border-y border-border py-card">
+    <section className="space-y-5">
+      <div className="rounded-[28px] border border-border/60 bg-muted/25 p-6 text-center">
         {passed ? (
-          <CheckCircle2 className="size-icon-lg text-primary" />
+          <CheckCircle2 className="mx-auto h-9 w-9 text-primary" />
         ) : (
           <XCircle className="mx-auto h-9 w-9 text-muted-foreground" />
         )}
 
-        <h3 className="mt-3 text-section font-semibold text-foreground">
+        <h3 className="mt-4 text-xl font-semibold text-foreground">
           {passed ? t("passedTitle") : t("failedTitle")}
         </h3>
 
-        <p className="mt-2 text-body text-secondary-text">
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">
           {passed ? t("passedDescription") : t("failedDescription")}
         </p>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
           <Badge variant="secondary">
             {t("score", {
               score: feedback.score,
@@ -83,8 +83,8 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
       </div>
 
       {!passed ? (
-        <div className="border-t border-border pt-card">
-          <h4 className="text-section font-semibold text-foreground">{t("weakAreas")}</h4>
+        <div className="rounded-[24px] border border-border/60 p-5">
+          <h4 className="font-semibold text-foreground">{t("weakAreas")}</h4>
 
           {attempt.weak_areas.length > 0 ? (
             <div className="mt-3 flex flex-wrap gap-2">
@@ -95,7 +95,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
               ))}
             </div>
           ) : (
-            <p className="mt-2 text-body text-muted-foreground">
+            <p className="mt-2 text-sm text-muted-foreground">
               {t("noWeakAreas")}
             </p>
           )}
@@ -113,7 +113,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
           return (
             <article
               key={item.question_id}
-              className="border-t border-border pt-card"
+              className="rounded-[24px] border border-border/60 p-5"
             >
               <div className="flex items-start gap-3">
                 {item.correct ? (
@@ -123,13 +123,13 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
                 )}
 
                 <div className="min-w-0">
-                  <p className="text-caption font-medium text-muted-foreground">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                     {t("question", {
                       number: index + 1,
                     })}
                   </p>
 
-                  <p className="mt-2 text-body font-medium [overflow-wrap:anywhere] text-foreground">
+                  <p className="mt-2 font-medium leading-7 text-foreground">
                     {question.prompt}
                   </p>
                 </div>
@@ -141,7 +141,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
                     {t("yourAnswer")}
                   </p>
 
-                  <p className="mt-1 text-foreground [overflow-wrap:anywhere]">
+                  <p className="mt-1 text-foreground">
                     {optionLabels(
                       item.question_id,
                       item.selected_option_indices,
@@ -167,7 +167,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
                     {t("explanation")}
                   </p>
 
-                  <p className="mt-1 text-body text-foreground [overflow-wrap:anywhere]">
+                  <p className="mt-1 leading-6 text-foreground">
                     {item.explanation}
                   </p>
                 </div>

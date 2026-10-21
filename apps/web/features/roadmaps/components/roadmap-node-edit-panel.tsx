@@ -1,11 +1,5 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-
 import type {
   RoadmapFlowNode,
   RoadmapFlowNodeData,
@@ -25,18 +19,21 @@ export function RoadmapNodeEditPanel({
   onChangeNode,
   onDeleteNode,
 }: RoadmapNodeEditPanelProps) {
-  const t = useTranslations("roadmaps");
   if (!selectedNode) {
     return (
-      <aside className="min-w-0 border-t border-border pt-card xl:border-t-0 xl:border-l xl:pl-card xl:pt-0">
-        <p className="text-caption text-muted-foreground">
-          {t("nodeEditor")}
+      <aside className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          Node Editor
         </p>
 
-        <h2 className="mt-2 text-section font-semibold text-foreground">
-          {t("noSelection")}
+        <h2 className="mt-2 text-xl font-bold text-neutral-950 dark:text-neutral-50">
+          Select a node
         </h2>
 
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+          Click a roadmap node to edit its title, description, estimated hours,
+          priority, and suggested dates.
+        </p>
       </aside>
     );
   }
@@ -44,64 +41,64 @@ export function RoadmapNodeEditPanel({
   const data = selectedNode.data;
 
   return (
-    <aside className="min-w-0 border-t border-border pt-card xl:border-t-0 xl:border-l xl:pl-card xl:pt-0">
+    <aside className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-caption text-muted-foreground">
-            {t("nodeEditor")}
+          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            Node Editor
           </p>
 
-          <h2 className="mt-2 text-section font-semibold text-foreground">
-            {t("editNode", { type: t(`types.${data.nodeType}`) })}
+          <h2 className="mt-2 text-xl font-bold text-neutral-950 dark:text-neutral-50">
+            Edit {data.nodeType}
           </h2>
         </div>
 
-        <span className="rounded-sm bg-muted px-2 py-0.5 text-caption text-foreground">
-          {t(`types.${data.nodeType}`)}
+        <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+          {data.nodeType}
         </span>
       </div>
 
       <div className="mt-5 space-y-4">
-        <label className="block min-w-0 space-y-1.5">
-          <span className="text-label font-medium text-foreground">
-            {t("fields.title")}
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Title
           </span>
 
-          <Input
+          <input
             value={data.title}
             onChange={(event) =>
               onChangeNode(selectedNode.id, {
                 title: event.target.value,
               })
             }
-            className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
           />
         </label>
 
-        <label className="block min-w-0 space-y-1.5">
-          <span className="text-label font-medium text-foreground">
-            {t("fields.description")}
+        <label className="space-y-2">
+          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+            Description
           </span>
 
-          <Textarea
+          <textarea
             value={data.description ?? ""}
-            rows={3}
+            rows={5}
             onChange={(event) =>
               onChangeNode(selectedNode.id, {
                 description: event.target.value,
               })
             }
-            className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
           />
         </label>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.hours")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Estimated hours
             </span>
 
-            <Input
+            <input
               type="number"
               min={0.25}
               step={0.25}
@@ -111,13 +108,13 @@ export function RoadmapNodeEditPanel({
                   estimatedHours: Number(event.target.value),
                 })
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.priority")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Priority
             </span>
 
             <select
@@ -127,7 +124,7 @@ export function RoadmapNodeEditPanel({
                   priority: Number(event.target.value),
                 })
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             >
               {[1, 2, 3, 4, 5].map((priority) => (
                 <option key={priority} value={priority}>
@@ -139,12 +136,12 @@ export function RoadmapNodeEditPanel({
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.startDate")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Start date
             </span>
 
-            <Input
+            <input
               type="date"
               value={data.suggestedStartDate ?? ""}
               onChange={(event) =>
@@ -152,16 +149,16 @@ export function RoadmapNodeEditPanel({
                   suggestedStartDate: event.target.value || null,
                 })
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.endDate")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              End date
             </span>
 
-            <Input
+            <input
               type="date"
               value={data.suggestedEndDate ?? ""}
               onChange={(event) =>
@@ -169,19 +166,18 @@ export function RoadmapNodeEditPanel({
                   suggestedEndDate: event.target.value || null,
                 })
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
         </div>
 
-        <Button
+        <button
           type="button"
           onClick={() => onDeleteNode(selectedNode.id)}
-          variant="outline"
-          className="hover:bg-danger/10"
+          className="w-full rounded-xl border border-red-200 px-4 py-2.5 text-sm font-semibold text-red-700 transition hover:bg-red-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30"
         >
-          <Trash2 aria-hidden="true" />{t("deleteNode")}
-        </Button>
+          Delete node
+        </button>
       </div>
     </aside>
   );

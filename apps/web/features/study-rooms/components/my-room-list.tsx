@@ -1,10 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslations } from "next-intl";
-import type { JoinedStudyRoom } from "../study-room.types";
 
 import { RoomCard } from "@/features/study-rooms/components/room-card";
 
 type MyRoomListProps = {
-  rooms: JoinedStudyRoom[];
+  rooms: Array<{
+    room_id: string;
+    study_rooms: any;
+  }>;
 };
 
 export function MyRoomList({ rooms }: MyRoomListProps) {
@@ -20,22 +23,22 @@ export function MyRoomList({ rooms }: MyRoomListProps) {
   const uniqueRooms = Array.from(uniqueRoomsMap.values());
 
   return (
-    <section className="w-full min-w-0 space-y-card">
+    <section className="space-y-4 w-full">
       <div>
-        <h2 className="text-section font-semibold">{t("title")}</h2>
-        <p className="mt-1 text-body text-secondary-text">
+        <h2 className="text-xl font-semibold">{t("title")}</h2>
+        <p className="mt-1 text-sm text-neutral-600">
           {t("description")}
         </p>
       </div>
 
       {uniqueRooms.length === 0 ? (
-        <div className="border-y border-border py-section text-center">
-          <p className="text-body text-muted-foreground">
+        <div className="rounded-2xl border border-dashed bg-white p-8 text-center">
+          <p className="text-sm text-neutral-600">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div className="grid min-w-0 grid-cols-1 gap-card md:grid-cols-2 xl:grid-cols-3">
+        <div className="space-y-4 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2">
           {uniqueRooms.map((item) =>
             item.study_rooms ? (
               <RoomCard

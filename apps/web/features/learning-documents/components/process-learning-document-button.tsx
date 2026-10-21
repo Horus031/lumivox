@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -41,17 +39,17 @@ export function ProcessLearningDocumentButton({
   }
 
   return (
-    <Button variant="outline" size="sm"
+    <button
       type="button"
       onClick={handleProcess}
       disabled={isProcessing}
-      aria-busy={isProcessing}
+      className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-800 dark:hover:bg-neutral-900"
     >
-      <RefreshCw aria-hidden="true" />{isProcessing
+      {isProcessing
         ? t("processing")
         : isCompleted
           ? t("reprocess")
           : t("process")}
-    </Button>
+    </button>
   );
 }

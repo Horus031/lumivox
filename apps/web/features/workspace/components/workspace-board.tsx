@@ -146,7 +146,7 @@ export function WorkspaceBoard({
     <>
       <DragDropProvider onDragEnd={handleDragEnd}>
         <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
-          <div role="region" aria-label={t("title")} tabIndex={0} className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          <div className="flex gap-4 overflow-x-auto pb-4">
             {TASK_BOARD_LANES.map((status) => (
               <WorkspaceLane
                 key={status}

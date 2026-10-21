@@ -1,37 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
-type DocumentShareLinkCardProps = { documentId: string };
+type DocumentShareLinkCardProps = {
+  documentId: string;
+};
 
-export function DocumentShareLinkCard({ documentId }: DocumentShareLinkCardProps) {
-  const locale = useLocale();
-  const t = useTranslations("documentUi");
-  const sharePath = `/${locale}/documents/shared/${documentId}`;
-  const [shareUrl, setShareUrl] = useState(sharePath);
-  useEffect(() => { setShareUrl(`${window.location.origin}${sharePath}`); }, [sharePath]);
+export function DocumentShareLinkCard({
+  documentId,
+}: DocumentShareLinkCardProps) {
+  const sharePath = `/documents/shared/${documentId}`;
+  const shareUrl =
+    typeof window === "undefined"
+      ? sharePath
+      : `${window.location.origin}${sharePath}`;
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success(t("copied"));
-    } catch {
-      toast.error(t("copyFailed"));
-    }
+    await navigator.clipboard.writeText(shareUrl);
+    toast.success("Share link copied.");
   }
 
   return (
-    <section className="min-w-0 border-t border-border pt-card">
-      <h2 className="text-section font-semibold">{t("linkTitle")}</h2>
-      <p className="mt-1 text-body text-secondary-text">{t("linkDescription")}</p>
-      <div className="mt-3 flex min-w-0 items-center gap-2">
-        <Input readOnly value={shareUrl} aria-label={t("linkTitle")} className="min-w-0 flex-1" />
-        <Button type="button" size="icon" variant="outline" onClick={handleCopy} aria-label={t("copy")} title={t("copy")}><Copy aria-hidden="true" /></Button>
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
+      <div>
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Share Link
+        </p>
+
+        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+          Document access link
+        </h2>
+
+        <p className="mt-2 text-sm text-muted-foreground">
+          Users still need the correct permission unless the document is public.
+        </p>
+      </div>
+
+      <div className="mt-5 flex flex-col gap-3 md:flex-row md:items-center">
+        <Input readOnly value={shareUrl} />
+
+        <Button type="button" onClick={handleCopy}>
+          Copy Link
+        </Button>
       </div>
     </section>
   );

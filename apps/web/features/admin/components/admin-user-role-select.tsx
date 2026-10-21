@@ -27,11 +27,9 @@ export function AdminUserRoleSelect({
 }: AdminUserRoleSelectProps) {
   const router = useRouter();
   const t = useTranslations("admin.common.roles");
-  const commonT = useTranslations("admin.common");
   const [isPending, startTransition] = useTransition();
 
   function handleChange(nextRole: "user" | "admin") {
-    if (isPending || nextRole === currentRole) return;
     startTransition(async () => {
       const result = await updateAdminUserRoleAction({
         userId,
@@ -56,12 +54,12 @@ export function AdminUserRoleSelect({
         disabled={isPending}
         onValueChange={(value) => handleChange(value as "user" | "admin")}
       >
-        <SelectTrigger aria-label={`${commonT("role")}: ${userId}`} aria-busy={isPending} className="w-full min-w-40">
+        <SelectTrigger className="w-full max-w-24">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            <SelectLabel>{commonT("role")}</SelectLabel>
+            <SelectLabel>Roles</SelectLabel>
             <SelectItem value="user">{t("user")}</SelectItem>
             <SelectItem value="admin">{t("admin")}</SelectItem>
           </SelectGroup>

@@ -6,7 +6,6 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import { WorkspaceGoalActions } from "./workspace-goal-actions";
-import { WorkspaceGoalSelector } from "./workspace-goal-selector";
 
 type WorkspaceGoalRailProps = {
   goals: GoalWithProgress[];
@@ -19,28 +18,27 @@ export async function WorkspaceGoalRail({
 }: WorkspaceGoalRailProps) {
   const t = await getTranslations("workspace.rail");
   const linkClassName =
-    "block min-h-touch shrink-0 rounded-md px-2 py-2 text-label font-medium text-secondary-text transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:min-h-control";
+    "block shrink-0 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring";
 
   return (
     <aside className="min-w-0">
-      <div className="min-w-0 border-b border-border pb-card lg:border-r lg:border-b-0 lg:pr-card lg:pb-0">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-            <p className="mt-1 text-caption text-muted-foreground">
+      <div className="rounded-[28px] border border-border/60 bg-background/80 p-3 shadow-sm">
+        <div className="mb-3 flex items-center justify-between gap-2 px-2">
+          <div>
+            <h2 className="font-semibold text-foreground">{t("title")}</h2>
+            <p className="mt-1 text-xs text-muted-foreground">
               {t("description")}
             </p>
           </div>
           <WorkspaceCreateGoalButton iconOnly />
         </div>
-        <WorkspaceGoalSelector goals={goals} selectedKey={selectedKey} />
-        <nav aria-label={t("title")} className="hidden min-w-0 lg:block lg:space-y-1">
+        <nav className="flex gap-2 overflow-x-auto pb-1 lg:block lg:space-y-1 lg:overflow-visible">
           <Link
             href="/workspace?goal=all"
             aria-current={selectedKey === "all" ? "page" : undefined}
             className={cn(
               linkClassName,
-              selectedKey === "all" && "bg-muted text-foreground",
+              selectedKey === "all" && "bg-primary/10 text-primary",
             )}
           >
             {t("allTasks")}
@@ -50,21 +48,20 @@ export async function WorkspaceGoalRail({
             aria-current={selectedKey === "unassigned" ? "page" : undefined}
             className={cn(
               linkClassName,
-              selectedKey === "unassigned" && "bg-muted text-foreground",
+              selectedKey === "unassigned" && "bg-primary/10 text-primary",
             )}
           >
             {t("unassigned")}
           </Link>
           {goals.map((goal) => {
             const selected = selectedKey === goal.id;
-            const progress = Math.min(100, Math.max(0, goal.computed_progress));
 
             return (
               <div
                 key={goal.id}
                 className={cn(
-                  "flex w-56 shrink-0 items-start rounded-md lg:w-full",
-                  selected && "bg-muted",
+                  "flex w-64 shrink-0 items-start gap-1 rounded-lg lg:w-full",
+                  selected && "bg-primary/10",
                 )}
               >
                 <Link
@@ -75,30 +72,30 @@ export async function WorkspaceGoalRail({
 
                     "min-w-0 flex-1",
 
-                    selected && "text-foreground",
+                    selected && "text-primary",
                   )}
                 >
                   <div className="min-w-0">
                     <div className="flex items-center justify-between gap-3">
-                      <p title={goal.title} className="min-w-0 truncate text-label font-medium">
+                      <p className="truncate text-sm font-medium">
                         {goal.title}
                       </p>
 
-                      <span className="shrink-0 text-caption text-muted-foreground tabular-nums">
-                        {Math.round(progress)}%
+                      <span className="text-xs text-muted-foreground">
+                        {Math.round(goal.computed_progress)}%
                       </span>
                     </div>
 
-                    <div role="meter" aria-label={goal.title} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
+                    <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none dark:bg-success"
+                        className="h-full rounded-full bg-primary transition-all"
                         style={{
-                          width: `${progress}%`,
+                          width: `${goal.computed_progress}%`,
                         }}
                       />
                     </div>
 
-                    <p className="mt-1 text-caption text-muted-foreground">
+                    <p className="mt-1 text-[11px] text-muted-foreground">
                       {t("taskProgress", {
                         completed: goal.completed_tasks,
 
@@ -108,7 +105,7 @@ export async function WorkspaceGoalRail({
                   </div>
                 </Link>
 
-                <div className="shrink-0">
+                <div className="pt-1">
                   <WorkspaceGoalActions goal={goal} />
                 </div>
               </div>

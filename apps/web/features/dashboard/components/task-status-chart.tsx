@@ -21,44 +21,35 @@ type TaskStatusChartProps = {
   data: TaskStatusPoint[];
 };
 
-const TASK_STATUSES: Record<string, { key: string; color: string }> = {
-  Todo: { key: "todo", color: "var(--text-muted)" },
-  "In Progress": { key: "in_progress", color: "var(--info)" },
-  "In Review": { key: "in_review", color: "var(--warning)" },
-  Completed: { key: "completed", color: "hsl(var(--chart-1))" },
-  Overdue: { key: "overdue", color: "var(--danger)" },
-  Cancelled: { key: "cancelled", color: "var(--text-secondary)" },
-};
+const TASK_STATUS_COLORS = [
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 export function TaskStatusChart({ data }: TaskStatusChartProps) {
   const t = useTranslations("dashboard.taskStatus");
-  const statusT = useTranslations("tasks.form.statuses");
-  const chartData = data.map((item) => ({
-    ...item,
-    label: TASK_STATUSES[item.status]
-      ? statusT(TASK_STATUSES[item.status].key)
-      : item.status,
-  }));
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+    <section className="flex h-full min-h-80 flex-col rounded-2xl bg-card/90 p-4 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.55)]">
       <div className="mb-3">
-        <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-        <p className="mt-1 text-body text-secondary-text">
+        <h2 className="text-base font-semibold text-foreground">{t("title")}</h2>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
           {t("description")}
         </p>
       </div>
 
-      {data.every((item) => item.count === 0) ? <div className="flex h-64 items-center justify-center text-body text-muted-foreground">{t("empty")}</div> : <div className="h-64 min-w-0 w-full">
+      <div className="min-h-52 w-full flex-1">
         <ResponsiveContainer
           width="100%"
           height="100%"
           minWidth={0}
-          minHeight={256}
+          minHeight={208}
         >
           <BarChart
-            accessibilityLayer
-            data={chartData}
+            data={data}
             layout="vertical"
             margin={{ top: 4, right: 18, left: 4, bottom: 0 }}
           >
@@ -69,22 +60,21 @@ export function TaskStatusChart({ data }: TaskStatusChartProps) {
             <XAxis
               type="number"
               allowDecimals={false}
-              tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+              tick={{ fill: "hsl(var(--chart-axis))", fontSize: 10 }}
               tickLine={false}
             />
             <YAxis
-              dataKey="label"
+              dataKey="status"
               type="category"
-              tick={{ fill: "var(--text-muted)", fontSize: 12 }}
+              tick={{ fill: "hsl(var(--chart-axis))", fontSize: 10 }}
               tickLine={false}
-              width={104}
+              width={78}
             />
             <Tooltip
-              itemStyle={{ color: "var(--foreground)" }}
               contentStyle={{
                 backgroundColor: "var(--surface)",
                 border: "1px solid var(--overlay)",
-                borderRadius: "var(--radius-lg)",
+                borderRadius: 10,
                 color: "var(--foreground)",
                 fontSize: 12,
               }}
@@ -93,19 +83,18 @@ export function TaskStatusChart({ data }: TaskStatusChartProps) {
             <Bar
               dataKey="count"
               name={t("tasks")}
-              radius={[0, 4, 4, 0]}
-              maxBarSize={20}
+              radius={[0, 8, 8, 0]}
             >
-              {data.map((item) => (
+              {data.map((item, index) => (
                 <Cell
-                  fill={TASK_STATUSES[item.status]?.color ?? "var(--text-muted)"}
+                  fill={TASK_STATUS_COLORS[index % TASK_STATUS_COLORS.length]}
                   key={item.status}
                 />
               ))}
             </Bar>
           </BarChart>
         </ResponsiveContainer>
-      </div>}
+      </div>
     </section>
   );
 }

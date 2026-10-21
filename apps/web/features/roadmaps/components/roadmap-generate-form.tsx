@@ -2,11 +2,6 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
-import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
 
 import { useRouter } from "@/i18n/navigation";
 import { generateLearningRoadmapAction } from "@/features/roadmaps/roadmap.actions";
@@ -50,7 +45,6 @@ function addMonthsInputValue(months: number) {
 export function RoadmapGenerateForm({
   preferredLocale,
 }: RoadmapGenerateFormProps) {
-  const t = useTranslations("roadmaps");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -97,116 +91,119 @@ export function RoadmapGenerateForm({
     event.preventDefault();
 
     startTransition(async () => {
-      try {
-        const result = await generateLearningRoadmapAction({
-          topic,
-          subjectName,
-          description,
+      const result = await generateLearningRoadmapAction({
+        topic,
+        subjectName,
+        description,
 
-          currentLevel,
-          targetLevel,
-          customCurrentLevel,
-          customTargetLevel,
+        currentLevel,
+        targetLevel,
+        customCurrentLevel,
+        customTargetLevel,
 
-          startDate,
-          endDate,
+        startDate,
+        endDate,
 
-          studyDaysPerWeek,
-          availableWeekdays,
-          minutesPerStudyDay,
+        studyDaysPerWeek,
+        availableWeekdays,
+        minutesPerStudyDay,
 
-          preferredLocale,
-        });
+        preferredLocale,
+      });
 
-        if (!result.success) {
-          toast.error(result.message);
-          return;
-        }
-
-        toast.success(result.message);
-        router.push(`/roadmaps/${result.data.roadmapId}`);
-      } catch {
-        toast.error(t("generateFailed"));
+      if (!result.success) {
+        toast.error(result.message);
+        return;
       }
+
+      toast.success(result.message);
+      router.push(`/roadmaps/${result.data.roadmapId}`);
     });
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 rounded-lg border border-border bg-card p-card">
-      <fieldset disabled={isPending} className="min-w-0 space-y-section">
-      <section className="border-b border-border pb-card">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
         <div>
-          <h2 className="mt-2 text-section font-semibold text-foreground">
-            {t("inputTitle")}
+          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+            Roadmap Input
+          </p>
+
+          <h2 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+            What do you want to learn?
           </h2>
 
+          <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
+            Provide enough context so the AI can generate a realistic tree of
+            goals, tasks, and subtasks.
+          </p>
         </div>
 
-        <div className="mt-4 grid gap-card md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5 md:col-span-2">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.topic")}
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <label className="space-y-2 md:col-span-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Topic / Course *
             </span>
 
-            <Input
+            <input
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
-              placeholder={t("placeholders.topic")}
+              placeholder="Example: Learn Python for Data Analytics"
               required
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.subject")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Subject name
             </span>
 
-            <Input
+            <input
               value={subjectName}
               onChange={(event) => setSubjectName(event.target.value)}
-              placeholder={t("placeholders.subject")}
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              placeholder="Example: Data Analytics"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.language")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Output language
             </span>
 
-            <Input
-              value={t(`languages.${preferredLocale}`)}
+            <input
+              value={preferredLocale === "vi" ? "Vietnamese" : "English"}
               disabled
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-neutral-50 px-3 py-2.5 text-sm text-neutral-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5 md:col-span-2">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.description")}
+          <label className="space-y-2 md:col-span-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Description / context
             </span>
 
-            <Textarea
+            <textarea
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              placeholder={t("placeholders.description")}
-              rows={3}
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              placeholder="Describe your goal, background, expected outcome, exam/project requirement, or anything the AI should consider."
+              rows={5}
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
         </div>
       </section>
 
-      <section className="border-b border-border pb-card">
-        <h2 className="text-section font-semibold text-foreground">
-          {t("levelTitle")}
+      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <h2 className="text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+          Level and target
         </h2>
 
-        <div className="mt-4 grid gap-card md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.currentLevel")}
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Current level
             </span>
 
             <select
@@ -214,19 +211,19 @@ export function RoadmapGenerateForm({
               onChange={(event) =>
                 setCurrentLevel(event.target.value as RoadmapLevel)
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             >
               {levels.map((level) => (
                 <option key={level.value} value={level.value}>
-                  {t(`levels.${level.value}`)}
+                  {level.label}
                 </option>
               ))}
             </select>
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.targetLevel")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Target level
             </span>
 
             <select
@@ -234,90 +231,90 @@ export function RoadmapGenerateForm({
               onChange={(event) =>
                 setTargetLevel(event.target.value as RoadmapLevel)
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             >
               {levels.map((level) => (
                 <option key={level.value} value={level.value}>
-                  {t(`levels.${level.value}`)}
+                  {level.label}
                 </option>
               ))}
             </select>
           </label>
 
           {currentLevel === "custom" ? (
-            <label className="block min-w-0 space-y-1.5">
-              <span className="text-label font-medium text-foreground">
-                {t("fields.customCurrent")}
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                Custom current level
               </span>
 
-              <Input
+              <input
                 value={customCurrentLevel}
                 onChange={(event) =>
                   setCustomCurrentLevel(event.target.value)
                 }
-                placeholder={t("placeholders.current")}
-                className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+                placeholder="Describe your current skill level"
+                className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
               />
             </label>
           ) : null}
 
           {targetLevel === "custom" ? (
-            <label className="block min-w-0 space-y-1.5">
-              <span className="text-label font-medium text-foreground">
-                {t("fields.customTarget")}
+            <label className="space-y-2">
+              <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+                Custom target level
               </span>
 
-              <Input
+              <input
                 value={customTargetLevel}
                 onChange={(event) => setCustomTargetLevel(event.target.value)}
-                placeholder={t("placeholders.target")}
-                className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+                placeholder="Describe your desired outcome"
+                className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
               />
             </label>
           ) : null}
         </div>
       </section>
 
-      <section className="border-b border-border pb-card">
-        <h2 className="text-section font-semibold text-foreground">
-          {t("scheduleTitle")}
+      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <h2 className="text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+          Time plan
         </h2>
 
-        <div className="mt-4 grid gap-card md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.startDate")}
+        <div className="mt-6 grid gap-5 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Start date
             </span>
 
-            <Input
+            <input
               type="date"
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
               required
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.endDate")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              End date
             </span>
 
-            <Input
+            <input
               type="date"
               value={endDate}
               onChange={(event) => setEndDate(event.target.value)}
               required
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.days")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Study days per week
             </span>
 
-            <Input
+            <input
               type="number"
               min={1}
               max={7}
@@ -325,16 +322,16 @@ export function RoadmapGenerateForm({
               onChange={(event) =>
                 setStudyDaysPerWeek(Number(event.target.value))
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.minutes")}
+          <label className="space-y-2">
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Minutes per study day
             </span>
 
-            <Input
+            <input
               type="number"
               min={10}
               max={480}
@@ -342,13 +339,13 @@ export function RoadmapGenerateForm({
               onChange={(event) =>
                 setMinutesPerStudyDay(Number(event.target.value))
               }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
+              className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
             />
           </label>
 
           <div className="md:col-span-2">
-            <p className="text-label font-medium text-foreground">
-              {t("fields.weekdays")}
+            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
+              Available weekdays
             </p>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -356,39 +353,38 @@ export function RoadmapGenerateForm({
                 const active = availableWeekdays.includes(day.value);
 
                 return (
-                  <Button
+                  <button
                     key={day.value}
                     type="button"
                     onClick={() => toggleWeekday(day.value)}
-                    aria-pressed={active}
-                    size="sm"
-                    variant={active ? "default" : "outline"}
-
+                    className={
+                      active
+                        ? "rounded-full bg-neutral-900 px-4 py-2 text-sm font-medium text-white dark:bg-white dark:text-neutral-950"
+                        : "rounded-full border px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-900"
+                    }
                   >
-                    {t(`weekdays.${day.value}`)}
-                  </Button>
+                    {day.label}
+                  </button>
                 );
               })}
             </div>
 
-            <p className="mt-3 text-caption text-muted-foreground">
-              {t("weeklyHours", { hours: estimatedWeeklyHours })}
+            <p className="mt-3 text-sm text-neutral-500 dark:text-neutral-400">
+              Estimated weekly study time: {estimatedWeeklyHours} hour(s)
             </p>
           </div>
         </div>
       </section>
 
       <div className="flex justify-end">
-        <Button
+        <button
           type="submit"
           disabled={isPending}
-          aria-busy={isPending}
+          className="rounded-xl bg-neutral-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
         >
-          <Sparkles aria-hidden="true" />
-          {isPending ? t("generating") : t("generate")}
-        </Button>
+          {isPending ? "Generating roadmap..." : "Generate roadmap"}
+        </button>
       </div>
-      </fieldset>
     </form>
   );
 }

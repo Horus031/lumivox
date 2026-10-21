@@ -18,10 +18,7 @@ import {
   type OnInit,
   type OnReconnect,
 } from "@xyflow/react";
-import { ArrowLeft, Save, Workflow } from "lucide-react";
-import { useTranslations } from "next-intl";
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/features/app-shell/components/page-header";
+import { Workflow } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -54,10 +51,10 @@ const defaultEdgeOptions = {
   deletable: false,
 } satisfies Partial<Edge>;
 
-const NODE_WIDTH = 240;
-const NODE_HEIGHT = 224;
+const NODE_WIDTH = 280;
+const NODE_HEIGHT = 220;
 const NODE_X_GAP = 96;
-const NODE_Y_GAP = 240;
+const NODE_Y_GAP = 280;
 
 function isValidParentChild(
   parentType: RoadmapNodeType,
@@ -265,11 +262,9 @@ function makeEdge(source: string, target: string): Edge {
 function makeNewChildNode({
   parent,
   nodeType,
-  title,
 }: {
   parent: RoadmapFlowNodeType;
   nodeType: RoadmapNodeType;
-  title: string;
 }): RoadmapFlowNodeType {
   const id = crypto.randomUUID();
 
@@ -283,7 +278,7 @@ function makeNewChildNode({
     data: {
       nodeType,
       parentNodeId: parent.id,
-      title,
+      title: nodeType === "task" ? "New task" : "New subtask",
       description: "",
       estimatedHours: 1,
       suggestedStartDate: null,
@@ -298,7 +293,6 @@ export function RoadmapVisualEditor({
   roadmap,
   initialNodes,
 }: RoadmapVisualEditorProps) {
-  const t = useTranslations("roadmaps");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -469,7 +463,6 @@ export function RoadmapVisualEditor({
         const newNode = makeNewChildNode({
           parent,
           nodeType: childType,
-          title: t("newNode", { type: t(`types.${childType}`) }),
         });
 
         setSelectedNodeId(newNode.id);
@@ -481,9 +474,8 @@ export function RoadmapVisualEditor({
 
         return layoutRoadmapNodes([...currentNodes, newNode]);
       });
-      fitViewAfterLayout?.();
     },
-    [fitViewAfterLayout, setEdges, setNodes, t],
+    [setEdges, setNodes],
   );
 
   function handleChangeNode(
@@ -614,29 +606,80 @@ export function RoadmapVisualEditor({
   );
 
   return (
-    <div className="min-w-0 space-y-section">
-      <PageHeader eyebrow={t("editorTitle")} title={roadmap.title} action={<>
-        <Button type="button" variant="outline" size="icon" onClick={handleBackToDetail} aria-label={t("back")} title={t("back")}><ArrowLeft aria-hidden="true" /></Button>
-        <Button type="button" variant="outline" size="icon" onClick={handleAutoLayout} disabled={isPending} aria-label={t("autoLayout")} title={t("autoLayout")}><Workflow aria-hidden="true" /></Button>
-        <Button type="button" onClick={handleSave} disabled={isPending} aria-busy={isPending}><Save aria-hidden="true" />{isPending ? t("saving") : t("save")}</Button>
-      </>} />
-      <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <section aria-label={t("editorTitle")} className="min-w-0 overflow-hidden rounded-lg border border-border">
-          <div className="h-112 min-w-0 md:h-136">
-            <ReactFlow className="roadmap-editor-flow"
-              nodes={nodesWithCallbacks} edges={edges} nodeTypes={nodeTypes}
-              defaultEdgeOptions={defaultEdgeOptions} onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange} onConnect={onConnect} onReconnect={onReconnect}
-              onInit={onInit} isValidConnection={isValidConnection} edgesReconnectable
-              deleteKeyCode={null} minZoom={0.2} fitView fitViewOptions={{ padding: 0.15 }}>
-              <MiniMap className="hidden md:block" pannable zoomable nodeColor="var(--elevated)" />
-              <Controls />
-              <Background color="var(--overlay)" />
-            </ReactFlow>
+    <div className="grid min-h-190 gap-6 xl:grid-cols-[1fr_380px]">
+      <section className="overflow-hidden rounded-2xl border bg-white shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <div className="flex flex-col justify-between gap-4 border-b p-5 dark:border-neutral-800 md:flex-row md:items-center">
+          <div>
+            <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+              Visual Roadmap Editor
+            </p>
+
+            <h1 className="mt-1 text-2xl font-bold text-neutral-950 dark:text-neutral-50">
+              {roadmap.title}
+            </h1>
+
+            <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+              Drag nodes, reconnect valid edges, edit details, then save.
+            </p>
           </div>
-        </section>
-        <RoadmapNodeEditPanel selectedNode={selectedNode} onChangeNode={handleChangeNode} onDeleteNode={handleDeleteNode} />
-      </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={handleBackToDetail}
+              className="rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+            >
+              Back
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAutoLayout}
+              className="inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
+            >
+              <Workflow className="size-4" aria-hidden="true" />
+              Auto layout
+            </button>
+
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isPending}
+              className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-neutral-800 disabled:opacity-60 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
+            >
+              {isPending ? "Saving..." : "Save changes"}
+            </button>
+          </div>
+        </div>
+
+        <div className="h-165">
+          <ReactFlow
+            nodes={nodesWithCallbacks}
+            edges={edges}
+            nodeTypes={nodeTypes}
+            defaultEdgeOptions={defaultEdgeOptions}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onReconnect={onReconnect}
+            onInit={onInit}
+            isValidConnection={isValidConnection}
+            edgesReconnectable
+            deleteKeyCode={null}
+            fitView
+          >
+            <MiniMap pannable zoomable />
+            <Controls />
+            <Background />
+          </ReactFlow>
+        </div>
+      </section>
+
+      <RoadmapNodeEditPanel
+        selectedNode={selectedNode}
+        onChangeNode={handleChangeNode}
+        onDeleteNode={handleDeleteNode}
+      />
     </div>
   );
 }

@@ -19,9 +19,8 @@ export function WorkspaceCreateGoalButton({
           type="button"
           variant="outline"
           size={iconOnly ? "icon" : "default"}
-          className={iconOnly ? "sm:size-touch lg:size-control-sm" : "gap-2"}
+          className={iconOnly ? undefined : "gap-2"}
           aria-label={iconOnly ? t("rail.createGoal") : undefined}
-          title={iconOnly ? t("rail.createGoal") : undefined}
         >
           <Plus className="h-4 w-4" />
           {iconOnly ? null : t("page.newGoal")}

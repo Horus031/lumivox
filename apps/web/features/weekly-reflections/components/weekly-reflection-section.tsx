@@ -17,19 +17,19 @@ export function WeeklyReflectionSection({
   const t = useTranslations("reflections.section");
 
   return (
-    <section className="min-w-0 space-y-section">
+    <section className="space-y-5">
       {cards.length === 0 ? (
-        <div className="min-w-0 border-t border-border py-section">
-          <h3 className="text-section font-semibold text-foreground">
+        <div className="rounded-[28px] border border-dashed border-border/70 bg-card/80 p-10 text-center">
+          <h3 className="text-lg font-semibold text-foreground">
             {t("emptyTitle")}
           </h3>
 
-          <p className="mt-2 text-body text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {t("emptyDescription")}
           </p>
         </div>
       ) : (
-        <div className="min-w-0 space-y-section">
+        <div className="space-y-5">
           {cards.map((card) => (
             <WeeklyReflectionCard key={card.id} card={card} />
           ))}

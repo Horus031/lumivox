@@ -6,7 +6,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { deleteLearningDocumentAction } from "@/features/learning-documents/learning-document.actions";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 type DeleteLearningDocumentButtonProps = {
@@ -43,14 +42,13 @@ export function DeleteLearningDocumentButton({
 
   return (
     <Button
-      variant="ghost"
-      size="sm"
+      variant={"outline"}
       type="button"
       onClick={handleDelete}
       disabled={isPending}
-      className="text-danger hover:bg-danger/10 hover:text-danger"
+      className="cursor-pointer border border-danger/20 px-4 py-2 text-sm font-medium text-danger/60 transition hover:bg-danger/5 disabled:cursor-not-allowed disabled:opacity-60 dark:border-red-900/60 dark:text-red-300 dark:hover:bg-red-950/30"
     >
-      <Trash2 aria-hidden="true" />{isPending ? t("deleting") : commonT("delete")}
+      {isPending ? t("deleting") : commonT("delete")}
     </Button>
   );
 }

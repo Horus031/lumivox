@@ -1,6 +1,5 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -24,10 +23,9 @@ export function DocumentPreviewLink({ document }: DocumentPreviewLinkProps) {
     <Button
       type="button"
       onClick={handleOpen}
-      size="sm"
-      variant="outline"
+      className="px-4 py-2 text-sm font-medium transition "
     >
-      <ExternalLink aria-hidden="true" />{t("preview")}
+      {t("preview")}
     </Button>
   );
 }

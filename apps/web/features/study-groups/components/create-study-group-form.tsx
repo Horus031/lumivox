@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
@@ -10,14 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export function CreateStudyGroupForm() {
   const router = useRouter();
   const t = useTranslations("groups.createForm");
-  const id = useId();
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -39,7 +35,6 @@ export function CreateStudyGroupForm() {
       toast.success(result.message);
       setTitle("");
       setDescription("");
-      setOpen(false);
 
       if (result.data?.groupId) {
         router.push(`/groups/${result.data.groupId}`);
@@ -51,42 +46,61 @@ export function CreateStudyGroupForm() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button type="button"><Plus aria-hidden="true" />{t("create")}</Button>
-      </DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
-        <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
-          <DialogHeader className="pr-10 text-left">
-            <DialogTitle className="text-section">{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
-          <fieldset disabled={isPending} className="min-w-0 space-y-card">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-name`}>{t("fields.name")}</Label>
-              <Input
-                id={`${id}-name`} value={title} onChange={(event) => setTitle(event.target.value)}
-                required minLength={2} maxLength={80} placeholder={t("placeholders.name")}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
-              <Textarea
-                id={`${id}-description`} value={description} onChange={(event) => setDescription(event.target.value)}
-                rows={3} maxLength={500} placeholder={t("placeholders.description")}
-              />
-            </div>
-          </fieldset>
-          <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>{t("cancel")}</Button>
-            </DialogClose>
-            <Button type="submit" disabled={isPending}>
-              <Plus aria-hidden="true" />{isPending ? t("creating") : t("create")}
-            </Button>
-          </DialogFooter>
-        </form>
-      </DialogContent>
-    </Dialog>
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border bg-background space-y-4 p-6 shadow-sm"
+    >
+      <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+        {t("eyebrow")}
+      </p>
+
+      <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
+        {t("title")}
+      </h2>
+
+      <p className="mt-2 text-sm text-muted-foreground">
+        {t("description")}
+      </p>
+
+      <div className="mt-5 space-y-4">
+        <div className="block space-y-2">
+          <Label>{t("fields.name")}</Label>
+          <Input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            required
+            placeholder={t("placeholders.name")}
+          />
+        </div>
+
+        <div className="block space-y-2">
+          <Label>{t("fields.description")}</Label>
+          <Input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            required
+            placeholder={t("placeholders.name")}
+          />
+        </div>
+
+        <label className="block space-y-2">
+          <span className="text-sm font-medium text-muted-foreground">
+            {t("fields.description")}
+          </span>
+
+          <Textarea
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
+            placeholder={t("placeholders.description")}
+          />
+        </label>
+      </div>
+
+      <Button type="submit" disabled={isPending}>
+        {isPending ? t("creating") : t("create")}
+      </Button>
+    </form>
   );
 }

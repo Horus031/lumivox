@@ -34,31 +34,37 @@ export function AdminGroupMessagesTable({
   const t = useTranslations("admin.groups.messages");
 
   return (
-    <section className="min-w-0 space-y-3 border-t border-border pt-card">
-        <h2 className="text-section font-semibold text-foreground">
+    <section className="rounded-2xl border bg-surface p-6 shadow-sm">
+      <div>
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {t("eyebrow")}
+        </p>
+
+        <h2 className="mt-2 text-2xl font-bold text-foreground">
           {t("title")}
         </h2>
+      </div>
 
       {messages.length === 0 ? (
-        <div className="py-section">
-          <p className="text-body text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-sm text-muted-foreground">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div className="divide-y divide-border">
+        <div className="mt-6 space-y-4">
           {messages.map((message) => (
             <article
               key={message.message_id}
-              className="min-w-0 py-3"
+              className="rounded-2xl bg-surface p-4"
             >
-              <div className="flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0 [overflow-wrap:anywhere]">
-                  <p className="text-body font-medium text-foreground">
+              <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+                <div>
+                  <p className="font-semibold text-foreground">
                     {getName(message)}
                   </p>
 
-                  <p className="mt-1 text-caption text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {message.email ?? message.user_id} -{" "}
                     {new Date(message.created_at).toLocaleString(locale)}
                   </p>
@@ -70,7 +76,7 @@ export function AdminGroupMessagesTable({
                 />
               </div>
 
-              <p className="mt-3 max-h-80 overflow-y-auto whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">
+              <p className="mt-4 whitespace-pre-wrap bg-surface border p-2 px-4 rounded-xl text-sm leading-6 text-foreground">
                 {message.content}
               </p>
             </article>

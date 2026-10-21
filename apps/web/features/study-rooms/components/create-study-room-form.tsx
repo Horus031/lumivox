@@ -1,24 +1,41 @@
 "use client";
 
-import { FormEvent, useId, useState, useTransition } from "react";
+import { FormEvent, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+
 import { createStudyRoomAction } from "@/features/study-rooms/study-room.actions";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Field, FieldGroup } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function CreateStudyRoomForm() {
   const router = useRouter();
   const t = useTranslations("rooms.createForm");
-  const id = useId();
-  const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [visibility, setVisibility] = useState<"public" | "private">("public");
@@ -26,64 +43,197 @@ export function CreateStudyRoomForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
     startTransition(async () => {
-      const result = await createStudyRoomAction({ title, description, visibility, maxParticipants: Number(maxParticipants) });
+      const result = await createStudyRoomAction({
+        title,
+        description,
+        visibility,
+        maxParticipants: Number(maxParticipants),
+      });
+
       if (!result.success) {
         toast.error(result.message);
         return;
       }
+
       toast.success(result.message);
+
       setTitle("");
       setDescription("");
       setVisibility("public");
       setMaxParticipants("20");
-      setOpen(false);
+
       router.push(`/rooms/${result.data.roomId}`);
       router.refresh();
     });
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button type="button"><Plus aria-hidden="true" />{t("trigger")}</Button></DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
-        <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
-          <DialogHeader className="pr-10 text-left">
-            <DialogTitle className="text-section">{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button type="button">{t("trigger")}</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>
+              {t("description")}
+            </DialogDescription>
           </DialogHeader>
-          <fieldset disabled={isPending} className="min-w-0 space-y-card">
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
-              <Input id={`${id}-title`} value={title} onChange={(event) => setTitle(event.target.value)} required minLength={3} maxLength={100} placeholder={t("placeholders.title")} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
-              <Textarea id={`${id}-description`} value={description} onChange={(event) => setDescription(event.target.value)} maxLength={500} placeholder={t("placeholders.description")} rows={3} />
-            </div>
-            <div className="grid gap-card sm:grid-cols-2">
-              <div className="min-w-0 space-y-2">
-                <Label htmlFor={`${id}-visibility`}>{t("fields.visibility")}</Label>
-                <Select value={visibility} onValueChange={(value) => setVisibility(value as "public" | "private")} disabled={isPending}>
-                  <SelectTrigger id={`${id}-visibility`} className="w-full"><SelectValue /></SelectTrigger>
+          <FieldGroup>
+            <Field>
+              <Label>{t("fields.title")}</Label>
+              <Input
+                type="text"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder={t("placeholders.title")}
+              />
+            </Field>
+            <Field>
+              <Label>{t("fields.description")}</Label>
+              <Textarea
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                placeholder={t("placeholders.description")}
+                rows={3}
+              />
+            </Field>
+            <FieldGroup className="flex-row gap-4">
+              <Field>
+                <Label>{t("fields.visibility")}</Label>
+
+                <Select
+                  value={visibility ?? ""}
+                  onValueChange={(value) =>
+                    setVisibility(value as "public" | "private")
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={t("fields.visibility")} />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="public">{t("visibility.public")}</SelectItem>
-                    <SelectItem value="private">{t("visibility.private")}</SelectItem>
+                    <SelectGroup>
+                      <SelectLabel>{t("fields.visibility")}</SelectLabel>
+                      <SelectItem value="public">
+                        {t("visibility.public")}
+                      </SelectItem>
+                      <SelectItem value="private">
+                        {t("visibility.private")}
+                      </SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="min-w-0 space-y-2">
-                <Label htmlFor={`${id}-capacity`}>{t("fields.maxParticipants")}</Label>
-                <Input id={`${id}-capacity`} type="number" min={2} max={100} step={1} required value={maxParticipants} onChange={(event) => setMaxParticipants(event.target.value)} />
-              </div>
-            </div>
-          </fieldset>
+                {/* <select
+                value={visibility}
+                onChange={(event) =>
+                  setVisibility(event.target.value as "public" | "private")
+                }
+                className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+              >
+                <option value="public">Public room</option>
+                <option value="private">Private room</option>
+              </select> */}
+              </Field>
+
+              <Field>
+                <Label>{t("fields.maxParticipants")}</Label>
+                <Input
+                  type="number"
+                  min={2}
+                  max={100}
+                  value={maxParticipants}
+                  onChange={(event) => setMaxParticipants(event.target.value)}
+                />
+              </Field>
+            </FieldGroup>
+          </FieldGroup>
           <DialogFooter>
-            <DialogClose asChild><Button type="button" variant="outline" disabled={isPending}>{t("cancel")}</Button></DialogClose>
-            <Button type="submit" disabled={isPending}><Plus aria-hidden="true" />{isPending ? t("creating") : t("create")}</Button>
+            <DialogClose asChild>
+              <Button variant={"outline"}>{t("cancel")}</Button>
+            </DialogClose>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? t("creating") : t("create")}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
+    // <section className="rounded-2xl border bg-white p-6 shadow-sm">
+    //   <div className="mb-5">
+    //     <h2 className="text-xl font-semibold">Create a study room</h2>
+    //     <p className="mt-1 text-sm text-neutral-600">
+    //       Open a collaborative space where learners can study together.
+    //     </p>
+    //   </div>
+
+    //   <form onSubmit={handleSubmit} className="space-y-4">
+    //     <div>
+    //       <label className="mb-1.5 block text-sm font-medium">Room title</label>
+    //       <input
+    //         type="text"
+    //         value={title}
+    //         onChange={(event) => setTitle(event.target.value)}
+    //         placeholder="Final Project Sprint Room"
+    //         className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+    //       />
+    //     </div>
+
+    //     <div>
+    //       <label className="mb-1.5 block text-sm font-medium">
+    //         Description
+    //       </label>
+    //       <textarea
+    //         value={description}
+    //         onChange={(event) => setDescription(event.target.value)}
+    //         placeholder="A focused room for evening study sessions."
+    //         rows={3}
+    //         className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+    //       />
+    //     </div>
+
+    //     <div className="grid gap-4 md:grid-cols-2">
+    //       <div>
+    //         <label className="mb-1.5 block text-sm font-medium">
+    //           Visibility
+    //         </label>
+    //         <select
+    //           value={visibility}
+    //           onChange={(event) =>
+    //             setVisibility(event.target.value as "public" | "private")
+    //           }
+    //           className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+    //         >
+    //           <option value="public">Public room</option>
+    //           <option value="private">Private room</option>
+    //         </select>
+    //       </div>
+
+    //       <div>
+    //         <label className="mb-1.5 block text-sm font-medium">
+    //           Max participants
+    //         </label>
+    //         <input
+    //           type="number"
+    //           min={2}
+    //           max={100}
+    //           value={maxParticipants}
+    //           onChange={(event) => setMaxParticipants(event.target.value)}
+    //           className="w-full rounded-xl border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+    //         />
+    //       </div>
+    //     </div>
+
+    //     <button
+    //       type="submit"
+    //       disabled={isPending}
+    //       className="rounded-xl bg-neutral-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+    //     >
+    //       {isPending ? "Creating room..." : "Create room"}
+    //     </button>
+    //   </form>
+    // </section>
   );
 }

@@ -16,7 +16,6 @@ import { sendStudyRoomMessageAction } from "@/features/study-room-chat/study-roo
 import type { StudyRoomMessageWithSender } from "@/features/study-room-chat/study-room-chat.types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
 
 type StudyRoomChatPanelProps = {
   roomId: string;
@@ -186,43 +185,103 @@ export function StudyRoomChatPanel({
   };
 
   return (
-    <section className="min-w-0">
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-        <span role="status" className={`rounded-sm px-2 py-0.5 text-caption font-medium ${liveState === "connected" ? "bg-success/10 text-success" : liveState === "error" ? "bg-danger/10 text-danger" : "bg-muted text-muted-foreground"}`}>
+    <section className="rounded-2xl max-w-2xl border bg-background p-6 shadow-sm">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+        <div>
+          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
+            {t("eyebrow")}
+          </p>
+
+          <h2 className="mt-2 text-2xl font-bold tracking-tight">
+            {t("title")}
+          </h2>
+
+          <p className="mt-2 max-w-2xl text-neutral-600">
+            {t("description")}
+          </p>
+        </div>
+
+        <span
+          className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+            liveState === "connected"
+              ? "bg-emerald-50 text-emerald-700"
+              : liveState === "error"
+                ? "bg-red-50 text-red-700"
+                : "bg-neutral-100 text-neutral-700"
+          }`}
+        >
           {t(`connection.${liveState}`)}
         </span>
       </div>
-      <div className="flex h-96 min-w-0 flex-col overflow-hidden rounded-lg border border-border bg-card md:h-112">
-        <div ref={messagesContainerRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3" tabIndex={0} aria-label={t("title")}>
+
+      <div className="mt-6 flex h-115 flex-col rounded-2xl border bg-surface">
+        <div ref={messagesContainerRef} className="flex-1 space-y-4 overflow-y-auto p-4">
           {messages.length === 0 ? (
             <div className="flex h-full items-center justify-center text-center">
-              <p className="max-w-sm text-body text-muted-foreground">{t("empty")}</p>
+              <p className="text-sm text-neutral-500">
+                {t("empty")}
+              </p>
             </div>
-          ) : messages.map((message) => {
-            const isMine = message.sender_id === currentUserId;
-            return (
-              <article key={message.id} className={`w-fit max-w-[92%] rounded-lg px-3 py-2 ${isMine ? "ml-auto bg-primary/10" : "bg-muted"}`}>
-                <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
-                  <p className="min-w-0 text-label font-medium text-foreground [overflow-wrap:anywhere]">{message.profiles?.full_name ?? t("lumivoxUser")}</p>
-                  <time dateTime={message.created_at} className="text-caption text-muted-foreground">
-                    {formatMessageTime(message.created_at, locale)}
-                  </time>
-                </div>
-                <p className="mt-1 whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">{message.content}</p>
-              </article>
-            );
-          })}
+          ) : (
+            messages.map((message) => {
+              const isMine = message.sender_id === currentUserId;
+
+              return (
+                <article
+                  key={message.id}
+                  className={`max-w-[88%] rounded-2xl border p-4 ${
+                    isMine
+                      ? "ml-auto border-background bg-background text-foreground"
+                      : "bg-background text-foreground"
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <p className={`text-sm font-semibold text-foreground}`}>
+                      {message.profiles?.full_name ?? t("lumivoxUser")}
+                    </p>
+
+                    <span
+                      className={`text-xs ${
+                        isMine ? "text-foreground" : "text-foreground"
+                      }`}
+                    >
+                      {formatMessageTime(message.created_at, locale)}
+                    </span>
+                  </div>
+
+                  <p className="mt-3 whitespace-pre-wrap text-sm leading-6">
+                    {message.content}
+                  </p>
+                </article>
+              );
+            })
+          )}
         </div>
-        <form ref={formRef} onSubmit={handleSubmit} aria-busy={isSubmitting} className="flex items-end gap-2 border-t border-border p-3">
-          <Textarea value={content} onChange={(event) => setContent(event.target.value)}
-            onKeyDown={handleKeyDown} maxLength={2000} disabled={isSubmitting} rows={2}
-            aria-label={t("placeholder")} placeholder={t("placeholder")}
-            className="max-h-32 min-h-touch min-w-0 flex-1 resize-none" />
-          <Button type="submit" size="icon" disabled={isSubmitting || !content.trim()}
-            aria-label={isSubmitting ? t("sending") : t("send")} title={isSubmitting ? t("sending") : t("send")}>
-            <Send aria-hidden="true" />
-          </Button>
+
+        <form
+          ref={formRef}
+          onSubmit={handleSubmit}
+          className="border-t bg-background p-4"
+        >
+          <div className="flex flex-col gap-3 md:flex-row">
+            <Textarea
+              value={content}
+              disabled={isSubmitting}
+              onKeyDown={handleKeyDown}
+              onChange={(event) => setContent(event.target.value)}
+              placeholder={t("placeholder")}
+              rows={1}
+              className="w-full h-fit resize-none border px-3 py-2.5 outline-none transition focus:border-neutral-900"
+            />
+
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="px-5 py-2.5 text-sm font-medium text-primary-foreground transition disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isSubmitting ? t("sending") : t("send")}
+            </Button>
+          </div>
         </form>
       </div>
     </section>

@@ -20,22 +20,22 @@ export function StudyGroupMemberList({ members }: StudyGroupMemberListProps) {
   const t = useTranslations("groups.members");
 
   return (
-    <section className="min-w-0 border-t border-border pt-card">
-      <h2 className="text-section font-semibold text-foreground">
+    <section className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+      <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
         {t("title")}
       </h2>
 
-      <div className="mt-2 divide-y divide-border">
+      <div className="mt-5 space-y-3">
         {members.map((member) => (
           <article
             key={member.member_id}
-            className="min-w-0 py-3"
+            className="rounded-2xl border p-4 dark:border-neutral-800"
           >
-            <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
+            <p className="font-semibold text-neutral-950 dark:text-neutral-50">
               {getDisplayName(member)}
             </p>
 
-            <p className="mt-1 text-caption text-muted-foreground">
+            <p className="mt-2 text-xs uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
               {t(`roles.${member.role}`)} -{" "}
               {t(`status.${member.membership_status}`)}
             </p>

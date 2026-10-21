@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Pencil, Trash2, Check, Play, RotateCcw, X } from "lucide-react";
 
 import {
   createSubtaskAction,
@@ -158,44 +157,43 @@ export function TaskSubtasksPanel({
   }
 
   return (
-    <div className="min-w-0 space-y-card">
+    <div className="space-y-5">
       <div>
-        <h3 className="text-base text-section font-semibold text-foreground">
+        <h3 className="text-base font-semibold text-foreground">
           {t("title")}
         </h3>
 
-        <p className="mt-1 text-body text-secondary-text">
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
           {t("description")}
         </p>
       </div>
 
       {canCreate ? (
-        <form onSubmit={handleCreate} aria-busy={isPending} className="flex min-w-0 flex-col gap-2 sm:flex-row">
+        <form onSubmit={handleCreate} className="flex gap-2">
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder={t("placeholder")}
-            aria-label={t("placeholder")}
             maxLength={160}
             disabled={isPending}
           />
 
           <Button type="submit" disabled={isPending || !title.trim()}>
-            <Plus aria-hidden="true" />{isPending ? t("adding") : t("add")}
+            {isPending ? t("adding") : t("add")}
           </Button>
         </form>
       ) : (
-        <div className="border-y border-border py-card text-body text-muted-foreground">
+        <div className="rounded-2xl border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
           {t("createUnavailable")}
         </div>
       )}
 
       {subtasks.length === 0 ? (
-        <div className="border-y border-border py-section text-center">
-          <p className="text-body text-muted-foreground">{t("empty")}</p>
+        <div className="rounded-2xl border border-dashed border-border/70 p-7 text-center">
+          <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div className="divide-y divide-border">
+        <div className="space-y-3">
           {subtasks.map((subtask) => {
             const boardStatus = getTaskBoardStatus(subtask, new Date());
 
@@ -240,11 +238,11 @@ export function TaskSubtasksPanel({
             return (
               <article
                 key={subtask.id}
-                className="min-w-0 border-t border-border py-card"
+                className="rounded-[22px] border border-border/60 bg-muted/25 p-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
+                    <p className="font-medium text-foreground">
                       {subtask.title}
                     </p>
 
@@ -267,17 +265,16 @@ export function TaskSubtasksPanel({
 
                   <Button
                     type="button"
-                    size="icon"
+                    size="sm"
                     variant="ghost"
-                    aria-label={t("delete")} title={t("delete")}
                     disabled={isPending}
                     onClick={() => handleDelete(subtask)}
                   >
-                    <Trash2 aria-hidden="true" />
+                    {t("delete")}
                   </Button>
                 </div>
 
-                <div className="mt-3 flex flex-wrap gap-2">
+                <div className="mt-4 flex flex-wrap gap-2">
                   {actions.map((action) => (
                     <Button
                       key={action.target}
@@ -289,7 +286,7 @@ export function TaskSubtasksPanel({
                       disabled={isPending}
                       onClick={() => transitionSubtask(subtask, action.target)}
                     >
-                      {action.target === "completed" ? <Check aria-hidden="true" /> : action.target === "in_progress" ? <Play aria-hidden="true" /> : action.target === "cancelled" ? <X aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}{action.label}
+                      {action.label}
                     </Button>
                   ))}
 
@@ -304,7 +301,7 @@ export function TaskSubtasksPanel({
                       )
                     }
                   >
-                    <Pencil aria-hidden="true" />{commonT("edit")}
+                    {commonT("edit")}
                   </Button>
                 </div>
 

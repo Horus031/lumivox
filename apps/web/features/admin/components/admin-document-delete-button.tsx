@@ -1,7 +1,6 @@
 "use client";
 
 import { useTransition } from "react";
-import { Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -23,7 +22,6 @@ export function AdminDocumentDeleteButton({
   const [isPending, startTransition] = useTransition();
 
   function handleDelete() {
-    if (isPending) return;
     const confirmed = window.confirm(t("deleteConfirm"));
 
     if (!confirmed) return;
@@ -51,9 +49,7 @@ export function AdminDocumentDeleteButton({
       onClick={handleDelete}
       disabled={isPending}
       variant={"destructive"}
-      aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
       {isPending ? t("deleting") : t("deleteDocument")}
     </Button>
   );

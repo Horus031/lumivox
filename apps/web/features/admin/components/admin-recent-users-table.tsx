@@ -1,8 +1,3 @@
-import { useId } from "react";
-import { useLocale, useTranslations } from "next-intl";
-import { Badge } from "@/components/ui/badge";
-import { Link } from "@/i18n/navigation";
-
 type RecentUser = {
   user_id: string;
   full_name: string | null;
@@ -37,72 +32,76 @@ export function AdminRecentUsersTable({
   const locale = useLocale();
   const t = useTranslations("admin.users.recentTable");
   const commonT = useTranslations("admin.common");
-  const titleId = useId();
 
   return (
-    <section className="min-w-0 space-y-3 border-t border-border pt-card">
-      <h2 id={titleId} className="text-section font-semibold text-foreground">
-        {t("title")}
-      </h2>
+    <section className="rounded-2xl p-6 shadow-sm">
+      <div>
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          {t("eyebrow")}
+        </p>
+
+        <h2 className="mt-2 text-2xl font-bold text-foreground">
+          {t("title")}
+        </h2>
+      </div>
 
       {users.length === 0 ? (
-        <div className="py-section">
-          <p className="text-body text-muted-foreground">
+        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
+          <p className="text-sm text-muted-foreground">
             {t("empty")}
           </p>
         </div>
       ) : (
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <table className="min-w-190 w-full text-left text-body">
-            <caption className="sr-only">{t("title")}</caption>
-            <thead className="border-b border-border bg-muted text-label text-secondary-text">
+        <div className="mt-6 overflow-x-auto rounded-2xl border">
+          <table className="min-w-190 w-full text-sm">
+            <thead className="bg-surface text-left">
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {commonT("user")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {commonT("role")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {commonT("leaderboard")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {commonT("created")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {commonT("lastSignIn")}
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y dark:divide-neutral-800">
               {users.map((user) => (
-                <tr key={user.user_id} className="hover:bg-muted/50">
-                  <td className="max-w-72 px-3 py-3 align-top [overflow-wrap:anywhere]">
-                    <Link href={`/admin/users/${user.user_id}`} className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <tr key={user.user_id}>
+                  <td className="px-4 py-3">
+                    <p className="font-medium text-foreground">
                       {displayName(user)}
-                    </Link>
+                    </p>
 
-                    <p className="mt-1 text-caption text-muted-foreground">
+                    <p className="text-xs text-muted-foreground">
                       {user.user_id}
                     </p>
                   </td>
 
-                  <td className="px-3 py-3 align-top">
-                    <Badge variant="outline">{commonT(`roles.${user.role}`)}</Badge>
+                  <td className="px-4 py-3 capitalize text-foreground">
+                    {commonT(`roles.${user.role}`)}
                   </td>
 
-                  <td className="px-3 py-3 align-top text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {user.leaderboard_opt_in
                       ? commonT("visibility.visible")
                       : commonT("visibility.hidden")}
                   </td>
 
-                  <td className="px-3 py-3 align-top tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {formatDate(user.created_at, locale, commonT("na"))}
                   </td>
 
-                  <td className="px-3 py-3 align-top tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {formatDate(user.last_sign_in_at, locale, commonT("na"))}
                   </td>
                 </tr>
@@ -114,3 +113,4 @@ export function AdminRecentUsersTable({
     </section>
   );
 }
+import { useLocale, useTranslations } from "next-intl";

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { Badge } from "@/components/ui/badge";
 import { formatDisplayDate } from "@/lib/utils/date";
+import { getPriorityTone } from "@/lib/utils/color";
 import { cn } from "@/lib/utils";
 import type { WorkspaceTask } from "../workspace.types";
 
@@ -13,13 +14,6 @@ type WorkspaceTaskCardProps = {
   task: WorkspaceTask;
   onOpen: (task: WorkspaceTask) => void;
   disabled?: boolean;
-};
-
-const PRIORITY_TONES = {
-  critical: "border-danger/30 bg-danger/10 text-foreground",
-  high: "border-warning/30 bg-warning/10 text-foreground",
-  medium: "border-info/30 bg-info/10 text-foreground",
-  low: "border-border bg-muted text-secondary-text",
 };
 
 export function WorkspaceTaskCard({
@@ -44,34 +38,35 @@ export function WorkspaceTaskCard({
     <article
       ref={draggable.ref}
       className={cn(
-        "relative w-full min-w-0 rounded-lg border border-border bg-card text-left transition-colors hover:border-ring/40",
+        "relative w-full rounded-[22px] border border-border/60 bg-background text-left shadow-sm transition hover:shadow-md",
         draggable.isDragging && "opacity-60",
       )}
     >
       <button
         type="button"
         onClick={() => onOpen(task)}
-        className="block min-h-touch w-full rounded-lg p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="block w-full rounded-[22px] p-4 pr-10 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <h3 title={task.title} className="min-h-touch pr-10 text-body font-medium text-foreground line-clamp-2 [overflow-wrap:anywhere] lg:min-h-control-sm">
-          {task.title}
-        </h3>
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="line-clamp-2 text-sm font-semibold leading-5 text-foreground">
+            {task.title}
+          </h3>
 
-        <div className="mt-2 flex min-w-0 items-center gap-2">
-          <Badge variant="secondary" className={cn("shrink-0", PRIORITY_TONES[task.priority])}>
+          <Badge variant="secondary" className={getPriorityTone(task.priority)}>
             {taskT(`priorities.${task.priority}`)}
           </Badge>
-          {task.goals ? (
-            <p title={task.goals.title} className="min-w-0 truncate text-caption text-muted-foreground">
-              {task.goals.title}
-            </p>
-          ) : null}
         </div>
 
-        {(task.due_at || task.subtasks.length > 0) ? <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
+        {task.goals ? (
+          <p className="mt-2 truncate text-xs text-muted-foreground">
+            {task.goals.title}
+          </p>
+        ) : null}
+
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
           {task.due_at ? (
             <span className="flex items-center gap-1">
-              <CalendarClock aria-hidden="true" className="size-icon-sm shrink-0" />
+              <CalendarClock className="h-3.5 w-3.5" />
 
               {formatDisplayDate(task.due_at)}
             </span>
@@ -79,7 +74,7 @@ export function WorkspaceTaskCard({
 
           {task.subtasks.length > 0 ? (
             <span className="flex items-center gap-1">
-              <CheckSquare2 aria-hidden="true" className="size-icon-sm shrink-0" />
+              <CheckSquare2 className="h-3.5 w-3.5" />
 
               {t("subtaskProgress", {
                 completed: completedSubtasks,
@@ -87,7 +82,7 @@ export function WorkspaceTaskCard({
               })}
             </span>
           ) : null}
-        </div> : null}
+        </div>
       </button>
       <button
         ref={draggable.handleRef}
@@ -95,9 +90,9 @@ export function WorkspaceTaskCard({
         disabled={disabled}
         aria-label={t("dragTask")}
         title={t("dragTask")}
-        className="absolute right-1 top-1 flex size-touch touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-40 cursor-grab active:cursor-grabbing lg:size-control-sm"
+        className="absolute right-1 top-2 flex h-8 w-8 touch-none items-center justify-center rounded-md text-muted-foreground hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 cursor-grab active:cursor-grabbing"
       >
-        <GripVertical aria-hidden="true" className="size-icon" />
+        <GripVertical className="h-4 w-4" />
       </button>
     </article>
   );

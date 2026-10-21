@@ -1,4 +1,3 @@
-import { useId } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Image from "next/image";
 
@@ -20,13 +19,19 @@ type GlobalLeaderboardTableProps = {
   rows: GlobalLeaderboardRow[];
 };
 
+function getRankLabel(rank: number) {
+  if (rank === 1) return "\u{1f947}";
+  if (rank === 2) return "\u{1f948}";
+  if (rank === 3) return "\u{1f949}";
+  return `#${rank}`;
+}
+
 export function GlobalLeaderboardTable({
   weekStart,
   weekEnd,
   rows,
 }: GlobalLeaderboardTableProps) {
   const locale = useLocale();
-  const titleId = useId();
   const t = useTranslations("leaderboard.table");
   const dateFormatter = new Intl.DateTimeFormat(locale, {
     month: "short",
@@ -34,104 +39,101 @@ export function GlobalLeaderboardTable({
   });
 
   return (
-    <section className="min-w-0 space-y-3 border-t border-border pt-card">
-      <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+    <section className="rounded-2xl border bg-background p-6 shadow-sm">
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-caption text-muted-foreground">
+          <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
             {t("eyebrow")}
           </p>
 
-          <h2 id={titleId} className="mt-1 text-section font-semibold text-foreground">
+          <h2 className="mt-2 text-2xl font-bold text-foreground">
             {t("title")}
           </h2>
 
-          <p className="mt-1 text-caption text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             {dateFormatter.format(new Date(weekStart))} -{" "}
             {dateFormatter.format(new Date(weekEnd))}
           </p>
         </div>
 
-        <p className="max-w-full text-caption text-secondary-text [overflow-wrap:anywhere]">
+        <p className="rounded-full bg-surface px-3 py-1 text-xs font-medium text-foreground">
           {t("scoreFormula")}
         </p>
       </div>
 
       {rows.length === 0 ? (
-        <div className="py-section">
+        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <table className="min-w-180 w-full text-left text-body"><caption className="sr-only">{t("title")}</caption>
-            <thead className="border-b border-border bg-muted text-label text-secondary-text">
+        <div className="mt-6 overflow-hidden rounded-2xl border">
+          <table className="w-full text-sm">
+            <thead className="bg-background text-left">
               <tr>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.rank")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.learner")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.focus")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.tasks")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.sessions")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.streak")}
                 </th>
-                <th scope="col" className="px-3 py-2 font-medium">
+                <th className="px-4 py-3 font-semibold text-muted-foreground">
                   {t("columns.score")}
                 </th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-border">
+            <tbody className="divide-y dark:divide-neutral-800">
               {rows.map((row) => (
                 <tr key={row.user_id}>
-                  <td className="px-3 py-3 font-medium tabular-nums text-secondary-text">
-                    #{row.rank_position}
+                  <td className="px-4 py-3 font-bold text-muted-foreground">
+                    {getRankLabel(row.rank_position)}
                   </td>
 
-                  <td className="px-3 py-3">
-                    <div className="flex min-w-0 items-center gap-2">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
                       {row.avatar_url && (
                         <Image
                           src={row.avatar_url}
-                          width={32}
-                          height={32}
-                          unoptimized
                           alt=""
-                          className="size-8 shrink-0 rounded-full object-cover"
+                          className="h-9 w-9 rounded-full object-cover"
                         />
                       )}
 
-                      <p className="min-w-0 max-w-60 font-medium text-foreground [overflow-wrap:anywhere]">
+                      <p className="font-medium text-foreground">
                         {row.display_name}
                       </p>
                     </div>
                   </td>
 
-                  <td className="px-3 py-3 tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {t("minutes", { count: row.focus_minutes })}
                   </td>
 
-                  <td className="px-3 py-3 tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {row.completed_tasks}
                   </td>
 
-                  <td className="px-3 py-3 tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {row.focus_sessions}
                   </td>
 
-                  <td className="px-3 py-3 tabular-nums text-secondary-text">
+                  <td className="px-4 py-3 text-foreground">
                     {t("days", { count: row.current_streak })}
                   </td>
 
-                  <td className="px-3 py-3 font-semibold tabular-nums text-foreground">
+                  <td className="px-4 py-3 font-bold text-foreground">
                     {row.score}
                   </td>
                 </tr>

@@ -8,8 +8,6 @@ import { ShareDocumentForm } from "@/features/learning-documents/components/shar
 import { DocumentVisibilityControl } from "@/features/learning-documents/components/document-visibility-control";
 import { DocumentPermissionList } from "@/features/learning-documents/components/document-permission-list";
 import { DocumentShareLinkCard } from "@/features/learning-documents/components/document-share-link-card";
-import { PageHeader } from "@/features/app-shell/components/page-header";
-import { getTranslations } from "next-intl/server";
 
 type DocumentSharePageProps = {
   params: Promise<{
@@ -22,10 +20,9 @@ export default async function DocumentSharePage({
 }: DocumentSharePageProps) {
   const { documentId } = await params;
 
-  const [document, permissions, t] = await Promise.all([
+  const [document, permissions] = await Promise.all([
     getOwnedLearningDocumentById(documentId),
     getLearningDocumentPermissions(documentId),
-    getTranslations("documentUi"),
   ]);
 
   if (!document) {
@@ -33,8 +30,20 @@ export default async function DocumentSharePage({
   }
 
   return (
-    <section className="min-w-0 max-w-5xl space-y-section">
-      <PageHeader eyebrow={t("shareEyebrow")} title={document.file_name} description={t("shareDescription")} />
+    <main className="space-y-6">
+      <section className="rounded-2xl border bg-background p-6 shadow-sm">
+        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Document Sharing
+        </p>
+
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
+          {document.file_name}
+        </h1>
+
+        <p className="mt-3 text-sm text-muted-foreground">
+          Manage who can access this learning document.
+        </p>
+      </section>
 
       <DocumentShareLinkCard documentId={document.id} />
 
@@ -43,6 +52,6 @@ export default async function DocumentSharePage({
       <ShareDocumentForm documentId={document.id} />
 
       <DocumentPermissionList permissions={permissions} />
-    </section>
+    </main>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import type { FormEvent } from "react";
-import { useId, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -38,7 +38,6 @@ export function CreateTaskModal({
   const t = useTranslations("tasks.form");
   const commonT = useTranslations("common");
   const router = useRouter();
-  const id = useId();
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -113,8 +112,8 @@ export function CreateTaskModal({
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} type="button">
-        <Plus aria-hidden="true" />
+      <Button onClick={() => setIsOpen(true)} className="gap-2 px-4">
+        <Plus className="h-4 w-4" />
         {t("trigger")}
       </Button>
 
@@ -124,13 +123,12 @@ export function CreateTaskModal({
         title={t("createTitle")}
         description={t("createDescription")}
       >
-        <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
-      <fieldset disabled={isPending} className="min-w-0 space-y-card">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
+            <label className="text-sm font-medium text-foreground">
+              {t("fields.title")}
+            </label>
             <Input
-              id={`${id}-title`}
-              maxLength={160}
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               placeholder={t("placeholders.title")}
@@ -139,31 +137,32 @@ export function CreateTaskModal({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`${id}-description`}>{t("fields.description")}
+            <Label className="text-sm font-medium text-foreground">
+              {t("fields.description")}
             </Label>
             <Textarea
-              id={`${id}-description`}
               value={description}
               onChange={(event) => setDescription(event.target.value)}
-              rows={3}
-              maxLength={1200}
+              rows={4}
               className="resize-none"
               placeholder={t("placeholders.description")}
             />
           </div>
 
-          <div className="grid min-w-0 gap-card sm:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}
+              <Label className="text-sm font-medium text-foreground">
+                {t("fields.linkedGoal")}
               </Label>
               <Select
-                disabled={isPending}
-                value={goalId || "no-goal"}
+                value={goalId ?? ""}
                 onValueChange={(value) =>
                   value === "no-goal" ? setGoalId("") : setGoalId(value)
                 }
+                defaultValue="no-goal"
               >
-                <SelectTrigger id={`${id}-linkedGoal`} className="w-full"><SelectValue />
+                <SelectTrigger className="flex w-full h-11! px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
+                  <SelectValue placeholder={t("fields.linkedGoal")} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
@@ -180,17 +179,17 @@ export function CreateTaskModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor={`${id}-priority`}>{t("fields.priority")}
+              <Label className="text-sm font-medium text-foreground">
+                {t("fields.priority")}
               </Label>
 
               <Select
-                disabled={isPending}
                 value={priority ?? ""}
                 onValueChange={(value) =>
                   setPriority(value as "low" | "medium" | "high" | "critical")
                 }
               >
-                <SelectTrigger id={`${id}-priority`} className="w-full">
+                <SelectTrigger className="flex w-full h-11! bg-transparent px-3 text-sm shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring">
                   <SelectValue placeholder={t("fields.priority")} />
                 </SelectTrigger>
                 <SelectContent>
@@ -210,12 +209,12 @@ export function CreateTaskModal({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor={`${id}-estimatedMinutes`}>{t("fields.estimatedMinutes")}</Label>
+              <label className="text-sm font-medium text-foreground">
+                {t("fields.estimatedMinutes")}
+              </label>
               <Input
-                id={`${id}-estimatedMinutes`}
-            type="number"
+                type="number"
                 min={0}
-            step={1}
                 value={estimatedMinutes}
                 onChange={(event) => setEstimatedMinutes(event.target.value)}
                 placeholder="90"
@@ -224,29 +223,39 @@ export function CreateTaskModal({
 
             <div className="space-y-2">
               <TaskDatePicker
-                disabled={isPending}
                 dueAt={dueAt}
                 setDueAt={setDueAt}
                 dueTime={dueTime}
                 setDueTime={setDueTime}
               />
+
+              {/* <Input
+                type="datetime-local"
+                value={dueAt}
+                onChange={(event) => setDueAt(event.target.value)}
+              /> */}
             </div>
           </div>
 
-          <div className="flex flex-wrap justify-end gap-2">
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="rounded-full px-5"
+            >
+              {isPending ? t("creating") : t("createSubmit")}
+            </Button>
+
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isPending}
+              className="rounded-full px-5 bg-transparent hover:bg-black/10"
             >
               {commonT("cancel")}
             </Button>
-            <Button type="submit" disabled={isPending}>
-              <Plus aria-hidden="true" />{isPending ? t("creating") : t("createSubmit")}
-            </Button>
           </div>
-        </fieldset>
         </form>
       </TaskModalShell>
     </>

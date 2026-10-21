@@ -12,10 +12,9 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
 
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const adminTabs = [
   {
@@ -75,11 +74,8 @@ const adminTabs = [
 ] as const;
 
 function getActiveTab(pathname: string, locale: string) {
-  const normalizedPathname = pathname === `/${locale}`
-    ? "/"
-    : pathname.startsWith(`/${locale}/`)
-      ? pathname.slice(locale.length + 1)
-      : pathname;
+  const normalizedPathname =
+    pathname.replace(new RegExp(`^/${locale}`), "") || "/";
 
   const activeTab = [...adminTabs]
     .sort((firstTab, secondTab) => secondTab.href.length - firstTab.href.length)
@@ -96,42 +92,34 @@ function getActiveTab(pathname: string, locale: string) {
 export function AdminSectionTabs() {
   const locale = useLocale();
   const pathname = usePathname();
-  const t = useTranslations("admin.navigation");
-  const activeTab = getActiveTab(pathname, locale);
-  const navigationRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const navigation = navigationRef.current;
-    const active = navigation?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (!navigation || !active) return;
-    const relativeLeft = active.getBoundingClientRect().left - navigation.getBoundingClientRect().left;
-    if (relativeLeft < 0 || relativeLeft + active.offsetWidth > navigation.clientWidth) {
-      navigation.scrollLeft += relativeLeft - (navigation.clientWidth - active.offsetWidth) / 2;
-    }
-  }, [activeTab]);
+  const t = useTranslations("admin.dashboard.actions");
 
   return (
-    <nav ref={navigationRef} aria-label={t("label")} className="w-full min-w-0 overflow-x-auto">
-      <div className="flex min-w-max gap-1 p-1">
-        {adminTabs.map((tab) => {
-          const Icon = tab.icon;
+    <Tabs value={getActiveTab(pathname, locale)} className="gap-0">
+      <div className="overflow-x-auto pb-1">
+        <TabsList
+          variant="line"
+          className="min-w-max rounded-xl border border-border/70 bg-surface/90 p-1 shadow-sm backdrop-blur"
+        >
+          {adminTabs.map((tab) => {
+            const Icon = tab.icon;
 
-          return (
-            <Link
-              key={tab.value}
-              href={tab.href}
-              aria-current={activeTab === tab.value ? "page" : undefined}
-              className={cn(
-                "inline-flex h-touch shrink-0 items-center justify-center gap-2 rounded-md px-3 text-label font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-control",
-                activeTab === tab.value ? "bg-secondary text-secondary-foreground" : "text-secondary-text hover:bg-muted hover:text-foreground",
-              )}
-            >
-              <Icon className="size-icon shrink-0" aria-hidden="true" />
-              {t(tab.labelKey)}
-            </Link>
-          );
-        })}
+            return (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                asChild
+                className="rounded-lg h-fit px-3 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
+              >
+                <Link href={tab.href}>
+                  <Icon />
+                  {t(tab.labelKey)}
+                </Link>
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
       </div>
-    </nav>
+    </Tabs>
   );
 }

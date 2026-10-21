@@ -20,8 +20,8 @@ export default async function RoadmapEditPage({
   }
 
   return (
-    <section className="min-w-0">
+    <main>
       <RoadmapVisualEditor roadmap={roadmap} initialNodes={nodes} />
-    </section>
+    </main>
   );
 }

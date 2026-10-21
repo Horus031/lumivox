@@ -18,7 +18,6 @@ import { StudyGroupWeeklyChallenge } from "@/features/study-groups/components/st
 import { StudyGroupWeeklyChallengeForm } from "@/features/study-groups/components/study-group-weekly-challenge-form";
 import { getWeeklyChallengeDefaultSettings } from "@/features/cms-settings/cms-settings.queries";
 import { getLeaderboardSettings } from "@/features/cms-settings/cms-settings.queries";
-import { PageHeader } from "@/features/app-shell/components/page-header";
 
 type GroupDetailPageProps = {
   params: Promise<{
@@ -39,11 +38,11 @@ async function GroupLeaderboardArea({
     const t = await getTranslations("groups.detail");
 
     return (
-      <section className="min-w-0 border-t border-border pt-card">
-        <h2 className="text-section font-semibold text-foreground">
+      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <h2 className="text-2xl font-bold text-neutral-950 dark:text-neutral-50">
           {t("leaderboardDisabledTitle")}
         </h2>
-        <p className="mt-1 text-body text-secondary-text">
+        <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-400">
           {t("leaderboardDisabledDescription")}
         </p>
       </section>
@@ -59,7 +58,7 @@ async function GroupLeaderboardArea({
 
   return (
     <>
-      <div className="grid min-w-0 gap-section xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
+      <div className="grid gap-6 xl:grid-cols-2">
         <StudyGroupWeeklyChallenge progress={challengeProgress} />
 
         <StudyGroupLeaderboard
@@ -110,7 +109,7 @@ function GroupPanelFallback({ className }: { className: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`}
+      className={`${className} animate-pulse rounded-2xl border border-border/60 bg-card/60`}
     />
   );
 }
@@ -136,8 +135,22 @@ export default async function GroupDetailPage({
     ["owner", "admin"].includes(membership.role);
 
   return (
-    <section className="min-w-0 space-y-section">
-      <PageHeader eyebrow={t("eyebrow")} title={group.title} description={group.description ?? undefined} />
+    <main className="space-y-6">
+      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+        <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          {t("eyebrow")}
+        </p>
+
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
+          {group.title}
+        </h1>
+
+        {group.description ? (
+          <p className="mt-3 max-w-3xl text-neutral-600 dark:text-neutral-400">
+            {group.description}
+          </p>
+        ) : null}
+      </section>
 
       <Suspense fallback={<GroupPanelFallback className="h-72" />}>
         <GroupLeaderboardArea groupId={groupId} canManage={canInvite} />
@@ -145,12 +158,12 @@ export default async function GroupDetailPage({
 
       {canInvite ? <InviteStudyGroupMemberForm groupId={groupId} /> : null}
 
-      <div className="grid min-w-0 gap-section xl:grid-cols-[18rem_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <Suspense fallback={<GroupPanelFallback className="h-96" />}>
           <GroupMembersSection groupId={groupId} />
         </Suspense>
 
-        <Suspense fallback={<GroupPanelFallback className="h-112" />}>
+        <Suspense fallback={<GroupPanelFallback className="h-150" />}>
           <GroupChatSection
             groupId={groupId}
             currentUserId={user.id}
@@ -158,6 +171,6 @@ export default async function GroupDetailPage({
           />
         </Suspense>
       </div>
-    </section>
+    </main>
   );
 }
