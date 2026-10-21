@@ -13,6 +13,8 @@ import {
 
 import { initializeFocusPopup } from "./focus-popup";
 
+import { initializeAttentionPopup } from "./attention-popup";
+
 declare const __LUMIVOX_API_ORIGIN__: string;
 
 function element<T extends HTMLElement>(id: string): T {
@@ -235,6 +237,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   initializeFocusPopup();
+
+  initializeAttentionPopup();
 
   void Promise.all([refreshSite(), refreshAuth()]);
 });

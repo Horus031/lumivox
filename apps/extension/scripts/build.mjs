@@ -129,6 +129,7 @@ const manifest = {
     service_worker: "background.js",
   },
   permissions: ["activeTab", "storage"],
+  optional_permissions: ["tabs"],
   host_permissions: hostPermissions,
   content_scripts: [
     {

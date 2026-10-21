@@ -191,3 +191,38 @@ footer {
 .focus-controls [hidden] {
   display: none !important;
 }
+
+.attention-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.attention-actions button {
+  width: 100%;
+}
+
+#attention-enable,
+#attention-open-focus {
+  background: #dce7ff;
+  color: #10203c;
+}
+
+#attention-disable,
+#attention-refresh,
+#attention-dismiss {
+  background: transparent;
+  color: #f3f6fc;
+}
+
+#attention-candidate {
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid #667797;
+  border-radius: 8px;
+  background: #101522;
+}
+
+#attention-candidate[hidden] {
+  display: none !important;
+}
