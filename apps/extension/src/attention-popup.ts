@@ -41,6 +41,7 @@ export function initializeAttentionPopup(): void {
   const refreshButton = required<HTMLButtonElement>("attention-refresh");
   const dismissButton = required<HTMLButtonElement>("attention-dismiss");
   const openButton = required<HTMLButtonElement>("attention-open-focus");
+  const confirmButton = required<HTMLButtonElement>("attention-confirm");
 
   let busy = false;
 
@@ -50,6 +51,7 @@ export function initializeAttentionPopup(): void {
     refreshButton,
     dismissButton,
     openButton,
+    confirmButton,
   ];
 
   function setBusy(value: boolean) {
@@ -66,6 +68,10 @@ export function initializeAttentionPopup(): void {
       : "Đang tắt — không theo dõi tab";
 
     error.textContent = response.error ?? "";
+
+    if (response.saved) {
+      status.textContent = "Đã lưu sự kiện vào Lumivox";
+    }
 
     enableButton.hidden = response.enabled;
     disableButton.hidden = !response.enabled && !response.permissionGranted;
@@ -170,6 +176,22 @@ export function initializeAttentionPopup(): void {
     void chrome.tabs.create({
       url: `${__LUMIVOX_API_ORIGIN__}/en/focus`,
     });
+  });
+
+  confirmButton.addEventListener("click", () => {
+    if (busy) return;
+
+    setBusy(true);
+    error.textContent = "";
+
+    void send("ATTENTION_CONFIRM")
+      .then(render)
+      .catch(() => {
+        error.textContent = "Không nhận được xác nhận. Gợi ý chưa bị xóa.";
+      })
+      .finally(() => {
+        setBusy(false);
+      });
   });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {

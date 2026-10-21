@@ -8,7 +8,8 @@ export type AttentionRequest = {
     | "ATTENTION_STATUS"
     | "ATTENTION_ENABLE"
     | "ATTENTION_DISABLE"
-    | "ATTENTION_DISMISS";
+    | "ATTENTION_DISMISS"
+    | "ATTENTION_CONFIRM";
 };
 
 export type AttentionResponse = {
@@ -19,6 +20,7 @@ export type AttentionResponse = {
   permissionGranted: boolean;
   candidate: AttentionCandidate | null;
   error?: string;
+  saved?: boolean;
 };
 
 function isRecord(input: unknown): input is Record<string, unknown> {
@@ -36,6 +38,7 @@ export function isAttentionRequest(input: unknown): input is AttentionRequest {
       "ATTENTION_ENABLE",
       "ATTENTION_DISABLE",
       "ATTENTION_DISMISS",
+      "ATTENTION_CONFIRM",
     ].includes(String(input.type))
   );
 }
@@ -57,6 +60,10 @@ export function isAttentionResponse(
   if (input.error !== undefined && typeof input.error !== "string")
     return false;
 
+  if (input.saved !== undefined && typeof input.saved !== "boolean") {
+    return false;
+  }
+
   if (input.candidate === null) return true;
   if (!isRecord(input.candidate)) return false;
 
@@ -75,6 +82,7 @@ export function attentionResult(
   permissionGranted: boolean,
   candidate: AttentionCandidate | null,
   error?: string,
+  saved = false,
 ): AttentionResponse {
   return {
     channel: PROTOCOL_CHANNEL,
@@ -83,6 +91,7 @@ export function attentionResult(
     enabled,
     permissionGranted,
     candidate,
+    saved,
     ...(error ? { error } : {}),
   };
 }
