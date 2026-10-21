@@ -95,6 +95,10 @@ export function ActiveFocusSessionPanel({
     ? "completed"
     : session.status;
   const areActionsDisabled = isPending || isCompletingOptimistically;
+  const progress = Math.min(
+    100,
+    Math.max(0, (1 - remainingSeconds / (session.planned_minutes * 60)) * 100),
+  );
 
   function handlePause() {
     startTransition(async () => {
@@ -138,7 +142,6 @@ export function ActiveFocusSessionPanel({
     setIsCompletingOptimistically(true);
 
     startTransition(async () => {
-<<<<<<< HEAD
       try {
         const result = await completeFocusSessionAction(session.id);
         if (!result.success) {
@@ -150,18 +153,9 @@ export function ActiveFocusSessionPanel({
         toast.success(result.message);
         router.refresh();
       } catch {
-=======
-      const result = await completeFocusSessionAction(session.id);
-
-      if (!result.success) {
->>>>>>> parent of d2dd692 (Merge pull request #92 from Horus031/product-release)
         setIsCompletingOptimistically(false);
-        toast.error(result.message);
-        return;
+        toast.error(t("requestFailed"));
       }
-
-      toast.success(result.message);
-      router.refresh();
     });
   }
 
@@ -295,10 +289,15 @@ export function ActiveFocusSessionPanel({
                   </Badge>
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {t("compactProgress", {
-                    remaining: timerText,
-                    minutes: session.planned_minutes,
-                  })}
+                  <span role="timer" aria-label={t("remainingTime")} aria-live="off" className="sr-only" suppressHydrationWarning>
+                    {timerText}
+                  </span>
+                  <span aria-hidden="true">
+                    {t("compactProgress", {
+                      remaining: timerText,
+                      minutes: session.planned_minutes,
+                    })}
+                  </span>
                 </p>
               </div>
             </div>
@@ -363,6 +362,10 @@ export function ActiveFocusSessionPanel({
                 </p>
 
                 <p
+                  role="timer"
+                  aria-label={t("remainingTime")}
+                  aria-live="off"
+                  suppressHydrationWarning
                   className={`mt-1 text-5xl font-bold tracking-tight ${
                     remainingSeconds <= 0 ? "text-success" : "text-foreground"
                   }`}
@@ -378,6 +381,16 @@ export function ActiveFocusSessionPanel({
               </div>
 
               {actionButtons}
+            </div>
+            <div
+              role="progressbar"
+              aria-label={t("compactProgress", { remaining: timerText, minutes: session.planned_minutes })}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progress)}
+              className="h-1.5 overflow-hidden rounded-full bg-muted"
+            >
+              <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
             </div>
           </div>
         )}

@@ -122,6 +122,7 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
                 variant="outline"
                 key={value}
                 type="button"
+                aria-pressed={plannedMinutes === value}
                 onClick={() => setPlannedMinutes(value)}
                 className={`border bg-transparent text-primary-foreground px-4 py-2 text-sm font-medium transition ${
                   plannedMinutes === value
