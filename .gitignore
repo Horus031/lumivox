@@ -9,6 +9,7 @@ node_modules/
 playwright-report/
 test-results/
 apps/extension/dist/
+apps/extension/release/
 
 services/ai-api/ml/artifacts/**/*.joblib
 !services/ai-api/ml/artifacts/native-task-risk/logistic_regression_balanced.joblib

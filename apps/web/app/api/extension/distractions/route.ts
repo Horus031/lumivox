@@ -15,7 +15,7 @@ const schema = z
   })
   .strict();
 
-type Input = z.infer<typeof schema>;
+// type Input = z.infer<typeof schema>;
 
 const responseHeaders = {
   "Cache-Control": "no-store",
@@ -29,163 +29,141 @@ function json(body: unknown, status = 200) {
   });
 }
 
-type Identity = NonNullable<Awaited<ReturnType<typeof authenticateExtension>>>;
+// type Identity = NonNullable<Awaited<ReturnType<typeof authenticateExtension>>>;
 
-async function findExisting(identity: Identity, eventId: string) {
-  return identity.supabase
-    .from("distraction_events")
-    .select(
-      "id,session_id,extension_segment_id,distraction_type,duration_seconds",
-    )
-    .eq("user_id", identity.userId)
-    .eq("extension_event_id", eventId)
-    .maybeSingle();
-}
+// async function findExisting(identity: Identity, eventId: string) {
+//   return identity.supabase
+//     .from("distraction_events")
+//     .select(
+//       "id,session_id,extension_segment_id,distraction_type,duration_seconds",
+//     )
+//     .eq("user_id", identity.userId)
+//     .eq("extension_event_id", eventId)
+//     .maybeSingle();
+// }
 
-function matchesExisting(
-  existing: {
-    session_id: string;
-    extension_segment_id: string | null;
-    distraction_type: string;
-    duration_seconds: number;
-  },
-  input: Input,
-): boolean {
-  return (
-    existing.session_id === input.sessionId &&
-    existing.extension_segment_id === input.segmentId &&
-    existing.distraction_type === input.distractionType &&
-    existing.duration_seconds === input.durationSeconds
-  );
-}
+// function matchesExisting(
+//   existing: {
+//     session_id: string;
+//     extension_segment_id: string | null;
+//     distraction_type: string;
+//     duration_seconds: number;
+//   },
+//   input: Input,
+// ): boolean {
+//   return (
+//     existing.session_id === input.sessionId &&
+//     existing.extension_segment_id === input.segmentId &&
+//     existing.distraction_type === input.distractionType &&
+//     existing.duration_seconds === input.durationSeconds
+//   );
+// }
 
-async function resolveDuplicate(identity: Identity, input: Input) {
-  const { data, error } = await findExisting(identity, input.eventId);
+// async function resolveDuplicate(identity: Identity, input: Input) {
+//   const { data, error } = await findExisting(identity, input.eventId);
 
-  if (error) {
-    return json({ error: "Database unavailable" }, 503);
-  }
+//   if (error) {
+//     return json({ error: "Database unavailable" }, 503);
+//   }
 
-  if (!data) {
-    return json({ error: "Retry required" }, 503);
-  }
+//   if (!data) {
+//     return json({ error: "Retry required" }, 503);
+//   }
 
-  if (!matchesExisting(data, input)) {
-    return json({ error: "Event ID already used for different data" }, 409);
-  }
+//   if (!matchesExisting(data, input)) {
+//     return json({ error: "Event ID already used for different data" }, 409);
+//   }
 
-  return json({
-    saved: true,
-    duplicate: true,
-    id: data.id,
-  });
-}
+//   return json({
+//     saved: true,
+//     duplicate: true,
+//     id: data.id,
+//   });
+// }
 
 export async function POST(request: Request) {
   if (process.env.FOCUS_V2_ENABLED !== "true") {
     return json({ error: "Focus V2 disabled" }, 503);
   }
 
+  if (process.env.EXTENSION_DISTRACTION_WRITE_ENABLED !== "true") {
+    return json(
+      { error: "Extension distraction logging temporarily disabled" },
+      503,
+    );
+  }
+
+  let identity;
+
   try {
-    const identity = await authenticateExtension(request);
+    identity = await authenticateExtension(request);
+  } catch {
+    return json({ error: "Authentication unavailable" }, 503);
+  }
 
-    if (!identity) {
-      return json({ error: "Unauthorized" }, 401);
-    }
+  if (!identity) {
+    return json({ error: "Unauthorized" }, 401);
+  }
 
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return json({ error: "Invalid JSON" }, 400);
-    }
+  let body: unknown;
 
-    const parsed = schema.safeParse(body);
+  try {
+    body = await request.json();
+  } catch {
+    return json({ error: "Invalid JSON" }, 400);
+  }
 
-    if (!parsed.success) {
-      return json({ error: "Invalid distraction" }, 400);
-    }
+  const parsed = schema.safeParse(body);
 
-    const input = parsed.data;
-    const { supabase, userId } = identity;
+  if (!parsed.success) {
+    return json({ error: "Invalid distraction data" }, 400);
+  }
 
-    // Resolve an already-committed retry before checking
-    // whether the original focus segment is still active.
-    const existing = await findExisting(identity, input.eventId);
+  const input = parsed.data;
 
-    if (existing.error) {
+  try {
+    const { data, error } = await identity.supabase.rpc(
+      "extension_confirm_distraction",
+      {
+        p_event_id: input.eventId,
+        p_session_id: input.sessionId,
+        p_segment_id: input.segmentId,
+        p_category: input.distractionType,
+        p_duration_seconds: input.durationSeconds,
+      },
+    );
+
+    if (error) {
+      if (error.code === "P0001") {
+        return json({ error: "Event or Focus state changed" }, 409);
+      }
+
+      if (error.code === "22023") {
+        return json({ error: "Invalid data" }, 400);
+      }
+
+      if (error.code === "42501") {
+        return json({ error: "Forbidden" }, 403);
+      }
+
       return json({ error: "Database unavailable" }, 503);
     }
 
-    if (existing.data) {
-      return resolveDuplicate(identity, input);
-    }
-
-    // Ownership and active parent are independently verified.
-    const { data: parent, error: parentError } = await supabase
-      .from("focus_sessions")
-      .select("id")
-      .eq("id", input.sessionId)
-      .eq("user_id", userId)
-      .eq("session_mode", "pomodoro")
-      .eq("status", "ongoing")
-      .maybeSingle();
-
-    if (parentError) {
-      return json({ error: "Session unavailable" }, 503);
-    }
-
-    if (!parent) {
-      return json({ error: "Active session not found" }, 409);
-    }
-
-    // The candidate must belong to the current running
-    // focus round, never a break or pending segment.
-    const { data: segment, error: segmentError } = await supabase
-      .from("focus_session_segments")
-      .select("id")
-      .eq("id", input.segmentId)
-      .eq("session_id", input.sessionId)
-      .eq("segment_kind", "focus")
-      .eq("status", "running")
-      .maybeSingle();
-
-    if (segmentError) {
-      return json({ error: "Segment unavailable" }, 503);
-    }
-
-    if (!segment) {
-      return json({ error: "Focus round changed" }, 409);
-    }
-
-    const { data: inserted, error: insertError } = await supabase
-      .from("distraction_events")
-      .insert({
-        user_id: userId,
-        session_id: input.sessionId,
-        extension_event_id: input.eventId,
-        extension_segment_id: input.segmentId,
-        distraction_type: input.distractionType,
-        duration_seconds: input.durationSeconds,
-        note: null,
-      })
-      .select("id")
-      .single();
-
-    // Two simultaneous requests can both see "not found".
-    // PostgreSQL's unique index resolves that race.
-    if (insertError?.code === "23505") {
-      return resolveDuplicate(identity, input);
-    }
-
-    if (insertError || !inserted) {
-      return json({ error: "Unable to save distraction" }, 503);
+    if (
+      typeof data !== "object" ||
+      data === null ||
+      Array.isArray(data) ||
+      data.saved !== true ||
+      typeof data.duplicate !== "boolean" ||
+      typeof data.id !== "string"
+    ) {
+      return json({ error: "Invalid RPC response" }, 502);
     }
 
     return json({
       saved: true,
-      duplicate: false,
-      id: inserted.id,
+      duplicate: data.duplicate,
+      id: data.id,
     });
   } catch {
     return json({ error: "Distraction service unavailable" }, 503);
