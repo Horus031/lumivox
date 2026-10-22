@@ -1,5 +1,5 @@
 import { ClipboardCheck, NotebookPen, ScanEye, Timer } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 type DashboardSummaryCardsProps = {
   completedTasks: number;
@@ -15,6 +15,8 @@ export function DashboardSummaryCards({
   distractionEvents,
 }: DashboardSummaryCardsProps) {
   const t = useTranslations("dashboard.summary");
+  const locale = useLocale();
+  const formatter = new Intl.NumberFormat(locale);
   const cards = [
     {
       key: "completedTasks",
@@ -39,28 +41,22 @@ export function DashboardSummaryCards({
   ];
 
   return (
-    <section className="flex flex-col md:flex-row justify-between gap-4">
+    <section className="grid min-w-0 grid-cols-2 gap-3 xl:grid-cols-4">
       {cards.map((card) => (
         <article
           key={card.key}
-          className="group w-full rounded-2xl bg-card/90 p-4 shadow-[0_16px_50px_-40px_hsl(var(--primary)/0.55)] transition hover:-translate-y-0.5 hover:shadow-[0_20px_60px_-42px_hsl(var(--primary)/0.8)]"
+          className="min-w-0 rounded-lg border border-border bg-card p-card"
         >
-          {/* <div className="mb-4 h-1.5 w-14 rounded-full bg-gradient-to-r from-primary via-teal-500 to-amber-400 opacity-80 transition group-hover:w-20" /> */}
-          <div className="flex justify-between items-center">
-            <div>
-              <p className="text-xs text-muted-foreground">
-                {t(`${card.key}.title`)}
-              </p>
-              <p className="text-xl font-semibold tracking-tight text-foreground">
-                {card.value}
-              </p>
-            </div>
-
-            <div className="bg-primary/70 p-2 rounded-md text-white">{card.icon}</div>
+          <div className="flex items-start justify-between gap-2">
+            <p className="min-h-9 min-w-0 text-label text-secondary-text">
+              {t(`${card.key}.title`)}
+            </p>
+            <span aria-hidden="true" className="hidden shrink-0 text-muted-foreground sm:inline-flex [&_svg]:size-icon">{card.icon}</span>
           </div>
-          {/* <p className="mt-1 text-xs text-muted-foreground">
-            {t(`${card.key}.subtitle`)}
-          </p> */}
+          <p className="mt-2 text-metric font-semibold text-foreground tabular-nums [overflow-wrap:anywhere]">
+            {formatter.format(card.value)}
+          </p>
+          <p className="mt-1 text-caption text-muted-foreground">{t(`${card.key}.subtitle`)}</p>
         </article>
       ))}
     </section>

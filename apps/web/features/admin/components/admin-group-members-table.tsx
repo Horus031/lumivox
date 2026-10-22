@@ -30,32 +30,32 @@ export function AdminGroupMembersTable({
   const commonT = useTranslations("admin.common");
 
   return (
-    <section className="rounded-2xl border bg-surface p-6 shadow-sm">
-      <h2 className="text-2xl font-bold text-foreground">
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
+      <h2 className="text-section font-semibold text-foreground">
         {t("title")}
       </h2>
 
-      <div className="mt-5 space-y-3">
+      {members.length === 0 ? <p className="py-section text-body text-muted-foreground">{t("empty")}</p> : <ul className="divide-y divide-border">
         {members.map((member) => (
-          <article
+          <li
             key={member.member_id}
-            className="rounded-2xl border p-4"
+            className="min-w-0 py-3 [overflow-wrap:anywhere]"
           >
-            <p className="font-semibold text-foreground">
+            <p className="text-body font-medium text-foreground">
               {getName(member)}
             </p>
 
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 text-caption text-muted-foreground">
               {member.email ?? member.user_id}
             </p>
 
-            <p className="mt-2 text-xs uppercase tracking-wide text-muted-foreground">
+            <p className="mt-2 text-caption text-secondary-text">
               {commonT(`roles.${member.role}`)} -{" "}
               {commonT(`membershipStatus.${member.membership_status}`)}
             </p>
-          </article>
+          </li>
         ))}
-      </div>
+      </ul>}
     </section>
   );
 }

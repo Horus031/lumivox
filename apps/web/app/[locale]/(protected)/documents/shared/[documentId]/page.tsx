@@ -5,6 +5,8 @@ import {
   createLearningDocumentSignedUrl,
 } from "@/features/learning-documents/learning-document.queries";
 import { LearningDocumentPreview } from "@/features/learning-documents/components/learning-document-preview";
+import { PageHeader } from "@/features/app-shell/components/page-header";
+import { getTranslations } from "next-intl/server";
 
 type SharedDocumentPageProps = {
   params: Promise<{
@@ -17,7 +19,7 @@ export default async function SharedDocumentPage({
 }: SharedDocumentPageProps) {
   const { documentId } = await params;
 
-  const document = await getAccessibleLearningDocumentOrThrow(documentId);
+  const [document, t] = await Promise.all([getAccessibleLearningDocumentOrThrow(documentId), getTranslations("documentUi")]);
 
   if (!document) {
     notFound();
@@ -26,24 +28,9 @@ export default async function SharedDocumentPage({
   const signedUrl = await createLearningDocumentSignedUrl(document.file_path);
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-background p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Shared Document
-        </p>
-
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {document.file_name}
-        </h1>
-
-        <p className="mt-3 text-sm text-muted-foreground">
-          Visibility: {document.visibility}
-        </p>
-      </section>
-
-      <section className="rounded-2xl border bg-background p-4 shadow-sm">
+    <section className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("sharedEyebrow")} title={document.file_name} description={`${t("visibilityField")}: ${t(`visibility.${document.visibility}`)}`} />
         <LearningDocumentPreview document={document} signedUrl={signedUrl} />
-      </section>
-    </main>
+    </section>
   );
 }

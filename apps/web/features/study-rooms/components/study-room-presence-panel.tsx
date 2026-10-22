@@ -44,14 +44,14 @@ function flattenPresenceState(
 
 function getStatusBadgeClass(status: PresenceStatus) {
   if (status === "focusing") {
-    return "bg-emerald-50 text-emerald-700";
+    return "bg-success/10 text-success";
   }
 
   if (status === "paused") {
-    return "bg-amber-50 text-amber-700";
+    return "bg-warning/10 text-warning";
   }
 
-  return "bg-neutral-100 text-neutral-700";
+  return "bg-muted text-muted-foreground";
 }
 
 export function StudyRoomPresencePanel({
@@ -79,7 +79,7 @@ export function StudyRoomPresencePanel({
     t("messages.connecting"),
   );
 
-  const [, setMyStatus] = useState<PresenceStatus>("available");
+  const [myStatus, setMyStatus] = useState<PresenceStatus>("available");
 
   const [participants, setParticipants] = useState<PresencePayload[]>([]);
 
@@ -220,6 +220,7 @@ export function StudyRoomPresencePanel({
 
           .subscribe(async (status, error) => {
             if (status === "SUBSCRIBED") {
+              setMyStatus("available");
               setConnectionState("connected");
               setConnectionMessage(t("messages.connected"));
 
@@ -368,112 +369,47 @@ export function StudyRoomPresencePanel({
   }
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-        <div>
-          <p className="text-sm font-medium uppercase tracking-wide text-foreground">
-            {t("eyebrow")}
-          </p>
+    <section className="min-w-0 border-t border-border pt-card">
+      <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-caption">
+        <span className="text-muted-foreground">{t("connectionLabel")}</span>
+        <span role="status" className={connectionState === "connected" ? "font-medium text-success" : connectionState === "error" ? "font-medium text-danger" : "text-muted-foreground"}>
+          {t(`connection.${connectionState}`)}
+        </span>
+      </div>
+      <p className="mt-1 text-caption text-muted-foreground [overflow-wrap:anywhere]">{connectionMessage}</p>
 
-          <h2 className="mt-2 text-2xl font-bold tracking-tight">
-            {t("title")}
-          </h2>
-
-          <p className="mt-2 max-w-2xl text-neutral-600">
-            {t("description")}
-          </p>
-        </div>
-
-        <div className="rounded-2xl bg-surface px-4 py-3">
-          <p className="text-xs font-semibold uppercase tracking-wide text-foreground">
-            {t("connectionLabel")}
-          </p>
-
-          <p
-            className={`mt-1 text-sm font-semibold capitalize ${
-              connectionState === "connected"
-                ? "text-emerald-700"
-                : connectionState === "error"
-                  ? "text-red-700"
-                  : "text-neutral-700"
-            }`}
-          >
-            {t(`connection.${connectionState}`)}
-          </p>
-
-          <p className="mt-1 max-w-55 text-xs leading-5 text-foreground">
-            {connectionMessage}
-          </p>
+      <div className="mt-card border-y border-border py-card">
+        <p className="text-label font-medium">{t("myStatus")}</p>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {(["available", "focusing", "paused"] as const).map((status) => (
+            <Button key={status} size="sm" variant={myStatus === status ? "default" : "outline"}
+              aria-pressed={myStatus === status} disabled={connectionState !== "connected"}
+              onClick={() => updateMyStatus(status)}>
+              {t(`status.${status}`)}
+            </Button>
+          ))}
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl border p-4">
-        <p className="text-sm font-semibold">{t("myStatus")}</p>
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          <Button
-            onClick={() => updateMyStatus("available")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition `}
-          >
-            {t("status.available")}
-          </Button>
-
-          <Button
-            variant={"outline"}
-            onClick={() => updateMyStatus("focusing")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
-          >
-            {t("status.focusing")}
-          </Button>
-
-          <Button
-            variant={"outline"}
-            onClick={() => updateMyStatus("paused")}
-            className={`rounded-xl px-4 py-2 text-sm font-medium transition hover:text-primary-foreground`}
-          >
-            {t("status.paused")}
-          </Button>
+      <div className="mt-card">
+        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-label font-medium">{t("onlineParticipants")}</h3>
+          <span className="text-caption tabular-nums text-muted-foreground">{t("onlineCount", { count: participants.length })}</span>
         </div>
-      </div>
-
-      <div className="mt-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{t("onlineParticipants")}</h3>
-
-          <span className="rounded-full bg-surface px-3 py-1 text-sm font-semibold text-foreground">
-            {t("onlineCount", { count: participants.length })}
-          </span>
-        </div>
-
         {participants.length === 0 ? (
-          <div className="rounded-2xl border border-dashed p-8 text-center">
-            <p className="text-sm text-neutral-600">
-              {t("empty")}
-            </p>
-          </div>
+          <p className="py-card text-body text-muted-foreground">{t("empty")}</p>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2">
+          <div className="divide-y divide-border">
             {participants.map((participant) => (
-              <article
-                key={participant.userId}
-                className="rounded-2xl border p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="font-semibold">{participant.fullName}</p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      {t("connectedNow")}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${getStatusBadgeClass(
-                      participant.status,
-                    )}`}
-                  >
-                    {t(`status.${participant.status}`)}
-                  </span>
+              <article key={participant.userId} className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-3">
+                <div className="min-w-0 flex-1 basis-32">
+                  <p className="text-body font-medium [overflow-wrap:anywhere]">{participant.fullName}</p>
+                  <p className="text-caption text-muted-foreground">{t("connectedNow")}</p>
                 </div>
+                <span className={`rounded-sm px-2 py-0.5 text-caption font-medium ${getStatusBadgeClass(participant.status)}`}>
+                  {t(`status.${participant.status}`)}
+                </span>
               </article>
             ))}
           </div>

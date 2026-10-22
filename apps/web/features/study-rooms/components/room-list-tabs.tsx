@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useTranslations } from "next-intl";
+import type { JoinedStudyRoom, StudyRoomWithOwnerPreview } from "../study-room.types";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MyRoomList } from "./my-room-list";
@@ -7,8 +7,8 @@ import { PublicRoomList } from "./public-room-list";
 import { JoinPrivateRoomForm } from "./join-private-room-form";
 
 type RoomListTabsType = {
-  myRooms: any;
-  discoverablePublicRooms: any[];
+  myRooms: JoinedStudyRoom[];
+  discoverablePublicRooms: StudyRoomWithOwnerPreview[];
 };
 
 export function RoomListTabs(props: RoomListTabsType) {
@@ -17,7 +17,7 @@ export function RoomListTabs(props: RoomListTabsType) {
 
   return (
     <Tabs defaultValue="my-room-list" className="w-full">
-      <TabsList>
+      <TabsList variant="line" className="w-full overflow-x-auto border-b border-border">
         <TabsTrigger value="my-room-list">{t("myRooms")}</TabsTrigger>
         <TabsTrigger value="public-room">{t("publicRooms")}</TabsTrigger>
         <TabsTrigger value="code-joining">{t("joinWithCode")}</TabsTrigger>

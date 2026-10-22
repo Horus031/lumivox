@@ -7,6 +7,8 @@ import { toast } from "sonner";
 
 import { joinPublicStudyRoomAction } from "@/features/study-rooms/study-room.actions";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Users } from "lucide-react";
 
 type RoomCardProps = {
   room: {
@@ -44,28 +46,29 @@ export function RoomCard({ room, mode }: RoomCardProps) {
   }
 
   return (
-    <article className="rounded-2xl border bg-background p-5 shadow-sm h-full">
-      <div className="flex flex-col gap-4 justify-between h-full">
-        <div>
-          <div className="mb-3 flex flex-wrap gap-2">
-            <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold capitalize text-foreground">
+    <article className="h-full min-w-0 rounded-lg border border-border bg-card p-card">
+      <div className="flex h-full flex-col justify-between gap-card">
+        <div className="min-w-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <Badge variant="secondary">
               {t(`visibility.${room.visibility}`)}
-            </span>
+            </Badge>
 
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            <span className="inline-flex items-center gap-1 text-caption text-muted-foreground">
+              <Users className="size-icon-sm" aria-hidden="true" />
               {t("capacity", { count: room.max_participants })}
             </span>
           </div>
 
-          <h3 className="text-xl font-bold">{room.title}</h3>
+          <h3 className="text-section font-semibold [overflow-wrap:anywhere]">{room.title}</h3>
 
           {room.description ? (
-            <p className="mt-2 text-sm leading-6 text-foreground">
+            <p className="mt-1 line-clamp-3 text-body text-secondary-text [overflow-wrap:anywhere]" title={room.description}>
               {room.description}
             </p>
           ) : null}
 
-          <p className="mt-3 text-sm text-neutral-500">
+          <p className="mt-3 text-caption text-muted-foreground [overflow-wrap:anywhere]">
             {t("owner", {
               name: room.profiles?.full_name ?? t("unknownUser"),
             })}
@@ -74,18 +77,17 @@ export function RoomCard({ room, mode }: RoomCardProps) {
 
         <div className="flex shrink-0 flex-wrap gap-2">
           {mode === "joined" ? (
-            <Link
-              href={`/rooms/${room.id}`}
-              className="bg-transparent w-full text-center border border-primary rounded-md px-4 py-2.5 text-sm font-medium text-primary transition hover:bg-primary hover:text-primary-foreground"
-            >
-              {t("enter")}
-            </Link>
+            <Button asChild variant="outline" size="sm">
+              <Link href={`/rooms/${room.id}`}><ArrowRight aria-hidden="true" />{t("enter")}</Link>
+            </Button>
           ) : (
             <Button
               onClick={handleJoin}
               disabled={isPending}
-              className="border px-4 py-2.5 text-sm font-medium transition hover:bg-primary/80 disabled:cursor-not-allowed disabled:opacity-60"
+              size="sm"
+              aria-busy={isPending}
             >
+              <ArrowRight aria-hidden="true" />
               {isPending ? t("joining") : t("join")}
             </Button>
           )}

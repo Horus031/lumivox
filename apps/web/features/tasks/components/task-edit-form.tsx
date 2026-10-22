@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useTransition, type FormEvent } from "react";
+import { useId, useState, useTransition, type FormEvent } from "react";
 
 import { useRouter } from "next/navigation";
 
 import { useTranslations } from "next-intl";
 
 import { toast } from "sonner";
+import { Save } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -72,6 +73,7 @@ export function TaskEditForm({
   const commonT = useTranslations("common");
 
   const router = useRouter();
+  const id = useId();
 
   const [isPending, startTransition] = useTransition();
 
@@ -142,11 +144,13 @@ export function TaskEditForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
+      <fieldset disabled={isPending} className="min-w-0 space-y-card">
       <div className="space-y-2">
-        <Label>{t("fields.title")}</Label>
+        <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
 
         <Input
+          id={`${id}-title`}
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           maxLength={160}
@@ -155,29 +159,30 @@ export function TaskEditForm({
       </div>
 
       <div className="space-y-2">
-        <Label>{t("fields.description")}</Label>
+        <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
 
         <Textarea
+          id={`${id}-description`}
           value={description}
           onChange={(event) => setDescription(event.target.value)}
-          rows={4}
+          rows={3}
           maxLength={1200}
         />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-card sm:grid-cols-2">
         {allowGoalChange ? (
           <div className="space-y-2">
-            <Label>{t("fields.linkedGoal")}</Label>
+            <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
 
             <Select
+            disabled={isPending}
               value={goalId || "no-goal"}
               onValueChange={(value) =>
                 setGoalId(value === "no-goal" ? "" : value)
               }
             >
-              <SelectTrigger className="w-full">
-                <SelectValue />
+              <SelectTrigger id={`${id}-linkedGoal`} className="w-full"><SelectValue />
               </SelectTrigger>
 
               <SelectContent>
@@ -196,15 +201,16 @@ export function TaskEditForm({
         ) : null}
 
         <div className="space-y-2">
-          <Label>{t("fields.priority")}</Label>
+          <Label htmlFor={`${id}-priority`}>{t("fields.priority")}</Label>
 
           <Select
+            disabled={isPending}
             value={priority}
             onValueChange={(value) =>
               setPriority(value as "low" | "medium" | "high" | "critical")
             }
           >
-            <SelectTrigger className="w-full">
+            <SelectTrigger id={`${id}-priority`} className="w-full">
               <SelectValue />
             </SelectTrigger>
 
@@ -227,19 +233,22 @@ export function TaskEditForm({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-card sm:grid-cols-2">
         <div className="space-y-2">
-          <Label>{t("fields.estimatedMinutes")}</Label>
+          <Label htmlFor={`${id}-estimatedMinutes`}>{t("fields.estimatedMinutes")}</Label>
 
           <Input
+            id={`${id}-estimatedMinutes`}
             type="number"
             min={0}
+            step={1}
             value={estimatedMinutes}
             onChange={(event) => setEstimatedMinutes(event.target.value)}
           />
         </div>
 
         <TaskDatePicker
+          disabled={isPending}
           dueAt={dueAt}
           setDueAt={setDueAt}
           dueTime={dueTime}
@@ -257,10 +266,11 @@ export function TaskEditForm({
           {commonT("cancel")}
         </Button>
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending}><Save aria-hidden="true" />
           {isPending ? t("saving") : commonT("save")}
         </Button>
       </div>
+    </fieldset>
     </form>
   );
 }

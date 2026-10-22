@@ -4,6 +4,11 @@ import type { Metadata } from "next";
 import { redirectToDashboardIfOnboardingCompleted } from "@/lib/auth/onboarding-guard";
 import { getCurrentProfileWithWeights } from "@/features/profiles/profile.queries";
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form";
+import { PageHeader } from "@/features/app-shell/components/page-header";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations } from "next-intl/server";
+import { cookies } from "next/headers";
+import { routing } from "@/i18n/routing";
 
 export const metadata: Metadata = {
   robots: {
@@ -23,39 +28,30 @@ export default async function OnboardingPage() {
 async function OnboardingPageContent() {
   await redirectToDashboardIfOnboardingCompleted();
 
-  const { profile, weights } = await getCurrentProfileWithWeights();
+  const savedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
+  const locale = hasLocale(routing.locales, savedLocale) ? savedLocale : routing.defaultLocale;
+  const [{ profile, weights }, messages, t] = await Promise.all([
+    getCurrentProfileWithWeights(), getMessages({ locale }), getTranslations({ locale, namespace: "onboarding" }),
+  ]);
 
   return (
-    <main className="min-h-screen bg-background px-4 py-8">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <header>
-          <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
-            Lumivox
-          </p>
-
-          <h1 className="mt-2 text-foreground text-3xl font-bold tracking-tight">
-            Welcome — let&apos;s calibrate your learning profile
-          </h1>
-
-          <p className="mt-2 max-w-3xl text-neutral-600">
-            This setup defines your timezone and your Personalized PBI
-            weighting. Standard PBI remains fixed for academic consistency;
-            Personalized PBI reflects your own emphasis.
-          </p>
-        </header>
-
-        <OnboardingForm profile={profile} weights={weights} />
-      </div>
-    </main>
+    <NextIntlClientProvider locale={locale} messages={messages}>
+      <main className="min-h-dvh bg-background p-page">
+        <div className="mx-auto min-w-0 max-w-3xl space-y-section">
+          <PageHeader eyebrow="Lumivox" title={t("title")} description={t("description")} />
+          <OnboardingForm profile={profile} weights={weights} />
+        </div>
+      </main>
+    </NextIntlClientProvider>
   );
 }
 
 function OnboardingPageFallback() {
   return (
-    <main className="min-h-screen bg-background px-4 py-8">
-      <div className="mx-auto max-w-5xl space-y-8">
-        <div className="h-28 animate-pulse rounded-[28px] border border-border/70 bg-card/70" />
-        <div className="h-112 animate-pulse rounded-[28px] border border-border/70 bg-card/70" />
+    <main className="min-h-dvh bg-background p-page" aria-busy="true">
+      <div className="mx-auto max-w-3xl space-y-section">
+        <div className="h-20 animate-pulse rounded-lg bg-muted" />
+        <div className="h-112 animate-pulse rounded-lg bg-muted" />
       </div>
     </main>
   );

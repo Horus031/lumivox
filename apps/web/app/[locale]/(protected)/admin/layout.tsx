@@ -8,13 +8,11 @@ type AdminLayoutProps = {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
-    <>
-      <div className="sticky top-0 z-10 border-b border-border/60 bg-background/90 px-4 py-3 backdrop-blur-xl md:px-6 lg:top-18 lg:px-8">
-        <div className="mx-auto">
-          <AdminSectionTabs />
-        </div>
+    <div className="min-w-0 space-y-section">
+      <div className="sticky top-topbar z-10 min-w-0 border-b border-border bg-background py-2">
+        <AdminSectionTabs />
       </div>
       {children}
-    </>
+    </div>
   );
 }

@@ -81,7 +81,7 @@ export default async function WorkspacePage({
   const referenceNow = new Date().toISOString();
 
   return (
-    <section className="space-y-6">
+    <section className="min-w-0 space-y-section">
       <PageHeader
         eyebrow={t("eyebrow")}
         title={t("title")}
@@ -99,7 +99,7 @@ export default async function WorkspacePage({
         }
       />
 
-      <div className="grid min-w-0 gap-4 lg:grid-cols-[17rem_minmax(0,1fr)]">
+      <div className="grid min-w-0 items-start gap-card lg:grid-cols-[14rem_minmax(0,1fr)]">
         <WorkspaceGoalRail goals={goals} selectedKey={selectedKey} />
 
         <WorkspaceBoard

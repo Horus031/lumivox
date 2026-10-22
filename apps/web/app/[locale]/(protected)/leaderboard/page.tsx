@@ -3,6 +3,7 @@ import { MyGlobalRankCard } from "@/features/leaderboard/components/my-global-ra
 import { getGlobalWeeklyLeaderboardBundle } from "@/features/leaderboard/leaderboard.queries";
 import { getLeaderboardSettings } from "@/features/cms-settings/cms-settings.queries";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 
 export default async function LeaderboardPage() {
   const [{ globalLeaderboardEnabled }, t] = await Promise.all([
@@ -12,41 +13,17 @@ export default async function LeaderboardPage() {
 
   if (!globalLeaderboardEnabled) {
     return (
-      <main className="space-y-6">
-        <section className="rounded-2xl border bg-background p-6 shadow-sm">
-          <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-            {t("disabledEyebrow")}
-          </p>
-
-          <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-            {t("disabledTitle")}
-          </h1>
-
-          <p className="mt-3 max-w-3xl text-muted-foreground">
-            {t("disabledDescription")}
-          </p>
-        </section>
-      </main>
+      <div className="min-w-0 space-y-section">
+        <PageHeader eyebrow={t("disabledEyebrow")} title={t("disabledTitle")} description={t("disabledDescription")} />
+      </div>
     );
   }
 
   const leaderboard = await getGlobalWeeklyLeaderboardBundle();
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-background p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          {t("eyebrow")}
-        </p>
-
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {t("title")}
-        </h1>
-
-        <p className="mt-3 max-w-3xl text-muted-foreground">
-          {t("description")}
-        </p>
-      </section>
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
       <MyGlobalRankCard rank={leaderboard.myRank} />
 
@@ -55,6 +32,6 @@ export default async function LeaderboardPage() {
         weekEnd={leaderboard.weekEnd}
         rows={leaderboard.rows}
       />
-    </main>
+    </div>
   );
 }

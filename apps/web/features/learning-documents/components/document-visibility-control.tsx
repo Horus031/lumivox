@@ -1,8 +1,10 @@
 "use client";
 
-import { useTransition } from "react";
+import { useId, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
+import { Label } from "@/components/ui/label";
 
 import type {
   LearningDocument,
@@ -12,9 +14,7 @@ import { updateLearningDocumentVisibilityAction } from "@/features/learning-docu
 import {
   Select,
   SelectContent,
-  SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -27,6 +27,8 @@ export function DocumentVisibilityControl({
   document,
 }: DocumentVisibilityControlProps) {
   const router = useRouter();
+  const t = useTranslations("documentUi");
+  const id = useId();
   const [isPending, startTransition] = useTransition();
 
   function handleChange(value: LearningDocumentVisibility) {
@@ -47,56 +49,17 @@ export function DocumentVisibilityControl({
   }
 
   return (
-    <section className="rounded-2xl border bg-background p-6 shadow-sm">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Visibility
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-          Document access mode
-        </h2>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          Private documents are only visible to you. Shared documents are
-          visible to specific email permissions. Public documents are visible to
-          authenticated users with the link.
-        </p>
-      </div>
-
-      <div className="mt-5">
-        <Select
-          disabled={isPending}
-          value={document.visibility}
-          onValueChange={(value) =>
-            handleChange(value as LearningDocumentVisibility)
-          }
-        >
-          <SelectTrigger className="w-full max-w-48">
-            <SelectValue />
-          </SelectTrigger>
+    <section aria-busy={isPending} className="min-w-0 border-t border-border pt-card">
+      <h2 className="text-section font-semibold">{t("visibilityTitle")}</h2>
+      <p className="mt-1 max-w-3xl text-body text-secondary-text">{t("visibilityDescription")}</p>
+      <div className="mt-3 max-w-xs space-y-2">
+        <Label htmlFor={id}>{t("visibilityField")}</Label>
+        <Select disabled={isPending} value={document.visibility} onValueChange={(value) => handleChange(value as LearningDocumentVisibility)}>
+          <SelectTrigger id={id} className="w-full"><SelectValue /></SelectTrigger>
           <SelectContent>
-            <SelectGroup>
-              <SelectLabel>Visibilities</SelectLabel>
-              <SelectItem value="private">Private</SelectItem>
-              <SelectItem value="shared">Shared by email</SelectItem>
-              <SelectItem value="public">Public link</SelectItem>
-            </SelectGroup>
+            {(["private", "shared", "public"] as const).map((visibility) => <SelectItem key={visibility} value={visibility}>{t(`visibility.${visibility}`)}</SelectItem>)}
           </SelectContent>
         </Select>
-
-        {/* <select
-          value={document.visibility}
-          disabled={isPending}
-          onChange={(event) =>
-            handleChange(event.target.value as LearningDocumentVisibility)
-          }
-          className="w-full max-w-sm rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 disabled:opacity-60 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50 dark:focus:border-neutral-400"
-        >
-          <option value="private">Private</option>
-          <option value="shared">Shared by email</option>
-          <option value="public">Public link</option>
-        </select> */}
       </div>
     </section>
   );

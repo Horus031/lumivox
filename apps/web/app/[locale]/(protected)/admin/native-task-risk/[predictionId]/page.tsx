@@ -1,4 +1,8 @@
 import { Link } from "@/i18n/navigation";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getAdminNativeTaskRiskPredictionDetail } from "@/features/admin/admin-native-task-risk.queries";
 import type { Json } from "@/types/database.types";
 import { getTranslations } from "next-intl/server";
@@ -21,9 +25,9 @@ function toArray<T>(value: Json): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
-function JsonBlock({ value }: { value: unknown }) {
+function JsonBlock({ value, label }: { value: unknown; label: string }) {
   return (
-    <pre className="max-h-105 overflow-auto rounded-2xl bg-neutral-950 p-4 text-xs leading-6 text-neutral-100">
+    <pre role="region" aria-label={label} tabIndex={0} className="max-h-80 max-w-full overflow-auto rounded-md border border-border bg-muted p-3 text-caption text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
       {JSON.stringify(value, null, 2)}
     </pre>
   );
@@ -31,18 +35,18 @@ function JsonBlock({ value }: { value: unknown }) {
 
 function bandClass(band: string) {
   if (band === "high") {
-    return "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300";
+    return "border-danger/25 bg-danger/10 text-foreground";
   }
 
   if (band === "elevated") {
-    return "bg-orange-50 text-orange-700 dark:bg-orange-950/40 dark:text-orange-300";
+    return "border-warning/40 bg-warning/15 text-foreground";
   }
 
   if (band === "moderate") {
-    return "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300";
+    return "border-warning/25 bg-warning/10 text-foreground";
   }
 
-  return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300";
+  return "border-success/25 bg-success/10 text-foreground";
 }
 
 export default async function AdminNativeTaskRiskPredictionDetailPage({
@@ -60,83 +64,40 @@ export default async function AdminNativeTaskRiskPredictionDetailPage({
   );
 
   return (
-    <main className="space-y-6">
-      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-          <div>
-            <p className="text-sm font-medium uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-              {t("eyebrow")}
-            </p>
-
-            <h1 className="mt-2 text-3xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50">
-              {prediction.task_title ?? prediction.task_id}
-            </h1>
-
-            <p className="mt-3 text-neutral-600 dark:text-neutral-400">
-              {t("owner", {
-                name: prediction.owner_name ?? t("unknownOwner"),
-                email: prediction.owner_email ?? prediction.user_id,
-              })}
-            </p>
-          </div>
-
-          <Link
-            href="/admin/native-task-risk"
-            className="rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
-          >
-            {t("back")}
-          </Link>
-        </div>
-
-        <div className="mt-6 flex flex-wrap gap-2">
-          <span
-            className={`rounded-full px-3 py-1 text-xs font-semibold ${bandClass(
-              prediction.risk_band
-            )}`}
-          >
-            {t(`riskBands.${prediction.risk_band}`)}
-          </span>
-
-          <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
-            {t("probability", {
-              value: Math.round(Number(prediction.risk_probability) * 100),
-            })}
-          </span>
-
-          <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
-            {t("threshold", { value: prediction.decision_threshold })}
-          </span>
-
-          <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
-            {prediction.algorithm}
-          </span>
-        </div>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-2">
-        <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
+    <div className="min-w-0 space-y-section">
+      <PageHeader eyebrow={t("eyebrow")} title={prediction.task_title ?? prediction.task_id} description={t("owner", { name: prediction.owner_name ?? t("unknownOwner"), email: prediction.owner_email ?? prediction.user_id })} action={
+        <Button asChild variant="outline"><Link href="/admin/native-task-risk"><ArrowLeft aria-hidden="true" />{t("back")}</Link></Button>
+      } />
+      <div className="flex min-w-0 flex-wrap items-center gap-3 border-t border-border pt-card">
+        <Badge variant="outline" className={bandClass(prediction.risk_band)}>{t(`riskBands.${prediction.risk_band}`)}</Badge>
+        <span className="text-label tabular-nums text-secondary-text">{t("probability", { value: Math.round(Number(prediction.risk_probability) * 100) })}</span>
+        <span className="text-label tabular-nums text-secondary-text">{t("threshold", { value: prediction.decision_threshold })}</span>
+        <span className="min-w-0 text-label text-secondary-text [overflow-wrap:anywhere]">{prediction.algorithm}</span>
+      </div>
+      <section className="grid min-w-0 gap-section xl:grid-cols-2">
+        <div className="min-w-0 space-y-3 border-t border-border pt-card">
+          <h2 className="text-section font-semibold text-foreground">
             {t("attributionsTitle")}
           </h2>
 
-          <div className="mt-4 space-y-3">
+          <div className="divide-y divide-border">
             {attributions.map(
               (item) => (
                 <div
                   key={`${item.feature_name}-${item.rank}`}
-                  className="rounded-xl bg-neutral-50 p-4 dark:bg-neutral-900"
+                  className="min-w-0 py-3 [overflow-wrap:anywhere]"
                 >
-                  <div className="flex justify-between gap-4">
-                    <p className="font-medium text-neutral-950 dark:text-neutral-50">
+                  <div className="flex min-w-0 flex-wrap justify-between gap-2">
+                    <p className="text-body font-medium text-foreground">
                       {item.rank}. {item.feature_name}
                     </p>
 
-                    <span className="text-sm text-neutral-500">
+                    <span className="text-caption text-muted-foreground">
                       {item.effect}
                     </span>
                   </div>
 
-                  <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+                  <p className="mt-1 text-caption text-secondary-text">
                     {t("attributionMeta", {
                       value: item.feature_value,
                       contribution: item.contribution,
@@ -148,36 +109,36 @@ export default async function AdminNativeTaskRiskPredictionDetailPage({
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-          <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
+        <div className="min-w-0 space-y-3 border-t border-border pt-card">
+          <h2 className="text-section font-semibold text-foreground">
             {t("modelMetricsTitle")}
           </h2>
 
           <div className="mt-4">
-            <JsonBlock value={prediction.model_metrics} />
+            <JsonBlock label={t("modelMetricsTitle")} value={prediction.model_metrics} />
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
+      <section className="min-w-0 space-y-3 border-t border-border pt-card">
+        <h2 className="text-section font-semibold text-foreground">
           {t("featurePayloadTitle")}
         </h2>
 
         <div className="mt-4">
-          <JsonBlock value={prediction.feature_payload} />
+          <JsonBlock label={t("featurePayloadTitle")} value={prediction.feature_payload} />
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
-        <h2 className="text-xl font-bold text-neutral-950 dark:text-neutral-50">
+      <section className="min-w-0 space-y-3 border-t border-border pt-card">
+        <h2 className="text-section font-semibold text-foreground">
           {t("predictionMetadataTitle")}
         </h2>
 
         <div className="mt-4">
-          <JsonBlock value={prediction.prediction_metadata} />
+          <JsonBlock label={t("predictionMetadataTitle")} value={prediction.prediction_metadata} />
         </div>
       </section>
-    </main>
+    </div>
   );
 }

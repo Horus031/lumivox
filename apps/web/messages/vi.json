@@ -9,6 +9,7 @@
     "search": "Tìm kiếm",
     "settings": "Cài đặt",
     "language": "Ngôn ngữ",
+    "theme": "Giao diện",
     "pagination": {
       "ariaLabel": "Phân trang bảng dữ liệu",
       "showing": "Trang {page} / {totalPages}",
@@ -102,6 +103,7 @@
       }
     },
     "behaviourTrend": {
+      "empty": "Chưa ghi nhận hoạt động học tập.",
       "title": "Xu hướng hành vi - 7 ngày gần đây",
       "description": "So sánh thời gian tập trung và các lần xao nhãng trong những ngày gần đây.",
       "focusMinutes": "Phút tập trung",
@@ -115,6 +117,7 @@
       "personalizedPbi": "PBI cá nhân hóa"
     },
     "taskStatus": {
+      "empty": "Chưa có nhiệm vụ nào.",
       "title": "Tổng quan trạng thái nhiệm vụ",
       "description": "Phân bố hiện tại của các trạng thái nhiệm vụ trong hệ thống.",
       "tasks": "Nhiệm vụ"
@@ -133,15 +136,19 @@
       "title": "Trí tuệ hành vi",
       "fallbackUser": "Người dùng Lumivox",
       "signOut": "Đăng xuất",
+      "account": "Menu tài khoản",
       "collapseSidebar": "Thu gọn thanh bên",
       "expandSidebar": "Mở rộng thanh bên"
     },
     "navigation": {
+      "more": "Thêm",
       "dashboard": {
+        "mobileLabel": "Tổng quan",
         "label": "Tổng quan",
         "description": "Phân tích và insight hành vi"
       },
       "workspace": {
+        "mobileLabel": "Học tập",
         "label": "Không gian học tập",
         "description": "Quản lý mục tiêu và nhiệm vụ trên cùng một bảng."
       },
@@ -560,7 +567,8 @@
       "unlinked": "Chưa liên kết",
       "selectDate": "Chọn ngày",
       "creating": "Đang tạo...",
-      "createSubmit": "Tạo nhiệm vụ"
+      "createSubmit": "Tạo nhiệm vụ",
+      "saving": "Đang lưu..."
     },
     "filters": {
       "searchLabel": "Tìm nhiệm vụ",
@@ -667,6 +675,39 @@
       "previous": "Trước",
       "next": "Tiếp"
     }
+  },
+  "documentUi": {
+    "shareEyebrow": "Chia sẻ tài liệu",
+    "shareDescription": "Quản lý quyền truy cập tài liệu học tập.",
+    "sharedEyebrow": "Tài liệu được chia sẻ",
+    "visibilityTitle": "Quyền truy cập tài liệu",
+    "visibilityDescription": "Riêng tư: chỉ chủ sở hữu. Chia sẻ: người được cấp quyền qua email. Công khai: người đã đăng nhập có liên kết.",
+    "visibilityField": "Chế độ truy cập",
+    "visibility": {
+      "private": "Riêng tư",
+      "shared": "Chia sẻ qua email",
+      "public": "Liên kết công khai"
+    },
+    "shareTitle": "Cấp quyền truy cập",
+    "email": "Email",
+    "role": "Vai trò",
+    "roles": {
+      "viewer": "Người xem",
+      "editor": "Người chỉnh sửa"
+    },
+    "share": "Chia sẻ tài liệu",
+    "sharing": "Đang chia sẻ...",
+    "linkTitle": "Liên kết tài liệu",
+    "linkDescription": "Liên kết không thay thế quyền truy cập.",
+    "copy": "Sao chép liên kết",
+    "copied": "Đã sao chép liên kết.",
+    "copyFailed": "Không thể sao chép liên kết. Vui lòng thử lại.",
+    "permissionsTitle": "Người được chia sẻ",
+    "permissionsEmpty": "Chưa cấp quyền truy cập cho người dùng nào.",
+    "remove": "Gỡ quyền truy cập",
+    "removing": "Đang gỡ...",
+    "original": "Mở tệp gốc",
+    "unsupported": "Định dạng tệp này không hỗ trợ xem trực tiếp."
   },
   "taskReview": {
     "loading": "Đang tải AI Review...",
@@ -833,6 +874,105 @@
         "reprocess": "Xử lý lại",
         "process": "Xử lý cho AI"
       }
+    }
+  },
+  "roadmaps": {
+    "title": "Lộ trình học tập",
+    "description": "Các kế hoạch học tập và trạng thái áp dụng.",
+    "create": "Tạo lộ trình",
+    "newTitle": "Tạo lộ trình học tập",
+    "newDescription": "Chủ đề, mục tiêu và lịch học.",
+    "emptyTitle": "Chưa có lộ trình",
+    "emptyDescription": "Các lộ trình học tập của bạn sẽ xuất hiện tại đây.",
+    "fallbackTitle": "Lộ trình học tập",
+    "back": "Quay lại",
+    "edit": "Chỉnh sửa cây",
+    "apply": "Áp dụng lộ trình",
+    "applying": "Đang áp dụng...",
+    "viewGoals": "Xem mục tiêu",
+    "nodes": "{count} nội dung",
+    "studyTime": "{days} ngày/tuần · {minutes} phút/ngày",
+    "treeTitle": "Mục tiêu, nhiệm vụ và nhiệm vụ con",
+    "treeEmpty": "Chưa có nội dung trong lộ trình.",
+    "priority": "Ưu tiên {value}",
+    "hours": "{value} giờ",
+    "noStart": "Chưa có ngày bắt đầu",
+    "noEnd": "Chưa có ngày kết thúc",
+    "editorTitle": "Chỉnh sửa lộ trình",
+    "autoLayout": "Sắp xếp tự động",
+    "save": "Lưu thay đổi",
+    "saving": "Đang lưu...",
+    "nodeEditor": "Chi tiết nội dung",
+    "noSelection": "Chưa chọn nội dung",
+    "editNode": "Chỉnh sửa {type}",
+    "deleteNode": "Xóa nội dung",
+    "addChild": "Thêm {type}",
+    "newNode": "{type} mới",
+    "generate": "Tạo lộ trình",
+    "generating": "Đang tạo lộ trình...",
+    "generateFailed": "Không thể tạo lộ trình. Vui lòng thử lại.",
+    "applyConfirm": "Áp dụng lộ trình này? Các mục tiêu, nhiệm vụ và nhiệm vụ con sẽ được tạo. Thao tác này không thể lặp lại.",
+    "applied": "Đã tạo {goals} mục tiêu, {tasks} nhiệm vụ và {subtasks} nhiệm vụ con.",
+    "inputTitle": "Mục tiêu học tập",
+    "levelTitle": "Trình độ và mục tiêu",
+    "scheduleTitle": "Lịch học",
+    "weeklyHours": "Thời gian học dự kiến: {hours} giờ/tuần",
+    "statuses": {
+      "draft": "Bản nháp",
+      "applied": "Đã áp dụng",
+      "archived": "Đã lưu trữ"
+    },
+    "types": {
+      "goal": "Mục tiêu",
+      "task": "Nhiệm vụ",
+      "subtask": "Nhiệm vụ con"
+    },
+    "levels": {
+      "beginner": "Cơ bản",
+      "intermediate": "Trung cấp",
+      "advanced": "Nâng cao",
+      "custom": "Tùy chỉnh"
+    },
+    "fields": {
+      "topic": "Chủ đề / khóa học",
+      "subject": "Tên môn học",
+      "language": "Ngôn ngữ đầu ra",
+      "description": "Mô tả / bối cảnh",
+      "currentLevel": "Trình độ hiện tại",
+      "targetLevel": "Trình độ mục tiêu",
+      "customCurrent": "Trình độ hiện tại tùy chỉnh",
+      "customTarget": "Trình độ mục tiêu tùy chỉnh",
+      "startDate": "Ngày bắt đầu",
+      "endDate": "Ngày kết thúc",
+      "days": "Số ngày học mỗi tuần",
+      "minutes": "Số phút học mỗi ngày",
+      "weekdays": "Ngày có thể học",
+      "title": "Tiêu đề",
+      "hours": "Số giờ dự kiến",
+      "priority": "Mức ưu tiên",
+      "dateRange": "Khoảng thời gian",
+      "studyTime": "Thời gian học",
+      "level": "Trình độ"
+    },
+    "placeholders": {
+      "topic": "Python cho phân tích dữ liệu",
+      "subject": "Phân tích dữ liệu",
+      "description": "Mục tiêu học tập và kiến thức nền",
+      "current": "Kỹ năng hiện tại",
+      "target": "Kết quả mong muốn"
+    },
+    "weekdays": {
+      "mon": "T2",
+      "tue": "T3",
+      "wed": "T4",
+      "thu": "T5",
+      "fri": "T6",
+      "sat": "T7",
+      "sun": "CN"
+    },
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh"
     }
   },
   "focus": {
@@ -1060,6 +1200,7 @@
       "plannedDurationSub": "Bạn có thể thay đổi theo ý thích ngoài các thời lượng bên dưới.",
       "minutes": "{value} phút",
       "plannedMinutesPlaceholder": "Nhập số phút bạn muốn...",
+      "failed": "Không thể bắt đầu phiên tập trung. Vui lòng thử lại.",
       "starting": "Đang bắt đầu...",
       "start": "Bắt đầu phiên tập trung"
     },
@@ -1067,6 +1208,8 @@
       "eyebrow": "Phiên tập trung đang diễn ra",
       "generalSession": "Phiên tập trung chung",
       "remainingTime": "Thời gian còn lại",
+      "progress": "Tiến độ phiên",
+      "requestFailed": "Không thể cập nhật phiên tập trung. Vui lòng thử lại.",
       "compactProgress": "Còn {remaining} / dự kiến {minutes} phút",
       "plannedBadge": "Dự kiến: {minutes} phút",
       "durationReached": "Đã đạt thời lượng dự kiến. Bạn có thể hoàn thành phiên này.",
@@ -1154,6 +1297,12 @@
       }
     }
   },
+  "onboarding": {
+    "title": "Thiết lập hồ sơ học tập",
+    "description": "Chọn múi giờ và trọng số PBI cá nhân. PBI chuẩn giữ nguyên các trọng số học thuật.",
+    "complete": "Hoàn tất thiết lập",
+    "completing": "Đang hoàn tất..."
+  },
   "settings": {
     "page": {
       "eyebrow": "Lumivox",
@@ -1172,7 +1321,7 @@
         "description": "Điều chỉnh mức độ tác động của từng chiều hành vi đến Chỉ số Hành vi Năng suất Cá nhân hóa.",
         "reset": "Đặt lại theo mặc định học thuật",
         "totalWeight": "Tổng trọng số hiện tại",
-        "totalHelp": "Tổng phải bằng chính xác 1.00 trước khi có thể hoàn tất onboarding."
+        "totalHelp": "Tổng trọng số phải bằng 1,00 trước khi lưu."
       },
       "weights": {
         "weight": "Trọng số",
@@ -1206,6 +1355,7 @@
       "save": "Lưu cài đặt"
     },
     "theme": {
+      "label": "Giao diện",
       "light": "Sáng",
       "dark": "Tối",
       "system": "Hệ thống"
@@ -1241,6 +1391,14 @@
     "restoreButton": {
       "restoring": "Đang khôi phục...",
       "restore": "Khôi phục chuỗi"
+    }
+  },
+  "pageStates": {
+    "error": {
+      "title": "Không thể tải trang",
+      "description": "Đã xảy ra lỗi. Vui lòng thử lại.",
+      "retry": "Thử lại",
+      "dashboard": "Tổng quan"
     }
   },
   "reflections": {
@@ -1345,6 +1503,7 @@
       "description": "Tạo nhóm riêng cho trò chuyện học tập và cộng tác dài hạn.",
       "creating": "Đang tạo...",
       "create": "Tạo nhóm",
+      "cancel": "Hủy",
       "fields": {
         "name": "Tên nhóm",
         "description": "Mô tả"
@@ -1356,6 +1515,7 @@
     },
     "inviteForm": {
       "title": "Mời thành viên",
+      "emailLabel": "Email thành viên",
       "description": "Thêm người dùng Lumivox vào nhóm học riêng này bằng email.",
       "placeholder": "friend@example.com",
       "inviting": "Đang mời...",
@@ -1365,6 +1525,10 @@
       "title": "Trò chuyện nhóm",
       "description": "Tin nhắn xuất hiện theo thời gian thực cho các thành viên đang hoạt động.",
       "realtime": "Thời gian thực",
+      "connection": {
+        "connecting": "Đang kết nối",
+        "error": "Mất kết nối"
+      },
       "empty": "Chưa có tin nhắn. Hãy bắt đầu cuộc trò chuyện nhóm.",
       "you": "Bạn",
       "placeholder": "Viết tin nhắn...",
@@ -1624,6 +1788,7 @@
   "admin": {
     "common": {
       "adminCms": "CMS quản trị",
+      "backToList": "Quay lại danh sách",
       "search": "Tìm kiếm",
       "all": "Tất cả",
       "view": "Xem",
@@ -1705,7 +1870,20 @@
       "sources": "Nguồn",
       "latency": "Độ trễ"
     },
+    "navigation": {
+      "label": "Các mục quản trị",
+      "overview": "Tổng quan",
+      "users": "Người dùng",
+      "documents": "Tài liệu",
+      "groups": "Nhóm",
+      "ai": "AI",
+      "roadmaps": "Lộ trình",
+      "nativeTaskRisk": "Rủi ro nhiệm vụ",
+      "translations": "Phiên dịch",
+      "settings": "Cài đặt"
+    },
     "dashboard": {
+      "metricsLabel": "Số liệu nền tảng",
       "eyebrow": "CMS quản trị",
       "title": "Bảng điều khiển quản trị",
       "description": "Theo dõi người dùng, hoạt động học tập, tài liệu, nhóm và mức sử dụng AI trên Lumivox.",
@@ -1802,6 +1980,7 @@
       "detail": {
         "eyebrow": "Admin CMS",
         "embeddedChunksDescription": "Chunk đã nhúng / tổng số chunk",
+        "metadata": "Thông tin tài liệu",
         "failedChunks": "Chunk lỗi",
         "fileSize": "Kích thước tệp",
         "mimeType": "Loại MIME",
@@ -1849,7 +2028,8 @@
         "delete": "Xóa"
       },
       "members": {
-        "title": "Thành viên"
+        "title": "Thành viên",
+        "empty": "Không tìm thấy thành viên."
       },
       "messages": {
         "eyebrow": "Kiểm duyệt",
@@ -2139,6 +2319,8 @@
         "description": "Quản lý cờ tính năng, mặc định RAG, mặc định thử thách tuần và cài đặt vận hành nền tảng."
       },
       "form": {
+        "label": "Cấu hình CMS",
+        "invalidNumber": "Nhập số nguyên lớn hơn hoặc bằng 0.",
         "featureFlags": {
           "title": "Cờ tính năng",
           "globalLeaderboard": {
@@ -2192,6 +2374,7 @@
     "board": {
       "empty": "Chưa có nhiệm vụ ở giai đoạn này.",
       "subtaskProgress": "{completed}/{total} nhiệm vụ con",
+      "title": "Bảng nhiệm vụ",
       "reviewManaged": "Giai đoạn do AI quản lý",
       "overdueManaged": "Tự động xác định theo thời hạn",
       "dragTask": "Kéo nhiệm vụ",

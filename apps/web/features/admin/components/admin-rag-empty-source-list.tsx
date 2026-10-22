@@ -1,92 +1,37 @@
+import { ArrowUpRight, AlertTriangle } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
 
 type EmptySourceAnswer = {
-  message_id: string;
-  session_id: string;
-  user_id: string;
-  user_name: string | null;
-  user_email: string | null;
-  content: string;
-  context_mode: string;
-  top_k: number | null;
-  prompt_variant: string | null;
-  latency_ms: number | null;
-  created_at: string;
+  message_id: string; session_id: string; user_id: string; user_name: string | null;
+  user_email: string | null; content: string; context_mode: string; top_k: number | null;
+  prompt_variant: string | null; latency_ms: number | null; created_at: string;
 };
 
-type AdminRagEmptySourceListProps = {
-  answers: EmptySourceAnswer[];
-};
-
-export function AdminRagEmptySourceList({
-  answers,
-}: AdminRagEmptySourceListProps) {
+export function AdminRagEmptySourceList({ answers }: { answers: EmptySourceAnswer[] }) {
   const locale = useLocale();
   const t = useTranslations("admin.ai.emptySources");
   const commonT = useTranslations("admin.common");
-
   return (
-    <section className="rounded-2xl shadow-sm">
-      <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-red-500">
-          {t("eyebrow")}
-        </p>
-
-        <h2 className="mt-2 text-2xl font-bold text-foreground">
-          {t("title")}
-        </h2>
-
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("description")}
-        </p>
+    <section className="min-w-0 space-y-3 border-t border-border pt-card">
+      <div className="min-w-0">
+        <h2 className="flex items-start gap-2 text-section font-semibold text-foreground"><AlertTriangle className="mt-1 size-icon shrink-0 text-foreground" aria-hidden="true" />{t("title")}</h2>
+        <p className="mt-1 text-body text-secondary-text [overflow-wrap:anywhere]">{t("description")}</p>
       </div>
-
-      {answers.length === 0 ? (
-        <div className="mt-6 rounded-2xl border border-dashed p-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            {t("empty")}
-          </p>
-        </div>
-      ) : (
-        <div className="mt-6 space-y-4">
+      {answers.length === 0 ? <p className="py-section text-body text-muted-foreground">{t("empty")}</p> : (
+        <div className="divide-y divide-border">
           {answers.map((answer) => (
-            <article
-              key={answer.message_id}
-              className="rounded-2xl border bg-red-50/40 p-4 dark:border-red-900 dark:bg-red-950/20"
-            >
-              <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
-                <div>
-                  <p className="font-semibold text-neutral-950 dark:text-neutral-50">
-                    {answer.user_name ??
-                      t("fallbackUser", { id: answer.user_id.slice(0, 8) })}
-                  </p>
-
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {answer.user_email ?? answer.user_id} -{" "}
-                    {new Date(answer.created_at).toLocaleString(locale)}
-                  </p>
-
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                    {t("metadata", {
-                      topK: answer.top_k ?? commonT("na"),
-                      prompt: answer.prompt_variant ?? commonT("na"),
-                      latency: answer.latency_ms ?? 0,
-                    })}
-                  </p>
+            <article key={answer.message_id} className="min-w-0 py-card">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0 [overflow-wrap:anywhere]">
+                  <h3 className="text-body font-medium text-foreground">{answer.user_name ?? t("fallbackUser", { id: answer.user_id.slice(0, 8) })}</h3>
+                  <p className="mt-1 text-caption text-muted-foreground">{answer.user_email ?? answer.user_id} - {new Date(answer.created_at).toLocaleString(locale)}</p>
+                  <p className="mt-1 text-caption text-muted-foreground">{t("metadata", { topK: answer.top_k ?? commonT("na"), prompt: answer.prompt_variant ?? commonT("na"), latency: answer.latency_ms ?? 0 })}</p>
                 </div>
-
-                <Link
-                  href={`/admin/ai/sessions/${answer.session_id}`}
-                  className="rounded-xl border px-3 py-2 text-sm font-medium transition hover:bg-white dark:border-red-900 dark:hover:bg-red-950/40"
-                >
-                  {t("reviewSession")}
-                </Link>
+                <Button asChild variant="ghost" size="icon"><Link href={`/admin/ai/sessions/${answer.session_id}`} aria-label={`${t("reviewSession")}: ${answer.session_id}`} title={t("reviewSession")}><ArrowUpRight aria-hidden="true" /></Link></Button>
               </div>
-
-              <p className="mt-4 line-clamp-4 whitespace-pre-wrap rounded-xl bg-white p-4 text-sm leading-6 text-neutral-700 dark:bg-neutral-950 dark:text-neutral-300">
-                {answer.content}
-              </p>
+              <p className="mt-3 line-clamp-4 whitespace-pre-wrap border-l-2 border-warning pl-3 text-body text-secondary-text [overflow-wrap:anywhere]">{answer.content}</p>
             </article>
           ))}
         </div>

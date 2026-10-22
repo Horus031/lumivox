@@ -70,8 +70,9 @@ export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
           type="button"
           size="icon"
           variant="ghost"
-          className="size-8 shrink-0"
+          className="shrink-0 sm:size-touch lg:size-control-sm"
           aria-label={t("goalActions")}
+          title={t("goalActions")}
         >
           <MoreHorizontal className="size-4" />
         </Button>

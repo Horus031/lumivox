@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
 
 // import {
 //   Select,
@@ -50,6 +51,8 @@ type ChatMessage = {
 };
 
 type RagStudyAssistantProps = {
+  compact?: boolean;
+  className?: string;
   focusSessionId?: string | null;
   documents: RagDocumentOption[];
   defaultTopK?: number;
@@ -66,6 +69,8 @@ function isNearChatBottom(container: HTMLDivElement) {
 }
 
 export function RagStudyAssistant({
+  compact = false,
+  className,
   focusSessionId,
   documents,
   defaultTopK,
@@ -191,7 +196,7 @@ export function RagStudyAssistant({
   }, [messages]);
 
   return (
-    <section className="rounded-2xl h-fit border bg-background p-5 shadow-sm">
+    <section className={cn("rounded-2xl h-fit border bg-background p-5 shadow-sm", className)}>
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         {/* <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-1">
@@ -247,14 +252,14 @@ export function RagStudyAssistant({
       <div
         ref={chatContainerRef}
         onScroll={handleChatScroll}
-        className="mt-5 scroll-smooth h-96 space-y-4 rounded-2xl overflow-y-scroll"
+        className={cn("mt-5 scroll-smooth h-96 space-y-4 rounded-2xl overflow-y-scroll", compact && "mt-3 h-64 rounded-md")}
       >
         {messages.length === 0 ? (
           <div className="flex flex-col h-full gap-4 items-center justify-center text-center">
-            <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+            <p className={cn("text-sm font-medium uppercase tracking-wide text-muted-foreground", compact && "text-caption tracking-normal")}>
               {t("ragTitle")}
             </p>
-            <p className="max-w-md text-3xl text-muted-foreground">
+            <p className={cn("max-w-md text-3xl text-muted-foreground", compact && "text-section text-secondary-text")}>
               {t("emptyPrompt")}
             </p>
           </div>
@@ -406,19 +411,20 @@ export function RagStudyAssistant({
           </Popover>
         </div>
 
-        <div className="flex gap-4">
+        <div className={cn("flex gap-4", compact && "items-end gap-2")}>
           <Textarea
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t("askPlaceholder")}
+            aria-label={t("askPlaceholder")}
             onKeyDown={handleKeyDown}
-            className="min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition"
+            className={cn("min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition", compact && "min-h-touch rounded-md py-2 text-base md:text-body")}
           />
 
           <Button
             type="submit"
             disabled={!canAsk || isPending}
-            className=" bg-primary text-foreground px-5 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60 "
+            className={cn("bg-primary text-foreground px-5 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60", compact && "h-touch px-3 text-primary-foreground sm:h-touch lg:h-control")}
           >
             {isPending ? t("thinking") : t("ask")}
           </Button>
