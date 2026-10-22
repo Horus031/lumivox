@@ -226,3 +226,14 @@ footer {
 #attention-candidate[hidden] {
   display: none !important;
 }
+
+#attention-confirm {
+  width: 100%;
+  background: #dce7ff;
+  color: #10203c;
+}
+
+#attention-confirm:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}

@@ -157,17 +157,23 @@ isOneToOne: false
                   ]
                 },"distraction_events": {
                   Row: {
-                    "created_at": string,"distraction_type": Database["public"]['Enums']["distraction_type"],"duration_seconds": number,"id": string,"note": string | null,"occurred_at": string,"session_id": string,"user_id": string
+                    "created_at": string,"distraction_type": Database["public"]['Enums']["distraction_type"],"duration_seconds": number,"extension_event_id": string | null,"extension_segment_id": string | null,"id": string,"note": string | null,"occurred_at": string,"session_id": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id": string,"user_id": string
+                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"extension_event_id"?: string | null,"extension_segment_id"?: string | null,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id": string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id"?: string,"user_id"?: string
+                    "created_at"?: string,"distraction_type"?: Database["public"]['Enums']["distraction_type"],"duration_seconds"?: number,"extension_event_id"?: string | null,"extension_segment_id"?: string | null,"id"?: string,"note"?: string | null,"occurred_at"?: string,"session_id"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "distraction_events_extension_segment_id_fkey"
+      columns: ["extension_segment_id"]
+isOneToOne: false
+      referencedRelation: "focus_session_segments"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "distraction_events_session_id_fkey"
       columns: ["session_id"]
 isOneToOne: false

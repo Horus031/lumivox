@@ -141,15 +141,24 @@ export function initializeFocusPopup(): void {
       return;
     }
 
-    // On uncertainty keep displaying the last confirmed state,
-    // but never allow a new write before reconciliation.
+    // We no longer know whether the snapshot is current.
+    // Keep it for display only; never allow further writes.
+    connectionHealthy = false;
+
     if (snapshot) {
-      for (const button of buttons) button.disabled = true;
+      display();
+    } else {
+      for (const button of buttons) {
+        button.hidden = true;
+        button.disabled = true;
+      }
+      clock.textContent = "--:--";
+      round.textContent = "";
     }
 
     state.textContent =
       response.state === "conflict"
-        ? "Phiên đã thay đổi; đang đồng bộ"
+        ? "Phiên đã thay đổi; cần đồng bộ"
         : "Mất kết nối với Focus Service";
   }
 

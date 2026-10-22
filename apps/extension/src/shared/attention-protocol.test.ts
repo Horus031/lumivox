@@ -71,4 +71,34 @@ describe("Attention message protocol", () => {
   it("supports disabled state without candidate", () => {
     expect(isAttentionResponse(attentionResult(false, false, null))).toBe(true);
   });
+
+  it("allows explicit confirmation", () => {
+    expect(
+      isAttentionRequest({
+        channel: "lumivox.extension",
+        version: 1,
+        type: "ATTENTION_CONFIRM",
+      }),
+    ).toBe(true);
+  });
+
+  it("accepts a confirmed save response", () => {
+    expect(
+      isAttentionResponse(attentionResult(true, true, null, undefined, true)),
+    ).toBe(true);
+  });
+
+  it("does not allow arbitrary saved values", () => {
+    expect(
+      isAttentionResponse({
+        channel: "lumivox.extension",
+        version: 1,
+        type: "ATTENTION_RESULT",
+        enabled: true,
+        permissionGranted: true,
+        candidate: null,
+        saved: "yes",
+      }),
+    ).toBe(false);
+  });
 });
