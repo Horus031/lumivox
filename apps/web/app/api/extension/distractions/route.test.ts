@@ -40,64 +40,29 @@ function database(
     existing?: boolean;
     parent?: boolean;
     segment?: boolean;
-    duplicateInsert?: boolean;
   } = {},
 ) {
-  const inserts: unknown[] = [];
+  // Ownership, session state and idempotency are checked inside the RPC.
+  const unavailable = options.parent === false || options.segment === false;
 
-  const from = (tableName: string) => {
-    const query: Record<string, unknown> = {};
-
-    query.select = vi.fn(() => query);
-    query.eq = vi.fn(() => query);
-
-    query.maybeSingle = vi.fn(async () => {
-      if (tableName === "distraction_events") {
-        return {
-          data: options.existing
-            ? {
-                id: "record-id",
-                session_id: sessionId,
-                extension_segment_id: segmentId,
-                distraction_type: "social_media",
-                duration_seconds: 45,
-              }
-            : null,
-          error: null,
-        };
-      }
-
-      return {
-        data: (
-          tableName === "focus_sessions"
-            ? options.parent !== false
-            : options.segment !== false
-        )
-          ? { id: "verified-id" }
-          : null,
-        error: null,
-      };
-    });
-
-    query.insert = vi.fn((value: unknown) => {
-      inserts.push(value);
-      return query;
-    });
-
-    query.single = vi.fn(async () => ({
-      data: options.duplicateInsert ? null : { id: "new-record" },
-      error: options.duplicateInsert ? { code: "23505" } : null,
-    }));
-
-    return query;
+  return {
+    rpc: vi.fn().mockResolvedValue({
+      data: unavailable
+        ? null
+        : {
+            saved: true,
+            duplicate: options.existing === true,
+            id: options.existing ? "record-id" : "new-record",
+          },
+      error: unavailable ? { code: "P0001" } : null,
+    }),
   };
-
-  return { from, inserts };
 }
 
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubEnv("FOCUS_V2_ENABLED", "true");
+  vi.stubEnv("EXTENSION_DISTRACTION_WRITE_ENABLED", "true");
 
   mocks.authenticate.mockResolvedValue({
     userId,
@@ -108,6 +73,18 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Extension distraction integration API", () => {
+  it.each(["FOCUS_V2_ENABLED", "EXTENSION_DISTRACTION_WRITE_ENABLED"])(
+    "rejects requests when %s is disabled",
+    async (flag) => {
+      vi.stubEnv(flag, "false");
+
+      const response = await POST(post(input));
+
+      expect(response.status).toBe(503);
+      expect(mocks.authenticate).not.toHaveBeenCalled();
+    },
+  );
+
   it("rejects anonymous requests", async () => {
     mocks.authenticate.mockResolvedValue(null);
 
@@ -128,7 +105,7 @@ describe("Extension distraction integration API", () => {
     expect(response.status).toBe(400);
   });
 
-  it("saves using the authenticated identity", async () => {
+  it("calls the authenticated client's RPC without a client-supplied identity", async () => {
     const db = database();
 
     mocks.authenticate.mockResolvedValue({
@@ -143,17 +120,20 @@ describe("Extension distraction integration API", () => {
     expect(result.saved).toBe(true);
     expect(result.duplicate).toBe(false);
 
-    expect(db.inserts).toContainEqual(
-      expect.objectContaining({
-        user_id: userId,
-        session_id: sessionId,
-        extension_segment_id: segmentId,
-        extension_event_id: eventId,
-      }),
+    expect(mocks.authenticate).toHaveBeenCalledOnce();
+    expect(db.rpc).toHaveBeenCalledExactlyOnceWith(
+      "extension_confirm_distraction",
+      {
+        p_event_id: eventId,
+        p_session_id: sessionId,
+        p_segment_id: segmentId,
+        p_category: input.distractionType,
+        p_duration_seconds: input.durationSeconds,
+      },
     );
   });
 
-  it("accepts an existing event without another insert", async () => {
+  it("returns the RPC's duplicate confirmation", async () => {
     const db = database({ existing: true });
 
     mocks.authenticate.mockResolvedValue({
@@ -166,7 +146,8 @@ describe("Extension distraction integration API", () => {
 
     expect(response.status).toBe(200);
     expect(result.duplicate).toBe(true);
-    expect(db.inserts).toHaveLength(0);
+    expect(result.id).toBe("record-id");
+    expect(db.rpc).toHaveBeenCalledOnce();
   });
 
   it("rejects a session that is not accessible", async () => {
@@ -180,7 +161,7 @@ describe("Extension distraction integration API", () => {
     const response = await POST(post(input));
 
     expect(response.status).toBe(409);
-    expect(db.inserts).toHaveLength(0);
+    expect(await response.json()).toEqual({ error: "Event or Focus state changed" });
   });
 
   it("rejects a changed focus segment", async () => {
@@ -194,6 +175,40 @@ describe("Extension distraction integration API", () => {
     const response = await POST(post(input));
 
     expect(response.status).toBe(409);
-    expect(db.inserts).toHaveLength(0);
+    expect(await response.json()).toEqual({ error: "Event or Focus state changed" });
+  });
+
+  it.each([
+    ["22023", 400],
+    ["42501", 403],
+    ["XX000", 503],
+  ])("maps RPC error %s to HTTP %i", async (code, status) => {
+    const db = database();
+    db.rpc.mockResolvedValue({ data: null, error: { code } });
+    mocks.authenticate.mockResolvedValue({ userId, supabase: db });
+
+    const response = await POST(post(input));
+
+    expect(response.status).toBe(status);
+  });
+
+  it("rejects an invalid RPC response", async () => {
+    const db = database();
+    db.rpc.mockResolvedValue({ data: { saved: true }, error: null });
+    mocks.authenticate.mockResolvedValue({ userId, supabase: db });
+
+    const response = await POST(post(input));
+
+    expect(response.status).toBe(502);
+  });
+
+  it("handles an unavailable RPC", async () => {
+    const db = database();
+    db.rpc.mockRejectedValue(new Error("Connection unavailable"));
+    mocks.authenticate.mockResolvedValue({ userId, supabase: db });
+
+    const response = await POST(post(input));
+
+    expect(response.status).toBe(503);
   });
 });

@@ -1,5 +1,5 @@
 import { build } from "esbuild";
-import { copyFile, mkdir, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rm, writeFile, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -53,6 +53,16 @@ if (!approvedOrigins.includes(apiOrigin)) {
 
 const supabaseUrl = process.env.LUMIVOX_EXTENSION_SUPABASE_URL?.trim();
 
+if (target === "production") {
+  if (extraOrigin) {
+    throw new Error("Production build must not contain extra site origins.");
+  }
+
+  if (apiOrigin !== productionOrigin) {
+    throw new Error("Production API must use the production Lumivox origin.");
+  }
+}
+
 const publishableKey =
   process.env.LUMIVOX_EXTENSION_SUPABASE_PUBLISHABLE_KEY?.trim();
 
@@ -88,8 +98,34 @@ const hostPermissions = [
   ]),
 ];
 
+const packageJson = JSON.parse(
+  await readFile(resolve(root, "package.json"), "utf8"),
+);
+
+const extensionVersion = packageJson.version;
+
+if (
+  typeof extensionVersion !== "string" ||
+  !/^\d+\.\d+\.\d+$/.test(extensionVersion)
+) {
+  throw new Error("Extension package version must use major.minor.patch.");
+}
+
 await rm(output, { recursive: true, force: true });
 await mkdir(output, { recursive: true });
+
+const iconsOutput = resolve(output, "icons");
+
+await mkdir(iconsOutput, { recursive: true });
+
+await Promise.all(
+  [16, 32, 48, 128].map((size) =>
+    copyFile(
+      resolve(root, `public/icons/icon-${size}.png`),
+      resolve(iconsOutput, `icon-${size}.png`),
+    ),
+  ),
+);
 
 await build({
   entryPoints: {
@@ -109,6 +145,8 @@ await build({
     __LUMIVOX_SUPABASE_URL__: JSON.stringify(supabaseUrl),
     __LUMIVOX_SUPABASE_PUBLISHABLE_KEY__: JSON.stringify(publishableKey),
   },
+  minify: target === "production",
+  legalComments: "none",
 });
 
 await Promise.all([
@@ -120,7 +158,7 @@ const manifest = {
   manifest_version: 3,
   name: "Lumivox Focus Companion",
   description: "Securely connect your Lumivox account.",
-  version: "0.2.0",
+  version: extensionVersion,
   action: {
     default_title: "Lumivox Companion",
     default_popup: "popup.html",
@@ -139,6 +177,12 @@ const manifest = {
       all_frames: false,
     },
   ],
+  icons: {
+    16: "icons/icon-16.png",
+    32: "icons/icon-32.png",
+    48: "icons/icon-48.png",
+    128: "icons/icon-128.png",
+  },
 };
 
 await writeFile(
