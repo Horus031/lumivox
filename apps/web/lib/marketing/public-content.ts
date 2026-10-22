@@ -173,15 +173,42 @@ export const featureContent = {
     description:
       "Lumivox connects study planning, focused work, behavioral insights, and AI-assisted recommendations while keeping students in control of their decisions.",
     items: [
-      ["Study planning and task management", "Break learning objectives into dated, prioritized tasks. Link work to short- or long-term goals so every study plan retains its context."],
-      ["Focus timer and study sessions", "Run structured focus sessions, record actual focused time and distractions, and use that history to understand working patterns."],
-      ["Study analytics and behavioral insights", "Review task completion, deadline adherence, consistency, and focus quality through a Personal Behavior Index and interpretable component-level signals."],
-      ["AI-assisted study recommendations", "Receive contextual suggestions and weekly reflections based on recorded activity. Recommendations support student judgment; they are not guarantees or professional advice."],
-      ["Task-delay risk prediction", "Estimate whether an active task may be late within a 14-day horizon. The current native model uses a documented 0.4 decision threshold and exposes explanation metadata."],
-      ["Learning roadmaps", "Generate an editable study roadmap, review its goals and tasks, and decide whether to apply it to the workspace."],
-      ["Study rooms", "Create or join study spaces with presence, text chat, voice participation, group membership, and shared weekly challenges."],
-      ["Document-grounded AI", "Upload learning documents, process them into searchable chunks, and ask questions with retrieved sources when document context is selected."],
-      ["Weekly reflection and study habits", "Use weekly reflection, streaks, tokens, and progress snapshots as feedback mechanisms. These signals support consistent study habits without claiming academic outcomes."],
+      [
+        "Study planning and task management",
+        "Break learning objectives into dated, prioritized tasks. Link work to short- or long-term goals so every study plan retains its context.",
+      ],
+      [
+        "Focus timer and study sessions",
+        "Run structured focus sessions, record actual focused time and distractions, and use that history to understand working patterns.",
+      ],
+      [
+        "Study analytics and behavioral insights",
+        "Review task completion, deadline adherence, consistency, and focus quality through a Personal Behavior Index and interpretable component-level signals.",
+      ],
+      [
+        "AI-assisted study recommendations",
+        "Receive contextual suggestions and weekly reflections based on recorded activity. Recommendations support student judgment; they are not guarantees or professional advice.",
+      ],
+      [
+        "Task-delay risk prediction",
+        "Estimate whether an active task may be late within a 14-day horizon. The current native model uses a documented 0.4 decision threshold and exposes explanation metadata.",
+      ],
+      [
+        "Learning roadmaps",
+        "Generate an editable study roadmap, review its goals and tasks, and decide whether to apply it to the workspace.",
+      ],
+      [
+        "Study rooms",
+        "Create or join study spaces with presence, text chat, voice participation, group membership, and shared weekly challenges.",
+      ],
+      [
+        "Document-grounded AI",
+        "Upload learning documents, process them into searchable chunks, and ask questions with retrieved sources when document context is selected.",
+      ],
+      [
+        "Weekly reflection and study habits",
+        "Use weekly reflection, streaks, tokens, and progress snapshots as feedback mechanisms. These signals support consistent study habits without claiming academic outcomes.",
+      ],
     ],
   },
   vi: {
@@ -190,15 +217,42 @@ export const featureContent = {
     description:
       "Lumivox kết nối lập kế hoạch học tập, quản lý thời gian tập trung, phân tích thói quen và gợi ý AI nhưng vẫn để sinh viên tự quyết định cách học.",
     items: [
-      ["Lập kế hoạch học tập và quản lý nhiệm vụ", "Chia mục tiêu học tập thành nhiệm vụ có ngày, mức ưu tiên và liên kết với mục tiêu ngắn hoặc dài hạn để kế hoạch luôn có ngữ cảnh."],
-      ["Bộ đếm tập trung và phiên học", "Thực hiện phiên tập trung có cấu trúc, ghi lại thời gian tập trung thực tế và xao nhãng, rồi dùng lịch sử đó để hiểu mô thức làm việc."],
-      ["Phân tích thói quen và hành vi học tập", "Xem mức hoàn thành nhiệm vụ, tuân thủ deadline, độ đều đặn và chất lượng tập trung qua Chỉ số Hành vi Cá nhân cùng các tín hiệu có thể giải thích."],
-      ["Gợi ý học tập có AI hỗ trợ", "Nhận gợi ý theo ngữ cảnh và phản tư tuần dựa trên hoạt động đã ghi. Gợi ý hỗ trợ phán đoán của sinh viên, không phải bảo đảm hay tư vấn chuyên môn."],
-      ["Dự đoán rủi ro trễ nhiệm vụ", "Ước lượng nhiệm vụ đang hoạt động có thể bị trễ trong 14 ngày hay không. Mô hình native hiện tại dùng ngưỡng 0.4 đã ghi tài liệu và cung cấp metadata giải thích."],
-      ["Lộ trình học tập", "Tạo lộ trình có thể chỉnh sửa, xem lại mục tiêu và nhiệm vụ, sau đó tự quyết định có áp dụng vào workspace hay không."],
-      ["Phòng học", "Tạo hoặc tham gia không gian học với hiện diện, chat văn bản, voice, thành viên nhóm và thử thách tuần chung."],
-      ["AI có nguồn từ tài liệu", "Tải tài liệu học, xử lý thành các đoạn có thể tìm kiếm và đặt câu hỏi kèm nguồn truy xuất khi chọn ngữ cảnh tài liệu."],
-      ["Phản tư tuần và thói quen học tập", "Dùng phản tư tuần, streak, token và snapshot tiến độ như cơ chế phản hồi. Các tín hiệu hỗ trợ duy trì thói quen mà không claim kết quả học tập."],
+      [
+        "Lập kế hoạch học tập và quản lý nhiệm vụ",
+        "Chia mục tiêu học tập thành nhiệm vụ có ngày, mức ưu tiên và liên kết với mục tiêu ngắn hoặc dài hạn để kế hoạch luôn có ngữ cảnh.",
+      ],
+      [
+        "Bộ đếm tập trung và phiên học",
+        "Thực hiện phiên tập trung có cấu trúc, ghi lại thời gian tập trung thực tế và xao nhãng, rồi dùng lịch sử đó để hiểu mô thức làm việc.",
+      ],
+      [
+        "Phân tích thói quen và hành vi học tập",
+        "Xem mức hoàn thành nhiệm vụ, tuân thủ deadline, độ đều đặn và chất lượng tập trung qua Chỉ số Hành vi Cá nhân cùng các tín hiệu có thể giải thích.",
+      ],
+      [
+        "Gợi ý học tập có AI hỗ trợ",
+        "Nhận gợi ý theo ngữ cảnh và phản tư tuần dựa trên hoạt động đã ghi. Gợi ý hỗ trợ phán đoán của sinh viên, không phải bảo đảm hay tư vấn chuyên môn.",
+      ],
+      [
+        "Dự đoán rủi ro trễ nhiệm vụ",
+        "Ước lượng nhiệm vụ đang hoạt động có thể bị trễ trong 14 ngày hay không. Mô hình native hiện tại dùng ngưỡng 0.4 đã ghi tài liệu và cung cấp metadata giải thích.",
+      ],
+      [
+        "Lộ trình học tập",
+        "Tạo lộ trình có thể chỉnh sửa, xem lại mục tiêu và nhiệm vụ, sau đó tự quyết định có áp dụng vào workspace hay không.",
+      ],
+      [
+        "Phòng học",
+        "Tạo hoặc tham gia không gian học với hiện diện, chat văn bản, voice, thành viên nhóm và thử thách tuần chung.",
+      ],
+      [
+        "AI có nguồn từ tài liệu",
+        "Tải tài liệu học, xử lý thành các đoạn có thể tìm kiếm và đặt câu hỏi kèm nguồn truy xuất khi chọn ngữ cảnh tài liệu.",
+      ],
+      [
+        "Phản tư tuần và thói quen học tập",
+        "Dùng phản tư tuần, streak, token và snapshot tiến độ như cơ chế phản hồi. Các tín hiệu hỗ trợ duy trì thói quen mà không claim kết quả học tập.",
+      ],
     ],
   },
 } as const;
@@ -210,15 +264,46 @@ export const privacyContent = {
     description:
       "Lumivox processes study activity to provide its core workspace, analytics, and AI-assisted features. This page describes the current project implementation; it is not a claim that no third party ever processes data.",
     sections: [
-      ["Account data", "Authentication and profile records identify your account, preferred language, onboarding state, and product settings. Supabase provides authentication and database infrastructure. These records are used to secure access and personalize the workspace."],
-      ["Tasks, goals, and focus behavior", "Task titles, descriptions, priorities, dates, completion state, goals, focus-session duration, and recorded distractions support planning and behavioral analytics. They may also form input features for task-risk assessment and weekly reflection."],
-      ["Study-room interactions", "Room membership, presence, text messages, voice-room connection metadata, reactions, and challenge progress are processed to provide collaborative study features. Other room participants can see information that the interface presents as shared."],
-      ["Uploaded documents", "Files that you upload are stored for document features. Extracted text can be divided into chunks and represented as embeddings so selected documents can be searched during grounded AI conversations. Only upload material you are permitted to use."],
-      ["AI request context", "When you request an AI insight, roadmap, translation, reflection, or document-grounded answer, relevant prompt text and selected context may be sent through the Lumivox AI service to configured external model providers. The current service supports Google Gemini and Groq-backed generation paths; document embeddings use Google Gemini."],
-      ["Storage and access controls", "Application records are stored in Supabase. Public-schema tables use row-level security so application requests are scoped by the relevant ownership and access policies. Secret backend credentials are not shipped to the browser; the web client uses a publishable key."],
-      ["Website analytics", "Lumivox uses Google Analytics to understand how the public website is discovered and used. Analytics may process information such as page views, session activity, browser and device characteristics, and approximate geographic information. Lumivox uses this information to evaluate website and SEO performance. Application passwords, task content, uploaded documents, and email addresses are not intentionally included in analytics event parameters."],
-      ["Managing your information", "You can edit or remove many workspace records through their product controls. Account-level export and deletion are not currently presented as a self-service control in this codebase. For requests that cannot be completed in the interface, contact the project through the public repository and avoid posting private data in a public issue."],
-      ["Research reporting", "Public research pages use aggregate metrics. Participant names and verbatim usability comments are not published without explicit consent. Model evaluation statistics describe classifier performance and do not represent improvements in student outcomes."],
+      [
+        "Account data",
+        "Authentication and profile records identify your account, preferred language, onboarding state, and product settings. Supabase provides authentication and database infrastructure. These records are used to secure access and personalize the workspace.",
+      ],
+      [
+        "Tasks, goals, and focus behavior",
+        "Task titles, descriptions, priorities, dates, completion state, goals, focus-session duration, and recorded distractions support planning and behavioral analytics. They may also form input features for task-risk assessment and weekly reflection.",
+      ],
+      [
+        "Study-room interactions",
+        "Room membership, presence, text messages, voice-room connection metadata, reactions, and challenge progress are processed to provide collaborative study features. Other room participants can see information that the interface presents as shared.",
+      ],
+      [
+        "Uploaded documents",
+        "Files that you upload are stored for document features. Extracted text can be divided into chunks and represented as embeddings so selected documents can be searched during grounded AI conversations. Only upload material you are permitted to use.",
+      ],
+      [
+        "AI request context",
+        "When you request an AI insight, roadmap, translation, reflection, or document-grounded answer, relevant prompt text and selected context may be sent through the Lumivox AI service to configured external model providers. The current service supports Google Gemini and Groq-backed generation paths; document embeddings use Google Gemini.",
+      ],
+      [
+        "Storage and access controls",
+        "Application records are stored in Supabase. Public-schema tables use row-level security so application requests are scoped by the relevant ownership and access policies. Secret backend credentials are not shipped to the browser; the web client uses a publishable key.",
+      ],
+      [
+        "Website analytics",
+        "Lumivox uses Google Analytics to understand how the public website is discovered and used. Analytics may process information such as page views, session activity, browser and device characteristics, and approximate geographic information. Lumivox uses this information to evaluate website and SEO performance. Application passwords, task content, uploaded documents, and email addresses are not intentionally included in analytics event parameters.",
+      ],
+      [
+        "Managing your information",
+        "You can edit or remove many workspace records through their product controls. Account-level export and deletion are not currently presented as a self-service control in this codebase. For requests that cannot be completed in the interface, contact the project through the public repository and avoid posting private data in a public issue.",
+      ],
+      [
+        "Research reporting",
+        "Public research pages use aggregate metrics. Participant names and verbatim usability comments are not published without explicit consent. Model evaluation statistics describe classifier performance and do not represent improvements in student outcomes.",
+      ],
+      [
+        "Chrome Extension and focus awareness",
+        "Lumivox Focus Companion uses a separate authenticated session to display and control focus timers. Optional tab observation is disabled by default and requires explicit Chrome permission. When enabled, the extension processes the active tab's domain locally to identify possible distractions during an active focus round. Full browsing URLs, page titles, and browsing history are not transmitted to Lumivox. Temporary observations and suggestions are held in extension session storage. Only when the user explicitly confirms a suggestion are its category, duration, and associated focus-session identifiers sent to Lumivox for storage and analytics. Authentication session credentials are stored in extension-local storage with access restricted to trusted extension contexts. Users may disable observation, revoke the optional tabs permission, dismiss suggestions, and sign out of the extension. Data is processed using the infrastructure identified elsewhere in this policy.",
+      ],
     ],
     updated: "Implementation reviewed: 30 September 2026",
   },
@@ -228,15 +313,47 @@ export const privacyContent = {
     description:
       "Lumivox xử lý hoạt động học để cung cấp workspace, phân tích và tính năng có AI hỗ trợ. Trang này mô tả implementation hiện tại của dự án; đây không phải claim rằng không có bên thứ ba nào xử lý dữ liệu.",
     sections: [
-      ["Dữ liệu tài khoản", "Bản ghi xác thực và hồ sơ nhận diện tài khoản, ngôn ngữ, trạng thái onboarding và cài đặt sản phẩm. Supabase cung cấp hạ tầng xác thực và cơ sở dữ liệu. Các bản ghi này được dùng để bảo vệ truy cập và cá nhân hóa workspace."],
-      ["Nhiệm vụ, mục tiêu và hành vi tập trung", "Tiêu đề, mô tả, ưu tiên, ngày, trạng thái nhiệm vụ, mục tiêu, thời lượng tập trung và xao nhãng đã ghi hỗ trợ lập kế hoạch và phân tích hành vi. Chúng cũng có thể trở thành feature đầu vào cho đánh giá rủi ro nhiệm vụ và phản tư tuần."],
-      ["Tương tác trong phòng học", "Thành viên, hiện diện, tin nhắn, metadata kết nối voice, reaction và tiến độ thử thách được xử lý để cung cấp tính năng học cộng tác. Người cùng phòng có thể thấy thông tin mà giao diện xác định là được chia sẻ."],
-      ["Tài liệu tải lên", "Tệp người dùng tải lên được lưu cho tính năng tài liệu. Văn bản trích xuất có thể được chia thành chunk và biểu diễn bằng embedding để tìm kiếm trong hội thoại AI có nguồn. Chỉ tải lên nội dung bạn có quyền sử dụng."],
-      ["Ngữ cảnh yêu cầu AI", "Khi yêu cầu insight, lộ trình, bản dịch, phản tư hoặc câu trả lời dựa trên tài liệu, prompt và ngữ cảnh liên quan có thể đi qua dịch vụ AI của Lumivox đến nhà cung cấp model bên ngoài đã cấu hình. Dịch vụ hiện hỗ trợ luồng tạo sinh Google Gemini và Groq; embedding tài liệu dùng Google Gemini."],
-      ["Lưu trữ và kiểm soát truy cập", "Bản ghi ứng dụng được lưu trên Supabase. Các bảng trong public schema dùng row-level security để request ứng dụng bị giới hạn theo policy sở hữu và quyền truy cập tương ứng. Secret backend không được gửi đến trình duyệt; web client dùng publishable key."],
-      ["Phân tích website", "Lumivox sử dụng Google Analytics để hiểu cách website public được tìm thấy và sử dụng. Analytics có thể xử lý các thông tin như lượt xem trang, hoạt động phiên truy cập, đặc điểm trình duyệt và thiết bị, cùng thông tin vị trí gần đúng. Lumivox sử dụng dữ liệu này để đánh giá hiệu quả website và SEO. Mật khẩu, nội dung nhiệm vụ, tài liệu tải lên và địa chỉ email không được chủ ý gửi trong tham số sự kiện analytics."],
-      ["Quản lý thông tin", "Bạn có thể sửa hoặc xóa nhiều bản ghi workspace qua control trong sản phẩm. Export và xóa toàn bộ tài khoản hiện chưa xuất hiện như control tự phục vụ trong codebase. Với yêu cầu không thể thực hiện trong giao diện, hãy liên hệ qua repository công khai và không đăng dữ liệu riêng tư trong issue public."],
-      ["Báo cáo nghiên cứu", "Trang nghiên cứu public chỉ dùng chỉ số tổng hợp. Tên và nhận xét nguyên văn của participant không được công bố khi chưa có consent rõ ràng. Chỉ số model mô tả hiệu năng bộ phân loại, không đại diện cho mức cải thiện kết quả học tập."],
+      [
+        "Dữ liệu tài khoản",
+        "Bản ghi xác thực và hồ sơ nhận diện tài khoản, ngôn ngữ, trạng thái onboarding và cài đặt sản phẩm. Supabase cung cấp hạ tầng xác thực và cơ sở dữ liệu. Các bản ghi này được dùng để bảo vệ truy cập và cá nhân hóa workspace.",
+      ],
+      [
+        "Nhiệm vụ, mục tiêu và hành vi tập trung",
+        "Tiêu đề, mô tả, ưu tiên, ngày, trạng thái nhiệm vụ, mục tiêu, thời lượng tập trung và xao nhãng đã ghi hỗ trợ lập kế hoạch và phân tích hành vi. Chúng cũng có thể trở thành feature đầu vào cho đánh giá rủi ro nhiệm vụ và phản tư tuần.",
+      ],
+      [
+        "Tương tác trong phòng học",
+        "Thành viên, hiện diện, tin nhắn, metadata kết nối voice, reaction và tiến độ thử thách được xử lý để cung cấp tính năng học cộng tác. Người cùng phòng có thể thấy thông tin mà giao diện xác định là được chia sẻ.",
+      ],
+      [
+        "Tài liệu tải lên",
+        "Tệp người dùng tải lên được lưu cho tính năng tài liệu. Văn bản trích xuất có thể được chia thành chunk và biểu diễn bằng embedding để tìm kiếm trong hội thoại AI có nguồn. Chỉ tải lên nội dung bạn có quyền sử dụng.",
+      ],
+      [
+        "Ngữ cảnh yêu cầu AI",
+        "Khi yêu cầu insight, lộ trình, bản dịch, phản tư hoặc câu trả lời dựa trên tài liệu, prompt và ngữ cảnh liên quan có thể đi qua dịch vụ AI của Lumivox đến nhà cung cấp model bên ngoài đã cấu hình. Dịch vụ hiện hỗ trợ luồng tạo sinh Google Gemini và Groq; embedding tài liệu dùng Google Gemini.",
+      ],
+      [
+        "Lưu trữ và kiểm soát truy cập",
+        "Bản ghi ứng dụng được lưu trên Supabase. Các bảng trong public schema dùng row-level security để request ứng dụng bị giới hạn theo policy sở hữu và quyền truy cập tương ứng. Secret backend không được gửi đến trình duyệt; web client dùng publishable key.",
+      ],
+      [
+        "Phân tích website",
+        "Lumivox sử dụng Google Analytics để hiểu cách website public được tìm thấy và sử dụng. Analytics có thể xử lý các thông tin như lượt xem trang, hoạt động phiên truy cập, đặc điểm trình duyệt và thiết bị, cùng thông tin vị trí gần đúng. Lumivox sử dụng dữ liệu này để đánh giá hiệu quả website và SEO. Mật khẩu, nội dung nhiệm vụ, tài liệu tải lên và địa chỉ email không được chủ ý gửi trong tham số sự kiện analytics.",
+      ],
+      [
+        "Quản lý thông tin",
+        "Bạn có thể sửa hoặc xóa nhiều bản ghi workspace qua control trong sản phẩm. Export và xóa toàn bộ tài khoản hiện chưa xuất hiện như control tự phục vụ trong codebase. Với yêu cầu không thể thực hiện trong giao diện, hãy liên hệ qua repository công khai và không đăng dữ liệu riêng tư trong issue public.",
+      ],
+      [
+        "Báo cáo nghiên cứu",
+        "Trang nghiên cứu public chỉ dùng chỉ số tổng hợp. Tên và nhận xét nguyên văn của participant không được công bố khi chưa có consent rõ ràng. Chỉ số model mô tả hiệu năng bộ phân loại, không đại diện cho mức cải thiện kết quả học tập.",
+      ],
+
+      [
+        "Chrome Extension và nhận biết xao nhãng",
+        "Lumivox Focus Companion sử dụng phiên đăng nhập riêng để hiển thị và điều khiển đồng hồ tập trung. Việc quan sát tab mặc định tắt và chỉ hoạt động sau khi người dùng chủ động cấp quyền Chrome. Khi bật, Extension xử lý domain của tab đang hoạt động ngay trên thiết bị để xác định những tín hiệu có khả năng gây xao nhãng trong giờ Focus. URL đầy đủ, tiêu đề trang và lịch sử duyệt web không được gửi tới Lumivox. Quan sát và gợi ý tạm thời được lưu trong extension session storage. Chỉ khi người dùng xác nhận gợi ý, loại xao nhãng, thời lượng và các mã định danh phiên học liên quan mới được gửi tới Lumivox để lưu và phân tích. Credential đăng nhập được lưu trong extension-local storage và giới hạn truy cập ở các ngữ cảnh tin cậy của Extension. Người dùng có thể tắt quan sát, thu hồi quyền tabs, bỏ qua gợi ý và đăng xuất Extension. Dữ liệu được xử lý bởi các dịch vụ hạ tầng đã được nêu trong các mục khác của chính sách này.",
+      ],
     ],
     updated: "Rà soát implementation: 30 tháng 9 năm 2026",
   },
@@ -249,14 +366,38 @@ export const termsContent = {
     description:
       "These project terms set practical expectations for using Lumivox. They are a plain-language project policy and are not a substitute for jurisdiction-specific legal advice.",
     sections: [
-      ["Educational and productivity purpose", "Lumivox is provided as a study and productivity tool. It does not provide medical, psychological, legal, financial, or academic-guarantee services. You remain responsible for study choices, deadlines, submitted work, and decisions made from product output."],
-      ["AI and prediction limitations", "AI-generated recommendations, summaries, roadmaps, translations, and risk estimates may be incomplete or wrong. A task-risk warning is a probabilistic signal, not a fact. Review outputs before relying on them and do not use Lumivox as the sole basis for high-impact decisions."],
-      ["Account security", "Provide accurate account information, keep credentials confidential, and notify the project if you believe your account is compromised. You are responsible for activity performed through your account unless applicable rules require otherwise."],
-      ["Acceptable use", "Do not use Lumivox to violate law, harm others, attempt unauthorized access, disrupt the service, distribute malicious content, scrape private information, or abuse AI and collaboration features. Access may be limited when necessary to protect the project and its users."],
-      ["Uploaded content", "You retain responsibility for documents and messages you provide. You must have the right to upload and process that material. Do not upload confidential, infringing, or sensitive content unless you understand the processing described in the privacy page."],
-      ["Intellectual property", "The Lumivox name, interface, source materials, and project documentation remain subject to their respective ownership and repository license terms. These terms do not transfer ownership of user-provided content to other users."],
-      ["Availability and changes", "Lumivox is an evolving university project. Features, models, providers, limits, and availability may change, and uninterrupted service is not guaranteed. Material changes to public terms or data practices should be reflected on these pages."],
-      ["Contact and interpretation", "Questions and technical reports can be submitted through the project repository. If a translated version differs in meaning, the project team should clarify the intended policy rather than silently relying on an ambiguous interpretation."],
+      [
+        "Educational and productivity purpose",
+        "Lumivox is provided as a study and productivity tool. It does not provide medical, psychological, legal, financial, or academic-guarantee services. You remain responsible for study choices, deadlines, submitted work, and decisions made from product output.",
+      ],
+      [
+        "AI and prediction limitations",
+        "AI-generated recommendations, summaries, roadmaps, translations, and risk estimates may be incomplete or wrong. A task-risk warning is a probabilistic signal, not a fact. Review outputs before relying on them and do not use Lumivox as the sole basis for high-impact decisions.",
+      ],
+      [
+        "Account security",
+        "Provide accurate account information, keep credentials confidential, and notify the project if you believe your account is compromised. You are responsible for activity performed through your account unless applicable rules require otherwise.",
+      ],
+      [
+        "Acceptable use",
+        "Do not use Lumivox to violate law, harm others, attempt unauthorized access, disrupt the service, distribute malicious content, scrape private information, or abuse AI and collaboration features. Access may be limited when necessary to protect the project and its users.",
+      ],
+      [
+        "Uploaded content",
+        "You retain responsibility for documents and messages you provide. You must have the right to upload and process that material. Do not upload confidential, infringing, or sensitive content unless you understand the processing described in the privacy page.",
+      ],
+      [
+        "Intellectual property",
+        "The Lumivox name, interface, source materials, and project documentation remain subject to their respective ownership and repository license terms. These terms do not transfer ownership of user-provided content to other users.",
+      ],
+      [
+        "Availability and changes",
+        "Lumivox is an evolving university project. Features, models, providers, limits, and availability may change, and uninterrupted service is not guaranteed. Material changes to public terms or data practices should be reflected on these pages.",
+      ],
+      [
+        "Contact and interpretation",
+        "Questions and technical reports can be submitted through the project repository. If a translated version differs in meaning, the project team should clarify the intended policy rather than silently relying on an ambiguous interpretation.",
+      ],
     ],
     updated: "Effective: 27 September 2026",
   },
@@ -266,14 +407,38 @@ export const termsContent = {
     description:
       "Các điều khoản dự án này đặt kỳ vọng thực tế khi dùng Lumivox. Đây là chính sách dự án bằng ngôn ngữ dễ hiểu, không thay thế tư vấn pháp lý theo từng khu vực pháp lý.",
     sections: [
-      ["Mục đích học tập và năng suất", "Lumivox được cung cấp như công cụ học tập và năng suất. Sản phẩm không cung cấp dịch vụ y tế, tâm lý, pháp lý, tài chính hoặc bảo đảm kết quả học tập. Bạn vẫn chịu trách nhiệm với lựa chọn học, deadline, bài nộp và quyết định dựa trên output sản phẩm."],
-      ["Giới hạn của AI và dự đoán", "Gợi ý, tóm tắt, lộ trình, bản dịch và ước lượng rủi ro do AI tạo có thể thiếu hoặc sai. Cảnh báo rủi ro nhiệm vụ là tín hiệu xác suất, không phải sự thật chắc chắn. Hãy kiểm tra output và không dùng Lumivox làm cơ sở duy nhất cho quyết định có ảnh hưởng lớn."],
-      ["Bảo mật tài khoản", "Cung cấp thông tin tài khoản chính xác, giữ bí mật thông tin đăng nhập và thông báo cho dự án nếu nghi ngờ tài khoản bị xâm phạm. Bạn chịu trách nhiệm với hoạt động qua tài khoản trừ khi quy định áp dụng yêu cầu khác."],
-      ["Sử dụng chấp nhận được", "Không dùng Lumivox để vi phạm pháp luật, gây hại, truy cập trái phép, làm gián đoạn dịch vụ, phát tán nội dung độc hại, thu thập dữ liệu riêng tư hoặc lạm dụng tính năng AI và cộng tác. Quyền truy cập có thể bị giới hạn để bảo vệ dự án và người dùng."],
-      ["Nội dung tải lên", "Bạn chịu trách nhiệm với tài liệu và tin nhắn mình cung cấp, đồng thời phải có quyền tải lên và xử lý nội dung đó. Không tải nội dung bí mật, vi phạm bản quyền hoặc nhạy cảm nếu chưa hiểu cách xử lý mô tả tại trang quyền riêng tư."],
-      ["Sở hữu trí tuệ", "Tên Lumivox, giao diện, tài liệu nguồn và tài liệu dự án tuân theo quyền sở hữu và license repository tương ứng. Điều khoản này không chuyển quyền sở hữu nội dung người dùng cung cấp cho người dùng khác."],
-      ["Tính sẵn sàng và thay đổi", "Lumivox là đồ án đại học đang phát triển. Tính năng, model, provider, giới hạn và khả năng hoạt động có thể thay đổi; dịch vụ liên tục không được bảo đảm. Thay đổi quan trọng về điều khoản hoặc dữ liệu cần được phản ánh trên các trang public này."],
-      ["Liên hệ và diễn giải", "Câu hỏi và báo cáo kỹ thuật có thể gửi qua repository dự án. Nếu bản dịch có khác biệt về nghĩa, nhóm dự án cần làm rõ chính sách dự kiến thay vì âm thầm dựa vào cách diễn giải mơ hồ."],
+      [
+        "Mục đích học tập và năng suất",
+        "Lumivox được cung cấp như công cụ học tập và năng suất. Sản phẩm không cung cấp dịch vụ y tế, tâm lý, pháp lý, tài chính hoặc bảo đảm kết quả học tập. Bạn vẫn chịu trách nhiệm với lựa chọn học, deadline, bài nộp và quyết định dựa trên output sản phẩm.",
+      ],
+      [
+        "Giới hạn của AI và dự đoán",
+        "Gợi ý, tóm tắt, lộ trình, bản dịch và ước lượng rủi ro do AI tạo có thể thiếu hoặc sai. Cảnh báo rủi ro nhiệm vụ là tín hiệu xác suất, không phải sự thật chắc chắn. Hãy kiểm tra output và không dùng Lumivox làm cơ sở duy nhất cho quyết định có ảnh hưởng lớn.",
+      ],
+      [
+        "Bảo mật tài khoản",
+        "Cung cấp thông tin tài khoản chính xác, giữ bí mật thông tin đăng nhập và thông báo cho dự án nếu nghi ngờ tài khoản bị xâm phạm. Bạn chịu trách nhiệm với hoạt động qua tài khoản trừ khi quy định áp dụng yêu cầu khác.",
+      ],
+      [
+        "Sử dụng chấp nhận được",
+        "Không dùng Lumivox để vi phạm pháp luật, gây hại, truy cập trái phép, làm gián đoạn dịch vụ, phát tán nội dung độc hại, thu thập dữ liệu riêng tư hoặc lạm dụng tính năng AI và cộng tác. Quyền truy cập có thể bị giới hạn để bảo vệ dự án và người dùng.",
+      ],
+      [
+        "Nội dung tải lên",
+        "Bạn chịu trách nhiệm với tài liệu và tin nhắn mình cung cấp, đồng thời phải có quyền tải lên và xử lý nội dung đó. Không tải nội dung bí mật, vi phạm bản quyền hoặc nhạy cảm nếu chưa hiểu cách xử lý mô tả tại trang quyền riêng tư.",
+      ],
+      [
+        "Sở hữu trí tuệ",
+        "Tên Lumivox, giao diện, tài liệu nguồn và tài liệu dự án tuân theo quyền sở hữu và license repository tương ứng. Điều khoản này không chuyển quyền sở hữu nội dung người dùng cung cấp cho người dùng khác.",
+      ],
+      [
+        "Tính sẵn sàng và thay đổi",
+        "Lumivox là đồ án đại học đang phát triển. Tính năng, model, provider, giới hạn và khả năng hoạt động có thể thay đổi; dịch vụ liên tục không được bảo đảm. Thay đổi quan trọng về điều khoản hoặc dữ liệu cần được phản ánh trên các trang public này.",
+      ],
+      [
+        "Liên hệ và diễn giải",
+        "Câu hỏi và báo cáo kỹ thuật có thể gửi qua repository dự án. Nếu bản dịch có khác biệt về nghĩa, nhóm dự án cần làm rõ chính sách dự kiến thay vì âm thầm dựa vào cách diễn giải mơ hồ.",
+      ],
     ],
     updated: "Có hiệu lực: 27 tháng 9 năm 2026",
   },

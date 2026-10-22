@@ -1133,6 +1133,9 @@ isOneToOne: false
 "evaluate_engagement_streak_states":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"extension_confirm_distraction":
+{ Args: { "p_category": string,"p_duration_seconds": number,"p_event_id": string,"p_segment_id": string,"p_session_id": string }; Returns: Json
+                           },
 "extract_learning_document_id_from_storage_path":
 { Args: { "p_object_name": string }; Returns: string
                            },
