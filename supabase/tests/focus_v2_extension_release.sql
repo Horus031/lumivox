@@ -43,12 +43,19 @@ select ok(
 );
 
 select ok(
-  not has_function_privilege(
-    'PUBLIC',
-    'public.extension_confirm_distraction(uuid,uuid,uuid,text,integer)',
-    'EXECUTE'
+  -- PUBLIC is a pseudo-role (ACL grantee 0), not a named database role.
+  not exists (
+    select 1
+    from pg_proc as p
+    cross join lateral aclexplode(
+      coalesce(p.proacl, acldefault('f', p.proowner))
+    ) as acl
+    where p.oid =
+      'public.extension_confirm_distraction(uuid,uuid,uuid,text,integer)'::regprocedure
+      and acl.grantee = 0
+      and acl.privilege_type = 'EXECUTE'
   ),
-  'PUBLIC does not inherit EXECUTE'
+  'PUBLIC is not granted EXECUTE'
 );
 
 select * from finish();
