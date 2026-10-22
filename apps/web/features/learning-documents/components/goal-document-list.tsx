@@ -3,6 +3,8 @@ import { DeleteLearningDocumentButton } from "@/features/learning-documents/comp
 import { DocumentPreviewLink } from "@/features/learning-documents/components/document-preview-link";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { Share2 } from "lucide-react";
 import { ProcessLearningDocumentButton } from "./process-learning-document-button";
 
 type GoalDocumentListProps = {
@@ -25,30 +27,30 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
   const t = await getTranslations("goals.documents.list");
 
   return (
-    <section className="rounded-2xl border bg-background p-5 shadow-sm">
+    <section className="min-w-0 border-t border-border pt-card">
       <div>
-        <p className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="text-caption font-medium text-muted-foreground">
           {t("eyebrow")}
         </p>
 
-        <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
+        <h3 className="mt-1 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
           {t("title")}
         </h3>
       </div>
 
       {documents.length === 0 ? (
-        <div className="mt-5 rounded-2xl border border-dashed p-8 text-center">
+        <div className="mt-card border-t border-border py-section text-center">
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div className="mt-5 space-y-3">
+        <div className="mt-3 divide-y divide-border">
           {documents.map((document) => (
             <article
               key={document.id}
-              className="flex flex-col justify-between gap-4 rounded-2xl border p-4 dark:border-neutral-800 md:flex-row md:items-center"
+              className="flex min-w-0 flex-col justify-between gap-3 py-card xl:flex-row xl:items-center"
             >
-              <div>
-                <p className="font-semibold text-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
                   {document.file_name}
                 </p>
 
@@ -57,7 +59,7 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
                   {formatFileSize(Number(document.file_size_bytes))}
                 </p>
 
-                <p className="mt-1 text-xs capitalize text-muted-foreground">
+                <p className="mt-1 text-caption text-muted-foreground">
                   {t("metadata", {
                     visibility: t(`visibility.${document.visibility}`),
                     status: t(
@@ -75,12 +77,9 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
 
                 <DocumentPreviewLink document={document} />
 
-                <Link
-                  href={`/documents/${document.id}/share`}
-                  className="rounded-md border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
-                >
-                  {t("share")}
-                </Link>
+                <Button asChild variant="outline" size="sm">
+                  <Link href={`/documents/${document.id}/share`}><Share2 aria-hidden="true" />{t("share")}</Link>
+                </Button>
 
                 <DeleteLearningDocumentButton documentId={document.id} />
               </div>

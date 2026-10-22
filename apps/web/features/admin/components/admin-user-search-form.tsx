@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
@@ -19,6 +20,7 @@ export function AdminUserSearchForm({
   const t = useTranslations("admin.users.search");
   const commonT = useTranslations("admin.common");
   const [query, setQuery] = useState(initialQuery);
+  const id = useId();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,24 +37,25 @@ export function AdminUserSearchForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl shadow-sm">
-      <label className="block space-y-2">
-        <Label className="text-sm font-medium text-foreground">
+    <form onSubmit={handleSubmit} className="min-w-0 space-y-2">
+        <Label htmlFor={id}>
           {t("label")}
         </Label>
 
-        <div className="flex flex-col gap-3 md:flex-row">
+        <div className="flex min-w-0 gap-2">
           <Input
+            id={id}
+            type="search"
+            className="min-w-0 flex-1"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("placeholder")}
           />
 
-          <Button type="submit" size={"lg"}>
-            {commonT("search")}
+          <Button type="submit" size="icon" aria-label={commonT("search")} title={commonT("search")}>
+            <Search aria-hidden="true" />
           </Button>
         </div>
-      </label>
     </form>
   );
 }

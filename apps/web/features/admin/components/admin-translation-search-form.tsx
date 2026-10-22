@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AdminTranslationSearchFormProps = {
   initialQuery?: string;
@@ -23,6 +28,7 @@ export function AdminTranslationSearchForm({
   const [query, setQuery] = useState(initialQuery);
   const [targetLocale, setTargetLocale] = useState(initialTargetLocale);
   const [status, setStatus] = useState(initialStatus);
+  const id = useId();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -49,62 +55,27 @@ export function AdminTranslationSearchForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-2xl border bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-950"
-    >
-      <div className="grid gap-4 md:grid-cols-[1fr_180px_180px_auto] md:items-end">
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            {t("label")}
-          </span>
-
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={t("placeholder")}
-            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition focus:border-neutral-900 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
-          />
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            {t("targetLocale")}
-          </span>
-
-          <select
-            value={targetLocale}
-            onChange={(event) => setTargetLocale(event.target.value)}
-            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
-          >
-            <option value="all">{commonT("all")}</option>
-            <option value="en">{t("locales.en")}</option>
-            <option value="vi">{t("locales.vi")}</option>
-          </select>
-        </label>
-
-        <label className="space-y-2">
-          <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-            {commonT("status")}
-          </span>
-
-          <select
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-            className="w-full rounded-xl border bg-white px-3 py-2.5 text-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-50"
-          >
-            <option value="all">{commonT("all")}</option>
-            <option value="completed">{t("statuses.completed")}</option>
-            <option value="failed">{t("statuses.failed")}</option>
-          </select>
-        </label>
-
-        <button
-          type="submit"
-          className="rounded-xl bg-neutral-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-neutral-800 dark:bg-white dark:text-neutral-950 dark:hover:bg-neutral-200"
-        >
-          {commonT("search")}
-        </button>
+    <form onSubmit={handleSubmit} className="min-w-0">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] xl:grid-cols-[minmax(0,1fr)_10rem_10rem_auto]">
+        <div className="col-span-2 grid min-w-0 gap-2 sm:col-span-3 xl:col-span-1">
+          <Label htmlFor={`${id}-query`}>{t("label")}</Label>
+          <Input id={`${id}-query`} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("placeholder")} />
+        </div>
+        <div className="col-span-2 grid min-w-0 gap-2 sm:col-span-1">
+          <Label htmlFor={`${id}-locale`}>{t("targetLocale")}</Label>
+          <Select value={targetLocale} onValueChange={setTargetLocale}>
+            <SelectTrigger id={`${id}-locale`} className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="all">{commonT("all")}</SelectItem>{["en", "vi"].map((value) => <SelectItem key={value} value={value}>{t(`locales.${value}`)}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <div className="grid min-w-0 gap-2">
+          <Label htmlFor={`${id}-status`}>{commonT("status")}</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger id={`${id}-status`} className="w-full"><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="all">{commonT("all")}</SelectItem>{["completed", "failed"].map((value) => <SelectItem key={value} value={value}>{t(`statuses.${value}`)}</SelectItem>)}</SelectContent>
+          </Select>
+        </div>
+        <Button type="submit" size="icon" aria-label={commonT("search")} title={commonT("search")}><Search aria-hidden="true" /></Button>
       </div>
     </form>
   );

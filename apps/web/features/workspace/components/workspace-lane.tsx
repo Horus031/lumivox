@@ -42,21 +42,21 @@ export function WorkspaceLane({
       ref={droppable.ref}
       data-status={status}
       className={cn(
-        "flex h-fit min-h-56 w-[18rem] shrink-0 flex-col rounded-[28px] border border-border/60 bg-muted/30 p-3 xl:w-76",
-        droppable.isDropTarget && "ring-2 ring-primary/40",
+        "flex h-fit min-h-56 w-64 max-w-full shrink-0 flex-col",
+        droppable.isDropTarget && "rounded-lg bg-muted ring-2 ring-ring",
       )}
     >
-      <header className="mb-3 flex items-center justify-between gap-3 px-1">
-        <h2 className="text-sm font-semibold text-foreground">{label}</h2>
+      <header className="mb-3 flex min-h-control items-center justify-between gap-3 border-b border-border pb-2">
+        <h2 className="min-w-0 text-label font-semibold text-foreground">{label}</h2>
 
-        <span className="rounded-full bg-background px-2 py-1 text-xs font-medium text-muted-foreground ring-1 ring-border/60">
+        <span className="shrink-0 text-caption font-medium text-muted-foreground tabular-nums">
           {tasks.length}
         </span>
       </header>
 
       {(status === "in_review" || status === "overdue") && (
-        <p className="mb-3 flex items-start gap-1.5 px-1 text-xs text-muted-foreground">
-          <LockKeyhole className="mt-0.5 h-3 w-3 shrink-0" />
+        <p className="mb-3 flex items-start gap-1.5 text-caption text-muted-foreground">
+          <LockKeyhole aria-hidden="true" className="mt-0.5 size-icon-sm shrink-0" />
           {t(status === "in_review" ? "reviewManaged" : "overdueManaged")}
         </p>
       )}
@@ -67,7 +67,7 @@ export function WorkspaceLane({
         />
       )}
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {tasks.length ? (
           tasks.map((task) => (
             <WorkspaceTaskCard
@@ -78,7 +78,7 @@ export function WorkspaceLane({
             />
           ))
         ) : (
-          <div className="rounded-xl border border-dashed border-border p-5 text-center text-xs text-muted-foreground">
+          <div className="py-6 text-center text-caption text-muted-foreground">
             {t("empty")}
           </div>
         )}

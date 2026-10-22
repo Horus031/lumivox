@@ -122,55 +122,56 @@ export function StudyRoomMemberRoster({
   }, [roomId, scheduleRefreshMembers, supabase]);
 
   return (
-    <article className="rounded-2xl border bg-background p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
+    <section className="min-w-0 border-t border-border pt-card">
+      <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
-          <h2 className="text-xl font-semibold">{t("title")}</h2>
-          <p className="mt-1 text-sm text-neutral-600">
+          <h2 className="text-section font-semibold">{t("title")}</h2>
+          <p className="mt-1 text-body text-secondary-text">
             {t("description")}
           </p>
         </div>
 
         <span
-          className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${
+          role="status"
+          className={`rounded-sm px-2 py-0.5 text-caption font-medium ${
             liveState === "connected"
-              ? "bg-emerald-50 text-emerald-700"
+              ? "bg-success/10 text-success"
               : liveState === "error"
-                ? "bg-red-50 text-red-700"
-                : "bg-neutral-100 text-neutral-700"
+                ? "bg-danger/10 text-danger"
+                : "bg-muted text-muted-foreground"
           }`}
         >
           {t(`connection.${liveState}`)}
         </span>
       </div>
 
-      <div className="mt-5 space-y-3">
+      <div className="mt-2 divide-y divide-border">
         {members.length === 0 ? (
-          <div className="rounded-xl border border-dashed p-4 text-sm text-foreground">
+          <div className="py-card text-body text-muted-foreground">
             {t("empty")}
           </div>
         ) : (
           members.map((member) => (
             <div
               key={member.id}
-              className="flex items-center justify-between rounded-xl border p-3"
+              className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-3"
             >
-              <div>
-                <p className="font-medium">
+              <div className="min-w-0 flex-1 basis-32">
+                <p className="text-body font-medium [overflow-wrap:anywhere]">
                   {member.profiles?.full_name ?? t("unknownUser")}
                 </p>
-                <p className="mt-1 text-xs capitalize text-neutral-500">
+                <p className="mt-1 text-caption text-muted-foreground">
                   {t(`roles.${member.role}`)}
                 </p>
               </div>
 
-              <span className="rounded-full bg-surface px-3 py-1 text-xs font-semibold text-foreground">
+              <span className="text-caption text-muted-foreground">
                 {t("memberBadge")}
               </span>
             </div>
           ))
         )}
       </div>
-    </article>
+    </section>
   );
 }

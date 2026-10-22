@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -21,8 +21,6 @@ import type {
   TaskWithGoal,
 } from "@/features/tasks/task.types";
 
-import { formatDisplayDate } from "@/lib/utils/date";
-
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
 import { TaskDocumentsPanel } from "./task-documents-panel";
@@ -34,6 +32,7 @@ import { TaskSubtasksPanel } from "./task-subtasks-panel";
 import { TaskReviewPanel } from "@/features/task-review/components/task-review-panel";
 import { GoalOption } from "@/features/goals/goal.types";
 import { TaskEditForm } from "./task-edit-form";
+import { Pencil, Trash2, X } from "lucide-react";
 
 export type TaskDrawerTab = "overview" | "subtasks" | "documents" | "review";
 
@@ -57,6 +56,7 @@ export function TaskDetailsDrawer({
   initialEditMode,
 }: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
+  const locale = useLocale();
 
   const formT = useTranslations("tasks.form");
 
@@ -114,7 +114,7 @@ export function TaskDetailsDrawer({
     setIsEditing(initialEditMode ?? false);
 
     refreshDetails();
-  }, [taskId, taskUpdatedAt, initialTab, initialEditMode, refreshDetails]);
+  }, [taskId, taskUpdatedAt, task?.status, initialTab, initialEditMode, refreshDetails]);
 
   if (!task) {
     return null;
@@ -126,6 +126,9 @@ export function TaskDetailsDrawer({
 
   const documents = details?.documents ?? [];
 
+  const dateFormatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
+  const displayDate = (value: string | null) => value ? dateFormatter.format(new Date(value)) : t("notSet");
+
   const summaryRows = [
     {
       label: t("summary.goal"),
@@ -135,7 +138,7 @@ export function TaskDetailsDrawer({
     {
       label: t("summary.due"),
 
-      value: formatDisplayDate(currentTask.due_at),
+      value: displayDate(currentTask.due_at),
     },
     {
       label: t("summary.estimate"),
@@ -195,7 +198,6 @@ export function TaskDetailsDrawer({
             type="button"
             variant="outline"
             onClick={onClose}
-            className="rounded-full px-5"
           >
             {t("close")}
           </Button>
@@ -205,18 +207,18 @@ export function TaskDetailsDrawer({
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
-            className="rounded-full px-5"
           >
+            <Trash2 aria-hidden="true" />
             {isDeleting ? t("deleting") : t("deleteTask")}
           </Button>
         </div>
       }
     >
-      <div className="space-y-5">
+      <div className="min-w-0 space-y-card">
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="secondary"
-            className={`rounded-full px-3 py-1.5 ${getPriorityTone(
+            className={`${getPriorityTone(
               currentTask.priority,
             )}`}
           >
@@ -225,7 +227,7 @@ export function TaskDetailsDrawer({
 
           <Badge
             variant="outline"
-            className={`rounded-full px-3 py-1.5 ${getStatusTone(
+            className={`${getStatusTone(
               currentTask.status,
             )}`}
           >
@@ -234,7 +236,7 @@ export function TaskDetailsDrawer({
         </div>
 
         {isLoadingDetails && !details ? (
-          <div className="rounded-2xl border border-dashed border-border/70 p-4 text-sm text-muted-foreground">
+          <div role="status" className="py-2 text-body text-muted-foreground">
             {t("loadingDetails")}
           </div>
         ) : null}
@@ -245,7 +247,7 @@ export function TaskDetailsDrawer({
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
-            <TabsList>
+            <TabsList variant="line" className="min-w-max border-b border-border">
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
 
               <TabsTrigger value="subtasks">
@@ -264,7 +266,7 @@ export function TaskDetailsDrawer({
             </TabsList>
           </div>
 
-          <TabsContent value="overview">
+          <TabsContent value="overview" className="min-w-0 space-y-card">
             <div className="flex items-center justify-end">
               <Button
                 type="button"
@@ -272,12 +274,13 @@ export function TaskDetailsDrawer({
                 size="sm"
                 onClick={() => setIsEditing((current) => !current)}
               >
+                {isEditing ? <X aria-hidden="true" /> : <Pencil aria-hidden="true" />}
                 {isEditing ? commonT("cancel") : commonT("edit")}
               </Button>
             </div>
 
             {isEditing ? (
-              <div className="rounded-3xl border border-border/70 bg-muted/20 p-4">
+              <div className="min-w-0">
                 <TaskEditForm
                   key={currentTask.updated_at}
                   task={currentTask}
@@ -292,60 +295,60 @@ export function TaskDetailsDrawer({
               </div>
             ) : null}
 
-            <div className="space-y-5">
-              <div className="grid gap-3 sm:grid-cols-2">
+            {!isEditing ? <div className="space-y-card">
+              <dl className="grid gap-card sm:grid-cols-2">
                 {summaryRows.map((row) => (
                   <div
                     key={row.label}
-                    className="rounded-[22px] bg-muted/45 px-4 py-3 ring-1 ring-border/50"
+                    className="min-w-0"
                   >
-                    <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                    <dt className="text-label font-medium text-muted-foreground">
                       {row.label}
-                    </p>
+                    </dt>
 
-                    <p className="mt-2 text-sm font-medium text-foreground">
+                    <dd className="mt-1 text-body font-medium text-foreground [overflow-wrap:anywhere]">
                       {row.value}
-                    </p>
+                    </dd>
                   </div>
                 ))}
-              </div>
+              </dl>
 
-              <div className="rounded-3xl bg-muted/35 p-4 ring-1 ring-border/50">
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              <div className="border-t border-border pt-card">
+                <h3 className="text-label font-medium text-muted-foreground">
                   {t("notes")}
-                </p>
+                </h3>
 
-                <p className="mt-2 text-sm leading-6 text-foreground/90">
+                <p className="mt-1 whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">
                   {currentTask.description?.trim()
                     ? currentTask.description
                     : t("noDescription")}
                 </p>
               </div>
 
-              <div className="rounded-3xl bg-muted/35 p-4 ring-1 ring-border/50">
-                <p className="text-[0.7rem] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              <div className="border-t border-border pt-card">
+                <h3 className="text-label font-medium text-muted-foreground">
                   {t("systemFields")}
-                </p>
+                </h3>
 
-                <div className="mt-3 grid gap-2 text-sm text-muted-foreground">
-                  <div className="flex items-center justify-between gap-3">
+                <div className="mt-2 grid gap-2 text-body text-muted-foreground">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span>{t("created")}</span>
 
                     <span className="font-medium text-foreground">
-                      {formatDisplayDate(currentTask.created_at)}
+                      {displayDate(currentTask.created_at)}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
                     <span>{t("updated")}</span>
 
                     <span className="font-medium text-foreground">
-                      {formatDisplayDate(currentTask.updated_at)}
+                      {displayDate(currentTask.updated_at)}
                     </span>
                   </div>
                 </div>
               </div>
-            </div>
+            </div> : null}
           </TabsContent>
 
           <TabsContent value="subtasks">

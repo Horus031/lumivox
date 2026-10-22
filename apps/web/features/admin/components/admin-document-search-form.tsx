@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
+import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
@@ -31,6 +32,7 @@ export function AdminDocumentSearchForm({
   const commonT = useTranslations("admin.common");
   const [query, setQuery] = useState(initialQuery);
   const [status, setStatus] = useState(initialStatus);
+  const id = useId();
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -51,32 +53,34 @@ export function AdminDocumentSearchForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-2xl shadow-sm">
-      <div className="flex items-end gap-4">
-        <div className="space-y-2 w-full">
-          <Label className="text-sm font-medium text-foreground">
+    <form onSubmit={handleSubmit} className="min-w-0">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
+        <div className="col-span-2 grid min-w-0 gap-2 md:col-span-1">
+          <Label htmlFor={`${id}-query`}>
             {t("label")}
           </Label>
 
           <Input
+            id={`${id}-query`}
+            type="search"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder={t("placeholder")}
           />
         </div>
 
-        <div>
-          <Label className="text-sm font-medium text-foreground">
+        <div className="grid min-w-0 gap-2">
+          <Label htmlFor={`${id}-status`}>
             {commonT("aiStatus")}
           </Label>
 
           <Select value={status} onValueChange={(value) => setStatus(value)}>
-            <SelectTrigger className="w-full min-w-48">
+            <SelectTrigger id={`${id}-status`} className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                <SelectLabel>AI Statuses</SelectLabel>
+                <SelectLabel>{commonT("aiStatus")}</SelectLabel>
                 <SelectItem value="all">{commonT("all")}</SelectItem>
                 <SelectItem value="pending">
                   {commonT("aiStatuses.pending")}
@@ -100,9 +104,11 @@ export function AdminDocumentSearchForm({
 
         <Button
           type="submit"
-          size={"lg"}
+          size="icon"
+          aria-label={commonT("search")}
+          title={commonT("search")}
         >
-          {commonT("search")}
+          <Search aria-hidden="true" />
         </Button>
       </div>
     </form>

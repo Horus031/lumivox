@@ -2,24 +2,24 @@ import { TaskWithGoal } from "@/features/tasks/task.types";
 
 export function getStatusTone(status: TaskWithGoal["status"]) {
   if (status === "completed")
-    return "bg-emerald-500/10 text-emerald-700 border-emerald-500/15";
+    return "bg-success/10 text-foreground border-success/30";
   if (status === "overdue")
-    return "bg-rose-500/10 text-rose-700 border-rose-500/15";
+    return "bg-danger/10 text-foreground border-danger/30";
   if (status === "in_progress")
-    return "bg-sky-500/10 text-sky-700 border-sky-500/15";
+    return "bg-info/10 text-foreground border-info/30";
   if (status === "in_review")
-    return "bg-violet-500/10 text-violet-700 border-violet-500/15";
+    return "bg-info/10 text-foreground border-info/30";
   if (status === "cancelled")
-    return "bg-neutral-500/10 text-neutral-500 border-neutral-500/15";
-  return "bg-amber-500/10 text-amber-700 border-amber-500/15 ring-amber-500/15";
+    return "bg-muted text-muted-foreground border-border";
+  return "bg-warning/10 text-foreground border-warning/30";
 }
 
 export function getPriorityTone(priority: TaskWithGoal["priority"]) {
   if (priority === "critical")
-    return "bg-rose-500/10 text-rose-700 border-rose-500/15";
+    return "bg-danger/10 text-foreground border-danger/30";
   if (priority === "high")
-    return "bg-orange-500/10 text-orange-700 border-orange-500/15 ring-orange-500/15";
+    return "bg-warning/10 text-foreground border-warning/30";
   if (priority === "medium")
-    return "bg-sky-500/10 text-sky-700 border-sky-500/15";
-  return "bg-neutral-500/10 text-neutral-500 border-neutral-500/15";
+    return "bg-info/10 text-foreground border-info/30";
+  return "bg-muted text-muted-foreground border-border";
 }
