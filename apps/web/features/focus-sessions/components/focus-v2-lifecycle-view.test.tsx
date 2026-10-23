@@ -108,4 +108,28 @@ describe("Focus V2 production lifecycle UI", () => {
     act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
     expect(node.querySelector('[aria-pressed="true"]')).toBeNull();
   });
+  it("keeps the chat and its draft mounted across fullscreen and settings", () => {
+    act(() => root.render(<FocusV2LifecycleView initialSnapshot={snapshot} taskTitle="Study">
+      <input aria-label="Chat draft" defaultValue="Keep this question" />
+    </FocusV2LifecycleView>));
+    const draft = node.querySelector("input");
+    expect(document.querySelector('[aria-label="title"]')).toBeNull();
+    act(() => node.querySelector<HTMLButtonElement>('[aria-label="immersive"]')!.click());
+    expect(node.querySelector("input")).toBe(draft);
+    expect(document.body.style.overflow).toBe("hidden");
+    act(() => node.querySelector<HTMLButtonElement>('[aria-label="settings"]')!.click());
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(node.querySelector("input")).toBe(draft);
+    // Escape belongs to the settings dialog while it is open.
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
+    expect(node.querySelector('[aria-label="exitImmersive"]')).not.toBeNull();
+    act(() => document.querySelector<HTMLButtonElement>('[data-slot="dialog-close"]')!.click());
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    act(() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" })));
+    expect(node.querySelector('[aria-label="immersive"]')).not.toBeNull();
+    expect(node.querySelector("input")).toBe(draft);
+    expect(draft?.value).toBe("Keep this question");
+    expect(document.body.style.overflow).not.toBe("hidden");
+  });
+
 });

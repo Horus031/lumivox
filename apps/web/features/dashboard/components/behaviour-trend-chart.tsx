@@ -28,20 +28,20 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
   const t = useTranslations("dashboard.behaviourTrend");
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+    <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-4">
         <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-        <p className="mt-1 text-body text-secondary-text">
+        <p className="mt-1 text-caption text-secondary-text">
           {t("description")}
         </p>
       </div>
 
-      {data.length === 0 ? <div className="flex h-64 items-center justify-center text-body text-muted-foreground">{t("empty")}</div> : <div className="h-64 min-w-0 w-full">
+      {data.length === 0 ? <div className="flex h-48 items-center justify-center text-body text-muted-foreground">{t("empty")}</div> : <div className="h-48 min-w-0 w-full">
         <ResponsiveContainer
           width="100%"
           height="100%"
           minWidth={0}
-          minHeight={256}
+          minHeight={192}
         >
           <ComposedChart
             accessibilityLayer

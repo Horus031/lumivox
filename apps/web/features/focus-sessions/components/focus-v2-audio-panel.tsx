@@ -11,9 +11,14 @@ import type { FocusV2Projection } from "../focus-v2.types";
 type Props = { sessionId: string; projection: FocusV2Projection };
 
 export function FocusV2AudioPanel({ sessionId, projection }: Props) {
+  const audio = useFocusV2Audio(sessionId, projection);
+  return <FocusV2AudioControls audio={audio} />;
+}
+
+export function FocusV2AudioControls({ audio }: { audio: ReturnType<typeof useFocusV2Audio>; }) {
   const t = useTranslations("focus.audio");
   const { settings, hydrated, enabled, error, updateSettings, toggleAudio, previewCue } =
-    useFocusV2Audio(sessionId, projection);
+    audio;
 
   return (
     <section aria-label={t("title")} className="min-w-0 space-y-4 rounded-lg border border-border bg-card p-4">

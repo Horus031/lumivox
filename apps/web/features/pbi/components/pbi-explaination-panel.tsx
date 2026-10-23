@@ -22,7 +22,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
 
   if (!explanation) {
     return (
-      <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+      <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
         <h2 className="text-section font-semibold text-foreground">
           {t("emptyTitle")}
         </h2>
@@ -34,7 +34,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
   }
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+    <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-caption font-medium text-muted-foreground">

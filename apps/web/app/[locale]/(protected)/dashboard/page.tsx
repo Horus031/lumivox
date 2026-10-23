@@ -1,4 +1,8 @@
 import { Suspense } from "react";
+import { Play } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
+import { FocusOverview } from "@/features/dashboard/components/focus-overview";
 import { getTranslations } from "next-intl/server";
 
 import { BehaviourTrendChart } from "@/features/dashboard/components/behaviour-trend-chart";
@@ -20,6 +24,7 @@ import type { PbiExplanationPayload } from "@/features/pbi/pbi.types";
 import { requireUser } from "@/lib/auth/require-user";
 
 type DashboardPageProps = {
+  searchParams: Promise<{ focusPeriod?: string }>;
   params: Promise<{
     locale: string;
   }>;
@@ -128,11 +133,13 @@ async function DashboardTaskStatusSection({
 //   return <NativeTaskRiskAlertsCard alerts={alerts} />;
 // }
 
-export default async function DashboardPage({ params }: DashboardPageProps) {
-  const [{ locale }, headerT, { supabase }] = await Promise.all([
+export default async function DashboardPage({ params, searchParams }: DashboardPageProps) {
+  const [{ locale }, headerT, { supabase }, { focusPeriod }, focusT] = await Promise.all([
     params,
     getTranslations("dashboard.header"),
     requireUser(),
+    searchParams,
+    getTranslations("focus.startForm"),
   ]);
 
   // Start independent dashboard reads immediately. The same promises are shared
@@ -143,12 +150,15 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
   return (
     <section>
-      <div className="mx-auto min-w-0 max-w-full space-y-section">
+      <div className="mx-auto min-w-0 max-w-full space-y-5">
         <PageHeader
           eyebrow={headerT("eyebrow")}
           title={headerT("title")}
           description={headerT("description")}
-          action={<RefreshPbiButton />}
+          action={<>
+            <Button asChild><Link href="/focus"><Play aria-hidden="true" />{focusT("start")}</Link></Button>
+            <RefreshPbiButton />
+          </>}
         />
 
         <Suspense fallback={
@@ -161,28 +171,29 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
           <DashboardSummarySection activityPromise={activityPromise} />
         </Suspense>
 
-        <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <Suspense fallback={<DashboardSectionSkeleton height="h-96" />}>
-            <DashboardPbiScoreSection pbiPromise={pbiPromise} />
-          </Suspense>
-          <Suspense fallback={<DashboardSectionSkeleton height="h-52" />}>
-            <DashboardPbiExplanationSection
-              pbiPromise={pbiPromise}
-              locale={locale}
-            />
-          </Suspense>
-        </div>
-
         <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
-          <DashboardBehaviourSection activityPromise={activityPromise} />
+          <FocusOverview days={focusPeriod === "7" ? 7 : 30} />
         </Suspense>
 
-        <div className="grid min-w-0 items-start gap-card xl:grid-cols-2">
+        <div className="grid min-w-0 items-stretch gap-4 xl:grid-cols-2">
           <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+            <DashboardPbiScoreSection pbiPromise={pbiPromise} />
+          </Suspense>
+          <div className="min-w-0 space-y-4">
+            <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
+              <DashboardBehaviourSection activityPromise={activityPromise} />
+            </Suspense>
+            <Suspense fallback={<DashboardSectionSkeleton height="h-52" />}>
+              <DashboardPbiExplanationSection pbiPromise={pbiPromise} locale={locale} />
+            </Suspense>
+          </div>
+        </div>
+
+        <div className="grid min-w-0 items-stretch gap-4 xl:grid-cols-2">
+          <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
             <DashboardPbiHistorySection pbiPromise={pbiPromise} />
           </Suspense>
-
-          <Suspense fallback={<DashboardSectionSkeleton height="h-80" />}>
+          <Suspense fallback={<DashboardSectionSkeleton height="h-64" />}>
             <DashboardTaskStatusSection activityPromise={activityPromise} />
           </Suspense>
         </div>
