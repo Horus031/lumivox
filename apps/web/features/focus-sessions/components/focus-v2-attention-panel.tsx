@@ -15,10 +15,15 @@ type DistractionType = typeof DISTRACTION_TYPES[number];
 type Props = { sessionId: string; projection: FocusV2Projection };
 
 export function FocusV2AttentionPanel({ sessionId, projection }: Props) {
+  const attention = useFocusV2Attention(sessionId, projection);
+  return <FocusV2AttentionControls attention={attention} projection={projection} sessionId={sessionId} />;
+}
+
+export function FocusV2AttentionControls({ attention, projection, sessionId }: { sessionId: string; attention: ReturnType<typeof useFocusV2Attention>; projection: FocusV2Projection; }) {
   const t = useTranslations("focus.attention");
   const { settings, hydrated, permission, permissionError, awayCandidate,
     updateSettings, enableNotifications, dismissAwayCandidate,
-  } = useFocusV2Attention(sessionId, projection);
+  } = attention;
   const [distractionType, setDistractionType] = useState<DistractionType>("other");
   const [durationSeconds, setDurationSeconds] = useState("0");
   const [note, setNote] = useState("");

@@ -977,6 +977,8 @@
   },
   "focus": {
     "analytics": {
+      "details": "Detailed statistics",
+      "loading": "Loading focus statistics",
       "title": "Focus analytics",
       "subtitle": "Last {days} calendar days (UTC). Recorded sessions only.",
       "periodLabel": "Reporting period",
@@ -1088,6 +1090,11 @@
       }
     },
     "live": {
+      "settings": "Session settings",
+      "settingsDescription": "Adjust focus sounds, notifications and distraction tracking.",
+      "sessionOverview": "Session overview",
+      "studyChat": "Study assistant",
+      "reviewDistraction": "Review time away",
       "eyebrow": "Focus Session 2.0",
       "generalStudy": "General study session",
       "roundOf": "Round {current} of {total}",
