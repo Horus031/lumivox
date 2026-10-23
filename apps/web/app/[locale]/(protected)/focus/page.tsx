@@ -1,13 +1,9 @@
 import { Suspense } from "react";
 import { getAvailableFocusTasks } from "@/features/tasks/task.queries";
-import {
-  getActiveFocusSession,
-  getRecentFocusSessions,
-} from "@/features/focus-sessions/focus-session.queries";
+import { getActiveFocusSession } from "@/features/focus-sessions/focus-session.queries";
 
 import { StartFocusSessionForm } from "@/features/focus-sessions/components/start-focus-session-form";
 import { ActiveFocusSessionPanel } from "@/features/focus-sessions/components/active-focus-session-panel";
-import { RecentFocusSessions } from "@/features/focus-sessions/components/recent-focus-sessions";
 
 import { PageHeader } from "@/features/app-shell/components/page-header";
 import { getAccessibleProcessedLearningDocuments } from "@/features/learning-documents/learning-document.queries";
@@ -18,10 +14,9 @@ import { getActiveFocusV2Snapshot } from "@/features/focus-sessions/focus-v2.que
 import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-preferences.queries";
 import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
 import { FocusV2LifecycleView } from "@/features/focus-sessions/components/focus-v2-lifecycle-view";
-import { FocusV2AnalyticsDashboard } from "@/features/focus-sessions/components/focus-v2-analytics-dashboard";
 import { isFocusV2CreationEnabled } from "@/features/focus-sessions/focus-v2-release";
 
-async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
+async function FocusRagSection({ focusSessionId, fillHeight = false }: { focusSessionId: string; fillHeight?: boolean }) {
   const [documents, ragDefaults] = await Promise.all([
     getAccessibleProcessedLearningDocuments(),
     getRagDefaultSettings(),
@@ -30,7 +25,8 @@ async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
   return (
     <RagStudyAssistant
       compact
-      className="min-w-0 rounded-lg border-border bg-card p-card shadow-none"
+      fillHeight={fillHeight}
+      className="min-w-0 rounded-xl border-border bg-card p-3 shadow-none"
       focusSessionId={focusSessionId}
       documents={documents}
       defaultTopK={ragDefaults.defaultTopK}
@@ -41,20 +37,17 @@ async function FocusRagSection({ focusSessionId }: { focusSessionId: string }) {
 
 function RagLoadingFallback() {
   return (
-    <div aria-hidden="true" className="h-64 animate-pulse rounded-lg border border-border bg-muted" />
+    <div aria-hidden="true" className="h-full min-h-64 animate-pulse rounded-lg border border-border bg-muted" />
   );
 }
 
-export default async function FocusPage({ searchParams }: { searchParams: Promise<{ focusPeriod?: string }> }) {
-  const { focusPeriod } = await searchParams;
-  const analyticsDays: 7 | 30 = focusPeriod === "7" ? 7 : 30;
+export default async function FocusPage() {
   const activeV2 = process.env.FOCUS_V2_ENABLED === "true"
     ? await getActiveFocusV2Snapshot()
     : null;
-  const [tasks, activeSession, recentSessions, t] = await Promise.all([
+  const [tasks, activeSession, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
-    getRecentFocusSessions(),
     getTranslations("focus.page"),
   ]);
   const initialPreferences = isFocusV2CreationEnabled() && !activeSession && !activeV2
@@ -63,24 +56,25 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
 
   return (
     <section>
-      <div className="mx-auto min-w-0 space-y-section">
-        <PageHeader
+      <div className="mx-auto min-w-0 space-y-5">
+        {!activeV2 && <PageHeader
           eyebrow={t("eyebrow")}
           title={t("title")}
           description={t("description")}
-        />
+        />}
 
-        <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0">
           <div className="min-w-0 space-y-card">
             {activeV2 ? (
               <>
                 <FocusV2LifecycleView
                   initialSnapshot={activeV2}
                   taskTitle={tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null}
-                />
-                <Suspense fallback={<RagLoadingFallback />}>
-                  <FocusRagSection focusSessionId={activeV2.session.id} />
-                </Suspense>
+                >
+                  <Suspense fallback={<RagLoadingFallback />}>
+                    <FocusRagSection focusSessionId={activeV2.session.id} fillHeight />
+                  </Suspense>
+                </FocusV2LifecycleView>
               </>
             ) : activeSession ? (
               <>
@@ -95,14 +89,7 @@ export default async function FocusPage({ searchParams }: { searchParams: Promis
                 : <StartFocusSessionForm tasks={tasks} />
             )}
           </div>
-
-          <RecentFocusSessions sessions={recentSessions} />
         </div>
-        {process.env.FOCUS_V2_ENABLED === "true" && (
-          <Suspense fallback={<div className="h-48 animate-pulse rounded-lg bg-muted" aria-hidden="true" />}>
-            <FocusV2AnalyticsDashboard days={analyticsDays} />
-          </Suspense>
-        )}
       </div>
     </section>
   );

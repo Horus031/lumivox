@@ -36,7 +36,7 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
 
   if (!snapshot) {
     return (
-      <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+      <section className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
         <h2 className="text-section font-semibold">{t("emptyTitle")}</h2>
         <p className="mt-1 text-body text-secondary-text">{t("emptyDescription")}</p>
       </section>
@@ -55,7 +55,7 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
     : fallbackComponents;
 
   return (
-    <section className="min-w-0 rounded-lg border border-border bg-card p-card">
+    <section className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="grid grid-cols-2 gap-card border-b border-border pb-card">
         {[{ key: "personalized", score: snapshot.personalized_pbi }, { key: "standard", score: snapshot.standard_pbi }].map((metric) => (
           <div key={metric.key} className="min-w-0">
@@ -70,7 +70,7 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
         {t("period", { start: snapshot.period_start, end: snapshot.period_end })}
       </p>
       <h3 className="mt-4 text-label font-medium">{explanationT("componentTitle")}</h3>
-      <div className="mt-3 space-y-3">
+      <div className="mt-3 flex flex-1 flex-col justify-between gap-3">
         {components.map((component) => {
           const score = Math.min(100, Math.max(0, component.score * 100));
           const levelLabel = explanationT(`levels.${component.level}`);

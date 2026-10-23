@@ -977,6 +977,8 @@
   },
   "focus": {
     "analytics": {
+      "details": "Thống kê chi tiết",
+      "loading": "Đang tải thống kê tập trung",
       "title": "Phân tích phiên tập trung",
       "subtitle": "{days} ngày lịch gần nhất (UTC), chỉ tính dữ liệu đã ghi nhận.",
       "periodLabel": "Khoảng thống kê",
@@ -1088,6 +1090,11 @@
       }
     },
     "live": {
+      "settings": "Cài đặt phiên học",
+      "settingsDescription": "Tùy chỉnh âm thanh, thông báo và ghi nhận xao nhãng.",
+      "sessionOverview": "Tổng quan phiên học",
+      "studyChat": "Trợ lý học tập",
+      "reviewDistraction": "Xem lại thời gian rời trang",
       "eyebrow": "Phiên tập trung 2.0",
       "generalStudy": "Phiên học tự do",
       "roundOf": "Vòng {current} / {total}",

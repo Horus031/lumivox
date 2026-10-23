@@ -52,6 +52,7 @@ type ChatMessage = {
 
 type RagStudyAssistantProps = {
   compact?: boolean;
+  fillHeight?: boolean;
   className?: string;
   focusSessionId?: string | null;
   documents: RagDocumentOption[];
@@ -70,6 +71,7 @@ function isNearChatBottom(container: HTMLDivElement) {
 
 export function RagStudyAssistant({
   compact = false,
+  fillHeight = false,
   className,
   focusSessionId,
   documents,
@@ -196,69 +198,19 @@ export function RagStudyAssistant({
   }, [messages]);
 
   return (
-    <section className={cn("rounded-2xl h-fit border bg-background p-5 shadow-sm", className)}>
-      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-        {/* <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <Label className="text-muted-foreground text-xs">
-              Top-k chunks
-            </Label>
-            <Select
-              value={String(topK)}
-              disabled={selectedDocumentIds.length === 0}
-              onValueChange={(e) => setTopK(Number(e) as 3 | 5 | 7)}
-            >
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Select top chunks" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Top chunks</SelectLabel>
-                  <SelectItem value="3">Top 3</SelectItem>
-                  <SelectItem value="5">Top 5</SelectItem>
-                  <SelectItem value="7">Top 7</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-muted-foreground text-xs">
-              Prompt variant
-            </Label>
-
-            <Select
-              value={promptVariant}
-              disabled={selectedDocumentIds.length === 0}
-              onValueChange={(e) =>
-                setPromptVariant(e as "no_rule" | "grounded_rule")
-              }
-            >
-              <SelectTrigger className="w-full max-w-48">
-                <SelectValue placeholder="Select prompt variants" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Prompt variants</SelectLabel>
-                  <SelectItem value="grounded_rule">Grounded rule</SelectItem>
-                  <SelectItem value="no_rule">No strict rule</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-        </div> */}
-      </div>
+    <section className={cn("rounded-2xl h-fit border bg-background p-5 shadow-sm", fillHeight && "flex h-full min-h-0 flex-col overflow-hidden", className)}>
+      {fillHeight && <h3 className="shrink-0 border-b border-border pb-2 text-label font-semibold">{t("ragTitle")}</h3>}
 
       <div
         ref={chatContainerRef}
         onScroll={handleChatScroll}
-        className={cn("mt-5 scroll-smooth h-96 space-y-4 rounded-2xl overflow-y-scroll", compact && "mt-3 h-64 rounded-md")}
+        className={cn("mt-5 scroll-smooth h-96 space-y-4 rounded-2xl overflow-y-scroll", compact && "mt-3 h-64 rounded-md", fillHeight && "h-auto min-h-0 flex-1 overflow-y-auto overscroll-contain")}
       >
         {messages.length === 0 ? (
           <div className="flex flex-col h-full gap-4 items-center justify-center text-center">
-            <p className={cn("text-sm font-medium uppercase tracking-wide text-muted-foreground", compact && "text-caption tracking-normal")}>
+            {!fillHeight && <p className={cn("text-sm font-medium uppercase tracking-wide text-muted-foreground", compact && "text-caption tracking-normal")}>
               {t("ragTitle")}
-            </p>
+            </p>}
             <p className={cn("max-w-md text-3xl text-muted-foreground", compact && "text-section text-secondary-text")}>
               {t("emptyPrompt")}
             </p>
@@ -333,17 +285,18 @@ export function RagStudyAssistant({
       <form
         ref={formRef}
         onSubmit={handleAsk}
-        className="mt-4 flex flex-col gap-3"
+        className={cn("mt-4 flex flex-col gap-3", fillHeight && "mt-2 shrink-0 gap-2 border-t border-border pt-2")}
       >
         <div>
           <Popover>
-            <PopoverTrigger>
-              <Label className="text-xs px-4 py-2 rounded-md cursor-pointer hover:bg-accent">
-                <Plus size={12} /> {t("chooseDocuments")}
-              </Label>
+            <PopoverTrigger asChild>
+              <Button type="button" variant="ghost" size="sm" className="max-w-full text-caption">
+                <Plus size={12} aria-hidden="true" /> {t("chooseDocuments")}
+              </Button>
+            </PopoverTrigger>
               <PopoverContent
                 align="start"
-                className="max-w-xl w-full"
+                className="max-h-[60dvh] w-[min(28rem,calc(100vw-2rem))] overflow-y-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <PopoverHeader>
@@ -407,18 +360,18 @@ export function RagStudyAssistant({
                   </div>
                 )}
               </PopoverContent>
-            </PopoverTrigger>
           </Popover>
         </div>
 
         <div className={cn("flex gap-4", compact && "items-end gap-2")}>
           <Textarea
+            rows={fillHeight ? 2 : undefined}
             value={question}
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t("askPlaceholder")}
             aria-label={t("askPlaceholder")}
             onKeyDown={handleKeyDown}
-            className={cn("min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition", compact && "min-h-touch rounded-md py-2 text-base md:text-body")}
+            className={cn("min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition", compact && "min-h-touch rounded-md py-2 text-base md:text-body", fillHeight && "max-h-28 overflow-y-auto")}
           />
 
           <Button
