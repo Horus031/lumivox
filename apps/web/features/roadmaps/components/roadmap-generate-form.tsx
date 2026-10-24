@@ -4,6 +4,8 @@ import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { formatLocalDate, parseLocalDate } from "@/lib/local-date";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
@@ -38,13 +40,13 @@ const levels: { value: RoadmapLevel; label: string }[] = [
 ];
 
 function todayInputValue() {
-  return new Date().toISOString().slice(0, 10);
+  return formatLocalDate(new Date());
 }
 
 function addMonthsInputValue(months: number) {
   const date = new Date();
   date.setMonth(date.getMonth() + months);
-  return date.toISOString().slice(0, 10);
+  return formatLocalDate(date);
 }
 
 export function RoadmapGenerateForm({
@@ -284,33 +286,9 @@ export function RoadmapGenerateForm({
         </h2>
 
         <div className="mt-4 grid gap-card md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.startDate")}
-            </span>
+          <DatePicker label={t("fields.startDate")} value={parseLocalDate(startDate)} onChange={(date) => setStartDate(formatLocalDate(date))} disabled={isPending} required />
 
-            <Input
-              type="date"
-              value={startDate}
-              onChange={(event) => setStartDate(event.target.value)}
-              required
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
-            />
-          </label>
-
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.endDate")}
-            </span>
-
-            <Input
-              type="date"
-              value={endDate}
-              onChange={(event) => setEndDate(event.target.value)}
-              required
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
-            />
-          </label>
+          <DatePicker label={t("fields.endDate")} value={parseLocalDate(endDate)} onChange={(date) => setEndDate(formatLocalDate(date))} disabled={isPending} required />
 
           <label className="block min-w-0 space-y-1.5">
             <span className="text-label font-medium text-foreground">
