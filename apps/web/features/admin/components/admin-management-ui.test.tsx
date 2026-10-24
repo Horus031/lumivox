@@ -5,6 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/vi.json";
 import en from "@/messages/en.json";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn(), role: vi.fn(), visibility: vi.fn(), remove: vi.fn(), process: vi.fn(), success: vi.fn(), error: vi.fn(), users: vi.fn(), user: vi.fn(), documents: vi.fn(), document: vi.fn(), chunks: vi.fn() }));
 vi.mock("@/i18n/navigation", () => ({
   useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
@@ -47,7 +50,7 @@ const chunk = { chunk_id: "chunk-1", chunk_index: 0, content: "<img src=x onerro
 describe("Admin management UI", () => {
   let container: HTMLDivElement; let root: Root;
   beforeEach(() => {
-    vi.clearAllMocks(); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     for (const action of [mocks.role, mocks.visibility, mocks.remove, mocks.process]) action.mockResolvedValue({ success: true, message: "OK" });
     mocks.users.mockResolvedValue([user]); mocks.user.mockResolvedValue(user); mocks.documents.mockResolvedValue([documentData]); mocks.document.mockResolvedValue(documentData); mocks.chunks.mockResolvedValue([chunk]);
     container = document.createElement("div"); document.body.append(container); root = createRoot(container);
@@ -93,10 +96,10 @@ describe("Admin management UI", () => {
     expect(mocks.error).toHaveBeenCalledWith("Rejected"); expect(mocks.refresh).toHaveBeenCalledTimes(1); expect(container.querySelector("button")!.disabled).toBe(false);
   });
   it("never deletes without confirmation", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(false); await render(<AdminDocumentDeleteButton documentId="doc-1" filePath="user-1/doc.pdf" />); await click(); expect(mocks.remove).not.toHaveBeenCalled(); expect(mocks.push).not.toHaveBeenCalled();
+    confirmation.mockResolvedValue(false); await render(<AdminDocumentDeleteButton documentId="doc-1" filePath="user-1/doc.pdf" />); await click(); expect(mocks.remove).not.toHaveBeenCalled(); expect(mocks.push).not.toHaveBeenCalled();
   });
   it.each([true, false])("keeps scoped delete payload and navigation on success=%s", async (success) => {
-    vi.spyOn(window, "confirm").mockReturnValue(true); mocks.remove.mockResolvedValue({ success, message: "Result" }); await render(<AdminDocumentDeleteButton documentId="doc-1" filePath="user-1/doc.pdf" />); await click();
+    confirmation.mockResolvedValue(true); mocks.remove.mockResolvedValue({ success, message: "Result" }); await render(<AdminDocumentDeleteButton documentId="doc-1" filePath="user-1/doc.pdf" />); await click();
     expect(mocks.remove).toHaveBeenCalledWith({ documentId: "doc-1", filePath: "user-1/doc.pdf" }); expect(mocks.push).toHaveBeenCalledTimes(success ? 1 : 0); expect(mocks.refresh).toHaveBeenCalledTimes(success ? 1 : 0); if (success) expect(mocks.push).toHaveBeenCalledWith("/admin/documents");
   });
   it.each(["vi", "en"])("shows semantic tables and localized detail links in %s", async (locale) => {

@@ -5,6 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/vi.json";
 import en from "@/messages/en.json";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn(), archive: vi.fn(), remove: vi.fn(), setting: vi.fn(), success: vi.fn(), error: vi.fn(), groups: vi.fn(), group: vi.fn(), members: vi.fn(), messages: vi.fn(), settings: vi.fn() }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }), Link: ({ href, children, ...props }: React.ComponentProps<"a">) => { const locale = useLocale(); return <a href={`/${locale}${href}`} {...props}>{children}</a>; } }));
 vi.mock("sonner", () => ({ toast: { success: mocks.success, error: mocks.error } }));
@@ -42,7 +45,7 @@ const settings = [{ key: "weekly_challenge_default_focus_minutes", value: 600, d
 describe("Admin Groups and CMS settings", () => {
   let container: HTMLDivElement; let root: Root;
   beforeEach(() => {
-    vi.clearAllMocks(); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     for (const action of [mocks.archive, mocks.remove, mocks.setting]) action.mockResolvedValue({ success: true, message: "OK" });
     mocks.groups.mockResolvedValue([group]); mocks.group.mockResolvedValue(group); mocks.members.mockResolvedValue([member]); mocks.messages.mockResolvedValue([message]); mocks.settings.mockResolvedValue(settings);
     container = document.createElement("div"); document.body.append(container); root = createRoot(container);
@@ -61,23 +64,23 @@ describe("Admin Groups and CMS settings", () => {
     await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))); expect(mocks.push).toHaveBeenLastCalledWith("/admin/groups");
   });
   it.each([false, true])("requires confirmation for archived=%s", async (archived) => {
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false); await render(<AdminGroupArchiveButton groupId="group-1" archived={archived} />); await click();
-    expect(confirm).toHaveBeenCalledWith(archived ? messages.admin.groups.actions.restoreConfirm : messages.admin.groups.actions.archiveConfirm); expect(mocks.archive).not.toHaveBeenCalled();
+    const confirm = confirmation.mockResolvedValue(false); await render(<AdminGroupArchiveButton groupId="group-1" archived={archived} />); await click();
+    expect(confirm.mock.calls[0][0]).toBe(archived ? messages.admin.groups.actions.restoreConfirm : messages.admin.groups.actions.archiveConfirm); expect(mocks.archive).not.toHaveBeenCalled();
   });
   it.each([true, false])("preserves archive note/payload and success-only refresh=%s", async (success) => {
-    vi.spyOn(window, "confirm").mockReturnValue(true); mocks.archive.mockResolvedValue({ success, message: "Result" }); await render(<AdminGroupArchiveButton groupId="group-1" archived={false} />);
+    confirmation.mockResolvedValue(true); mocks.archive.mockResolvedValue({ success, message: "Result" }); await render(<AdminGroupArchiveButton groupId="group-1" archived={false} />);
     const note = container.querySelector("input")!; expect(note.maxLength).toBe(500); expect(container.querySelector("label")!.htmlFor).toBe(note.id); enter(note, "Keep this note"); await click();
     expect(mocks.archive).toHaveBeenCalledWith({ groupId: "group-1", archived: true, adminNote: "Keep this note" }); expect(mocks.refresh).toHaveBeenCalledTimes(success ? 1 : 0); expect(note.value).toBe("Keep this note"); expect(success ? mocks.success : mocks.error).toHaveBeenCalledWith("Result");
   });
   it("restores archived groups with the original empty-note payload", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true); await render(<AdminGroupArchiveButton groupId="group-1" archived />); expect(container.querySelector("input")).toBeNull(); await click(); expect(mocks.archive).toHaveBeenCalledWith({ groupId: "group-1", archived: false, adminNote: "" });
+    confirmation.mockResolvedValue(true); await render(<AdminGroupArchiveButton groupId="group-1" archived />); expect(container.querySelector("input")).toBeNull(); await click(); expect(mocks.archive).toHaveBeenCalledWith({ groupId: "group-1", archived: false, adminNote: "" });
   });
   it("disables archive note and submit during the request", async () => {
-    vi.spyOn(window, "confirm").mockReturnValue(true); let resolve!: (value: { success: boolean; message: string }) => void; mocks.archive.mockReturnValue(new Promise((done) => { resolve = done; }));
+    confirmation.mockResolvedValue(true); let resolve!: (value: { success: boolean; message: string }) => void; mocks.archive.mockReturnValue(new Promise((done) => { resolve = done; }));
     await render(<AdminGroupArchiveButton groupId="group-1" archived={false} />); await click(); expect(container.querySelector("input")!.disabled).toBe(true); expect(container.querySelector("button")!.disabled).toBe(true); await act(async () => resolve({ success: false, message: "Rejected" })); expect(container.querySelector("input")!.disabled).toBe(false);
   });
   it.each([true, false])("keeps message identity and success-only refresh=%s", async (success) => {
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false); await render(<AdminGroupMessageDeleteButton groupId="group-1" messageId="message-1" />); await click(); expect(mocks.remove).not.toHaveBeenCalled();
+    const confirm = confirmation.mockResolvedValue(false); await render(<AdminGroupMessageDeleteButton groupId="group-1" messageId="message-1" />); await click(); expect(mocks.remove).not.toHaveBeenCalled();
     confirm.mockReturnValue(true); mocks.remove.mockResolvedValue({ success, message: "Result" }); await click(); expect(mocks.remove).toHaveBeenCalledWith({ groupId: "group-1", messageId: "message-1" }); expect(mocks.refresh).toHaveBeenCalledTimes(success ? 1 : 0); expect(container.querySelector("button")!.getAttribute("aria-label")).toBe(messages.admin.groups.actions.delete);
   });
   it.each(["vi", "en"])("shows bounded semantic tables, member fallbacks and escaped messages in %s", async (locale) => {

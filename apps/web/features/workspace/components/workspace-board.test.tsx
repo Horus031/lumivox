@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DragEndEvent } from "@dnd-kit/react";
 import { workspaceTask } from "../workspace.test-fixtures";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({
   transition: vi.fn(),
   create: vi.fn(),
@@ -75,7 +78,7 @@ describe("workspace optimistic controller", () => {
     referenceNow: "2026-10-04T12:00:00Z",
   };
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     container = document.createElement("div");
     document.body.append(container);

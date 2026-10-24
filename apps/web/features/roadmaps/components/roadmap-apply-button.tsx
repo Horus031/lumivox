@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { toast } from "sonner";
 
@@ -20,12 +22,11 @@ export function RoadmapApplyButton({
 }: RoadmapApplyButtonProps) {
   const router = useRouter();
   const t = useTranslations("roadmaps");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
-  function handleApply() {
-    const confirmed = window.confirm(
-      t("applyConfirm")
-    );
+  async function handleApply() {
+    const confirmed = await confirm(t("applyConfirm"));
 
     if (!confirmed) return;
 

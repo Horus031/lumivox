@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useState, useTransition, type FormEvent } from "react";
 
 import { useRouter } from "next/navigation";
@@ -48,6 +50,7 @@ export function TaskSubtasksPanel({
   onChanged,
 }: TaskSubtasksPanelProps) {
   const t = useTranslations("tasks.details.subtasks");
+  const confirm = useConfirmDialog();
 
   const formT = useTranslations("tasks.form");
 
@@ -133,8 +136,8 @@ export function TaskSubtasksPanel({
     });
   }
 
-  function handleDelete(subtask: TaskWithGoal) {
-    const confirmed = window.confirm(t("deleteConfirm"));
+  async function handleDelete(subtask: TaskWithGoal) {
+    const confirmed = await confirm(t("deleteConfirm"), { variant: "destructive" });
 
     if (!confirmed) {
       return;

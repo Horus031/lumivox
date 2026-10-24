@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -42,6 +44,7 @@ function segmentStatusKey(status: FocusV2Segment["status"]):
 export function FocusV2LifecycleView({ initialSnapshot, taskTitle, children }: Props) {
   const router = useRouter();
   const t = useTranslations("focus.live");
+  const confirm = useConfirmDialog();
   const { snapshot, projection, error, isPending, online, refresh, transition } = useFocusV2Timer(initialSnapshot);
   const audio = useFocusV2Audio(snapshot.session.id, projection);
   const attention = useFocusV2Attention(snapshot.session.id, projection);
@@ -111,7 +114,7 @@ export function FocusV2LifecycleView({ initialSnapshot, taskTitle, children }: P
 
   async function perform(action: FocusV2Action, segmentId: string | null) {
     if (busy || !online) return;
-    if (action === "cancel" && !window.confirm(t("cancelConfirm"))) return;
+    if (action === "cancel" && !(await confirm(t("cancelConfirm"), { variant: "destructive", title: t("cancel"), confirmLabel: t("cancel") }))) return;
     setLocalBusy(true);
     try {
       const success = await transition(action, segmentId);
