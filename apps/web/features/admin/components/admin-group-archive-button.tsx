@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useId, useState, useTransition } from "react";
 import { Archive, ArchiveRestore, Loader2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
@@ -24,16 +26,15 @@ export function AdminGroupArchiveButton({
 }: AdminGroupArchiveButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.groups.actions");
+  const confirm = useConfirmDialog();
   const detailT = useTranslations("admin.groups.detail");
   const id = useId();
   const [note, setNote] = useState("");
   const [isPending, startTransition] = useTransition();
 
-  function handleClick() {
+  async function handleClick() {
     if (isPending) return;
-    const confirmed = window.confirm(
-      archived ? t("restoreConfirm") : t("archiveConfirm")
-    );
+    const confirmed = await confirm(archived ? t("restoreConfirm") : t("archiveConfirm"));
 
     if (!confirmed) return;
 

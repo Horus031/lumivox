@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useEffect, useId, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -47,6 +49,7 @@ export function ActiveFocusSessionPanel({
   const panelId = useId();
   const router = useRouter();
   const t = useTranslations("focus.active");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [isCompletingOptimistically, setIsCompletingOptimistically] =
@@ -137,8 +140,8 @@ export function ActiveFocusSessionPanel({
     });
   }
 
-  function handleCancel() {
-    const confirmed = window.confirm(t("cancelConfirm"));
+  async function handleCancel() {
+    const confirmed = await confirm(t("cancelConfirm"), { variant: "destructive", title: t("actions.cancel"), confirmLabel: t("actions.cancel") });
 
     if (!confirmed) return;
 

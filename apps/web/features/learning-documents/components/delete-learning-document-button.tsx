@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -17,14 +19,13 @@ export function DeleteLearningDocumentButton({
   documentId,
 }: DeleteLearningDocumentButtonProps) {
   const t = useTranslations("goals.documents.delete");
+  const confirm = useConfirmDialog();
   const commonT = useTranslations("common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete() {
-    const confirmed = window.confirm(
-      t("confirm"),
-    );
+  async function handleDelete() {
+    const confirmed = await confirm(t("confirm"), { variant: "destructive" });
 
     if (!confirmed) return;
 

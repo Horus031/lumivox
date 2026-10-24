@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -17,10 +19,11 @@ type LeaveRoomButtonProps = {
 export function LeaveRoomButton({ roomId }: LeaveRoomButtonProps) {
   const router = useRouter();
   const t = useTranslations("rooms.leave");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
-  function handleLeave() {
-    const confirmed = window.confirm(t("confirm"));
+  async function handleLeave() {
+    const confirmed = await confirm(t("confirm"));
 
     if (!confirmed) return;
 

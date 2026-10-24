@@ -6,6 +6,7 @@ import { Toaster } from "sonner";
 import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { Plus_Jakarta_Sans } from "next/font/google";
+import { ConfirmationProvider } from "@/components/ui/confirmation-dialog";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -61,7 +62,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <ConfirmationProvider>{children}</ConfirmationProvider>
 
           <Toaster richColors position="top-right" closeButton />
         </ThemeProvider>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { Eraser, Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,11 +23,12 @@ export function AdminTranslationDeleteButton({
 }: AdminTranslationDeleteButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.translations.actions");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete() {
+  async function handleDelete() {
     if (isPending) return;
-    const confirmed = window.confirm(t("deleteConfirm"));
+    const confirmed = await confirm(t("deleteConfirm"), { variant: "destructive" });
 
     if (!confirmed) return;
 
@@ -72,11 +75,12 @@ export function AdminClearEntityTranslationsButton({
 }: AdminClearEntityTranslationsButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.translations.actions");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
-  function handleClear() {
+  async function handleClear() {
     if (isPending) return;
-    const confirmed = window.confirm(t("clearEntityConfirm"));
+    const confirmed = await confirm(t("clearEntityConfirm"), { variant: "destructive" });
 
     if (!confirmed) return;
 

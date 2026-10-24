@@ -1,5 +1,12 @@
 {
   "common": {
+    "confirmation": {
+      "title": "Confirm action",
+      "destructiveTitle": "Confirm deletion",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    },
     "appName": "Lumivox",
     "save": "Save",
     "cancel": "Cancel",
@@ -877,6 +884,7 @@
     }
   },
   "roadmaps": {
+    "deleteNodeConfirm": "Delete this node? Child nodes connected under it will also be deleted.",
     "title": "Learning Roadmaps",
     "description": "Your learning plans and application status.",
     "create": "Create roadmap",

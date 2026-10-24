@@ -3,6 +3,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ActiveFocusSessionWithTask } from "../focus-session.types";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({ create: vi.fn(), complete: vi.fn(), pause: vi.fn(), resume: vi.fn(), cancel: vi.fn(), success: vi.fn(), refresh: vi.fn(), error: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
@@ -27,7 +30,7 @@ describe("focus session UI", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true);
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-10-12T12:02:00Z"));
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -85,7 +88,7 @@ describe("focus session UI", () => {
 
   it.each(["pause", "resume", "cancel"] as const)("handles rejected %s without success feedback", async action => {
     mocks[action].mockRejectedValue(new Error("network"));
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    confirmation.mockResolvedValue(true);
     const value = action === "resume" ? { ...session, status: "paused" as const, paused_at: "2026-10-12T12:01:00Z" } : session;
     act(() => root.render(<ActiveFocusSessionPanel session={value} />));
     await act(async () => button(`actions.${action}`).click());
@@ -97,7 +100,7 @@ describe("focus session UI", () => {
 
   it.each(["pause", "resume", "cancel", "complete"] as const)("refreshes stale %s failures without success feedback", async action => {
     mocks[action].mockResolvedValue({ success: false, message: "Session state changed. Please refresh." });
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    confirmation.mockResolvedValue(true);
     const value = action === "resume" ? { ...session, status: "paused" as const, paused_at: "2026-10-12T12:01:00Z" } : session;
     act(() => root.render(<ActiveFocusSessionPanel session={value} />));
     await act(async () => button(`actions.${action}`).click());
@@ -109,7 +112,7 @@ describe("focus session UI", () => {
 
   it.each(["pause", "resume", "cancel"] as const)("does not refresh ordinary %s failures", async action => {
     mocks[action].mockResolvedValue({ success: false, message: "Rejected" });
-    vi.spyOn(window, "confirm").mockReturnValue(true);
+    confirmation.mockResolvedValue(true);
     act(() => root.render(<ActiveFocusSessionPanel session={action === "resume" ? { ...session, status: "paused", paused_at: "2026-10-12T12:01:00Z" } : session} />));
     await act(async () => button(`actions.${action}`).click());
     expect(mocks.error).toHaveBeenCalledWith("Rejected");

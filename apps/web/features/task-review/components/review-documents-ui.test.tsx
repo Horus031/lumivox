@@ -8,6 +8,9 @@ import type { TaskReviewAttempt } from "../task-review.types";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 import type { LearningDocument } from "@/features/learning-documents/learning-document.types";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({ submit: vi.fn(), latest: vi.fn(), generate: vi.fn(), create: vi.fn(), transition: vi.fn(), share: vi.fn(), refresh: vi.fn(), changed: vi.fn(), copied: vi.fn(), error: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("@/i18n/navigation", () => ({ Link: (props: React.ComponentProps<"a">) => <a {...props} /> }));
@@ -43,7 +46,7 @@ describe("review and document UI", () => {
   let container: HTMLDivElement;
   let root: Root;
   beforeEach(() => {
-    vi.clearAllMocks(); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     container = document.createElement("div"); document.body.append(container); root = createRoot(container);
     Object.defineProperty(navigator, "clipboard", { value: { writeText: mocks.copied }, configurable: true });
   });

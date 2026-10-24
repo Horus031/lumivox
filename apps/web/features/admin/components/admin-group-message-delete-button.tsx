@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { Loader2, Trash2 } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
@@ -20,11 +22,12 @@ export function AdminGroupMessageDeleteButton({
 }: AdminGroupMessageDeleteButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.groups.actions");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete() {
+  async function handleDelete() {
     if (isPending) return;
-    const confirmed = window.confirm(t("deleteMessageConfirm"));
+    const confirmed = await confirm(t("deleteMessageConfirm"), { variant: "destructive" });
 
     if (!confirmed) return;
 
