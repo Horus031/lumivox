@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Input } from "@/components/ui/input";
+import { DatePicker } from "@/components/ui/date-picker";
+import { formatLocalDate, parseLocalDate } from "@/lib/local-date";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
@@ -139,39 +141,9 @@ export function RoadmapNodeEditPanel({
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.startDate")}
-            </span>
+          <DatePicker label={t("fields.startDate")} value={parseLocalDate(data.suggestedStartDate)} onChange={(date) => onChangeNode(selectedNode.id, { suggestedStartDate: formatLocalDate(date) || null })} />
 
-            <Input
-              type="date"
-              value={data.suggestedStartDate ?? ""}
-              onChange={(event) =>
-                onChangeNode(selectedNode.id, {
-                  suggestedStartDate: event.target.value || null,
-                })
-              }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
-            />
-          </label>
-
-          <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.endDate")}
-            </span>
-
-            <Input
-              type="date"
-              value={data.suggestedEndDate ?? ""}
-              onChange={(event) =>
-                onChangeNode(selectedNode.id, {
-                  suggestedEndDate: event.target.value || null,
-                })
-              }
-              className="h-touch w-full min-w-0 rounded-md border border-input bg-background px-3 py-1 text-base text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30 sm:h-control md:text-body"
-            />
-          </label>
+          <DatePicker label={t("fields.endDate")} value={parseLocalDate(data.suggestedEndDate)} onChange={(date) => onChangeNode(selectedNode.id, { suggestedEndDate: formatLocalDate(date) || null })} />
         </div>
 
         <Button

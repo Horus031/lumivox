@@ -5,12 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/vi.json";
 import type { TaskWithGoal } from "../task.types";
 import type { Goal } from "@/features/goals/goal.types";
+import type { RoadmapFlowNode } from "@/features/roadmaps/components/roadmap-flow-node";
 
-const mocks = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), createGoal: vi.fn(), updateGoal: vi.fn(), refresh: vi.fn(), saved: vi.fn(), error: vi.fn() }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), update: vi.fn(), createGoal: vi.fn(), updateGoal: vi.fn(), generateRoadmap: vi.fn(), refresh: vi.fn(), push: vi.fn(), saved: vi.fn(), error: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: vi.fn() } }));
 vi.mock("../task.actions", () => ({ createTaskAction: mocks.create, updateTaskAction: mocks.update }));
 vi.mock("@/features/goals/goal.actions", () => ({ createGoalAction: mocks.createGoal, updateGoalAction: mocks.updateGoal }));
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
+vi.mock("@/features/roadmaps/roadmap.actions", () => ({ generateLearningRoadmapAction: mocks.generateRoadmap }));
 vi.mock("@/components/ui/dialog", () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
   return { Dialog: Wrapper, DialogTrigger: Wrapper, DialogClose: Wrapper, DialogContent: Wrapper, DialogTitle: Wrapper, DialogDescription: Wrapper, DialogFooter: Wrapper };
@@ -20,11 +23,13 @@ vi.mock("@/components/ui/popover", () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
   return { Popover: Wrapper, PopoverTrigger: Wrapper, PopoverContent: Wrapper };
 });
-vi.mock("@/components/ui/calendar", () => ({ Calendar: ({ onSelect }: { onSelect: (date: Date | undefined) => void }) => <><button type="button" data-date onClick={() => onSelect(new Date(2026, 9, 20))}>Date fixture</button><button type="button" data-clear onClick={() => onSelect(undefined)}>Clear fixture</button></> }));
+vi.mock("@/components/ui/calendar", () => ({ Calendar: ({ onSelect }: { onSelect: (date: Date | undefined) => void }) => <><button type="button" data-date onClick={() => onSelect(new Date(2031, 9, 20))}>Date fixture</button><button type="button" data-clear onClick={() => onSelect(undefined)}>Clear fixture</button></> }));
 
 import { TaskEditForm } from "./task-edit-form";
 import { CreateTaskModal } from "./create-task-modal";
 import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
+import { RoadmapGenerateForm } from "@/features/roadmaps/components/roadmap-generate-form";
+import { RoadmapNodeEditPanel } from "@/features/roadmaps/components/roadmap-node-edit-panel";
 
 describe("task form presentation and payloads", () => {
   let container: HTMLDivElement;
@@ -68,7 +73,7 @@ describe("task form presentation and payloads", () => {
     enter(container.querySelector('input[type="time"]')!, "16:45:00");
     act(() => container.querySelector<HTMLButtonElement>("[data-date]")!.click());
     await submit();
-    expect(mocks.update.mock.calls[0][0].dueAt).toBe(new Date(2026, 9, 20, 16, 45).toISOString());
+    expect(mocks.update.mock.calls[0][0].dueAt).toBe(new Date(2031, 9, 20, 16, 45).toISOString());
     act(() => container.querySelector<HTMLButtonElement>("[data-clear]")!.click());
     await submit();
     expect(mocks.update.mock.calls[1][0].dueAt).toBe("");
@@ -104,7 +109,7 @@ describe("task form presentation and payloads", () => {
     enter(container.querySelector("input")!, "New goal");
     act(() => container.querySelector<HTMLButtonElement>("[data-date]")!.click());
     await submit();
-    expect(mocks.createGoal).toHaveBeenCalledWith({ title: "New goal", description: "", goalType: "short_term", startDate: "2026-10-20", targetDate: "" });
+    expect(mocks.createGoal).toHaveBeenCalledWith({ title: "New goal", description: "", goalType: "short_term", startDate: "2031-10-20", targetDate: "" });
     expect(container.querySelector("input")!.value).toBe("");
   });
 
@@ -116,5 +121,32 @@ describe("task form presentation and payloads", () => {
     expect(mocks.updateGoal).toHaveBeenCalledWith({ goalId: "goal", title: "Existing", description: "Notes", goalType: "long_term", status: "paused", startDate: "2026-10-12", targetDate: "2026-10-20" });
     expect(container.querySelector("input")!.value).toBe("Existing");
     expect(container.querySelector("fieldset")!.disabled).toBe(false);
+  });
+
+  it("submits future roadmap dates as date-only strings and preserves them on failure", async () => {
+    mocks.generateRoadmap.mockResolvedValue({ success: false, message: "Rejected" });
+    render(<RoadmapGenerateForm preferredLocale="vi" />);
+    act(() => {
+      container.querySelectorAll<HTMLButtonElement>("[data-date]")[0].click();
+      container.querySelectorAll<HTMLButtonElement>("[data-date]")[1].click();
+    });
+    await submit();
+    expect(mocks.generateRoadmap).toHaveBeenCalledWith(expect.objectContaining({ startDate: "2031-10-20", endDate: "2031-10-20", preferredLocale: "vi" }));
+    expect(mocks.error).toHaveBeenCalledWith("Rejected");
+    expect(container.querySelector("fieldset")!.disabled).toBe(false);
+    expect(container.querySelector('input[type="date"]')).toBeNull();
+  });
+
+  it("keeps roadmap node date payloads and clears optional dates to null", () => {
+    const changed = vi.fn();
+    const node: RoadmapFlowNode = { id: "node-1", type: "roadmapNode", position: { x: 0, y: 0 }, data: {
+      nodeType: "task", title: "Study", description: null, estimatedHours: 1, priority: 3,
+      suggestedStartDate: "2030-01-10", suggestedEndDate: "2030-02-10", parentNodeId: null, sortOrder: 0,
+    } };
+    render(<RoadmapNodeEditPanel selectedNode={node} onChangeNode={changed} onDeleteNode={vi.fn()} />);
+    act(() => container.querySelectorAll<HTMLButtonElement>("[data-date]")[0].click());
+    expect(changed).toHaveBeenLastCalledWith("node-1", { suggestedStartDate: "2031-10-20" });
+    act(() => container.querySelectorAll<HTMLButtonElement>("[data-clear]")[1].click());
+    expect(changed).toHaveBeenLastCalledWith("node-1", { suggestedEndDate: null });
   });
 });
