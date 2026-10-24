@@ -1,5 +1,14 @@
 {
   "common": {
+    "datePicker": {
+      "placeholder": "Chọn ngày",
+      "today": "Hôm nay",
+      "clear": "Xóa ngày",
+      "month": "Tháng",
+      "year": "Năm",
+      "previousMonth": "Tháng trước",
+      "nextMonth": "Tháng sau"
+    },
     "confirmation": {
       "title": "Xác nhận thao tác",
       "destructiveTitle": "Xác nhận xóa",

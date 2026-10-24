@@ -1,5 +1,14 @@
 {
   "common": {
+    "datePicker": {
+      "placeholder": "Select date",
+      "today": "Today",
+      "clear": "Clear date",
+      "month": "Month",
+      "year": "Year",
+      "previousMonth": "Previous month",
+      "nextMonth": "Next month"
+    },
     "confirmation": {
       "title": "Confirm action",
       "destructiveTitle": "Confirm deletion",

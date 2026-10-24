@@ -10,10 +10,12 @@ import {
   DayPicker,
   getDefaultClassNames,
   type DayButton,
+  type DropdownProps,
 } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
 import { Button, buttonVariants } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 function Calendar({
   className,
@@ -23,6 +25,8 @@ function Calendar({
   buttonVariant = "ghost",
   formatters,
   components,
+  startMonth = new Date(new Date().getFullYear() - 100, 0),
+  endMonth = new Date(new Date().getFullYear() + 100, 11),
   ...props
 }: React.ComponentProps<typeof DayPicker> & {
   buttonVariant?: React.ComponentProps<typeof Button>["variant"]
@@ -39,6 +43,8 @@ function Calendar({
         className
       )}
       captionLayout={captionLayout}
+      startMonth={startMonth}
+      endMonth={endMonth}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString("default", { month: "short" }),
@@ -52,17 +58,17 @@ function Calendar({
         ),
         month: cn("flex w-full flex-col gap-4", defaultClassNames.month),
         nav: cn(
-          "absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
+          "pointer-events-none absolute inset-x-0 top-0 flex w-full items-center justify-between gap-1",
           defaultClassNames.nav
         ),
         button_previous: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "pointer-events-auto size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
           defaultClassNames.button_previous
         ),
         button_next: cn(
           buttonVariants({ variant: buttonVariant }),
-          "size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
+          "pointer-events-auto size-(--cell-size) p-0 select-none aria-disabled:opacity-50",
           defaultClassNames.button_next
         ),
         month_caption: cn(
@@ -162,6 +168,7 @@ function Calendar({
           )
         },
         DayButton: CalendarDayButton,
+        Dropdown: CalendarDropdown,
         WeekNumber: ({ children, ...props }) => {
           return (
             <td {...props}>
@@ -175,6 +182,23 @@ function Calendar({
       }}
       {...props}
     />
+  )
+}
+
+function CalendarDropdown({ options, value, onChange, disabled, id, name, "aria-label": ariaLabel, "aria-labelledby": ariaLabelledBy }: DropdownProps) {
+  return (
+    <Select name={name} value={String(value)} disabled={disabled}
+      onValueChange={(nextValue) => {
+        // DayPicker's dropdown handlers read target.value, just like a native select.
+        onChange?.({ target: { value: nextValue }, currentTarget: { value: nextValue } } as React.ChangeEvent<HTMLSelectElement>)
+      }}>
+      <SelectTrigger id={id} aria-label={ariaLabel} aria-labelledby={ariaLabelledBy} size="sm" className="h-8 gap-1 border-transparent bg-transparent px-2 text-sm shadow-none hover:bg-muted sm:h-8">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent position="popper" className="z-[60] max-h-64 min-w-24">
+        {options?.map((option) => <SelectItem key={option.value} value={String(option.value)} disabled={option.disabled}>{option.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
   )
 }
 
