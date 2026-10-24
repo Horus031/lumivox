@@ -1,5 +1,12 @@
 {
   "common": {
+    "confirmation": {
+      "title": "Xác nhận thao tác",
+      "destructiveTitle": "Xác nhận xóa",
+      "confirm": "Xác nhận",
+      "delete": "Xóa",
+      "cancel": "Hủy"
+    },
     "appName": "Lumivox",
     "save": "Lưu",
     "cancel": "Hủy",
@@ -877,6 +884,7 @@
     }
   },
   "roadmaps": {
+    "deleteNodeConfirm": "Xóa nút này? Các nút con bên dưới cũng sẽ bị xóa.",
     "title": "Lộ trình học tập",
     "description": "Các kế hoạch học tập và trạng thái áp dụng.",
     "create": "Tạo lộ trình",

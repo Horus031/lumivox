@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useCallback, useMemo, useState, useTransition } from "react";
 import {
   Background,
@@ -299,6 +301,7 @@ export function RoadmapVisualEditor({
   initialNodes,
 }: RoadmapVisualEditorProps) {
   const t = useTranslations("roadmaps");
+  const confirm = useConfirmDialog();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -505,14 +508,12 @@ export function RoadmapVisualEditor({
     );
   }
 
-  function handleDeleteNode(nodeId: string) {
+  async function handleDeleteNode(nodeId: string) {
     const node = nodeById.get(nodeId);
 
     if (!node) return;
 
-    const confirmed = window.confirm(
-      "Delete this node? Child nodes connected under it will also be deleted.",
-    );
+    const confirmed = await confirm(t("deleteNodeConfirm"), { variant: "destructive" });
 
     if (!confirmed) return;
 

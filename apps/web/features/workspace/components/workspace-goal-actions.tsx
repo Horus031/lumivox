@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { MoreHorizontal } from "lucide-react";
 
 import { useTransition } from "react";
@@ -34,6 +36,7 @@ type WorkspaceGoalActionsProps = {
 
 export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
   const t = useTranslations("workspace.rail");
+  const confirm = useConfirmDialog();
 
   const commonT = useTranslations("common");
 
@@ -41,8 +44,8 @@ export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
 
   const [isPending, startTransition] = useTransition();
 
-  function handleDelete() {
-    if (!window.confirm(t("deleteGoalConfirm"))) {
+  async function handleDelete() {
+    if (!(await confirm(t("deleteGoalConfirm"), { variant: "destructive" }))) {
       return;
     }
 

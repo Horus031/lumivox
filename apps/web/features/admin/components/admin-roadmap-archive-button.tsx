@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useTransition } from "react";
 import { Archive, ArchiveRestore, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -20,6 +22,7 @@ export function AdminRoadmapArchiveButton({
 }: AdminRoadmapArchiveButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.roadmaps.actions");
+  const confirm = useConfirmDialog();
   const [isPending, startTransition] = useTransition();
 
   if (status === "applied") {
@@ -28,12 +31,10 @@ export function AdminRoadmapArchiveButton({
 
   const archived = status === "archived";
 
-  function handleClick() {
+  async function handleClick() {
     if (isPending) return;
-    const confirmed = window.confirm(
-      archived
-        ? t("restoreConfirm")
-        : t("archiveConfirm")
+    const confirmed = await confirm(
+      archived ? t("restoreConfirm") : t("archiveConfirm"),
     );
 
     if (!confirmed) return;

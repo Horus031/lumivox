@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from "react";
+import { useConfirmation } from "@/components/ui/confirmation-dialog";
 import {
   Heart,
   User,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 export default function BuyMeCoffeeSePay() {
+  const showConfirmation = useConfirmation();
   const [amount, setAmount] = useState<number>(50000); // Mặc định gợi ý 50k
   const [customAmountText, setCustomAmountText] = useState<string>("50,000");
   const [name, setName] = useState("");
@@ -40,9 +42,12 @@ export default function BuyMeCoffeeSePay() {
 
   const handlePayment = async () => {
     if (amount < 10000) {
-      alert(
-        "Số tiền quyên góp tối thiểu là 10.000đ để hệ thống ngân hàng xử lý.",
-      );
+      await showConfirmation({
+        mode: "alert",
+        title: "Kiểm tra số tiền quyên góp",
+        description: "Số tiền quyên góp tối thiểu là 10.000đ để hệ thống ngân hàng xử lý.",
+        confirmLabel: "Đã hiểu",
+      });
       return;
     }
 

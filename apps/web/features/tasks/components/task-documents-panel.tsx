@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useRef, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
@@ -51,6 +53,7 @@ export function TaskDocumentsPanel({
   onChanged,
 }: TaskDocumentsPanelProps) {
   const t = useTranslations("tasks.details.documents");
+  const confirm = useConfirmDialog();
 
   const documentT = useTranslations("goals.documents.list");
 
@@ -111,8 +114,8 @@ export function TaskDocumentsPanel({
     });
   }
 
-  function handleDelete(documentId: string) {
-    if (!window.confirm(t("deleteConfirm"))) {
+  async function handleDelete(documentId: string) {
+    if (!(await confirm(t("deleteConfirm"), { variant: "destructive" }))) {
       return;
     }
 

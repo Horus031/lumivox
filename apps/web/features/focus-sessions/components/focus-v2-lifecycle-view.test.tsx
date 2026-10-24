@@ -3,6 +3,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { FocusV2Snapshot } from "../focus-v2.types";
 
+const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+
 const mocks = vi.hoisted(() => ({
   refreshRoute: vi.fn(), refresh: vi.fn(), transition: vi.fn(),
   timer: vi.fn(),
@@ -50,7 +53,7 @@ describe("Focus V2 production lifecycle UI", () => {
   let node: HTMLDivElement;
   let root: Root;
   beforeEach(() => {
-    vi.clearAllMocks();
+    vi.clearAllMocks(); confirmation.mockResolvedValue(true);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     node = document.createElement("div");
     document.body.append(node);
@@ -90,7 +93,7 @@ describe("Focus V2 production lifecycle UI", () => {
     expect(mocks.transition).toHaveBeenCalledWith("skip_break", id);
   });
   it("cancellation requires confirmation", async () => {
-    const confirm = vi.spyOn(window, "confirm").mockReturnValue(false);
+    const confirm = confirmation.mockResolvedValue(false);
     mount(); await act(async () => button("cancel").click());
     expect(mocks.transition).not.toHaveBeenCalled();
     confirm.mockRestore();

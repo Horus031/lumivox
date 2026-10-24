@@ -1,5 +1,7 @@
 "use client";
 
+import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
+
 import { useCallback, useEffect, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
@@ -56,6 +58,7 @@ export function TaskDetailsDrawer({
   initialEditMode,
 }: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
+  const confirm = useConfirmDialog();
   const locale = useLocale();
 
   const formT = useTranslations("tasks.form");
@@ -161,8 +164,8 @@ export function TaskDetailsDrawer({
     },
   ];
 
-  function handleDelete() {
-    const confirmed = window.confirm(t("deleteConfirm"));
+  async function handleDelete() {
+    const confirmed = await confirm(t("deleteConfirm"), { variant: "destructive" });
 
     if (!confirmed) {
       return;
