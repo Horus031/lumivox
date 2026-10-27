@@ -68,3 +68,51 @@ Working directory: `apps/web`. Commands below are the package scripts or their d
 - Step 4: existing security test PASS (7/7), local TypeScript types regenerated, lint PASS with one warning, unit tests PASS with one skip, production build PASS.
 - Step 5: actual results recorded in this file.
 - Overall Phase 02: not declared fully verified. A complete acceptance decision still requires the missing security coverage and migration-replay evidence above.
+
+
+## Final Acceptance — Step 2.4
+
+Verified on 2026-10-27, approximately 13:50–13:53 (Asia/Bangkok), on
+`feature/learning-schedule-foundation`, starting commit
+`1db7ec0bae9425c36a2c5b28bf4ae4ca4f669811` with working-tree changes.
+This section records a new verification run and supersedes the earlier run's
+pending migration replay and seven-assertion security results above.
+Only the local Supabase stack was reset/tested. Supabase commands were executed
+using the installed CLI executable in the npm cache; web commands used Node
+directly where needed to avoid the broken shell npm/npx shims. Docker and build
+commands ran outside the sandbox with the required permissions.
+
+### Clean Migration Replay
+- Command: supabase db reset --local
+- Result: PASS, exit code 0. CLI reported `Finished supabase db reset on branch feature/learning-schedule-foundation.`
+- Applied migrations: all 72 SQL migrations, from `20260514043306_init_lumivox_core_schema.sql` through `20261027063026_learning_schedule_constrains_hardening.sql`, including `20261027060524_learning_schedule_foundation.sql`.
+- Non-fatal messages: `[inbucket]` configuration is deprecated in favor of `[local_smtp]`; no files matched `supabase/seed.sql`. Schema replay completed successfully; no seed data was loaded from that missing file.
+
+### Database Security
+- Command: supabase test db --local
+- Result: PASS, exit code 0, run after the clean migration replay. `All tests successful. Files=11, Tests=110. Result: PASS`.
+- Assertions: all 20 assertions in `learning_schedule_security.sql` passed; the remaining 90 assertions in the other 10 SQL test files also passed.
+- Test fixtures are enclosed in transactions ending in `ROLLBACK`.
+
+### Constraints
+- Overlapping slots: PASS. Inserting Monday 20:00–21:00 into a schedule already containing Monday 19:00–20:30 is rejected with SQLSTATE `23P01`.
+- Completed occurrence uniqueness: PASS. After marking the original occurrence completed, recreating its `(schedule_id, logical_occurrence_key)` as a new scheduled session is rejected with SQLSTATE `23505`.
+
+### Authorization
+- User A: PASS for the assertions present: reads one own session, one own schedule and one own slot; sees zero B sessions, revisions and events.
+- User B: PASS: reads one own session and sees zero A sessions after switching the JWT subject to B.
+- Anonymous access: PASS: after switching to `anon` and clearing JWT claims, the session query returns zero rows. The assertion checks RLS visibility rather than expecting permission error `42501` because table-level SELECT is granted to `anon`.
+- Direct write restrictions: PASS, SQLSTATE `42501` for authenticated UPDATE sessions, UPDATE schedules, DELETE slots, INSERT revisions and DELETE session events.
+- Ownership FK: PASS, SQLSTATE `23503` for a cross-owner slot insertion.
+- Coverage limit: no revision/event fixtures are inserted, so the zero-row checks for those two tables alone do not prove cross-owner isolation. Explicit RLS-enabled metadata is asserted only for sessions. These results cover the current 20 assertions, not an exhaustive security review of every operation on all five tables.
+
+### Quality Gates
+- Working directory: `apps/web`.
+- Lint: PASS, exit code 0. Executed `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`); 0 errors, 1 warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6` for missing effect dependency `projection`.
+- Unit tests: PASS, exit code 0. Executed `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`); 58 files passed, 1 skipped; 505 tests passed, 1 skipped; duration 63.16 seconds. The skipped Focus PostgREST integration test requires `FOCUS_TEST_SUPABASE_*` environment variables, at least one of which is absent. The existing Vite ESM/native-config warning remains non-fatal.
+- Build: PASS, exit code 0. Executed `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build` (the package's `npm run build`, including prebuild). Next.js 16.2.6 compiled successfully in 18.8 seconds, completed TypeScript in 22.9 seconds, and generated 98/98 static pages. Used existing `.env.local`; no secret values are recorded here.
+
+### Final Review
+- Phase 02 status: PASS for the Step 2.4 commands and assertions specified above, with one lint warning, one skipped integration test, and the documented security-coverage limits.
+- No runtime files, migration files or test assertions were changed during this verification run. Only this evidence section was filled in; pre-existing test edits were preserved.
+- No commit, push or remote database operation was performed.
