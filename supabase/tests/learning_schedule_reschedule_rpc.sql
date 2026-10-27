@@ -207,12 +207,13 @@ SELECT lives_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,NULL,%L,%L,%L)',
  (SELECT s.id FROM public.task_study_sessions s JOIN rs_cases c ON c.schedule_id=s.schedule_id
   WHERE c.zone='America/New_York' AND s.schedule_revision=2)),
  'DST fold accepts earlier valid instant');
-SELECT lives_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,NULL,%L,%L,%L)',
+SELECT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,NULL,%L,%L,%L)',
  'America/New_York','2030-11-03','01:30','02:30',md5('fold-later')::uuid::text,
  '2030-11-03 06:30Z','2030-11-03 07:30Z',
  (SELECT s.id FROM public.task_study_sessions s JOIN rs_cases c ON c.schedule_id=s.schedule_id
   WHERE c.zone='America/New_York' AND s.schedule_revision=2)),
- 'KNOWN BLOCKER direct RPC also accepts later fold instant');
+ '22023','Noncanonical or nonexistent local study time',
+ 'DST canonicalization rejects later fold instant through direct RPC');
 
 -- Privileged fixture changes, then test with a real authenticated role.
 RESET ROLE;
