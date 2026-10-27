@@ -73,3 +73,24 @@
 VERIFIED for the existing Step 3.3 migration replay, 8 RPC assertions and web quality gates, with one lint warning, one skipped integration test and the coverage limits above. Phase 03 remains IN PROGRESS: the listed concurrency, failure-injection, DST fold and Step 3.4 work are still outstanding.
 
 Only this evidence section was updated during verification. Existing source, migration and test files were preserved. No commit, push or remote database operation was performed.
+
+## Step 3.4A — Schedule Revisions
+
+- Migration replay: PASS — `supabase db reset --local`, exit code 0. All 74 migrations replayed successfully, including `20261027083912_learning_schedule_revise_rpc.sql`. Non-fatal messages: deprecated `[inbucket]` config and missing `supabase/seed.sql`; no seed file was loaded. Only the local Supabase stack was reset.
+- Server Action typecheck/build: PASS — from `apps/web`, `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, exit code 0. Next.js 16.2.6 compiled in 16.1 seconds, completed TypeScript in 32.8 seconds and generated 98/98 static pages. Covers compilation of `schedule-revision.actions.ts` with the existing working-tree generated types; does not exercise the Server Action through a browser or a dedicated action unit test.
+- Revision increment: PASS — a valid owner request with expected revision 1 returns 2, stores revision 2 on the schedule, keeps revision 1 and inserts revision 2 with change reason `schedule_edited`. The new slot and scheduled occurrence are persisted with the expected UTC instant and revision 2.
+- Optimistic concurrency: PASS for the stale-revision guard — a subsequent request with expected revision 1 is rejected with SQLSTATE `40001` and exact message `Stale schedule revision`; full schedule/slot/session/revision snapshots remain unchanged. Simultaneous requests from separate connections were not tested.
+- Preserve completed/past sessions: PASS with an explicit reference-change exception — completed and past scheduled fixtures retain every field except `source_slot_id`, which is intentionally nulled by the FK when old slots are deleted. Completion timestamps, statuses, scheduled times and original revision are preserved; all three original sessions remain without hard deletion. This is not a claim that historical rows are byte-for-byte unchanged.
+- Cancel future scheduled sessions: PASS — the original future scheduled fixture remains in history with status `cancelled` and cancellation reason `schedule_changed`; a new revision-2 scheduled occurrence replaces the plan.
+- Rollback on invalid occurrence: PASS — a forged UTC instant causes SQLSTATE `22023`, exact message `Invalid occurrence instant`, after the function has reached cancellation and slot replacement. Complete before/after snapshots of schedules, slots, sessions and revisions are equal, proving those intermediate writes rolled back for this failure path.
+- Cross-owner authorization: PASS — user B supplies an otherwise valid payload for user A's schedule and receives SQLSTATE `22023`, exact message `Schedule not found`. After switching back to A, all four table snapshots match their original state.
+- Cancellation audit events: NOT IMPLEMENTED
+- DST fold hardening: NOT IMPLEMENTED
+
+Verification: 2026-10-27, approximately 15:44–15:47 (Asia/Bangkok), on `feature/learning-schedule-foundation`, starting HEAD `c27ad22238b46f78367bd284fe20f08407336d0c`, including existing working-tree migration, action and generated-type changes.
+
+Tests: added `supabase/tests/learning_schedule_revise_rpc.sql` because no revision-specific test file existed. It contains 16 pgTAP assertions, temporary invoker-only helpers and snapshots, with all fixtures enclosed in a transaction ending in `ROLLBACK`. Executed `supabase test db --local` after clean replay: exit code 0, all 13 files / 134 assertions PASS, including all 16 revision assertions. Supabase used the installed CLI executable from the npm cache outside the sandbox for Docker access. Build also ran outside the sandbox with existing `.env.local`; no secrets are recorded here.
+
+Scope: this run checked the Step 3.4A items above. Lint and the web unit-test suite were not rerun because they are not listed in this section; their earlier results remain historical. Server Action runtime error mapping, cancellation audit events, DST fold enforcement, and real concurrent RPC execution are not established by these tests.
+
+Status: IN PROGRESS — migration replay, Server Action typecheck/build and the six revision behavior checks above are verified within their stated coverage. Cancellation audit events and DST fold hardening remain unimplemented. Added the revision test file and filled this section; no existing migration, runtime source or generated types were edited by this verification run. No commit, push or remote database operation was performed.

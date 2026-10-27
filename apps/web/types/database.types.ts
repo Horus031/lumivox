@@ -1389,6 +1389,9 @@ isOneToOne: false
 "ls_create_schedule":
 { Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
                            },
+"ls_revise_schedule":
+{ Args: { "p_ends_on": string,"p_expected_revision": number,"p_occurrences": Json,"p_schedule_id": string,"p_slots": Json,"p_starts_on": string,"p_timezone": string }; Returns: number
+                           },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
