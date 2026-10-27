@@ -815,6 +815,142 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_study_schedule_revisions": {
+                  Row: {
+                    "change_reason": string | null,"changed_by": string | null,"created_at": string,"ends_on": string,"id": string,"revision": number,"schedule_id": string,"slots_snapshot": NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on": string,"id"?: string,"revision": number,"schedule_id": string,"slots_snapshot"?: NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  Update: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"schedule_id"?: string,"slots_snapshot"?: NonNullable<Json>,"starts_on"?: string,"timezone"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_rev_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedule_revisions_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_schedule_slots": {
+                  Row: {
+                    "created_at": string,"end_time": string,"id": string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"end_time": string,"id"?: string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  Update: {
+                    "created_at"?: string,"end_time"?: string,"id"?: string,"schedule_id"?: string,"start_time"?: string,"user_id"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_slot_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"task_study_schedules": {
+                  Row: {
+                    "created_at": string,"ends_on": string,"id": string,"revision": number,"starts_on": string,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"ends_on": string,"id"?: string,"revision"?: number,"starts_on": string,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"starts_on"?: string,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_schedule_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedules_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_session_events": {
+                  Row: {
+                    "actor_id": string | null,"created_at": string,"event_key": string,"event_type": string,"from_status": string | null,"id": string,"payload": NonNullable<Json>,"session_id": string,"to_status": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key": string,"event_type": string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id": string,"to_status"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key"?: string,"event_type"?: string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id"?: string,"to_status"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_event_session_owner_fk"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_session_events_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_sessions": {
+                  Row: {
+                    "actual_study_minutes": number | null,"cancellation_reason": string | null,"completed_at": string | null,"created_at": string,"id": string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id": string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id": string | null,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id"?: string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id"?: string | null,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date"?: string,"local_end_time"?: string,"local_start_time"?: string,"logical_occurrence_key"?: string,"replaces_session_id"?: string | null,"schedule_id"?: string,"schedule_revision"?: number,"scheduled_end_at"?: string,"scheduled_start_at"?: string,"source_slot_id"?: string | null,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_session_replaces_owner_fk"
+      columns: ["replaces_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_schedule_task_owner_fk"
+      columns: ["schedule_id","task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","task_id","user_id"]
+    },{
+      foreignKeyName: "ls_session_slot_owner_fk"
+      columns: ["source_slot_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedule_slots"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
                 },"tasks": {
                   Row: {
                     "completed_at": string | null,"created_at": string,"description": string | null,"due_at": string | null,"due_date": string | null,"estimated_minutes": number | null,"goal_id": string | null,"id": string,"parent_task_id": string | null,"priority": Database["public"]['Enums']["task_priority"],"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"status": Database["public"]['Enums']["task_status"],"title": string,"updated_at": string,"user_id": string
