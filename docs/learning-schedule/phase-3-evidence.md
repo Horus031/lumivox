@@ -247,3 +247,53 @@ LOCAL VERIFICATION PASS for the cancellation-audit behavior and six cases descri
 - No separate README with additional detailed cases was available; tests implement the retry, per-field changes, old/legacy replay and audit-rollback requirements in the user's instruction. No claim is made about unseen requirements.
 - Supabase commands used the installed CLI executable from the npm cache outside the sandbox for local Docker access. No linked/remote database was accessed. Lint/unit/build were not rerun: this request changes SQL tests and SQL migration syntax only; previous web gate results remain historical.
 - Changed the reschedule test, repaired the untracked migration syntax and appended these two evidence sections. No UI/email changes, type regeneration, commit or push were performed. Phase 03 remains IN PROGRESS pending the remaining concurrency/integration checks; this is local verification, not production approval.
+
+## Step 3.5D-A — Task Lifecycle Synchronization
+
+### Source
+
+- Baseline SHA: `6683101972dc4a058437409dca11e8dce88496f1`, branch `feature/learning-schedule-foundation`; commit `fix(learning-schedule): synchronize task close and study sessions`. Working tree was clean when verification began.
+- Verified on 2026-10-27, approximately 17:52–17:55 (Asia/Bangkok).
+- Migration under test: `supabase/migrations/20261027104448_learning_schedule_task_close.sql`, unchanged from the local commit.
+- Added `supabase/tests/learning_schedule_task_close.sql`: 31 pgTAP assertions, authenticated invoker helpers, real Task/schedule/session fixtures and a temporary audit INSERT failure trigger. All test objects and fixtures roll back.
+
+### Migration Replay
+
+- Command: `supabase db reset --local` from repository root.
+- Result: PASS, exit 0; all 79 migrations replayed through `20261027104448_learning_schedule_task_close.sql`; CLI confirmed reset finished on `feature/learning-schedule-foundation`.
+- Non-fatal messages: deprecated `[inbucket]` config and no matching `supabase/seed.sql`. Only the local database was reset; no remote project was accessed.
+
+### Task Lifecycle Assertions
+
+- Command: `supabase test db --local` after replay.
+- Result: PASS, exit 0; `All tests successful. Files=16, Tests=322. Result: PASS`. Includes all 31 new Task-close assertions and the 291 previous assertions.
+- Both closing statuses: PASS — authenticated owner transitions separate `in_progress` Tasks to `completed` and `cancelled`; each Task stores its requested closed status and its active schedule becomes `closed`.
+- Future obligations: PASS — future `scheduled` session becomes `cancelled` with reason `task_closed`; all six session fixtures remain without hard deletion.
+- Preserve history: PASS — running, completed, missed, skipped and past scheduled sessions are compared as full JSON rows before/after Task closure and remain exactly unchanged.
+- Audit event: PASS — exactly one cancellation event for the affected session, with owner/actor equal to the authenticated user, `scheduled -> cancelled`, key `ls:task-close:<session_id>`, reason `task_closed`, Task ID and closed status, schedule ID and original scheduled start/end. The existing schedule-change trigger adds no duplicate event for this different reason.
+- Unaffected sessions: PASS — the five preserved historical/running session fixtures receive zero cancellation events.
+- Repeat/reopen behavior: PASS — same-status update adds no event; reopening Task to `in_progress` keeps schedule closed and session cancelled; closing again leaves the existing audit event unchanged.
+- Ordinary Task: PASS — a Task without a study schedule still closes successfully.
+
+### Audit Rollback
+
+- Failure injection: a test-only BEFORE INSERT trigger rejects `ls:task-close:*` events with `P0001` / `Injected Task-close audit failure`.
+- Completed Task path: PASS — audit failure aborts the Task UPDATE; complete snapshots of Tasks, schedules, sessions and events equal their original state.
+- Cancelled Task path: PASS — the same failure and four-table rollback checks pass independently.
+- The failure trigger is explicitly removed before successful lifecycle tests. These are expected, asserted exceptions; no unexpected migration/test failure occurred.
+
+### Web Quality Gates
+
+- Working directory: `apps/web`.
+- Lint: PASS — `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit 0; 0 errors, 1 existing warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`, missing effect dependency `projection`.
+- Unit tests: PASS — `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit 0; 60 files passed, 1 skipped; 524 tests passed, 1 skipped; duration 54.83 seconds. The Focus PostgREST integration test is skipped without required `FOCUS_TEST_SUPABASE_*` variables. Existing Vite ESM/native-config warning remains non-fatal.
+- Build: PASS — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build` (including prebuild), exit 0; Next.js 16.2.6 compiled in 18.5 seconds, completed TypeScript in 23.2 seconds, generated 98/98 static pages.
+- Supabase used the installed CLI executable from the npm cache outside the sandbox for Docker access. Direct Node entry points bypass broken shell npm/npx shims. Build ran outside the sandbox with existing `.env.local`; no secret values are recorded.
+
+### Coverage Limits / Status
+
+- LOCAL VERIFICATION PASS for the lifecycle and rollback cases above. This demonstrates Task/schedule/session/audit atomicity for single-connection Task updates and the injected audit failure; it does not establish concurrency safety against simultaneous create/revise/reschedule commands.
+- Fixtures cover one active schedule and one future scheduled session per closing Task, UTC times, and a Task without a schedule. Paused schedules, multiple cancellable future sessions, cross-user Task mutation and browser/Server Action invocation were not independently tested here.
+- Reopening remains deliberately non-restoring; no resume-confirmation UI or notification replanning was introduced.
+- Earlier notes describing Task-close integration as outstanding are historical; this commit's single-transaction lifecycle behavior is now tested within the limits above. Phase 03 remains IN PROGRESS pending remaining concurrency/release checks; no production approval is implied.
+- Only the new SQL test and this evidence section were added. Existing runtime sources, migrations and generated types were unchanged. No commit or push was performed.
