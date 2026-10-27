@@ -54,6 +54,25 @@ function asMinutes(time: Temporal.PlainTime): number {
   return time.hour * 60 + time.minute;
 }
 
+function validateIanaTimezone(value: string): void {
+  if (
+    typeof value !== "string" ||
+    !value.trim() ||
+    value !== value.trim() ||
+    /^[+-]\d{2}(?::?\d{2})?$/.test(value)
+  ) {
+    throw new Error(`Invalid IANA timezone: ${value}`);
+  }
+
+  try {
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: value,
+    }).format(new Date("2026-01-01T00:00:00Z"));
+  } catch {
+    throw new Error(`Invalid IANA timezone: ${value}`);
+  }
+}
+
 function resolveLocal(
   date: Temporal.PlainDate,
   time: Temporal.PlainTime,
@@ -73,46 +92,58 @@ function resolveLocal(
   );
   // A spring-forward gap shifts wall-clock time under 'earlier'; reject it.
   if (
-    zoned.year !== date.year || zoned.month !== date.month || zoned.day !== date.day ||
-    zoned.hour !== time.hour || zoned.minute !== time.minute
+    zoned.year !== date.year ||
+    zoned.month !== date.month ||
+    zoned.day !== date.day ||
+    zoned.hour !== time.hour ||
+    zoned.minute !== time.minute
   ) {
-    throw new Error(`Nonexistent local time ${date.toString()} ${time.toString().slice(0, 5)} in ${timezone}`);
+    throw new Error(
+      `Nonexistent local time ${date.toString()} ${time.toString().slice(0, 5)} in ${timezone}`,
+    );
   }
   return zoned;
 }
 
 /** Pure calculation: does not access Supabase, user state or system timezone. */
-export function generateStudyOccurrences(input: StudyScheduleInput): GeneratedStudySession[] {
+export function generateStudyOccurrences(
+  input: StudyScheduleInput,
+): GeneratedStudySession[] {
   const start = parseDate(input.startsOn);
   const end = parseDate(input.endsOn);
   const days = start.until(end, { largestUnit: "days" }).days + 1;
   if (days <= 0 || days > SCHEDULE_LIMITS.maxDays) {
-    throw new Error(`Schedule must cover between 1 and ${SCHEDULE_LIMITS.maxDays} days`);
+    throw new Error(
+      `Schedule must cover between 1 and ${SCHEDULE_LIMITS.maxDays} days`,
+    );
   }
   if (!input.slots.length || input.slots.length > SCHEDULE_LIMITS.maxSlots) {
-    throw new Error(`Schedule requires 1–${SCHEDULE_LIMITS.maxSlots} weekly slots`);
+    throw new Error(
+      `Schedule requires 1–${SCHEDULE_LIMITS.maxSlots} weekly slots`,
+    );
   }
-  // Validate timezone before producing any output, including weeks with no matches.
-  try {
-    Temporal.ZonedDateTime.from({
-      timeZone: input.timezone, year: start.year, month: start.month, day: start.day,
-    });
-  } catch {
-    throw new Error(`Invalid timezone: ${input.timezone}`);
-  }
+  // Reject malformed timezone identifiers before recurrence generation.
+  // UTC and valid IANA identifiers such as Asia/Ho_Chi_Minh are supported.
+  validateIanaTimezone(input.timezone);
 
   const normalized = input.slots.map((slot, index) => {
-    if (!Number.isInteger(slot.weekday) || slot.weekday < 1 || slot.weekday > 7) {
+    if (
+      !Number.isInteger(slot.weekday) ||
+      slot.weekday < 1 ||
+      slot.weekday > 7
+    ) {
       throw new Error(`Invalid ISO weekday at slot ${index}`);
     }
     const from = asMinutes(parseTime(slot.startTime));
     const to = asMinutes(parseTime(slot.endTime));
-    if (from >= to) throw new Error(`Slot ${index} must end on the same day after it starts`);
+    if (from >= to)
+      throw new Error(`Slot ${index} must end on the same day after it starts`);
     return { ...slot, index, from, to };
   });
   for (let i = 0; i < normalized.length; i++) {
     for (let j = i + 1; j < normalized.length; j++) {
-      const a = normalized[i]; const b = normalized[j];
+      const a = normalized[i];
+      const b = normalized[j];
       if (a.weekday === b.weekday && a.from < b.to && b.from < a.to) {
         throw new Error(`Overlapping weekly slots ${i} and ${j}`);
       }
@@ -120,21 +151,31 @@ export function generateStudyOccurrences(input: StudyScheduleInput): GeneratedSt
   }
 
   const result: GeneratedStudySession[] = [];
-  for (let date = start; Temporal.PlainDate.compare(date, end) <= 0; date = date.add({ days: 1 })) {
-    const todaySlots = normalized.filter(slot => slot.weekday === date.dayOfWeek)
+  for (
+    let date = start;
+    Temporal.PlainDate.compare(date, end) <= 0;
+    date = date.add({ days: 1 })
+  ) {
+    const todaySlots = normalized
+      .filter((slot) => slot.weekday === date.dayOfWeek)
       .sort((a, b) => a.from - b.from);
     for (const slot of todaySlots) {
-      if (result.length >= SCHEDULE_LIMITS.maxOccurrences) throw new Error("Occurrence limit exceeded");
+      if (result.length >= SCHEDULE_LIMITS.maxOccurrences)
+        throw new Error("Occurrence limit exceeded");
       const startTime = parseTime(slot.startTime);
       const endTime = parseTime(slot.endTime);
       const from = resolveLocal(date, startTime, input.timezone);
       const to = resolveLocal(date, endTime, input.timezone);
       if (Temporal.Instant.compare(from.toInstant(), to.toInstant()) >= 0) {
-        throw new Error(`Nonpositive duration at ${date.toString()} in ${input.timezone}`);
+        throw new Error(
+          `Nonpositive duration at ${date.toString()} in ${input.timezone}`,
+        );
       }
       result.push({
-        localDate: date.toString(), localStartTime: slot.startTime,
-        localEndTime: slot.endTime, timezone: input.timezone,
+        localDate: date.toString(),
+        localStartTime: slot.startTime,
+        localEndTime: slot.endTime,
+        timezone: input.timezone,
         scheduledStartAt: from.toInstant().toString(),
         scheduledEndAt: to.toInstant().toString(),
         slotIndex: slot.index,
