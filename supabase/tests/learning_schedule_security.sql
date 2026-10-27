@@ -1,8 +1,11 @@
 -- Run only against an isolated LOCAL Supabase database:
--- psql "$LOCAL_DB_URL" -v ON_ERROR_STOP=1 -f this-file.sql
+-- npx supabase test db
 -- All fixtures are rolled back even when assertions pass.
 \set ON_ERROR_STOP on
 BEGIN;
+CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
+SET LOCAL search_path = public, extensions;
+SELECT plan(7);
 
 -- Two test accounts (the local auth.users schema supports these columns).
 INSERT INTO auth.users (id, instance_id, aud, role, email, encrypted_password, email_confirmed_at, created_at, updated_at)
@@ -36,47 +39,38 @@ VALUES
 ('b5000000-0000-4000-8000-000000000002','b1000000-0000-4000-8000-000000000002','b2000000-0000-4000-8000-000000000002','b3000000-0000-4000-8000-000000000002',1,'b4000000-0000-4000-8000-000000000002','monday-2026-11-02','2026-11-02','19:00','20:30','Asia/Ho_Chi_Minh','2026-11-02 12:00:00+00','2026-11-02 13:30:00+00');
 
 -- Structural invariant checks using privileged local role.
-DO $$
-BEGIN
-  IF NOT (SELECT relrowsecurity FROM pg_class WHERE oid='public.task_study_sessions'::regclass) THEN
-    RAISE EXCEPTION 'RLS not enabled on task_study_sessions';
-  END IF;
-  BEGIN
+SELECT ok(
+  (SELECT relrowsecurity FROM pg_class WHERE oid='public.task_study_sessions'::regclass),
+  'RLS is enabled on task_study_sessions'
+);
+SELECT throws_ok($$
     INSERT INTO public.task_study_schedule_slots(user_id,schedule_id,weekday,start_time,end_time)
     VALUES ('a1000000-0000-4000-8000-000000000001','b3000000-0000-4000-8000-000000000002',1,'08:00','09:00');
-    RAISE EXCEPTION 'Cross-owner slot insert unexpectedly succeeded';
-  EXCEPTION WHEN foreign_key_violation THEN NULL;
-  END;
-  BEGIN
+$$, '23503', NULL, 'Ownership FK rejects a cross-owner slot');
+SELECT throws_ok($$
     INSERT INTO public.task_study_schedule_slots(user_id,schedule_id,weekday,start_time,end_time)
     VALUES ('a1000000-0000-4000-8000-000000000001','a3000000-0000-4000-8000-000000000001',1,'20:00','19:00');
-    RAISE EXCEPTION 'Invalid time range unexpectedly succeeded';
-  EXCEPTION WHEN check_violation THEN NULL;
-  END;
-  BEGIN
+$$, '23514', NULL, 'Slot end time must be after start time');
+SELECT throws_ok($$
     INSERT INTO public.task_study_schedule_slots(user_id,schedule_id,weekday,start_time,end_time)
     VALUES ('a1000000-0000-4000-8000-000000000001','a3000000-0000-4000-8000-000000000001',1,'19:00','20:30');
-    RAISE EXCEPTION 'Duplicate slot unexpectedly succeeded';
-  EXCEPTION WHEN unique_violation THEN NULL;
-  END;
-END $$;
+$$, '23505', NULL, 'Duplicate slots are rejected');
 
 -- Test as a real authenticated SQL role with a signed-in user's claim.
 SET LOCAL ROLE authenticated;
-SELECT set_config('request.jwt.claim.sub','a1000000-0000-4000-8000-000000000001',true);
-SELECT set_config('request.jwt.claim.role','authenticated',true);
-DO $$
-DECLARE own_rows int; other_rows int;
-BEGIN
-  SELECT count(*) INTO own_rows FROM public.task_study_sessions WHERE user_id='a1000000-0000-4000-8000-000000000001';
-  SELECT count(*) INTO other_rows FROM public.task_study_sessions WHERE user_id='b1000000-0000-4000-8000-000000000002';
-  IF own_rows<>1 OR other_rows<>0 THEN RAISE EXCEPTION 'RLS isolation failed: own %, other %',own_rows,other_rows; END IF;
-  BEGIN
+SET LOCAL "request.jwt.claim.sub" = 'a1000000-0000-4000-8000-000000000001';
+SET LOCAL "request.jwt.claim.role" = 'authenticated';
+SELECT is(
+  (SELECT count(*) FROM public.task_study_sessions WHERE user_id='a1000000-0000-4000-8000-000000000001'),
+  1::bigint, 'Authenticated user can read their own session'
+);
+SELECT is(
+  (SELECT count(*) FROM public.task_study_sessions WHERE user_id='b1000000-0000-4000-8000-000000000002'),
+  0::bigint, 'Authenticated user cannot read another user session'
+);
+SELECT throws_ok($$
     UPDATE public.task_study_sessions SET status='missed' WHERE id='a5000000-0000-4000-8000-000000000001';
-    RAISE EXCEPTION 'Direct authenticated write unexpectedly succeeded';
-  EXCEPTION WHEN insufficient_privilege THEN NULL;
-  END;
-END $$;
+$$, '42501', NULL, 'Authenticated direct session writes are denied');
 RESET ROLE;
-DO $$ BEGIN RAISE NOTICE 'PASS: ownership FK, constraints, RLS read isolation and write revocation'; END $$;
+SELECT * FROM finish();
 ROLLBACK;
