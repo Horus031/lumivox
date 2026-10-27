@@ -157,8 +157,17 @@ BEGIN
    AND logical_occurrence_key='original-obligation' AND schedule_revision=1
    FROM public.task_study_sessions WHERE id=c.session_id),
    z||': whole revision supersedes override without deleting its identity');
- RETURN NEXT is((SELECT count(*) FROM public.task_study_session_events WHERE session_id=c.session_id),
+ RETURN NEXT is((SELECT count(*) FROM public.task_study_session_events WHERE session_id=c.session_id
+                AND event_type='rescheduled'),
    2::bigint,z||': whole revision preserves both prior reschedule events');
+ RETURN NEXT is((SELECT count(*) FROM public.task_study_session_events WHERE session_id=c.session_id
+                AND event_type='cancelled'),
+   1::bigint,z||': whole revision adds exactly one cancellation audit event');
+ RETURN NEXT ok((SELECT from_status='scheduled' AND to_status='cancelled'
+   AND actor_id=auth.uid() AND payload->>'reason'='schedule_changed'
+   AND payload->>'scheduleId'=c.schedule_id::text
+   FROM public.task_study_session_events WHERE session_id=c.session_id AND event_type='cancelled'),
+   z||': cancellation event has expected status, actor and reason');
 END $$;
 
 SET LOCAL ROLE authenticated;

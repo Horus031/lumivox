@@ -2,7 +2,7 @@
 BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgtap WITH SCHEMA extensions;
 SET LOCAL search_path = public, extensions;
-SELECT plan(16);
+SELECT plan(22);
 
 INSERT INTO auth.users (id, email) VALUES
   ('d1000000-0000-4000-8000-000000000001', 'ls-revise-a@example.invalid'),
@@ -60,7 +60,8 @@ LANGUAGE sql SECURITY INVOKER AS $$
     'schedules', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_schedules t),
     'slots', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_schedule_slots t),
     'sessions', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_sessions t),
-    'revisions', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_schedule_revisions t)
+    'revisions', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_schedule_revisions t),
+    'events', (SELECT jsonb_agg(to_jsonb(t) ORDER BY id) FROM public.task_study_session_events t)
   );
 $$;
 CREATE FUNCTION pg_temp.revise(expected integer, forged boolean DEFAULT false)
@@ -98,7 +99,29 @@ SELECT is(pg_temp.revision_state(), (SELECT state FROM revision_before),
 SELECT throws_ok('SELECT pg_temp.revise(1, true)', '22023', 'Invalid occurrence instant',
                  'Forged occurrence causes revision failure after intermediate writes');
 SELECT is(pg_temp.revision_state(), (SELECT state FROM revision_before),
-          'Invalid occurrence rolls back schedule, slots, sessions and revisions');
+          'Invalid occurrence rolls back schedule, slots, sessions, revisions and cancellation events');
+
+-- Force the audit INSERT to fail and prove cancellation and all related writes
+-- roll back with it. This test-only trigger is removed before normal revision.
+RESET ROLE;
+CREATE FUNCTION pg_temp.fail_cancellation_event() RETURNS trigger
+LANGUAGE plpgsql SECURITY INVOKER AS $$
+BEGIN
+  IF NEW.event_type='cancelled' THEN
+    RAISE EXCEPTION 'Injected cancellation audit failure' USING ERRCODE='P0001';
+  END IF;
+  RETURN NEW;
+END $$;
+CREATE TRIGGER revision_test_audit_failure BEFORE INSERT ON public.task_study_session_events
+  FOR EACH ROW EXECUTE FUNCTION pg_temp.fail_cancellation_event();
+SET LOCAL ROLE authenticated;
+SELECT throws_ok('SELECT pg_temp.revise(1)', 'P0001', 'Injected cancellation audit failure',
+                 'Cancellation event insert failure aborts revision');
+SELECT is(pg_temp.revision_state(), (SELECT state FROM revision_before),
+          'Audit insert failure rolls back all five tables');
+RESET ROLE;
+DROP TRIGGER revision_test_audit_failure ON public.task_study_session_events;
+SET LOCAL ROLE authenticated;
 
 SELECT is(pg_temp.revise(1), 2, 'Successful revision returns incremented revision 2');
 SELECT is((SELECT revision FROM public.task_study_schedules
@@ -123,6 +146,24 @@ SELECT ok((SELECT status='cancelled' AND cancellation_reason='schedule_changed'
            FROM public.task_study_sessions
            WHERE id='d5000000-0000-4000-8000-000000000003'),
           'Future scheduled session is cancelled with schedule_changed reason');
+SELECT is((SELECT count(*) FROM public.task_study_session_events
+           WHERE session_id='d5000000-0000-4000-8000-000000000003' AND event_type='cancelled'),
+          1::bigint, 'Future session cancellation creates exactly one event');
+SELECT ok((SELECT user_id=auth.uid() AND actor_id=auth.uid()
+           AND from_status='scheduled' AND to_status='cancelled'
+           AND event_key='ls:schedule-change-cancel:'||session_id::text
+           AND payload->>'reason'='schedule_changed'
+           AND payload->>'scheduleId'='d3000000-0000-4000-8000-000000000001'
+           AND (payload->>'scheduleRevision')::integer=1
+           AND (payload->>'scheduledStartAt')::timestamptz='2030-01-14T19:00:00Z'::timestamptz
+           AND (payload->>'scheduledEndAt')::timestamptz='2030-01-14T20:30:00Z'::timestamptz
+           FROM public.task_study_session_events
+           WHERE session_id='d5000000-0000-4000-8000-000000000003' AND event_type='cancelled'),
+          'Cancellation audit stores owner, actor, key, reason, generation revision and prior times');
+SELECT is((SELECT count(*) FROM public.task_study_session_events
+           WHERE session_id IN ('d5000000-0000-4000-8000-000000000001',
+                                'd5000000-0000-4000-8000-000000000002')),
+          0::bigint, 'Preserved completed and past sessions get no cancellation events');
 SELECT is((SELECT count(*) FROM public.task_study_sessions WHERE schedule_revision=1),
           3::bigint, 'All three original sessions remain without hard deletion');
 SELECT is((SELECT count(*) FROM public.task_study_sessions
@@ -141,7 +182,9 @@ SET LOCAL ROLE authenticated;
 SELECT throws_ok('SELECT pg_temp.revise(1)', '40001', 'Stale schedule revision',
                  'Stale expected revision is rejected by optimistic concurrency guard');
 SELECT is(pg_temp.revision_state(), (SELECT state FROM revision_after),
-          'Stale revision rejection leaves all four tables unchanged');
+          'Stale revision rejection leaves all five tables unchanged');
+SELECT is((SELECT count(*) FROM public.task_study_session_events WHERE event_type='cancelled'),
+          1::bigint, 'Stale revision does not duplicate cancellation event');
 SELECT is((SELECT change_reason FROM public.task_study_schedule_revisions WHERE revision=2),
           'schedule_edited'::text, 'Edited revision records its change reason');
 RESET ROLE;

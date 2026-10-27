@@ -150,3 +150,42 @@ Status: IN PROGRESS — migration replay, Server Action typecheck/build and the 
 LOCAL TESTS VERIFIED — the required pgTAP cases and quality gates passed within the documented coverage. Phase 03 remains IN PROGRESS and production/UI release remains BLOCKED by the Phase 03.5 items above. No UI wiring or email sending was added.
 
 Added the SQL acceptance test, regenerated local database types and appended this evidence. Existing migration and Server Action source were preserved. No commit, push or production approval was performed.
+
+## Step 3.5A — Schedule Cancellation Audit
+
+### Source
+
+- Baseline SHA: `81c73bf0c8236f835760839a03d43a37369aef40`, branch `feature/learning-schedule-foundation`, including the pre-existing untracked migration `supabase/migrations/20261027093221_learning_schedule_cancellation_audit.sql`.
+- Verified on 2026-10-27, approximately 16:42–16:46 (Asia/Bangkok).
+- Updated tests: `supabase/tests/learning_schedule_revise_rpc.sql` and `supabase/tests/learning_schedule_reschedule_rpc.sql`. No migration or runtime implementation was changed in this run.
+- Earlier entries above are historical snapshots. This verification supersedes the earlier cancellation-audit `NOT IMPLEMENTED` statement and the old revision/reschedule assertion counts; other release blockers are unchanged.
+
+### Failure and Fix
+
+- Reported failure: tests 27, 50 and 73 expected two total events after whole-schedule revision but observed three. Each overridden session now correctly has two `rescheduled` events plus one new `cancelled` event from the audit trigger.
+- Fix: count preserved events with `event_type = 'rescheduled'`, still expecting exactly two. Add separate assertions for exactly one `cancelled` event and its status/actor/reason metadata in each of UTC, Asia/Ho_Chi_Minh and America/New_York. The reschedule file now has 95 assertions instead of 89.
+- Revision tests: increased the plan from 16 to 22, included audit events in full before/after snapshots, and added a temporary trigger that fails cancellation-event INSERTs. Test helpers/triggers and fixtures are rolled back; the failure-injection trigger is also explicitly removed before the successful revision case.
+- README coverage limitation: the six-case README mentioned in the request was not available in the repository or supplied attachment. The following six cases were verified against the actual migration behavior; this is not a claim of line-by-line compliance with the unavailable README.
+
+### Database Verification
+
+- Clean migration replay: PASS — `supabase db reset --local`, exit code 0; all 76 migrations replayed, including `20261027093221_learning_schedule_cancellation_audit.sql`. Non-fatal messages: deprecated `[inbucket]` config and missing `supabase/seed.sql`.
+- Complete tests: PASS — `supabase test db --local`, exit code 0 after reset; `All tests successful. Files=14, Tests=235. Result: PASS`. Includes all 22 revision assertions and all 95 reschedule assertions.
+- Case 1 — one cancellation event: PASS. Successful whole-schedule revision cancels the future scheduled fixture and creates exactly one `cancelled` audit event.
+- Case 2 — event metadata: PASS. Event owner/actor equal the authenticated owner; status transition is `scheduled -> cancelled`; deterministic event key is `ls:schedule-change-cancel:<session_id>`; payload contains `schedule_changed`, schedule ID, original generation revision 1, and the previous UTC start/end timestamps.
+- Case 3 — preserve historical sessions: PASS. Completed and past scheduled fixtures are preserved apart from the already documented retired slot reference, and receive zero cancellation audit events.
+- Case 4 — stale revision / duplication: PASS. A stale request raises `40001`, leaves all five table snapshots unchanged and does not create a second cancellation event. This is sequential stale-version testing, not a multi-connection race test.
+- Case 5 — invalid occurrence rollback: PASS. A forged instant rejected after intermediate cancellation/slot changes restores schedules, slots, sessions, revisions and events to their original snapshots. No cancellation event survives the failed revision.
+- Case 6 — audit INSERT failure rollback: PASS. The test-only trigger raises `P0001` / `Injected cancellation audit failure`; the RPC fails and all five tables exactly match their prior snapshots. The injected error is expected and asserted, not a test-suite failure.
+- Failures in this run: none unexpected. The user's supplied 3-failure log documents the initial regression; after updating the assertions, the complete local suite passed on the replayed schema.
+
+### Web Quality Gates
+
+- Lint: PASS — from `apps/web`, `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit code 0; 0 errors, 1 existing warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6` (`react-hooks/exhaustive-deps`, missing dependency `projection`).
+- Unit tests: PASS — `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit code 0; 60 files passed, 1 skipped; 524 tests passed, 1 skipped; duration 67.14 seconds. The Focus PostgREST integration test remains skipped when required `FOCUS_TEST_SUPABASE_*` variables are absent. Existing Vite ESM/native-config warning is non-fatal.
+- Build: PASS — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, exit code 0; Next.js 16.2.6 compiled in 19.3 seconds, completed TypeScript in 26.5 seconds and generated 98/98 static pages.
+- Execution: Supabase used the installed CLI executable from the npm cache with local Docker access outside the sandbox. Direct Node entry points bypass the broken npm/npx shell shims. Build ran outside the sandbox using existing `.env.local`; no secret values are recorded. No linked or production database was accessed.
+
+### Status
+
+LOCAL VERIFICATION PASS for the cancellation-audit behavior and six cases described above. Phase 03 remains IN PROGRESS: DB earlier-fold enforcement, event-key fingerprint binding, real concurrent execution and transactional Task-close integration still require hardening/review. No UI or email changes were introduced. Only the two SQL test files and this evidence were changed; the user's new migration was preserved. No commit or push was performed.
