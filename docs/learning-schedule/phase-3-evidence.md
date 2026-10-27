@@ -189,3 +189,61 @@ Added the SQL acceptance test, regenerated local database types and appended thi
 ### Status
 
 LOCAL VERIFICATION PASS for the cancellation-audit behavior and six cases described above. Phase 03 remains IN PROGRESS: DB earlier-fold enforcement, event-key fingerprint binding, real concurrent execution and transactional Task-close integration still require hardening/review. No UI or email changes were introduced. Only the two SQL test files and this evidence were changed; the user's new migration was preserved. No commit or push was performed.
+
+## Step 3.5B — DST Canonicalization
+
+### Source
+
+- Baseline SHA: `c0189cd3f281f99f530daed9c5ddaa8d8a64c7eb`, branch `feature/learning-schedule-foundation`, including the user's untracked Step 3.5C migration.
+- Verified on 2026-10-27, approximately 17:12–17:16 (Asia/Bangkok), together with Step 3.5C below.
+- Migration: `supabase/migrations/20261027100125_learning_schedule_dst_canonicalization.sql`.
+- Tests: `supabase/tests/learning_schedule_dst_canonicalization.sql` and the DST gap/fold cases in `supabase/tests/learning_schedule_reschedule_rpc.sql`.
+
+### Database Verification
+
+- Clean replay: final `supabase db reset --local` PASS, exit 0; all 78 migrations replayed through `20261027101134_learning_schedule_reschedule_idempotency.sql`. The first attempt failed in the later Step 3.5C migration; see its failure/fix below. Non-fatal messages: deprecated `[inbucket]` config and missing `supabase/seed.sql`.
+- Acceptance command: `supabase test db --local supabase/tests/learning_schedule_dst_canonicalization.sql supabase/tests/learning_schedule_reschedule_rpc.sql`.
+- Result: PASS, exit 0; 2 files / 151 assertions, comprising 5 DST canonicalizer assertions and 146 reschedule assertions.
+- Canonicalizer: all 5 assertions PASS — New York `2026-11-01 01:30` resolves to earlier `05:30Z`, not later `06:30Z`; New York `2026-03-08 02:30` gap resolves to NULL; Vietnam and UTC conversions match expected instants.
+- Authenticated RPC guard: PASS — New York `2030-11-03 01:30` accepts earlier `05:30Z` and rejects later `06:30Z` with `22023` / `Noncanonical or nonexistent local study time`. The already-updated assertion expecting rejection remains in place.
+- Gap rejection: PASS — existing positive-duration mismatched wall-clock/UTC and nonpositive-duration gap payloads are rejected through the authenticated RPC.
+- Complete regression command: `supabase test db --local`; PASS, exit 0; 15 files / 291 assertions, after the final replay and test edits.
+
+### Coverage Limits / Status
+
+- LOCAL ACCEPTANCE PASS for the tested DST dates and zones. Earlier-fold enforcement is now demonstrated through the authenticated reschedule RPC for the New York fold; older `NOT IMPLEMENTED` / known-blocker entries above are historical.
+- This does not establish every historical or unusual IANA transition, canonicalizer behavior across every timezone, or Server Action Temporal behavior at runtime. No browser or concurrent-connection test was run.
+
+## Step 3.5C — Reschedule Event-Key Fingerprint
+
+### Source
+
+- Same baseline, branch and verification window as Step 3.5B above.
+- Migration: `supabase/migrations/20261027101134_learning_schedule_reschedule_idempotency.sql` (initially untracked).
+- Updated test: `supabase/tests/learning_schedule_reschedule_rpc.sql`; 146 assertions after expansion, previously 95.
+- Replaced `KNOWN BLOCKER same key with different payload replays ID` with an exact `throws_ok` assertion for SQLSTATE `22023`, message `Event key reused with different request`. Kept the complete session/events unchanged assertion.
+
+### Failures and Repair
+
+- Initial clean replay FAILED, exit 1, SQLSTATE `42601`, syntax error near `FROM` inside `pg_catalog.extract(epoch FROM p_expected_updated_at)`. This prevented the new RPC from being installed.
+- Repaired all three expressions in the untracked migration to PostgreSQL's special syntax `EXTRACT(EPOCH FROM ...)` for expected version, start instant and end instant. This retains numeric epoch representation and fingerprint semantics; no RPC signature, schema or generated types changed.
+- Repeated clean replay PASS for all 78 migrations. Both targeted acceptance and the full DB suite then PASS; there were no unexpected assertion failures.
+
+### Acceptance Tests
+
+- Same-key identical retry: PASS in UTC, Asia/Ho_Chi_Minh and America/New_York. Original expected timestamp is accepted; Session ID is returned and full session/event snapshots remain equal with a single initial audit event.
+- Changed payload: PASS — same key with different proposed start/end raises exact `22023` / `Event key reused with different request`; no session/event changes.
+- Per-field fingerprint binding: PASS — separately changing expected timestamp, local date, local start time, local end time, UTC start instant or UTC end instant produces that same exact error. Each attempted mutation has an independent before/after snapshot equality assertion in all three schedule timezones.
+- Fingerprint stored: PASS — the successful event contains a 64-character lowercase hexadecimal SHA-256 `requestFingerprint`.
+- Replay after newer command: PASS — retrying the identical original command after a later successful reschedule still returns the original Session ID. It neither reverts the newer scheduled times nor duplicates audit events.
+- Legacy event replay: PASS — privileged fixtures with no `requestFingerprint` are rejected by the authenticated RPC with the exact `22023` error. Session and event snapshots remain unchanged, including when the original session has since been cancelled by whole-schedule revision.
+- Audit failure rollback: PASS — existing test-only INSERT failure raises `P0001` / `Injected audit insert failure`; full session/event snapshots remain equal, proving no update or fingerprint-bearing event survives the failed command.
+- Commands/results: targeted two-file acceptance PASS (151 assertions) and full `supabase test db --local` PASS (15 files, 291 assertions), as recorded in Step 3.5B. All fixtures/helpers/test triggers are transaction-local and rolled back.
+
+### Coverage Limits / Status
+
+- LOCAL ACCEPTANCE PASS for fingerprint binding and replay behavior above. Session ID is held constant in per-field mutation tests: event-key uniqueness and replay lookup are scoped to `(session_id, event_key)`, so another session is a different command, not a globally forbidden key reuse.
+- Retry is tested against an already-present audit row inside the same rolled-back transaction; separate durable-commit retries and simultaneous connections remain untested. Task-close transactional integration remains outstanding.
+- No separate README with additional detailed cases was available; tests implement the retry, per-field changes, old/legacy replay and audit-rollback requirements in the user's instruction. No claim is made about unseen requirements.
+- Supabase commands used the installed CLI executable from the npm cache outside the sandbox for local Docker access. No linked/remote database was accessed. Lint/unit/build were not rerun: this request changes SQL tests and SQL migration syntax only; previous web gate results remain historical.
+- Changed the reschedule test, repaired the untracked migration syntax and appended these two evidence sections. No UI/email changes, type regeneration, commit or push were performed. Phase 03 remains IN PROGRESS pending the remaining concurrency/integration checks; this is local verification, not production approval.

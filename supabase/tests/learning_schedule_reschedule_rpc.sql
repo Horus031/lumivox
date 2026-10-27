@@ -88,6 +88,7 @@ CREATE TRIGGER rs_test_failure BEFORE INSERT ON public.task_study_session_events
 CREATE FUNCTION pg_temp.rs_suite(z text) RETURNS SETOF text
 LANGUAGE plpgsql SECURITY INVOKER AS $$
 DECLARE c record; k text := md5(z||'first')::uuid::text; before_state jsonb; n integer;
+        args jsonb; changed jsonb; field text;
 BEGIN
  SELECT * INTO c FROM rs_cases WHERE zone=z;
  RETURN NEXT is(pg_temp.rs_change(z,'2030-01-07','09:00','10:00',k,c.old_stamp),
@@ -110,11 +111,33 @@ BEGIN
                 c.session_id,z||': same-key retry accepts original expected timestamp');
  RETURN NEXT is(pg_temp.rs_state(c.session_id),before_state,
                 z||': retry changes neither session nor the single audit event');
- -- Characterize a documented release blocker without calling it a secure guarantee.
- RETURN NEXT is(pg_temp.rs_change(z,'2030-01-07','16:00','17:00',k,c.old_stamp),
-                c.session_id,z||': KNOWN BLOCKER same key with different payload replays ID');
+ RETURN NEXT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,%L)',
+   z,'2030-01-07','16:00','17:00',k,c.old_stamp),
+   '22023','Event key reused with different request',z||': same key rejects different payload');
  RETURN NEXT is(pg_temp.rs_state(c.session_id),before_state,
                 z||': changed-payload replay leaves prior times/event intact');
+ -- Mutate each request field independently, retaining the successful event key.
+ -- Session ID/key scope is per session; changing session ID is a different command.
+ args:=jsonb_build_object('version',c.old_stamp,'day','2030-01-07','starts','09:00',
+   'ends','10:00','startAt',('2030-01-07 09:00'::timestamp AT TIME ZONE z),
+   'endAt',('2030-01-07 10:00'::timestamp AT TIME ZONE z));
+ FOREACH field IN ARRAY ARRAY['version','day','starts','ends','startAt','endAt'] LOOP
+   changed:=args || CASE field
+     WHEN 'version' THEN jsonb_build_object(field,c.old_stamp+interval '1 second')
+     WHEN 'day' THEN jsonb_build_object(field,'2030-01-08')
+     WHEN 'starts' THEN jsonb_build_object(field,'09:15')
+     WHEN 'ends' THEN jsonb_build_object(field,'10:15')
+     WHEN 'startAt' THEN jsonb_build_object(field,('2030-01-07 09:01'::timestamp AT TIME ZONE z))
+     ELSE jsonb_build_object(field,('2030-01-07 10:01'::timestamp AT TIME ZONE z)) END;
+   RETURN NEXT throws_ok(format('SELECT public.ls_reschedule_session(%L,%L,%L,%L,%L,%L,%L,%L)',
+     c.session_id,changed->>'version',changed->>'day',changed->>'starts',changed->>'ends',
+     changed->>'startAt',changed->>'endAt',k),
+     '22023','Event key reused with different request',z||': fingerprint rejects changed '||field);
+   RETURN NEXT is(pg_temp.rs_state(c.session_id),before_state,z||': changed '||field||' has no effects');
+ END LOOP;
+ RETURN NEXT ok((SELECT payload->>'requestFingerprint' ~ '^[0-9a-f]{64}$'
+   FROM public.task_study_session_events WHERE session_id=c.session_id AND event_key=k),
+   z||': successful event stores SHA-256 fingerprint');
  RETURN NEXT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,%L)',
    z,'2030-01-07','09:30','10:30',md5(z||'stale')::uuid::text,c.old_stamp),
    '40001','Stale session version',z||': stale update rejected');
@@ -134,6 +157,10 @@ BEGIN
    z,'2030-01-07','11:00','12:00',md5(z||'adjacent')::uuid::text),
    z||': adjacent occurrence ending at neighbor start is allowed');
  before_state:=pg_temp.rs_state(c.session_id);
+ RETURN NEXT is(pg_temp.rs_change(z,'2030-01-07','09:00','10:00',k,c.old_stamp),
+   c.session_id,z||': identical old event replays after a later successful command');
+ RETURN NEXT is(pg_temp.rs_state(c.session_id),before_state,
+   z||': replay of old command does not undo newer times or duplicate events');
  RETURN NEXT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L)',
    z,'2030-01-07','15:00','16:00','eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee'),
    'P0001','Injected audit insert failure',z||': audit insert failure propagates');
@@ -245,6 +272,29 @@ SELECT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,NULL,NULL,NULL,
  '2030-01-07','16:00','17:00',md5(c.zone||'closed-schedule')::uuid::text,s.id),
  '22023','Session is not eligible for rescheduling',c.zone||': closed schedule rejected')
  FROM rs_cases c JOIN public.task_study_sessions s ON s.schedule_id=c.schedule_id AND s.schedule_revision=2;
+RESET ROLE;
+-- Legacy audit rows have no fingerprint: fail closed, even when supplied times
+-- match the old command. Insert fixtures as postgres, then exercise real RLS.
+INSERT INTO public.task_study_session_events
+ (user_id,session_id,event_type,from_status,to_status,actor_id,event_key,payload)
+ SELECT 'e1000000-0000-4000-8000-000000000001',session_id,'rescheduled','scheduled','scheduled',
+        'e1000000-0000-4000-8000-000000000001',md5(zone||'legacy')::uuid::text,
+        '{"new":{"localDate":"2030-01-07","startTime":"09:00","endTime":"10:00"}}'::jsonb
+ FROM rs_cases;
+CREATE FUNCTION pg_temp.rs_legacy_suite(z text) RETURNS SETOF text
+LANGUAGE plpgsql SECURITY INVOKER AS $$
+DECLARE c record; before_state jsonb;
+BEGIN
+ SELECT * INTO c FROM rs_cases WHERE zone=z;
+ before_state:=pg_temp.rs_state(c.session_id);
+ RETURN NEXT throws_ok(format('SELECT pg_temp.rs_change(%L,%L,%L,%L,%L,%L)',
+   z,'2030-01-07','09:00','10:00',md5(z||'legacy')::uuid::text,c.old_stamp),
+   '22023','Event key reused with different request',z||': legacy event without fingerprint fails closed');
+ RETURN NEXT is(pg_temp.rs_state(c.session_id),before_state,
+   z||': legacy replay leaves session and audit rows unchanged');
+END $$;
+SET LOCAL ROLE authenticated;
+SELECT tests.* FROM rs_cases c CROSS JOIN LATERAL pg_temp.rs_legacy_suite(c.zone) tests;
 RESET ROLE;
 SELECT * FROM finish();
 ROLLBACK;
