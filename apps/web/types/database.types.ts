@@ -1,4 +1,4 @@
-﻿
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -1388,6 +1388,9 @@ isOneToOne: false
                            },
 "ls_create_schedule":
 { Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
+                           },
+"ls_reschedule_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_new_end_at": string,"p_new_end_time": string,"p_new_local_date": string,"p_new_start_at": string,"p_new_start_time": string,"p_session_id": string }; Returns: string
                            },
 "ls_revise_schedule":
 { Args: { "p_ends_on": string,"p_expected_revision": number,"p_occurrences": Json,"p_schedule_id": string,"p_slots": Json,"p_starts_on": string,"p_timezone": string }; Returns: number

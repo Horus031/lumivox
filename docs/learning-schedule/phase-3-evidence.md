@@ -94,3 +94,59 @@ Tests: added `supabase/tests/learning_schedule_revise_rpc.sql` because no revisi
 Scope: this run checked the Step 3.4A items above. Lint and the web unit-test suite were not rerun because they are not listed in this section; their earlier results remain historical. Server Action runtime error mapping, cancellation audit events, DST fold enforcement, and real concurrent RPC execution are not established by these tests.
 
 Status: IN PROGRESS — migration replay, Server Action typecheck/build and the six revision behavior checks above are verified within their stated coverage. Cancellation audit events and DST fold hardening remain unimplemented. Added the revision test file and filled this section; no existing migration, runtime source or generated types were edited by this verification run. No commit, push or remote database operation was performed.
+
+## Step 3.4B — Individual Session Rescheduling
+
+### Source
+
+- Baseline SHA: `af71d40c2a5258ce40b85e6aaf80141cf7ad8130`, branch `feature/learning-schedule-foundation`, including pre-existing working-tree migration, Server Action and generated-type changes.
+- Verified on 2026-10-27, approximately 16:01–16:08 (Asia/Bangkok).
+- RPC migration: `supabase/migrations/20261027085534_learning_schedule_single_reschedule.sql`. This is the actual local file; the README's `20261027163000` filename does not exist. No duplicate migration or rename was introduced.
+- Server Action: `apps/web/features/learning-schedule/session-reschedule.actions.ts`.
+- Added tests: `supabase/tests/learning_schedule_reschedule_rpc.sql`. Uses pgTAP `no_plan()` / `finish()`, authenticated invoker helpers, real fixtures and a deliberately failing audit INSERT trigger. Everything, including the test trigger/helpers, is enclosed in a transaction ending in `ROLLBACK`.
+
+### Database Verification
+
+- Clean migration replay: PASS — `supabase db reset --local`, exit code 0; all 75 migrations replayed through `20261027085534_learning_schedule_single_reschedule.sql`. The local stack was already running, so a separate `supabase start` was unnecessary. Non-fatal messages: deprecated `[inbucket]` configuration and no matching `supabase/seed.sql`.
+- Targeted tests: initial `supabase test db --local supabase/tests/learning_schedule_reschedule_rpc.sql` passed 83/83 assertions. Added six Task-status assertions afterward; the final file has 89 assertions, all passing in the complete suite below.
+- Complete suite: `supabase test db --local`, exit code 0; `All tests successful. Files=14, Tests=223. Result: PASS`. Includes all 89 reschedule assertions plus 134 pre-existing assertions. Final suite ran after clean replay and after the final test edits.
+- Timezones: the common acceptance cases run under schedule timezones `UTC`, `Asia/Ho_Chi_Minh` and `America/New_York`. These are schedule timezone variations, not variations in the host process timezone.
+- Valid change / identity: PASS — RPC returns the original Session ID and retains `logical_occurrence_key` and generation `schedule_revision`; new wall-clock/UTC values are stored and `source_slot_id` becomes null.
+- Exactly one event: PASS — initial reschedule creates exactly one `rescheduled` audit event with the authenticated actor, previous/new times, and scheduled-to-scheduled status.
+- Same-key retry: PASS — retry with the same event UUID and original expected timestamp returns the prior Session ID; full session/event JSON snapshots remain identical, proving no extra event or second update in this test transaction.
+- Stale update: PASS — a new event key with an obsolete expected timestamp raises `40001`, exact message `Stale session version`, with no session/event changes.
+- Cross-owner denial: PASS — user B cannot reschedule A's session, even with otherwise valid target times; receives `22023`, exact message `Session not found`; no audit events are created by these attempts.
+- Eligibility: PASS — completed, missed and past sessions are rejected with `22023`, exact message `Session is not eligible for rescheduling`. Both `todo` and `in_progress` Tasks permit valid changes; completed/cancelled Tasks and closed schedules reject new reschedules.
+- Schedule date range: PASS — a new local date outside the owning schedule range is rejected with `22023` / `Invalid new study time`.
+- Local-to-UTC validation: PASS — mismatched wall-clock/UTC input is rejected with `22023` / `Local time/UTC mismatch`.
+- Overlap: PASS — overlap with another scheduled occurrence on the same schedule raises `23P01` / `Study session overlaps another obligation`; rejected requests leave session/event snapshots unchanged.
+- Adjacency: PASS — an occurrence ending exactly when its neighbor starts is allowed, exercising the half-open interval boundary.
+- Whole-schedule revision after override: PASS — `ls_revise_schedule` succeeds with revision 2, supersedes the still-future overridden session with `cancelled` / `schedule_changed`, retains its original ID/key/generation revision, and preserves the two preceding reschedule audit events. This does not assert that revision cancellation itself emits an event.
+- Audit INSERT failure rollback: PASS — a temporary trigger raises `P0001` / `Injected audit insert failure` after the session UPDATE; complete before/after session and event snapshots remain equal, including version and scheduled times. The failure is expected and asserted, not a suite failure.
+- DST gap: PASS — New York `2030-03-10 02:30` is rejected; probes cover both nonpositive UTC duration and positive-duration input that cannot round-trip to the nonexistent local start.
+- DST fold: earlier New York `2030-11-03 01:30` instant (`05:30Z`) is accepted. A separate characterization assertion confirms that the direct RPC also accepts the later instant (`06:30Z`); this is a reproduced release blocker, not evidence that earlier-fold enforcement is implemented.
+- Failures: no unexpected SQL, migration or pgTAP failures occurred. The documented later-fold and changed-payload replay limitations were reproduced with explicitly named `KNOWN BLOCKER` assertions.
+
+### Generated Types and Web Quality Gates
+
+- Types: PASS — `supabase gen types typescript --local`, exit code 0, generated from local `127.0.0.1:55322`; output validated before writing `apps/web/types/database.types.ts`. The generated schema contains `ls_reschedule_session`. CLI notes that generated TypeScript is unformatted; no formatter was installed.
+- Lint: PASS — from `apps/web`, `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit code 0; 0 errors, 1 existing `react-hooks/exhaustive-deps` warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`, missing dependency `projection`.
+- Unit tests: PASS — `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit code 0; 60 files passed, 1 skipped; 524 tests passed, 1 skipped; duration 57.98 seconds. The Focus PostgREST integration test remains skipped without its required `FOCUS_TEST_SUPABASE_*` variables. Existing Vite ESM/native-config warning is non-fatal.
+- Build: PASS — after type generation, `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build` (includes prebuild), exit code 0; Next.js 16.2.6 compiled in 13.6 seconds, completed TypeScript in 21.5 seconds, generated 98/98 static pages.
+- Execution: Supabase commands used the installed CLI executable from the npm cache with Docker access outside the sandbox. Direct Node entry points bypass the broken shell npm/npx shims. Build ran outside the sandbox with existing `.env.local`; no secrets are recorded. No remote project was targeted.
+
+### Coverage Limits / Phase 03.5 Release Blockers
+
+- DB earlier-fold enforcement: NOT IMPLEMENTED; later valid fold acceptance was demonstrated above. Do not enable UI until the database boundary has trustworthy canonicalization/hardening.
+- Event key fingerprint: NOT IMPLEMENTED; in all three timezones, reusing the successful event UUID with different proposed times returns the previous ID and leaves the prior row/event intact. This characterizes the README limitation rather than endorsing payload-blind replay.
+- Whole-schedule cancellation audit events: NOT IMPLEMENTED; forward-only audit hardening remains necessary.
+- Notifications: not implemented; Phase 07 must cancel/replan unsent reminders after rescheduling.
+- Actual concurrent connections and retry after a separate durable COMMIT were not exercised. These tests verify stale-version handling and replay against an existing event within one rolled-back transaction. Lock ordering is not marked verified by concurrency testing.
+- Existing create/revise RPC concurrency/failure-injection coverage and transactional Task-close integration still require release review. The tests here set Task status as fixtures; they do not prove atomic Task-close integration.
+- Server Action was compiled/typechecked but not invoked through a browser or dedicated action unit test. DST tests above call the RPC directly; they do not independently verify Temporal resolution in the Server Action at runtime.
+
+### Status
+
+LOCAL TESTS VERIFIED — the required pgTAP cases and quality gates passed within the documented coverage. Phase 03 remains IN PROGRESS and production/UI release remains BLOCKED by the Phase 03.5 items above. No UI wiring or email sending was added.
+
+Added the SQL acceptance test, regenerated local database types and appended this evidence. Existing migration and Server Action source were preserved. No commit, push or production approval was performed.
