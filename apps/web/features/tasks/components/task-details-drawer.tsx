@@ -2,7 +2,7 @@
 
 import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -35,6 +35,8 @@ import { TaskReviewPanel } from "@/features/task-review/components/task-review-p
 import { GoalOption } from "@/features/goals/goal.types";
 import { TaskEditForm } from "./task-edit-form";
 import { Pencil, Trash2, X } from "lucide-react";
+
+import { TaskStudyScheduleSection } from "@/features/learning-schedule/components/task-study-schedule-section";
 
 export type TaskDrawerTab = "overview" | "subtasks" | "documents" | "review";
 
@@ -82,6 +84,7 @@ export function TaskDetailsDrawer({
   const taskId = task?.id ?? null;
 
   const taskUpdatedAt = task?.updated_at ?? null;
+  const detailsRequest = useRef(0);
 
   const refreshDetails = useCallback(() => {
     if (!taskId) {
@@ -89,7 +92,9 @@ export function TaskDetailsDrawer({
     }
 
     startDetailsTransition(async () => {
+      const request = ++detailsRequest.current;
       const result = await getTaskDetailsAction(taskId);
+      if (request !== detailsRequest.current) return;
 
       if (!result.success) {
         toast.error(result.message);
@@ -97,7 +102,7 @@ export function TaskDetailsDrawer({
         return;
       }
 
-      setDetails(result.data);
+      if (result.data.task.id === taskId) setDetails(result.data);
     });
   }, [taskId]);
 
@@ -117,20 +122,33 @@ export function TaskDetailsDrawer({
     setIsEditing(initialEditMode ?? false);
 
     refreshDetails();
-  }, [taskId, taskUpdatedAt, task?.status, initialTab, initialEditMode, refreshDetails]);
+    return () => { detailsRequest.current += 1; };
+  }, [
+    taskId,
+    taskUpdatedAt,
+    task?.status,
+    initialTab,
+    initialEditMode,
+    refreshDetails,
+  ]);
 
   if (!task) {
     return null;
   }
 
-  const currentTask = details?.task ?? task;
+  const currentDetails = details?.task.id === task.id ? details : null;
+  const currentTask = currentDetails?.task ?? task;
 
-  const subtasks = details?.subtasks ?? [];
+  const subtasks = currentDetails?.subtasks ?? [];
 
-  const documents = details?.documents ?? [];
+  const documents = currentDetails?.documents ?? [];
 
-  const dateFormatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
-  const displayDate = (value: string | null) => value ? dateFormatter.format(new Date(value)) : t("notSet");
+  const dateFormatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const displayDate = (value: string | null) =>
+    value ? dateFormatter.format(new Date(value)) : t("notSet");
 
   const summaryRows = [
     {
@@ -165,7 +183,9 @@ export function TaskDetailsDrawer({
   ];
 
   async function handleDelete() {
-    const confirmed = await confirm(t("deleteConfirm"), { variant: "destructive" });
+    const confirmed = await confirm(t("deleteConfirm"), {
+      variant: "destructive",
+    });
 
     if (!confirmed) {
       return;
@@ -197,11 +217,7 @@ export function TaskDetailsDrawer({
       align="right"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             {t("close")}
           </Button>
 
@@ -221,18 +237,14 @@ export function TaskDetailsDrawer({
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="secondary"
-            className={`${getPriorityTone(
-              currentTask.priority,
-            )}`}
+            className={`${getPriorityTone(currentTask.priority)}`}
           >
             {formT(`priorities.${currentTask.priority}`)}
           </Badge>
 
           <Badge
             variant="outline"
-            className={`${getStatusTone(
-              currentTask.status,
-            )}`}
+            className={`${getStatusTone(currentTask.status)}`}
           >
             {formT(`statuses.${currentTask.status}`)}
           </Badge>
@@ -250,7 +262,10 @@ export function TaskDetailsDrawer({
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
-            <TabsList variant="line" className="min-w-max border-b border-border">
+            <TabsList
+              variant="line"
+              className="min-w-max border-b border-border"
+            >
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
 
               <TabsTrigger value="subtasks">
@@ -277,7 +292,11 @@ export function TaskDetailsDrawer({
                 size="sm"
                 onClick={() => setIsEditing((current) => !current)}
               >
-                {isEditing ? <X aria-hidden="true" /> : <Pencil aria-hidden="true" />}
+                {isEditing ? (
+                  <X aria-hidden="true" />
+                ) : (
+                  <Pencil aria-hidden="true" />
+                )}
                 {isEditing ? commonT("cancel") : commonT("edit")}
               </Button>
             </div>
@@ -298,60 +317,70 @@ export function TaskDetailsDrawer({
               </div>
             ) : null}
 
-            {!isEditing ? <div className="space-y-card">
-              <dl className="grid gap-card sm:grid-cols-2">
-                {summaryRows.map((row) => (
-                  <div
-                    key={row.label}
-                    className="min-w-0"
-                  >
-                    <dt className="text-label font-medium text-muted-foreground">
-                      {row.label}
-                    </dt>
+            {!isEditing ? (
+              <div className="space-y-card">
+                <dl className="grid gap-card sm:grid-cols-2">
+                  {summaryRows.map((row) => (
+                    <div key={row.label} className="min-w-0">
+                      <dt className="text-label font-medium text-muted-foreground">
+                        {row.label}
+                      </dt>
 
-                    <dd className="mt-1 text-body font-medium text-foreground [overflow-wrap:anywhere]">
-                      {row.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+                      <dd className="mt-1 text-body font-medium text-foreground wrap-anywhere">
+                        {row.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
 
-              <div className="border-t border-border pt-card">
-                <h3 className="text-label font-medium text-muted-foreground">
-                  {t("notes")}
-                </h3>
+                <div className="border-t border-border pt-card">
+                  <h3 className="text-label font-medium text-muted-foreground">
+                    {t("notes")}
+                  </h3>
 
-                <p className="mt-1 whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">
-                  {currentTask.description?.trim()
-                    ? currentTask.description
-                    : t("noDescription")}
-                </p>
-              </div>
+                  <p className="mt-1 whitespace-pre-wrap text-body text-foreground wrap-anywhere">
+                    {currentTask.description?.trim()
+                      ? currentTask.description
+                      : t("noDescription")}
+                  </p>
+                </div>
 
-              <div className="border-t border-border pt-card">
-                <h3 className="text-label font-medium text-muted-foreground">
-                  {t("systemFields")}
-                </h3>
+                <div className="border-t border-border pt-card">
+                  <h3 className="text-label font-medium text-muted-foreground">
+                    {t("systemFields")}
+                  </h3>
 
-                <div className="mt-2 grid gap-2 text-body text-muted-foreground">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>{t("created")}</span>
+                  <div className="mt-2 grid gap-2 text-body text-muted-foreground">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span>{t("created")}</span>
 
-                    <span className="font-medium text-foreground">
-                      {displayDate(currentTask.created_at)}
-                    </span>
-                  </div>
+                      <span className="font-medium text-foreground">
+                        {displayDate(currentTask.created_at)}
+                      </span>
+                    </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>{t("updated")}</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span>{t("updated")}</span>
 
-                    <span className="font-medium text-foreground">
-                      {displayDate(currentTask.updated_at)}
-                    </span>
+                      <span className="font-medium text-foreground">
+                        {displayDate(currentTask.updated_at)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div> : null}
+            ) : null}
+
+            {!isEditing && (
+              <TaskStudyScheduleSection
+                key={currentTask.id}
+                taskId={currentTask.id}
+                eligible={
+                  currentTask.parent_task_id === null &&
+                  ["todo", "in_progress"].includes(currentTask.status)
+                }
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="subtasks">
