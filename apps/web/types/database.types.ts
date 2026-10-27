@@ -1,4 +1,4 @@
-
+﻿
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -1385,6 +1385,9 @@ isOneToOne: false
                            },
 "leave_study_room":
 { Args: { "p_room_id": string }; Returns: undefined
+                           },
+"ls_create_schedule":
+{ Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
