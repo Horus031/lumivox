@@ -213,10 +213,83 @@ All commands below ran from `apps/web`.
 - User will handle commit and push.
 
 
+## Step 4.5 — Single-Session Reschedule UI
+
+### Baseline / Implementation
+
+- Starting HEAD: `1eda1d3a5e841a9fda1cae9c0129cf9efd06b47d`, branch `feature/learning-schedule-foundation`; initial working tree was clean.
+- Verified on 2026-10-28, approximately 15:16–15:27 (Asia/Bangkok). Earlier Step 4.1–4.4 results remain historical snapshots.
+- Added `components/session-reschedule-dialog.tsx`. It uses the existing Dialog/Button controls, initializes stored local date and HH:mm times, displays the session timezone, validates real calendar dates and ordered same-day times, and requires explicit Confirm reschedule. Cancel does not mutate.
+- Added `updated_at` to the sessions SELECT; the inferred row type supplies the exact database version to the Dialog without any cast to any. `canReschedule` defaults false and is enabled in Task Details only for an eligible Task and active Schedule. Each row also requires scheduled status and a future scheduled_start_at; the RPC rechecks these rules at transaction time.
+- A frozen submission object contains sessionId, expectedUpdatedAt, localDate, startTime, endTime and a UUID eventKey. Retrying unchanged input reuses it; editing input after a definitive rejection clears it so the next command gets a new key. A synchronous ref prevents duplicate submissions; fields and close controls are disabled while saving.
+- Unknown outcomes lock the draft and expose `Retry exact command` and `Check latest session`. Retry sends the same object, key, payload and expected version; no automatic replay occurs. Check latest discards the draft and reloads database state. A confirmed conflict also blocks overwrite and offers reload. Unmounted forms ignore late responses, and session ID/version changes remount the form.
+- `StudySessionsList` now supports mutation refresh: the wrapper increments a refresh key used in the actual SessionRows key. Save or Check latest remounts the rows, invalidates old requests, clears accumulated pages and starts one new page-0 load. The existing schedule/revision keys are retained.
+- `rescheduleStudySessionAction` retains authenticated owner-filtered reads and Temporal conversion using the owning Schedule timezone. It now rejects end <= start before authentication, bounds the RPC HTTP request to 5 seconds, and treats transport/abort results as uncertain. A bounded owner-version reread detects an accompanying version change; it never infers a successful commit. The existing RPC, DST guard and request-fingerprint contract were not changed.
+- No migration, database reset, type regeneration, attendance controls, email sending, commit or push was performed.
+
+### Acceptance Tests — Executed
+
+| ID | Actual verification and boundary | Result |
+| --- | --- | --- |
+| RS-01 | List component exposes exactly one Reschedule button for a future scheduled row when canReschedule is enabled; disabling parent permission removes it. | PASS |
+| RS-02 | List component hides controls for completed, missed, skipped, cancelled and in-progress rows. Local action tests additionally exercise real rejection of all five statuses without row changes. Status changes are privileged fixtures only. | PASS |
+| RS-03 | List component hides Reschedule for a past scheduled row; local authenticated action rejects an actual past scheduled fixture with no writes. | PASS |
+| RS-04 | Dialog prefills local values/timezone, edits date/start/end, and sends the selected values with the original database updated_at. | PASS — component |
+| RS-05 | Equal, earlier and empty end times disable Confirm. Server Action validates ordering independently. | PASS — component/action |
+| RS-06 | Real authenticated reschedule returns and retains the original Session ID, logical_occurrence_key and generation revision; source_slot_id becomes null. | PASS |
+| RS-07 | Complete before/after session snapshots prove every unselected session remains byte-for-byte equivalent as returned by PostgREST. Only the chosen session is moved. | PASS |
+| RS-08 | Exactly one real rescheduled audit event exists for the chosen ID/key and owning actor. | PASS |
+| RS-09 | A second command with the original stale updated_at returns failure/conflict after a winning move. Entire winning session snapshot and audit remain unchanged. Component conflict test retains draft, disables save and provides reload. Local PostgREST uses the bounded unknown-outcome path described below. | PASS with documented timeout boundary |
+| RS-10 | Local overlapping move fails, direct authenticated RPC returns 23P01, and complete sessions/audit snapshots are unchanged. An adjacent move starting at the other session's end is accepted. | PASS |
+| RS-11 | America/New_York 2030-03-10 gap: action rejects it and direct invalid UTC RPC returns 22023 without changes. 2030-11-03 fold: direct later-fold RPC returns 22023 without changes; action uses the earlier 05:30Z instant and succeeds. | PASS — Temporal + real DB boundary |
+| RS-12 | Same-key/same-payload action replay returns the original ID; session and event snapshots remain exactly equal with one event. Component unknown-outcome retry uses the very same frozen submission object. | PASS |
+| RS-13 | Changed time under a used key fails via the action; direct RPC confirms 22023 / Event key reused with different request. Rows/audit remain unchanged. Component test confirms a new payload gets a new UUID. | PASS |
+| RS-14 | A second real authenticated user cannot load the owner's session through the reschedule action and receives Study session not found. Owner filters and existing RLS are both active; this is not an isolated RLS-only test. | PASS |
+| RS-15 | Actual list/Dialog component test loads page 1, reschedules its row, closes the Dialog, discards old pages and requests page 0 again. Check latest after unknown outcome also reloads page 0 and does not replay a mutation. | PASS — component |
+
+### Individual Override -> Whole-Schedule Revision — Executed
+
+- Created a real local recurring Schedule, moved its first session to 2030-01-08 18:00–19:00 through the authenticated reschedule action, then revised the recurring slots through the authenticated revision action.
+- The original Session ID remains in the session query as cancelled with reason schedule_changed and its overridden local date.
+- Its original rescheduled audit row is preserved exactly, and one additional cancelled audit event records scheduled -> cancelled / schedule_changed. Exactly two events remain for this session. Replacement sessions are generated by the existing revision RPC; no history is deleted.
+- This is a real local action/RPC integration flow with injected authenticated clients, not an authenticated browser E2E claim.
+
+### Test Files / Commands / Actual Results
+
+- Added `components/session-reschedule-dialog.test.tsx`: 11 cases including parameterized invalid end-time cases, confirmation/cancel, duplicate submission, key lifetime, immutable unknown-outcome retry, check latest, conflict and a stale mutation response after switching sessions.
+- Added `session-reschedule.actions.test.ts`: 12 cases including strict validation, owner filters, timezone/UTC arguments, actual Temporal gap/fold handling, SQLSTATE handling, abort/transport uncertainty and missing-owner denial.
+- Extended `components/study-sessions-list.test.tsx` from 8 to 11 cases: eligibility/status/past-time filtering, reschedule from a loaded second page then page-0 refresh, and explicit latest-state refresh after unknown outcome. Existing initial/load-more stale-response tests remain in the suite.
+- Extended `session.queries.actions.test.ts` to assert updated_at is selected.
+- Targeted command from `apps/web`: `node node_modules/vitest/vitest.mjs run features/learning-schedule/components/session-reschedule-dialog.test.tsx features/learning-schedule/session-reschedule.actions.test.ts features/learning-schedule/components/study-sessions-list.test.tsx features/learning-schedule/session.queries.actions.test.ts`.
+- Final targeted result: exit 0; 4 files / 42 tests PASS, duration 9.66 seconds, after the query-chain typing correction below.
+- Extended `schedule.integration.test.ts` from 13 to 19 cases with six new scenarios covering identity/unchanged peers/audit/idempotency/fingerprint, stale version, overlap/adjacency, owner/status/past-time denial, DST gap/fold and override -> whole revision history.
+- Local command: `node node_modules/vitest/vitest.mjs run features/learning-schedule/schedule.integration.test.ts --reporter=verbose`. Local credentials came from CLI `supabase status -o json` into LEARNING_SCHEDULE_TEST_* process variables without printing/saving them. The test guards loopback host and API port 55321.
+- Final local result: exit 0; 19/19 PASS, duration 14.01 seconds, after the query-chain correction. The stale-session case took 5.145 seconds; the previous same-revision race regression took 5.104 seconds. An earlier complete local run also passed 19/19 in 14.78 seconds.
+- Real Supabase Auth, PostgREST and Postgres were used. requireUser injects each signed-in fixture client rather than Next request cookies. Sign-out, deletion of both fixture users and zero remaining fixture Task counts all passed. No remote database was accessed.
+
+### Quality Gates / Failure Corrected
+
+- Lint: `node node_modules/eslint/bin/eslint.js .` (equivalent to npm run lint), exit 0; 0 errors and 1 existing projection dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Full unit suite: `node node_modules/vitest/vitest.mjs run` (equivalent to npm run test:unit), exit 0; 68 files passed / 2 skipped; 605 tests passed / 20 skipped (625 total), duration 68.85 seconds. The default run skips 19 opt-in Schedule integration tests and 1 existing Focus integration test. Schedule integration passed separately above; Focus integration was not run.
+- The first build failed TypeScript because abortSignal was chained after maybeSingle on the version reread; the installed SDK's maybeSingle return type does not expose that method. Fixed by calling abortSignal before maybeSingle, without any cast. The matching action test builder was corrected too. The targeted 42 tests and all 19 real integration tests were rerun successfully after this change; the full 605-test run predates this small chain-order correction.
+- Final build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in 15.1 seconds, TypeScript completed in 23.0 seconds and generated 98/98 static pages in 781 ms.
+- React review covered unconditional hooks, keyed state reset, stale-response cleanup, native disabled controls, Dialog semantics, exact-command retries and duplicate-submit guards. `git diff --check` passed; line-ending notices are not failures.
+- Direct Node commands bypass broken npm/npx shell shims. Integration/CLI access and build used the required permissions; build used existing .env.local. Existing Vite config-loader and Supabase inbucket/optional-stopped-service notices remain non-fatal. No credentials are recorded.
+
+### Coverage Limits / Status
+
+- Step 4.5: LOCAL VERIFICATION PASS for RS-01–RS-15 and the override -> revision integration scenario within the boundaries above.
+- PostgREST serialization-error retry behavior found in Step 4.4 remains unresolved at the server layer. The stale-session test also reaches the 5-second HTTP bound. Abort is not proof of rollback or immediate server-side cancellation; a changed version alone is not treated as proof that this request committed. The UI requires an explicit latest-state check or exact-command retry.
+- Uncertain outcomes and retry UI are tested with mocked action results/transport exceptions; real idempotent RPC replay and the real stale-RPC timeout path are separately verified against local Supabase. A deliberately severed network connection after a successful commit was not injected in this step.
+- Exact retries retain the original client command while the Dialog remains mounted. Closing/reloading discards it; no durable retry store across navigation is implemented. If another operation changes the owning Schedule timezone between attempts, the Server Action resolves UTC against that newly saved timezone and the DB fingerprint remains authoritative; concurrent timezone-change/replay was not tested here.
+- Offset pagination still lacks snapshot consistency against changes from another client. This UI's own successful reschedule reloads page 0; it does not solve all concurrent pagination cases.
+- Browser E2E/Next cookie transport, visual/mobile review, browser focus/keyboard flow, EN/VI localization, fresh migration replay, audit failure injection and the independent Phase 03 concurrency harness were not run here. No attendance or notification functionality is claimed.
+- No commit or push was performed; the user will handle both.
+
 ## Remaining Work / Final Decision
 
-- Steps 4.1, 4.2, 4.3 and 4.4: local verification PASS within the boundaries above; Step 4.4 includes the documented bounded-request mitigation and server retry limitation.
+- Steps 4.1, 4.2, 4.3, 4.4 and 4.5: local verification PASS within the boundaries above; Step 4.4 includes the documented bounded-request mitigation and server retry limitation.
 - EN/VI strings, responsive/visual review, browser keyboard flow, focus behavior and authenticated browser E2E still need later Phase 04 verification. The new scheduling text remains English; i18n completion is not claimed.
-- Phase 04 overall: IN PROGRESS — Steps 4.5–4.7 have not been verified here.
+- Phase 04 overall: IN PROGRESS — Steps 4.6–4.7 have not been verified here.
 - Production deployment authorized: NO.
 - No commit or push was performed. This report and the added tests/fixes remain working-tree changes.

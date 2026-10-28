@@ -2,15 +2,18 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ query: vi.fn() }));
+const mocks = vi.hoisted(() => ({ query: vi.fn(), reschedule: vi.fn() }));
 vi.mock("../session.queries.actions", () => ({ getStudySessionsAction: mocks.query }));
+vi.mock("../session-reschedule.actions", () => ({ rescheduleStudySessionAction: mocks.reschedule }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
 import { StudySessionsList } from "./study-sessions-list";
 
 function session(index: number, status = "scheduled") {
   return { id: `session-${index}`, local_date: `2030-01-${String(index + 1).padStart(2, "0")}`,
     local_start_time: "19:00:00", local_end_time: "20:30:00", timezone: "Asia/Ho_Chi_Minh", status,
     schedule_revision: 1, scheduled_start_at: "2030-01-01T12:00:00Z", scheduled_end_at: "2030-01-01T13:30:00Z",
-    cancellation_reason: status === "cancelled" ? "task_closed" : null, completed_at: null };
+    cancellation_reason: status === "cancelled" ? "task_closed" : null, completed_at: null,
+    updated_at: "2026-10-28T01:00:00Z" };
 }
 function page(rows: ReturnType<typeof session>[], total = rows.length, index = 0, hasMore = false) {
   return { success: true as const, sessions: rows, total, page: index, hasMore };
@@ -28,7 +31,7 @@ describe("Study sessions read-only list", () => {
     host = document.createElement("div"); document.body.append(host); root = createRoot(host);
   });
   afterEach(() => { act(() => root.unmount()); host.remove(); });
-  async function render(scheduleId = "A") { await act(async () => { root.render(<StudySessionsList scheduleId={scheduleId} />); }); }
+  async function render(scheduleId = "A", canReschedule = false) { await act(async () => { root.render(<StudySessionsList scheduleId={scheduleId} canReschedule={canReschedule} />); }); }
   function button(label: string) { return [...host.querySelectorAll("button")].find(x => x.textContent === label)!; }
   async function click(label: string) { await act(async () => { button(label).click(); }); }
 
@@ -102,5 +105,34 @@ describe("Study sessions read-only list", () => {
     mocks.query.mockResolvedValue(page([])); await render();
     expect(host.textContent).toContain("No study sessions found.");
     expect(host.querySelectorAll("button")).toHaveLength(0);
+  });
+  it("only exposes Reschedule for future scheduled rows and an eligible parent", async () => {
+    const states = ["scheduled", "in_progress", "completed", "missed", "skipped", "cancelled"];
+    const rows = states.map((status, i) => session(i, status));
+    rows.push({ ...session(8), scheduled_start_at: "2020-01-01T12:00:00Z" });
+    mocks.query.mockResolvedValue(page(rows)); await render("A", true);
+    expect([...host.querySelectorAll("button")].filter(x => x.textContent === "Reschedule")).toHaveLength(1);
+    await render("A", false); expect(host.textContent).not.toContain("Reschedule");
+  });
+  it("reschedules a page-1 row, discards old pages and really reloads page zero", async () => {
+    mocks.query.mockResolvedValueOnce(page([session(0)], 2, 0, true))
+      .mockResolvedValueOnce(page([session(1)], 2, 1)).mockResolvedValueOnce(page([session(9)]));
+    mocks.reschedule.mockResolvedValue({ success: true, sessionId: "session-1" });
+    await render("A", true); await click("Load more");
+    await act(async () => { [...host.querySelectorAll("button")].filter(x => x.textContent === "Reschedule")[1].click(); });
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm reschedule")!.click(); });
+    expect(mocks.reschedule.mock.calls[0][0]).toMatchObject({ sessionId: "session-1", expectedUpdatedAt: "2026-10-28T01:00:00Z" });
+    expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 });
+    expect(host.querySelectorAll("li")).toHaveLength(1); expect(host.textContent).toContain("2030-01-10");
+    expect(host.textContent).not.toContain("2030-01-01"); expect(document.querySelector('[role="dialog"]')).toBeNull();
+  });
+  it("unknown outcome check latest closes dialog and reloads instead of replaying", async () => {
+    mocks.query.mockResolvedValueOnce(page([session(0)])).mockResolvedValueOnce(page([session(9)]));
+    mocks.reschedule.mockResolvedValue({ success: false, uncertain: true, message: "Unknown" });
+    await render("A", true); await click("Reschedule");
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm reschedule")!.click(); });
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Check latest session")!.click(); });
+    expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 }); expect(mocks.reschedule).toHaveBeenCalledOnce();
+    expect(host.textContent).toContain("2030-01-10");
   });
 });

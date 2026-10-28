@@ -13,9 +13,10 @@ import { getTaskStudyScheduleAction } from "../schedule.queries.actions";
 
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
 import { StudySessionsList } from "./study-sessions-list";
-import { ScheduleRevisionEditor } from "./schedule-revision-editor";
 
 import type { StudyScheduleInput } from "../schedule-engine";
+
+import { ScheduleRevisionEditor } from "./schedule-revision-editor";
 
 type Props = {
   taskId: string;
@@ -66,9 +67,9 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [editing, setEditing] = useState(false);
-  const [revising, setRevising] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState<StudyScheduleInput>(() => defaultDraft());
+  const [revising, setRevising] = useState(false);
 
   const [saving, startSaving] = useTransition();
   const saveInFlight = useRef(false);
@@ -88,7 +89,8 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
         setLoadError(result.message);
       }
     } catch {
-      if (request === loadRequest.current) setLoadError("Unable to load study schedule.");
+      if (request === loadRequest.current)
+        setLoadError("Unable to load study schedule.");
     } finally {
       if (request === loadRequest.current) setLoading(false);
     }
@@ -96,7 +98,9 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
 
   useEffect(() => {
     void loadSchedule();
-    return () => { loadRequest.current += 1; };
+    return () => {
+      loadRequest.current += 1;
+    };
   }, [loadSchedule]);
 
   function handleCreate(value: StudyScheduleInput) {
@@ -153,14 +157,16 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           </Button>
         </div>
       ) : schedule ? (
-        <div className="space-y-2 text-sm">
+        <div className="space-y-4">
           <p>
             {schedule.starts_on} – {schedule.ends_on}
           </p>
+
           <p>Timezone: {schedule.timezone}</p>
           <p>Status: {schedule.status}</p>
           <p>Revision: {schedule.revision}</p>
-          {revising && eligible && schedule.status === "active" ? (
+
+          {revising ? (
             <ScheduleRevisionEditor
               key={schedule.id}
               scheduleId={schedule.id}
@@ -173,11 +179,19 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           ) : (
             <>
               {eligible && schedule.status === "active" && (
-                <Button type="button" variant="outline" onClick={() => setRevising(true)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setRevising(true)}
+                >
                   Edit recurring schedule
                 </Button>
               )}
-              <StudySessionsList key={`${schedule.id}-${schedule.revision}`} scheduleId={schedule.id} />
+
+              <StudySessionsList
+                key={`${schedule.id}-${schedule.revision}`}
+                scheduleId={schedule.id}
+              />
             </>
           )}
         </div>
@@ -191,7 +205,11 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           aria-busy={saving}
           className={`min-w-0 border-0 p-0 ${saving ? "opacity-60" : ""}`}
         >
-          {saveError && <p role="alert" className="text-sm text-red-600">{saveError}</p>}
+          {saveError && (
+            <p role="alert" className="text-sm text-red-600">
+              {saveError}
+            </p>
+          )}
           <ScheduleDraftEditor
             initialValue={draft}
             onContinue={(value) => {

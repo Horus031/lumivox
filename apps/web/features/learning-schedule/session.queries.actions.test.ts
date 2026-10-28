@@ -25,6 +25,7 @@ describe("sessions read action", () => {
     expect(query.eq).toHaveBeenCalledWith("schedule_id", scheduleId);
     expect(query.eq).toHaveBeenCalledWith("user_id", "owner");
     expect(query.select).toHaveBeenCalledWith(expect.stringContaining("cancellation_reason"), { count: "exact" });
+    expect(query.select).toHaveBeenCalledWith(expect.stringContaining("updated_at"), { count: "exact" });
     expect(query.order.mock.calls).toEqual([["scheduled_start_at", { ascending: true }], ["id", { ascending: true }]]);
     expect(query.range).toHaveBeenCalledWith(20, 39);
   });

@@ -3,23 +3,27 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { getStudySessionsAction } from "../session.queries.actions";
+import { SessionRescheduleDialog } from "./session-reschedule-dialog";
 
 type SuccessResult = Extract<Awaited<ReturnType<typeof getStudySessionsAction>>, { success: true }>;
 type Session = SuccessResult["sessions"][number];
-type Props = { scheduleId: string };
+type Props = { scheduleId: string; canReschedule?: boolean };
 
 const STATUS_LABELS: Record<string, string> = {
   scheduled: "Scheduled", in_progress: "In progress", completed: "Completed",
   missed: "Missed", skipped: "Skipped", cancelled: "Cancelled",
 };
 
-export function StudySessionsList({ scheduleId }: Props) {
+export function StudySessionsList({ scheduleId, canReschedule = false }: Props) {
+  const [refreshKey, setRefreshKey] = useState(0);
   // Keep the reset synchronous when the viewed schedule changes, including
   // callers other than the keyed Task section.
-  return <SessionRows key={scheduleId} scheduleId={scheduleId} />;
+  return <SessionRows key={`${scheduleId}-${canReschedule}-${refreshKey}`} scheduleId={scheduleId}
+    canReschedule={canReschedule} onReload={() => setRefreshKey(key => key + 1)} />;
 }
 
-function SessionRows({ scheduleId }: Props) {
+function SessionRows({ scheduleId, canReschedule, onReload }: Props & { onReload: () => void }) {
+  const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -100,6 +104,12 @@ function SessionRows({ scheduleId }: Props) {
               <span className="rounded-md border px-2 py-1 text-xs">
                 {STATUS_LABELS[session.status] ?? session.status}
               </span>
+              {canReschedule && session.status === "scheduled" &&
+                new Date(session.scheduled_start_at).getTime() > Date.now() && (
+                  <Button type="button" variant="outline" size="sm" onClick={() => setSelectedSession(session)}>
+                    Reschedule
+                  </Button>
+                )}
             </div>
             {session.status === "cancelled" && session.cancellation_reason && (
               <p className="mt-2 text-xs text-muted-foreground">Reason: {session.cancellation_reason}</p>
@@ -107,9 +117,12 @@ function SessionRows({ scheduleId }: Props) {
           </li>
         ))}
       </ul>
+      {selectedSession && <SessionRescheduleDialog session={selectedSession} open
+        onOpenChange={open => { if (!open) setSelectedSession(null); }}
+        onSaved={onReload} onReload={onReload} />}
       {loading && <p role="status" className="text-sm">Loading sessions...</p>}
       {hasMore && !error && (
-        <Button type="button" variant="outline" disabled={loading}
+        <Button type="button" variant="outline" disabled={loading || selectedSession !== null}
           onClick={() => void loadPage(page + 1)}>Load more</Button>
       )}
     </section>

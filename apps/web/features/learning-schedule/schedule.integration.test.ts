@@ -17,6 +17,7 @@ import { getTaskStudyScheduleAction } from "./schedule.queries.actions";
 import { getStudySessionsAction } from "./session.queries.actions";
 import { getStudyScheduleEditorAction } from "./schedule-editor.queries.actions";
 import { reviseStudyScheduleAction } from "./schedule-revision.actions";
+import { rescheduleStudySessionAction } from "./session-reschedule.actions";
 import { deleteTaskAction, getTaskDetailsAction, transitionTaskStatusAction, updateTaskAction } from "@/features/tasks/task.actions";
 
 const url = process.env.LEARNING_SCHEDULE_TEST_URL;
@@ -64,6 +65,114 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
       user_id: fixtures[0].user.id, status, parent_task_id: parent }).select("*").single();
     expect(inserted.error).toBeNull(); return inserted.data!;
   }
+  async function sessionFixture(input = draft) {
+    const root = await task();
+    const created = await createStudyScheduleAction({ taskId: root.id, ...input });
+    if (!created.success) throw new Error(created.message);
+    const rows = await fixtures[0].client.from("task_study_sessions").select("*")
+      .eq("schedule_id", created.scheduleId).order("scheduled_start_at").order("id");
+    expect(rows.error).toBeNull();
+    return { scheduleId: created.scheduleId, rows: rows.data!, root };
+  }
+  async function sessionSnapshot(scheduleId: string) {
+    const rows = await admin.from("task_study_sessions").select("*").eq("schedule_id", scheduleId).order("id");
+    expect(rows.error).toBeNull(); return rows.data!;
+  }
+  async function eventsFor(sessionId: string) {
+    const events = await admin.from("task_study_session_events").select("*").eq("session_id", sessionId).order("id");
+    expect(events.error).toBeNull(); return events.data!;
+  }
+  it("reschedules one ID only, retains logical identity, retries once and rejects changed same-key payload", async () => {
+    const fixture = await sessionFixture(); const chosen = fixture.rows[0];
+    const before = await sessionSnapshot(fixture.scheduleId);
+    const command = { sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: "2030-01-08", startTime: "18:00", endTime: "19:00", eventKey: randomUUID() };
+    expect(await rescheduleStudySessionAction(command)).toEqual({ success: true, sessionId: chosen.id });
+    const after = await sessionSnapshot(fixture.scheduleId);
+    expect(after.filter(x => x.id !== chosen.id)).toEqual(before.filter(x => x.id !== chosen.id));
+    expect(after.find(x => x.id === chosen.id)).toMatchObject({ id: chosen.id, logical_occurrence_key: chosen.logical_occurrence_key,
+      schedule_revision: 1, source_slot_id: null, local_date: command.localDate, local_start_time: "18:00:00", local_end_time: "19:00:00" });
+    const events = await eventsFor(chosen.id); expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ event_type: "rescheduled", event_key: command.eventKey, actor_id: fixtures[0].user.id });
+    expect(await rescheduleStudySessionAction(command)).toEqual({ success: true, sessionId: chosen.id });
+    expect(await eventsFor(chosen.id)).toEqual(events); expect(await sessionSnapshot(fixture.scheduleId)).toEqual(after);
+    expect(await rescheduleStudySessionAction({ ...command, startTime: "17:00" })).toMatchObject({ success: false });
+    const mismatch = await fixtures[0].client.rpc("ls_reschedule_session", { p_session_id: chosen.id,
+      p_expected_updated_at: chosen.updated_at, p_new_local_date: command.localDate, p_new_start_time: "17:00", p_new_end_time: "19:00",
+      p_new_start_at: "2030-01-08T10:00:00Z", p_new_end_at: "2030-01-08T12:00:00Z", p_event_key: command.eventKey }).abortSignal(AbortSignal.timeout(5000));
+    expect(mismatch.error).toMatchObject({ code: "22023", message: "Event key reused with different request" });
+    expect(await eventsFor(chosen.id)).toEqual(events); expect(await sessionSnapshot(fixture.scheduleId)).toEqual(after);
+    const read = await getStudySessionsAction({ scheduleId: fixture.scheduleId, page: 0 });
+    if (!read.success) throw new Error(read.message);
+    expect(read.sessions.find(x => x.id === chosen.id)?.updated_at).toBe(after.find(x => x.id === chosen.id)?.updated_at);
+  });
+  it("stale session version shows conflict/unknown outcome without overwriting winning change", async () => {
+    const fixture = await sessionFixture(); const chosen = fixture.rows[0];
+    const command = { sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: "2030-01-08", startTime: "18:00", endTime: "19:00", eventKey: randomUUID() };
+    expect(await rescheduleStudySessionAction(command)).toMatchObject({ success: true });
+    const before = await sessionSnapshot(fixture.scheduleId); const events = await eventsFor(chosen.id);
+    expect(await rescheduleStudySessionAction({ ...command, localDate: "2030-01-09", eventKey: randomUUID() })).toMatchObject({ success: false, conflict: true });
+    expect(await sessionSnapshot(fixture.scheduleId)).toEqual(before); expect(await eventsFor(chosen.id)).toEqual(events);
+  }, 15000);
+  it("overlap is rejected with unchanged rows/audit; adjacent move is allowed", async () => {
+    const fixture = await sessionFixture(); const [chosen, other] = fixture.rows;
+    const before = await sessionSnapshot(fixture.scheduleId);
+    const command = { sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: other.local_date, startTime: "19:00", endTime: "20:00", eventKey: randomUUID() };
+    expect(await rescheduleStudySessionAction(command)).toMatchObject({ success: false });
+    const overlap = await fixtures[0].client.rpc("ls_reschedule_session", { p_session_id: chosen.id, p_expected_updated_at: chosen.updated_at,
+      p_new_local_date: other.local_date, p_new_start_time: "19:00", p_new_end_time: "20:00", p_new_start_at: other.scheduled_start_at,
+      p_new_end_at: `${other.local_date}T13:00:00Z`, p_event_key: randomUUID() });
+    expect(overlap.error?.code).toBe("23P01");
+    expect(await sessionSnapshot(fixture.scheduleId)).toEqual(before); expect(await eventsFor(chosen.id)).toHaveLength(0);
+    expect(await rescheduleStudySessionAction({ ...command, startTime: "20:30", endTime: "21:30", eventKey: randomUUID() })).toMatchObject({ success: true, sessionId: chosen.id });
+  });
+  it("denies cross-owner reschedule and rejects completed/missed/skipped/cancelled/in-progress/past sessions", async () => {
+    const fixture = await sessionFixture(); const chosen = fixture.rows[0];
+    const command = { sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: "2030-01-08", startTime: "18:00", endTime: "19:00", eventKey: randomUUID() };
+    auth.requireUser.mockResolvedValue({ supabase: fixtures[1].client, user: fixtures[1].user });
+    expect(await rescheduleStudySessionAction(command)).toEqual({ success: false, message: "Study session not found." });
+    auth.requireUser.mockResolvedValue({ supabase: fixtures[0].client, user: fixtures[0].user });
+    for (const status of ["completed", "missed", "skipped", "cancelled", "in_progress", "scheduled"]) {
+      const updated = await admin.from("task_study_sessions").update({ status,
+        completed_at: status === "completed" ? "2026-10-28T01:00:00Z" : null,
+        ...(status === "scheduled" ? { local_date: "2020-01-06", scheduled_start_at: "2020-01-06T12:00:00Z", scheduled_end_at: "2020-01-06T13:30:00Z" } : {}),
+      }).eq("id", chosen.id).select("updated_at").single();
+      expect(updated.error).toBeNull();
+      const before = await sessionSnapshot(fixture.scheduleId);
+      expect(await rescheduleStudySessionAction({ ...command, expectedUpdatedAt: updated.data!.updated_at, eventKey: randomUUID() })).toMatchObject({ success: false });
+      expect(await sessionSnapshot(fixture.scheduleId)).toEqual(before);
+    }
+    expect(await eventsFor(chosen.id)).toHaveLength(0);
+  });
+  it("DST gap and later fold are rejected by DB; action rejects gap and chooses earlier fold", async () => {
+    for (const localDate of ["2030-03-10", "2030-11-03"]) {
+      const fixture = await sessionFixture({ startsOn: localDate, endsOn: localDate, timezone: "America/New_York", slots: [{ weekday: 7, startTime: "12:00", endTime: "13:00" }] });
+      const chosen = fixture.rows[0]; const gap = localDate === "2030-03-10";
+      const before = await sessionSnapshot(fixture.scheduleId);
+      const invalid = await fixtures[0].client.rpc("ls_reschedule_session", { p_session_id: chosen.id, p_expected_updated_at: chosen.updated_at,
+        p_new_local_date: localDate, p_new_start_time: gap ? "02:30" : "01:30", p_new_end_time: gap ? "04:00" : "01:45",
+        p_new_start_at: gap ? `${localDate}T07:30:00Z` : `${localDate}T06:30:00Z`,
+        p_new_end_at: gap ? `${localDate}T08:00:00Z` : `${localDate}T06:45:00Z`, p_event_key: randomUUID() });
+      expect(invalid.error?.code).toBe("22023"); expect(await sessionSnapshot(fixture.scheduleId)).toEqual(before);
+      expect(await eventsFor(chosen.id)).toHaveLength(0);
+      const result = await rescheduleStudySessionAction({ sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate,
+        startTime: gap ? "02:30" : "01:30", endTime: gap ? "04:00" : "01:45", eventKey: randomUUID() });
+      expect(result.success).toBe(!gap);
+      const after = await sessionSnapshot(fixture.scheduleId);
+      if (gap) expect(after).toEqual(before);
+      else expect(new Date(after[0].scheduled_start_at).toISOString()).toBe(`${localDate}T05:30:00.000Z`);
+    }
+  });
+  it("individual override then whole revision retains reschedule audit and adds cancellation history", async () => {
+    const fixture = await sessionFixture(); const chosen = fixture.rows[0]; const key = randomUUID();
+    expect(await rescheduleStudySessionAction({ sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: "2030-01-08", startTime: "18:00", endTime: "19:00", eventKey: key })).toMatchObject({ success: true, sessionId: chosen.id });
+    const prior = (await eventsFor(chosen.id))[0];
+    expect(await reviseStudyScheduleAction({ scheduleId: fixture.scheduleId, expectedRevision: 1, ...draft,
+      slots: [{ weekday: 2, startTime: "20:00", endTime: "21:00" }] })).toMatchObject({ success: true, revision: 2 });
+    const rows = await getStudySessionsAction({ scheduleId: fixture.scheduleId, page: 0 }); if (!rows.success) throw new Error(rows.message);
+    expect(rows.sessions.find(x => x.id === chosen.id)).toMatchObject({ status: "cancelled", cancellation_reason: "schedule_changed", local_date: "2030-01-08" });
+    const events = await eventsFor(chosen.id); expect(events).toHaveLength(2); expect(events).toContainEqual(prior);
+    expect(events.find(x => x.event_type === "cancelled")).toMatchObject({ from_status: "scheduled", to_status: "cancelled", payload: { reason: "schedule_changed" } });
+  });
   it.each(["todo", "in_progress"] as const)("root %s saves through the real RPC and loads correct summary/session count", async status => {
     const root = await task(status);
     expect(await getTaskStudyScheduleAction(root.id)).toMatchObject({ success: true, schedule: null });

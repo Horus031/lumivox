@@ -21,7 +21,7 @@ export async function getStudySessionsAction(raw: unknown) {
     const { data, error, count } = await supabase
       .from("task_study_sessions")
       .select(
-        "id, local_date, local_start_time, local_end_time, timezone, status, schedule_revision, scheduled_start_at, scheduled_end_at, cancellation_reason, completed_at",
+        "id, local_date, local_start_time, local_end_time, timezone, status, schedule_revision, scheduled_start_at, scheduled_end_at, cancellation_reason, completed_at, updated_at",
         { count: "exact" },
       )
       .eq("schedule_id", scheduleId)
