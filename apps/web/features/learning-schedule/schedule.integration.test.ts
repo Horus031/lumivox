@@ -15,6 +15,8 @@ vi.mock("@/features/engagement-retention/engagement-retention.background", () =>
 import { createStudyScheduleAction } from "./schedule.actions";
 import { getTaskStudyScheduleAction } from "./schedule.queries.actions";
 import { getStudySessionsAction } from "./session.queries.actions";
+import { getStudyScheduleEditorAction } from "./schedule-editor.queries.actions";
+import { reviseStudyScheduleAction } from "./schedule-revision.actions";
 import { deleteTaskAction, getTaskDetailsAction, transitionTaskStatusAction, updateTaskAction } from "@/features/tasks/task.actions";
 
 const url = process.env.LEARNING_SCHEDULE_TEST_URL;
@@ -119,6 +121,76 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
     expect(await getStudySessionsAction({ scheduleId: created.scheduleId, page: 0 })).toEqual({
       success: true, sessions: [], total: 0, page: 0, hasMore: false,
     });
+    expect(await getStudyScheduleEditorAction(created.scheduleId)).toMatchObject({ success: false });
+    expect(await reviseStudyScheduleAction({ scheduleId: created.scheduleId, expectedRevision: 1, ...draft }))
+      .toMatchObject({ success: false, message: "Schedule not found." });
+  });
+  it("revises through authenticated action, preserves history, audits cancellation and reloads revision 2 then 3", async () => {
+    const root = await task();
+    const created = await createStudyScheduleAction({ taskId: root.id, ...draft });
+    if (!created.success) throw new Error(created.message);
+    const scheduleId = created.scheduleId;
+    expect(await getStudyScheduleEditorAction(scheduleId)).toEqual({ success: true, revision: 1, draft });
+    const original = await admin.from("task_study_sessions").select("*").eq("schedule_id", scheduleId).order("scheduled_start_at");
+    expect(original.error).toBeNull();
+    const [completed, past, future] = original.data!;
+    // Privileged fixtures model pre-existing completed and past scheduled history.
+    expect((await admin.from("task_study_sessions").update({ status: "completed", completed_at: "2020-01-06T13:30:00Z",
+      local_date: "2020-01-06", scheduled_start_at: "2020-01-06T12:00:00Z", scheduled_end_at: "2020-01-06T13:30:00Z" }).eq("id", completed.id)).error).toBeNull();
+    expect((await admin.from("task_study_sessions").update({ local_date: "2020-01-13",
+      scheduled_start_at: "2020-01-13T12:00:00Z", scheduled_end_at: "2020-01-13T13:30:00Z" }).eq("id", past.id)).error).toBeNull();
+    const history = await admin.from("task_study_sessions").select("id,status,local_date,scheduled_start_at,scheduled_end_at,completed_at,logical_occurrence_key")
+      .in("id", [completed.id, past.id]).order("id");
+    expect(history.error).toBeNull();
+    const next = { ...draft, startsOn: "2030-01-08", endsOn: "2030-01-22", slots: [{ weekday: 2, startTime: "20:00", endTime: "21:30" }] };
+    expect(await reviseStudyScheduleAction({ scheduleId, expectedRevision: 1, ...next })).toEqual({ success: true, revision: 2, sessionCount: 3 });
+    expect(await getTaskStudyScheduleAction(root.id)).toMatchObject({ success: true, schedule: { revision: 2, starts_on: next.startsOn } });
+    expect(await getStudyScheduleEditorAction(scheduleId)).toEqual({ success: true, revision: 2, draft: next });
+    const rows = await getStudySessionsAction({ scheduleId, page: 0 });
+    if (!rows.success) throw new Error(rows.message);
+    expect(rows.total).toBe(6);
+    expect(rows.sessions.filter(x => x.schedule_revision === 2)).toHaveLength(3);
+    expect(rows.sessions.find(x => x.id === future.id)).toMatchObject({ status: "cancelled", cancellation_reason: "schedule_changed" });
+    const afterHistory = await admin.from("task_study_sessions").select("id,status,local_date,scheduled_start_at,scheduled_end_at,completed_at,logical_occurrence_key")
+      .in("id", [completed.id, past.id]).order("id");
+    expect(afterHistory.error).toBeNull(); expect(afterHistory.data).toEqual(history.data);
+    const events = await fixtures[0].client.from("task_study_session_events").select("*").eq("session_id", future.id).eq("event_type", "cancelled");
+    expect(events.error).toBeNull(); expect(events.data).toHaveLength(1);
+    expect(events.data![0]).toMatchObject({ from_status: "scheduled", to_status: "cancelled", actor_id: fixtures[0].user.id,
+      payload: { reason: "schedule_changed", scheduleId, scheduleRevision: 1 } });
+    const third = { ...next, slots: [{ weekday: 2, startTime: "21:00", endTime: "22:00" }] };
+    expect(await reviseStudyScheduleAction({ scheduleId, expectedRevision: 2, ...third })).toEqual({ success: true, revision: 3, sessionCount: 3 });
+    expect(await getTaskStudyScheduleAction(root.id)).toMatchObject({ success: true, schedule: { revision: 3 } });
+    const final = await getStudySessionsAction({ scheduleId, page: 0 });
+    if (!final.success) throw new Error(final.message);
+    expect(final.total).toBe(9); expect(final.sessions.filter(x => x.status === "cancelled")).toHaveLength(4);
+    expect(final.sessions.filter(x => x.schedule_revision === 3 && x.status === "scheduled")).toHaveLength(3);
+  });
+  it("two same-revision editors yield one success, one conflict and no duplicate revision", async () => {
+    const root = await task(); const created = await createStudyScheduleAction({ taskId: root.id, ...draft });
+    if (!created.success) throw new Error(created.message);
+    const next = { ...draft, slots: [{ weekday: 1, startTime: "20:00", endTime: "21:00" }] };
+    const results = await Promise.all([0, 1].map(() => reviseStudyScheduleAction({ scheduleId: created.scheduleId, expectedRevision: 1, ...next })));
+    expect(results.filter(x => x.success)).toHaveLength(1);
+    expect(results.find(x => !x.success)).toMatchObject({ success: false, conflict: true });
+    expect(await getStudyScheduleEditorAction(created.scheduleId)).toEqual({ success: true, revision: 2, draft: next });
+    const read = await getStudySessionsAction({ scheduleId: created.scheduleId, page: 0 });
+    if (!read.success) throw new Error(read.message);
+    expect(read.total).toBe(6); expect(read.sessions.filter(x => x.status === "scheduled")).toHaveLength(3);
+  }, 15000);
+  it("rejects past-date revision and in-progress session without changing schedule or sessions", async () => {
+    const root = await task(); const created = await createStudyScheduleAction({ taskId: root.id, ...draft });
+    if (!created.success) throw new Error(created.message);
+    const scheduleId = created.scheduleId;
+    const first = await admin.from("task_study_sessions").select("id").eq("schedule_id", scheduleId).limit(1).single();
+    expect(first.error).toBeNull();
+    expect((await admin.from("task_study_sessions").update({ status: "in_progress" }).eq("id", first.data!.id)).error).toBeNull();
+    const snapshot = () => admin.from("task_study_sessions").select("*").eq("schedule_id", scheduleId).order("id");
+    const before = await snapshot(); expect(before.error).toBeNull();
+    expect(await reviseStudyScheduleAction({ scheduleId, expectedRevision: 1, ...draft })).toMatchObject({ success: false });
+    expect(await reviseStudyScheduleAction({ scheduleId, expectedRevision: 1, ...draft, startsOn: "2020-01-06", endsOn: "2020-01-20" })).toMatchObject({ success: false });
+    const after = await snapshot(); expect(after.error).toBeNull(); expect(after.data).toEqual(before.data);
+    expect(await getStudyScheduleEditorAction(scheduleId)).toEqual({ success: true, revision: 1, draft });
   });
   it("reads >20 sessions in stable pages, including history statuses, without changing rows", async () => {
     const root = await task();

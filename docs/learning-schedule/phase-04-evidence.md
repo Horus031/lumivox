@@ -139,10 +139,84 @@ All commands below ran from `apps/web`.
 - Step 4.3: LOCAL VERIFICATION PASS within the documented boundaries. The application additions are read-only; no attendance or notification implementation, migration or database reset was introduced.
 - No commit or push was performed, per the user's instruction.
 
+
+## Step 4.4 — Whole-Schedule Revision UI
+
+### Baseline / Review Findings
+
+- Starting HEAD: `90af77a0f03ebf6a71b908864499ae64b72513be`, branch `feature/learning-schedule-foundation`.
+- Verified on 2026-10-28 (Asia/Bangkok). Earlier Step 4.1–4.3 figures remain historical results.
+- Initial working tree contained the user's two untracked files: `schedule-editor.queries.actions.ts` and `components/schedule-revision-editor.tsx`. Their paths, owner filters, time-to-HH:mm conversion and reuse of `ScheduleDraftEditor` matched the guide.
+- Missing requirements found and fixed: editor integration in Task Details, confirmation before mutation, metadata revision/status recheck after reading slots, load Retry, explicit conflict recovery, and revision-aware session-list remount.
+- No migration, database reset, generated-type change, email sending, attendance control, commit or push was performed. Existing local schema/RPCs were used.
+
+### Implementation / Behavior
+
+- `getStudyScheduleEditorAction` authenticates, filters all three reads by owner, loads ordered weekly slots, converts seconds to HH:mm, and rereads revision/status after slots. If revision changed, status ceased to be active, or the row disappeared, it rejects the read instead of returning a mixed-version draft. This follows the guide's recheck option; it is not a database snapshot function.
+- `ScheduleRevisionEditor` retains the saved dates, timezone and weekly slots. It uses the existing recurrence engine for preview. It displays current/prospective revision and explains replacement of future scheduled sessions, including individual overrides, while keeping completed/past history.
+- Continue opens the existing accessible Dialog primitives; only Confirm revision calls the mutation action. Back to draft and Cancel do not mutate. Native fieldsets/buttons disable interaction while saving; a synchronous ref guards duplicate confirmations. Keyed editor state and effect cleanup ignore stale reads, and an unmounted editor ignores mutation responses.
+- Save failures keep the edited draft and show an alert. A revision conflict disables resubmission, keeps the draft visible, and offers explicit `Discard draft and reload`; this operation intentionally discards the draft only after the user chooses it.
+- Date policy is explicit: the original startsOn is never silently advanced. Continue rejects startsOn before today in the selected timezone and occurrences at/before the current instant, explaining how to choose a valid future range. Database validation remains authoritative if time advances before confirmation.
+- `TaskStudyScheduleSection` exposes Edit only for eligible Tasks with an active Schedule. Existing Add Schedule branches remain. Successful revisions reload summary and mount sessions with `key={schedule.id + '-' + schedule.revision}`; sessions restart at page 0.
+
+### Acceptance Tests — Executed
+
+| ID | Actual verification | Result |
+| --- | --- | --- |
+| REV-01 | Section component with an active Schedule and eligible Task exposes Edit; opening it loads the real editor component. | PASS |
+| REV-02 | Component cases cover closed, paused and ineligible Task; editor action tests reject closed/paused metadata. | PASS — mocked component/query boundaries |
+| REV-03 | Action tests verify owner filtering, both slot sort clauses, HH:mm conversion and final revision/status recheck. Local authenticated integration loads the exact saved draft at revisions 1 and 2. | PASS |
+| REV-04 | Real draft editor changes start/end dates, weekday and start/end time; preview shows the expected Tuesday occurrences and total 3. Existing recurrence-engine tests also run in the full suite. | PASS — component/engine |
+| REV-05 | Continue opens confirmation without an action call; Back keeps edited input; Cancel invokes only the close callback. | PASS — component |
+| REV-06 | Real authenticated action/RPC changes revision 1 to 2, then 2 to 3; replacement count is exactly 3 each time. Duplicate confirmation clicks make one action call. | PASS |
+| REV-07 | Two concurrent action calls with expectedRevision 1 yield one success and one conflict, saved revision 2 and exactly 3 scheduled replacements. See the timeout failure and mitigation below. | PASS with bounded-request mitigation |
+| REV-08 | Section component completes two successive revisions, reloads summary each time and requests sessions page 0 again. Local action integration rereads totals 6 then 9 and replacement/history rows at revisions 2 and 3. | PASS — composed component + separate local integration |
+| REV-09 | Local privileged fixtures model a completed historical row and a past scheduled row. IDs, status, local_date, UTC instants, completed_at and logical keys remain identical after revision. Source-slot references may be nulled by the existing FK when slots are replaced; full-row immutability is not claimed. | PASS |
+| REV-10 | One original future row becomes cancelled with schedule_changed and exactly one cancellation audit carrying actor/from/to/reason/schedule/revision. After another revision, all 3 revision-2 rows are cancelled and 3 revision-3 rows are scheduled. | PASS — real local RPC and audit trigger |
+| REV-11 | Mocked RPC failure preserves edited draft, shows error, emits no success toast and supports retry. Real in-progress-session and past-date rejections leave all session rows and schedule revision unchanged. | PASS |
+| REV-12 | A second real signed-in user cannot load A's editor or revise A's schedule through the actions. Existing session read isolation remains covered. | PASS — owner filters plus RLS |
+
+### Test Files / Commands / Local Results
+
+- Added `components/schedule-revision-editor.test.tsx`: 12 component cases (including parameterized eligibility cases) covering preview, confirmation/back/cancel, duplicate saves, loading/retry, draft retention, conflict/reload, date policy, stale reads and two successive summary/list reloads.
+- Added `schedule-editor.queries.actions.test.ts`: 8 cases including concurrent revision/status/deletion recheck failures.
+- Added `schedule-revision.actions.test.ts`: 5 cases for bounded RPC, direct 40001, failed/aborted response plus changed owned revision, and unchanged/unreadable revision without inferred success.
+- Extended `schedule.integration.test.ts` from 10 to 13 cases: revision/history/audit/two successive revisions, concurrent same-revision saves, and real rejected revision/no-change cases. The existing cross-owner case now checks editor read and revision denial too.
+- Targeted command from `apps/web`: `node node_modules/vitest/vitest.mjs run features/learning-schedule/components/schedule-revision-editor.test.tsx features/learning-schedule/schedule-editor.queries.actions.test.ts features/learning-schedule/schedule-revision.actions.test.ts features/learning-schedule/components/task-scheduling-ui.test.tsx`.
+- Targeted result: exit 0; 4 files / 39 tests PASS, duration 5.60 seconds, including the existing Step 4.1/4.2 regression tests.
+- Local command: `node node_modules/vitest/vitest.mjs run features/learning-schedule/schedule.integration.test.ts --reporter=verbose`. Credentials were read from local CLI `supabase status -o json` into `LEARNING_SCHEDULE_TEST_*` process variables without printing or saving them. The test rejects non-loopback endpoints and any API port other than 55321.
+- Final local result: exit 0; 13/13 PASS, duration 7.74 seconds. The concurrent revision case completed in 5.108 seconds. Real Auth/PostgREST/Postgres were used; `requireUser` injects signed-in fixture clients instead of Next request cookies. Users sign out and are deleted, and remaining Task counts are checked as zero.
+
+### Failure Found / Mitigation / Remaining Boundary
+
+- Initial local run: 12 PASS / 1 FAIL, concurrent same-revision test timed out at 5 seconds. Raising only the test deadline to 15 seconds still failed; an isolated diagnostic run also failed at 15 seconds. These were actual failed runs, not acceptance passes.
+- Local PostgREST reports version 14.5. Postgres logs showed the losing RPC repeatedly executing and raising `Stale schedule revision` after the winning request committed. An activity sample did not show a persistent blocking transaction; the observed failure was repeated stale-RPC execution, not evidence of a durable lock deadlock.
+- Mitigation in `schedule-revision.actions.ts`: bound the RPC HTTP request with `AbortSignal.timeout(5000)`. Preserve direct 40001 mapping; for other failed/aborted responses, reread the authenticated owner's revision and return conflict if it changed. Otherwise return a generic failure. Never infer success or automatically replay a failed mutation.
+- The concurrent integration test retains a 15-second deadline to accommodate the intentional 5-second request bound and fixture/assertion overhead. It now passes with one committed revision and one conflict.
+- This is an application-level response bound, not a fix to PostgREST's internal retry behavior and not proof that abort always cancels server-side execution immediately. A timeout can also represent an unknown commit outcome, so the UI requires reload instead of reporting success. Investigate/harden server-side serialization-error handling before production release; no database migration or SQLSTATE contract was changed here.
+
+### Quality Gates — Final Run
+
+- Lint: `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit 0; 0 errors, 1 existing missing `projection` useEffect dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Full unit suite: `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit 0; 66 files passed / 2 skipped; 579 tests passed / 14 skipped (593 total), duration 57.87 seconds. Default suite skips the 13 opt-in Schedule integration cases plus 1 existing Focus integration case. Schedule integration was actually exercised separately (13/13 PASS above); Focus integration was not run.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0; Next.js 16.2.6 compiled in 13.8 seconds, TypeScript completed in 52 seconds and generated 98/98 static pages in 1973 ms. This final build includes the bounded revision action change.
+- Direct Node entry points bypass the environment's broken npm/npx shims. Local CLI/integration and build ran with the required permissions; build used existing `.env.local`. No credentials are recorded. Existing Vite config-loader and Supabase inbucket/optional-stopped-service notices remain non-fatal.
+- React review covered unconditional hooks, keyed state reset, stale response cleanup, native disabled controls, confirmation dialog semantics and duplicate-submit guards. `git diff --check` passed; line-ending normalization notices are not whitespace failures.
+
+### Coverage Limits / Status
+
+- Step 4.4: LOCAL VERIFICATION PASS for REV-01–REV-12 within the boundaries above, including the documented PostgREST mitigation and unresolved server-side retry concern.
+- No authenticated browser E2E/Next cookie transport, visual/mobile review or browser focus/keyboard verification was run. Component tests use jsdom and mocked actions; integration calls the action functions against real local services. These are separate layers, not a browser-to-database E2E claim.
+- Loading/confirmation/conflict/error cases are simulated in component tests. Completed/past history states are deliberately created by a privileged local fixture client; no attendance UI was introduced.
+- Offset pagination can still miss/stale rows during mutations from another client between page loads. Successful edits in this UI reset the list; that does not establish snapshot consistency across other concurrent clients. Existing overrides' cancellation policy is shown in UI, but a new override-then-revise integration scenario was not rerun in this step.
+- Fresh migration replay, audit-failure injection, the independent Phase 03 concurrency harness, translations and browser E2E were not rerun here. Historical Phase 03 evidence is not represented as a new execution.
+- User will handle commit and push.
+
+
 ## Remaining Work / Final Decision
 
-- Steps 4.1, 4.2 and 4.3: local verification PASS within the boundaries above.
+- Steps 4.1, 4.2, 4.3 and 4.4: local verification PASS within the boundaries above; Step 4.4 includes the documented bounded-request mitigation and server retry limitation.
 - EN/VI strings, responsive/visual review, browser keyboard flow, focus behavior and authenticated browser E2E still need later Phase 04 verification. The new scheduling text remains English; i18n completion is not claimed.
-- Phase 04 overall: IN PROGRESS — Steps 4.4–4.7 have not been verified here.
+- Phase 04 overall: IN PROGRESS — Steps 4.5–4.7 have not been verified here.
 - Production deployment authorized: NO.
 - No commit or push was performed. This report and the added tests/fixes remain working-tree changes.

@@ -13,6 +13,7 @@ import { getTaskStudyScheduleAction } from "../schedule.queries.actions";
 
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
 import { StudySessionsList } from "./study-sessions-list";
+import { ScheduleRevisionEditor } from "./schedule-revision-editor";
 
 import type { StudyScheduleInput } from "../schedule-engine";
 
@@ -65,6 +66,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const [editing, setEditing] = useState(false);
+  const [revising, setRevising] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [draft, setDraft] = useState<StudyScheduleInput>(() => defaultDraft());
 
@@ -158,7 +160,26 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           <p>Timezone: {schedule.timezone}</p>
           <p>Status: {schedule.status}</p>
           <p>Revision: {schedule.revision}</p>
-          <StudySessionsList key={schedule.id} scheduleId={schedule.id} />
+          {revising && eligible && schedule.status === "active" ? (
+            <ScheduleRevisionEditor
+              key={schedule.id}
+              scheduleId={schedule.id}
+              onCancel={() => setRevising(false)}
+              onSaved={() => {
+                setRevising(false);
+                void loadSchedule();
+              }}
+            />
+          ) : (
+            <>
+              {eligible && schedule.status === "active" && (
+                <Button type="button" variant="outline" onClick={() => setRevising(true)}>
+                  Edit recurring schedule
+                </Button>
+              )}
+              <StudySessionsList key={`${schedule.id}-${schedule.revision}`} scheduleId={schedule.id} />
+            </>
+          )}
         </div>
       ) : !eligible ? (
         <p className="text-sm text-muted-foreground">

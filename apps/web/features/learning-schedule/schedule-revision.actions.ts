@@ -44,6 +44,8 @@ export async function reviseStudyScheduleAction(raw: unknown): Promise<
       success: false, message: "Schedule changed elsewhere. Reload before editing.", conflict: true,
     };
 
+    // Bound the HTTP request: local PostgREST can keep retrying a deliberate
+    // serialization error. A failed/aborted response must never report success.
     const { data, error } = await supabase.rpc("ls_revise_schedule", {
       p_schedule_id: scheduleId,
       p_expected_revision: expectedRevision,
@@ -52,9 +54,15 @@ export async function reviseStudyScheduleAction(raw: unknown): Promise<
       p_timezone: schedule.timezone,
       p_slots: schedule.slots,
       p_occurrences: occurrences,
-    });
+    }).abortSignal(AbortSignal.timeout(5000));
     if (error) {
       if (error.code === "40001") return {
+        success: false, conflict: true, message: "Schedule changed elsewhere. Reload before editing.",
+      };
+      const { data: current, error: currentError } = await supabase
+        .from("task_study_schedules").select("revision")
+        .eq("id", scheduleId).eq("user_id", user.id).maybeSingle();
+      if (!currentError && current && current.revision !== expectedRevision) return {
         success: false, conflict: true, message: "Schedule changed elsewhere. Reload before editing.",
       };
       return { success: false, message: "Could not update schedule. Check future dates and active sessions." };
