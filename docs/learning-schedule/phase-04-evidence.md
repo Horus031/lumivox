@@ -90,10 +90,59 @@ All commands below ran from `apps/web`.
 - Direct Node entry points bypass the broken npm/npx shell shims in the agent environment. Local CLI/integration execution and production build ran outside the sandbox with the required permissions. Build used existing `.env.local`; no secret values are recorded.
 - React Best Practices review covered stale effect responses, unconditional hooks, synchronous submit locking, accessible error output/native disabled controls and generated Task types. `git diff --check` passed.
 
+## Step 4.3 — Schedule Details and Study Sessions List
+
+### Baseline / Implementation
+
+- Starting HEAD: `e7512f942a71f43828238519a4b973fc78366ce9`, branch `feature/learning-schedule-foundation`; working tree was clean at the start of this step.
+- Verified on 2026-10-27, approximately 19:30–19:38 (Asia/Bangkok). Earlier Step 4.1/4.2 results above remain historical snapshots.
+- Added `apps/web/features/learning-schedule/session.queries.actions.ts`: strict UUID/page validation, 20 rows per page, authenticated owner filter plus existing RLS, exact total count, stable ascending `scheduled_start_at` then `id`, and bounded offset pagination as specified.
+- Added `components/study-sessions-list.tsx` and mounted it below the existing summary in `TaskStudyScheduleSection`, with `key={schedule.id}` and `scheduleId={schedule.id}`. Schedule changes reset internal list state synchronously; request versions ignore old responses and an in-flight guard prevents duplicate page requests.
+- Added explicit Retry for initial-load and next-page failures to meet the guide's acceptance criterion; retrying a failed next page retains existing rows. Appended rows are deduplicated by Session ID, including duplicate IDs within a response.
+- Rows show stored local date/time, their own timezone, all six status labels and cancellation reason. No completed/missed/skipped controls, attendance mutations, metrics changes or email sending were added. All new application database access is SELECT-only; status changes below are integration fixtures only.
+
+### Acceptance Tests — Executed
+
+| Required behavior | Actual result and boundary |
+| --- | --- |
+| 3 sessions with correct date/time/status | PASS — list DOM test renders 3 rows with expected local fields; real create/read action integration checks 3 rows, exact total, dates, local start time and scheduled status. |
+| More than 20, first-page-only and Load more | PASS — component initially requests page 0 only, then page 1; rapid clicks make one extra request and duplicate IDs are not appended. Real local integration creates 22 occurrences and reads pages of 20 and 2 with exact totals, stable IDs/order and no omissions/duplicates in a static dataset. |
+| API error and retry | PASS — initial action failure shows an alert/Retry and retries page 0. A thrown next-page error preserves loaded rows and retries the same page. These failure responses are mocked component cases. |
+| Task A -> B clears A sessions | PASS — actual Drawer/section component regression test now includes an A session and verifies it disappears on switching Task; late A Task details do not restore it. |
+| Out-of-order requests | PASS — separate initial A/B and late A load-more cases resolve B first, then A; only B rows remain. Component tests also exercise schedule reset without relying on the parent key. |
+| Cancelled reason | PASS — DOM shows `Reason: task_closed`; local read returns the fixture cancellation reason without filtering history out. |
+| Completed/missed/skipped/in-progress are read-only | PASS — all six labels render without action buttons. Local pagination fixture includes completed, missed, skipped, in-progress and cancelled rows; full before/after session snapshots are identical after reads. |
+| User B cannot read A sessions | PASS — two real locally authenticated users; B's action query for A's Schedule returns `sessions: []`, `total: 0`, `hasMore: false`. This checks the action's owner filter together with existing RLS, not RLS in isolation. |
+
+### Test Files and Commands
+
+- Added `components/study-sessions-list.test.tsx`: 8 component tests covering rows, pagination, rapid clicks/deduplication, retry, stale responses, statuses/reason and empty state.
+- Added `session.queries.actions.test.ts`: 8 tests covering strict input limits/extra fields, owner/schedule filters, exact-count selection, both order clauses, page range, final/null results and sanitized database/authentication errors.
+- Extended `components/task-scheduling-ui.test.tsx` to mock the new read action and verify actual Task switching clears sessions. Existing Step 4.1/4.2 interactions remain covered.
+- Targeted command from `apps/web`: `node node_modules/vitest/vitest.mjs run features/learning-schedule/components/study-sessions-list.test.tsx features/learning-schedule/session.queries.actions.test.ts features/learning-schedule/components/task-scheduling-ui.test.tsx`; initial result 3 files / 30 tests PASS. The later full suite includes the final Task-switch assertions.
+- Extended `schedule.integration.test.ts` to check real session reads in the existing root-create and cross-owner cases, plus one >20-row/history/read-only pagination case.
+- Local integration command: `node node_modules/vitest/vitest.mjs run features/learning-schedule/schedule.integration.test.ts --reporter=verbose`, with local credentials read from `supabase status -o json` into `LEARNING_SCHEDULE_TEST_*` process variables without printing or saving them.
+- Integration result: exit 0; 10/10 PASS, duration 1.98 seconds. Auth/PostgREST/PostgreSQL are real local services; `requireUser()` injects each signed-in fixture client instead of Next request cookies. Fixture users sign out and are deleted, and their remaining Task counts are confirmed zero. No remote database was accessed.
+
+### Quality Gates — Executed
+
+- Lint: `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit 0; 0 errors, 1 existing `projection` dependency warning in `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Unit suite: `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit 0; 63 files passed, 2 skipped; 554 tests passed, 11 skipped; duration 68.22 seconds. Default run skips the 10 opt-in Schedule integration cases plus the existing Focus integration case. All 10 Schedule cases were exercised and passed in the separate local integration run above; the Focus case was not run here.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build` (including prebuild), exit 0; Next.js 16.2.6 compiled in 25.8 seconds, completed TypeScript in 37.6 seconds, generated 98/98 static pages.
+- Existing Vite ESM/native-config and local Supabase deprecation/optional-stopped-service notices are non-fatal. Direct Node commands bypass broken npm/npx shell shims. Integration/CLI access and build ran outside the sandbox with the required permissions; existing `.env.local` was used for build. No secrets are recorded.
+- React review covered unconditional hooks, keyed state reset, effect cleanup, request deduplication, native disabled controls, status/error semantics and inferred action result types. `git diff --check` passed. No unexpected test or build failure occurred.
+
+### Coverage Limits / Status
+
+- Offset pagination follows the approved simple local implementation. Deduplication protects repeated IDs but cannot guarantee against missing/stale rows if sessions move between pages during concurrent rescheduling. Integration tested a static dataset; cursor pagination or refresh strategy remains a consideration before concurrent-mutation rollout.
+- UI/query tests use jsdom and mocked read actions; local integration calls real action functions with an injected authenticated client. Browser E2E, Next cookie/HTTP transport, visual/mobile review and EN/VI translations are not verified here and remain Step 4.6 work.
+- Step 4.3: LOCAL VERIFICATION PASS within the documented boundaries. The application additions are read-only; no attendance or notification implementation, migration or database reset was introduced.
+- No commit or push was performed, per the user's instruction.
+
 ## Remaining Work / Final Decision
 
-- Steps 4.1 and 4.2: local verification PASS within the boundaries above.
+- Steps 4.1, 4.2 and 4.3: local verification PASS within the boundaries above.
 - EN/VI strings, responsive/visual review, browser keyboard flow, focus behavior and authenticated browser E2E still need later Phase 04 verification. The new scheduling text remains English; i18n completion is not claimed.
-- Phase 04 overall: IN PROGRESS — Steps 4.3–4.7 have not been verified here.
+- Phase 04 overall: IN PROGRESS — Steps 4.4–4.7 have not been verified here.
 - Production deployment authorized: NO.
 - No commit or push was performed. This report and the added tests/fixes remain working-tree changes.

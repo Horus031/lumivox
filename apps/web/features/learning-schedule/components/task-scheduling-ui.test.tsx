@@ -6,12 +6,13 @@ import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-engine";
 
 const mocks = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn(), details: vi.fn(),
-  remove: vi.fn(), refresh: vi.fn(), error: vi.fn(), success: vi.fn(), confirm: vi.fn() }));
+  sessions: vi.fn(), remove: vi.fn(), refresh: vi.fn(), error: vi.fn(), success: vi.fn(), confirm: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock("../schedule.actions", () => ({ createStudyScheduleAction: mocks.create }));
 vi.mock("../schedule.queries.actions", () => ({ getTaskStudyScheduleAction: mocks.load }));
+vi.mock("../session.queries.actions", () => ({ getStudySessionsAction: mocks.sessions }));
 vi.mock("@/features/tasks/task.actions", () => ({ getTaskDetailsAction: mocks.details, deleteTaskAction: mocks.remove }));
 vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => mocks.confirm }));
 vi.mock("@/features/tasks/components/task-modal-shell", () => ({
@@ -46,6 +47,7 @@ describe("Task scheduling UI", () => {
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     host = document.createElement("div"); document.body.append(host); root = createRoot(host);
     mocks.load.mockResolvedValue({ success: true, schedule: null });
+    mocks.sessions.mockResolvedValue({ success: true, sessions: [], total: 0, page: 0, hasMore: false });
     mocks.details.mockImplementation(async (id: string) => ({ success: true,
       data: { task: id === a.id ? a : b, subtasks: [], documents: [] } }));
     mocks.confirm.mockResolvedValue(true);
@@ -172,10 +174,15 @@ describe("Task scheduling UI", () => {
     const old = deferred<unknown>(); const newer = deferred<unknown>();
     mocks.details.mockImplementation((id: string) => id === a.id ? old.promise : newer.promise);
     mocks.load.mockImplementation(async (id: string) => ({ success: true, schedule: id === a.id ? summary : null }));
+    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-A", local_date: "2030-01-09",
+      local_start_time: "19:00:00", local_end_time: "20:30:00", timezone: "UTC", status: "scheduled",
+      cancellation_reason: null }], total: 1, page: 0, hasMore: false });
     await render(drawer(a)); expect(host.textContent).toContain("Revision: 1");
+    expect(host.textContent).toContain("2030-01-09");
     // Check the immediate render too, before effects clear old detail state.
     act(() => { root.render(drawer(b)); });
     expect(host.textContent).not.toContain("Revision: 1");
+    expect(host.textContent).not.toContain("2030-01-09");
     await act(async () => { newer.resolve({ success: true, data: { task: b, subtasks: [], documents: [] } }); });
     await act(async () => { old.resolve({ success: true, data: { task: a, subtasks: [], documents: [] } }); });
     expect(host.textContent).not.toContain("Revision: 1");

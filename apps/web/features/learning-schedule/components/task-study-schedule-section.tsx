@@ -12,6 +12,7 @@ import { createStudyScheduleAction } from "../schedule.actions";
 import { getTaskStudyScheduleAction } from "../schedule.queries.actions";
 
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
+import { StudySessionsList } from "./study-sessions-list";
 
 import type { StudyScheduleInput } from "../schedule-engine";
 
@@ -157,6 +158,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           <p>Timezone: {schedule.timezone}</p>
           <p>Status: {schedule.status}</p>
           <p>Revision: {schedule.revision}</p>
+          <StudySessionsList key={schedule.id} scheduleId={schedule.id} />
         </div>
       ) : !eligible ? (
         <p className="text-sm text-muted-foreground">

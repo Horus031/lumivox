@@ -14,6 +14,7 @@ vi.mock("next-intl/server", () => ({ getTranslations: async () => (key: string) 
 vi.mock("@/features/engagement-retention/engagement-retention.background", () => ({ scheduleEngagementRecalculation: vi.fn() }));
 import { createStudyScheduleAction } from "./schedule.actions";
 import { getTaskStudyScheduleAction } from "./schedule.queries.actions";
+import { getStudySessionsAction } from "./session.queries.actions";
 import { deleteTaskAction, getTaskDetailsAction, transitionTaskStatusAction, updateTaskAction } from "@/features/tasks/task.actions";
 
 const url = process.env.LEARNING_SCHEDULE_TEST_URL;
@@ -76,6 +77,11 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
     expect(sessions.data!.map(x => new Date(x.scheduled_start_at).toISOString()))
       .toEqual(expected.map(x => new Date(x.scheduledStartAt).toISOString()));
     expect(sessions.data!.every(x => x.status === "scheduled")).toBe(true);
+    const displayed = await getStudySessionsAction({ scheduleId: created.scheduleId, page: 0 });
+    expect(displayed).toMatchObject({ success: true, total: 3, page: 0, hasMore: false });
+    if (!displayed.success) throw new Error(displayed.message);
+    expect(displayed.sessions.map(x => x.local_date)).toEqual(expected.map(x => x.localDate));
+    expect(displayed.sessions.every(x => x.local_start_time === "19:00:00" && x.status === "scheduled")).toBe(true);
     const details = await getTaskDetailsAction(root.id);
     expect(details).toMatchObject({ success: true, data: { task: { parent_task_id: null } } });
   });
@@ -104,10 +110,49 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
   });
   it("another signed-in user cannot load or create the owner's schedule", async () => {
     const root = await task();
-    expect((await createStudyScheduleAction({ taskId: root.id, ...draft })).success).toBe(true);
+    const created = await createStudyScheduleAction({ taskId: root.id, ...draft });
+    expect(created.success).toBe(true);
+    if (!created.success) throw new Error(created.message);
     auth.requireUser.mockResolvedValue({ supabase: fixtures[1].client, user: fixtures[1].user });
     expect(await getTaskStudyScheduleAction(root.id)).toMatchObject({ success: true, schedule: null });
     expect((await createStudyScheduleAction({ taskId: root.id, ...draft })).success).toBe(false);
+    expect(await getStudySessionsAction({ scheduleId: created.scheduleId, page: 0 })).toEqual({
+      success: true, sessions: [], total: 0, page: 0, hasMore: false,
+    });
+  });
+  it("reads >20 sessions in stable pages, including history statuses, without changing rows", async () => {
+    const root = await task();
+    const longer = { ...draft, endsOn: "2030-06-03" };
+    const created = await createStudyScheduleAction({ taskId: root.id, ...longer });
+    expect(created.success).toBe(true);
+    if (!created.success) throw new Error(created.message);
+    const selectAll = () => admin.from("task_study_sessions").select("*")
+      .eq("schedule_id", created.scheduleId).order("scheduled_start_at").order("id");
+    const fixtures = await selectAll(); expect(fixtures.error).toBeNull();
+    const states = ["completed", "missed", "skipped", "in_progress", "cancelled"];
+    for (const [index, status] of states.entries()) {
+      const updated = await admin.from("task_study_sessions").update({ status,
+        completed_at: status === "completed" ? new Date().toISOString() : null,
+        cancellation_reason: status === "cancelled" ? "fixture_cancelled" : null,
+      }).eq("id", fixtures.data![index].id);
+      expect(updated.error).toBeNull();
+    }
+    const before = await selectAll(); expect(before.error).toBeNull();
+    const first = await getStudySessionsAction({ scheduleId: created.scheduleId, page: 0 });
+    const second = await getStudySessionsAction({ scheduleId: created.scheduleId, page: 1 });
+    expect(first.success).toBe(true); expect(second.success).toBe(true);
+    if (!first.success || !second.success) throw new Error("Pagination failed");
+    const expected = generateStudyOccurrences(longer);
+    expect(expected.length).toBeGreaterThan(20);
+    expect(first.sessions).toHaveLength(20); expect(first.hasMore).toBe(true);
+    expect(first.total).toBe(expected.length); expect(second.total).toBe(expected.length);
+    expect(second.sessions).toHaveLength(expected.length - 20); expect(second.hasMore).toBe(false);
+    const rows = [...first.sessions, ...second.sessions];
+    expect(rows.map(x => x.id)).toEqual(before.data!.map(x => x.id));
+    expect(new Set(rows.map(x => x.id)).size).toBe(expected.length);
+    expect(first.sessions.slice(0, 5).map(x => x.status)).toEqual(states);
+    expect(first.sessions[4].cancellation_reason).toBe("fixture_cancelled");
+    const after = await selectAll(); expect(after.error).toBeNull(); expect(after.data).toEqual(before.data);
   });
   it("normal Task without schedule keeps real edit/status/delete Server Actions working", async () => {
     const root = await task();
