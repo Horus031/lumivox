@@ -1,6 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { ScheduleValidationError, formatStudyDate } from "../schedule-presentation";
+
+import { useId, useMemo, useState } from "react";
 
 import {
   generateStudyOccurrences,
@@ -12,9 +15,13 @@ type Props = {
   onContinue?: (draft: StudyScheduleInput) => void;
 };
 
-const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const weekdays = [1, 2, 3, 4, 5, 6, 7];
 
 export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
+  const t = useTranslations("learningSchedule");
+  const locale = useLocale();
+  const fieldId = useId();
+  const zones = useMemo(() => Array.from(new Set(["UTC", "Asia/Ho_Chi_Minh", ...Intl.supportedValuesOf("timeZone")])), []);
   const [draft, setDraft] = useState<StudyScheduleInput>(initialValue);
 
   const preview = useMemo(() => {
@@ -28,7 +35,7 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
     } catch (error) {
       return {
         occurrences: [],
-        error: error instanceof Error ? error.message : "Invalid schedule",
+        error: error instanceof ScheduleValidationError ? error.code : "invalidInput",
       };
     }
   }, [draft]);
@@ -56,59 +63,62 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
   const canContinue = !preview.error && preview.occurrences.length > 0;
 
   return (
-    <section aria-label="Study schedule editor" className="space-y-5">
+    <section aria-label={t("editor")} className="min-w-0 space-y-5">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <label className="space-y-2">
-          <span className="block text-sm font-medium">Start date</span>
-          <input
+          <span className="block text-sm font-medium">{t("startDate")}</span>
+          <input aria-invalid={Boolean(preview.error)} aria-describedby={preview.error ? `${fieldId}-error` : undefined}
             type="date"
             value={draft.startsOn}
             onChange={(event) => update({ startsOn: event.target.value })}
-            className="w-full rounded-md border p-2"
+            className="min-w-0 w-full rounded-md border p-2"
           />
         </label>
 
         <label className="space-y-2">
-          <span className="block text-sm font-medium">End date</span>
+          <span className="block text-sm font-medium">{t("endDate")}</span>
           <input
             type="date"
             value={draft.endsOn}
             onChange={(event) => update({ endsOn: event.target.value })}
-            className="w-full rounded-md border p-2"
+            className="min-w-0 w-full rounded-md border p-2"
           />
         </label>
       </div>
 
       <label className="block space-y-2">
-        <span className="block text-sm font-medium">IANA timezone</span>
+        <span className="block text-sm font-medium">{t("timezoneInput")}</span>
         <input
-          value={draft.timezone}
+          aria-describedby={`${fieldId}-timezone-help${preview.error ? " " + fieldId + "-error" : ""}`} aria-invalid={Boolean(preview.error)} list={`${fieldId}-zones`} value={draft.timezone}
           onChange={(event) => update({ timezone: event.target.value })}
           placeholder="Asia/Ho_Chi_Minh"
-          className="w-full rounded-md border p-2"
+          className="min-w-0 w-full rounded-md border p-2"
         />
       </label>
 
-      <fieldset className="space-y-3">
-        <legend className="font-medium">Weekly study slots</legend>
+      <datalist id={`${fieldId}-zones`}>{zones.map(zone => <option key={zone} value={zone} />)}</datalist>
+      <p id={`${fieldId}-timezone-help`} className="text-xs text-muted-foreground">{t("selectTimezone")} {t("dstHelp")}</p>
+      <fieldset className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
+        <legend className="font-medium">{t("weeklySlots")}</legend>
 
         {draft.slots.map((slot, index) => (
           <div
-            key={index}
+            key={index} role="group" aria-label={t("slotLabel", { index: index + 1 })}
             className="grid grid-cols-1 gap-2 rounded-md border p-3 sm:grid-cols-4"
           >
             <label className="space-y-1">
-              <span className="block text-xs">Weekday</span>
+              <span id={`${fieldId}-weekday-${index}`} className="block text-xs">{t("weekday")}</span>
               <select
+                aria-labelledby={`${fieldId}-weekday-${index}`}
                 value={slot.weekday}
                 onChange={(event) =>
                   updateSlot(index, "weekday", Number(event.target.value))
                 }
-                className="w-full rounded-md border p-2"
+                className="min-w-0 w-full rounded-md border p-2"
               >
                 {weekdays.map((day, i) => (
                   <option key={day} value={i + 1}>
-                    {day}
+                    {t(`weekdayName.${day}`)}
                   </option>
                 ))}
               </select>
@@ -117,7 +127,7 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
             {(["startTime", "endTime"] as const).map((field) => (
               <label key={field} className="space-y-1">
                 <span className="block text-xs">
-                  {field === "startTime" ? "Start" : "End"}
+                  {field === "startTime" ? t("start") : t("end")}
                 </span>
                 <input
                   type="time"
@@ -125,23 +135,21 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
                   onChange={(event) =>
                     updateSlot(index, field, event.target.value)
                   }
-                  className="w-full rounded-md border p-2"
+                  className="min-w-0 w-full rounded-md border p-2"
                 />
               </label>
             ))}
 
             <button
               type="button"
-              aria-label={`Remove slot ${index + 1}`}
+              aria-label={t("removeSlot", { index: index + 1 })}
               onClick={() =>
                 update({
                   slots: draft.slots.filter((_, i) => i !== index),
                 })
               }
               className="rounded-md border px-3 py-2 text-sm"
-            >
-              Remove
-            </button>
+            >{t("remove")}</button>
           </div>
         ))}
 
@@ -161,42 +169,38 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
             })
           }
           className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
-        >
-          Add weekly slot
-        </button>
+        >{t("addSlot")}</button>
       </fieldset>
 
       <section
-        aria-label="Schedule preview"
+        aria-label={t("previewRegion")}
         className="space-y-2 rounded-md border p-4"
       >
-        <h3 className="font-medium">Upcoming study sessions</h3>
+        <h3 className="font-medium">{t("preview")}</h3>
 
         {preview.error ? (
-          <p role="alert" className="text-sm text-red-600">
-            {preview.error}
+          <p role="alert" id={`${fieldId}-error`} className="text-sm text-red-600">
+            {t(`errors.${preview.error}`)}
           </p>
         ) : preview.occurrences.length === 0 ? (
-          <p className="text-sm">No sessions match this date range.</p>
+          <p className="text-sm">{t("errors.empty")}</p>
         ) : (
           <>
             <p className="text-sm">
-              {preview.occurrences.length} sessions across this schedule.
+              {t("previewCount", { count: preview.occurrences.length })}
             </p>
 
             <ul className="space-y-1 text-sm">
               {preview.occurrences.slice(0, 8).map((session) => (
                 <li key={session.occurrenceKey}>
-                  {session.localDate} · {session.localStartTime}–
+                  {formatStudyDate(session.localDate, locale)} · {session.localStartTime}–
                   {session.localEndTime}
                 </li>
               ))}
             </ul>
 
             {preview.occurrences.length > 8 && (
-              <p className="text-xs opacity-70">
-                Showing the first 8 sessions.
-              </p>
+              <p className="text-xs opacity-70">{t("firstEight")}</p>
             )}
           </>
         )}
@@ -207,9 +211,7 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
         disabled={!canContinue || !onContinue}
         onClick={() => onContinue?.(draft)}
         className="rounded-md border px-4 py-2 disabled:opacity-50"
-      >
-        Continue
-      </button>
+      >{t("continue")}</button>
     </section>
   );
 }

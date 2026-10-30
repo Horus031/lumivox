@@ -286,10 +286,92 @@ All commands below ran from `apps/web`.
 - Browser E2E/Next cookie transport, visual/mobile review, browser focus/keyboard flow, EN/VI localization, fresh migration replay, audit failure injection and the independent Phase 03 concurrency harness were not run here. No attendance or notification functionality is claimed.
 - No commit or push was performed; the user will handle both.
 
+## Step 4.6 — i18n, Accessibility and Browser E2E
+
+### Baseline / Scope
+
+- Starting HEAD: `9323dd9f72a771d452f7058b1aa3f947fee2d86f`, branch `feature/learning-schedule-foundation`; initial working tree was clean.
+- Verified on 2026-10-29 (Asia/Bangkok). Final Chromium run began at 21:11:26 and completed in 60.042 seconds; quality gates below include the subsequent build. Earlier Step 4.1–4.5 figures remain historical snapshots.
+- Scope: localize and verify the existing scheduling features, without new scheduling business rules, migrations, database reset, email sending or attendance controls. No commit or push was performed.
+- Verification story: real browser login -> Next.js session cookies -> Task Details -> scheduling Server Actions -> requireUser -> local Supabase/RLS/RPC -> persisted data -> browser reload. Browser tests do not inject requireUser or substitute action/RPC responses.
+
+### Step 4.6A — EN/VI Localization — PASS
+
+- Added matching `learningSchedule` namespaces to `apps/web/messages/en.json` and `vi.json`, preserving existing namespaces. They cover draft/preview controls, weekdays, schedule/session statuses, cancellation reasons, dialogs, loading, errors, toasts, confirmation/impact text, uncertain outcomes and DST guidance.
+- All five scheduling UI components use next-intl. Server Actions remain locale-independent and now return stable error codes alongside their existing compatibility messages. UI translates the code instead of matching or displaying raw English action messages. Recurrence validation exposes a typed ScheduleValidationError code while preserving engine diagnostic messages for existing tests.
+- `schedule-presentation.ts` formats stored calendar dates as en-CA ISO-style dates for EN and vi-VN dates for VI using a fixed UTC date anchor. Stored local HH:mm and the Schedule timezone remain visible; the device timezone does not reinterpret the study time.
+- Browser context timezone was Asia/Tokyo throughout. A Ho Chi Minh Schedule's 21:00 remains 21:00 in displayed schedule text and input values. Native date/time control chrome follows browser locale/preferences (e.g. a 12-hour input can show 09:00 PM); this does not change the stored 21:00 value.
+- Added `schedule-localization.test.tsx`: 7 real-catalog/provider cases covering exact key parity, ICU singular/plural, all six session status translations, EN/VI editor/weekday labels, IANA suggestions, localized DST-gap/action errors without raw messages, and local-time preservation under a Tokyo provider timezone.
+- Existing scheduling component tests now use a stable real EN translator. Action tests use partial failure-object assertions where the contract now adds a code; existing message and denial assertions are retained.
+
+### Step 4.6B — Accessibility / Responsive — PASS Within Tested Scope
+
+- Draft inputs retain visible labels, slots have labeled groups, weekday selects use explicit aria-labelledby, validation remains announced with role=alert, and loading uses role=status / aria-busy. Status labels and cancellation reasons are textual, not color-only.
+- Timezone input now has native searchable datalist suggestions from Intl.supportedValuesOf, including UTC and Asia/Ho_Chi_Minh, plus localized help explaining schedule timezone, DST gaps and earlier-fold selection. Valid IANA aliases remain accepted by the existing validator.
+- Added `use-schedule-dialog-focus.ts` because these controlled dialogs do not have a Radix Trigger. Revision confirmation captures the Continue opener before disabling the fieldset; close restores its focus. Reschedule closes back to its opener, with a scheduling heading fallback if a successful refresh removed the old row.
+- Browser keyboard test uses actual Tab/Enter/Escape: reaches Reschedule from the sessions heading, opens the dialog, traverses date/start/end/Confirm controls, closes without mutation, and verifies focus returns to the opener.
+- Pending-save browser check delays transport only, then continues the original real Server Action request. While pending, Cancel is disabled and Escape does not close the dialog. After release, the real mutation commits and the list refreshes; the response is never mocked.
+- Dialogs have bounded viewport height and vertical scrolling; scheduling containers/inputs use min-width safeguards and long-text wrapping. Real 390x844 EN/VI tests check document/summary/editor/dialog horizontal overflow and dialog width. Desktop Chromium viewport is 1280x720.
+- Saved and visually inspected VI mobile editor/dialog screenshots. This is Chromium keyboard/DOM/visual verification, not a screen-reader certification or a full WCAG audit.
+
+### Step 4.6C — Chromium Browser E2E — PASS
+
+- Added `apps/web/tests/learning-schedule.spec.ts`, reusing existing Playwright config, Chromium project, tests directory and submitLoginForm helper. No new i18n/E2E library was installed; the existing Playwright Chromium runtime was initialized.
+- Mutation tests require explicit local credentials and guard loopback browser/Supabase hosts plus Supabase API port 55321. Default runs skip this suite without opt-in credentials; the actual run below had zero skips/retries/flaky tests.
+- Fixture setup creates one disposable Auth account, completed-onboarding profile and Goal. Task/Schedule creation and all scheduling changes occur through browser UI and real Server Actions. Separate privileged fixture reads verify persisted identities, statuses and audit; the service key is never supplied to the browser.
+- Each test logs in through the actual login form; no storage-state bypass, cookie injection, requireUser mock or fake RPC response is used. Fixture user deletion and zero remaining Task count passed after every full/diagnostic run. Browser contexts are disposed by Playwright.
+
+| E2E | Actual checks | Result |
+| --- | --- | --- |
+| 01 | UI login, create root Task via workspace, open Overview, create a three-session Schedule; read persisted Task/Schedule/session rows. | PASS |
+| 02 | Reload browser page, reopen Task, find revision 1, 3 sessions and original 19:00–20:30 wall-clock display. | PASS |
+| 03 | Edit recurring times, show impact dialog before mutation, verify DB revision remains 1 until confirmed; Back restores Continue focus, confirmation saves revision 2. | PASS |
+| 04 | Six rows remain: 3 cancelled originals and 3 replacements; exactly 3 cancellation audit events exist. | PASS |
+| 05 | Move one selected session, preserve all IDs and complete unselected-row snapshots, create one rescheduled event and reload new time. Also verify Cancel/Escape cannot close during a held pending request. | PASS |
+| 06 | Two browser tabs load revision 2; first saves revision 3; stale tab receives localized conflict and reload option without another revision. | PASS |
+| 07 | VI schedule/status/reschedule labels render; Ho Chi Minh timezone and stored 21:00 remain correct on a Tokyo browser device. | PASS |
+| 08 | Real Tab/Enter/Escape flow traverses inputs and Confirm; focus enters the dialog and returns to the Reschedule opener after close. | PASS |
+| 09 | EN/VI summary, revision editor and reschedule dialog fit 390x844; document/section scroll widths and dialog bounding width do not overflow. Screenshots retained; desktop screenshot is 1280x720. | PASS |
+| 10 | A separate Task without Schedule still supports real Todo -> In progress drag/drop, metadata edit, Save, delete confirmation and deletion. | PASS |
+
+- Runtime flow evidence: local server logged successful login/dashboard/workspace responses and createTaskAction, getTaskDetailsAction, createStudyScheduleAction, reviseStudyScheduleAction, rescheduleStudySessionAction and refreshed session queries. Each browser test asserts no uncaught pageerror. Known dashboard chart-size warnings are described below.
+
+### Commands / Reports / Quality Gates — Executed
+
+- Docker Desktop was initially stopped. Started it and the existing Supabase containers; no database reset was run.
+- Local Next server: `node node_modules/next/dist/bin/next dev -p 3005` from apps/web, with process-only NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY and SUPABASE_SERVICE_ROLE_KEY read from local CLI status. Existing .env.local was not edited. The temporary server was stopped after browser tests, before build.
+- Browser command from apps/web: `node node_modules/@playwright/test/cli.js test tests/learning-schedule.spec.ts --project=chromium --retries=0 --reporter=list,html,json`.
+- Browser variables: PLAYWRIGHT_BASE_URL=http://127.0.0.1:3005, PLAYWRIGHT_HTML_OPEN=never, PLAYWRIGHT_JSON_OUTPUT_FILE pointing to the repository-path JSON report, and LEARNING_SCHEDULE_TEST_URL / LEARNING_SCHEDULE_TEST_SERVICE_KEY from local CLI status. No credential values were printed or saved.
+- Final browser result: 10 expected/passed, 0 unexpected, 0 skipped, 0 flaky, no retries; duration 60.042 seconds. JSON: [phase-04-browser-results.json](./phase-04-browser-results.json). HTML report remains locally at apps/web/playwright-report/index.html. Seven persistent screenshots are in [evidence/step-46](./evidence/step-46/), including desktop, EN/VI summary/editor/dialog mobile captures.
+- Targeted command: `node node_modules/vitest/vitest.mjs run features/learning-schedule`; final result 11 files passed / 1 skipped, 107 tests passed / 19 skipped, duration 11.72 seconds. The skips are the opt-in direct integration suite, which was exercised separately below.
+- Direct local integration: `node node_modules/vitest/vitest.mjs run features/learning-schedule/schedule.integration.test.ts --reporter=verbose`, credentials from local CLI into LEARNING_SCHEDULE_TEST_*; exit 0, 19/19 PASS, duration 14.32 seconds. This regression run retains its injected-client boundary and is separate from the real cookie-based E2E above.
+- Lint: `node node_modules/eslint/bin/eslint.js .` (equivalent to npm run lint), exit 0; 0 errors and 1 existing missing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Full unit suite: `node node_modules/vitest/vitest.mjs run` (equivalent to npm run test:unit), exit 0; 69 files passed / 2 skipped; 612 tests passed / 20 skipped (632 total), duration 82.35 seconds. Default skips are 19 Schedule integration cases plus the existing Focus integration case. The 19 Schedule cases passed separately; Focus integration was not run.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0; Next.js 16.2.6 compiled in 19.9 seconds, TypeScript completed in 26.0 seconds and generated 98/98 static pages in 1251 ms.
+- React review covered unconditional hooks, translation dependencies, stale request guards, immutable submission behavior, native disabled controls, keyed state reset, dialog focus capture and mobile sizing. `git diff --check` passed. Direct Node entry points bypass broken npm/npx shell shims; local runtime/browser/build used the required permissions.
+
+### Failures Found / Corrections / Warnings
+
+- Initial test invocation from repo root lacked the apps/web Vitest alias/environment config; reran from apps/web. During localization, an unstable newly introduced translator mock caused repeated effect reads/timeouts; made the mock translator stable and updated assertions to check translated messages. The final targeted/full suites passed.
+- An incremental tsc invocation could not write the existing tsconfig.tsbuildinfo under the sandbox. The non-incremental no-emit check above passed without altering that artifact.
+- First E2E run failed on an exact Weekday label; 9 serial dependents did not run. Added an explicit aria-labelledby because wrapping the select in a label included option text in its accessible name.
+- Next E2E run passed 2 cases, then failed focus restoration from revision confirmation; 7 did not run. The opener had lost focus after its fieldset was disabled. Capture it before opening/disabling, and restore through the shared focus helper.
+- Next E2E run passed 9 cases and failed the unscheduled Task regression's assumed single-step keyboard DnD sequence. Reused the existing workspace pointer drag/drop interaction instead and corrected the existing Task title label in the test; its isolated rerun passed. No unrelated Task workflow implementation was changed.
+- A complete 10/10 run passed, then the browser suite was extended to test pending-request Escape protection and editor/dialog mobile overflow. The final 10/10 report above includes these checks; earlier failed/skipped runs are not counted as acceptance passes.
+- Existing non-fatal warnings: Vite native config-loader warning, local Supabase inbucket/INBUCKET_URL deprecations and optional stopped services, dashboard Recharts initial width/height -1 warnings, and an npm update notice. No npm upgrade was performed and no uncaught browser pageerror occurred in the final run.
+
+### Coverage Limits / Status
+
+- Step 4.6A: PASS. Step 4.6B: PASS within the Chromium keyboard/mobile/DOM checks above. Step 4.6C: PASS on local Chromium with actual Next.js cookie authentication and local Supabase.
+- PostgREST stale-RPC retry/5-second HTTP bounds remain a production-hardening concern from Steps 4.4/4.5; this step did not change RPC/SQLSTATE contracts or prove that HTTP abort cancels a server transaction. The two-tab browser scenario catches the stale revision at action preflight; the direct integration suite still exercises the bounded stale-RPC path.
+- Browser coverage is Chromium on desktop 1280x720 and mobile 390x844, EN/VI, device timezone Asia/Tokyo. Firefox/WebKit, real assistive technology, additional mobile devices, production/staging deployments, migration replay and a fresh failure-injection/concurrency harness run were not performed here.
+- Phase 04 remains IN PROGRESS. Step 4.7 Final Acceptance has not been executed or approved. No commit/push was performed.
+
 ## Remaining Work / Final Decision
 
-- Steps 4.1, 4.2, 4.3, 4.4 and 4.5: local verification PASS within the boundaries above; Step 4.4 includes the documented bounded-request mitigation and server retry limitation.
-- EN/VI strings, responsive/visual review, browser keyboard flow, focus behavior and authenticated browser E2E still need later Phase 04 verification. The new scheduling text remains English; i18n completion is not claimed.
-- Phase 04 overall: IN PROGRESS — Steps 4.6–4.7 have not been verified here.
+- Steps 4.1–4.6: local verification PASS within the boundaries above; Step 4.4 includes the documented bounded-request mitigation and server retry limitation.
+- EN/VI, Chromium keyboard/focus, mobile sizing and authenticated browser E2E were verified in Step 4.6. Broader browser/assistive-technology coverage and final acceptance remain outside this report.
+- Phase 04 overall: IN PROGRESS — Step 4.7 Final Acceptance has not been executed here.
 - Production deployment authorized: NO.
 - No commit or push was performed. This report and the added tests/fixes remain working-tree changes.

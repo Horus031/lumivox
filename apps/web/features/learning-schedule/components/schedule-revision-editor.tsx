@@ -1,9 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useEffect, useRef, useState, useTransition } from "react";
 import { Temporal } from "@js-temporal/polyfill";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useScheduleDialogFocus } from "../use-schedule-dialog-focus";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { reviseStudyScheduleAction } from "../schedule-revision.actions";
@@ -19,6 +22,8 @@ export function ScheduleRevisionEditor(props: Props) {
 }
 
 function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
+  const t = useTranslations("learningSchedule");
+  const dialogFocus = useScheduleDialogFocus();
   const router = useRouter();
   const [loaded, setLoaded] = useState<LoadedDraft | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -43,18 +48,18 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       try {
         const result = await getStudyScheduleEditorAction(scheduleId);
         if (cancelled) return;
-        if (!result.success) { setError(result.message); return; }
+        if (!result.success) { setError(t(`errors.${result.code ?? "loadFailed"}`)); return; }
         setLoaded({ revision: result.revision, draft: result.draft });
         setConflict(false);
       } catch {
-        if (!cancelled) setError("Unable to load schedule editor.");
+        if (!cancelled) setError(t("errors.loadFailed"));
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
     void load();
     return () => { cancelled = true; };
-  }, [scheduleId, reload]);
+  }, [scheduleId, reload, t]);
 
   function review(draft: StudyScheduleInput) {
     if (!loaded || conflict || inFlight.current) return;
@@ -65,12 +70,13 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       const occurrences = generateStudyOccurrences(draft);
       if (Temporal.PlainDate.compare(draft.startsOn, today) < 0 ||
         occurrences.some(x => Temporal.Instant.compare(x.scheduledStartAt, now) <= 0)) {
-        setError("Choose a start date of today or later and session times in the future. Existing dates are kept until you change them.");
+        setError(t("errors.futureDates"));
         return;
       }
+      dialogFocus.captureOpener();
       setPending(draft);
     } catch {
-      setError("Check the schedule dates, timezone and weekly slots.");
+      setError(t("errors.invalidInput"));
     }
   }
 
@@ -86,54 +92,50 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
         setPending(null);
         if (!result.success) {
           setConflict(Boolean(result.conflict));
-          setError(result.message);
+          setError(t(`errors.${result.code ?? "saveFailed"}`));
           return;
         }
-        toast.success(`Study schedule updated to revision ${result.revision}.`);
+        toast.success(t("revised", { revision: result.revision }));
         onSaved();
         router.refresh();
       } catch {
-        if (mounted.current) { setPending(null); setError("Unable to revise schedule."); }
+        if (mounted.current) { setPending(null); setError(t("errors.saveFailed")); }
       } finally {
         inFlight.current = false;
       }
     });
   }
 
-  if (loading) return <p role="status">Loading schedule editor...</p>;
+  if (loading) return <p role="status">{t("loadingEditor")}</p>;
   if (!loaded) return <div role="alert" className="space-y-2">
-    <p>{error ?? "Schedule unavailable."}</p>
-    <Button type="button" onClick={() => setReload(x => x + 1)}>Retry</Button>
-    <Button type="button" variant="outline" onClick={onCancel}>Close</Button>
+    <p>{error ?? t("errors.loadFailed")}</p>
+    <Button type="button" onClick={() => setReload(x => x + 1)}>{t("retry")}</Button>
+    <Button type="button" variant="outline" onClick={onCancel}>{t("close")}</Button>
   </div>;
 
-  return <section aria-label="Recurring schedule revision" className="space-y-4">
-    <h4 className="font-medium">Edit recurring study schedule</h4>
-    <p>Current revision: {loaded.revision} · Prospective revision: {loaded.revision + 1}</p>
-    <p className="text-sm text-muted-foreground">
-      Saving cancels future scheduled sessions and generates replacements, including individually rescheduled sessions.
-      Completed and historical sessions remain. Choose today or a later start date, with all new sessions in the future.
-    </p>
+  return <section aria-label={t("revisionEditor")} className="min-w-0 space-y-4 [overflow-wrap:anywhere]">
+    <h4 className="font-medium">{t("revisionTitle")}</h4>
+    <p>{t("versions", { current: loaded.revision, next: loaded.revision + 1 })}</p>
+    <p className="text-sm text-muted-foreground">{t("revisionImpact")}</p>
     {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
     {conflict && <div className="space-y-2">
-      <p>Another update changed this schedule. Your draft is kept below. Reloading discards it and loads the latest saved schedule.</p>
-      <Button type="button" onClick={() => { setLoaded(null); setReload(x => x + 1); }}>Discard draft and reload</Button>
+      <p>{t("conflictDraft")}</p>
+      <Button type="button" onClick={() => { setLoaded(null); setReload(x => x + 1); }}>{t("discardReload")}</Button>
     </div>}
-    <fieldset disabled={saving || conflict || pending !== null} aria-busy={saving} className="space-y-3">
+    <fieldset disabled={saving || conflict || pending !== null} aria-busy={saving} className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
       <ScheduleDraftEditor key={`${scheduleId}-${loaded.revision}`} initialValue={loaded.draft} onContinue={review} />
     </fieldset>
-    <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>Cancel</Button>
+    <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>{t("cancel")}</Button>
     <Dialog open={pending !== null} onOpenChange={open => { if (!open && !inFlight.current) setPending(null); }}>
-      <DialogContent showCloseButton={!saving} onEscapeKeyDown={event => { if (inFlight.current) event.preventDefault(); }}
+      <DialogContent {...dialogFocus.dialogProps} className="max-h-[calc(100dvh-2rem)] overflow-y-auto [overflow-wrap:anywhere]" showCloseButton={false} onEscapeKeyDown={event => { if (inFlight.current) event.preventDefault(); }}
         onInteractOutside={event => { if (inFlight.current) event.preventDefault(); }}>
-        <DialogTitle>Confirm recurring schedule revision</DialogTitle>
+        <DialogTitle>{t("confirmRevisionTitle")}</DialogTitle>
         <DialogDescription>
-          Future scheduled sessions will be cancelled and replaced, including individual session overrides.
-          Completed and past sessions stay in history. Save revision {loaded.revision + 1}?
+          {t("confirmRevisionImpact", { revision: loaded.revision + 1 })}
         </DialogDescription>
         <DialogFooter>
-          <Button type="button" variant="outline" disabled={saving} onClick={() => setPending(null)}>Back to draft</Button>
-          <Button type="button" disabled={saving} onClick={save}>Confirm revision</Button>
+          <Button type="button" variant="outline" disabled={saving} onClick={() => setPending(null)}>{t("backToDraft")}</Button>
+          <Button type="button" disabled={saving} onClick={save}>{t("confirmRevision")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

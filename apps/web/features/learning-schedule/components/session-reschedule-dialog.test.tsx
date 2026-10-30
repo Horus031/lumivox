@@ -1,3 +1,9 @@
+vi.mock("next-intl", async original => {
+ const actual = await original<typeof import("next-intl")>();
+ const { learningSchedule } = await import("@/messages/en.json");
+ const translate = actual.createTranslator({ locale: "en", messages: { learningSchedule }, namespace: "learningSchedule" });
+ return { ...actual, useLocale: () => "en", useTranslations: (namespace: string) => namespace === "learningSchedule" ? translate : (key: string) => key };
+});
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -40,7 +46,7 @@ describe("single session reschedule dialog", () => {
   it("keeps draft after rejection, retries unchanged with same key and changes key for new payload", async () => {
     mocks.action.mockResolvedValue({ success: false, message: "Overlap rejected" }); await render(); enter("New date", "2030-01-08");
     await click("Confirm reschedule"); const first = mocks.action.mock.calls[0][0];
-    expect(document.body.textContent).toContain("Overlap rejected"); expect(input("New date").value).toBe("2030-01-08"); expect(mocks.toast).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain("Could not save study schedule. Check the dates and active sessions."); expect(input("New date").value).toBe("2030-01-08"); expect(mocks.toast).not.toHaveBeenCalled();
     await click("Confirm reschedule"); expect(mocks.action.mock.calls[1][0]).toEqual(first);
     enter("Start time", "18:00"); await click("Confirm reschedule"); expect(mocks.action.mock.calls[2][0].eventKey).not.toBe(first.eventKey);
   });

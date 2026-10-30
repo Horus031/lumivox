@@ -11,7 +11,7 @@ const PAGE_SIZE = 20;
 
 export async function getStudySessionsAction(raw: unknown) {
   const parsed = schema.safeParse(raw);
-  if (!parsed.success) return { success: false as const, message: "Invalid sessions request." };
+  if (!parsed.success) return { success: false as const, code: "invalidInput" as const, message: "Invalid sessions request." };
 
   try {
     const { supabase, user } = await requireUser();
@@ -29,10 +29,10 @@ export async function getStudySessionsAction(raw: unknown) {
       .order("scheduled_start_at", { ascending: true })
       .order("id", { ascending: true })
       .range(from, to);
-    if (error) return { success: false as const, message: "Could not load study sessions." };
+    if (error) return { success: false as const, code: "loadFailed" as const, message: "Could not load study sessions." };
     return { success: true as const, sessions: data ?? [], total: count ?? 0,
       page, hasMore: to + 1 < (count ?? 0) };
   } catch {
-    return { success: false as const, message: "Unable to load study sessions." };
+    return { success: false as const, code: "loadFailed" as const, message: "Unable to load study sessions." };
   }
 }

@@ -1,3 +1,9 @@
+vi.mock("next-intl", async original => {
+ const actual = await original<typeof import("next-intl")>();
+ const { learningSchedule } = await import("@/messages/en.json");
+ const translate = actual.createTranslator({ locale: "en", messages: { learningSchedule }, namespace: "learningSchedule" });
+ return { ...actual, useLocale: () => "en", useTranslations: (namespace: string) => namespace === "learningSchedule" ? translate : (key: string) => key };
+});
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -47,7 +53,7 @@ describe("recurring schedule revision UI", () => {
   });
   it("keeps draft after RPC failure and retries", async () => {
     mocks.revise.mockResolvedValueOnce({ success: false, message: "RPC failed" }); await render(); enter("Start", "18:00"); await click("Continue"); await click("Confirm revision");
-    expect(host.textContent).toContain("RPC failed"); expect(input("Start").value).toBe("18:00"); expect(mocks.success).not.toHaveBeenCalled();
+    expect(host.textContent).toContain("Could not save study schedule. Check the dates and active sessions."); expect(input("Start").value).toBe("18:00"); expect(mocks.success).not.toHaveBeenCalled();
     await click("Continue"); await click("Confirm revision"); expect(mocks.saved).toHaveBeenCalledOnce();
   });
   it("preserves conflict draft, blocks save and explicitly reloads latest revision", async () => {
@@ -57,7 +63,7 @@ describe("recurring schedule revision UI", () => {
   });
   it("shows loading/error and retries failed editor read", async () => {
     const load = deferred<{ success: false; message: string }>(); mocks.load.mockReturnValueOnce(load.promise); await render(); expect(host.textContent).toContain("Loading schedule editor");
-    await act(async () => { load.resolve({ success: false, message: "Load failed" }); }); expect(host.textContent).toContain("Load failed"); await click("Retry"); expect(input("Start").value).toBe("19:00");
+    await act(async () => { load.resolve({ success: false, message: "Load failed" }); }); expect(host.textContent).toContain("Could not load study schedule."); await click("Retry"); expect(input("Start").value).toBe("19:00");
   });
   it("keeps past startsOn and explains future-date policy before any RPC", async () => {
     mocks.load.mockResolvedValue({ success: true, revision: 1, draft: { ...draft, startsOn: "2020-01-06", endsOn: "2020-01-20" } }); await render(); await click("Continue");

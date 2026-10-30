@@ -1,3 +1,9 @@
+vi.mock("next-intl", async original => {
+ const actual = await original<typeof import("next-intl")>();
+ const { learningSchedule } = await import("@/messages/en.json");
+ const translate = actual.createTranslator({ locale: "en", messages: { learningSchedule }, namespace: "learningSchedule" });
+ return { ...actual, useLocale: () => "en", useTranslations: (namespace: string) => namespace === "learningSchedule" ? translate : (key: string) => key };
+});
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,7 +14,6 @@ import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-e
 const mocks = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn(), details: vi.fn(),
   sessions: vi.fn(), remove: vi.fn(), refresh: vi.fn(), error: vi.fn(), success: vi.fn(), confirm: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
-vi.mock("next-intl", () => ({ useLocale: () => "en", useTranslations: () => (key: string) => key }));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock("../schedule.actions", () => ({ createStudyScheduleAction: mocks.create }));
 vi.mock("../schedule.queries.actions", () => ({ getTaskStudyScheduleAction: mocks.load }));
@@ -103,7 +108,7 @@ describe("Task scheduling UI", () => {
   it("4.1 rejects a DST gap and disables empty previews or missing callback", async () => {
     await render(<ScheduleDraftEditor initialValue={{ startsOn: "2030-03-10", endsOn: "2030-03-10",
       timezone: "America/New_York", slots: [{ weekday: 7, startTime: "02:30", endTime: "04:00" }] }} onContinue={vi.fn()} />);
-    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/Nonexistent/);
+    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/does not exist/);
     expect(button("Continue").disabled).toBe(true);
     await render(<ScheduleDraftEditor key="no-matching-day" initialValue={{ ...draft,
       startsOn: "2030-01-08", endsOn: "2030-01-08" }} onContinue={vi.fn()} />);
@@ -150,8 +155,8 @@ describe("Task scheduling UI", () => {
       weekday.value = "1"; weekday.dispatchEvent(new Event("change", { bubbles: true }));
     });
     await click("Continue");
-    expect(mocks.error).toHaveBeenCalledWith("Rejected by RPC");
-    expect(host.querySelector('[role="alert"]')?.textContent).toBe("Rejected by RPC");
+    expect(mocks.error).toHaveBeenCalledWith("Could not save study schedule. Check the dates and active sessions.");
+    expect(host.querySelector('[role="alert"]')?.textContent).toBe("Could not save study schedule. Check the dates and active sessions.");
     expect(host.querySelector<HTMLInputElement>('input[type="date"]')!.value).toBe("2030-01-07");
     expect(host.querySelector('[aria-label="Study schedule editor"]')).not.toBeNull();
     mocks.load.mockResolvedValue({ success: true, schedule: summary });

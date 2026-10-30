@@ -1,3 +1,9 @@
+vi.mock("next-intl", async original => {
+ const actual = await original<typeof import("next-intl")>();
+ const { learningSchedule } = await import("@/messages/en.json");
+ const translate = actual.createTranslator({ locale: "en", messages: { learningSchedule }, namespace: "learningSchedule" });
+ return { ...actual, useLocale: () => "en", useTranslations: (namespace: string) => namespace === "learningSchedule" ? translate : (key: string) => key };
+});
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -59,7 +65,7 @@ describe("Study sessions read-only list", () => {
   });
   it("shows initial API errors and retries page zero", async () => {
     mocks.query.mockResolvedValueOnce({ success: false, message: "Read denied" }).mockResolvedValueOnce(page([session(0)]));
-    await render(); expect(host.querySelector('[role="alert"]')?.textContent).toBe("Read denied");
+    await render(); expect(host.querySelector('[role="alert"]')?.textContent).toBe("Could not load study schedule.");
     await click("Retry"); expect(host.querySelectorAll("li")).toHaveLength(1);
     expect(host.querySelector('[role="alert"]')).toBeNull();
     expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 });
@@ -69,7 +75,7 @@ describe("Study sessions read-only list", () => {
       .mockRejectedValueOnce(new Error("Network error")).mockResolvedValueOnce(page([session(1)], 2, 1));
     await render(); await click("Load more");
     expect(host.querySelectorAll("li")).toHaveLength(1);
-    expect(host.querySelector('[role="alert"]')?.textContent).toBe("Unable to load more sessions.");
+    expect(host.querySelector('[role="alert"]')?.textContent).toBe("Could not load study schedule.");
     await click("Retry"); expect(host.querySelectorAll("li")).toHaveLength(2);
     expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 1 });
   });
@@ -96,7 +102,7 @@ describe("Study sessions read-only list", () => {
     const statuses = ["scheduled", "in_progress", "completed", "missed", "skipped", "cancelled"];
     mocks.query.mockResolvedValue(page(statuses.map((status, i) => session(i, status))));
     await render();
-    for (const label of ["Scheduled", "In progress", "Completed", "Missed", "Skipped", "Cancelled", "Reason: task_closed"])
+    for (const label of ["Scheduled", "In progress", "Completed", "Missed", "Skipped", "Cancelled", "Reason: Task closed"])
       expect(host.textContent).toContain(label);
     expect(host.querySelectorAll("button")).toHaveLength(0);
     expect(mocks.query).toHaveBeenCalledOnce();

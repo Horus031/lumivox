@@ -15,14 +15,14 @@ export async function getStudyScheduleEditorAction(
     }
   | {
       success: false;
-      message: string;
+      message: string; code?: string;
     }
 > {
   const parsed = z.string().uuid().safeParse(rawScheduleId);
 
   if (!parsed.success) {
     return {
-      success: false,
+      success: false, code: "invalidInput" as const,
       message: "Invalid schedule ID.",
     };
   }
@@ -39,14 +39,14 @@ export async function getStudyScheduleEditorAction(
 
     if (error || !schedule) {
       return {
-        success: false,
+        success: false, code: "notFound" as const,
         message: "Study schedule not found.",
       };
     }
 
     if (schedule.status !== "active") {
       return {
-        success: false,
+        success: false, code: "notEligible" as const,
         message: "This schedule cannot be edited.",
       };
     }
@@ -61,7 +61,7 @@ export async function getStudyScheduleEditorAction(
 
     if (slotsError || !slots?.length) {
       return {
-        success: false,
+        success: false, code: "loadFailed" as const,
         message: "Could not load weekly slots.",
       };
     }
@@ -75,7 +75,7 @@ export async function getStudyScheduleEditorAction(
       .eq("user_id", user.id)
       .single();
     if (currentError || !current || current.revision !== schedule.revision || current.status !== "active") {
-      return { success: false, message: "Schedule changed while loading. Retry to load the latest version." };
+      return { success: false, code: "conflict" as const, message: "Schedule changed while loading. Retry to load the latest version." };
     }
 
     return {
@@ -94,7 +94,7 @@ export async function getStudyScheduleEditorAction(
     };
   } catch {
     return {
-      success: false,
+      success: false, code: "loadFailed" as const,
       message: "Unable to load schedule editor.",
     };
   }

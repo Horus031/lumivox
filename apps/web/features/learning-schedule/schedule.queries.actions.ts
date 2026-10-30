@@ -8,7 +8,7 @@ export async function getTaskStudyScheduleAction(rawTaskId: unknown) {
 
   if (!parsed.success) {
     return {
-      success: false as const,
+      success: false as const, code: "invalidInput" as const,
       message: "Invalid task ID.",
     };
   }
@@ -27,7 +27,7 @@ export async function getTaskStudyScheduleAction(rawTaskId: unknown) {
 
     if (error) {
       return {
-        success: false as const,
+        success: false as const, code: "loadFailed" as const,
         message: "Could not load study schedule.",
       };
     }
@@ -38,7 +38,7 @@ export async function getTaskStudyScheduleAction(rawTaskId: unknown) {
     };
   } catch {
     return {
-      success: false as const,
+      success: false as const, code: "loadFailed" as const,
       message: "Unable to load study schedule.",
     };
   }

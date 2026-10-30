@@ -15,7 +15,7 @@ describe("sessions read action", () => {
     { scheduleId: "bad", page: 0 }, { scheduleId, page: -1 }, { scheduleId, page: 1.5 },
     { scheduleId, page: 1001 }, { scheduleId, page: 0, userId: "forged" },
   ])("rejects invalid/extra pagination input before authentication: %j", async input => {
-    expect(await getStudySessionsAction(input)).toEqual({ success: false, message: "Invalid sessions request." });
+    expect(await getStudySessionsAction(input)).toMatchObject({ success: false, message: "Invalid sessions request." });
     expect(mocks.auth).not.toHaveBeenCalled();
   });
   it("reads exactly one page with owner filtering, exact count and deterministic order", async () => {
@@ -37,8 +37,8 @@ describe("sessions read action", () => {
   });
   it("sanitizes database errors and authentication failures", async () => {
     query.range.mockResolvedValue({ error: { message: "Private internal detail" } });
-    expect(await getStudySessionsAction({ scheduleId, page: 0 })).toEqual({ success: false, message: "Could not load study sessions." });
+    expect(await getStudySessionsAction({ scheduleId, page: 0 })).toMatchObject({ success: false, message: "Could not load study sessions." });
     mocks.auth.mockRejectedValue(new Error("No session"));
-    expect(await getStudySessionsAction({ scheduleId, page: 0 })).toEqual({ success: false, message: "Unable to load study sessions." });
+    expect(await getStudySessionsAction({ scheduleId, page: 0 })).toMatchObject({ success: false, message: "Unable to load study sessions." });
   });
 });

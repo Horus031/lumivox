@@ -1,4 +1,5 @@
 "use server";
+import { ScheduleValidationError } from "./schedule-presentation";
 
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
@@ -19,21 +20,21 @@ const inputSchema = z.object({
 
 export async function createStudyScheduleAction(raw: unknown): Promise<
   { success: true; scheduleId: string; sessionCount: number } |
-  { success: false; message: string }
+  { success: false; message: string; code?: string }
 > {
   const parsed = inputSchema.safeParse(raw);
-  if (!parsed.success) return { success: false, message: "Invalid study schedule input." };
+  if (!parsed.success) return { success: false, code: "invalidInput" as const, message: "Invalid study schedule input." };
   try {
     const { supabase, user } = await requireUser();
     const { taskId, ...schedule } = parsed.data;
     const occurrences = generateStudyOccurrences(schedule);
-    if (!occurrences.length) return { success: false, message: "No study sessions match this date range." };
+    if (!occurrences.length) return { success: false, code: "empty" as const, message: "No study sessions match this date range." };
     const { data: task, error: taskError } = await supabase.from("tasks")
       .select("id,user_id,parent_task_id,status")
       .eq("id", taskId).eq("user_id", user.id).maybeSingle();
     if (taskError || !task || task.parent_task_id !== null ||
         !["todo", "in_progress"].includes(task.status)) {
-      return { success: false, message: "Task is not eligible for scheduling." };
+      return { success: false, code: "notEligible" as const, message: "Task is not eligible for scheduling." };
     }
     const { data, error } = await supabase.rpc("ls_create_schedule", {
       p_task_id: taskId,
@@ -45,10 +46,9 @@ export async function createStudyScheduleAction(raw: unknown): Promise<
     });
     if (error || !data) {
       // Do not expose raw database error messages to unauthenticated callers.
-      return { success: false, message: "Could not create study schedule. Check that the task has no active schedule and the dates are valid." };
+      return { success: false, code: "saveFailed" as const, message: "Could not create study schedule. Check that the task has no active schedule and the dates are valid." };
     }
     return { success: true, scheduleId: data, sessionCount: occurrences.length };
-  } catch {
-    return { success: false, message: "Unable to create the study schedule." };
+  } catch (error) { return { success: false, code: error instanceof ScheduleValidationError ? error.code : "saveFailed", message: "Unable to create the study schedule." };
   }
 }

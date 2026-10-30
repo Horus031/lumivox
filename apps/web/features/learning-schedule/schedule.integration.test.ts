@@ -129,7 +129,7 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
     const fixture = await sessionFixture(); const chosen = fixture.rows[0];
     const command = { sessionId: chosen.id, expectedUpdatedAt: chosen.updated_at, localDate: "2030-01-08", startTime: "18:00", endTime: "19:00", eventKey: randomUUID() };
     auth.requireUser.mockResolvedValue({ supabase: fixtures[1].client, user: fixtures[1].user });
-    expect(await rescheduleStudySessionAction(command)).toEqual({ success: false, message: "Study session not found." });
+    expect(await rescheduleStudySessionAction(command)).toMatchObject({ success: false, message: "Study session not found." });
     auth.requireUser.mockResolvedValue({ supabase: fixtures[0].client, user: fixtures[0].user });
     for (const status of ["completed", "missed", "skipped", "cancelled", "in_progress", "scheduled"]) {
       const updated = await admin.from("task_study_sessions").update({ status,
@@ -199,13 +199,13 @@ describe.skipIf(!enabled)("local Task scheduling Server Actions integration", ()
   it.each(["completed", "cancelled", "in_review"] as const)("rejects real creation for %s", async status => {
     const root = await task(status);
     expect(await createStudyScheduleAction({ taskId: root.id, ...draft }))
-      .toEqual({ success: false, message: "Task is not eligible for scheduling." });
+      .toMatchObject({ success: false, message: "Task is not eligible for scheduling." });
     expect(await getTaskStudyScheduleAction(root.id)).toMatchObject({ success: true, schedule: null });
   });
   it("rejects subtask scheduling", async () => {
     const parent = await task(); const child = await task("todo", parent.id);
     expect(await createStudyScheduleAction({ taskId: child.id, ...draft }))
-      .toEqual({ success: false, message: "Task is not eligible for scheduling." });
+      .toMatchObject({ success: false, message: "Task is not eligible for scheduling." });
     expect(await getTaskStudyScheduleAction(child.id)).toMatchObject({ success: true, schedule: null });
   });
   it("two concurrent create actions persist one schedule and exactly three sessions", async () => {

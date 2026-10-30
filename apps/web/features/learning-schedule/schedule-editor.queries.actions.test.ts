@@ -25,7 +25,7 @@ describe("schedule editor read action", () => {
   });
   it.each(["closed", "paused"])("rejects %s schedule", async status => {
     q.single.mockReset().mockResolvedValue({ data: { ...metadata, status }, error: null });
-    expect(await getStudyScheduleEditorAction(id)).toEqual({ success: false, message: "This schedule cannot be edited." }); expect(q.order).not.toHaveBeenCalled();
+    expect(await getStudyScheduleEditorAction(id)).toMatchObject({ success: false, message: "This schedule cannot be edited." }); expect(q.order).not.toHaveBeenCalled();
   });
   it.each([{ revision: 3, status: "active" }, { revision: 2, status: "closed" }, null])("rejects concurrent changed/deleted metadata: %j", async current => {
     q.single.mockReset().mockResolvedValueOnce({ data: metadata, error: null }).mockResolvedValue({ data: current, error: null });
@@ -33,9 +33,9 @@ describe("schedule editor read action", () => {
   });
   it("handles missing owner, empty slots and auth failures safely", async () => {
     q.single.mockReset().mockResolvedValue({ data: null, error: { message: "private" } });
-    expect(await getStudyScheduleEditorAction(id)).toEqual({ success: false, message: "Study schedule not found." });
+    expect(await getStudyScheduleEditorAction(id)).toMatchObject({ success: false, message: "Study schedule not found." });
     q.single.mockResolvedValue({ data: metadata, error: null }); q.order.mockReset().mockReturnValueOnce(q).mockResolvedValue({ data: [], error: null });
-    expect(await getStudyScheduleEditorAction(id)).toEqual({ success: false, message: "Could not load weekly slots." });
-    mocks.auth.mockRejectedValue(new Error("private")); expect(await getStudyScheduleEditorAction(id)).toEqual({ success: false, message: "Unable to load schedule editor." });
+    expect(await getStudyScheduleEditorAction(id)).toMatchObject({ success: false, message: "Could not load weekly slots." });
+    mocks.auth.mockRejectedValue(new Error("private")); expect(await getStudyScheduleEditorAction(id)).toMatchObject({ success: false, message: "Unable to load schedule editor." });
   });
 });

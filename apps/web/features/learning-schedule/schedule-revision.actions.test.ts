@@ -32,6 +32,6 @@ describe("revision action conflict boundary", () => {
   it.each([{ data: { revision: 1 }, error: null }, { data: null, error: { message: "private" } }])("does not infer success or conflict without changed owned revision: %j", async current => {
     q.abortSignal.mockResolvedValue({ data: null, error: { code: "", message: "private" } });
     q.maybeSingle.mockResolvedValueOnce({ data: { revision: 1 }, error: null }).mockResolvedValue(current);
-    expect(await reviseStudyScheduleAction(request)).toEqual({ success: false, message: "Could not update schedule. Check future dates and active sessions." });
+    expect(await reviseStudyScheduleAction(request)).toMatchObject({ success: false, message: "Could not update schedule. Check future dates and active sessions." });
   });
 });
