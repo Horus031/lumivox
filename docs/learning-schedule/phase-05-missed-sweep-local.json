@@ -1,0 +1,174 @@
+{
+  "baseline": "67bdea65a9e8128f1092bfbd941562f162621b54",
+  "startedAt": "2026-10-31T08:32:10.687Z",
+  "runs": [
+    {
+      "name": "default-disabled-and-trusted-service-role-manual",
+      "status": "PASS",
+      "result": {
+        "marked": 1,
+        "examined": 1
+      }
+    },
+    {
+      "name": "ineligible-full-row-preservation",
+      "status": "PASS",
+      "states": [
+        "in_progress",
+        "completed",
+        "skipped",
+        "cancelled"
+      ]
+    },
+    {
+      "name": "double-sweep-uncommitted-first-transition",
+      "iteration": 1,
+      "status": "PASS",
+      "first": {
+        "marked": 1,
+        "examined": 1
+      },
+      "second": {
+        "marked": 0,
+        "examined": 1
+      },
+      "events": 1
+    },
+    {
+      "name": "double-sweep-uncommitted-first-transition",
+      "iteration": 2,
+      "status": "PASS",
+      "first": {
+        "marked": 1,
+        "examined": 1
+      },
+      "second": {
+        "marked": 0,
+        "examined": 1
+      },
+      "events": 1
+    },
+    {
+      "name": "double-sweep-uncommitted-first-transition",
+      "iteration": 3,
+      "status": "PASS",
+      "first": {
+        "marked": 1,
+        "examined": 1
+      },
+      "second": {
+        "marked": 0,
+        "examined": 1
+      },
+      "events": 1
+    },
+    {
+      "name": "locked-candidate-retry",
+      "lock": "Task",
+      "status": "PASS",
+      "observedHolderExclusiveLocks": 1,
+      "blocked": {
+        "marked": 0,
+        "examined": 1
+      },
+      "retry": {
+        "marked": 1,
+        "examined": 1
+      }
+    },
+    {
+      "name": "locked-candidate-retry",
+      "lock": "Schedule",
+      "status": "PASS",
+      "observedHolderExclusiveLocks": 1,
+      "blocked": {
+        "marked": 0,
+        "examined": 1
+      },
+      "retry": {
+        "marked": 1,
+        "examined": 1
+      }
+    },
+    {
+      "name": "locked-candidate-retry",
+      "lock": "Session",
+      "status": "PASS",
+      "observedHolderExclusiveLocks": 1,
+      "blocked": {
+        "marked": 0,
+        "examined": 1
+      },
+      "retry": {
+        "marked": 1,
+        "examined": 1
+      }
+    }
+  ],
+  "backendPids": [
+    536,
+    537,
+    538
+  ],
+  "environment": {
+    "cron": "1.6.4",
+    "postgres": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",
+    "migrations": 83
+  },
+  "registeredJob": {
+    "jobid": 2,
+    "active": true,
+    "command": "\r\n    SELECT public.ls_run_missed_sweep_if_enabled();\r\n  ",
+    "jobname": "lumivox-learning-schedule-missed-5m",
+    "database": "postgres",
+    "nodename": "localhost",
+    "nodeport": 5432,
+    "schedule": "*/5 * * * *",
+    "username": "postgres"
+  },
+  "cron": {
+    "status": "PASS",
+    "temporarySchedule": "1 second",
+    "automaticRuns": [
+      {
+        "jobid": 2,
+        "runid": 1,
+        "status": "succeeded",
+        "command": "\r\n    SELECT public.ls_run_missed_sweep_if_enabled();\r\n  ",
+        "job_pid": 539,
+        "database": "postgres",
+        "end_time": "2026-10-31T08:32:12.048317+00:00",
+        "username": "postgres",
+        "start_time": "2026-10-31T08:32:12.040146+00:00",
+        "return_message": "1 row"
+      },
+      {
+        "jobid": 2,
+        "runid": 2,
+        "status": "succeeded",
+        "command": "\r\n    SELECT public.ls_run_missed_sweep_if_enabled();\r\n  ",
+        "job_pid": 540,
+        "database": "postgres",
+        "end_time": "2026-10-31T08:32:13.052318+00:00",
+        "username": "postgres",
+        "start_time": "2026-10-31T08:32:13.04929+00:00",
+        "return_message": "1 row"
+      }
+    ],
+    "session": "4c5333fa-fb6d-4f71-93d0-8162daab2943",
+    "events": 1,
+    "gateDisabledAfter": true,
+    "restoredSchedule": "*/5 * * * *"
+  },
+  "status": "PASS",
+  "cleanup": {
+    "gateEnabled": false,
+    "jobSchedule": "*/5 * * * *",
+    "workerLocks": 0,
+    "fixtureTasks": 0,
+    "fixtureUsers": 0,
+    "failureTriggers": 0,
+    "openWorkerTransactions": 0
+  },
+  "finishedAt": "2026-10-31T08:32:13.512Z"
+}

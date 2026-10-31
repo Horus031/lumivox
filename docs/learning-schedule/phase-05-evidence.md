@@ -232,3 +232,73 @@
 - Step 5.3: **PASS (LOCAL)** for the executed sequential RPC, HTTP, rollback, ownership and regression scope above; pending boundary/concurrency work remains explicitly open.
 - Ready for Step 5.4: **YES**, with the Step 5.6/5.7 limits retained.
 - Production authorized: **NO**.
+
+
+## Step 5.4 — Automatic Missed Sweep
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: `67bdea65a9e8128f1092bfbd941562f162621b54` — `feat(learning-schedule): add audited study session skip RPC`. New Sweep migration/test were untracked working-tree additions; the SHA identifies the baseline, not a commit containing Sweep.
+- Migration filename: `supabase/migrations/20261031082113_learning_schedule_missed_sweep.sql`; reviewed together with `supabase/tests/learning_schedule_missed_sweep.sql`. Both user-supplied implementation files were tested without edits. Verification updates this evidence and adds the local result report; no commit/push.
+- Supabase local version: CLI **2.122.0**, database **PostgreSQL 17.6**, **pg_cron 1.6.4**; container `supabase_db_lumivox-proj`. CLI invoked by its installed Windows executable because npm/npx shell shims are broken.
+
+### Database
+
+- Clean replay: **PASS** — executed `supabase db reset --local` followed by `supabase test db --local`, both exit 0. All commands targeted local Supabase; no production activation or remote database operation.
+- Total migrations: **83**, independently confirmed by querying `supabase_migrations.schema_migrations` after clean replay.
+- pgTAP: **PASS — 21 files, 433 assertions, 0 failures**, 6 wall-clock seconds. The persistent concurrency fixture setup file intentionally emits a TAP skip. Existing extension notices and absent optional seed.sql warning were non-fatal.
+- Existing assertions: **409**, all passed again, including Start/Complete/Skip and earlier Learning Schedule/Focus/Workspace coverage.
+- New sweep assertions: **24**, all passed in `learning_schedule_missed_sweep.sql`. Fixtures and audit-failure trigger were rolled back. Additional committed fixtures for real local connections/Cron were created and cleaned by a temporary Node/psql probe; [raw local probe report](./phase-05-missed-sweep-local.json).
+
+### Batch Processor
+
+- Scheduled after grace: **PASS** — overdue scheduled fixtures ended 3 hours before the anchor; eligible active-root-Task sessions become missed. Additional committed-fixture probe verifies same UUID, preserved scheduled end, Task todo and one system audit. Source evaluates clock_timestamp after Task -> Schedule -> Session locks and accepts elapsed grace >= 60 minutes; exact equality was not tested.
+- Scheduled before grace: **PASS** — fixture ended 15 minutes before anchor remains scheduled with no marked_missed event.
+- In-progress deferred: **PASS** — overdue in_progress remains unchanged. Additional probe compares the full row and events, rather than only status, after a batch scan. No Focus reconciliation is implied.
+- Completed/skipped/cancelled preserved: **PASS** — no marked_missed events in pgTAP; independent committed-fixture probe additionally confirms full row/event snapshots remain equal for all three states.
+- Closed Task / paused Schedule: **PASS for executed cases** — completed Task and paused Schedule fixtures produce no marked_missed events. Closed-Task lifecycle hooks may already change eligibility; this assertion does not prove that every closed-Task branch reached the sweep's own post-lock guard. Other Task status/subtask branches were source-reviewed only.
+- Batch size limit: **PASS** — batch size 1 marks exactly one of two eligible rows; a second batch marks the remaining row. Inputs 0 and 501 reject 22023 / `Invalid missed sweep batch size`. Source also rejects null/negative sizes and bounds discovery at p_batch_size * 10; null/negative/500-boundary and saturated-discovery/fairness cases were not independently tested.
+- Repeated execution: **PASS** — pgTAP repeated batch returns marked=0 with event total unchanged. Independent-connection probe repeats after each committed Double Sweep and verifies the full final snapshot stays equal.
+- Audit event count: **PASS** — exactly one marked_missed event per transitioned session, from scheduled to missed, actor_id null, source attendance_sweep, reason grace_expired, graceMinutes 60. Committed-fixture probe also checks deterministic key `ls:missed:<session UUID>`; no user event key is needed.
+- Audit failure rollback: **PASS** — temporary BEFORE INSERT marked_missed trigger raises P0001 / `Injected missed audit failure`. Full session row, including timestamps, is restored and no audit survives. Executed failure injection covers one eligible transition; rollback of multiple earlier successful rows in the same failing batch was not separately injected.
+- Execution permissions: **PASS** — pgTAP confirms anon/authenticated cannot execute the batch, service_role can, and authenticated cannot update the control gate. Additional real database connection executes a successful batch under `SET ROLE service_role` and resets role afterward. Wrapper/table revocations, RLS and empty function search_path were source-reviewed; this step did not run browser or PostgREST permission probes.
+
+### Cron
+
+- Job registered: **PASS** — exactly the reviewed named job `lumivox-learning-schedule-missed-5m` was observed as jobid 2, active=true, schedule `*/5 * * * *`, database postgres, username postgres, command `SELECT public.ls_run_missed_sweep_if_enabled();`. Active Cron registration and disabled processing gate are separate controls.
+- Default gate disabled: **PASS** — fresh replay yields enabled=false. Disabled wrapper returns 0 and leaves an eligible committed fixture's complete row/events unchanged.
+- Trusted manual execution: **PASS** — with gate still disabled, service_role directly calls `ls_mark_missed_batch(100)` and receives marked=1/examined=1. Direct trusted batch deliberately bypasses the wrapper gate; ordinary users lack execute privilege.
+- Local Cron activated: **PASS** — only on local, temporarily applied `cron.alter_job(2, schedule := '1 second')` and set control enabled=true for a disposable overdue fixture. The registered command was unchanged. Accelerated scheduling uses the supported interval syntax in the [pg_cron documentation](https://github.com/citusdata/pg_cron#cron-syntax); no migration was edited to enable the gate or change the default schedule.
+- Job run history: **PASS** — actual `cron.job_run_details` records runid 1 and 2, status succeeded, worker PIDs 539/540, at **2026-10-31 08:32:12 and 08:32:13 UTC**. These differ from the probe's independent connection PIDs 536/537/538. Cron's return_message is `1 row`, the SQL result-row count, not proof of one transition per run.
+- Automatic local transition: **PASS** — after enabling the gate, the probe only polls snapshots/history; Cron workers invoke the registered wrapper. The committed overdue fixture becomes missed with exactly one marked_missed event, preserved ID/end time and unchanged parent Task.
+- Repeated-run idempotency: **PASS** — after at least two successful automatic runs, the fixture still has exactly one event and its completed snapshot is unchanged after gate disable. This verifies automatic behavior using the temporary 1-second cadence; a full pair of original 5-minute intervals was not awaited.
+- Gate disabled after test: **PASS** — enabled=false, original schedule `*/5 * * * *` restored and registered job active=true. Cleanup confirmed 0 probe fixture users/Tasks, 0 injected audit-failure triggers, 0 worker transactions and 0 worker locks. Temporary probe script was removed; the secret-free JSON report remains. Cron history is retained as local evidence.
+
+### Concurrency
+
+- Double Sweep: **PASS — 3/3 controlled interleavings**, using two independent worker psql connections and a third observer. A runs the batch but holds its transaction open; B scans the same still-visible candidate and returns marked=0/examined=1 via SKIP LOCKED. After both transactions commit, observer sees missed plus exactly one event; another batch returns 0 with full snapshot unchanged. This is transaction overlap with a fixed ordering, not random simultaneous-start load testing.
+- Locked candidate retry: **PASS — 3/3 cases**, separately holding Task, Schedule and Session row locks on A. Observer confirms the holder's granted transaction lock; B examines the candidate, skips it without transition/event and returns 0. After A commits, B retries and marks it once. No blocking wait is expected or claimed because these paths use SKIP LOCKED. No worker locks/transactions remain after cleanup.
+- Deferred cross-command scenarios: **NOT EXECUTED** — Complete-vs-Sweep, Skip-vs-Sweep, Start-vs-Sweep, Task-close/revision-vs-Sweep and lock waits crossing cutoff remain for the broader Step 5.6 acceptance work. Earlier command-specific concurrency evidence is not substituted for these races.
+
+### Regression
+
+- Lint: **PASS** — from apps/web, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing missing projection dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Vitest: **PASS** — `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, duration **120.54 seconds**. The 19 opt-in Phase 04 direct integration cases and 1 existing Focus integration case were not separately run here. New Sweep checks are pgTAP/local SQL/Cron checks, not part of the 612 web passes.
+- TypeScript: **PASS** — `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: **PASS** — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in **34.1 seconds**, TypeScript finished in **76 seconds**, generated **98/98** pages in **862 ms**. Existing .env.local was unchanged. Non-fatal Vite config-loader and Supabase deprecated inbucket notices remain. No replay, pgTAP, probe or web quality-gate failure occurred in this verification.
+
+### Known Limits
+
+- In-progress Focus reconciliation deferred — only scheduled -> missed is automatic; no trustworthy Study Session/Focus linkage was introduced or tested.
+- Complete-vs-Sweep concurrency deferred to Step 5.6 — not executed.
+- Skip-vs-Sweep concurrency deferred to Step 5.6 — not executed.
+- Exact grace-cutoff testing deferred to Step 5.6 — away-from-boundary fixtures only; no exact/just-before/just-after controlled clock or lock crossing the cutoff.
+- No production Cron activation — local gate is OFF again. Original 5-minute registration was verified and restored; actual automatic execution was tested with an accelerated local cadence. No production deployment/authorization is implied.
+- Further limits: no saturated discovery/starvation/load validation, no multi-row partial-batch failure injection, no new UI/browser attendance flow, no email/notification delivery and no Focus/minutes mutations verified. Phase 05 remains IN PROGRESS.
+
+### Final Decision
+
+- Step 5.4: **PASS (LOCAL)** for executed replay, batch, audit rollback, permissions, Double Sweep/locked-candidate checks, actual local Cron and regression scope above; deferred acceptance cases remain open.
+- Ready for Step 5.5: **YES**, retaining the Step 5.6 concurrency/boundary work and deferred Focus/UI scope.
+- Production authorized: **NO**.
