@@ -98,3 +98,78 @@
 - Existing Phase 03 RPCs still have their documented 40001/HTTP-timeout limitation; this migration's PT409 contract does not repair those older functions. Durable client command storage across navigation remains outside this SQL step.
 - Phase 05 overall: IN PROGRESS. Steps 5.2–5.8 have not been executed. Ready to develop Step 5.2 locally; production deployment authorized: NO.
 - No commit or push was performed; the user will handle both.
+
+## Step 5.2 — Complete Session RPC
+
+### Baseline / Reviewed Changes
+
+- Checked HEAD: `3e90ade177779fc1fe7c6117e332768d60aa37fa`, branch `feature/learning-schedule-foundation`.
+- Verified on 2026-10-31, approximately 14:45–14:50, Asia/Bangkok. Step 5.1 results above remain historical snapshots.
+- Initial working tree contained two user-supplied untracked files: the Complete migration and its SQL acceptance test. This verification did not modify their implementation, create/rename another migration, add application code, regenerate types, commit or push.
+- Actual existing migration filename: `supabase/migrations/20261031073306_learning_schedule_complete_attendance.sql`. This is the supplied CLI-named migration used for replay, not an invented timestamp or a migration generated again during verification.
+- Acceptance file reviewed and executed: `supabase/tests/learning_schedule_complete_attendance.sql`.
+- RPC: `public.ls_complete_study_session(uuid,timestamptz,text) RETURNS uuid`. Reviewed Task -> Schedule -> Session locking, auth.uid/owner guards, root Task todo/in_progress eligibility, active Schedule, scheduled/in_progress source states, exact replay before eligibility/staleness, canonical fingerprint, completed_at and atomic completed audit.
+- Completion policy in source: inclusive scheduled_start_at, exclusive scheduled_end_at + 60 elapsed minutes. Uses clock_timestamp after row locks. Sets status=completed and completed_at to the same server instant recorded in audit; wasLate is true only after planned end. Does not change Task status, Focus data or actual_study_minutes.
+
+### Clean Replay / pgTAP — Executed
+
+- From repo root: `supabase db reset --local`, exit 0. Clean replay applied all 81 migrations, including `20261031073306_learning_schedule_complete_attendance.sql`. Independent database history count confirmed 81.
+- Then `supabase test db --local`, exit 0; Files=19, Tests=381, Result=PASS, 6 wallclock seconds. Includes 26 new Complete assertions plus 355 existing assertions.
+- The persistent concurrency setup file emits its intentional TAP SKIP; this is not a concurrency test for Complete and is not counted as one. Existing pgtap extension notices are non-fatal.
+- Missing supabase/seed.sql warning was observed; no seed file was present and replay still completed. Only Supabase local was reset; no linked/remote database was used.
+
+### Complete Acceptance — Executed Results
+
+| Area / test | Actual coverage | Result |
+| --- | --- | --- |
+| COMPLETE-01: scheduled -> completed | Original Session UUID returned; completed status and nonnull completed_at persisted; actual_study_minutes stays null. | PASS — pgTAP and HTTP |
+| COMPLETE-02: in_progress -> completed | Original UUID returned; HTTP probe additionally verifies completed state/time and audit from_status=in_progress. | PASS |
+| COMPLETE-03: within grace | Fixture ended 10 minutes ago; completion accepted with wasLate=true. Other HTTP fixtures complete before end with wasLate=false. | PASS |
+| COMPLETE-04: authoritative audit | Exactly one completed event with correct from/to, owning actor and fingerprint. HTTP verifies 64-hex fingerprint and equality of audit completedAt and persisted completed_at as instants. | PASS |
+| COMPLETE-05: exact replay | Original expected version/key succeeds after completion; one event only. HTTP compares full session snapshots before/after replay, preserving completed_at/updated_at and UUID. | PASS |
+| COMPLETE-06: key fingerprint | Changing expected version under a used key rejects with 22023 / Event key reused with different request before completed-state/stale handling. Event count and full HTTP row snapshot remain unchanged. | PASS |
+| COMPLETE-07: timing rejection | Future fixture and expired grace-window fixture reject 22023 / Session is outside the completion window. | PASS — pgTAP |
+| COMPLETE-08: disallowed states | Already completed, cancelled, missed and skipped fixtures reject 22023. Late recovery is not silently treated as ordinary Complete. | PASS — pgTAP |
+| COMPLETE-09: parent eligibility | Completed Task and paused Schedule fixtures reject 22023. Other parent eligibility branches were source-reviewed, not individually exercised in this new suite. | PASS for executed cases |
+| COMPLETE-10: stale PT409 | Otherwise eligible stale scheduled row remains scheduled with null completion and original timestamp. HTTP 409/PT409 observed in 13 ms; independent full-row before/after comparison is equal. | PASS |
+| COMPLETE-11: user isolation | User B cannot complete A's session: SQLSTATE 42501; real authenticated HTTP response is 403. No owner-row change follows denial. | PASS |
+| COMPLETE-12: Task/Focus separation | Task stays todo, minutes stay null; no Focus-start or Task-completion call exists in this function. Focus table snapshots were not independently compared in this step. | PASS within stated boundary |
+| COMPLETE-13: audit rollback | Temporary BEFORE INSERT completed-event trigger raises P0001 after attempted completion. Complete session/event snapshots equal the pre-command snapshot, including timestamps; the error aborts both writes. | PASS — pgTAP |
+| Execution privileges | anon cannot execute; authenticated can execute the reviewed RPC. Security-definer owner checks precede replay/mutation and empty search_path is retained. | PASS — pgTAP plus source review |
+
+### HTTP Contract — Supabase Local
+
+- Ran a local Node stdin probe from apps/web using existing @supabase/supabase-js and Temporal packages. The probe guarded loopback host and API port 55321; URL/anon/service credentials came from local CLI status into process variables without printing or saving secrets.
+- Created two disposable users, signed in with real Auth/JWT clients, and used actual PostgREST RPC requests against scheduled, in_progress and post-end/in-grace fixtures. No requireUser injection or fake RPC response was used; no Next.js attendance Server Action or browser UI exists in this verification.
+- 14/14 checks PASS. [Raw report: phase-05-complete-http.json](./phase-05-complete-http.json).
+
+| Request | HTTP / SQLSTATE | Actual result |
+| --- | --- | --- |
+| Stale expected version on eligible session | 409 / PT409 | Rejected in 13 ms; row unchanged; 5-second request bound not reached. |
+| Another authenticated owner | 403 / 42501 | Denied; row unchanged. |
+| Complete from scheduled | 200 | Same UUID; completed timestamp and one event. |
+| Complete from in_progress | 200 | Same UUID; correct audit source state. |
+| Complete after end, inside grace | 200 | wasLate=true; completion time persisted. |
+| Exact replay of each successful command | 200 | Same UUID and entire completed row; no extra event. |
+| Changed version under each used key | 400 / 22023 | Rejected; row and one-event count unchanged. |
+
+- Both probe users signed out and were deleted; remaining per-user Task counts were zero. Final independent query confirmed 0 completion fixture users and 0 complete_test_audit_failure triggers. pgTAP fixtures/helpers/injected trigger rolled back.
+
+### Application Quality Gates — Executed
+
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing missing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, exit 0; 69 files passed / 2 skipped; 612 tests passed / 20 skipped (632 total), duration 98.06 seconds.
+- Skip accounting: 19 opt-in Phase 04 direct integration cases and 1 existing Focus integration case were not separately run in Step 5.2. The new Complete checks ran in pgTAP and the real HTTP probe above; they are not included in the 612 Vitest passes.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in 13.4 seconds, TypeScript completed in 26.2 seconds and generated 98/98 static pages in 967 ms.
+- Direct Node entry points bypass the broken npm/npx shell shims. Existing .env.local was not edited; build used it normally. Local database/HTTP/build commands ran with the required permissions. Existing Vite config-loader and Supabase deprecated inbucket/optional stopped-service notices remain non-fatal.
+- No test, replay, HTTP or build failure occurred in this verification. `git diff --check` passed for tracked edits. No application source, generated types or migration/test implementation was changed by this verification.
+
+### Explicit Limits / Remaining Work
+
+- **Two-connection Complete concurrency: NOT EXECUTED.** This suite uses sequential pgTAP calls and sequential HTTP requests. Neither proves race safety. Lock order was source-reviewed only for Complete; prior Start/Phase 03 concurrency reports do not establish Complete versus Complete/Start/Task-close/sweep behavior. Add independent PostgreSQL connections, observed lock waits, final audit counts and cleanup checks in Step 5.6.
+- **Exactly at grace cutoff: NOT EXECUTED.** Tests cover valid-before-end, 10 minutes after end but before the 60-minute cutoff, future and expired fixtures. The SQL specifies a strict exclusive cutoff, but no controlled exact-microsecond boundary, just-before/just-after pair or lock wait crossing the cutoff was injected. Do not mark that boundary test PASS from source review.
+- Additional not-newly-executed cases include null/whitespace key variants for Complete, mismatched historical event types/legacy fingerprints, cancelled Task specifically, other Task status/subtask branches and replay after later Task/Schedule changes. Existing source guards are not substituted for these tests.
+- No generated Complete RPC TypeScript binding, authenticated Next.js Complete action, Attendance UI/browser E2E, Focus integration, minutes accounting, reminder/email handling or production deployment was added/tested. Web type/build success does not prove a future Complete client binding.
+- Step 5.2: LOCAL PASS for the executed sequential RPC, HTTP, rollback, ownership and web regression checks above; concurrency and exact-cutoff acceptance remain open, not implied complete.
+- Phase 05 overall remains IN PROGRESS; Steps 5.3–5.8 have not been executed here. Production deployment authorized: NO. No commit or push was performed.
