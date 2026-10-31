@@ -1,0 +1,4507 @@
+{
+  "baseline": "26d8dfa19a51e7c1efdb47c0ba1f19b884e525db",
+  "startedAt": "2026-10-31T06:42:17.202Z",
+  "localContainer": "supabase_db_lumivox-proj",
+  "iterations": 3,
+  "lockTimeout": "5s",
+  "statementTimeout": "10s",
+  "harnessDeadline": "15s",
+  "runs": [
+    {
+      "name": "task-close-before-create",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 57,
+      "blockers": [
+        514
+      ],
+      "firstResult": "",
+      "secondResult": {
+        "state": "22023",
+        "message": "Task is not eligible for scheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:17.416212+00:00",
+          "updated_at": "2026-10-31T06:42:17.422837+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [],
+        "events": [],
+        "sessions": [],
+        "revisions": [],
+        "schedules": []
+      }
+    },
+    {
+      "name": "duplicate-create",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 153,
+      "blockers": [
+        514
+      ],
+      "firstResult": "89467f84-916d-43a7-bbdb-0168019c81e5",
+      "secondResult": {
+        "state": "23505",
+        "message": "duplicate key value violates unique constraint \"task_study_schedules_task_id_key\"",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:17.485573+00:00",
+          "updated_at": "2026-10-31T06:42:17.485573+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "6ee82023-11f9-4eaa-9c71-b3a2b6b00b83",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:17.490341+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "89467f84-916d-43a7-bbdb-0168019c81e5"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "dab60327-4b1f-4820-802a-e0787f0a5df2",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.490341+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.490341+00:00",
+            "schedule_id": "89467f84-916d-43a7-bbdb-0168019c81e5",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "6ee82023-11f9-4eaa-9c71-b3a2b6b00b83",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "6ac79a59-fbe7-4421-a898-aa1ce6283514",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.490341+00:00",
+            "schedule_id": "89467f84-916d-43a7-bbdb-0168019c81e5",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "89467f84-916d-43a7-bbdb-0168019c81e5",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:17.490341+00:00",
+            "updated_at": "2026-10-31T06:42:17.490341+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-before-task-close",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 97,
+      "blockers": [
+        514
+      ],
+      "firstResult": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:17.650195+00:00",
+          "updated_at": "2026-10-31T06:42:17.660708+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "19a0d009-6d9d-4744-934f-f354f29db55f",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:17.656957+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7"
+          }
+        ],
+        "events": [
+          {
+            "id": "9dec149f-d04a-4c9e-9aeb-181ea998572f",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "d2000000-0000-4000-8000-000000000001",
+              "scheduleId": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:task-close:24d7485f-4c02-406f-a06c-935edf1fcef6",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:17.660708+00:00",
+            "event_type": "cancelled",
+            "session_id": "24d7485f-4c02-406f-a06c-935edf1fcef6",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "24d7485f-4c02-406f-a06c-935edf1fcef6",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.656957+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.660708+00:00",
+            "schedule_id": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "19a0d009-6d9d-4744-934f-f354f29db55f",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "task_closed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "cb4e224b-1204-46c2-b0e9-13f8d4019869",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.656957+00:00",
+            "schedule_id": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "0ba9b18c-583e-4bb3-baf9-30e74b98e7c7",
+            "status": "closed",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:17.656957+00:00",
+            "updated_at": "2026-10-31T06:42:17.660708+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-vs-revise",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 105,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale schedule revision",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:17.759647+00:00",
+          "updated_at": "2026-10-31T06:42:17.759647+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "9e91feb3-ed6c-413d-8a60-b6282ec60159",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:17.812601+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "e00141bf-380a-4de7-b1be-dd120b6cd836"
+          }
+        ],
+        "events": [
+          {
+            "id": "0eafbb44-0dc0-4b8a-a927-f63cab6b41c7",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:82886177-a3c6-434c-a560-dc060a00d38a",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:17.812601+00:00",
+            "event_type": "cancelled",
+            "session_id": "82886177-a3c6-434c-a560-dc060a00d38a",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "82886177-a3c6-434c-a560-dc060a00d38a",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.762494+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.812601+00:00",
+            "schedule_id": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "afa15570-65d1-4866-ace0-06c15cdec0f8",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.812601+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.812601+00:00",
+            "schedule_id": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "9e91feb3-ed6c-413d-8a60-b6282ec60159",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "46ec457d-cfcc-4314-9aaa-e0dd7dc15fb2",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.762494+00:00",
+            "schedule_id": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "59b710ca-e2a0-49a7-b530-5985bcb51852",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.812601+00:00",
+            "schedule_id": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "e00141bf-380a-4de7-b1be-dd120b6cd836",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:17.762494+00:00",
+            "updated_at": "2026-10-31T06:42:17.812601+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-before-reschedule",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 106,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "22023",
+        "message": "Session is not eligible for rescheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:17.923751+00:00",
+          "updated_at": "2026-10-31T06:42:17.923751+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "2a62d3fd-5b5b-4da4-a863-ec61c6bd6e5a",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:17.979339+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "2b6c2042-cb3a-4891-9c04-c962973df6f7"
+          }
+        ],
+        "events": [
+          {
+            "id": "8449f723-ac87-4d70-a84c-913162fd15f3",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:ef152ac6-961b-4733-a0dd-409de695116d",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:17.979339+00:00",
+            "event_type": "cancelled",
+            "session_id": "ef152ac6-961b-4733-a0dd-409de695116d",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "3b0dff4f-734d-46f3-b25a-65faff37bea4",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.979339+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.979339+00:00",
+            "schedule_id": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "2a62d3fd-5b5b-4da4-a863-ec61c6bd6e5a",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          },
+          {
+            "id": "ef152ac6-961b-4733-a0dd-409de695116d",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:17.927703+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:17.979339+00:00",
+            "schedule_id": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "9e5defe3-ebdf-45a4-aa3c-e250569ed11c",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.927703+00:00",
+            "schedule_id": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "eedf3b6a-a894-499b-a197-4d9777266a4c",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:17.979339+00:00",
+            "schedule_id": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "2b6c2042-cb3a-4891-9c04-c962973df6f7",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:17.927703+00:00",
+            "updated_at": "2026-10-31T06:42:17.979339+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-before-revise",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 105,
+      "blockers": [
+        514
+      ],
+      "firstResult": "621e9456-b1e7-4258-b3b8-2e00a588131f",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "2"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.090144+00:00",
+          "updated_at": "2026-10-31T06:42:18.090144+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "b4f2c3c2-b041-4f24-9c2b-6b29cd29509a",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:18.146446+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "9eb9f365-b953-4725-9988-0e3ad4b46469"
+          }
+        ],
+        "events": [
+          {
+            "id": "48ecde37-6d7e-4fe9-adff-ad2567ddf5f5",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "66745c1966e209455660e23c4033d3e607d2e7314f64d8dde1898bed7b8e1d74"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "a103f2e8-0bd9-4292-90a7-15267eee55f0",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:18.14303+00:00",
+            "event_type": "rescheduled",
+            "session_id": "621e9456-b1e7-4258-b3b8-2e00a588131f",
+            "from_status": "scheduled"
+          },
+          {
+            "id": "e63c07e2-805f-40be-b584-9baf7128b9d2",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+              "scheduledEndAt": "2030-01-07T12:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T11:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:621e9456-b1e7-4258-b3b8-2e00a588131f",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:18.146446+00:00",
+            "event_type": "cancelled",
+            "session_id": "621e9456-b1e7-4258-b3b8-2e00a588131f",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "621e9456-b1e7-4258-b3b8-2e00a588131f",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.093248+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.146446+00:00",
+            "schedule_id": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "69fb8b18-a152-43dc-9331-0625339b9685",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.146446+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.146446+00:00",
+            "schedule_id": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "b4f2c3c2-b041-4f24-9c2b-6b29cd29509a",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "4c20522d-b366-4b03-8094-a07379bb203b",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.093248+00:00",
+            "schedule_id": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "b64fa124-d4b1-4997-a7cc-a75cb32382a3",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.146446+00:00",
+            "schedule_id": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "9eb9f365-b953-4725-9988-0e3ad4b46469",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.093248+00:00",
+            "updated_at": "2026-10-31T06:42:18.146446+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-conflict",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 55,
+      "blockers": [
+        514
+      ],
+      "firstResult": "aa4ba8b2-5e72-427c-ba49-bb45bc6f940c",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale session version",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.253733+00:00",
+          "updated_at": "2026-10-31T06:42:18.253733+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "1e6029b1-40c9-4c9b-b4be-b1ff716e613b",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.256757+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "fdd2155f-fe54-44df-8d11-90171e625903"
+          }
+        ],
+        "events": [
+          {
+            "id": "f8eeddff-ad68-4427-bda8-63ec3faf16a7",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "f7f9efe28520b06a7d80015e58635fe4c576fd9b1892afb7e288b457abe3b327"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "2071eb4b-7ce7-4636-8068-2cf6784a906f",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:18.310403+00:00",
+            "event_type": "rescheduled",
+            "session_id": "aa4ba8b2-5e72-427c-ba49-bb45bc6f940c",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "aa4ba8b2-5e72-427c-ba49-bb45bc6f940c",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.256757+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.310403+00:00",
+            "schedule_id": "fdd2155f-fe54-44df-8d11-90171e625903",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "3aad82c4-0cc0-48c7-abc1-ddce7d66f0d6",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.256757+00:00",
+            "schedule_id": "fdd2155f-fe54-44df-8d11-90171e625903",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "fdd2155f-fe54-44df-8d11-90171e625903",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.256757+00:00",
+            "updated_at": "2026-10-31T06:42:18.256757+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-concurrent-exact-retry",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 62,
+      "blockers": [
+        514
+      ],
+      "firstResult": "dfe40f2f-91b7-4ea8-be4f-c5909dfa51b0",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "dfe40f2f-91b7-4ea8-be4f-c5909dfa51b0"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.369555+00:00",
+          "updated_at": "2026-10-31T06:42:18.369555+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "e87bb732-57cb-45c8-8066-e1ead2c63570",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.373117+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "5554519c-f66a-467c-8dcf-be989363caf9"
+          }
+        ],
+        "events": [
+          {
+            "id": "b536d143-1394-45f8-a013-2cf5cd6280d2",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "0556fc1a43a5be3c3de9743ffd09892c451b60de732cd7902b5ea3cdb57ca109"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "873a10b6-d8bf-48c9-92b2-43e37678285b",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:18.424411+00:00",
+            "event_type": "rescheduled",
+            "session_id": "dfe40f2f-91b7-4ea8-be4f-c5909dfa51b0",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "dfe40f2f-91b7-4ea8-be4f-c5909dfa51b0",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.373117+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.424411+00:00",
+            "schedule_id": "5554519c-f66a-467c-8dcf-be989363caf9",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "dfec48ac-6039-4132-82f5-e35abbfee5b2",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.373117+00:00",
+            "schedule_id": "5554519c-f66a-467c-8dcf-be989363caf9",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "5554519c-f66a-467c-8dcf-be989363caf9",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.373117+00:00",
+            "updated_at": "2026-10-31T06:42:18.373117+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "retry-after-durable-commit",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 20,
+      "durableCommitObservedByThirdConnection": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.491313+00:00",
+          "updated_at": "2026-10-31T06:42:18.491313+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "8323c966-55cc-4886-97c3-c70c5b1105c7",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.49407+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "044151c4-47e1-45f7-ac87-b224f997e9c7"
+          }
+        ],
+        "events": [
+          {
+            "id": "d520608f-9088-4b8c-80c9-e2a98fc8cb57",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "a7523ed8664bbcf2743c4ed5c1e7cb378ff3f7f663e57a13dae6a42422acd771"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "29fc82af-5b3a-4d68-99ec-9f945d69a3d1",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:18.545249+00:00",
+            "event_type": "rescheduled",
+            "session_id": "4ddb6501-18b2-41ba-b317-af78d6f64122",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "4ddb6501-18b2-41ba-b317-af78d6f64122",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.49407+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.545249+00:00",
+            "schedule_id": "044151c4-47e1-45f7-ac87-b224f997e9c7",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "0efc7993-eed7-493a-b18b-1096b0542b3f",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.49407+00:00",
+            "schedule_id": "044151c4-47e1-45f7-ac87-b224f997e9c7",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "044151c4-47e1-45f7-ac87-b224f997e9c7",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.49407+00:00",
+            "updated_at": "2026-10-31T06:42:18.49407+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-reschedule",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 23,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.570539+00:00",
+          "updated_at": "2026-10-31T06:42:18.570539+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "3ad60f54-dc8a-4988-b58a-48f67fedee71",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.573751+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "af5be2df-441f-4191-8e40-169a3b3025a8"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "b5f22d17-8d3b-4e60-a7ec-c5041a195c39",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.573751+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.573751+00:00",
+            "schedule_id": "af5be2df-441f-4191-8e40-169a3b3025a8",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "3ad60f54-dc8a-4988-b58a-48f67fedee71",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "6013e0da-49eb-4d79-905e-e15791cc37d7",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.573751+00:00",
+            "schedule_id": "af5be2df-441f-4191-8e40-169a3b3025a8",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "af5be2df-441f-4191-8e40-169a3b3025a8",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.573751+00:00",
+            "updated_at": "2026-10-31T06:42:18.573751+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-revise",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 53,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.656039+00:00",
+          "updated_at": "2026-10-31T06:42:18.656039+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "b514b499-95e7-48c0-bf3c-b46d0527e3d0",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.65917+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "744ad375-6468-4c0f-9593-63ea02ad8b98"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "a4c12faa-e6ca-41ce-b287-00f220e25580",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.65917+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.65917+00:00",
+            "schedule_id": "744ad375-6468-4c0f-9593-63ea02ad8b98",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "b514b499-95e7-48c0-bf3c-b46d0527e3d0",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "ff9b7b82-3259-40e8-8ad5-1d1305bf4e16",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.65917+00:00",
+            "schedule_id": "744ad375-6468-4c0f-9593-63ea02ad8b98",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "744ad375-6468-4c0f-9593-63ea02ad8b98",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.65917+00:00",
+            "updated_at": "2026-10-31T06:42:18.65917+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-task-close",
+      "iteration": 1,
+      "status": "PASS",
+      "elapsedMs": 17,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.774118+00:00",
+          "updated_at": "2026-10-31T06:42:18.774118+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "3eb55b58-3b39-426f-9224-6e2c921de3e6",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.777281+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "6517c012-379d-471b-96a4-711d8268e07b"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "3c5edae2-2230-41ef-ac60-ce3a1f30a17c",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.777281+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.777281+00:00",
+            "schedule_id": "6517c012-379d-471b-96a4-711d8268e07b",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "3eb55b58-3b39-426f-9224-6e2c921de3e6",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "72598b9c-1df9-48b2-86f4-329887e5b7b2",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.777281+00:00",
+            "schedule_id": "6517c012-379d-471b-96a4-711d8268e07b",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "6517c012-379d-471b-96a4-711d8268e07b",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.777281+00:00",
+            "updated_at": "2026-10-31T06:42:18.777281+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "task-close-before-create",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 53,
+      "blockers": [
+        514
+      ],
+      "firstResult": "",
+      "secondResult": {
+        "state": "22023",
+        "message": "Task is not eligible for scheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.851179+00:00",
+          "updated_at": "2026-10-31T06:42:18.856641+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [],
+        "events": [],
+        "sessions": [],
+        "revisions": [],
+        "schedules": []
+      }
+    },
+    {
+      "name": "duplicate-create",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 142,
+      "blockers": [
+        514
+      ],
+      "firstResult": "e7a802f6-a47c-4174-8f4b-84d770e6ffbc",
+      "secondResult": {
+        "state": "23505",
+        "message": "duplicate key value violates unique constraint \"task_study_schedules_task_id_key\"",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:18.915007+00:00",
+          "updated_at": "2026-10-31T06:42:18.915007+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "1db4afbc-7c27-4fa6-8802-54bc7d748af0",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:18.921464+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "e7a802f6-a47c-4174-8f4b-84d770e6ffbc"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "2267bb55-823d-4341-a38b-5d9cc34d1365",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:18.921464+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:18.921464+00:00",
+            "schedule_id": "e7a802f6-a47c-4174-8f4b-84d770e6ffbc",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "1db4afbc-7c27-4fa6-8802-54bc7d748af0",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "6f54cc78-4f68-4193-a685-b1221ea7cc6a",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:18.921464+00:00",
+            "schedule_id": "e7a802f6-a47c-4174-8f4b-84d770e6ffbc",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "e7a802f6-a47c-4174-8f4b-84d770e6ffbc",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:18.921464+00:00",
+            "updated_at": "2026-10-31T06:42:18.921464+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-before-task-close",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 104,
+      "blockers": [
+        514
+      ],
+      "firstResult": "067678b3-7616-4338-84c0-88db7580d42d",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.069349+00:00",
+          "updated_at": "2026-10-31T06:42:19.077754+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "d16fd5ae-b9d5-4a17-bfee-c2bb9d9f01c8",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:19.074563+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "067678b3-7616-4338-84c0-88db7580d42d"
+          }
+        ],
+        "events": [
+          {
+            "id": "3fa46a66-1b81-4aae-865a-ba842734ded2",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "d2000000-0000-4000-8000-000000000001",
+              "scheduleId": "067678b3-7616-4338-84c0-88db7580d42d",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:task-close:34f516ce-fba0-4ff5-bc26-e4c86fcdf17a",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:19.077754+00:00",
+            "event_type": "cancelled",
+            "session_id": "34f516ce-fba0-4ff5-bc26-e4c86fcdf17a",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "34f516ce-fba0-4ff5-bc26-e4c86fcdf17a",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.074563+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.077754+00:00",
+            "schedule_id": "067678b3-7616-4338-84c0-88db7580d42d",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "d16fd5ae-b9d5-4a17-bfee-c2bb9d9f01c8",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "task_closed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "8f4b7b50-82c9-4de5-a8f9-f142cf73164a",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.074563+00:00",
+            "schedule_id": "067678b3-7616-4338-84c0-88db7580d42d",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "067678b3-7616-4338-84c0-88db7580d42d",
+            "status": "closed",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.074563+00:00",
+            "updated_at": "2026-10-31T06:42:19.077754+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-vs-revise",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 98,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale schedule revision",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.183254+00:00",
+          "updated_at": "2026-10-31T06:42:19.183254+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "e1002183-e4e1-44b9-93bf-1a5bb57a4f28",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:19.236517+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9"
+          }
+        ],
+        "events": [
+          {
+            "id": "1d52083c-c677-415e-b107-6391d05a8e00",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:e153cbf4-1674-41f7-aadd-9e4360c70ac8",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:19.236517+00:00",
+            "event_type": "cancelled",
+            "session_id": "e153cbf4-1674-41f7-aadd-9e4360c70ac8",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "9dca5b6f-09e0-48e6-ace6-a2a7becc915e",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.236517+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.236517+00:00",
+            "schedule_id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "e1002183-e4e1-44b9-93bf-1a5bb57a4f28",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          },
+          {
+            "id": "e153cbf4-1674-41f7-aadd-9e4360c70ac8",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.185985+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.236517+00:00",
+            "schedule_id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "9c4a3fbb-1549-49f1-85c1-08223011cbbb",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.185985+00:00",
+            "schedule_id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "f881044a-d55b-4599-ba95-7596174915a5",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.236517+00:00",
+            "schedule_id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "b642ffc0-7c93-45d7-b5fc-a79e7457afc9",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.185985+00:00",
+            "updated_at": "2026-10-31T06:42:19.236517+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-before-reschedule",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 94,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "22023",
+        "message": "Session is not eligible for rescheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.339165+00:00",
+          "updated_at": "2026-10-31T06:42:19.339165+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "b664981d-3655-42bb-814d-d770f48fdf74",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:19.391746+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b"
+          }
+        ],
+        "events": [
+          {
+            "id": "c0205e98-2044-4b2b-b6c1-77efdf811970",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:afce0bf7-ee25-4cfe-b7b0-b14295b3c287",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:19.391746+00:00",
+            "event_type": "cancelled",
+            "session_id": "afce0bf7-ee25-4cfe-b7b0-b14295b3c287",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "afce0bf7-ee25-4cfe-b7b0-b14295b3c287",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.341664+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.391746+00:00",
+            "schedule_id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "ccd80510-6ce7-4430-b5d2-951d1b470990",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.391746+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.391746+00:00",
+            "schedule_id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "b664981d-3655-42bb-814d-d770f48fdf74",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "596168bc-4621-4c43-b311-87346aad8681",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.391746+00:00",
+            "schedule_id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          },
+          {
+            "id": "f7cd822c-55ab-4da0-acde-4b5d619dd96e",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.341664+00:00",
+            "schedule_id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "b3f23bcc-0b89-4b70-80f2-5f3ebb00f08b",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.341664+00:00",
+            "updated_at": "2026-10-31T06:42:19.391746+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-before-revise",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 99,
+      "blockers": [
+        514
+      ],
+      "firstResult": "df4f1563-76d3-4a8d-932f-33bbbd319baa",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "2"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.490325+00:00",
+          "updated_at": "2026-10-31T06:42:19.490325+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "2fabaef9-2410-41d2-b99c-b14ca1f8a2eb",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:19.549543+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2"
+          }
+        ],
+        "events": [
+          {
+            "id": "52c4f3ca-0337-4ca8-b8fd-8555d0e303ac",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "b69c8a2678922c6bf07976d2952202dc0f1bda4948b3ce521dc9c2961ca1fc2a"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "65bdcc6e-bc6f-4d03-9551-c775365f33c6",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:19.546188+00:00",
+            "event_type": "rescheduled",
+            "session_id": "df4f1563-76d3-4a8d-932f-33bbbd319baa",
+            "from_status": "scheduled"
+          },
+          {
+            "id": "f509e048-b896-472e-a1bc-c6c476d3d92a",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+              "scheduledEndAt": "2030-01-07T12:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T11:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:df4f1563-76d3-4a8d-932f-33bbbd319baa",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:19.549543+00:00",
+            "event_type": "cancelled",
+            "session_id": "df4f1563-76d3-4a8d-932f-33bbbd319baa",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "df4f1563-76d3-4a8d-932f-33bbbd319baa",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.492876+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.549543+00:00",
+            "schedule_id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "fc83d87d-9580-444c-8b94-38c8066893ca",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.549543+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.549543+00:00",
+            "schedule_id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "2fabaef9-2410-41d2-b99c-b14ca1f8a2eb",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "50971933-2397-457c-ba63-1c4bbf4d5413",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.492876+00:00",
+            "schedule_id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "d38b3c66-a098-401f-9683-e3ab5cef2864",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.549543+00:00",
+            "schedule_id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "909f7eed-bb9d-42da-b5e9-cd65f2764dd2",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.492876+00:00",
+            "updated_at": "2026-10-31T06:42:19.549543+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-conflict",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 68,
+      "blockers": [
+        514
+      ],
+      "firstResult": "eacac6f0-85a9-4b55-85c2-1800c0af21a6",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale session version",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.649864+00:00",
+          "updated_at": "2026-10-31T06:42:19.649864+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "3ec0c944-6a25-4ff5-90ca-52dcae8f27f7",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:19.652873+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "a171ccda-0d8c-44a2-915b-5d932d701a23"
+          }
+        ],
+        "events": [
+          {
+            "id": "b97e3313-aa8b-4a14-b830-5cc097f37f6b",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "f4a99682b34d5dd96bce8beea83a6a6294dec09900233211d015471755dd33a6"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "0b1d97b9-5bad-41d1-b9ff-ab9d34e44465",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:19.70516+00:00",
+            "event_type": "rescheduled",
+            "session_id": "eacac6f0-85a9-4b55-85c2-1800c0af21a6",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "eacac6f0-85a9-4b55-85c2-1800c0af21a6",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.652873+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.70516+00:00",
+            "schedule_id": "a171ccda-0d8c-44a2-915b-5d932d701a23",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "236ad1b3-43f8-4116-bf82-2a000bab40d1",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.652873+00:00",
+            "schedule_id": "a171ccda-0d8c-44a2-915b-5d932d701a23",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "a171ccda-0d8c-44a2-915b-5d932d701a23",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.652873+00:00",
+            "updated_at": "2026-10-31T06:42:19.652873+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-concurrent-exact-retry",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 61,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2cc8c0c8-a0a5-4157-8d3a-2426ecbcf7cb",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "2cc8c0c8-a0a5-4157-8d3a-2426ecbcf7cb"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.777637+00:00",
+          "updated_at": "2026-10-31T06:42:19.777637+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "7044a026-8be4-40ef-81d8-ee94fdf5cbad",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:19.781022+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "d700b1d8-604c-44c8-b558-eb8dce06450f"
+          }
+        ],
+        "events": [
+          {
+            "id": "318f4fed-bc44-42b9-b898-d620b0356736",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "43d9b743121ab2b0f8e399b352334f174d66732554072606066003fa1ab2e5a9"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "477dbeaf-0895-4fcb-a533-a1134e11f2a2",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:19.831292+00:00",
+            "event_type": "rescheduled",
+            "session_id": "2cc8c0c8-a0a5-4157-8d3a-2426ecbcf7cb",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "2cc8c0c8-a0a5-4157-8d3a-2426ecbcf7cb",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.781022+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.831292+00:00",
+            "schedule_id": "d700b1d8-604c-44c8-b558-eb8dce06450f",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "4bab9398-f071-4112-a6b3-84a08917a43f",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.781022+00:00",
+            "schedule_id": "d700b1d8-604c-44c8-b558-eb8dce06450f",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "d700b1d8-604c-44c8-b558-eb8dce06450f",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.781022+00:00",
+            "updated_at": "2026-10-31T06:42:19.781022+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "retry-after-durable-commit",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 18,
+      "durableCommitObservedByThirdConnection": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.896972+00:00",
+          "updated_at": "2026-10-31T06:42:19.896972+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "8abdbe3d-e2ad-4b83-9265-55f5cff9d058",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:19.899796+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "c9f76d52-b937-4d5a-8671-9eb4c8e69fb3"
+          }
+        ],
+        "events": [
+          {
+            "id": "53b7dc41-365b-4133-a360-9188ca776ddf",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "ae0dc9a6735a86d7efaa529ec51068b8c971e51c0a661e43285f14da588b70b5"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "6957e7f0-5941-4dd7-8831-5c7bc1905c4f",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:19.949613+00:00",
+            "event_type": "rescheduled",
+            "session_id": "c8e53f6c-75ef-4b5c-8c92-0c032b37afbc",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "c8e53f6c-75ef-4b5c-8c92-0c032b37afbc",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.899796+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.949613+00:00",
+            "schedule_id": "c9f76d52-b937-4d5a-8671-9eb4c8e69fb3",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "8c0d8295-a8c0-47c2-8876-b89ea63dc677",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.899796+00:00",
+            "schedule_id": "c9f76d52-b937-4d5a-8671-9eb4c8e69fb3",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "c9f76d52-b937-4d5a-8671-9eb4c8e69fb3",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.899796+00:00",
+            "updated_at": "2026-10-31T06:42:19.899796+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-reschedule",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 15,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:19.971673+00:00",
+          "updated_at": "2026-10-31T06:42:19.971673+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "fafff3a3-8001-4285-b736-e9660a736f24",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:19.974329+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "196ab62f-1442-4b8b-a004-ce514192ecde"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "c586362d-cb02-424d-a0d5-ae9ddbb4b4c5",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:19.974329+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:19.974329+00:00",
+            "schedule_id": "196ab62f-1442-4b8b-a004-ce514192ecde",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "fafff3a3-8001-4285-b736-e9660a736f24",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "97c6eda2-3888-4793-9e5f-7a1f93463a2f",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:19.974329+00:00",
+            "schedule_id": "196ab62f-1442-4b8b-a004-ce514192ecde",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "196ab62f-1442-4b8b-a004-ce514192ecde",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:19.974329+00:00",
+            "updated_at": "2026-10-31T06:42:19.974329+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-revise",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 57,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.042623+00:00",
+          "updated_at": "2026-10-31T06:42:20.042623+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "8cfeec12-a233-4d9b-bc44-c064d0065e5c",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:20.045314+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "c046401f-0bd3-45f7-9bb2-d638f1ede113"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "52d1eff8-687e-4f13-83c9-1b8d4d6b047d",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.045314+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.045314+00:00",
+            "schedule_id": "c046401f-0bd3-45f7-9bb2-d638f1ede113",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "8cfeec12-a233-4d9b-bc44-c064d0065e5c",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "33d2be92-c3b9-45a0-8199-43fc7a9b7bfd",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.045314+00:00",
+            "schedule_id": "c046401f-0bd3-45f7-9bb2-d638f1ede113",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "c046401f-0bd3-45f7-9bb2-d638f1ede113",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.045314+00:00",
+            "updated_at": "2026-10-31T06:42:20.045314+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-task-close",
+      "iteration": 2,
+      "status": "PASS",
+      "elapsedMs": 15,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.161002+00:00",
+          "updated_at": "2026-10-31T06:42:20.161002+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "e1c969b5-6dbb-4536-855e-26402994fb06",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:20.164401+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "bb7a47ff-d263-43f7-9f6d-0ce4ce13d275"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "ad3fc3c8-b824-429b-a3be-bb9ef3bff433",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.164401+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.164401+00:00",
+            "schedule_id": "bb7a47ff-d263-43f7-9f6d-0ce4ce13d275",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "e1c969b5-6dbb-4536-855e-26402994fb06",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "d544cf05-886a-400e-9b66-e7ba0b205ed5",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.164401+00:00",
+            "schedule_id": "bb7a47ff-d263-43f7-9f6d-0ce4ce13d275",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "bb7a47ff-d263-43f7-9f6d-0ce4ce13d275",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.164401+00:00",
+            "updated_at": "2026-10-31T06:42:20.164401+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "task-close-before-create",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 61,
+      "blockers": [
+        514
+      ],
+      "firstResult": "",
+      "secondResult": {
+        "state": "22023",
+        "message": "Task is not eligible for scheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.23903+00:00",
+          "updated_at": "2026-10-31T06:42:20.24426+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [],
+        "events": [],
+        "sessions": [],
+        "revisions": [],
+        "schedules": []
+      }
+    },
+    {
+      "name": "duplicate-create",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 147,
+      "blockers": [
+        514
+      ],
+      "firstResult": "6006fee6-f059-4202-8719-45fd68bb0f50",
+      "secondResult": {
+        "state": "23505",
+        "message": "duplicate key value violates unique constraint \"task_study_schedules_task_id_key\"",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.310776+00:00",
+          "updated_at": "2026-10-31T06:42:20.310776+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "74cfe769-a712-41da-a966-ac369670d94d",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:20.318582+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "6006fee6-f059-4202-8719-45fd68bb0f50"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "5c831cc9-0adf-4020-94cd-62b032ecee6e",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.318582+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.318582+00:00",
+            "schedule_id": "6006fee6-f059-4202-8719-45fd68bb0f50",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "74cfe769-a712-41da-a966-ac369670d94d",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "dabccb67-1b6a-4aba-8c6c-61316f5bd4b2",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.318582+00:00",
+            "schedule_id": "6006fee6-f059-4202-8719-45fd68bb0f50",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "6006fee6-f059-4202-8719-45fd68bb0f50",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.318582+00:00",
+            "updated_at": "2026-10-31T06:42:20.318582+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "create-before-task-close",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 101,
+      "blockers": [
+        514
+      ],
+      "firstResult": "e9f4011b-d597-478a-9a9a-6acb40ee8c98",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "completed",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.470089+00:00",
+          "updated_at": "2026-10-31T06:42:20.481422+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "aaecf0d2-d184-41c1-b960-5cf06a35e2cf",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:20.47742+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "e9f4011b-d597-478a-9a9a-6acb40ee8c98"
+          }
+        ],
+        "events": [
+          {
+            "id": "af21e4df-1f8a-45fe-8998-d1a8e745f6f5",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "d2000000-0000-4000-8000-000000000001",
+              "scheduleId": "e9f4011b-d597-478a-9a9a-6acb40ee8c98",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:task-close:b1e1e6fc-f9c7-4071-ba3b-529f755d256c",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:20.481422+00:00",
+            "event_type": "cancelled",
+            "session_id": "b1e1e6fc-f9c7-4071-ba3b-529f755d256c",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "b1e1e6fc-f9c7-4071-ba3b-529f755d256c",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.47742+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.481422+00:00",
+            "schedule_id": "e9f4011b-d597-478a-9a9a-6acb40ee8c98",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "aaecf0d2-d184-41c1-b960-5cf06a35e2cf",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "task_closed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "fc881887-87e5-480c-b3d9-53447adcb749",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.47742+00:00",
+            "schedule_id": "e9f4011b-d597-478a-9a9a-6acb40ee8c98",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "e9f4011b-d597-478a-9a9a-6acb40ee8c98",
+            "status": "closed",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.47742+00:00",
+            "updated_at": "2026-10-31T06:42:20.481422+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-vs-revise",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 115,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale schedule revision",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.58355+00:00",
+          "updated_at": "2026-10-31T06:42:20.58355+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "e196a461-4e29-44cc-8dbd-70e7d1379e3b",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:20.64044+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "400d22a1-0dd8-4bb3-8b02-5effaab46218"
+          }
+        ],
+        "events": [
+          {
+            "id": "dff48642-178f-47df-902b-ad777aa05004",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:25d5c7e0-45d1-4010-92ec-454469993628",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:20.64044+00:00",
+            "event_type": "cancelled",
+            "session_id": "25d5c7e0-45d1-4010-92ec-454469993628",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "25d5c7e0-45d1-4010-92ec-454469993628",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.586945+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.64044+00:00",
+            "schedule_id": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "6e5c5b87-d099-472e-ac25-4fecb521cce3",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.64044+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.64044+00:00",
+            "schedule_id": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "e196a461-4e29-44cc-8dbd-70e7d1379e3b",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "6ea82164-4b07-4a0e-9895-aa23bbb83cf0",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.586945+00:00",
+            "schedule_id": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          },
+          {
+            "id": "9fc6fa1e-be32-4e58-a773-77fb05d189a9",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.64044+00:00",
+            "schedule_id": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "400d22a1-0dd8-4bb3-8b02-5effaab46218",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.586945+00:00",
+            "updated_at": "2026-10-31T06:42:20.64044+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "revise-before-reschedule",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 95,
+      "blockers": [
+        514
+      ],
+      "firstResult": "2",
+      "secondResult": {
+        "state": "22023",
+        "message": "Session is not eligible for rescheduling",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.759563+00:00",
+          "updated_at": "2026-10-31T06:42:20.759563+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "927ad1b4-5c19-4dd5-8aff-3bbf654607bf",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:20.81565+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "90605092-a096-4cb5-862e-96933e43b2e0"
+          }
+        ],
+        "events": [
+          {
+            "id": "4ea68bc9-aa64-4ea0-8b14-48144d3085c8",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "90605092-a096-4cb5-862e-96933e43b2e0",
+              "scheduledEndAt": "2030-01-07T13:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T12:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:9e1991ad-0293-496a-badb-61ceffec1db4",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:20.81565+00:00",
+            "event_type": "cancelled",
+            "session_id": "9e1991ad-0293-496a-badb-61ceffec1db4",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "9e1991ad-0293-496a-badb-61ceffec1db4",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.763064+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.81565+00:00",
+            "schedule_id": "90605092-a096-4cb5-862e-96933e43b2e0",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": null,
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "f533915f-b983-4951-b3ae-a24d03fe2fa2",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.81565+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.81565+00:00",
+            "schedule_id": "90605092-a096-4cb5-862e-96933e43b2e0",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "927ad1b4-5c19-4dd5-8aff-3bbf654607bf",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "86617eb2-29e3-4f3c-9116-a8b594766711",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.81565+00:00",
+            "schedule_id": "90605092-a096-4cb5-862e-96933e43b2e0",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          },
+          {
+            "id": "c8eaa8ad-c044-48e2-bcbd-92dd8b3870e7",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.763064+00:00",
+            "schedule_id": "90605092-a096-4cb5-862e-96933e43b2e0",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "90605092-a096-4cb5-862e-96933e43b2e0",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.763064+00:00",
+            "updated_at": "2026-10-31T06:42:20.81565+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-before-revise",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 111,
+      "blockers": [
+        514
+      ],
+      "firstResult": "0786d6fa-69a7-4021-9125-f716a593d1b8",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "2"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:20.915378+00:00",
+          "updated_at": "2026-10-31T06:42:20.915378+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "8ec009bc-6679-4b6f-b7cf-18d1fc63b3f8",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "21:00:00",
+            "created_at": "2026-10-31T06:42:20.973434+00:00",
+            "start_time": "20:00:00",
+            "schedule_id": "f98385b2-a410-4b91-88a6-a81b30612ad4"
+          }
+        ],
+        "events": [
+          {
+            "id": "d18021fe-0546-4409-8b78-3f0704333e4c",
+            "payload": {
+              "reason": "schedule_changed",
+              "scheduleId": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+              "scheduledEndAt": "2030-01-07T12:00:00+00:00",
+              "scheduleRevision": 1,
+              "scheduledStartAt": "2030-01-07T11:00:00+00:00"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "ls:schedule-change-cancel:0786d6fa-69a7-4021-9125-f716a593d1b8",
+            "to_status": "cancelled",
+            "created_at": "2026-10-31T06:42:20.973434+00:00",
+            "event_type": "cancelled",
+            "session_id": "0786d6fa-69a7-4021-9125-f716a593d1b8",
+            "from_status": "scheduled"
+          },
+          {
+            "id": "e56e5300-5080-430f-923d-b3ede073e1d2",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "f1e2042f26a05154b3f3c768aa09ce1649ce51055bdd0ba01680ef577692c3ef"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "6acb6c46-155c-4403-b7e4-367c47b980c7",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:20.970015+00:00",
+            "event_type": "rescheduled",
+            "session_id": "0786d6fa-69a7-4021-9125-f716a593d1b8",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "0786d6fa-69a7-4021-9125-f716a593d1b8",
+            "status": "cancelled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.917815+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.973434+00:00",
+            "schedule_id": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": "schedule_changed",
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          },
+          {
+            "id": "d347c839-a3cc-417c-9479-11685838e95c",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:20.973434+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:20.973434+00:00",
+            "schedule_id": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+            "completed_at": null,
+            "local_end_time": "21:00:00",
+            "source_slot_id": "8ec009bc-6679-4b6f-b7cf-18d1fc63b3f8",
+            "local_start_time": "20:00:00",
+            "scheduled_end_at": "2030-01-07T14:00:00+00:00",
+            "schedule_revision": 2,
+            "scheduled_start_at": "2030-01-07T13:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|20:00|21:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "a62effe9-8c6e-4a0a-8dd4-fcdefebe1761",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.973434+00:00",
+            "schedule_id": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+            "change_reason": "schedule_edited",
+            "slots_snapshot": [
+              {
+                "endTime": "21:00",
+                "weekday": 1,
+                "startTime": "20:00"
+              }
+            ]
+          },
+          {
+            "id": "bcaff622-fdf4-4845-9491-8b2d7084e95b",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:20.917815+00:00",
+            "schedule_id": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "f98385b2-a410-4b91-88a6-a81b30612ad4",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 2,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:20.917815+00:00",
+            "updated_at": "2026-10-31T06:42:20.973434+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-conflict",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 50,
+      "blockers": [
+        514
+      ],
+      "firstResult": "79de02a1-b5ee-4430-8393-b16c0671050c",
+      "secondResult": {
+        "state": "40001",
+        "message": "Stale session version",
+        "value": ""
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.086534+00:00",
+          "updated_at": "2026-10-31T06:42:21.086534+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "5488b24d-4f72-4328-b27e-92afd13c19ee",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.091463+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "ae520efc-03c9-4dd6-8c61-570c11d59364"
+          }
+        ],
+        "events": [
+          {
+            "id": "0ec55c7c-b754-409f-9d9f-ac96a5073d7b",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "f6cb6a7b171f007baa57f05482e08e2ef3fd3ecc418c7ef07af15a456a195669"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "6d315dd4-706d-4e03-8ffc-b9be54b26a24",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:21.142675+00:00",
+            "event_type": "rescheduled",
+            "session_id": "79de02a1-b5ee-4430-8393-b16c0671050c",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "79de02a1-b5ee-4430-8393-b16c0671050c",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.091463+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.142675+00:00",
+            "schedule_id": "ae520efc-03c9-4dd6-8c61-570c11d59364",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "b46aadef-afd6-421d-9fd9-976d9b97214c",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.091463+00:00",
+            "schedule_id": "ae520efc-03c9-4dd6-8c61-570c11d59364",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "ae520efc-03c9-4dd6-8c61-570c11d59364",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.091463+00:00",
+            "updated_at": "2026-10-31T06:42:21.091463+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "reschedule-concurrent-exact-retry",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 53,
+      "blockers": [
+        514
+      ],
+      "firstResult": "cbf56c36-d359-41cb-b3bf-78db690e80d4",
+      "secondResult": {
+        "state": "00000",
+        "message": null,
+        "value": "cbf56c36-d359-41cb-b3bf-78db690e80d4"
+      },
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.198045+00:00",
+          "updated_at": "2026-10-31T06:42:21.198045+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "7d9a5698-c341-4333-a582-6649f0e74ed4",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.200921+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "cbbbe9e8-59d4-4ee2-a100-ee6406f2ca74"
+          }
+        ],
+        "events": [
+          {
+            "id": "1051ad76-1125-4604-81fc-74669a13418f",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "93c326d42813bcabfab76939915fe79fda451516ba77d5559770d66801add75e"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "7cab4715-8dd0-4881-93ed-0c9e042fd6fe",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:21.251038+00:00",
+            "event_type": "rescheduled",
+            "session_id": "cbf56c36-d359-41cb-b3bf-78db690e80d4",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "cbf56c36-d359-41cb-b3bf-78db690e80d4",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.200921+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.251038+00:00",
+            "schedule_id": "cbbbe9e8-59d4-4ee2-a100-ee6406f2ca74",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "f3d62ce3-e2fd-4312-9e1f-f4509595eeaf",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.200921+00:00",
+            "schedule_id": "cbbbe9e8-59d4-4ee2-a100-ee6406f2ca74",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "cbbbe9e8-59d4-4ee2-a100-ee6406f2ca74",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.200921+00:00",
+            "updated_at": "2026-10-31T06:42:21.200921+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "retry-after-durable-commit",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 20,
+      "durableCommitObservedByThirdConnection": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.309643+00:00",
+          "updated_at": "2026-10-31T06:42:21.309643+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "8f577c91-c9ee-4975-be93-66cddc6b617b",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.31275+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "01e7ae78-5d8d-4616-9e15-33fa61f34267"
+          }
+        ],
+        "events": [
+          {
+            "id": "d463e2c6-3ebd-47f6-995f-75b63652cfd4",
+            "payload": {
+              "new": {
+                "endAt": "2030-01-07T12:00:00+00:00",
+                "endTime": "19:00:00",
+                "startAt": "2030-01-07T11:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "18:00:00"
+              },
+              "previous": {
+                "endAt": "2030-01-07T13:00:00+00:00",
+                "endTime": "20:00:00",
+                "startAt": "2030-01-07T12:00:00+00:00",
+                "localDate": "2030-01-07",
+                "startTime": "19:00:00"
+              },
+              "requestFingerprint": "e4f37c897b000c70dd10bc7e6207ede54f1a1a8fbc2845fa69bd027c5522f4b1"
+            },
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "actor_id": "d1000000-0000-4000-8000-000000000001",
+            "event_key": "d37860ee-1717-4139-904a-8b6f0efd6503",
+            "to_status": "scheduled",
+            "created_at": "2026-10-31T06:42:21.365432+00:00",
+            "event_type": "rescheduled",
+            "session_id": "e9d9b8ac-6ccb-4bc8-9a01-c141820384d9",
+            "from_status": "scheduled"
+          }
+        ],
+        "sessions": [
+          {
+            "id": "e9d9b8ac-6ccb-4bc8-9a01-c141820384d9",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.31275+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.365432+00:00",
+            "schedule_id": "01e7ae78-5d8d-4616-9e15-33fa61f34267",
+            "completed_at": null,
+            "local_end_time": "19:00:00",
+            "source_slot_id": null,
+            "local_start_time": "18:00:00",
+            "scheduled_end_at": "2030-01-07T12:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T11:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "f8170a21-ff63-4a2a-8d74-86ad77ad7ca3",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.31275+00:00",
+            "schedule_id": "01e7ae78-5d8d-4616-9e15-33fa61f34267",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "01e7ae78-5d8d-4616-9e15-33fa61f34267",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.31275+00:00",
+            "updated_at": "2026-10-31T06:42:21.31275+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-reschedule",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 19,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.389887+00:00",
+          "updated_at": "2026-10-31T06:42:21.389887+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "095c71d8-0bb1-485f-844b-e3f090b8388d",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.392957+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "4534f602-c209-4cbd-b80e-71f22b113617"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "43666a36-897d-4964-bf04-75818336cfd4",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.392957+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.392957+00:00",
+            "schedule_id": "4534f602-c209-4cbd-b80e-71f22b113617",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "095c71d8-0bb1-485f-844b-e3f090b8388d",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "eaeda7d6-ce34-4f83-b82c-508f9ac51fba",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.392957+00:00",
+            "schedule_id": "4534f602-c209-4cbd-b80e-71f22b113617",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "4534f602-c209-4cbd-b80e-71f22b113617",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.392957+00:00",
+            "updated_at": "2026-10-31T06:42:21.392957+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-revise",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 70,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.47185+00:00",
+          "updated_at": "2026-10-31T06:42:21.47185+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "bc882806-5405-4614-9686-e4ec9de9ae46",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.475413+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "37bf2f25-52fb-427d-b2a9-5d152ee460c0"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "aeee2ab2-1fed-499b-b306-73700910c120",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.475413+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.475413+00:00",
+            "schedule_id": "37bf2f25-52fb-427d-b2a9-5d152ee460c0",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "bc882806-5405-4614-9686-e4ec9de9ae46",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "96433264-c436-4eef-996b-0fcda6736e15",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.475413+00:00",
+            "schedule_id": "37bf2f25-52fb-427d-b2a9-5d152ee460c0",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "37bf2f25-52fb-427d-b2a9-5d152ee460c0",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.475413+00:00",
+            "updated_at": "2026-10-31T06:42:21.475413+00:00"
+          }
+        ]
+      }
+    },
+    {
+      "name": "audit-failure-task-close",
+      "iteration": 3,
+      "status": "PASS",
+      "elapsedMs": 14,
+      "expectedError": "P0001",
+      "message": "Injected concurrency audit failure",
+      "rolledBackAllRelatedRows": true,
+      "final": {
+        "task": {
+          "id": "d2000000-0000-4000-8000-000000000001",
+          "title": "Concurrency create-versus-close",
+          "due_at": null,
+          "status": "todo",
+          "goal_id": null,
+          "user_id": "d1000000-0000-4000-8000-000000000001",
+          "due_date": null,
+          "priority": "medium",
+          "created_at": "2026-10-31T06:42:21.609197+00:00",
+          "updated_at": "2026-10-31T06:42:21.609197+00:00",
+          "description": null,
+          "completed_at": null,
+          "parent_task_id": null,
+          "estimated_minutes": null,
+          "source_roadmap_id": null,
+          "source_roadmap_node_id": null
+        },
+        "slots": [
+          {
+            "id": "e0a31813-17b7-4d2d-a93a-ef8f0cc38ed0",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "weekday": 1,
+            "end_time": "20:00:00",
+            "created_at": "2026-10-31T06:42:21.615486+00:00",
+            "start_time": "19:00:00",
+            "schedule_id": "e06b7395-bc68-4de0-aac4-d256b4425472"
+          }
+        ],
+        "events": [],
+        "sessions": [
+          {
+            "id": "91ee78d3-d3cc-4f21-ab9e-c9046dae5493",
+            "status": "scheduled",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "timezone": "Asia/Ho_Chi_Minh",
+            "created_at": "2026-10-31T06:42:21.615486+00:00",
+            "local_date": "2030-01-07",
+            "updated_at": "2026-10-31T06:42:21.615486+00:00",
+            "schedule_id": "e06b7395-bc68-4de0-aac4-d256b4425472",
+            "completed_at": null,
+            "local_end_time": "20:00:00",
+            "source_slot_id": "e0a31813-17b7-4d2d-a93a-ef8f0cc38ed0",
+            "local_start_time": "19:00:00",
+            "scheduled_end_at": "2030-01-07T13:00:00+00:00",
+            "schedule_revision": 1,
+            "scheduled_start_at": "2030-01-07T12:00:00+00:00",
+            "cancellation_reason": null,
+            "replaces_session_id": null,
+            "actual_study_minutes": null,
+            "logical_occurrence_key": "2030-01-07|1|19:00|20:00"
+          }
+        ],
+        "revisions": [
+          {
+            "id": "6d499b48-6ad6-4bac-80d4-98cd2323f6c2",
+            "ends_on": "2030-01-07",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "changed_by": "d1000000-0000-4000-8000-000000000001",
+            "created_at": "2026-10-31T06:42:21.615486+00:00",
+            "schedule_id": "e06b7395-bc68-4de0-aac4-d256b4425472",
+            "change_reason": "initial_creation",
+            "slots_snapshot": [
+              {
+                "endTime": "20:00",
+                "weekday": 1,
+                "startTime": "19:00"
+              }
+            ]
+          }
+        ],
+        "schedules": [
+          {
+            "id": "e06b7395-bc68-4de0-aac4-d256b4425472",
+            "status": "active",
+            "ends_on": "2030-01-07",
+            "task_id": "d2000000-0000-4000-8000-000000000001",
+            "user_id": "d1000000-0000-4000-8000-000000000001",
+            "revision": 1,
+            "timezone": "Asia/Ho_Chi_Minh",
+            "starts_on": "2030-01-07",
+            "created_at": "2026-10-31T06:42:21.615486+00:00",
+            "updated_at": "2026-10-31T06:42:21.615486+00:00"
+          }
+        ]
+      }
+    }
+  ],
+  "backendPids": {
+    "A": 514,
+    "B": 515,
+    "observer": 513
+  },
+  "setupCommitted": true,
+  "status": "PASS",
+  "openWorkerTransactions": 0,
+  "remainingWorkerLocks": 0,
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T06:42:21.741Z"
+}
