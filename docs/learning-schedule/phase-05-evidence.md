@@ -517,3 +517,76 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - Step 5.6B-2: **PENDING**; remaining gaps above are not marked PASS.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**.
+
+
+
+## Step 5.6B-2A — Atomic Batch / Security / Historical Timezone
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: **`5c9b81bbe9c4aede8d19e7149ea5ccc1ee72bb22`**. New `supabase/tests/learning_schedule_attendance_hardening.sql` was an untracked working-tree addition; SHA identifies the baseline, not a commit containing the new test.
+- Supabase local version: CLI **2.122.0**, container `supabase_db_lumivox-proj`. Ran the installed executable directly because npm/npx shell shims are broken.
+- PostgreSQL version: **17.6**, independently queried after tests.
+- Migration count: **84**, independently confirmed from supabase_migrations.schema_migrations. No migration/production implementation change or new clean replay in this test-only step; prior 84-migration clean replay is recorded in Step 5.5.
+
+### Tests
+
+- pgTAP existing assertions: **467 PASS**, rerun with the new suite using `supabase test db --local`, exit 0. Persistent concurrency fixture setup remains an intentional TAP skip, not a concurrency execution in this step.
+- New HARD-01 to HARD-21: **21/21 PASS** in `supabase/tests/learning_schedule_attendance_hardening.sql`. Added a guard inside the second-row audit-failure trigger: it must observe the first session already missed and its deterministic marked_missed event already present before raising the expected error. This strengthens actual multi-row rollback evidence while retaining the 21 named assertions. No production trigger/RPC was changed.
+- Total assertions: **488 PASS across 24 files**, final run 3 wall-clock seconds. Initial supplied suite also passed; the entire pgTAP suite was rerun after strengthening the trigger guard.
+- Failures: **0**. All fixtures, temporary helpers and injected trigger run in a transaction ending with ROLLBACK. Independent final query confirms **0** attendance-hardening fixture users and **0** hardening_second_audit_failure triggers. No commit/push.
+
+### Multi-row rollback
+
+- First row was eligible: **PASS** — active Schedule/root todo Task with scheduled occurrence ending four local dates before the anchor, ordered before the second occurrence (three dates before). The injected second-row trigger additionally verifies the first session is already missed and its marked_missed event exists within that same batch before raising the expected failure. If that earlier work is absent, HARD-01 receives a different message and fails.
+- Second row audit failure injected: **PASS** — BEFORE INSERT trigger targets only batch_second's marked_missed event, after the earlier row/audit guard succeeds.
+- SQLSTATE: **P0001**, message **Injected second-row missed audit failure**, matched by HARD-01. The error is intentional test injection, not a migration/runtime failure.
+- Both rows restored: **PASS — HARD-02**, complete persisted session JSON snapshots for both rows match their pre-batch values, including status/timestamps, after the failed batch.
+- Event snapshots restored: **PASS — HARD-02**, full event-array snapshot equals the original empty array; the first row's inserted audit is also rolled back, not merely the failing second insert.
+- Successful retry marked: **2**, HARD-03; after dropping the injected trigger, the same two overdue candidates are processed by the real ls_mark_missed_batch(100). This invocation runs as trusted postgres in pgTAP, not through HTTP/Cron.
+- Final audit count: **2 marked_missed events**, HARD-04, one for each transitioned fixture. This count is observed before the repeated batch and before transaction rollback; no fixture events persist after the suite.
+- Repeated batch created no duplicates: **PASS within HARD-05's assertion scope** — repeated real batch returns marked=0. Together with the preceding count of 2 this covers no additional transition; a second event-array/count assertion after that repeated call is not separately present in this suite.
+
+### Historical timezone
+
+- Original Session timezone: **America/New_York**, HARD-06; valid fixture uses local noon two calendar dates before the anchor, and the stored Session timezone is unchanged.
+- Current Schedule timezone: **Asia/Tokyo**, HARD-07, changed after the historical Session was created.
+- Authenticated Recovery result: **PASS — HARD-08**, the real ls_recover_study_session RPC executes under SET LOCAL ROLE authenticated and the fixture owner's JWT claims, returning the same session UUID. This is actual database RPC execution, not mocked logic; no PostgREST request or browser/device timezone was tested in this step.
+- Persisted completion: **PASS — HARD-09**, Session completed, completed_at non-null and actual_study_minutes null inside the transaction.
+- Audit recovery cutoff: **PASS — HARD-09**, payload originalTimezone=America/New_York and recoveryCutoff equals midnight at historical Session local_date + 8 in **America/New_York**, despite the Schedule using Tokyo. This executes the historical-timezone branch through the real RPC; it is not an exact-time or DST-transition-boundary acceptance test.
+- Exact retry: **PASS — HARD-10**, same event key and original expected version return the original UUID after completion. Full completed row/timestamp equality before/after retry is not separately asserted by this new suite.
+- Event count: **1 recovered event**, HARD-11, after exact replay. The entire fixture is rolled back afterward.
+
+### Security
+
+- anon batch execution: **DENIED by effective privilege inspection**, HARD-12: has_function_privilege(..., EXECUTE)=false. This assertion checks catalog/effective grants, not an actual denied HTTP or SET ROLE call.
+- authenticated batch execution: **DENIED by effective privilege inspection**, HARD-13, execute=false.
+- service_role batch execution: **ALLOWED by effective privilege inspection**, HARD-14, execute=true. No new service_role execution attempt in this suite; the successful trusted service_role batch call in Step 5.4 is earlier evidence, not a freshly repeated case here.
+- Cron wrapper grants: **PASS — HARD-15/16/17**, effective execute privilege false for anon/authenticated, true for service_role on ls_run_missed_sweep_if_enabled(). Actual unauthorized execution attempts remain a separate hardening gap; no Cron activation was required.
+- Gate table privileges: **PASS — HARD-18/19**, authenticated and anon lack UPDATE privilege on public.ls_missed_sweep_control. This does not exhaustively test SELECT/INSERT/DELETE/TRUNCATE, ownership/role escalation or direct API attempts.
+- Gate enabled after test: **false / OFF**, HARD-20 plus independent post-suite query. No gate change or activation in this step.
+- Cron job configuration: **PASS — HARD-21**, exactly one matching lumivox-learning-schedule-missed-5m job with schedule `*/5 * * * *`, active=true. Independent final query confirms named-job count=1, same schedule and active=true; command text was not separately compared in the new assertion. Cron registration active does not mean processing gate enabled.
+
+### Regression
+
+- Lint: **PASS** — from apps/web, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing missing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: **PASS** — `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **97.14 seconds**. The 19 opt-in Phase 04 integration cases and 1 existing Focus integration case were not separately run. HARD tests are additional pgTAP coverage, not part of the 612 web passes.
+- TypeScript: **PASS** — `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: **PASS** — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in **26.1 seconds**, TypeScript finished in **60 seconds**, generated **98/98** pages in **1111 ms**. Existing .env.local unchanged. Existing Vite config-loader/Supabase deprecation notices were non-fatal. `git diff --check` passed after evidence update. Previous concurrency harnesses were not rerun in this step.
+
+### Remaining
+
+- Schedule Revision vs Attendance: **NOT EXECUTED**, both orderings and cancellation/supersession/audit invariants remain for 5.6B-2B.
+- Remaining reverse-order races: **NOT EXECUTED** — remaining Attendance-first vs Sweep, Recovery vs Task Close in both orders, Start-first then Task Close and other unexecuted lifecycle/status paths from B-1 remain open.
+- Exact real-RPC grace cutoff: **NOT EXECUTED** — no controlled-clock just-before/exact/just-after command or Sweep calls.
+- Exact real-RPC recovery cutoff: **NOT EXECUTED** — no controlled-clock boundary or replay after cutoff/later parent changes. The historical-timezone scenario is now executed, but does not close these other REC-B cases.
+- Lock wait crossing cutoff: **NOT EXECUTED**, true post-lock clock behavior at the boundary remains unverified.
+- DST transition boundary through RPC: **NOT EXECUTED** — New York historical-timezone Recovery uses an ordinary live-clock fixture away from the boundary. A window whose computed future cutoff crosses an offset change is not a controlled transition-boundary test; spring/fall, unusual midnight and exact cutoff cases remain open.
+- Additional scope limits retained from B-1: actual denied role/API calls and full privilege/argument/fingerprint matrix, multi-candidate fairness/starvation, broader identity/timestamp invariants, randomized load/final matrix acceptance, Focus reconciliation and UI/browser flows are not established by these 21 assertions. Multi-row rollback and changed-Schedule-vs-historical-Session timezone are now covered only in the executed forms above.
+
+### Decision
+
+- Step 5.6B-2A: **PASS (LOCAL)** for HARD-01–HARD-21 and freshly executed regression gates, within the stated privilege-inspection and sequential SQL scope. This is not full cross-command/boundary acceptance.
+- Ready for 5.6B-2B: **YES**, retaining all NOT EXECUTED cases above. Phase 05 remains **IN PROGRESS**.
+- Production deployment authorized: **NO**.
