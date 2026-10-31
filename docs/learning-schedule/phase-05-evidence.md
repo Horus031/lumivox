@@ -383,3 +383,63 @@
 - Step 5.5 executed core sequential RPC/HTTP, audit rollback, owner isolation and web gates: **LOCAL PASS within the stated executed scope**.
 - **Full Step 5.5 boundary/REC-B acceptance: PENDING — NOT EXECUTED cases above remain open.** Do not treat this evidence as an unconditional final acceptance of those cases. Phase 05 remains **IN PROGRESS**.
 - Production authorized: **NO**. No commit or push was performed.
+
+
+## Step 5.6A — Cross-Command Concurrency Foundation
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: `0684e02a8df0168e421111dd3516a3a6f11cd380`. The new attendance concurrency harness, boundary SQL test and initial report were untracked working-tree additions at review time; this SHA identifies the committed baseline, not a commit containing those additions.
+- PostgreSQL version: **17.6**, local container `supabase_db_lumivox-proj`.
+- Supabase local version: installed CLI **2.122.0**; same local database used in Step 5.5. No new migration was supplied for 5.6A. Reviewed `scripts/test-learning-schedule-attendance-concurrency.mjs` and `supabase/tests/learning_schedule_attendance_boundaries.sql` without changing them; reran the report rather than relying on its pre-existing PASS values.
+- Sweep gate before tests: **false**, independently queried before the concurrency run. No local Cron activation or schedule alteration in this step.
+- Sweep gate after tests: **false**, independently queried again after the final harness exited. No commit, push or production operation.
+
+### Database
+
+- Migration count: **84**, confirmed from `supabase_migrations.schema_migrations` before concurrency execution. No clean replay was repeated in 5.6A because this change adds tests only; the 84-migration clean replay was executed in Step 5.5.
+- pgTAP PASS / FAIL: **PASS — 23 files, 467 assertions, 0 failures**, 2 wall-clock seconds; ran local CLI `supabase test db --local`, exit 0. This includes all **459** previous assertions plus **8** new boundary assertions. Persistent concurrency fixture setup remains an intentional TAP skip; real races run separately below.
+- Timezone/DST tests: **8/8 PASS** in `learning_schedule_attendance_boundaries.sql`. Tests calculate New York spring-forward/fall-back local-midnight cutoffs, Ho Chi Minh midnight conversion, fixed one-microsecond-before/exact-cutoff comparisons and 60-minute elapsed grace arithmetic. These execute SQL expressions with literal dates/instants, **not attendance RPCs under a controlled clock**. In particular, the comparison of original date + 7 days against local_date + 8 differs by a calendar day as well as any offset change; that inequality alone does not isolate DST elapsed-duration behavior. DST boundary through a real RPC and exact-clock acceptance remain NOT EXECUTED in 5.6B below.
+
+### Real Concurrency
+
+- Independent PostgreSQL backend PIDs: final run **A=1605, B=1606, observer=1607**, independently captured from pg_stat_activity application names while the harness ran. The harness also asserts three distinct pg_backend_pid values. Worker transactions use authenticated role plus the fixture owner's JWT claims; observer/setup uses trusted postgres. [Fresh raw report](./phase-05-attendance-concurrency.json), including observedBackendPids and postExitVerification.
+- Iterations: **3 per scenario; 8 scenarios including CC-05b = 24/24 PASS**. Ran `node scripts/test-learning-schedule-attendance-concurrency.mjs` from repo root, exit 0. A second fresh run used a temporary external monitor to persist all three PIDs and post-exit cleanup; it also passed 24/24 and supplies the final report. The monitor was removed. This is controlled A-first transaction overlap, not randomized simultaneous-start/load testing or exhaustive reverse orderings.
+- CC-01 Complete vs Complete distinct: **3/3 PASS** — A completes; after the observed lock wait B rejects **22023**. Final completed state, one completed event.
+- CC-02 Complete exact replay: **3/3 PASS** — same key and original version; after waiting B returns **00000** / original session UUID. Final completed state, one completed event.
+- CC-03 Start vs Complete: **3/3 PASS** — A starts; B's old version rejects **PT409** after waiting. Final in_progress state, completed_at null, one started event. This does not test Complete-first or a refreshed version after Start.
+- CC-04 Complete vs Skip: **3/3 PASS** — A completes; after waiting B rejects **22023**. Final completed state, one completed event. Skip-first on a scheduled session was not included in this scenario.
+- CC-05 Recovery vs Recovery: **3/3 distinct-key PASS** — A recovers missed; B rejects **22023** after waiting. Additional **CC-05b exact-key: 3/3 PASS**, B returns **00000** / same UUID. Both variants end completed with exactly one recovered event.
+- CC-06 Recovery vs Skip: **3/3 PASS** — from missed, A recovers; B rejects **22023** after waiting. Final completed state, one recovered event.
+- CC-07 Skip vs Recovery: **3/3 PASS** — from missed, A skips; B's old version rejects **PT409** after waiting. Final skipped state, completed_at null, one skipped event. A later retry with refreshed version is outside this case.
+- Observed lock waits: **24/24** final-run records contain A (PID 1605) in pg_blocking_pids(B) before A commits. A explicitly holds the Task lock and executes its full command without committing; B issues the competing command on a separate connection. B's result is checked only after the observer confirms blocking and A commits. No sleep-only assumption is used to infer a race. Timeouts: 5-second lock, 10-second statement and 15-second client bound; none reached.
+- Final state invariants: **PASS for executed assertions** — observer reads after worker COMMIT/ROLLBACK; final status matches each case, Task remains todo, actual_study_minutes null, completed_at exists only for completed outcomes, and event keys are unique. Full session/event snapshots are retained in JSON. The harness checks returned IDs and final row by session ID, but does not compare every historical identity/time field or every timestamp before/after exact replay; those finer invariants are not newly established by this race suite.
+- Audit event counts: **exactly one per final session in all 24 runs**; report records completed for CC-01/02/04, started for CC-03, recovered for CC-05/05b/06 and skipped for CC-07. Harness asserts count/unique keys; event types were additionally checked in the fresh result report. Failed/stale second commands create no additional event. This suite does not inject audit failures; existing rollback pgTAP tests passed again in the full run.
+- Fixture cleanup: **PASS** — harness removes its fixture Task and user, verifies **0 open worker transactions**, then closes all three connections. Independent post-exit query confirms **0 attendance-cc fixture users, 0 fixture Tasks, 0 surviving worker backends and 0 worker locks**. Sweep gate stays false. Report contains no credentials. No application or migration implementation was edited.
+
+### Application
+
+- Lint: **PASS** — from apps/web, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors, 1 existing missing projection dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Vitest: **PASS** — `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **62.44 seconds**. The 19 opt-in Phase 04 direct integration cases and 1 existing Focus integration case were not separately run. pgTAP/races above are additional coverage, not part of the 612 web passes.
+- TypeScript: **PASS** — `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: **PASS** — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in **12.8 seconds**, TypeScript finished in **24.6 seconds**, generated **98/98** pages in **901 ms**. Existing .env.local unchanged. Existing Vite config-loader/Supabase deprecation notices were non-fatal. No pgTAP, race or quality-gate failure occurred; `git diff --check` passed after evidence update.
+
+### Pending Step 5.6B
+
+- Sweep vs Attendance commands — **NOT EXECUTED in 5.6A**. Earlier Sweep-vs-Sweep tests do not replace cross-command acceptance.
+- Task Close vs Attendance commands — **NOT EXECUTED**.
+- Schedule Revision vs Attendance — **NOT EXECUTED**.
+- Exact grace cutoff under controlled clock — **NOT EXECUTED**; literal timestamp arithmetic is not a real RPC clock-boundary test.
+- Exact recovery cutoff under controlled clock — **NOT EXECUTED**; including lock wait crossing the deadline and replay after the deadline.
+- DST boundary through real RPC — **NOT EXECUTED**; historical session timezone versus changed schedule/device timezone remains unexecuted. The eight new SQL-expression assertions do not close the pending REC-B acceptance from Step 5.5.
+- Multi-row batch failure rollback — **NOT EXECUTED**; existing single-transition rollback assertions are not a substitute.
+- Authorization and privilege hardening — **NOT EXECUTED as a dedicated 5.6B matrix**. Existing pgTAP ownership/execute checks reran, but the race harness has one authenticated owner and is not a cross-owner attack/privilege probe.
+- Full cross-command final acceptance — **PENDING**. This foundation covers the listed controlled orderings only; no full HTTP/browser attendance flow, randomized load, reverse-order matrix or production validation was performed.
+
+### Decision
+
+- Step 5.6A PASS / FAIL: **PASS (LOCAL)** for the executed CC-01–CC-07/CC-05b, SQL timezone-expression and regression scope above. This is not a PASS for pending 5.6B/REC-B cases.
+- Ready for Step 5.6B YES / NO: **YES**, with pending cases retained explicitly.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**.
