@@ -1,0 +1,253 @@
+
+-- Lumivox — Phase 05 / Step 5.3
+-- Audited, idempotent Skip Study Session.
+--
+-- scheduled -> skipped:
+--   allowed before end + 60 minutes (including future sessions)
+-- missed -> skipped:
+--   allowed before midnight at the start of local date + 8 days
+--
+-- The 7 recovery days are the seven calendar dates AFTER
+-- the originally scheduled local date.
+--
+-- SQLSTATE:
+-- 42501 = authentication / ownership
+-- 22023 = invalid input / state / time / reused key
+-- PT409 = stale version, HTTP 409
+
+CREATE OR REPLACE FUNCTION public.ls_skip_study_session(
+  p_session_id uuid,
+  p_expected_updated_at timestamptz,
+  p_event_key text,
+  p_reason text DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := (SELECT auth.uid());
+
+  v_task record;
+  v_schedule public.task_study_schedules%rowtype;
+  v_session public.task_study_sessions%rowtype;
+
+  v_prior record;
+  v_fingerprint text;
+  v_reason text;
+
+  v_now timestamptz;
+  v_recovery_cutoff timestamptz;
+BEGIN
+  -- 1. Authentication.
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Authentication required'
+      USING ERRCODE = '42501';
+  END IF;
+
+  -- 2. Required arguments.
+  IF p_session_id IS NULL
+     OR p_expected_updated_at IS NULL THEN
+    RAISE EXCEPTION 'Invalid session or expected version'
+      USING ERRCODE = '22023';
+  END IF;
+
+  IF p_event_key IS NULL
+     OR p_event_key <> btrim(p_event_key)
+     OR length(p_event_key) NOT BETWEEN 1 AND 256 THEN
+    RAISE EXCEPTION 'Invalid event key'
+      USING ERRCODE = '22023';
+  END IF;
+
+  -- Normalize the optional reason once.
+  -- NULL, empty string and whitespace-only reason mean
+  -- "no reason supplied".
+  v_reason := NULLIF(btrim(p_reason), '');
+
+  IF v_reason IS NOT NULL
+     AND length(v_reason) > 500 THEN
+    RAISE EXCEPTION 'Skip reason exceeds 500 characters'
+      USING ERRCODE = '22023';
+  END IF;
+
+  -- 3. Fingerprint contains every semantic input.
+  --
+  -- Two requests with the same key and different reasons
+  -- MUST NOT be treated as the same command.
+  v_fingerprint := pg_catalog.encode(
+    pg_catalog.sha256(
+      pg_catalog.convert_to(
+        pg_catalog.jsonb_build_object(
+          'command', 'skip',
+          'sessionId', p_session_id,
+          'expectedVersionEpoch',
+            EXTRACT(EPOCH FROM p_expected_updated_at),
+          'reason', v_reason
+        )::text,
+        'UTF8'
+      )
+    ),
+    'hex'
+  );
+
+  -- 4. Task lock: first in global lock order.
+  SELECT
+    t.id,
+    t.status::text AS status,
+    t.parent_task_id
+  INTO v_task
+  FROM public.tasks t
+  JOIN public.task_study_sessions x
+    ON x.task_id = t.id
+   AND x.user_id = t.user_id
+  WHERE x.id = p_session_id
+    AND x.user_id = v_uid
+  FOR UPDATE OF t;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Study session not found or not owned'
+      USING ERRCODE = '42501';
+  END IF;
+
+  -- 5. Schedule lock: second.
+  SELECT s.*
+  INTO v_schedule
+  FROM public.task_study_schedules s
+  JOIN public.task_study_sessions x
+    ON x.schedule_id = s.id
+   AND x.user_id = s.user_id
+  WHERE x.id = p_session_id
+    AND x.user_id = v_uid
+  FOR UPDATE OF s;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Study schedule not found'
+      USING ERRCODE = '42501';
+  END IF;
+
+  -- 6. Session lock: last.
+  SELECT *
+  INTO v_session
+  FROM public.task_study_sessions
+  WHERE id = p_session_id
+    AND user_id = v_uid
+  FOR UPDATE;
+
+  IF NOT FOUND
+     OR v_session.schedule_id IS DISTINCT FROM v_schedule.id THEN
+    RAISE EXCEPTION 'Study session not found or not owned'
+      USING ERRCODE = '42501';
+  END IF;
+
+  -- 7. Idempotency replay BEFORE eligibility/version checks.
+  SELECT event_type, payload
+  INTO v_prior
+  FROM public.task_study_session_events
+  WHERE session_id = p_session_id
+    AND event_key = p_event_key;
+
+  IF FOUND THEN
+    IF v_prior.event_type = 'skipped'
+       AND v_prior.payload->>'requestFingerprint'
+           = v_fingerprint THEN
+      RETURN p_session_id;
+    END IF;
+
+    RAISE EXCEPTION 'Event key reused with different request'
+      USING ERRCODE = '22023';
+  END IF;
+
+  -- 8. Parent eligibility.
+  IF v_task.parent_task_id IS NOT NULL
+     OR v_task.status NOT IN ('todo', 'in_progress')
+     OR v_schedule.status <> 'active'
+     OR v_session.status NOT IN ('scheduled', 'missed') THEN
+    RAISE EXCEPTION 'Session is not eligible for skipping'
+      USING ERRCODE = '22023';
+  END IF;
+
+  -- 9. Evaluate time after the locks.
+  v_now := pg_catalog.clock_timestamp();
+
+  IF v_session.status = 'scheduled' THEN
+    -- Before the session, during it, or within its grace.
+    -- After grace, the Missed Sweep owns the transition.
+    IF v_now >= v_session.scheduled_end_at
+                + interval '60 minutes' THEN
+      RAISE EXCEPTION 'Session is outside the skip window'
+        USING ERRCODE = '22023';
+    END IF;
+  ELSE
+    -- Missed -> skipped is allowed through the end of
+    -- the seventh LOCAL calendar day after local_date.
+    --
+    -- Midnight at the START of day 8 is exclusive.
+    -- Use the historical session timezone, not the
+    -- device timezone or a potentially revised Schedule zone.
+    v_recovery_cutoff :=
+      ((v_session.local_date + 8)::timestamp
+         AT TIME ZONE v_session.timezone);
+
+    IF v_now >= v_recovery_cutoff THEN
+      RAISE EXCEPTION 'Session is outside the recovery window'
+        USING ERRCODE = '22023';
+    END IF;
+  END IF;
+
+  -- 10. Stale version => explicit HTTP conflict.
+  IF p_expected_updated_at
+     IS DISTINCT FROM v_session.updated_at THEN
+    RAISE EXCEPTION 'Stale session version'
+      USING ERRCODE = 'PT409';
+  END IF;
+
+  -- 11. Update the intended session only.
+  UPDATE public.task_study_sessions
+  SET status = 'skipped'
+  WHERE id = p_session_id
+    AND user_id = v_uid;
+
+  -- 12. Append exactly one audit event.
+  -- Event insertion and session UPDATE are atomic.
+  INSERT INTO public.task_study_session_events (
+    user_id,
+    session_id,
+    event_type,
+    from_status,
+    to_status,
+    actor_id,
+    event_key,
+    payload
+  )
+  VALUES (
+    v_uid,
+    p_session_id,
+    'skipped',
+    v_session.status,
+    'skipped',
+    v_uid,
+    p_event_key,
+    pg_catalog.jsonb_build_object(
+      'requestFingerprint', v_fingerprint,
+      'expectedUpdatedAt', p_expected_updated_at,
+      'reason', v_reason,
+      'skippedAt', v_now
+    )
+  );
+
+  RETURN p_session_id;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION
+  public.ls_skip_study_session(
+    uuid, timestamptz, text, text
+  )
+FROM PUBLIC, anon;
+
+GRANT EXECUTE ON FUNCTION
+  public.ls_skip_study_session(
+    uuid, timestamptz, text, text
+  )
+TO authenticated;

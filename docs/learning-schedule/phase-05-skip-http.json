@@ -1,0 +1,147 @@
+{
+  "baseline": "78d30e41e04a83b61c06fcc8f84c0e84a71b01cc",
+  "startedAt": "2026-10-31T08:10:57.617Z",
+  "checks": [
+    {
+      "name": "stale-version",
+      "status": "PASS",
+      "http": 409,
+      "sqlstate": "PT409",
+      "elapsedMs": 32
+    },
+    {
+      "name": "cross-owner",
+      "status": "PASS",
+      "http": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "reason-length",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "skip-scheduled",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "audit-normalized-reason-and-identity-scheduled",
+      "status": "PASS",
+      "reason": null
+    },
+    {
+      "name": "canonical-replay-scheduled-0",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "canonical-replay-scheduled-1",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "canonical-replay-scheduled-2",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "canonical-replay-scheduled-3",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "different-reason-same-key-scheduled",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "skip-future",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "audit-normalized-reason-and-identity-future",
+      "status": "PASS",
+      "reason": "Personal appointment"
+    },
+    {
+      "name": "canonical-replay-future-0",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "canonical-replay-future-1",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "different-reason-same-key-future",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "skip-missed",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "audit-normalized-reason-and-identity-missed",
+      "status": "PASS",
+      "reason": "Could not attend"
+    },
+    {
+      "name": "canonical-replay-missed-0",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "different-reason-same-key-missed",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-in_progress",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-completed",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-cancelled",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-skipped",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-missed_expired",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "reject-scheduled_expired",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    }
+  ],
+  "status": "PASS",
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T08:10:58.477Z"
+}

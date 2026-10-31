@@ -173,3 +173,62 @@
 - No generated Complete RPC TypeScript binding, authenticated Next.js Complete action, Attendance UI/browser E2E, Focus integration, minutes accounting, reminder/email handling or production deployment was added/tested. Web type/build success does not prove a future Complete client binding.
 - Step 5.2: LOCAL PASS for the executed sequential RPC, HTTP, rollback, ownership and web regression checks above; concurrency and exact-cutoff acceptance remain open, not implied complete.
 - Phase 05 overall remains IN PROGRESS; Steps 5.3–5.8 have not been executed here. Production deployment authorized: NO. No commit or push was performed.
+
+## Step 5.3 — Skip Study Session
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: `78d30e41e04a83b61c06fcc8f84c0e84a71b01cc` — `feat(learning-schedule): add audited study session completion RPC`. The new Skip migration/test were untracked working-tree additions at verification time; this SHA identifies the baseline, not a commit containing Skip.
+- Migration filename: `supabase/migrations/20261031075444_learning_schedule_skip_attendance.sql`. Reviewed alongside `supabase/tests/learning_schedule_skip_attendance.sql`; both user-supplied files were tested without implementation edits. Only this evidence and the HTTP report were added/updated by verification. No commit or push.
+
+### Database
+
+- Clean replay: PASS — ran local CLI `supabase db reset --local`, then `supabase test db --local`, both exit 0. Commands used the installed Windows Supabase executable directly because the npm/npx shell shims are broken. No remote database was targeted.
+- Total migrations: **82**, independently confirmed from `supabase_migrations.schema_migrations` after clean replay.
+- pgTAP: **PASS — 20 files, 409 assertions, 0 failures**, 2 wall-clock seconds. The existing fixture/setup skip is not a new Skip assertion. SQL fixtures and injected audit-failure trigger run inside a rolled-back transaction.
+- Existing assertions: **381**, including Start, Complete and existing Learning Schedule/Focus/Workspace suites, passed again in the full run.
+- New Skip assertions: **28**, all passed in `learning_schedule_skip_attendance.sql`. Covers successful transitions/identity, audit, replay, reason fingerprint, timing/state/parent eligibility rejection, stale version, ownership/RLS, reason/key validation, Task separation, audit rollback and execution privileges.
+
+### Functional
+
+- scheduled -> skipped: PASS — current and future scheduled sessions return the original UUID and become skipped; planned time/logical occurrence identity is retained, completed_at and actual_minutes remain null. Verified by pgTAP and actual HTTP row snapshots.
+- missed -> skipped: PASS — a missed session inside its recovery window becomes skipped; the audit source status is missed. Verified by pgTAP and HTTP.
+- Optional reason: PASS — omitted reason, explicit null, empty string and ordinary-space-only reason are accepted as the same no-reason request via HTTP replay. A reason exceeding 500 characters rejects with 22023; audit stores normalized optional reason.
+- Reason normalization: PASS for executed ordinary-space cases — leading/trailing spaces are trimmed; `  Personal appointment  ` and `Personal appointment` replay identically. Source uses PostgreSQL `btrim`, so this does not establish normalization of tabs/newlines or arbitrary Unicode whitespace.
+- Idempotency: PASS — the original event key/version and equivalent normalized reason return the same UUID after the transition. Full persisted session and event snapshots stay equal; exactly one skipped audit event exists. Seven sequential HTTP replay requests passed across scheduled/future/missed fixtures.
+- Fingerprint mismatch: PASS — changing reason under an already-used key returns 22023 / `Event key reused with different request`; full session/event snapshots remain unchanged. Source review confirms fingerprint also binds command, session ID and expected-version epoch; changing each of those fields was not separately exercised in the new HTTP probe.
+- Recovery-window rejection: PASS for away-from-boundary fixtures — expired scheduled grace (end + 60 elapsed minutes) and missed recovery reject 22023 without mutation. A 2-day-old missed fixture succeeds; a 10-day-old fixture rejects. Source defines missed cutoff as exclusive local midnight at historical session local_date + 8 in the session timezone, rather than 7 x 24 UTC hours. Exactly-at-cutoff/DST behavior remains unexecuted below.
+- Stale PT409: PASS — otherwise eligible stale scheduled session rejects PT409 and stays unchanged. Real PostgREST response was HTTP 409 in **32 ms**, within the probe's 5-second bound.
+- Cross-owner denial: PASS — user B receives 42501 when targeting A's session; SQL RLS read isolation and HTTP full-row invariance passed. Anonymous execute denied and authenticated execute allowed by pgTAP.
+- Audit rollback: PASS — pgTAP injects a BEFORE INSERT skipped-event failure (P0001). Full session/event snapshots equal the originals after failure, including timestamps; no partial skipped transition/event survives. Final independent query found **0** `skip_test_audit_failure` triggers.
+- Parent Task unchanged: PASS — Task remains todo after successful Skip. Completed Task and paused Schedule fixtures reject 22023. Other Task-status/subtask branches were source-reviewed, not individually executed by this new suite. No Task completion, Focus start, minutes accounting or email is invoked in the reviewed RPC; no independent Focus table snapshot was taken.
+
+### HTTP
+
+- Valid: PASS — actual Supabase local Auth/JWT + PostgREST requests, no mocked RPC: scheduled, future scheduled and missed all return HTTP 200 / original UUID. Verified skipped status, preserved identity/time, null completion/minutes, unchanged Task and one authoritative event with actor, from/to status, normalized reason and a 64-hex fingerprint. **25/25 checks PASS**; [raw report](./phase-05-skip-http.json). Probe ran at 2026-10-31 08:10:57–08:10:58 UTC against loopback API port 55321. Credentials came from local CLI status into process variables and were not saved in the report.
+- Exact retry: PASS — HTTP 200 for all seven canonical retries; entire session and event snapshots unchanged. Omitted/null/empty/ordinary-space-only reasons normalize to the same request; padded/trimmed non-empty reasons also replay.
+- Different payload: PASS — changed reason under the same key returns HTTP 400 / 22023 / `Event key reused with different request`, with no mutation.
+- Stale conflict: PASS — HTTP 409 / PT409 in 32 ms, row unchanged; no automatic retry timeout observed.
+- Cross-owner: PASS — a separately authenticated user receives HTTP 403 / 42501; owner row unchanged.
+- Invalid state: PASS — in_progress, completed, cancelled and already-skipped fixtures reject HTTP 400 / 22023 with zero events and unchanged rows. Expired missed/scheduled fixtures also reject 400 / 22023; oversized reason rejects 400 / 22023. Both disposable users were signed out/deleted; final database query found **0** skip fixture users. Temporary probe script was removed; only the secret-free JSON report remains.
+
+### Regression
+
+- Lint: PASS — from `apps/web`, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors, 1 existing warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6` (missing projection dependency).
+- Vitest: PASS — `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, 94.68 seconds. The skipped cases comprise 19 opt-in Phase 04 direct integration tests and 1 existing Focus integration test; they were not separately executed here. New Skip coverage is in pgTAP/HTTP above, not included in the 612 web unit passes.
+- TypeScript: PASS — `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: PASS — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in 24.4 seconds, TypeScript finished in 47 seconds, generated **98/98** pages in 1036 ms. Existing .env.local was not edited. Supabase inbucket deprecation/optional stopped-service notices were non-fatal. No replay, test or quality-gate failure occurred in this verification.
+
+### Limits
+
+- Two-connection concurrency pending Step 5.6 — **NOT EXECUTED** for Skip. Sequential pgTAP and HTTP do not prove race safety; Task -> Schedule -> Session lock order was source-reviewed only. Earlier Start/Phase 03 concurrency reports do not establish Skip race behavior.
+- Exact DST recovery cutoff pending Step 5.6 — **NOT EXECUTED**. Fixtures use UTC or a fixed-offset timezone and valid/expired times away from the boundary. No DST transition, exact cutoff, just-before/just-after controlled pair, historical-timezone-change case or lock wait crossing cutoff was injected.
+- Attendance UI pending Step 5.7 — no Skip Server Action, UI binding, generated RPC type or browser E2E was added/tested here. Web quality gates establish regression health, not an attendance UI flow.
+- Additional unexecuted cases include changed expected version under a used Skip key, mismatched historical event types/legacy fingerprints, and replay after later Task/Schedule changes. Source guards are not substituted for these acceptance tests. Phase 05 remains IN PROGRESS.
+
+### Decision
+
+- Step 5.3: **PASS (LOCAL)** for the executed sequential RPC, HTTP, rollback, ownership and regression scope above; pending boundary/concurrency work remains explicitly open.
+- Ready for Step 5.4: **YES**, with the Step 5.6/5.7 limits retained.
+- Production authorized: **NO**.
