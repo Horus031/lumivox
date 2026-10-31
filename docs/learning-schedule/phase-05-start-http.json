@@ -1,0 +1,41 @@
+{
+  "startedAt": "2026-10-31T07:18:42.294Z",
+  "checks": [
+    {
+      "name": "stale-contract",
+      "status": "PASS",
+      "http": 409,
+      "sqlstate": "PT409",
+      "elapsedMs": 26
+    },
+    {
+      "name": "cross-owner",
+      "status": "PASS",
+      "http": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "valid-start",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "exact-replay",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "changed-request-same-key",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "one-event-no-completion-or-minutes",
+      "status": "PASS"
+    }
+  ],
+  "status": "PASS",
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T07:18:42.800Z"
+}

@@ -1,0 +1,100 @@
+# Phase 05 — Attendance & Recovery Evidence
+
+## Baseline and Scope
+
+- Branch: `feature/learning-schedule-foundation`.
+- Starting HEAD: `89be637e275db37854dc9bacb8e083dbd7f25a4e` (`test(learning-schedule): complete phase 04 acceptance`).
+- Verified on 2026-10-31, approximately 14:11–14:20, Asia/Bangkok.
+- Initial working tree: one untracked, empty (0-byte) migration, `supabase/migrations/20261031071036_learning_schedule_start_attendance.sql`; no Start acceptance test or Phase 05 evidence file existed. After this was identified, the user explicitly authorized writing the SQL according to the supplied guide.
+- Implemented content in the migration the user already created; did not create/rename another migration. Added rollback-only pgTAP acceptance tests and a repeatable independent-connection Start concurrency harness.
+- Phase 04 handoff remains local PASS according to its existing final report. Those historical results are not counted as fresh Phase 05 executions below.
+- This report covers Step 5.1 RPC/state transition only. No Attendance UI, Next.js Start Server Action, Focus integration, notification/email sending, generated TypeScript binding, commit, push or production deployment was added/performed.
+
+## Step 5.1 — Attendance State Machine and Start Session RPC
+
+### Implementation / Contracts
+
+- Migration: `supabase/migrations/20261031071036_learning_schedule_start_attendance.sql`.
+- RPC: `public.ls_start_study_session(p_session_id uuid, p_expected_updated_at timestamptz, p_event_key text) RETURNS uuid`.
+- SECURITY DEFINER is required for the existing authenticated read-only table model. The function sets an empty search_path, revokes execution from PUBLIC/anon, grants it only to authenticated, checks auth.uid and ownership before reading/replaying/writing the command, and never trusts user-editable metadata.
+- Row locks are acquired in Task -> Schedule -> Session order, matching existing scheduling commands. Task must be a root in todo/in_progress, Schedule active, and Session scheduled.
+- Start window: inclusive scheduled_start_at and exclusive scheduled_end_at + 60 elapsed minutes. Uses clock_timestamp after locks so waiting does not freeze eligibility at transaction-begin time. Starting after scheduled end is allowed only while still before grace cutoff.
+- Request fingerprint hashes a typed canonical object with command=start, Session ID and expected-version epoch. The event key is scoped by the existing unique (session_id,event_key) constraint. Exact replay is checked before state/window/stale checks and returns the prior ID without another event. A reused key with another version or incompatible prior event fails closed.
+- Transition updates only status to in_progress (plus the existing updated_at trigger), then inserts one started audit event with owner/actor, from/to states, event key, fingerprint, expected version and server-observed startedAt. Both writes are atomic.
+- Does not complete the Task, set completed_at, write actual_study_minutes, create a Focus timer, or send email. Original session identity and planned time are retained.
+
+### SQLSTATE / HTTP Contract
+
+| Condition | SQLSTATE | Verified HTTP response |
+| --- | --- | --- |
+| Missing authentication / non-owner / inaccessible session | 42501 | Cross-owner authenticated request: 403 |
+| Invalid key/version input, invalid state/window, changed payload under an existing key | 22023 | Changed same-key payload: 400 |
+| Stale expected version on an otherwise eligible scheduled session | PT409 | 409, observed in 26 ms |
+| Valid Start / identical replay | Success, same UUID | 200 |
+| Injected audit failure in test only | P0001 | SQL-only rollback test; not an HTTP acceptance case |
+
+- Business stale errors deliberately use PT409 rather than 40001. This follows [PostgREST custom HTTP error codes](https://docs.postgrest.org/en/v14/references/errors.html) and [Supabase guidance on custom serialization errors/retry loops](https://supabase.com/kb/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions). The HTTP mapping and absence of the previous multi-second stale response were actually probed locally; it is not a source-review-only claim.
+- Existing Phase 03 reschedule/revise RPC SQLSTATE contracts were not changed by this migration.
+
+### Acceptance Matrix — Executed
+
+| ID | Actual test / result | Status |
+| --- | --- | --- |
+| START-01 | Owner starts eligible session; same UUID, status in_progress, original logical identity retained, completed_at/actual_study_minutes remain null and parent Task stays todo. | PASS |
+| START-02 | Exactly one started event with scheduled -> in_progress, owning actor and nonnull fingerprint. Real Auth/PostgREST probe also verifies one event. | PASS |
+| START-03 | Original expected version/key replay succeeds after status/version change without another event. Independent-transaction durable replay also passes in the concurrency harness. | PASS |
+| START-04 | Same session/key with a different expected version fails 22023 / Event key reused with different request. Real HTTP probe returns 400; event count stays one. | PASS |
+| START-05 | Future session (one hour ahead) rejected as outside the start window. | PASS |
+| START-06 | Session more than 60 minutes after scheduled end rejected; a separate fixture after end but still inside grace starts successfully. | PASS |
+| START-07 | Completed, cancelled, missed, skipped and already-in-progress fixtures rejected. | PASS |
+| START-08 | Completed/cancelled Task and paused Schedule rejected. Existing Task-close integration/guards remain intact. | PASS |
+| START-09 | User B denied with 42501 and cannot read A's row through RLS. Real locally signed-in B receives HTTP 403. Missing auth identity is rejected, anon cannot execute, authenticated has execution permission. | PASS |
+| START-10 | Stale version does not overwrite scheduled status or timestamp; SQLSTATE PT409. Real authenticated PostgREST stale request returns 409 in 26 ms without changing the row. | PASS |
+| START-11 | Temporary BEFORE INSERT audit trigger throws after attempted status update; complete session/event snapshots match the prior snapshot, including updated_at. Trigger/helper/fixture changes roll back. | PASS |
+| START-12 | Separate A/B/observer PostgreSQL connections: distinct-key double Start has one transition and one 22023 loser; exact-key double Start returns the same ID to both with only one event. Both scenarios repeated three times and observed blocked by A before commit. | PASS — real concurrency |
+
+### Database Replay / pgTAP — Actual Commands and Results
+
+- LOCAL ONLY, from repo root: `supabase db reset --local`, exit 0. All 80 migrations replayed, including the new Start migration. Independent migration-history count confirmed 80. No linked/remote database was used.
+- Warning: no files matched supabase/seed.sql; no seed file was present. Migration replay still completed successfully.
+- `supabase test db --local`, exit 0: Files=18, Tests=355, Result=PASS, 1 wallclock second. This includes 33 new Start assertions plus the 322 existing database assertions.
+- Start test file: `supabase/tests/learning_schedule_start_attendance.sql`. It uses BEGIN/ROLLBACK, two Auth/profile owners, authenticated role/JWT claims, realistic current-window/future/expired fixtures, error assertions and audit-insert failure injection.
+- Fixture timezone is chosen between UTC and a fixed-offset IANA zone to keep local start/end away from midnight at any UTC execution hour. Original updated_at is intentionally older than the test transaction so version-change/replay assertions remain meaningful despite PostgreSQL transaction timestamps.
+- Persistent Phase 03 concurrency setup emits one intentional TAP SKIP; it is not a skipped Start acceptance case. START-12 is verified by its separate new real harness, not by sequential pgTAP statements.
+
+### START-12 — Real Concurrency / Durable Replay
+
+- Script: `scripts/test-learning-schedule-start-concurrency.mjs`; run from repo root with `node scripts/test-learning-schedule-start-concurrency.mjs`.
+- Exit 0; 6/6 races PASS (two scenarios x three iterations), all six blocking relations observed through pg_blocking_pids. A/B/observer are three distinct local psql backends inside supabase_db_lumivox-proj. No remote DB URL is accepted.
+- Worker A holds the Task lock and performs uncommitted Start. Worker B issues Start under a separate authenticated transaction. Observer proves B waits for A before A commits; the result is checked after both transactions finish.
+- Distinct-key case: A succeeds, B rejects ineligible in_progress state with 22023, not an invented second transition. Exact-key case: A/B return the same UUID. Each final state has one started event, in_progress status, null minutes/completion and unchanged todo Task.
+- An additional exact replay runs in a new transaction after durable commit for every race; all 6/6 preserve the final snapshot/event count.
+- Deadlines inherited from the existing connection helper pattern: lock timeout 5s, statement timeout 10s, client command deadline 15s; observed wait deadline 3.5s. The helper is copied into the dedicated script; the existing Phase 03 harness was not modified.
+- Report: [phase-05-start-concurrency.json](./phase-05-start-concurrency.json). status=PASS, cleanup=PASS, openWorkerTransactions=0, remainingWorkerLocks=0. Fixture UUIDs are fresh per run and cleanup checks ownership/title before deletion.
+
+### Authenticated HTTP Probe — Actual Results
+
+- Local Node stdin probe executed from apps/web with @supabase/supabase-js and Temporal already installed. LEARNING_SCHEDULE_TEST_URL/ANON_KEY/SERVICE_KEY came from CLI status into process variables without printing or saving credential values. Guard required loopback host/API port 55321.
+- Created two disposable locally signed-in users and a valid Start-window fixture; invoked the actual ls_start_study_session endpoint with a 5-second bound on the stale probe.
+- 6/6 checks PASS: stale PT409/HTTP 409 (26 ms); cross-owner 42501/HTTP 403; valid Start 200; identical replay 200; changed same-key request 22023/HTTP 400; exactly one started event and no completion/minutes afterward.
+- Report: [phase-05-start-http.json](./phase-05-start-http.json). status=PASS, cleanup=PASS. Users signed out/deleted, and remaining Task counts were confirmed zero.
+- This is real Auth/JWT/PostgREST verification of the RPC contract. It is not a Next.js Start Server Action or browser attendance E2E test; those have not been implemented here.
+
+### Web Quality Gates — Actual Results
+
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing missing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Unit suite: `node node_modules/vitest/vitest.mjs run`, exit 0; 69 files passed / 2 skipped; 612 tests passed / 20 skipped (632 total), duration 90.42 seconds. Skips are the 19 opt-in Phase 04 Schedule integration cases and 1 existing Focus integration case; these were not separately rerun in this Step 5.1 verification. New attendance acceptance executes in pgTAP, its real concurrency harness and the HTTP probe above.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0; Next.js 16.2.6 compiled in 25.2 seconds, TypeScript completed in 48 seconds and generated 98/98 static pages in 1142 ms.
+- Web source/generated types were unchanged by this backend-only step. The web gates were executed against the unchanged application during SQL implementation; no new Start RPC binding or UI type coverage is claimed.
+- Direct Node entry points bypass the environment's broken npm/npx shims. Existing Vite native config-loader and local Supabase inbucket/optional-stopped-service notices are non-fatal. No failed migration, pgTAP, concurrency, HTTP, lint, unit or build run occurred after SQL implementation in this step.
+- Final independent DB query: migrations=80, remaining attendance fixture users=0, start_test_audit_failure triggers=0. `git diff --check` passed.
+
+### Coverage Limits / Decision
+
+- Step 5.1 RPC/state-transition acceptance: LOCAL PASS for START-01–START-12 within the boundaries above. All success decisions use executed results, not source review alone.
+- Concurrency coverage is controlled same-session double Start with distinct/exact keys plus durable replay under READ COMMITTED. Start versus Task-close/revise/reschedule/missed sweep, audit failure under competing requests, arbitrary load and other isolation levels remain Step 5.6 hardening work. The previous 36-case Phase 03 harness was not rerun here.
+- Time tests cover future, valid, expired and within-grace fixtures. The code defines inclusive start/exclusive grace cutoff; an exact microsecond cutoff or a wait crossing that cutoff was not separately injected. Complete/Missed Sweep must adopt the same explicit policy in subsequent steps.
+- No Focus-session creation/minute accounting is implemented. Actual study duration must not be inferred from the planned duration. No attendance UI, Start Server Action, browser E2E or generated RPC types were added in this step.
+- Existing Phase 03 RPCs still have their documented 40001/HTTP-timeout limitation; this migration's PT409 contract does not repair those older functions. Durable client command storage across navigation remains outside this SQL step.
+- Phase 05 overall: IN PROGRESS. Steps 5.2–5.8 have not been executed. Ready to develop Step 5.2 locally; production deployment authorized: NO.
+- No commit or push was performed; the user will handle both.
