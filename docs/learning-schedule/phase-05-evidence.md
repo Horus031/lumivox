@@ -302,3 +302,84 @@
 - Step 5.4: **PASS (LOCAL)** for executed replay, batch, audit rollback, permissions, Double Sweep/locked-candidate checks, actual local Cron and regression scope above; deferred acceptance cases remain open.
 - Ready for Step 5.5: **YES**, retaining the Step 5.6 concurrency/boundary work and deferred Focus/UI scope.
 - Production authorized: **NO**.
+
+## Step 5.5 — Late Recovery
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: `c9a6ae23f77576083e4f491dce329b187b0f244f` — `feat(learning-schedule): add guarded automatic missed sweep`. New Late Recovery migration/test were untracked working-tree additions; the SHA identifies the baseline, not a commit containing Recovery.
+- Migration filename: `supabase/migrations/20261031091300_learning_schedule_late_recovery.sql`.
+- Reviewed test: `supabase/tests/learning_schedule_late_recovery.sql`. Both user-supplied SQL files were tested unchanged. This verification appends evidence and adds the HTTP result report; no commit/push or production deployment.
+
+### Database — Executed
+
+- Clean replay: **PASS** — `supabase db reset --local`, followed by `supabase test db --local`, both exit 0, using the installed Windows Supabase CLI directly. No remote database was targeted.
+- Total migrations: **84** after clean replay, independently confirmed from `supabase_migrations.schema_migrations`.
+- pgTAP: **PASS — 22 files, 459 assertions, 0 failures**, 9 wall-clock seconds. The existing persistent concurrency setup file intentionally emits a TAP skip; it does not execute concurrent Recovery commands.
+- Existing assertions: **433**, all passed again, including Start, Complete, Skip, Sweep and earlier Learning Schedule/Focus/Workspace coverage.
+- New Late Recovery assertions: **26**, all passed. The new suite uses real authenticated database roles/JWT claims and rolled-back fixtures; these are sequential SQL assertions, not a two-connection concurrency test.
+- Final independent query: **0** recovery fixture users and **0** recovery_test_audit_failure triggers. Sweep gate remains **false**; original Cron schedule remains `*/5 * * * *`. No Cron activation was performed in Step 5.5.
+
+### Functional Acceptance — Executed
+
+| Coverage | Actual result | Status |
+| --- | --- | --- |
+| REC-01 missed -> completed | Returns original session UUID, persists completed_at, retains logical occurrence identity and null actual_study_minutes. | PASS — pgTAP + HTTP |
+| REC-02 skipped -> completed | Returns original UUID and completed state; source status retained in audit. | PASS — pgTAP + HTTP |
+| REC-03 authoritative audit | One recovered event with owning actor, correct source/target state, wasLate=true and fingerprint. HTTP also checks 64-hex fingerprint, sourceStatus, original local date/timezone, computed cutoff and equality of recoveredAt/completed_at as instants. | PASS — pgTAP + HTTP |
+| REC-04 exact replay | Original key/version returns same UUID after completion; no additional event. HTTP compares the entire completed row and event array before/after retry, preserving timestamps. | PASS — pgTAP + HTTP |
+| REC-05 fingerprint mismatch | Changed expected version under a used key rejects 22023 / Event key reused with different request; HTTP confirms unchanged row/events. | PASS — pgTAP + HTTP |
+| REC-06 expired window | 10-day-old missed/skipped reject 22023. HTTP additionally checks both states on local day 8; both reject without mutation. | PASS for executed away-from-cutoff fixtures |
+| REC-07 disallowed states | scheduled, in_progress, completed and cancelled reject 22023; HTTP confirms unchanged rows and zero events. | PASS — pgTAP + HTTP |
+| REC-08 future obligation | Future missed rejects Session has not started; HTTP additionally checks future skipped with the same rejection and no mutation. | PASS — pgTAP + HTTP |
+| REC-09 parent eligibility | Completed Task and paused Schedule reject Session is not eligible for recovery. Other Task status/subtask branches were source-reviewed only. | PASS for executed pgTAP cases |
+| REC-10 stale version | Otherwise eligible stale request returns PT409; row remains missed with original updated_at and null completion. HTTP returns 409/PT409 and compares full row/events. | PASS — pgTAP + HTTP |
+| REC-11 owner isolation | B cannot recover A's session: 42501. Real HTTP is 403/42501; B's user-scoped SELECT returns zero rows, and A's row is unchanged. | PASS — pgTAP + HTTP |
+| REC-12 parent Task separation | Task stays todo; minutes remain null. HTTP confirms Task status and original session identity/time/revision/source slot. No independent Focus table snapshot was taken. | PASS within executed scope |
+| REC-13 audit rollback | BEFORE INSERT recovered-event trigger raises P0001 / Injected recovery audit failure. Full fixture session/event snapshots match their originals after failure, including timestamps. | PASS — pgTAP |
+| REC-14 execution privileges | anon cannot execute, authenticated can execute the reviewed RPC. Empty search_path and owner authorization before replay/mutation were also source-reviewed. | PASS — pgTAP plus stated source review |
+
+### HTTP Contract — Supabase Local
+
+- **28/28 checks PASS** using actual Supabase Auth/JWT clients and PostgREST RPC calls, with a loopback/port guard for `127.0.0.1:55321`. No fake RPC, injected requireUser or browser flow was used. [Raw HTTP report](./phase-05-recovery-http.json).
+- Probe execution: **2026-10-31 09:21:59–09:22:00 UTC**. Local CLI status credentials were passed only through process variables; no credentials/passwords are stored in the report.
+- Success: four fixtures, missed/skipped on local days 2 and 7, return HTTP **200** / same UUID, persist completion and exactly one recovered event.
+- Exact retry: four HTTP **200** responses; full persisted session/event snapshots remain equal. Changing expected version under each used key returns **400 / 22023**, with message `Event key reused with different request`, and no mutation.
+- Stale: **409 / PT409**, observed in **25 ms** including the probe's subsequent no-mutation reads, within a 5-second request bound; no retry timeout occurred. Cross-owner: **403 / 42501**, row unchanged and RLS read denied.
+- Invalid/expired/future cases: **400 / 22023** for scheduled/in_progress/completed/cancelled, missed/skipped on day 8 and day 10, and future missed/skipped. Each rejected case has unchanged full row and zero events.
+- Both disposable users signed out and were deleted; per-user Task counts are zero afterward. Temporary probe script removed; only the secret-free JSON report remains.
+
+### Boundary Coverage / REC-B
+
+- Source rule: cutoff is exclusive midnight at the start of `session.local_date + 8`, calculated in the **historical session timezone**. Source uses clock_timestamp after acquiring Task -> Schedule -> Session locks. These observations are source review, not boundary acceptance results.
+- **Executed:** pgTAP accepts 2-day-old sessions and rejects 10-day-old sessions. Real HTTP additionally accepts both missed/skipped on local day 7 and rejects both on day 8; audit recoveryCutoff is compared with an independently calculated Temporal midnight. Executed HTTP timezone was **UTC**. These fixtures were hours away from midnight and establish calendar-day samples only.
+- A separate REC-B case matrix/numbered definitions was not present in the checked repository files. No missing REC-B identifier is assigned a PASS or inferred mapping from ordinary REC-01–REC-14 assertions. The unexecuted boundary scenarios below remain explicit acceptance gaps.
+
+| Boundary scenario | Execution status |
+| --- | --- |
+| Exact cutoff instant, just-before and just-after controlled boundary pair | **NOT EXECUTED** |
+| DST spring-forward or fall-back recovery window; prove calendar-day semantics versus 7 x 24 elapsed hours | **NOT EXECUTED** |
+| Different historical session timezone versus subsequently changed schedule/device timezone | **NOT EXECUTED** |
+| Multiple non-UTC timezones or unusual midnight timezone transition | **NOT EXECUTED** |
+| Lock wait crosses recovery cutoff; true clock rechecked after waiting | **NOT EXECUTED** |
+| Exact replay after cutoff or later Task/Schedule eligibility changes | **NOT EXECUTED** |
+
+- The cutoff expression, earlier replay check and post-lock clock placement are **SOURCE REVIEW ONLY** for those scenarios. They do not change any NOT EXECUTED result to PASS. Broader REC-B acceptance remains open for Step 5.6/additional dedicated tests.
+
+### Web Gates — Executed
+
+- Lint: **PASS** — from apps/web, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing missing projection dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Vitest: **PASS** — `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **133.32 seconds**. The 19 opt-in Phase 04 direct integration cases and 1 existing Focus integration case were not separately executed here. New Recovery coverage is pgTAP/HTTP, not included in the 612 web passes.
+- TypeScript: **PASS** — `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: **PASS** — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in **34.1 seconds**, TypeScript finished in **71 seconds**, generated **98/98** pages in **1372 ms**. Existing .env.local was unchanged.
+- Existing Vite config-loader and Supabase inbucket/optional stopped-service/missing optional seed notices were non-fatal. No replay, pgTAP, HTTP or web gate failure occurred. `git diff --check` passed after evidence update.
+
+### Limits / Decision
+
+- **Two-connection Recovery concurrency: NOT EXECUTED.** No double-Recover, Recovery-vs-Skip/Complete/Sweep, Task-close/revision race or observed lock wait was run. Existing Start/Sweep/Phase 03 reports do not establish Recovery race safety.
+- Other additional unexecuted cases include null/invalid event-key variants, legacy/mismatched event fingerprints and changed command/session payload combinations under a historical key. Source validation is not a substitute for these tests.
+- No generated Recovery TypeScript binding, authenticated Next.js Recovery action, attendance UI/browser E2E, Focus integration, minutes accounting, notification/email handling or production deployment was added/tested. The reviewed RPC changes only completion and its audit; web gates do not prove a future UI flow.
+- Step 5.5 executed core sequential RPC/HTTP, audit rollback, owner isolation and web gates: **LOCAL PASS within the stated executed scope**.
+- **Full Step 5.5 boundary/REC-B acceptance: PENDING — NOT EXECUTED cases above remain open.** Do not treat this evidence as an unconditional final acceptance of those cases. Phase 05 remains **IN PROGRESS**.
+- Production authorized: **NO**. No commit or push was performed.
