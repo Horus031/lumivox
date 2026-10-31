@@ -443,3 +443,77 @@
 - Ready for Step 5.6B YES / NO: **YES**, with pending cases retained explicitly.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**.
+
+## Step 5.6B-1 — Sweep / Task Close Cross-Command Concurrency
+
+### Baseline / Changes Reviewed
+
+- Branch: `feature/learning-schedule-foundation`; verified locally on 2026-10-31 (Asia/Bangkok).
+- HEAD SHA: **`c524a76fa503d3262a354a5b00e98ca4ba52cba6`**. The cross-boundary harness/report were untracked additions; SHA identifies the baseline, not a commit containing this harness.
+- Harness: `scripts/test-learning-schedule-attendance-cross-boundary.mjs`. Local container `supabase_db_lumivox-proj`; no new migration or production code change in this verification.
+- Fixture correction retained: prepareOverdue derives UTC and local values from one materialized clock_timestamp anchor. Multiple independent clock calls previously differed by microseconds and triggered 22023 / Noncanonical or nonexistent local study time. The database canonicalization guard remains intact.
+- Added measurement/reporting for SKIP LOCKED elapsed time, actual backend PIDs, gate before/after and worker lock cleanup. No production SQL/RPC behavior was relaxed.
+
+### Executed Command / Result
+
+- From repo root: `node scripts/test-learning-schedule-attendance-cross-boundary.mjs`, **exit 0; 30/30 runs PASS** — 10 scenarios repeated 3 times.
+- Fresh report: [phase-05-attendance-cross-boundary.json](./phase-05-attendance-cross-boundary.json), **2026-10-31 10:01:50.855–10:01:53.095 UTC**.
+- Three independent PostgreSQL backend PIDs: **A=2718, B=2719, observer=2717**. Attendance/Task updates execute with authenticated owner claims; trusted Sweep executes as service_role. Observer independently reads blockers and final persisted state after COMMIT/ROLLBACK.
+- This is controlled transaction overlap with the listed first/second ordering, not arbitrary scheduling, load testing or a complete ordering matrix. It does not exercise an exact grace/recovery cutoff.
+
+### SQLSTATE / Final State / Audit Results
+
+| Scenario | Runs | Actual B result | Final Session / Task / Schedule | Events per fixture |
+| --- | --- | --- | --- | --- |
+| Sweep first vs Complete | 3/3 PASS | 22023 | missed / todo / active | 1 marked_missed |
+| Sweep first vs Start | 3/3 PASS | 22023 | missed / todo / active | 1 marked_missed |
+| Sweep first vs Skip | 3/3 PASS | PT409 | missed / todo / active | 1 marked_missed |
+| Sweep first vs Recovery | 3/3 PASS | PT409 | missed / todo / active | 1 marked_missed |
+| Task Close first vs Start | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
+| Task Close first vs Complete | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
+| Task Close first vs Skip | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
+| Complete first then Task Close | 3/3 PASS | 00000 | completed / completed / closed | 1 completed |
+| Skip first then Task Close | 3/3 PASS | 00000 | skipped / completed / closed | 1 skipped |
+| Locked Task -> Sweep skip -> retry | 3/3 PASS | Successful batch calls; marked 0 then 1 | missed / todo / active | 0 while locked, 1 marked_missed after retry |
+
+- Task-close-first fixtures have already started, so they stay scheduled rather than being cancelled as future unstarted occurrences. Their Schedule closes and all competing attendance commands reject; no completion/audit is invented.
+- PT409 after Sweep means the source state missed remains eligible for Skip/Recovery, but Sweep changed updated_at. No new event is written by the stale second command. Start/Complete are ineligible from missed and return 22023 instead.
+- All final fixtures retain null actual_study_minutes. completed_at is present only for completed outcomes; non-completed final states have null completed_at. Original ID is returned/queried and matches the audit session_id. Authoritative event type/count and Task/Schedule status assertions pass for the executed paths. For Sweep paths active Schedule is source/setup eligibility, not a separate final schedule-status assertion; closed status is explicitly queried in Task Close paths.
+- Total final events across the 30 disposable fixtures: **21** — **15 marked_missed, 3 completed, 3 skipped**; the 9 Task-close-first fixtures have zero events. Rejected/stale second commands add no event. Snapshots remain in the JSON report although fixtures are deleted.
+
+### Lock Evidence — Waiting vs SKIP LOCKED
+
+- **27 observed blocking cases**, each with A=2718 in `pg_blocking_pids(2719)` before A commits. This comprises **21 Attendance waiters** (12 after Sweep + 9 after Task Close) and **6 Task Close waiters** after Complete/Skip. Worker B's command is already pending on its separate backend when observer confirms the blocker; only then does A commit. Thus the result is not inferred from a sleep or source review.
+- **3 SKIP LOCKED cases are intentionally non-waiting**. No pg_blocking_pids evidence is required/claimed for them. A retains its explicit Task row lock throughout B's first batch call and B's COMMIT; that call finishes before A releases the lock.
+- First locked batches each return **marked=0, examined=1**. Measured end-to-end call durations: **2.0351 ms, 1.5642 ms, 1.4561 ms**, all below the explicit **2000 ms** assertion bound and well below the **5-second lock timeout**. These are local observations, not a production latency guarantee.
+- While A still holds the lock, the fixture remains scheduled with **0 events**. After A commits, a new trusted B transaction retries and returns **marked=1, examined=1** in all three cases; observer sees missed with exactly one marked_missed event and null completed_at/minutes. This establishes prompt skipping plus eventual retry, not a blocking wait.
+- Harness limits: 5-second lock timeout, 10-second statement timeout, 15-second client command deadline; none reached in the final run.
+
+### Cleanup / Gate / Verification Notes
+
+- **Cleanup PASS** — fixture Task and owner user removed; **0 open worker transactions, 0 remaining worker locks** recorded before connection shutdown. All three connections closed. Independent post-exit query confirms **0 attendance-cc fixture users, 0 fixture Tasks and 0 remaining harness backends**.
+- Sweep gate **OFF before and after** (`false` in report and independent final query). Existing local Cron remains registered; no gate activation or schedule change was performed. No remote database, production Cron activation, commit or push.
+- During instrumentation, one run completed all 30 races but the newly added scalar gate-result JSON parsing failed during report cleanup. Replaced that metadata query with a JSON object; reran all 30 successfully and independently confirmed cleanup. This was a harness/reporting failure, not a failed RPC concurrency assertion. The final linked report is the successful complete run; the earlier partial verification is not counted as acceptance evidence.
+- No new migration, web code or dependency changed. Full pgTAP/lint/Vitest/TypeScript/build gates were **NOT RERUN in this B-1 evidence turn**; their last executed results remain in Step 5.6A (467 pgTAP assertions; 612 Vitest passes/20 skips; lint/type/build PASS). Running this changed Node harness supplies its actual syntax/runtime and database verification; previous web results are not presented as fresh runs.
+
+### Remaining Step 5.6B-2 Gaps
+
+All items below remain **NOT EXECUTED / PENDING** unless an earlier section explicitly identifies a narrower executed case. No PASS is inferred from source review:
+
+- **Schedule Revision vs Attendance:** revise-first and attendance-first orderings for Start/Complete/Skip/Recovery, cancellation/supersession and authoritative audit invariants.
+- **Remaining Sweep/Attendance orderings:** attendance-first versus Sweep, state-appropriate reverse orderings, command retry with refreshed versions after Sweep and broader exact-key interactions. B-1 covers Sweep-first only, plus locked-Task skip/retry; it is not the full cross-command matrix.
+- **Remaining Task Close/Attendance cases:** Recovery on missed/skipped in both orderings, Start-first then close, other close/status paths and future-unstarted cancellation audit interactions. B-1 covers Task-completed-first vs Start/Complete/Skip and Complete/Skip-first vs Task-completed only.
+- **Exact grace cutoff under a controlled clock:** just-before/exact/just-after real RPC and Sweep calls, post-lock timing and lock wait crossing the deadline. Literal SQL-expression comparisons from 5.6A do not establish this.
+- **Exact recovery cutoff / REC-B under a controlled clock:** just-before/exact/just-after real Recovery/Skip, lock wait crossing cutoff, exact replay after deadline and later parent eligibility changes.
+- **DST boundary through real RPC:** spring-forward/fall-back calendar windows, non-UTC historical session timezone versus changed Schedule/device timezone, unusual midnight transitions and calendar days versus elapsed-time behavior. Existing expression tests and ordinary UTC fixtures do not close these gaps.
+- **Multi-row batch audit failure rollback:** fail a later audit after earlier rows changed, prove full-batch session/event snapshot restoration; include actual trusted batch entrypoints. Earlier single-transition rollback tests are narrower.
+- **Authorization and privilege hardening matrix:** anonymous/authenticated/cross-owner attempts against batch, gated wrapper and control table; function/public/service grants, null/invalid arguments, legacy/mismatched event fingerprints and semantic payload changes. Existing earlier ownership/grant tests are partial coverage, not full B-2 acceptance.
+- **Final invariants/coverage expansion:** explicit full identity/time/revision/timestamp comparisons through retries and competing lifecycle changes; multi-candidate batching/fairness/starvation and timeout/error cleanup as applicable. These 30 controlled interleavings are not randomized stress or exhaustive isolation-level testing.
+- **Full cross-command final acceptance:** PENDING until the remaining matrix, boundary, rollback and permission checks have actual results and required final regression gates are rerun. Attendance UI/browser integration, Focus reconciliation, reminders and production activation remain outside this B-1 test scope; Phase 05 is not complete.
+
+### Decision
+
+- Step 5.6B-1: **LOCAL PASS** for the documented **30 runs, 27 observed waits and 3 measured non-waiting SKIP LOCKED retries**.
+- Step 5.6B-2: **PENDING**; remaining gaps above are not marked PASS.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**.
