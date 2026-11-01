@@ -803,3 +803,71 @@ All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-b
 - Remaining Recovery/DST/security/final acceptance: **PENDING**, NOT EXECUTED cases above retained.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**. No commit or push performed.
+
+## Step 5.6B-2B.2C — Attendance HTTP Authorization
+
+### Baseline / Implementation
+
+- Branch: `feature/learning-schedule-foundation`, verified **2026-11-01 (Asia/Bangkok)**. `git pull --ff-only origin feature/learning-schedule-foundation` reported already up to date.
+- HEAD SHA: **`6e2e93c67d1a40f3ddbe2a5f8d03cbaff6f8d105`**. HTTP harness/report are working-tree additions, not contained in that baseline SHA.
+- Created `scripts/test-learning-schedule-attendance-http-security.mjs` from the supplied guide, applying the section 4 Auth correction: omit caller-supplied user ID and validate/use the UUID actually returned by the local Admin API for cleanup.
+- Added optional `SUPABASE_CLI_PATH` override while keeping `supabase` as the default executable. Local verification sets that variable to the installed Windows Supabase executable to bypass the broken npm/npx CLI shim. `status -o env` output is captured inside Node; credentials are not printed, saved to .env or written to reports.
+- Added sign-out of the disposable real Auth session before user deletion, retaining cleanup even if sign-out fails. Sign-out and deletion passed. No migration, production RPC, frontend/client binding or dependency change.
+- Local origin: **`http://127.0.0.1:55321`**, guarded exactly for http, loopback hostname, port and root pathname before any request. Docker queries use only `supabase_db_lumivox-proj`; **PostgreSQL 17.6 / 84 migrations** independently confirmed after execution. No migration replay repeated for this test-only step.
+
+### Actual HTTP Results
+
+- `node --check scripts/test-learning-schedule-attendance-http-security.mjs`: **exit 0**.
+- With SUPABASE_CLI_PATH pointing to the installed local CLI, ran `node scripts/test-learning-schedule-attendance-http-security.mjs`: **exit 0; 12/12 HTTP checks PASS**, plus two gate checks and cleanup/configuration checks.
+- [Fresh secret-free report](./phase-05-http-security.json), **2026-11-01 14:19:03.101–14:19:06.235 UTC** (21:19:03–21:19:06 Asia/Bangkok).
+- Anonymous requests use the local anon credential without a signed-in user. Authenticated requests use an actual access token returned by local Auth password sign-in, not simulated database claims or a fake RPC response. Service credential stays in the Node process and is used only for fixture administration and the disabled wrapper request.
+
+| Check | HTTP | Actual SQLSTATE / result | Outcome |
+| --- | --- | --- | --- |
+| SEC-anon-batch | **401** | **42501** | Anonymous POST ls_mark_missed_batch denied |
+| SEC-anon-cron-wrapper | **401** | **42501** | Anonymous POST ls_run_missed_sweep_if_enabled denied |
+| SEC-anon-control-read | **401** | **42501** | Anonymous GET ls_missed_sweep_control denied |
+| SEC-auth-batch | **403** | **42501** | Signed-in ordinary user cannot execute trusted batch |
+| SEC-auth-cron-wrapper | **403** | **42501** | Signed-in ordinary user cannot execute wrapper |
+| SEC-auth-control-read | **403** | **42501** | Signed-in ordinary user cannot read activation control |
+| SEC-auth-ownership-start | **403** | **42501** | Start with nonexistent Session UUID denied |
+| SEC-auth-ownership-complete | **403** | **42501** | Complete with nonexistent Session UUID denied |
+| SEC-auth-ownership-skip | **403** | **42501** | Skip with nonexistent Session UUID denied |
+| SEC-auth-ownership-recover | **403** | **42501** | Recovery with nonexistent Session UUID denied |
+| SEC-auth-invalid-event-key | **400** | **22023** | Whitespace-only Start event key rejected before ownership lookup |
+| SEC-service-disabled-wrapper | **200** | Scalar **0**, no error SQLSTATE | Trusted wrapper succeeds without processing while gate OFF |
+
+- All denials match explicit 401/403 plus 42501 assertions. No HTTP 404/PGRST202 or other schema-cache failure was accepted as a permission PASS.
+- Counts: **3 anonymous denials + 3 authenticated operational denials + 4 nonexistent-session ownership denials + 1 input rejection + 1 trusted disabled-wrapper success = 12 HTTP acceptance checks**. Report checks array additionally contains SEC-00/SEC-99 gate entries; Auth setup/sign-out/deletion requests are fixture operations and not inflated into the 12.
+- The harness deliberately **does not call ls_mark_missed_batch directly as service_role**, since that direct trusted operation bypasses the wrapper gate and could modify unrelated overdue local sessions. No operational gate enablement occurs.
+
+### Gate / User Cleanup / Configuration
+
+- **SEC-00 gate-before: false/OFF; SEC-99 gate-after: false/OFF**, both queried from local PostgreSQL. Independent post-suite query also confirms gate false. No local/remote Cron activation or schedule modification.
+- Disposable user is created via local Auth Admin API, then signed in with its generated password. After tests, session sign-out **PASS**, Admin user deletion **PASS**, own-UUID count **0**. Independent post-suite query confirms **0** users matching ls-security-%@example.invalid.
+- Cron configuration **PASS**: exactly one matching lumivox-learning-schedule-missed-5m job, `*/5 * * * *`, active=true, checked in harness and independently afterward. Active registration is distinct from the disabled processing gate. Command text was not newly compared by this check.
+- JSON report contains check names/statuses, HTTP status/SQLSTATE, origin, baseline, timestamps and cleanup results. A final scan confirmed no credential fields or JWT values. Keys/access tokens/passwords were not saved in repository files or printed by the harness. Existing .env.local unchanged.
+
+### Database and Web Regression — Fresh Runs
+
+- pgTAP: local CLI `supabase test db --local`, **exit 0; 25 files, 500 assertions PASS, 0 failures**, **21 wall-clock seconds**. Existing concurrency setup file intentionally emits TAP SKIP. No new SQL assertions were added in this HTTP-only step; HTTP checks run separately from pgTAP.
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, **exit 0; 69 files passed / 2 skipped, 612 tests passed / 20 skipped**, **89.31 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case were not separately executed. No Attendance UI/browser E2E was run.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **24.3 seconds**, TypeScript finished in **45 seconds**, generated **98/98** pages in **997 ms**.
+- Existing Vite config-loader and Supabase deprecated/optional stopped-service notices were non-fatal. No syntax, HTTP, cleanup, database or web-gate failure occurred. `git diff --check` passed after evidence update. Earlier concurrency/cutoff harnesses were not rerun; their reports remain historical evidence.
+
+### Scope Limits / Remaining Acceptance
+
+- This closes the **specified 12-check HTTP scope**, not every authorization permutation. Four user-command denials use a random nonexistent UUID; they do not newly prove denial against an existing Session owned by user A. Earlier actual cross-owner reports are separate evidence, not rerun in this harness.
+- **Expanded HTTP matrix: NOT EXECUTED here** — anonymous Start/Complete/Skip/Recovery, real A/B Session fixtures, own-session positive commands, control INSERT/UPDATE/DELETE, remaining argument/fingerprint variants, trusted direct batch and service-role control-table access. Control read denial and disabled wrapper success must not be generalized to those unexecuted requests.
+- **Exact Recovery cutoff through RPC: NOT EXECUTED**, including controlled before/exact/after, a Recovery lock wait crossing deadline and exact replay after cutoff.
+- **Controlled DST transition through RPC: NOT EXECUTED**; earlier literal arithmetic/historical-timezone tests remain narrower.
+- **Attendance-first-vs-Sweep remaining races: NOT EXECUTED** in this step. Prior matrices remain scoped to their actual orderings; no complete reverse-order or load/fairness acceptance is inferred from this HTTP harness.
+- Remaining clock-controlled/exact-grace RPC equality, broader replay/history and final acceptance, Attendance UI/browser E2E and Focus integration remain pending. No production approval or deployment is implied.
+
+### Decision
+
+- Step 5.6B-2B.2C — Attendance HTTP Authorization: **PASS (LOCAL)** for **12/12 real HTTP checks**, two gate checks, user sign-out/deletion, unchanged Cron registration and fresh database/web gates.
+- Recovery/DST/remaining-races/full acceptance: **PENDING** with NOT EXECUTED cases above retained. Phase 05 remains **IN PROGRESS**.
+- Production authorized: **NO**. No commit or push performed.
