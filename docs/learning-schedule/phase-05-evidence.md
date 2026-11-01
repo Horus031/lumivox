@@ -1015,3 +1015,75 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Ready for Step 5.6 final review / residual-risk decision: **YES**, with all NOT EXECUTED gaps above preserved.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**. No commit, push, merge or deployment performed.
+
+## Step 5.7A — Attendance Server Action Integration
+
+### Baseline / Backend Review Scope
+
+- Branch: `feature/learning-schedule-foundation`; implemented and verified **2026-11-01 (Asia/Bangkok)**. `git pull --ff-only origin feature/learning-schedule-foundation` reported already up to date.
+- HEAD SHA: **`0e2bb0dcd0833fce5a5d7908a94827783a88da5b`**. New action/unit tests and regenerated types are working-tree changes, not part of this baseline commit.
+- Backend integration readiness follows the supplied Step 5.6 final review: **conditional local integration readiness**, with production readiness still pending. Historical backend reports retain their actual executed scope; this action's mocked unit tests are not substituted for those RPC/concurrency/HTTP integration results.
+- Residual risks remain explicit: exact Recovery midnight execution and lock crossing that deadline, controlled DST RPC boundaries, Sweep backlog fairness and in_progress/Focus reconciliation. Sweep still only automates scheduled -> missed; no UI claim that every overdue in_progress session is automatically classified.
+
+### Files / Behavior Implemented
+
+- Added `apps/web/features/learning-schedule/session-attendance.actions.ts`: one async use-server entrypoint, mutateStudySessionAttendanceAction(raw), with typed AttendanceCommand and discriminated AttendanceActionResult unions.
+- Added `apps/web/features/learning-schedule/session-attendance.actions.test.ts`: **24 adapter unit tests** using mocked requireUser and Supabase RPC boundary, following the supplied acceptance cases.
+- Updated `apps/web/types/database.types.ts` using actual Supabase local type generation; no handwritten RPC type assertion or as any.
+- Zod strict discriminated schema accepts only start/complete/skip/recover, UUID Session/event keys and offset-aware expectedUpdatedAt. Only Skip accepts optional nullable reason, max 500 characters before normalization. Additional userId/now/sourceStatus/completedAt fields are outside the accepted schema; unit payload cases explicitly verify forged userId and now rejection before auth/dispatch.
+- requireUser supplies the normal user-scoped Supabase client. Action forwards the original Session UUID, expected version and event key with exact PostgreSQL argument names, adding normalized p_reason only for Skip. No service-role client, caller-supplied user identity/clock, pre-read eligibility check or application-side state transition.
+- Skip normalization uses JavaScript trim, blank/omitted/null -> null. Same command replay passes identical arguments; no new key or refreshed expected version is generated. Scope is stable normalized commands through this adapter; arbitrary raw direct-RPC whitespace variants are not newly tested here.
+- An **8-second AbortSignal timeout** bounds each RPC request. PT409 -> conflict with conflict=true; 42501 -> notAuthorized; 22023 -> notEligible; other known DB codes -> saveFailed. Returned messages are fixed safe text, not raw database errors.
+- Empty/no-code network errors, thrown errors after dispatch and unexpected successful RPC data return uncertain=true/code uncertain, without an automatic retry or false success. Auth failure before dispatch returns notAuthorized without calling RPC. Native 8-second elapsed timeout behavior was source-wired, while unit tests exercise abort-signal attachment and simulated network/thrown failures, not a real 8-second network timeout.
+
+### TypeScript Generation
+
+- Existing generated Database types did not contain Attendance RPC signatures. Checked CLI help, then ran local **supabase gen types typescript --local** using the installed Windows executable. Initial sandbox launch was denied; permitted rerun completed against local DB port 55322. No remote generation or credential export.
+- Captured stdout and wrote UTF-8 to the existing generated file only after successful generation and required Attendance symbol checks. This legitimately adds four Attendance RPCs, the missed-sweep control table and other current local functions (earliest-local-instant, batch and gated wrapper). Static generated declarations do not modify PostgreSQL grants or enable Sweep.
+- Retained generator formatting; trimmed whitespace on the newly generated control-table blank line so git diff --check succeeds. No as any, manual function-signature patch or dependency change. TypeScript and Next build both pass with the generated signatures.
+
+### New Unit Acceptance — 24/24 PASS
+
+- Targeted command from apps/web: `node node_modules/vitest/vitest.mjs run features/learning-schedule/session-attendance.actions.test.ts`, **exit 0; 1 file / 24 tests PASS**, **3.76 seconds**.
+
+| Group | Tests | Actual result |
+| --- | --- | --- |
+| Start/Complete/Recovery dispatch | 3 | Correct RPC name and exact p_session_id/p_expected_updated_at/p_event_key; abort signal attached; same UUID success |
+| Non-empty Skip normalization | 1 | Trimmed reason passed to ls_skip_study_session |
+| Optional/blank Skip normalization | 4 | undefined/null/empty/ordinary spaces normalize to null |
+| Invalid/extra input fields | 7 | Bad command/UUID/date, overlong reason, forged userId/now reject before requireUser and RPC |
+| Safe database error mapping | 4 | PT409/42501/22023/XX000 map to safe codes without exposing supplied sensitive DB message |
+| Network uncertainty | 1 | Empty error code -> uncertain; one RPC call only |
+| Thrown post-dispatch failure | 1 | uncertain; no automatic retry |
+| Unexpected RPC result | 1 | Different returned ID -> uncertain, not success |
+| Authentication failure | 1 | notAuthorized; no RPC dispatch |
+| Exact command identity | 1 | Two explicit calls pass identical version/key/Session args and return identical success |
+| **Total** | **24** | **PASS** |
+
+- Unit mocks intentionally isolate the Next.js adapter. They do not establish a fresh Server Action -> real Auth/PostgREST -> database completion path, DB audit idempotency or transaction rollback by themselves; earlier integration evidence remains separate.
+
+### Database / Application Gates — Actual Runs
+
+- Database regression: local CLI `supabase test db --local`, **exit 0; 26 files, 516 assertions PASS, 0 failures**, **8 wall-clock seconds**. Persistent concurrency fixture setup is intentionally TAP-skipped; no backend migration or new SQL assertion in this step.
+- Independent database query confirms **PostgreSQL 17.6, 84 migrations, Sweep gate false/OFF**. No clean replay, operational batch activation or production operation performed here.
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **30.9 seconds**, TypeScript finished in **65 seconds**, generated **98/98** pages in **1772 ms**. Existing .env.local unchanged.
+- **Initial full Vitest run: FAIL**, **1 file failed / 69 passed / 2 skipped; 7 failed / 629 passed / 20 skipped**, **113.06 seconds**. First existing DatePicker test timed out at 5000 ms while build/other gates were running; overlapping act warnings followed and six later DatePicker tests failed on missing DOM. New Attendance tests passed. This failure is retained in evidence rather than hidden by the later run.
+- **Full Vitest rerun after build finished: PASS**, same `node node_modules/vitest/vitest.mjs run` command, **exit 0; 70 files passed / 2 skipped; 636 tests passed / 20 skipped (656 total)**, **71.02 seconds**. No DatePicker source/test/config or timeout was changed. The rerun did not reproduce the failure; timing/load sensitivity is plausible, but its root cause is not proven by this rerun alone.
+- Final 636 web passes = previous 612 + new 24 Attendance tests. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case remain skipped and were not separately executed. Existing Vite config-loader/Supabase generation notices were non-fatal. `git diff --check` passed after whitespace cleanup/evidence update.
+
+### Explicit Limits / Next Step
+
+- **Attendance buttons/refetch/pending/confirmation/conflict UX: NOT IMPLEMENTED**, per Step 5.7B scope. study-sessions-list.tsx, TaskDetailsDrawer and layout/routes were not modified.
+- **Browser Attendance flow / accessibility E2E: NOT EXECUTED**, deferred to 5.7C. Next build does not prove browser command/retry/refetch behavior.
+- **Real authenticated Server Action integration: NOT EXECUTED in this step.** requireUser/Supabase boundary is mocked in the new tests; direct RPC/HTTP tests from earlier steps are not newly rerun through this action.
+- Exact RPC deadline/DST/Recovery/Focus/fairness residual risks from backend review remain open for final risk assessment. No production clock, ownership or audit behavior was weakened to start UI integration.
+- No email/reminder, Focus/minutes integration, deployment, staging/production activation, commit or push.
+
+### Decision
+
+- Step 5.7A — Attendance Server Action Integration: **PASS (LOCAL)** for the supplied adapter unit scope, generated types and final database/lint/type/build/Vitest checks, with the initial DatePicker failure/rerun documented above.
+- Ready for Step 5.7B Attendance controls: **YES**, retaining browser/integration acceptance and backend residual risks explicitly.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**.

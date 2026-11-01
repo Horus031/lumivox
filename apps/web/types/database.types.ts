@@ -461,7 +461,21 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"ml_model_versions": {
+                },"ls_missed_sweep_control": {
+                  Row: {
+                    "enabled": boolean,"singleton": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+
+                  ]
+},"ml_model_versions": {
                   Row: {
                     "algorithm": string,"artifact_path": string,"created_at": string,"explainability_metadata": NonNullable<Json>,"feature_schema": NonNullable<Json>,"id": string,"is_active": boolean,"metrics": NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at": string,"version": string
                   }
@@ -1386,14 +1400,35 @@ isOneToOne: false
 "leave_study_room":
 { Args: { "p_room_id": string }; Returns: undefined
                            },
+"ls_complete_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
 "ls_create_schedule":
 { Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
+                           },
+"ls_earliest_local_instant":
+{ Args: { "p_local_date": string,"p_local_time": string,"p_timezone": string }; Returns: string
+                           },
+"ls_mark_missed_batch":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_recover_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
                            },
 "ls_reschedule_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_new_end_at": string,"p_new_end_time": string,"p_new_local_date": string,"p_new_start_at": string,"p_new_start_time": string,"p_session_id": string }; Returns: string
                            },
 "ls_revise_schedule":
 { Args: { "p_ends_on": string,"p_expected_revision": number,"p_occurrences": Json,"p_schedule_id": string,"p_slots": Json,"p_starts_on": string,"p_timezone": string }; Returns: number
+                           },
+"ls_run_missed_sweep_if_enabled":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"ls_skip_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_reason"?: string,"p_session_id": string }; Returns: string
+                           },
+"ls_start_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
