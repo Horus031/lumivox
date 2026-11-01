@@ -659,3 +659,66 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - Remaining boundary/reverse-order/final acceptance: **PENDING**, with NOT EXECUTED cases above.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**. No commit/push performed.
+
+## Step 5.6B-2B.2A — Lifecycle Reverse-order Concurrency
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; implemented and verified **2026-11-01 (Asia/Bangkok)**.
+- HEAD SHA: **`0c8b17d5543843facc85fe054ab0b50ac06e6446`**. New lifecycle harness/report are working-tree additions, not part of this baseline commit.
+- PostgreSQL: **17.6**, container `supabase_db_lumivox-proj`, independently queried after execution.
+- Supabase local: CLI **2.122.0**, local API `http://127.0.0.1:55321`; local container healthy. CLI status was captured without printing credentials.
+- Migrations: **84**, independently confirmed. No new migration or production RPC modification; no clean replay repeated for this test-only change. Prior replay remains recorded in Step 5.5.
+- Created `scripts/test-learning-schedule-lifecycle-concurrency.mjs` from the passed Step 5.6A harness, retaining Connection/setup/command/snapshot/observeBlocker/cleanup infrastructure and adding the supplied future fixture, Task Close command, lifecycle executor and five scenarios. Scope follows the pasted guide: implement 2A now; cutoff production changes are deferred to 2B. No commit/push.
+
+### Real Concurrency
+
+- Independent backend PIDs: **A=843, B=844, observer=845**. Harness asserts distinct pg_backend_pid values. Workers use authenticated role plus fixture-owner JWT claims; observer independently checks blockers and persisted state. Actual RPC/database execution, not mocked responses or browser calls.
+- Observed lock waits: **15/15** — every record contains A=843 in `pg_blocking_pids(844)` before A commits. A executes the first operation uncommitted, B issues its competing operation and is observed waiting, then A releases its transaction. No SKIP LOCKED cases in this suite. These are fixed-order interleavings, not randomized load or exhaustive orderings.
+- LC-01 Start -> Task Close: **3/3 PASS**, B returns **00000** / Task UUID; Session stays **in_progress** with one started event. Task completed, Schedule closed. Exact Start replay afterward succeeds; this also covers **LC-06** from the contract.
+- LC-02 Recovery -> Task Close: **3/3 PASS**, from missed; B returns **00000** / Task UUID. Session **completed**, one recovered event and completed_at present. Exact Recovery replay after closure succeeds.
+- LC-03 Task Close -> Recovery: **3/3 PASS**, B rejects **22023**. Historical Session remains **missed**, completed_at null, **zero events**. Closed parent state does not produce an unauthorized recovery transition.
+- LC-04 Skip -> Task Close: **3/3 PASS**, from missed; B returns **00000** / Task UUID. Session remains **skipped**, one skipped event, completed_at null. Exact Skip replay after closure succeeds.
+- LC-05 Task Close -> Future Skip: **3/3 PASS**, B rejects **22023**. The actual future scheduled fixture is changed by Task Close to **cancelled**, cancellation_reason **task_closed**, with exactly one cancelled event. Harness verifies key `ls:task-close:<Session UUID>`, source scheduled and target cancelled. Future fixture local/UTC values derive from the same local day/IANA timezone; canonicalization guard is retained.
+- Total executions: **15/15 PASS**, five race scenarios x three iterations. `node --check scripts/test-learning-schedule-lifecycle-concurrency.mjs` and `node scripts/test-learning-schedule-lifecycle-concurrency.mjs` both exit 0. [Fresh raw report](./phase-05-lifecycle-concurrency.json), **2026-11-01 13:19:42.491–13:19:44.006 UTC** (20:19:42–20:19:44 Asia/Bangkok).
+- Expected/actual SQLSTATE: all match the supplied contract — B **9 x 00000**, **6 x 22023**; no PT409 observed/expected in these cases. All 9 additional exact replay requests also succeed. First-operation Session/Task UUID and successful second-operation return ID are checked.
+- Final Task status: **completed in all 15**.
+- Final Schedule status: **closed in all 15**, queried through observer after both worker transactions finish.
+- Final Session status: **3 in_progress, 3 completed, 3 missed, 3 skipped, 3 cancelled**. No fabricated actual_study_minutes; completed_at is non-null only for the completed outcomes. Historical rows remain available in final snapshots; no deletion/replacement is performed by these attendance/Task Close paths.
+- Audit event counts: **12 total across 15 fixtures** — **3 started, 3 recovered, 3 skipped, 3 cancelled**; the three LC-03 fixtures have zero. Expected event-type arrays and unique event keys are asserted. Task closure preserves prior attendance audit history.
+- Exact replay after Task Close: **9/9 PASS**, original event key and expected version reused for Start, Recovery and Skip after Task completed/Schedule closed. Returns the same Session UUID with no extra event. LC-06 is included in LC-01 replay, not counted as a sixth race scenario.
+- Full snapshot unchanged on replay: **9/9 PASS**, deep comparison of entire before/after Session row, Task status and audit array. This includes updated_at/completed_at, logical identity/time metadata and all event payloads; not merely an event-count comparison. Timeouts (5-second lock, 10-second statement, 15-second client command) were not reached.
+
+### Isolation and Cleanup
+
+- Sweep gate before: **OFF**, asserted by real query before the loop; no Cron activation in this step.
+- Sweep gate after: **OFF**, confirmed by a separate local PostgreSQL connection after the harness exited. No schedule or production configuration changed.
+- Remaining fixture users: **0**, independently queried by attendance-cc email pattern after exit; harness also checks its own UUID cleanup.
+- Remaining fixture Tasks: **0**, independently queried by the exact fixture title after exit. Cleanup checks owner/title identity before deleting its generated Task; no broad deletion of real data.
+- Remaining worker transactions: **0**, asserted by harness after ROLLBACK/cleanup and before shutdown.
+- Remaining worker backends: **0**, independently queried with application_name LIKE lumivox-attendance-cc-% after script exit. All three connections closed. Report cleanup **PASS**; no credentials saved in report.
+
+### Regression
+
+- pgTAP: **PASS**, local CLI `supabase test db --local`, exit 0; **24 files / 488 assertions / 0 failures**, **8 wall-clock seconds**. Persistent concurrency fixture setup is an intentional TAP skip; these 15 races and 9 replays are additional harness checks, not included in the 488 assertions.
+- Vitest: **PASS**, from apps/web `node node_modules/vitest/vitest.mjs run`, exit 0; **69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **99.56 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case were not separately executed; this is not Attendance browser E2E.
+- Lint: **PASS**, `node node_modules/eslint/bin/eslint.js .`, exit 0; 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- TypeScript: **PASS**, `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, exit 0.
+- Build: **PASS**, `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, exit 0. Next.js 16.2.6 compiled in **24.7 seconds**, TypeScript finished in **58 seconds**, generated **98/98** pages in **1220 ms**. Existing .env.local untouched. Existing Vite config-loader and Supabase deprecated/optional-service notices were non-fatal. No syntax, concurrency, database or web gate failure occurred; `git diff --check` passed after evidence update.
+
+### Pending Final Hardening
+
+- Exact grace cutoff through real RPC — **NOT EXECUTED**. No just-before/exact/just-after controlled-clock RPC/Sweep test in this step.
+- Exact recovery cutoff through real RPC — **NOT EXECUTED**. Exact replay after parent closure is now covered; replay after deadline itself is not covered by this live-clock suite.
+- Lock wait crossing deadline — **NOT EXECUTED**. Fifteen observed waits prove serialization, not crossing grace/recovery deadlines or post-wait clock rejection.
+- DST spring/fall boundary verification — **NOT EXECUTED** through controlled-time RPC calls. No authenticated caller-controlled p_now or weakened production clock was introduced.
+- Attendance-first vs Sweep remaining orderings — **NOT EXECUTED**, retained from the earlier partial Sweep matrix.
+- HTTP permission/privilege matrix — **NOT EXECUTED in this step**; authenticated database role/JWT claims and earlier effective-grant/ownership checks do not replace real HTTP denial cases.
+- Full final acceptance — **PENDING** for 5.6B-2B.2B and subsequent required gates. This closes the five specified lifecycle race scenarios and their replay extensions, not every status/reverse ordering. Existing broader load/fairness/remaining invariants, Attendance UI, Focus reconciliation and production acceptance remain outside this turn.
+
+### Decision
+
+- Step 5.6B-2B.2A: **PASS (LOCAL)** — **15/15 races, 15 observed blockers, 9/9 exact replays**, correct audit/history, clean fixtures and fresh database/web gates.
+- Ready for cutoff hardening: **YES**, with all NOT EXECUTED cases above retained.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**. No staging/production deployment, commit or push performed.

@@ -1,0 +1,886 @@
+{
+  "baseline": "0c8b17d5543843facc85fe054ab0b50ac06e6446",
+  "startedAt": "2026-11-01T13:19:42.491Z",
+  "container": "supabase_db_lumivox-proj",
+  "runs": [
+    {
+      "name": "LC-01-start-first-task-close/iteration-1",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "start",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "53065da8-e1a4-45e3-8477-5fcd70452709",
+            "payload": {
+              "startedAt": "2026-11-01T13:19:42.610962+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:42.596133+00:00",
+              "requestFingerprint": "8fab5ca00cb9b0c24630ddf97e631eea8531bb125801a1f2105e6541ca2df8d6"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "2a37a78f-51d1-41f3-9388-05a321eb7401",
+            "to_status": "in_progress",
+            "created_at": "2026-11-01T13:19:42.604058+00:00",
+            "event_type": "started",
+            "session_id": "652756cb-f1bb-43ed-82d7-5dc5058e73a1",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "652756cb-f1bb-43ed-82d7-5dc5058e73a1",
+          "status": "in_progress",
+          "task_id": "4746a025-e589-44a3-ab89-2906522e164c",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:42.596133+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:19:42.604058+00:00",
+          "schedule_id": "632ecca7-c736-45b4-9584-1fc3e33c55e5",
+          "completed_at": null,
+          "local_end_time": "13:49:42.596133",
+          "source_slot_id": null,
+          "local_start_time": "12:59:42.596133",
+          "scheduled_end_at": "2026-11-01T13:49:42.596133+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:59:42.596133+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-02-recovery-first-task-close/iteration-1",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "recover",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "de4e2da5-11da-49e7-a511-93a0b2efa001",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-11-01T13:19:42.715723+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-07T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-11-01T13:09:42.704781+00:00",
+              "originalLocalDate": "2026-10-30",
+              "requestFingerprint": "76509fcbed5eef06a353f496f035ddf6c09c8bc98b61b67b43a4f35e6458de24"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "e7772c7b-9007-4250-9364-813b04f4cb4d",
+            "to_status": "completed",
+            "created_at": "2026-11-01T13:19:42.71211+00:00",
+            "event_type": "recovered",
+            "session_id": "8475a060-e86b-412b-9763-32f0f76818ee",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "8475a060-e86b-412b-9763-32f0f76818ee",
+          "status": "completed",
+          "task_id": "d2cd3827-f672-42b6-8629-956fc0f09b9c",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:42.704781+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:42.71211+00:00",
+          "schedule_id": "6ad0f7e1-410c-4e25-89a8-2707da0114d0",
+          "completed_at": "2026-11-01T13:19:42.715723+00:00",
+          "local_end_time": "13:49:42.704781",
+          "source_slot_id": null,
+          "local_start_time": "13:19:42.704781",
+          "scheduled_end_at": "2026-10-30T13:49:42.704781+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:42.704781+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-03-task-close-first-recovery/iteration-1",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "missed",
+      "eventTypes": [],
+      "exactReplay": null,
+      "final": {
+        "events": [],
+        "session": {
+          "id": "b070dea6-32a4-4243-b5f1-c116144fbcdf",
+          "status": "missed",
+          "task_id": "6ddf606d-609f-4b5d-9882-39f3bb3f788e",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:42.803458+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:09:42.803458+00:00",
+          "schedule_id": "3772c8b1-5f7f-4f28-a9e4-21a5e4d79072",
+          "completed_at": null,
+          "local_end_time": "13:49:42.803458",
+          "source_slot_id": null,
+          "local_start_time": "13:19:42.803458",
+          "scheduled_end_at": "2026-10-30T13:49:42.803458+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:42.803458+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-04-skip-first-task-close/iteration-1",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "skip",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "8fd3d6d0-e93b-480a-9de3-5500bef419bb",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-11-01T13:19:42.890574+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:42.880667+00:00",
+              "requestFingerprint": "af735e71157d48022461677dc35ecebad7e9cdf314ca47130a06a833652de9ca"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "6cec2796-1e6c-4224-89e8-c8300645efa2",
+            "to_status": "skipped",
+            "created_at": "2026-11-01T13:19:42.886695+00:00",
+            "event_type": "skipped",
+            "session_id": "15b8689e-11a6-4c19-b4f0-4d1fdef912aa",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "15b8689e-11a6-4c19-b4f0-4d1fdef912aa",
+          "status": "skipped",
+          "task_id": "a700aeef-0f1a-4365-a641-34253b5ae6e6",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:42.880667+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:42.886695+00:00",
+          "schedule_id": "60766043-015e-4729-9254-d96e673dc750",
+          "completed_at": null,
+          "local_end_time": "13:49:42.880667",
+          "source_slot_id": null,
+          "local_start_time": "13:19:42.880667",
+          "scheduled_end_at": "2026-10-30T13:49:42.880667+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:42.880667+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-05-task-close-first-future-skip/iteration-1",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "cancelled",
+      "eventTypes": [
+        "cancelled"
+      ],
+      "exactReplay": null,
+      "final": {
+        "events": [
+          {
+            "id": "9d0fa7a4-9054-467c-85f5-d34961b732e0",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "c605b09a-e163-4802-b710-b86149c30947",
+              "scheduleId": "7329d38f-9a95-4833-9455-11486b5ad7cd",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2026-11-02T20:00:00+00:00",
+              "scheduledStartAt": "2026-11-02T19:00:00+00:00"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "ls:task-close:a64bca36-2cec-4d02-8b6b-fdfcaef3f49d",
+            "to_status": "cancelled",
+            "created_at": "2026-11-01T13:19:42.985889+00:00",
+            "event_type": "cancelled",
+            "session_id": "a64bca36-2cec-4d02-8b6b-fdfcaef3f49d",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "a64bca36-2cec-4d02-8b6b-fdfcaef3f49d",
+          "status": "cancelled",
+          "task_id": "c605b09a-e163-4802-b710-b86149c30947",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:42.971525+00:00",
+          "local_date": "2026-11-02",
+          "updated_at": "2026-11-01T13:19:42.985889+00:00",
+          "schedule_id": "7329d38f-9a95-4833-9455-11486b5ad7cd",
+          "completed_at": null,
+          "local_end_time": "20:00:00",
+          "source_slot_id": null,
+          "local_start_time": "19:00:00",
+          "scheduled_end_at": "2026-11-02T20:00:00+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-02T19:00:00+00:00",
+          "cancellation_reason": "task_closed",
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-01-start-first-task-close/iteration-2",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "start",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "f5bf0cf0-caab-4c13-bc69-55e491fca9b7",
+            "payload": {
+              "startedAt": "2026-11-01T13:19:43.059036+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.049797+00:00",
+              "requestFingerprint": "08f2fe0acf847329a77a87592b91328024be6303aab8db83f7bb2ec8447e87af"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "371584ba-e9e7-45dd-b49c-80a5bad33da0",
+            "to_status": "in_progress",
+            "created_at": "2026-11-01T13:19:43.056348+00:00",
+            "event_type": "started",
+            "session_id": "bd060b9b-74df-4682-8c5f-d253651f3404",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "bd060b9b-74df-4682-8c5f-d253651f3404",
+          "status": "in_progress",
+          "task_id": "04f929a8-7624-4bde-98a9-8eaf07e0a994",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.049797+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:19:43.056348+00:00",
+          "schedule_id": "ea620f19-7c3b-4e18-94cc-a96048409543",
+          "completed_at": null,
+          "local_end_time": "13:49:43.049797",
+          "source_slot_id": null,
+          "local_start_time": "12:59:43.049797",
+          "scheduled_end_at": "2026-11-01T13:49:43.049797+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:59:43.049797+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-02-recovery-first-task-close/iteration-2",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "recover",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "c90272d9-627c-4c85-9544-4ef43e861e97",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-11-01T13:19:43.149725+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-07T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.141348+00:00",
+              "originalLocalDate": "2026-10-30",
+              "requestFingerprint": "06efe023dfdf1bc955d86e8f34328d5d2d7f7b215d4d4f033f1bc67fa423fb68"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "6f505d2a-91e7-49e1-a098-1d7db3d1012b",
+            "to_status": "completed",
+            "created_at": "2026-11-01T13:19:43.147075+00:00",
+            "event_type": "recovered",
+            "session_id": "b12e9261-1ff6-4a02-aa68-3d545a403964",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "b12e9261-1ff6-4a02-aa68-3d545a403964",
+          "status": "completed",
+          "task_id": "c58a42c2-c509-49aa-8f04-3dbf32fda5a4",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.141348+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:43.147075+00:00",
+          "schedule_id": "00eae977-f040-48d0-9a11-a75c94686c5c",
+          "completed_at": "2026-11-01T13:19:43.149725+00:00",
+          "local_end_time": "13:49:43.141348",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.141348",
+          "scheduled_end_at": "2026-10-30T13:49:43.141348+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.141348+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-03-task-close-first-recovery/iteration-2",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "missed",
+      "eventTypes": [],
+      "exactReplay": null,
+      "final": {
+        "events": [],
+        "session": {
+          "id": "e4c2fafa-262f-4bca-a940-f3bd3e40ff35",
+          "status": "missed",
+          "task_id": "e894ad1a-b967-4b7c-be88-ca16ebc00556",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.231019+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:09:43.231019+00:00",
+          "schedule_id": "61529b4e-8c18-45b7-ab65-da3092413181",
+          "completed_at": null,
+          "local_end_time": "13:49:43.231019",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.231019",
+          "scheduled_end_at": "2026-10-30T13:49:43.231019+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.231019+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-04-skip-first-task-close/iteration-2",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "skip",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "e3dbdd58-83f9-4cca-ad69-ddc4b1077bf6",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-11-01T13:19:43.31852+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.31032+00:00",
+              "requestFingerprint": "dbfeca9bee05b137e829d4df985dfab2ceee0a5115ba4458f835d4785f8a28c6"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "fca692b4-8903-4692-9593-a8c1648c0ebf",
+            "to_status": "skipped",
+            "created_at": "2026-11-01T13:19:43.316153+00:00",
+            "event_type": "skipped",
+            "session_id": "67b0e1e8-0283-4ee6-9526-59bde7759c23",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "67b0e1e8-0283-4ee6-9526-59bde7759c23",
+          "status": "skipped",
+          "task_id": "e4b9ee48-9506-47fe-886b-c96f8cf89d06",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.31032+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:43.316153+00:00",
+          "schedule_id": "91b0e12a-7bc6-435c-96e8-65b073945347",
+          "completed_at": null,
+          "local_end_time": "13:49:43.31032",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.31032",
+          "scheduled_end_at": "2026-10-30T13:49:43.31032+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.31032+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-05-task-close-first-future-skip/iteration-2",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "cancelled",
+      "eventTypes": [
+        "cancelled"
+      ],
+      "exactReplay": null,
+      "final": {
+        "events": [
+          {
+            "id": "5d05372c-2d44-4cec-a7e9-34acbc0d8083",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "04125bb0-ac58-4801-aeb6-fc0a266fa18b",
+              "scheduleId": "137eb61e-40f7-48f7-8ffc-d33c2819ac13",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2026-11-02T20:00:00+00:00",
+              "scheduledStartAt": "2026-11-02T19:00:00+00:00"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "ls:task-close:0008c9eb-bb0a-422d-ad61-76a08504d4e6",
+            "to_status": "cancelled",
+            "created_at": "2026-11-01T13:19:43.412902+00:00",
+            "event_type": "cancelled",
+            "session_id": "0008c9eb-bb0a-422d-ad61-76a08504d4e6",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "0008c9eb-bb0a-422d-ad61-76a08504d4e6",
+          "status": "cancelled",
+          "task_id": "04125bb0-ac58-4801-aeb6-fc0a266fa18b",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.39874+00:00",
+          "local_date": "2026-11-02",
+          "updated_at": "2026-11-01T13:19:43.412902+00:00",
+          "schedule_id": "137eb61e-40f7-48f7-8ffc-d33c2819ac13",
+          "completed_at": null,
+          "local_end_time": "20:00:00",
+          "source_slot_id": null,
+          "local_start_time": "19:00:00",
+          "scheduled_end_at": "2026-11-02T20:00:00+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-02T19:00:00+00:00",
+          "cancellation_reason": "task_closed",
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-01-start-first-task-close/iteration-3",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "start",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "cc6342e5-3e36-4da8-9b0c-ccae4555d694",
+            "payload": {
+              "startedAt": "2026-11-01T13:19:43.489023+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.480394+00:00",
+              "requestFingerprint": "6d636b942a695e40b1c34a69bf48132f410450647f1d46082d1618c580f4329d"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "989cc733-e77a-469b-82db-5332de090133",
+            "to_status": "in_progress",
+            "created_at": "2026-11-01T13:19:43.485973+00:00",
+            "event_type": "started",
+            "session_id": "4728b8e5-1a50-4678-a22c-7a76722f7e94",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "4728b8e5-1a50-4678-a22c-7a76722f7e94",
+          "status": "in_progress",
+          "task_id": "f05733b1-f131-46bf-84ba-6a35671a84da",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.480394+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:19:43.485973+00:00",
+          "schedule_id": "21abc966-ab5e-4c51-af5d-437c177c0f11",
+          "completed_at": null,
+          "local_end_time": "13:49:43.480394",
+          "source_slot_id": null,
+          "local_start_time": "12:59:43.480394",
+          "scheduled_end_at": "2026-11-01T13:49:43.480394+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:59:43.480394+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-02-recovery-first-task-close/iteration-3",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "recover",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "8feca6ce-10f5-4ab2-974a-2e87ae60e42e",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-11-01T13:19:43.573527+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-07T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.564754+00:00",
+              "originalLocalDate": "2026-10-30",
+              "requestFingerprint": "e9a8965b225e4d9050a5002fd235da8635386ec200cb154c42b1202554339ec2"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "81bb2022-89fe-4363-9cba-cbe4ba8dfb09",
+            "to_status": "completed",
+            "created_at": "2026-11-01T13:19:43.570876+00:00",
+            "event_type": "recovered",
+            "session_id": "6e3de423-9838-4230-b133-29ee916cf346",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "6e3de423-9838-4230-b133-29ee916cf346",
+          "status": "completed",
+          "task_id": "85ad6ecd-3547-4377-8b25-f7f82b05e8f4",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.564754+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:43.570876+00:00",
+          "schedule_id": "00d69225-0c9e-4730-90a2-f35411795522",
+          "completed_at": "2026-11-01T13:19:43.573527+00:00",
+          "local_end_time": "13:49:43.564754",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.564754",
+          "scheduled_end_at": "2026-10-30T13:49:43.564754+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.564754+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-03-task-close-first-recovery/iteration-3",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "missed",
+      "eventTypes": [],
+      "exactReplay": null,
+      "final": {
+        "events": [],
+        "session": {
+          "id": "32ba104f-1e6c-4859-80e2-dcb611ebcb2f",
+          "status": "missed",
+          "task_id": "83aae411-8042-45c0-ba68-a44138c047d5",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.642749+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:09:43.642749+00:00",
+          "schedule_id": "f64ee380-2ebb-4cf9-a307-88f9525c8ecc",
+          "completed_at": null,
+          "local_end_time": "13:49:43.642749",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.642749",
+          "scheduled_end_at": "2026-10-30T13:49:43.642749+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.642749+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-04-skip-first-task-close/iteration-3",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "skip",
+      "second": "close",
+      "secondSqlstate": "00000",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "exactReplay": "PASS",
+      "final": {
+        "events": [
+          {
+            "id": "ce9e5eb7-0eef-4ace-91d5-357ece1713a2",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-11-01T13:19:43.717342+00:00",
+              "expectedUpdatedAt": "2026-11-01T13:09:43.709185+00:00",
+              "requestFingerprint": "9a5d40495c5012301ffbb91adc4a8962eaa4acb372e8cd12ee96e097ace99d7b"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "bf6ba48f-3c9e-43d4-8d79-d71051ae0439",
+            "to_status": "skipped",
+            "created_at": "2026-11-01T13:19:43.714959+00:00",
+            "event_type": "skipped",
+            "session_id": "df9595ae-51a8-4d8a-b9f2-b8dca3ee1f82",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "df9595ae-51a8-4d8a-b9f2-b8dca3ee1f82",
+          "status": "skipped",
+          "task_id": "9bbacc01-3f0f-44e7-9cca-f0fa0087471a",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.709185+00:00",
+          "local_date": "2026-10-30",
+          "updated_at": "2026-11-01T13:19:43.714959+00:00",
+          "schedule_id": "06782af6-6405-4246-aa60-438a8edc8260",
+          "completed_at": null,
+          "local_end_time": "13:49:43.709185",
+          "source_slot_id": null,
+          "local_start_time": "13:19:43.709185",
+          "scheduled_end_at": "2026-10-30T13:49:43.709185+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-30T13:19:43.709185+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    },
+    {
+      "name": "LC-05-task-close-first-future-skip/iteration-3",
+      "status": "PASS",
+      "blockers": [
+        843
+      ],
+      "first": "close",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "taskStatus": "completed",
+      "scheduleStatus": "closed",
+      "sessionStatus": "cancelled",
+      "eventTypes": [
+        "cancelled"
+      ],
+      "exactReplay": null,
+      "final": {
+        "events": [
+          {
+            "id": "6a492566-4041-439e-8c23-8a03deccbc7f",
+            "payload": {
+              "reason": "task_closed",
+              "taskId": "5abde597-bbb0-4ae5-99c6-11f8325a75e3",
+              "scheduleId": "642675d4-0c62-4f05-b219-95ebe23c5a07",
+              "taskStatus": "completed",
+              "scheduledEndAt": "2026-11-02T20:00:00+00:00",
+              "scheduledStartAt": "2026-11-02T19:00:00+00:00"
+            },
+            "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "actor_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+            "event_key": "ls:task-close:0d46a7cf-9754-4106-a0d8-e14d87ff38d9",
+            "to_status": "cancelled",
+            "created_at": "2026-11-01T13:19:43.807229+00:00",
+            "event_type": "cancelled",
+            "session_id": "0d46a7cf-9754-4106-a0d8-e14d87ff38d9",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "0d46a7cf-9754-4106-a0d8-e14d87ff38d9",
+          "status": "cancelled",
+          "task_id": "5abde597-bbb0-4ae5-99c6-11f8325a75e3",
+          "user_id": "53611d3d-db0e-4604-968a-d73b7e943abd",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:19:43.793992+00:00",
+          "local_date": "2026-11-02",
+          "updated_at": "2026-11-01T13:19:43.807229+00:00",
+          "schedule_id": "642675d4-0c62-4f05-b219-95ebe23c5a07",
+          "completed_at": null,
+          "local_end_time": "20:00:00",
+          "source_slot_id": null,
+          "local_start_time": "19:00:00",
+          "scheduled_end_at": "2026-11-02T20:00:00+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-02T19:00:00+00:00",
+          "cancellation_reason": "task_closed",
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "completed"
+      }
+    }
+  ],
+  "backendPids": {
+    "a": 843,
+    "b": 844,
+    "observer": 845
+  },
+  "status": "PASS",
+  "openWorkerTransactions": 0,
+  "cleanup": "PASS",
+  "finishedAt": "2026-11-01T13:19:44.006Z"
+}
