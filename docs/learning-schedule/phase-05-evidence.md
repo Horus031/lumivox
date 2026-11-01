@@ -722,3 +722,84 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - Ready for cutoff hardening: **YES**, with all NOT EXECUTED cases above retained.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**. No staging/production deployment, commit or push performed.
+
+## Step 5.6B-2B.2B — Grace Cutoff Reliability
+
+### Baseline / Implementation
+
+- Branch: `feature/learning-schedule-foundation`; verified **2026-11-01 (Asia/Bangkok)**. `git pull --ff-only origin feature/learning-schedule-foundation` reported already up to date before implementation.
+- HEAD SHA: **`48b2912910de203109b2eb8ca7ea5702f99a8b82`**. New cutoff harness/SQL/report are working-tree additions, not part of this baseline commit.
+- Local PostgreSQL **17.6**, container `supabase_db_lumivox-proj`, healthy; Supabase local API `http://127.0.0.1:55321`. CLI status captured without printing credentials.
+- Migration count: **84**, independently confirmed after tests. No new migration, production RPC change, test-clock parameter or database-wide configuration change. No clean replay repeated for this test-only change.
+- Created `scripts/test-learning-schedule-cutoff-concurrency.mjs` from the Step 5.6A harness; retained original connection/setup/cleanup infrastructure. Added supplied prepareNearGrace and runGraceCrossing helpers, corrected `GREATEST(...)` to use no schema prefix per the guide, removed old scenarios and ran Start/Complete three iterations each. Original Step 5.6A harness unchanged.
+- Timeout changes are scoped to test connections only: lock_timeout **15 seconds**, statement_timeout **25 seconds**, client command deadline **30 seconds**. Fixture grace deadline remains **5 seconds ahead**; no widening/retry was needed to make timing assertions pass.
+- Created `supabase/tests/learning_schedule_cutoff_precision.sql` with the supplied **12 fixed-instant assertions**. No staging/production deployment, commit or push.
+
+### Live Clock / Lock Crossing — Actual RPC Execution
+
+- `node --check scripts/test-learning-schedule-cutoff-concurrency.mjs`: **exit 0**.
+- `node scripts/test-learning-schedule-cutoff-concurrency.mjs`: **exit 0; 6/6 grace-crossing races PASS**, three Start plus three Complete commands, each on a separate newly prepared fixture.
+- [Fresh raw report](./phase-05-cutoff-concurrency.json): **2026-11-01 13:39:23.506–13:39:55.545 UTC** (20:39:23–20:39:55 Asia/Bangkok).
+- Independent PostgreSQL PIDs: **A=1768, B=1766, observer=1767**. Workers execute real authenticated production Start/Complete RPCs with the fixture owner's JWT claims. No function replacement, fake RPC response, injected p_now or mocked database clock.
+- **TIME-01/02/03: 3/3 Start + 3/3 Complete PASS. TIME-04: 6/6 observed waits.** A explicitly locks the parent Task. Both observeBlocker() and observed.blockingPids confirm A in pg_blocking_pids(B) before cutoff. B is already pending before observer waits for the actual database deadline; these are not sleep-only inferred races.
+- **TIME-05: 6/6 PASS.** Observer waits until the persisted fixture deadline plus 250 ms, then independently reads PostgreSQL clock_timestamp and asserts after >= deadline before A may COMMIT. The retained Task lock is released only after that read. Fresh report timestamps were independently checked again after execution.
+
+All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-bearing timestamps are in JSON.
+
+| Run | B observed blocked at | Grace deadline | Observer clock before A COMMIT | Actual SQLSTATE |
+| --- | --- | --- | --- | --- |
+| TIME-start-1 | 20:39:23.710859 | 20:39:28.657483 | 20:39:28.914474 | 22023 |
+| TIME-complete-1 | 20:39:29.008064 | 20:39:33.948757 | 20:39:34.202609 | 22023 |
+| TIME-start-2 | 20:39:34.317635 | 20:39:39.256849 | 20:39:39.511382 | 22023 |
+| TIME-complete-2 | 20:39:39.620679 | 20:39:44.551959 | 20:39:44.805331 | 22023 |
+| TIME-start-3 | 20:39:44.887906 | 20:39:49.833739 | 20:39:50.087044 | 22023 |
+| TIME-complete-3 | 20:39:50.168959 | 20:39:55.118767 | 20:39:55.371850 | 22023 |
+
+- Every observedAt is strictly before deadline, and every afterDeadline.after is >= deadline. Thus these runs genuinely span a deadline while waiting on the Task lock. Timestamp assertions use millisecond Date.parse in the harness; observed margins are seconds/~250 ms, so no exact-microsecond classification is inferred from them.
+- Start rejection message, **3/3**: **Session is outside the start window**, SQLSTATE **22023**. Complete rejection message, **3/3**: **Session is outside the completion window**, SQLSTATE **22023**. Rejections are the expected timing result, not PT409, ineligible-state error or lock/statement timeout.
+- This establishes that these actual RPC calls reject after a grace deadline crossed during their lock wait. It does not claim execution at the exact cutoff microsecond, all status/timezone orderings or a Recovery deadline crossing.
+
+### Session / Audit Snapshots
+
+- Observer reads after A COMMIT and B ROLLBACK: **all 6 Sessions remain scheduled**, completed_at null, actual_study_minutes null, Task todo and **0 audit events**.
+- Full final Session rows and event arrays are saved for all six fixtures in JSON. Existing UTC/local canonicalization is preserved using one materialized clock source for the near-grace fixture; guard/production logic unchanged.
+- The supplied live harness asserts the listed status/completion/minutes/Task/event invariants. It does not separately deep-compare every original Session field/timestamp against a pre-command snapshot; the saved final rows are not substituted for such an unexecuted comparison.
+
+### Fixed-instant Precision / DST Arithmetic
+
+- `learning_schedule_cutoff_precision.sql`: **PREC-01–PREC-12, 12/12 PASS** through pgTAP, rolled-back fixtures.
+- Grace arithmetic: one microsecond before permits the `< deadline` predicate; exact deadline denies that attendance predicate and satisfies Sweep's `>= deadline`; before deadline does not satisfy Sweep's predicate.
+- Recovery arithmetic: local_date + 8 midnight in Asia/Ho_Chi_Minh maps to the expected UTC instant; fixed before/exact/after comparisons follow the exclusive cutoff rule.
+- DST/timezone arithmetic: New York spring/fall local-midnight conversions match fixed UTC instants; historical New York versus Tokyo produces different cutoff instants; 60 elapsed minutes remain 60 minutes across spring-forward.
+- These **execute SQL expressions using literal timestamps**, not RPCs with injected clock values. They supplement the six live grace-crossing RPC tests; they do not prove exact Recovery cutoff, exact grace RPC execution, DST transition through RPC or trusted-clock injection safety.
+
+### Isolation / Cleanup — TIME-06
+
+- **Cleanup PASS** in report; own fixture Task and owner user removed, **0 open worker transactions** verified before connection shutdown. All three connections close.
+- Independent post-exit PostgreSQL queries confirm **0 attendance-cc fixture users, 0 fixture Tasks, 0 harness backends**, and **0 pg_locks entries for PIDs 1768/1766/1767**.
+- Sweep gate asserted **OFF before loop**, independently confirmed **false/OFF after execution**. No Cron activation or schedule change. Fixtures are isolated to this harness and each iteration uses a fresh Session.
+
+### Database / Web Gates — Fresh Runs
+
+- Database: local CLI `supabase test db --local`, **exit 0; 25 files, 500 assertions PASS, 0 failures**, **13 wall-clock seconds** — 488 previous plus 12 new precision assertions. Persistent concurrency fixture setup remains an intentional TAP skip; six real clock-crossing races run separately from pgTAP.
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, **exit 0; 69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **100.17 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case were not separately run; this is not Attendance browser E2E.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **23.7 seconds**, TypeScript finished in **52 seconds**, generated **98/98** pages in **1085 ms**. Existing .env.local unchanged.
+- Existing Vite config-loader/Supabase deprecated/optional-service notices were non-fatal. No syntax, live timing, pgTAP or web-gate failure occurred. `git diff --check` passed after evidence update. Earlier concurrency suites were not rerun in this step; their recorded evidence remains historical.
+
+### Remaining Acceptance Gaps
+
+- **Exact Recovery cutoff through real RPC: NOT EXECUTED**, including controlled before/exact/after local-midnight instants, Recovery lock wait crossing deadline and exact replay after the deadline. Fixed timestamp arithmetic does not close these cases.
+- **Exact grace cutoff microsecond through RPC / Sweep: NOT EXECUTED.** This step verifies actual live RPC rejection after lock crossing plus literal expression precision; it does not claim an RPC invocation at exact equality or every before/after boundary branch.
+- **DST transition through controlled RPC: NOT EXECUTED**, including spring/fall, unusual midnight, multiple non-UTC zones and historical-timezone deadlines under controlled clock. No caller-controlled p_now was introduced.
+- **Attendance-first-vs-Sweep remaining orderings: NOT EXECUTED** in this step. Prior partial Sweep/Task Close/Revision/Lifecycle matrices remain scoped to their actual cases.
+- **HTTP permissions matrix: NOT EXECUTED**, including actual denied anonymous/authenticated/cross-owner requests to operational endpoints/control table and remaining semantic input/fingerprint variants. Earlier database effective-privilege tests are narrower.
+- Broader final acceptance, remaining identity/replay/status combinations, load/fairness/error-path verification, Attendance UI/Focus integration and production readiness remain outside this step. Phase 05 is still in progress; do not close all Step 5.6/REC-B gaps from this evidence alone.
+
+### Decision
+
+- Step 5.6B-2B.2B — Grace Cutoff Reliability: **PASS (LOCAL)** for **6 real grace-crossing races / 6 observed waits**, correct time-window errors, clean state/audit, **12 precision assertions** and fresh database/web gates.
+- Remaining Recovery/DST/security/final acceptance: **PENDING**, NOT EXECUTED cases above retained.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**. No commit or push performed.

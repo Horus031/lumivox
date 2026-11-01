@@ -1,0 +1,298 @@
+{
+  "baseline": "48b2912910de203109b2eb8ca7ea5702f99a8b82",
+  "startedAt": "2026-11-01T13:39:23.506Z",
+  "container": "supabase_db_lumivox-proj",
+  "runs": [
+    {
+      "name": "TIME-start-1",
+      "status": "PASS",
+      "command": "start",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:28.657483+00:00",
+        "observedAt": "2026-11-01T13:39:23.710859+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:28.914474+00:00",
+        "deadline": "2026-11-01T13:39:28.657483+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the start window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "0e3285d0-1dff-46f7-a6c1-e73bb3e121ba",
+          "status": "scheduled",
+          "task_id": "a8f10686-510f-492e-aace-543cd1b45ef3",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:23.647161+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:23.656816+00:00",
+          "schedule_id": "7ea2bf0a-5409-485e-a8b5-2634ef156294",
+          "completed_at": null,
+          "local_end_time": "12:39:28.657483",
+          "source_slot_id": null,
+          "local_start_time": "12:09:28.657483",
+          "scheduled_end_at": "2026-11-01T12:39:28.657483+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:28.657483+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "TIME-complete-1",
+      "status": "PASS",
+      "command": "complete",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:33.948757+00:00",
+        "observedAt": "2026-11-01T13:39:29.008064+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:34.202609+00:00",
+        "deadline": "2026-11-01T13:39:33.948757+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the completion window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "b44a8baf-49c8-4161-b835-3050dea60224",
+          "status": "scheduled",
+          "task_id": "cb76c08c-6991-4bf8-af71-c2fc0fcaec2d",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:28.942577+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:28.948532+00:00",
+          "schedule_id": "a6d2c965-9673-47f7-9754-5f069a15ae07",
+          "completed_at": null,
+          "local_end_time": "12:39:33.948757",
+          "source_slot_id": null,
+          "local_start_time": "12:09:33.948757",
+          "scheduled_end_at": "2026-11-01T12:39:33.948757+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:33.948757+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "TIME-start-2",
+      "status": "PASS",
+      "command": "start",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:39.256849+00:00",
+        "observedAt": "2026-11-01T13:39:34.317635+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:39.511382+00:00",
+        "deadline": "2026-11-01T13:39:39.256849+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the start window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "6a3c1f8c-e0d4-41b4-9324-2b17dafeca3b",
+          "status": "scheduled",
+          "task_id": "9550cf7a-f635-4cda-9dca-8cbff2ba08f4",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:34.246307+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:34.256585+00:00",
+          "schedule_id": "0e11a8b4-ce6a-4480-bf84-cb4731b6eeee",
+          "completed_at": null,
+          "local_end_time": "12:39:39.256849",
+          "source_slot_id": null,
+          "local_start_time": "12:09:39.256849",
+          "scheduled_end_at": "2026-11-01T12:39:39.256849+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:39.256849+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "TIME-complete-2",
+      "status": "PASS",
+      "command": "complete",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:44.551959+00:00",
+        "observedAt": "2026-11-01T13:39:39.620679+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:44.805331+00:00",
+        "deadline": "2026-11-01T13:39:44.551959+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the completion window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "a39b4d8b-2141-47c1-8b33-bb1d871af36e",
+          "status": "scheduled",
+          "task_id": "8c8454fb-4539-45d7-ba3c-fb7175c6fb7b",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:39.541655+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:39.551533+00:00",
+          "schedule_id": "783ad91a-7def-4dd5-98be-d10b30711914",
+          "completed_at": null,
+          "local_end_time": "12:39:44.551959",
+          "source_slot_id": null,
+          "local_start_time": "12:09:44.551959",
+          "scheduled_end_at": "2026-11-01T12:39:44.551959+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:44.551959+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "TIME-start-3",
+      "status": "PASS",
+      "command": "start",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:49.833739+00:00",
+        "observedAt": "2026-11-01T13:39:44.887906+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:50.087044+00:00",
+        "deadline": "2026-11-01T13:39:49.833739+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the start window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "13128efd-499a-4abc-9216-e7cedc197ed8",
+          "status": "scheduled",
+          "task_id": "eec81d1a-f8f0-4373-88a3-cea741557c3e",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:44.827468+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:44.833446+00:00",
+          "schedule_id": "48291f1e-587e-4618-a7d2-c3e4eee353f9",
+          "completed_at": null,
+          "local_end_time": "12:39:49.833739",
+          "source_slot_id": null,
+          "local_start_time": "12:09:49.833739",
+          "scheduled_end_at": "2026-11-01T12:39:49.833739+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:49.833739+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "TIME-complete-3",
+      "status": "PASS",
+      "command": "complete",
+      "blockers": [
+        1768
+      ],
+      "observed": {
+        "deadline": "2026-11-01T13:39:55.118767+00:00",
+        "observedAt": "2026-11-01T13:39:50.168959+00:00",
+        "blockingPids": [
+          1768
+        ]
+      },
+      "afterDeadline": {
+        "after": "2026-11-01T13:39:55.37185+00:00",
+        "deadline": "2026-11-01T13:39:55.118767+00:00"
+      },
+      "secondSqlstate": "22023",
+      "secondMessage": "Session is outside the completion window",
+      "final": {
+        "events": [],
+        "session": {
+          "id": "96ac0af9-453c-4ea0-a075-6f01d1f30fb2",
+          "status": "scheduled",
+          "task_id": "a5d58428-35a4-411e-a5a5-18a84bd68380",
+          "user_id": "60bc941f-1510-4468-a4d3-a76bcd8d811a",
+          "timezone": "UTC",
+          "created_at": "2026-11-01T13:39:50.112482+00:00",
+          "local_date": "2026-11-01",
+          "updated_at": "2026-11-01T13:39:50.118481+00:00",
+          "schedule_id": "e4788f66-a499-4310-b0bb-777245e01191",
+          "completed_at": null,
+          "local_end_time": "12:39:55.118767",
+          "source_slot_id": null,
+          "local_start_time": "12:09:55.118767",
+          "scheduled_end_at": "2026-11-01T12:39:55.118767+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-11-01T12:09:55.118767+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    }
+  ],
+  "backendPids": {
+    "a": 1768,
+    "b": 1766,
+    "observer": 1767
+  },
+  "status": "PASS",
+  "openWorkerTransactions": 0,
+  "cleanup": "PASS",
+  "finishedAt": "2026-11-01T13:39:55.545Z"
+}
