@@ -947,3 +947,71 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Step 5.6B-2B.2D — Attendance-first vs Sweep: **PASS (LOCAL)** — **9/9 pre-cutoff Attendance successes, 9/9 prompt locked-candidate skips, 9/9 unchanged retry snapshots**, no false missed audit, clean fixtures/gate and fresh database/web gates.
 - Recovery cutoff / DST / full final acceptance: **PENDING** with NOT EXECUTED cases above retained. Phase 05 remains **IN PROGRESS**.
 - Production authorized: **NO**. No commit or push performed.
+
+## Step 5.6B-2B.2E — Recovery Timezone Matrix
+
+### Baseline / Implementation
+
+- Branch: `feature/learning-schedule-foundation`; implemented and verified **2026-11-01 (Asia/Bangkok)**. `git pull --ff-only origin feature/learning-schedule-foundation` reported already up to date.
+- HEAD SHA: **`db24f78d5cc2622b99662d5c9b8605f2af888fd8`**. New matrix SQL is a working-tree addition, not part of this baseline commit.
+- Database: independently queried **PostgreSQL 17.6**, container `supabase_db_lumivox-proj`, **84 migrations**. No new migration/production RPC change, clock override, deployment, commit or push. No clean replay repeated for this test-only step.
+- Created `supabase/tests/learning_schedule_recovery_timezone_matrix.sql` from the supplied guide, using real authenticated Recovery/Skip RPCs, historical local-noon fixtures and rolled-back transactions. Noon avoids ambiguous/nonexistent DST wall-clock hours and preserves the local/UTC canonicalization contract.
+- **Fixture correction:** supplied tokyo_expired initially had status skipped. ls_skip_study_session only permits scheduled/missed, so that fixture would fail eligibility before evaluating the recovery cutoff and could not prove the intended expired-window behavior. Changed only that fixture's initial status to **missed**, so ZONE-08 actually exercises expired missed -> skipped correction. Expected business error remains 22023 / Session is outside the recovery window; production rules unchanged. Tokyo skipped -> completed Recovery remains covered by the separate valid tokyo_skipped case.
+- **Assertion-count correction:** the supplied SQL expands to **16 assertions**, not 17: ZONE-01/02 contribute 2, ZONE-03/04/05 contribute 9, ZONE-06–10 contribute 5. Actual full-suite result is therefore **516**, not the guide's forecast 517. No padding assertion was added solely to match the forecast.
+
+### Actual ZONE Results
+
+| Group | Executed assertions | Actual result | Status |
+| --- | --- | --- | --- |
+| ZONE-01 | 1 | Historical Session timezone remains America/New_York | PASS |
+| ZONE-02 | 1 | Current Schedule timezone changed to Asia/Tokyo independently | PASS |
+| ZONE-03 | 3 | Real Recovery succeeds for NY missed, Tokyo skipped and HCM missed; each returns original Session UUID | PASS |
+| ZONE-04 | 3 | Each Session completed with non-null completed_at and null actual_study_minutes; recovered audit has correct source/target/owner and historical-zone cutoff | PASS |
+| ZONE-05 | 3 | Same key and original expected version replay successfully after completion in all three timezones; original UUID returned | PASS |
+| ZONE-06 | 1 | Each recovered Session has exactly one audit event after retries | PASS |
+| ZONE-07 | 1 | 10-local-day-old NY missed Recovery rejects 22023 / Session is outside the recovery window | PASS |
+| ZONE-08 | 1 | 10-local-day-old Tokyo missed Skip rejects 22023 / Session is outside the recovery window | PASS |
+| ZONE-09 | 1 | Both rejected expired Sessions retain their initial status and null completed_at | PASS |
+| ZONE-10 | 1 | Both expired requests append zero audit events | PASS |
+| **Total** | **16** | Sequential real database RPC/pgTAP checks | **PASS** |
+
+- Execution uses SET LOCAL ROLE authenticated and the fixture owner's actual JWT claims in PostgreSQL. It invokes production functions with their authorization/lock/time/audit logic intact; no fake result or test clock parameter. This is database RPC execution, not a fresh HTTP or browser test.
+- Valid fixtures are two local dates old; expired fixtures are ten local dates old. Each has its own root todo Task, active Schedule and Session. These samples are away from midnight cutoff and do not claim exact-boundary execution.
+
+### Audit Cutoff / Historical Timezone / Replay
+
+- For **America/New_York**, **Asia/Tokyo** and **Asia/Ho_Chi_Minh**, ZONE-04 reads the actual persisted recovered event and checks its recoveryCutoff against **((Session.local_date + 8)::timestamp AT TIME ZONE historical_zone)**. Payload originalTimezone equals that Session's saved zone, actor_id equals owner, from_status equals the original missed/skipped state and to_status is completed.
+- New York Session's Schedule is deliberately changed to Tokyo before real Recovery. Successful cutoff/audit checks prove this branch uses **historical New York**, not the current Schedule timezone. The test compares actual event values against the expected formula; no concrete cutoff timestamp is invented from source review in this evidence.
+- All three real exact retries succeed and final event counts are one each. This suite does not separately deep-compare every timestamp/Session field before and after replay; the full-row replay invariants executed in earlier suites are separate evidence, not a newly repeated assertion here.
+- Rejected expired requests are checked for unchanged status, null completed_at and no events. Full pre/post row equality including updated_at is not independently asserted by this new matrix; no stronger no-mutation result is claimed from ZONE-09 alone.
+
+### Database / Cleanup
+
+- Local command: `supabase test db --local` via the installed Windows CLI executable; **exit 0; 26 files, 516 assertions PASS, 0 failures**, **23 wall-clock seconds**. **500 previous assertions + 16 new matrix assertions**. Persistent concurrency fixture setup remains an intentional TAP skip.
+- No initial run with a deliberately invalid skipped fixture was counted as evidence; the source mismatch was corrected before acceptance execution. No fixture canonicalization/auth/RPC failure occurred in the run.
+- Entire SQL test ends with **ROLLBACK**, including generated Tasks/Schedules/Sessions/events and Auth/profile fixtures. Independent final query confirms **0 recovery-zone fixture users and 0 fixture Tasks** for UUID 57000000-0000-4000-8000-000000000001.
+- Sweep gate remains **false/OFF**, independently queried after tests. No Cron activation, production configuration or .env.local change. No new concurrency harness/worker connections in this step.
+
+### Web Regression — Fresh Runs
+
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, **exit 0; 69 files passed / 2 skipped; 612 tests passed / 20 skipped**, **118.68 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case were not separately run. New SQL coverage is not counted among the 612 web passes.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **28.6 seconds**, TypeScript finished in **74 seconds**, generated **98/98** pages in **1644 ms**.
+- Existing Vite config-loader/Supabase deprecated notices were non-fatal. `git diff --check` passed after evidence update. Earlier HTTP/concurrency harnesses were not rerun; their previous reports remain historical evidence.
+
+### Boundaries / Residual Risks for Final Review
+
+- **Exact Recovery RPC at midnight cutoff: NOT EXECUTED** — no trusted deterministic clock seam was added; ordinary live-clock date samples do not establish just-before/exact/just-after RPC acceptance.
+- **Recovery lock wait crossing midnight cutoff: NOT EXECUTED**. Earlier actual grace-crossing Start/Complete tests do not prove Recovery midnight crossing.
+- **Controlled DST spring/fall boundary through RPC: NOT EXECUTED**. These tests use three IANA timezones, but deliberately avoid ambiguous/nonexistent local hours and do not force the actual RPC clock to the transition instant. Existing attendance_boundaries/cutoff_precision fixed-instant assertions remain arithmetic evidence only.
+- **Replay after deadline / exact grace equality through RPC and broader status/payload/HTTP permutations:** not newly executed by this matrix. Earlier replay and HTTP scopes remain limited to their documented cases.
+- Treat exact midnight/DST/clock-control gaps as explicit **residual risks for Step 5.6 final review**, not as implicit PASS or a reason to expose caller-controlled p_now. No production clock/authorization boundary was weakened to satisfy testing.
+- Full backend acceptance/residual-risk decision, Attendance UI/browser E2E, Focus integration and Phase 05 final acceptance remain pending. No automatic transition to UI or production authorization in this step.
+
+### Decision
+
+- Step 5.6B-2B.2E — Recovery Timezone Matrix: **PASS (LOCAL)** for **16/16 actual matrix assertions, 516 total pgTAP assertions**, actual historical-zone Recovery/expired Skip behavior, cleanup and fresh web gates.
+- Ready for Step 5.6 final review / residual-risk decision: **YES**, with all NOT EXECUTED gaps above preserved.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**. No commit, push, merge or deployment performed.
