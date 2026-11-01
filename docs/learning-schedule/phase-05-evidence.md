@@ -871,3 +871,79 @@ All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-b
 - Step 5.6B-2B.2C — Attendance HTTP Authorization: **PASS (LOCAL)** for **12/12 real HTTP checks**, two gate checks, user sign-out/deletion, unchanged Cron registration and fresh database/web gates.
 - Recovery/DST/remaining-races/full acceptance: **PENDING** with NOT EXECUTED cases above retained. Phase 05 remains **IN PROGRESS**.
 - Production authorized: **NO**. No commit or push performed.
+
+## Step 5.6B-2B.2D — Attendance-first vs Sweep
+
+### Baseline / Implementation
+
+- Branch: `feature/learning-schedule-foundation`; implemented and verified **2026-11-01 (Asia/Bangkok)**. `git pull --ff-only origin feature/learning-schedule-foundation` reported already up to date.
+- HEAD SHA: **`f2b61b58517dd3a05a34a7fdca70efe30818ada3`**. New harness/report are working-tree additions, not part of that baseline commit.
+- Created `scripts/test-learning-schedule-attendance-first-sweep.mjs` from the passed cross-boundary harness, retaining Connection/setup/command/snapshot/cleanup and finally infrastructure. Added the supplied prepareBeforeSweepDeadline, assertNoOtherOverdueCandidates and runAttendanceFirstSweep helpers; replaced the old execution loop with Start/Complete/Skip repeated three times. No migration or production Attendance/Sweep RPC change.
+- Local environment: API `http://127.0.0.1:55321`, healthy container `supabase_db_lumivox-proj`, **PostgreSQL 17.6**, **84 migrations** independently confirmed after execution. CLI status captured without printing credentials. No clean replay repeated for this test-only change.
+- The local guard requires **zero unrelated overdue scheduled sessions** before Attendance and immediately before both trusted Sweep calls. All guard checks passed; no unrelated data was deleted or modified to make this test pass. This guard is a local harness precondition, not a production candidate filter.
+
+### Real Concurrency / Timing
+
+- `node --check scripts/test-learning-schedule-attendance-first-sweep.mjs`: **exit 0**.
+- `node scripts/test-learning-schedule-attendance-first-sweep.mjs`: **exit 0; 9/9 executions PASS** — SWR-01 Start -> Sweep **3/3**, SWR-02 Complete -> Sweep **3/3**, SWR-03 Skip -> Sweep **3/3**.
+- [Fresh raw report](./phase-05-attendance-first-sweep.json): **2026-11-01 14:27:13.505–14:28:10.623 UTC** (21:27:13–21:28:10 Asia/Bangkok).
+- Independent backend PIDs: **Attendance A=4010, Sweep B=4012, observer=4011**. A executes the actual authenticated Attendance RPC as the fixture owner; B executes the actual trusted batch as service_role; observer uses a separate PostgreSQL connection.
+- Each fixture uses a single materialized database clock anchor and a grace deadline **6 seconds ahead**. Real Start/Complete/Skip must return the same UUID before that deadline; the returned PostgreSQL attendanceFinishedAt is asserted < deadline. No timestamp or source-state rewrite after Attendance success/commit.
+- A keeps its successful Attendance transaction uncommitted across cutoff. Observer sees the old committed scheduled row with zero events before the wait and after B's first batch; B therefore scans a real expired committed candidate, not an already-visible completed/skipped row.
+- Observer waits to deadline + 250 ms using PostgreSQL time, asserts afterDeadline >= deadline, then B starts its first Sweep transaction while A still holds Task/Schedule/Session locks. A commits only after B finishes and observer confirms the old committed snapshot is still visible.
+
+All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report retains original PostgreSQL offsets; values here are normalized to the same timezone.
+
+| Run | Attendance finished | Grace deadline | Observer after deadline, before first Sweep | First Sweep elapsed ms |
+| --- | --- | --- | --- | --- |
+| SWR-start-1 | 21:27:13.814844 | 21:27:19.790441 | 21:27:20.048069 | 4.5064 |
+| SWR-complete-1 | 21:27:20.110210 | 21:27:26.097367 | 21:27:26.352701 | 2.5481 |
+| SWR-skip-1 | 21:27:26.415166 | 21:27:32.401411 | 21:27:32.657387 | 1.8046 |
+| SWR-start-2 | 21:27:32.714741 | 21:27:38.701036 | 21:27:38.957270 | 2.4660 |
+| SWR-complete-2 | 21:27:39.017543 | 21:27:45.003762 | 21:27:45.256377 | 1.8033 |
+| SWR-skip-2 | 21:27:45.313161 | 21:27:51.299597 | 21:27:51.554570 | 2.6979 |
+| SWR-start-3 | 21:27:51.612207 | 21:27:57.598581 | 21:27:57.854137 | 1.7016 |
+| SWR-complete-3 | 21:27:57.908956 | 21:28:03.895186 | 21:28:04.151168 | 2.0293 |
+| SWR-skip-3 | 21:28:04.210842 | 21:28:10.195827 | 21:28:10.449998 | 1.5869 |
+
+- **9/9** Attendance commands finished before cutoff; **9/9** first Sweep calls were issued only after observer confirmed cutoff passed. All these timing conditions were independently rechecked from the fresh JSON report, not inferred from total PASS output.
+
+### SKIP LOCKED / Committed Outcome
+
+- **9/9 first Sweep calls: marked=0, examined=1**, while A remains uncommitted. This proves discovery of the expired scheduled candidate and skipping it under the retained Attendance locks, rather than doing nothing because the deadline was not reached.
+- First Sweep durations **1.5869–4.5064 ms**, all below the explicit **2000 ms** assertion bound. This is observed local latency, not a production performance guarantee. All trusted batch/Attendance calls succeed through Connection.ok's SQLSTATE 00000 check; no lock timeout/error was accepted as a successful skip.
+- **No blocking-wait requirement or pg_blocking_pids PASS is claimed for these nine SKIP LOCKED cases.** B is expected to return promptly before A releases its locks. The retained lock comes from A's actual uncommitted Attendance RPC, not a sleep-only assumption that B must be waiting.
+- After A commits, **9/9 retries: marked=0, examined=0** in fresh JSON. The now-committed Session is no longer scheduled, so it is no longer a missed candidate. This differs intentionally from a locked scheduled candidate that should be marked missed on retry.
+- **9/9 full snapshot comparisons PASS:** after the retry, entire persisted Session row, Task status and event array equal the immediately post-A-commit snapshot. This includes updated_at, completed_at, logical identity/time metadata and event payloads.
+- Final states: **3 in_progress + 3 completed + 3 skipped**, all parent Tasks todo, all actual_study_minutes null. completed_at is present only for Complete outcomes. Exactly one event per Session with the submitted event key: **3 started + 3 completed + 3 skipped**; **zero marked_missed events** across all nine fixtures.
+- Full final snapshots, first/retry batch outputs, PostgreSQL timing values, per-run backend PIDs and elapsed times are preserved in JSON. Historical state is not manufactured by changing timestamps after Attendance commit.
+
+### Isolation / Cleanup / Gate
+
+- Sweep gate **false/OFF before and after**, asserted by harness and confirmed by an independent post-exit query. No Cron gate activation, production operation or schedule change.
+- Report cleanup **PASS**, **0 open worker transactions** and **0 remaining worker locks** before shutdown. All three connections close. Independent final query confirms **0 attendance-cc fixture users, 0 fixture Tasks and 0 harness backends**.
+- Cleanup checks fixture owner/title before deleting its own generated Task and user; no broad real-data deletion. The unrelated-overdue guard passed at every required checkpoint. Each run uses a distinct Session fixture.
+- No migration, dependency, production RPC, browser code or .env.local change. No commit/push.
+
+### Database / Web Regression — Fresh Runs
+
+- Database: local CLI `supabase test db --local`, **exit 0; 25 files, 500 assertions PASS, 0 failures**, **9 wall-clock seconds**. Intentional concurrency setup TAP skip remains; these nine real races are separate harness coverage.
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, **exit 0; 69 files passed / 2 skipped, 612 tests passed / 20 skipped**, **105.18 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case were not separately run. No Attendance browser/UI E2E executed.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **25.6 seconds**, TypeScript finished in **66 seconds**, generated **98/98** pages in **1257 ms**.
+- Existing Vite config-loader/Supabase deprecated/optional-service notices were non-fatal. No syntax, fixture guard, timing, race, database or web-gate failure occurred. `git diff --check` passed after evidence update. Earlier HTTP and other race harnesses were not rerun in this step.
+
+### Remaining Acceptance Gaps
+
+- **Exact Recovery cutoff through real RPC: NOT EXECUTED** — controlled before/exact/after, Recovery lock crossing cutoff and exact replay after deadline remain open.
+- **Controlled DST transition through RPC: NOT EXECUTED**, including spring/fall and unusual local-midnight boundaries. Single-anchor canonical fixtures and earlier fixed timestamp arithmetic are narrower evidence.
+- **Exact grace equality through RPC/Sweep: NOT EXECUTED** — this suite succeeds clearly before cutoff and scans clearly after it; it does not classify an RPC at the exact microsecond of equality.
+- The specified Attendance-first Start/Complete/Skip vs Sweep orderings are now **executed**. Recovery interaction, other eligibility states, multi-candidate contention/fairness, error-path cleanup and broader isolation/load cases are not newly established by these nine runs. Do not treat this as exhaustive Sweep acceptance.
+- Expanded HTTP permission/payload permutations remain as scoped in Step 5.6B-2B.2C; that earlier 12-check suite was not rerun here. Remaining final acceptance, Attendance UI/browser E2E, Focus reconciliation and production activation remain pending.
+
+### Decision
+
+- Step 5.6B-2B.2D — Attendance-first vs Sweep: **PASS (LOCAL)** — **9/9 pre-cutoff Attendance successes, 9/9 prompt locked-candidate skips, 9/9 unchanged retry snapshots**, no false missed audit, clean fixtures/gate and fresh database/web gates.
+- Recovery cutoff / DST / full final acceptance: **PENDING** with NOT EXECUTED cases above retained. Phase 05 remains **IN PROGRESS**.
+- Production authorized: **NO**. No commit or push performed.
