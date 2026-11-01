@@ -590,3 +590,72 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - Step 5.6B-2A: **PASS (LOCAL)** for HARD-01–HARD-21 and freshly executed regression gates, within the stated privilege-inspection and sequential SQL scope. This is not full cross-command/boundary acceptance.
 - Ready for 5.6B-2B: **YES**, retaining all NOT EXECUTED cases above. Phase 05 remains **IN PROGRESS**.
 - Production deployment authorized: **NO**.
+
+## Step 5.6B-2B.1 — Revision vs Attendance
+
+### Baseline
+
+- Branch: `feature/learning-schedule-foundation`; verified **2026-11-01 (Asia/Bangkok)**.
+- HEAD SHA: **`1a00a9d132f8b5ee60eb48539fd0565e1d93a46e`** — `test(learning-schedule): harden attendance batch rollback and privileges`. The new revision-attendance harness/report were untracked working-tree additions at review time; this SHA identifies the committed baseline, not a commit containing those files.
+- Reviewed and ran `scripts/test-learning-schedule-revision-attendance-concurrency.mjs` without edits. No new migration, application change, dependency, production operation, commit or push.
+- Database: local container `supabase_db_lumivox-proj`, **PostgreSQL 17.6**, **84 migrations** independently confirmed. Test-only verification did not repeat a clean migration replay; prior 84-migration replay remains Step 5.5 evidence.
+
+### Real Concurrency — Executed
+
+- Command from repo root: `node scripts/test-learning-schedule-revision-attendance-concurrency.mjs`, **exit 0; 18/18 executions PASS** — six scenarios repeated three times.
+- Fresh [raw report](./phase-05-revision-attendance-concurrency.json): **2026-11-01 13:11:22.163–13:11:30.344 UTC**, corresponding to **20:11:22–20:11:30 Asia/Bangkok**. Pre-existing report values were replaced by this actual run.
+- Independent PostgreSQL backend PIDs: **A=446, B=447, observer=454**. Both workers execute the real Revision/Attendance RPCs under authenticated role with the fixture owner's JWT claims; setup/observer use trusted postgres. This is database RPC testing, not a PostgREST or browser test.
+- **18/18 observed blockers:** observer confirms A=446 in `pg_blocking_pids(447)` while A's completed RPC transaction remains uncommitted. A commits only after the observed blocker; B's resulting SQLSTATE is then asserted and its transaction committed or rolled back. All six scenarios use real waiting, with no SKIP LOCKED case in this harness.
+- This tests the listed deterministic first/second transaction orderings, not simultaneous random load or every status/ordering. Timeouts: 5-second lock, 10-second statement, 15-second command; none reached.
+
+| Scenario | Executions | Actual B SQLSTATE | Schedule revision / original Session / audit | Sessions retained |
+| --- | --- | --- | --- | --- |
+| REV-01 Revision first vs future Skip | 3/3 PASS | **22023** | revision 2 / cancelled, reason schedule_changed / 1 cancelled event | Old revision-1 row retained; one new revision-2 scheduled row, distinct ID |
+| REV-02 Future Skip first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / skipped / 1 skipped event | Old skipped revision-1 row retained; one new revision-2 scheduled row |
+| REV-03 Start first vs Revision | 3/3 PASS | **22023** | revision 1 / in_progress / 1 started event | Only the original row; failed Revision creates no new occurrence |
+| REV-04 Revision first vs Recovery | 3/3 PASS | **00000**; Recovery returns original UUID | revision 2 / historical missed row becomes completed / 1 recovered event | Historical revision-1 row retained; one new revision-2 scheduled row |
+| REV-05 Recovery first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / completed / 1 recovered event | Completed revision-1 history retained; one new revision-2 scheduled row |
+| REV-06 Complete first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / completed / 1 completed event | Completed revision-1 history retained; one new revision-2 scheduled row |
+
+- SQLSTATE totals for B: **6 x 22023**, **12 x 00000**; **no PT409 observed** in these six scenarios. Do not substitute an expected stale conflict for the actual state/revision outcomes above.
+
+### Cancellation Audits / Session History
+
+- REV-01: all three fixtures retain the cancelled original UUID, with cancellation_reason **schedule_changed** and exactly one cancelled event. In addition to harness event-type/count assertions, all three fresh report records were checked for from_status=scheduled, to_status=cancelled, owner actor_id, deterministic key `ls:schedule-change-cancel:<original UUID>`, payload reason=schedule_changed and payload scheduleRevision=1.
+- Revision creates a new occurrence with a **different UUID**, schedule_revision=2 and status scheduled in each successful revision. Historical original Session rows retain revision 1 in the recorded session lists. The three Start-first runs remain at revision 1 with only the original in_progress row.
+- Skipped/completed historical sessions are retained rather than cancelled by Revision in the executed paths. Historical missed sessions remain recoverable after Revision: REV-04 succeeds with the original expected version. No cancellation event is added to those completed/skipped histories.
+- Every original Session has **exactly one event**; across 18 fixtures: **3 cancelled, 3 skipped, 3 started, 6 recovered, 3 completed**. Harness checks event types/counts and unique keys for original Sessions. Audit arrays for newly generated occurrences are not independently queried by this harness; no claim is made about a separately executed new-occurrence audit-count assertion.
+- Parent Task remains **todo** and Schedule **active** in all runs. actual_study_minutes remains null. completed_at exists for completed originals and is null for cancelled/skipped/in_progress originals. Returned original Session IDs and new-occurrence distinct IDs are asserted. Full original rows/events and per-Schedule session summaries are retained in JSON.
+- Limit: this suite does not compare every historical timestamp/time/identity field against a pre-command full snapshot; it does not test repeated revision idempotency or exact-key attendance retries through every later revision. Recorded final snapshots are not substituted for unexecuted before/after assertions.
+
+### Cleanup / Gate
+
+- Harness **cleanup PASS**, fixture Task/user removed, **0 open worker transactions** verified before closing all three connections.
+- Independent post-exit query confirms **0 attendance-cc fixture users, 0 fixture Tasks and 0 remaining harness backends**. No test connection survives; no retained worker transaction is claimed from a mere final-state snapshot.
+- Sweep gate is asserted **OFF before the harness** and independently confirmed **OFF afterward**. No Cron activation or schedule alteration. This verification used only local Supabase and did not touch .env.local.
+
+### Database and Web Gates — Fresh Runs
+
+- Database: local CLI `supabase test db --local`, **exit 0; 24 files, 488 assertions PASS, 0 failures**, 11 wall-clock seconds. This reruns HARD-01–21 and previous suites. Persistent concurrency fixture setup is intentionally TAP-skipped; the 18 real executions above are additional evidence, not part of the 488 pgTAP assertions.
+- Lint from apps/web: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104:6`.
+- Vitest: `node node_modules/vitest/vitest.mjs run`, **exit 0; 69 files passed / 2 skipped, 612 tests passed / 20 skipped**, **102.23 seconds**. The skipped 19 opt-in Phase 04 integration tests and 1 Focus integration test were not separately run. This is web regression coverage, not an attendance browser/UI acceptance run.
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **26.3 seconds**, TypeScript finished in **48 seconds**, generated **98/98** pages in **1055 ms**.
+- Existing Vite config-loader/Supabase notices were non-fatal. No database, concurrency or web-gate failure occurred. `git diff --check` passed after evidence update. Earlier 24-run/30-run harnesses were not rerun in this step; their prior results remain historical evidence.
+
+### NOT EXECUTED / Remaining Acceptance
+
+- **Exact grace cutoff: NOT EXECUTED** — no real RPC/Sweep just-before, exact or just-after controlled-clock case.
+- **Exact recovery cutoff: NOT EXECUTED** — no controlled Recovery/Skip boundary or replay after the deadline.
+- **Lock crossing boundary: NOT EXECUTED** — observed waits above prove serialization, not a wait crossing grace/recovery cutoff or true-clock rejection after that crossing.
+- **Reverse Sweep/Task Close cases: NOT EXECUTED in this step** — remaining Attendance-first vs Sweep, Start-first then close, Recovery vs Task Close in both orders and other outstanding status/lifecycle cases remain open. Prior B-1 partial coverage is not a complete reverse-order matrix.
+- **Clock-controlled RPC tests: NOT EXECUTED** — including DST spring/fall transitions, unusual midnight, exact cutoff and replay after eligibility changes. Earlier SQL timestamp-expression tests and the historical-timezone RPC test do not close these boundary gaps.
+- Remaining Revision scope: Revision-first vs current Start/Complete and other unlisted statuses/orderings, exact-key interactions, broader immutable-history comparisons and failure-injection through competing revisions have not been executed by these six scenarios. Revision-vs-Attendance is covered only to the extent listed above.
+- Broader final acceptance, full runtime privilege/API matrix, fairness/load/isolation coverage, Attendance UI/browser integration, Focus reconciliation and production activation remain outside this step. Preserve the remaining 5.6B/REC-B gaps until actual tests close them.
+
+### Decision
+
+- Step 5.6B-2B.1: **PASS (LOCAL)** for the six documented scenarios, **18 executions / 18 observed blockers**, cancellation/history assertions, cleanup and fresh database/web gates.
+- Remaining boundary/reverse-order/final acceptance: **PENDING**, with NOT EXECUTED cases above.
+- Phase 05 completed: **NO**.
+- Production authorized: **NO**. No commit/push performed.
