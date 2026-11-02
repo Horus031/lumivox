@@ -1,9 +1,117 @@
 {
-  "baseline": "f69ff4d78bd30b57e1a4c98c9940e357bc6b9ba5",
-  "startedAt": "2026-11-02T07:07:40.184Z",
+  "baseline": "b4143307c214ddbfc6257d042de25c24c21f7992",
+  "startedAt": "2026-11-02T07:39:53.26Z",
   "baseURL": "http://127.0.0.1:3100",
   "apiOrigin": "http://127.0.0.1:55321",
   "sweepGateBefore": false,
+  "caseDetails": {
+    "ATE-04": {
+      "upstreamHttpStatus": 200,
+      "committedObservedAt": "2026-11-02T07:40:13.02Z",
+      "beforeResponseLoss": {
+        "id": "fa34f71c-12f6-4a42-8469-415d6d3322b5",
+        "status": "completed",
+        "completed_at": "2026-11-02T14:40:13.000108+07:00",
+        "actual_study_minutes": null,
+        "updated_at": "2026-11-02T14:40:12.997882+07:00"
+      },
+      "eventCountBeforeResponseLoss": 1,
+      "originalCommand": {
+        "command": "complete",
+        "sessionId": "fa34f71c-12f6-4a42-8469-415d6d3322b5",
+        "expectedUpdatedAt": "2026-11-02T14:30:11.093+07:00",
+        "eventKey": "b2365b10-cc22-4f4d-b008-c85d8b2bd316"
+      },
+      "retryCommand": {
+        "command": "complete",
+        "sessionId": "fa34f71c-12f6-4a42-8469-415d6d3322b5",
+        "expectedUpdatedAt": "2026-11-02T14:30:11.093+07:00",
+        "eventKey": "b2365b10-cc22-4f4d-b008-c85d8b2bd316"
+      },
+      "requestBodiesIdentical": true,
+      "eventCountBeforeRetry": 1,
+      "eventCountAfterRetry": 1,
+      "sessionUnchangedOnReplay": true,
+      "auditUnchangedOnReplay": true,
+      "interceptedRequests": 2,
+      "retryVerifiedAt": "2026-11-02T07:40:13.488Z"
+    },
+    "ATE-05": {
+      "visited": [
+        "reason",
+        "Cancel",
+        "Confirm skip"
+      ],
+      "focusRestored": true,
+      "focusStayedInDialog": true,
+      "escapeClosedWithoutMutation": true,
+      "eventCount": 0
+    },
+    "ATE-06": {
+      "locales": [
+        {
+          "locale": "en",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "contentWidth": 356,
+          "clientWidth": 356,
+          "renderedWidth": 358,
+          "viewportWidth": 390,
+          "documentWidth": 390,
+          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-en-mobile.png",
+          "cancelled": true
+        },
+        {
+          "locale": "vi",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "contentWidth": 356,
+          "clientWidth": 356,
+          "renderedWidth": 358,
+          "viewportWidth": 390,
+          "documentWidth": 390,
+          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-vi-mobile.png",
+          "cancelled": true
+        }
+      ],
+      "eventCount": 0,
+      "sessionUnchanged": true
+    },
+    "ATE-07": {
+      "otherUserId": "141edf8c-643d-4b1d-a6ba-a4391d6da549",
+      "browserTaskVisible": false,
+      "rlsRowsReturned": 0,
+      "denials": [
+        {
+          "rpc": "ls_start_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_complete_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_skip_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_recover_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        }
+      ],
+      "sessionUnchanged": true,
+      "eventCount": 0,
+      "otherUserCleanup": "PASS"
+    }
+  },
   "runs": [
     {
       "name": "ATE-01 browser starts then completes one session",
@@ -11,30 +119,32 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "sessionId": "fa6d2c26-794e-4370-a69e-c7f2fec3e515",
+          "taskId": "f74339cb-2c42-414d-a982-ea498eb459b9",
+          "scheduleId": "6d350db3-e491-439d-bd09-b23c6bc884c7",
+          "sessionId": "55857237-33d1-4c21-a59a-9a40b51fc136",
           "session": {
-            "id": "fa6d2c26-794e-4370-a69e-c7f2fec3e515",
+            "id": "55857237-33d1-4c21-a59a-9a40b51fc136",
             "status": "completed",
-            "completed_at": "2026-11-02T07:07:52.775352+00:00",
+            "completed_at": "2026-11-02T14:39:59.099508+07:00",
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T07:07:52.769379+00:00"
+            "updated_at": "2026-11-02T14:39:59.09629+07:00"
           },
           "events": [
             {
-              "id": "6d17ad5e-efee-4119-8c50-3586e975af12",
+              "id": "c0c6da66-4843-4d49-abda-51bbb0c77c86",
               "event_type": "started",
-              "event_key": "a55a9656-2551-4603-ac8d-e803af5d4861",
+              "event_key": "3e9f0bd7-763d-424a-8278-36324a778889",
               "from_status": "scheduled",
               "to_status": "in_progress",
-              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
             },
             {
-              "id": "22a79b1c-e67d-4014-9793-2af8e02b9cfb",
+              "id": "0117873f-6426-4d22-817e-dd4e2c0cea92",
               "event_type": "completed",
-              "event_key": "5e589bb2-a38c-47e8-a633-9ea8845328b3",
+              "event_key": "a0a5b502-d918-48a3-969d-fcbeb52d0c05",
               "from_status": "in_progress",
               "to_status": "completed",
-              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
             }
           ],
           "taskStatus": "todo"
@@ -47,30 +157,32 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "sessionId": "d25c8326-8d93-46d6-b09d-c373fe1c12eb",
+          "taskId": "8400357d-ab5c-40d4-a7ca-3f022de83e30",
+          "scheduleId": "5fa7f5c9-b908-4a52-be91-83b97bc2be81",
+          "sessionId": "9cecbe7f-5c4f-4409-b101-f9cf30706f92",
           "session": {
-            "id": "d25c8326-8d93-46d6-b09d-c373fe1c12eb",
+            "id": "9cecbe7f-5c4f-4409-b101-f9cf30706f92",
             "status": "completed",
-            "completed_at": "2026-11-02T07:08:03.43664+00:00",
+            "completed_at": "2026-11-02T14:40:03.487575+07:00",
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T07:08:03.413679+00:00"
+            "updated_at": "2026-11-02T14:40:03.485007+07:00"
           },
           "events": [
             {
-              "id": "f6fbfd99-de38-4b5b-9045-71b79c986e0f",
+              "id": "19201f2c-cd76-440c-9ecb-225c1175652d",
               "event_type": "skipped",
-              "event_key": "3b28d3f9-327f-44df-98b1-cbf2c42e8203",
+              "event_key": "4ad6fd8b-9cfa-414e-a2ef-29a4ec6a130c",
               "from_status": "scheduled",
               "to_status": "skipped",
-              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
             },
             {
-              "id": "9c40dd22-492d-43a1-822b-8941bce2c287",
+              "id": "f7664b12-f26b-4fdb-b1d9-b08f99799e39",
               "event_type": "recovered",
-              "event_key": "da74d998-f2c2-46c3-98a0-82812536b896",
+              "event_key": "fdcfafa4-0271-4211-8b4b-2d2fd51aa059",
               "from_status": "skipped",
               "to_status": "completed",
-              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
             }
           ],
           "taskStatus": "todo"
@@ -83,24 +195,119 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "sessionId": "0601b9af-3e82-4b73-b275-2640047fa025",
+          "taskId": "111d9f20-c891-4d6b-85a5-7f349edf9e33",
+          "scheduleId": "4c9cc28d-902f-42f2-9406-7a6ce72fe133",
+          "sessionId": "7791cc24-016d-4a71-8025-140b580cf502",
           "session": {
-            "id": "0601b9af-3e82-4b73-b275-2640047fa025",
+            "id": "7791cc24-016d-4a71-8025-140b580cf502",
             "status": "in_progress",
             "completed_at": null,
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T07:08:13.588615+00:00"
+            "updated_at": "2026-11-02T14:40:08.635604+07:00"
           },
           "events": [
             {
-              "id": "83cadeff-10ec-43df-88b9-3753a64b02f6",
+              "id": "d325ca2f-39d7-4967-b428-188423637e27",
               "event_type": "started",
-              "event_key": "0faec564-5982-42aa-a60c-9b396f20f387",
+              "event_key": "46350b96-fde7-41a1-a75b-373588e1e0a5",
               "from_status": "scheduled",
               "to_status": "in_progress",
-              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
             }
           ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-04 lost response preserves exact completion",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "2a202899-ef1b-46a3-b011-04bfa3ddef65",
+          "scheduleId": "14b6522f-458b-4137-838d-dad31ed663e4",
+          "sessionId": "fa34f71c-12f6-4a42-8469-415d6d3322b5",
+          "session": {
+            "id": "fa34f71c-12f6-4a42-8469-415d6d3322b5",
+            "status": "completed",
+            "completed_at": "2026-11-02T14:40:13.000108+07:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:40:12.997882+07:00"
+          },
+          "events": [
+            {
+              "id": "3a412575-37a4-4fea-8440-68c561c21fa8",
+              "event_type": "completed",
+              "event_key": "b2365b10-cc22-4f4d-b008-c85d8b2bd316",
+              "from_status": "scheduled",
+              "to_status": "completed",
+              "actor_id": "2de5fe01-8c55-46ad-9ebd-9ce043fe9132"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-05 Attendance dialog supports keyboard and restores focus",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "d08caeec-7c7b-4720-85fa-4ffbcfb7660f",
+          "scheduleId": "36538607-c9c2-4543-9f4e-26a10353ebe7",
+          "sessionId": "bae0ed09-34ce-4848-9e9e-22d43e612d79",
+          "session": {
+            "id": "bae0ed09-34ce-4848-9e9e-22d43e612d79",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:30:14.979+07:00"
+          },
+          "events": [],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-06 mobile Attendance works in EN and VI",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "a2d28403-c60e-4265-bc26-28bb9ade2813",
+          "scheduleId": "050679e7-fa06-474d-a2ae-5f1e65ee72be",
+          "sessionId": "fb8adad3-8ec7-46f4-a914-c75fd8cc4be6",
+          "session": {
+            "id": "fb8adad3-8ec7-46f4-a914-c75fd8cc4be6",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:30:18.638+07:00"
+          },
+          "events": [],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-07 cross-owner cannot read or mutate Attendance",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "c0aa51d2-6777-469b-8fd5-1b870a3c550b",
+          "scheduleId": "bfcece1b-992a-4a95-a77f-74006b1b203c",
+          "sessionId": "dcadce76-4196-441b-bc66-9235e7fca90f",
+          "session": {
+            "id": "dcadce76-4196-441b-bc66-9235e7fca90f",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:30:24.272+07:00"
+          },
+          "events": [],
           "taskStatus": "todo"
         }
       ]
@@ -110,5 +317,17 @@
   "userCleanup": "PASS",
   "remainingSessions": 0,
   "remainingTasks": 0,
-  "finishedAt": "2026-11-02T07:08:15.294Z"
+  "finishedAt": "2026-11-02T07:40:29.33Z",
+  "finalVerification": {
+    "postgresVersion": "17.6",
+    "migrationCount": 84,
+    "sweepGate": false,
+    "remainingAuthFixtures": 0,
+    "remainingReportedTasks": 0,
+    "remainingReportedSchedules": 0,
+    "remainingReportedSessions": 0,
+    "remainingReportedEvents": 0,
+    "remainingActorEvents": 0,
+    "verifiedAt": "2026-11-02T07:49:48.1162573Z"
+  }
 }
