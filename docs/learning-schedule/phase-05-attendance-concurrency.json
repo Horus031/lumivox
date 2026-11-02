@@ -1,0 +1,1457 @@
+{
+  "baseline": "0684e02a8df0168e421111dd3516a3a6f11cd380",
+  "startedAt": "2026-10-31T09:42:44.388Z",
+  "container": "supabase_db_lumivox-proj",
+  "runs": [
+    {
+      "name": "CC-01 complete-vs-complete-distinct/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "7e5d2eef-6ff7-4667-82cc-25027cb086ce",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:44.488793+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.475262+00:00",
+              "requestFingerprint": "0690201d2232ea48fb3260c97239975cfa96d4ad24511bf4b837f5a98ee3c747"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "8f653947-a761-4c1d-9793-1ac149f91935",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.481771+00:00",
+            "event_type": "completed",
+            "session_id": "6ddd0f59-0bde-4767-a9f3-f985c82ff3ac",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "6ddd0f59-0bde-4767-a9f3-f985c82ff3ac",
+          "status": "completed",
+          "task_id": "2fe61570-51cb-4130-8af9-fb91e45d3d7f",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.475262+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:44.481771+00:00",
+          "schedule_id": "eaef301d-3170-4f67-bdab-435f7c9806e2",
+          "completed_at": "2026-10-31T09:42:44.488793+00:00",
+          "local_end_time": "10:12:44.475262",
+          "source_slot_id": null,
+          "local_start_time": "09:22:44.475262",
+          "scheduled_end_at": "2026-10-31T10:12:44.475262+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:44.475262+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-02 complete-vs-complete-exact/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "3f20cdfa-4944-450e-aeb5-65539d62b6d0",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:44.585685+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.571594+00:00",
+              "requestFingerprint": "2c60ded5855feec8d4f1857442c687404fc4ed73d797224bff05a59444f76bcc"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "ce8af63e-34c8-4353-8b75-a74597c09560",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.58007+00:00",
+            "event_type": "completed",
+            "session_id": "390bb82a-deff-4a78-ac63-b2a200b33169",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "390bb82a-deff-4a78-ac63-b2a200b33169",
+          "status": "completed",
+          "task_id": "1f766ccd-43f1-4f12-b603-4255a05f3d26",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.571594+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:44.58007+00:00",
+          "schedule_id": "a7aaf42a-dbf4-4d4f-8129-6eaadbafb21f",
+          "completed_at": "2026-10-31T09:42:44.585685+00:00",
+          "local_end_time": "10:12:44.571594",
+          "source_slot_id": null,
+          "local_start_time": "09:22:44.571594",
+          "scheduled_end_at": "2026-10-31T10:12:44.571594+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:44.571594+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-03 start-vs-complete-stale/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "start",
+      "second": "complete",
+      "secondSqlstate": "PT409",
+      "finalStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "deac254a-7681-43f3-8468-030a9da8bf7e",
+            "payload": {
+              "startedAt": "2026-10-31T09:42:44.652526+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.642424+00:00",
+              "requestFingerprint": "1f7a1b28583c4fc46afc5d01e83662556d91d0447985a5017990c9bbfa112955"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "cfcd4223-0ada-4584-94fc-fe01994b1cd6",
+            "to_status": "in_progress",
+            "created_at": "2026-10-31T09:42:44.648426+00:00",
+            "event_type": "started",
+            "session_id": "8a75a400-1424-417d-9d2a-a3665600662e",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "8a75a400-1424-417d-9d2a-a3665600662e",
+          "status": "in_progress",
+          "task_id": "f16221db-79ac-470c-8672-7235689d3195",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.642424+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:44.648426+00:00",
+          "schedule_id": "eb4e0b24-43a9-4822-a905-558ca4efa4cc",
+          "completed_at": null,
+          "local_end_time": "10:12:44.642424",
+          "source_slot_id": null,
+          "local_start_time": "09:22:44.642424",
+          "scheduled_end_at": "2026-10-31T10:12:44.642424+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:44.642424+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-04 complete-vs-skip/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "1a3075aa-5870-40f7-9488-999e17e7adfe",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:44.724047+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.715566+00:00",
+              "requestFingerprint": "40d353fdf9f035d9d1f44330eee94bd7df1bbd9c107c8b1418b2eb13360e7012"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "89722d33-1c90-437f-b367-2698e51f7438",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.720517+00:00",
+            "event_type": "completed",
+            "session_id": "bf73e4b0-21b1-4780-951c-3dca330811ed",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "bf73e4b0-21b1-4780-951c-3dca330811ed",
+          "status": "completed",
+          "task_id": "8dd608fa-6ce2-4446-8ca4-2f9dca8c1ce8",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.715566+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:44.720517+00:00",
+          "schedule_id": "c6d7a49c-9e8b-4ea1-a85f-7f82703d09ae",
+          "completed_at": "2026-10-31T09:42:44.724047+00:00",
+          "local_end_time": "10:12:44.715566",
+          "source_slot_id": null,
+          "local_start_time": "09:22:44.715566",
+          "scheduled_end_at": "2026-10-31T10:12:44.715566+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:44.715566+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05 recover-vs-recover-distinct/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "c9358070-5ef7-4d23-aec3-904816ca8bbc",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:44.788369+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.778298+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "5b39d4fdec4704ea69fa0171b0e6cf360f4725682052b6e0f7108c61cc6e0766"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "2a7b850a-b2a8-4fd7-8a75-e26c0d309846",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.783676+00:00",
+            "event_type": "recovered",
+            "session_id": "071b1bea-5482-4104-9122-d7c221b03780",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "071b1bea-5482-4104-9122-d7c221b03780",
+          "status": "completed",
+          "task_id": "0baaa447-f8d4-4977-9982-f1dd61c3ca55",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.778298+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:44.783676+00:00",
+          "schedule_id": "fb0a42c3-83f2-41a7-a523-f601b043e3ee",
+          "completed_at": "2026-10-31T09:42:44.788369+00:00",
+          "local_end_time": "10:12:44.778298",
+          "source_slot_id": null,
+          "local_start_time": "09:42:44.778298",
+          "scheduled_end_at": "2026-10-29T10:12:44.778298+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:44.778298+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05b recover-vs-recover-exact/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "b56ce15a-8ad3-4640-b041-5073d36a05d3",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:44.869523+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.85979+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "4d2dfa8f9f2436dda6afb41cc613410e98e2070044e17abc95259dd4f03eebcb"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "2fb3c80a-2006-4967-a08d-5ce2df097de4",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.865432+00:00",
+            "event_type": "recovered",
+            "session_id": "1a7a1075-d9f5-4fb4-a699-efd4c9a300df",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "1a7a1075-d9f5-4fb4-a699-efd4c9a300df",
+          "status": "completed",
+          "task_id": "d2ccb7fa-ec70-4b5d-b1ca-8c5af2af6d88",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.85979+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:44.865432+00:00",
+          "schedule_id": "b00a026f-8f90-4ae3-9646-8de100d1561c",
+          "completed_at": "2026-10-31T09:42:44.869523+00:00",
+          "local_end_time": "10:12:44.85979",
+          "source_slot_id": null,
+          "local_start_time": "09:42:44.85979",
+          "scheduled_end_at": "2026-10-29T10:12:44.85979+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:44.85979+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-06 recover-vs-skip/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "6c8d6557-370a-466d-9e68-0908973e0c8e",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:44.9426+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.934417+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "b1b70cdb2a3100f32615bd1a3b443729d972ccbe90c5bf29627c46296a6c84dd"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "b606abb9-581f-4983-baa3-0021fdd313db",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:44.938943+00:00",
+            "event_type": "recovered",
+            "session_id": "a99b4e8c-e704-4f85-860b-14d90f6c335e",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "a99b4e8c-e704-4f85-860b-14d90f6c335e",
+          "status": "completed",
+          "task_id": "ac9705f5-9905-487a-9fa1-bbf572124f85",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.934417+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:44.938943+00:00",
+          "schedule_id": "ce71a27b-75e7-4d14-ae12-1b7f1dd704f3",
+          "completed_at": "2026-10-31T09:42:44.9426+00:00",
+          "local_end_time": "10:12:44.934417",
+          "source_slot_id": null,
+          "local_start_time": "09:42:44.934417",
+          "scheduled_end_at": "2026-10-29T10:12:44.934417+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:44.934417+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-07 skip-vs-recover-stale/iteration-1",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "skip",
+      "second": "recover",
+      "secondSqlstate": "PT409",
+      "finalStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "b7889b3a-581a-4803-b4e3-028cb967c478",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-10-31T09:42:45.003154+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:44.99436+00:00",
+              "requestFingerprint": "6bf76e885e1ddceceeaa93d3ba15861936eeefa3d89718dd88c51f8ccf70715e"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "8a5ee6ef-1665-4694-b5f8-2dcb54011243",
+            "to_status": "skipped",
+            "created_at": "2026-10-31T09:42:44.999082+00:00",
+            "event_type": "skipped",
+            "session_id": "5b69b79d-8caa-4162-a5a7-aa5cc09f04cc",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "5b69b79d-8caa-4162-a5a7-aa5cc09f04cc",
+          "status": "skipped",
+          "task_id": "e0c83dc9-7be2-4c07-89e8-196f21e58a1c",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:44.99436+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:44.999082+00:00",
+          "schedule_id": "aa212292-4c56-4e39-8939-96838ee53682",
+          "completed_at": null,
+          "local_end_time": "10:12:44.99436",
+          "source_slot_id": null,
+          "local_start_time": "09:42:44.99436",
+          "scheduled_end_at": "2026-10-29T10:12:44.99436+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:44.99436+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-01 complete-vs-complete-distinct/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "0672e820-a2d0-40fb-97d6-324a128bdfca",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.06675+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.057359+00:00",
+              "requestFingerprint": "5a1c15e709585fcaafb2543b1d3416d5267d188c9a43941f9767d0d0c4b75d43"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "5561ff88-2cde-4f39-b09d-b3fb42799adf",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.063175+00:00",
+            "event_type": "completed",
+            "session_id": "3442c90a-8188-4b98-8be4-1aec9ff5e522",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "3442c90a-8188-4b98-8be4-1aec9ff5e522",
+          "status": "completed",
+          "task_id": "3e6756cb-0f8d-4596-b2c0-8544429f82ce",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.057359+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.063175+00:00",
+          "schedule_id": "011e8e8b-812f-4530-9258-a3f2a23cf102",
+          "completed_at": "2026-10-31T09:42:45.06675+00:00",
+          "local_end_time": "10:12:45.057359",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.057359",
+          "scheduled_end_at": "2026-10-31T10:12:45.057359+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.057359+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-02 complete-vs-complete-exact/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "97893a21-9800-4d7a-b816-13d07ea30d86",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.129391+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.119884+00:00",
+              "requestFingerprint": "c6e44ab4778ec44f6bc401dfc6b4e110819901958500e70a1a71e3c7eaf38bbd"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "875b82a7-9916-4032-9ba1-eb462a6232b3",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.125248+00:00",
+            "event_type": "completed",
+            "session_id": "02baa10e-b66b-4bd9-bb74-29a1e77bb922",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "02baa10e-b66b-4bd9-bb74-29a1e77bb922",
+          "status": "completed",
+          "task_id": "39921435-f1f4-430d-93c6-842853334b6f",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.119884+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.125248+00:00",
+          "schedule_id": "c92a8a16-9709-4882-b78b-7a4a638cd89c",
+          "completed_at": "2026-10-31T09:42:45.129391+00:00",
+          "local_end_time": "10:12:45.119884",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.119884",
+          "scheduled_end_at": "2026-10-31T10:12:45.119884+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.119884+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-03 start-vs-complete-stale/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "start",
+      "second": "complete",
+      "secondSqlstate": "PT409",
+      "finalStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "5c6805f0-ad58-4ab8-af4a-9d531a64c6dd",
+            "payload": {
+              "startedAt": "2026-10-31T09:42:45.204644+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.196616+00:00",
+              "requestFingerprint": "8b6b59fdc13e4fcc35b87feb749c0d1a0e0a264b39a19927b83e9944e6ddf02d"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "3617a2ef-d822-464a-8f66-d1e562603980",
+            "to_status": "in_progress",
+            "created_at": "2026-10-31T09:42:45.201349+00:00",
+            "event_type": "started",
+            "session_id": "3da21f95-5bb6-4da9-b70a-90fe5e2c3a4e",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "3da21f95-5bb6-4da9-b70a-90fe5e2c3a4e",
+          "status": "in_progress",
+          "task_id": "e00c742a-94ab-46a9-8962-5d500a2328cb",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.196616+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.201349+00:00",
+          "schedule_id": "3558a48f-bd0f-41c5-a077-90ec93554d3d",
+          "completed_at": null,
+          "local_end_time": "10:12:45.196616",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.196616",
+          "scheduled_end_at": "2026-10-31T10:12:45.196616+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.196616+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-04 complete-vs-skip/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "2a79b3d9-2afb-4fec-9d97-303710c7454b",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.266298+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.257628+00:00",
+              "requestFingerprint": "47e0c345181e12bbd5c93b3830d111ed3dd4212cb87f1337c5d3ba0a75cbd04e"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "711ed7dc-49cb-47ab-9dce-7ff39c402651",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.262922+00:00",
+            "event_type": "completed",
+            "session_id": "b187ea02-c04b-40d5-9263-ea60b76f78c2",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "b187ea02-c04b-40d5-9263-ea60b76f78c2",
+          "status": "completed",
+          "task_id": "0f6d5362-0d31-4412-8283-e0611a2c99dc",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.257628+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.262922+00:00",
+          "schedule_id": "639969a0-7c57-460f-a35b-d153894eb29a",
+          "completed_at": "2026-10-31T09:42:45.266298+00:00",
+          "local_end_time": "10:12:45.257628",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.257628",
+          "scheduled_end_at": "2026-10-31T10:12:45.257628+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.257628+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05 recover-vs-recover-distinct/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "1b60db92-cea7-463b-9d03-bb1141105e02",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:45.326459+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.318317+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "a946d256f7ce07cec6cc6cec0a58b3b01d4f7ed1400cc152a1a3fa6780164a5e"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "faf4cd1a-1cee-4623-a3b3-52e40247f371",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.322762+00:00",
+            "event_type": "recovered",
+            "session_id": "362ab9cb-9d25-4bff-a503-c4e95fc8c329",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "362ab9cb-9d25-4bff-a503-c4e95fc8c329",
+          "status": "completed",
+          "task_id": "09359887-873e-4099-9019-e22778691189",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.318317+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.322762+00:00",
+          "schedule_id": "295992e7-8109-4b54-ba48-0abe91d348d3",
+          "completed_at": "2026-10-31T09:42:45.326459+00:00",
+          "local_end_time": "10:12:45.318317",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.318317",
+          "scheduled_end_at": "2026-10-29T10:12:45.318317+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.318317+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05b recover-vs-recover-exact/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "d18e7cc9-2e10-4dab-bdce-5dcfcd650652",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:45.390052+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.38186+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "6a812e2e9ed664a8a8250a6f361e09f80e42c131a93d941dad78bd3d434f9b2e"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "79eb7fb3-3924-469b-9349-173098434427",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.38659+00:00",
+            "event_type": "recovered",
+            "session_id": "c596b1bd-fe5b-47ff-8a72-61875208420d",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "c596b1bd-fe5b-47ff-8a72-61875208420d",
+          "status": "completed",
+          "task_id": "8c619e29-5d64-4488-b643-1a6a05f1edf6",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.38186+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.38659+00:00",
+          "schedule_id": "a38d3798-9a18-4c55-b779-25403b488440",
+          "completed_at": "2026-10-31T09:42:45.390052+00:00",
+          "local_end_time": "10:12:45.38186",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.38186",
+          "scheduled_end_at": "2026-10-29T10:12:45.38186+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.38186+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-06 recover-vs-skip/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "3dc38555-20bd-4361-92e3-cdb919297048",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:45.453595+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.444689+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "fca856e1ba7f9772afc2b1bdaa3e0f0dde7bbbab28b33deb2e90999e922be6c9"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "10979689-e3ad-4481-bd36-06bf33574170",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.44979+00:00",
+            "event_type": "recovered",
+            "session_id": "36e8fc90-b56a-46de-91e3-0b76b739d530",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "36e8fc90-b56a-46de-91e3-0b76b739d530",
+          "status": "completed",
+          "task_id": "6fe2d0d3-bd8d-45c8-95cf-516ba49cf8ce",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.444689+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.44979+00:00",
+          "schedule_id": "8576c631-9f69-4043-836d-4d243ae6b881",
+          "completed_at": "2026-10-31T09:42:45.453595+00:00",
+          "local_end_time": "10:12:45.444689",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.444689",
+          "scheduled_end_at": "2026-10-29T10:12:45.444689+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.444689+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-07 skip-vs-recover-stale/iteration-2",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "skip",
+      "second": "recover",
+      "secondSqlstate": "PT409",
+      "finalStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "3ab162b5-11dc-4901-a9f4-edf9bb9a7be2",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-10-31T09:42:45.530659+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.520891+00:00",
+              "requestFingerprint": "f9b793890fc2745a76283058311cbb39fb74e5ea8ba6dbce6722c28fbbfba925"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "f757700f-7b10-42be-b17d-951f18455911",
+            "to_status": "skipped",
+            "created_at": "2026-10-31T09:42:45.526496+00:00",
+            "event_type": "skipped",
+            "session_id": "16ba32bc-06d4-451a-9c2a-79c4b557c190",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "16ba32bc-06d4-451a-9c2a-79c4b557c190",
+          "status": "skipped",
+          "task_id": "7e5bd35e-f8f7-486e-98f1-4ce992887e41",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.520891+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.526496+00:00",
+          "schedule_id": "0065e452-5bc5-4afa-af68-7c2c1db7c81c",
+          "completed_at": null,
+          "local_end_time": "10:12:45.520891",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.520891",
+          "scheduled_end_at": "2026-10-29T10:12:45.520891+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.520891+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-01 complete-vs-complete-distinct/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "ed83f5f0-a0de-419d-ba58-75c423fa7bdf",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.607015+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.598653+00:00",
+              "requestFingerprint": "98a9cbe2e33aacce5c66a941909b5759c49e63847e8b8fa908afdeddfa0c104c"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "1aa20d99-45ac-4f04-bcb1-f3a6e30f6cd5",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.603653+00:00",
+            "event_type": "completed",
+            "session_id": "d8182706-b2db-407c-a261-70d6c72546c9",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "d8182706-b2db-407c-a261-70d6c72546c9",
+          "status": "completed",
+          "task_id": "c8994379-cb89-4a49-8612-f84e65b26b1f",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.598653+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.603653+00:00",
+          "schedule_id": "9e1d403b-a338-4dc7-a3b3-bb9534ddf3bd",
+          "completed_at": "2026-10-31T09:42:45.607015+00:00",
+          "local_end_time": "10:12:45.598653",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.598653",
+          "scheduled_end_at": "2026-10-31T10:12:45.598653+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.598653+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-02 complete-vs-complete-exact/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "complete",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "ff051d94-7693-4a6a-92da-d3bf2e7223b5",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.667022+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.658703+00:00",
+              "requestFingerprint": "dd7c43ae7f899fb70c3f58f5531ac77444ccd9b591d6c521ad0648afb55b85c7"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "59c57c27-bbbd-4418-8dd0-a4aa5bba4c80",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.663797+00:00",
+            "event_type": "completed",
+            "session_id": "b76782d1-75df-477e-98f7-01050032d7ef",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "b76782d1-75df-477e-98f7-01050032d7ef",
+          "status": "completed",
+          "task_id": "cd8a0eaf-8c4b-4c95-9571-2997644a80af",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.658703+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.663797+00:00",
+          "schedule_id": "f2f8498b-fb5d-4e1b-8d7e-9cdad6628541",
+          "completed_at": "2026-10-31T09:42:45.667022+00:00",
+          "local_end_time": "10:12:45.658703",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.658703",
+          "scheduled_end_at": "2026-10-31T10:12:45.658703+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.658703+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-03 start-vs-complete-stale/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "start",
+      "second": "complete",
+      "secondSqlstate": "PT409",
+      "finalStatus": "in_progress",
+      "eventTypes": [
+        "started"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "c1b59764-9a21-4a49-972d-f71664e8ea3a",
+            "payload": {
+              "startedAt": "2026-10-31T09:42:45.732948+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.724001+00:00",
+              "requestFingerprint": "56483292008b856308600e7a01229b4868af410b4bd531dc9e41fd7794dbde7e"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "a06338f4-13a6-4b9c-b57f-009fc96f05cf",
+            "to_status": "in_progress",
+            "created_at": "2026-10-31T09:42:45.729178+00:00",
+            "event_type": "started",
+            "session_id": "d938d2d3-7abc-4971-9720-4a437da5e7c4",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "d938d2d3-7abc-4971-9720-4a437da5e7c4",
+          "status": "in_progress",
+          "task_id": "f3d1cdab-47b8-4a1b-9986-2f4930ef753c",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.724001+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.729178+00:00",
+          "schedule_id": "7138c46b-0d5d-4533-82cc-2535743c7b0c",
+          "completed_at": null,
+          "local_end_time": "10:12:45.724001",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.724001",
+          "scheduled_end_at": "2026-10-31T10:12:45.724001+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.724001+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-04 complete-vs-skip/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "complete",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "completed"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "a42789e2-931c-44a4-9e50-954085bd99c6",
+            "payload": {
+              "wasLate": false,
+              "completedAt": "2026-10-31T09:42:45.808069+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.798778+00:00",
+              "requestFingerprint": "71b448df3a3ff3efc82ed40aca68e7209bce4fa96e6e85a4bedbf49c1b80dcb1"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "3b85c378-ddd4-4873-a07e-640631a2a564",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.804349+00:00",
+            "event_type": "completed",
+            "session_id": "3c4295b0-dffc-4ceb-b50b-1a6ecce3025d",
+            "from_status": "scheduled"
+          }
+        ],
+        "session": {
+          "id": "3c4295b0-dffc-4ceb-b50b-1a6ecce3025d",
+          "status": "completed",
+          "task_id": "c84e8d35-15af-4a38-a085-50441a60fc3c",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.798778+00:00",
+          "local_date": "2026-10-31",
+          "updated_at": "2026-10-31T09:42:45.804349+00:00",
+          "schedule_id": "8aac4861-3051-467e-ba93-8db3d125d113",
+          "completed_at": "2026-10-31T09:42:45.808069+00:00",
+          "local_end_time": "10:12:45.798778",
+          "source_slot_id": null,
+          "local_start_time": "09:22:45.798778",
+          "scheduled_end_at": "2026-10-31T10:12:45.798778+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-31T09:22:45.798778+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05 recover-vs-recover-distinct/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "27eac08c-cfed-4784-9155-64f46f63e46b",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:45.881087+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.873168+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "8cfe19f2f10e0e277cf48a2d78b39c2b7ca8ceb5e89d10cff853dc62ac6c6f21"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "4222a77c-abc8-48d7-a49c-518c7f077125",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.878058+00:00",
+            "event_type": "recovered",
+            "session_id": "23fd84a7-6b74-4bc6-9ef7-1ba5f5c91338",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "23fd84a7-6b74-4bc6-9ef7-1ba5f5c91338",
+          "status": "completed",
+          "task_id": "5c45be52-0109-4c2f-a4e6-3ead9959ed9d",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.873168+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.878058+00:00",
+          "schedule_id": "c92b2c74-aedc-4433-a807-9b3f38ef05ae",
+          "completed_at": "2026-10-31T09:42:45.881087+00:00",
+          "local_end_time": "10:12:45.873168",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.873168",
+          "scheduled_end_at": "2026-10-29T10:12:45.873168+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.873168+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-05b recover-vs-recover-exact/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "recover",
+      "secondSqlstate": "00000",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "f938310b-ed77-41a0-a21c-a3041a21910a",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:45.942876+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.935096+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "18daac20faa33abaa86cdb4632533beb6832ead9830a7ab874b8fcfe54efcef9"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "d3393e2d-33b0-4835-8923-a02e79f60567",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:45.939684+00:00",
+            "event_type": "recovered",
+            "session_id": "fb33e2c3-d54f-4ccb-a885-2cf62af72aa9",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "fb33e2c3-d54f-4ccb-a885-2cf62af72aa9",
+          "status": "completed",
+          "task_id": "e21350c5-578e-4ff4-95e8-257b0aafb17a",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.935096+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:45.939684+00:00",
+          "schedule_id": "55511915-ebe0-4d22-9ef5-730ae2018661",
+          "completed_at": "2026-10-31T09:42:45.942876+00:00",
+          "local_end_time": "10:12:45.935096",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.935096",
+          "scheduled_end_at": "2026-10-29T10:12:45.935096+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.935096+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-06 recover-vs-skip/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "recover",
+      "second": "skip",
+      "secondSqlstate": "22023",
+      "finalStatus": "completed",
+      "eventTypes": [
+        "recovered"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "252e39f7-362a-4a8c-a1af-3d04c7bd0a53",
+            "payload": {
+              "wasLate": true,
+              "recoveredAt": "2026-10-31T09:42:46.008647+00:00",
+              "sourceStatus": "missed",
+              "recoveryCutoff": "2026-11-06T00:00:00+00:00",
+              "originalTimezone": "UTC",
+              "expectedUpdatedAt": "2026-10-31T09:32:45.999857+00:00",
+              "originalLocalDate": "2026-10-29",
+              "requestFingerprint": "398ff1c271e6f279b9f2e88db875e37ac61e58291a82d4132608a0a4a99d1b46"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "2652f564-6d88-4678-bccb-34ee115891da",
+            "to_status": "completed",
+            "created_at": "2026-10-31T09:42:46.004775+00:00",
+            "event_type": "recovered",
+            "session_id": "c31a8a8f-b88e-41cb-8876-529ee66d977b",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "c31a8a8f-b88e-41cb-8876-529ee66d977b",
+          "status": "completed",
+          "task_id": "ead6fd52-d956-43d5-88c8-c0f01c1e4267",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:45.999857+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:46.004775+00:00",
+          "schedule_id": "53a83a48-55f5-443a-8a8b-8983bffbf252",
+          "completed_at": "2026-10-31T09:42:46.008647+00:00",
+          "local_end_time": "10:12:45.999857",
+          "source_slot_id": null,
+          "local_start_time": "09:42:45.999857",
+          "scheduled_end_at": "2026-10-29T10:12:45.999857+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:45.999857+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    },
+    {
+      "name": "CC-07 skip-vs-recover-stale/iteration-3",
+      "status": "PASS",
+      "blockedBy": [
+        1605
+      ],
+      "first": "skip",
+      "second": "recover",
+      "secondSqlstate": "PT409",
+      "finalStatus": "skipped",
+      "eventTypes": [
+        "skipped"
+      ],
+      "final": {
+        "events": [
+          {
+            "id": "1e1db213-6b71-46ec-b04e-4fe912cb67c9",
+            "payload": {
+              "reason": null,
+              "skippedAt": "2026-10-31T09:42:46.083782+00:00",
+              "expectedUpdatedAt": "2026-10-31T09:32:46.074415+00:00",
+              "requestFingerprint": "c8ca4054b9cb7f3a15ec735a76ea630244721b6ddb6902ac18680179a8b79c07"
+            },
+            "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "actor_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+            "event_key": "b98cf075-5c3c-4f09-b039-630161363cd0",
+            "to_status": "skipped",
+            "created_at": "2026-10-31T09:42:46.079702+00:00",
+            "event_type": "skipped",
+            "session_id": "dedd18b2-6d6e-4d70-b5ad-36b867a4f6a5",
+            "from_status": "missed"
+          }
+        ],
+        "session": {
+          "id": "dedd18b2-6d6e-4d70-b5ad-36b867a4f6a5",
+          "status": "skipped",
+          "task_id": "993b48eb-ff52-47bb-8ac9-36dd9105a465",
+          "user_id": "5c3453e6-348f-4911-88f1-8155d33c0d1f",
+          "timezone": "UTC",
+          "created_at": "2026-10-31T09:42:46.074415+00:00",
+          "local_date": "2026-10-29",
+          "updated_at": "2026-10-31T09:42:46.079702+00:00",
+          "schedule_id": "d3727ea1-8f7d-4655-bf97-0b8e9f794f09",
+          "completed_at": null,
+          "local_end_time": "10:12:46.074415",
+          "source_slot_id": null,
+          "local_start_time": "09:42:46.074415",
+          "scheduled_end_at": "2026-10-29T10:12:46.074415+00:00",
+          "schedule_revision": 1,
+          "scheduled_start_at": "2026-10-29T09:42:46.074415+00:00",
+          "cancellation_reason": null,
+          "replaces_session_id": null,
+          "actual_study_minutes": null,
+          "logical_occurrence_key": "attendance-cc"
+        },
+        "taskStatus": "todo"
+      }
+    }
+  ],
+  "status": "PASS",
+  "openWorkerTransactions": 0,
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T09:42:46.265Z",
+  "observedBackendPids": [
+    {
+      "pid": 1606,
+      "application": "lumivox-attendance-cc-B"
+    },
+    {
+      "pid": 1605,
+      "application": "lumivox-attendance-cc-A"
+    },
+    {
+      "pid": 1607,
+      "application": "lumivox-attendance-cc-observer"
+    }
+  ],
+  "postExitVerification": {
+    "gateEnabled": false,
+    "workerLocks": 0,
+    "fixtureTasks": 0,
+    "fixtureUsers": 0,
+    "workerBackends": 0
+  }
+}

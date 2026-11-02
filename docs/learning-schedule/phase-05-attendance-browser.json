@@ -1,0 +1,404 @@
+{
+  "baseline": "7d1b0dc2c0d2df33ba782d17ee165b63e292dc8a",
+  "startedAt": "2026-11-02T08:05:41.839Z",
+  "baseURL": "http://127.0.0.1:3100",
+  "apiOrigin": "http://127.0.0.1:55321",
+  "sweepGateBefore": false,
+  "caseDetails": {
+    "ATE-04": {
+      "upstreamHttpStatus": 200,
+      "committedObservedAt": "2026-11-02T08:06:20.582Z",
+      "beforeResponseLoss": {
+        "id": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+        "status": "completed",
+        "completed_at": "2026-11-02T15:06:20.555368+07:00",
+        "actual_study_minutes": null,
+        "updated_at": "2026-11-02T15:06:20.554177+07:00"
+      },
+      "eventCountBeforeResponseLoss": 1,
+      "originalCommand": {
+        "command": "complete",
+        "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+        "expectedUpdatedAt": "2026-11-02T14:56:18.635+07:00",
+        "eventKey": "1144865f-f8af-4388-a36c-671e227a53ca"
+      },
+      "retryCommand": {
+        "command": "complete",
+        "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+        "expectedUpdatedAt": "2026-11-02T14:56:18.635+07:00",
+        "eventKey": "1144865f-f8af-4388-a36c-671e227a53ca"
+      },
+      "requestBodiesIdentical": true,
+      "eventCountBeforeRetry": 1,
+      "eventCountAfterRetry": 1,
+      "sessionUnchangedOnReplay": true,
+      "auditUnchangedOnReplay": true,
+      "interceptedRequests": 2,
+      "retryVerifiedAt": "2026-11-02T08:06:21.083Z"
+    },
+    "ATE-05": {
+      "visited": [
+        "reason",
+        "Cancel",
+        "Confirm skip"
+      ],
+      "focusRestored": true,
+      "focusStayedInDialog": true,
+      "escapeClosedWithoutMutation": true,
+      "eventCount": 0
+    },
+    "ATE-06": {
+      "locales": [
+        {
+          "locale": "en",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "contentWidth": 356,
+          "clientWidth": 356,
+          "renderedWidth": 358,
+          "viewportWidth": 390,
+          "documentWidth": 390,
+          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-en-mobile.png",
+          "cancelled": true
+        },
+        {
+          "locale": "vi",
+          "viewport": {
+            "width": 390,
+            "height": 844
+          },
+          "contentWidth": 356,
+          "clientWidth": 356,
+          "renderedWidth": 358,
+          "viewportWidth": 390,
+          "documentWidth": 390,
+          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-vi-mobile.png",
+          "cancelled": true
+        }
+      ],
+      "eventCount": 0,
+      "sessionUnchanged": true
+    },
+    "ATE-07": {
+      "otherUserId": "810d5459-2742-4518-b44d-db7f4ee704e7",
+      "browserTaskVisible": false,
+      "rlsRowsReturned": 0,
+      "denials": [
+        {
+          "rpc": "ls_start_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_complete_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_skip_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        },
+        {
+          "rpc": "ls_recover_study_session",
+          "sqlstate": "42501",
+          "httpStatus": 403
+        }
+      ],
+      "sessionUnchanged": true,
+      "eventCount": 0,
+      "otherUserCleanup": "PASS"
+    }
+  },
+  "runs": [
+    {
+      "name": "ATE-01 browser starts then completes one session",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "044e0893-daf3-4f93-b1be-c8a0a7ad7ef0",
+          "scheduleId": "9a3a8509-5cd2-441f-92b4-e4aeb3e5073f",
+          "sessionId": "90ddff58-08df-434e-8f6d-8c704d98610c",
+          "session": {
+            "id": "90ddff58-08df-434e-8f6d-8c704d98610c",
+            "status": "completed",
+            "completed_at": "2026-11-02T15:06:04.792133+07:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T15:06:04.788986+07:00"
+          },
+          "events": [
+            {
+              "id": "a542cc08-634c-4204-a158-8c7c82b54445",
+              "event_type": "started",
+              "event_key": "76771d51-ec22-43da-8fda-088564381cd0",
+              "from_status": "scheduled",
+              "to_status": "in_progress",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            },
+            {
+              "id": "358c0241-7764-4158-8665-fd7e349e6c63",
+              "event_type": "completed",
+              "event_key": "535ca088-85de-462f-bfa2-9cab7e7f7c2d",
+              "from_status": "in_progress",
+              "to_status": "completed",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-02 browser recovers a skipped session",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "92076cf0-0a5a-450c-8cfc-14c7bb132a5b",
+          "scheduleId": "3cd79524-2379-4b80-8228-15bb2296c918",
+          "sessionId": "606f68c0-403a-4617-8ca3-b41ea447604c",
+          "session": {
+            "id": "606f68c0-403a-4617-8ca3-b41ea447604c",
+            "status": "completed",
+            "completed_at": "2026-11-02T15:06:11.020055+07:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T15:06:11.015245+07:00"
+          },
+          "events": [
+            {
+              "id": "eaac28ab-9143-4705-a48a-484255ef1254",
+              "event_type": "skipped",
+              "event_key": "9a312f0c-4e9d-4f42-9539-0a4448125c88",
+              "from_status": "scheduled",
+              "to_status": "skipped",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            },
+            {
+              "id": "2cd2605e-865b-440d-8767-a9c7e87a9c8f",
+              "event_type": "recovered",
+              "event_key": "f69adcb0-ec8e-43eb-9a44-f78c199f0203",
+              "from_status": "skipped",
+              "to_status": "completed",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-03 two tabs reject a stale command",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "2e22ba57-36d8-4e42-95cc-172f7fd43048",
+          "scheduleId": "ed2212f1-68e4-4f77-8ec5-7335e8ca830f",
+          "sessionId": "dbc35ead-1c9b-405e-8c86-9f16e538af39",
+          "session": {
+            "id": "dbc35ead-1c9b-405e-8c86-9f16e538af39",
+            "status": "in_progress",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T15:06:16.13463+07:00"
+          },
+          "events": [
+            {
+              "id": "4ed68679-6b4c-4ed3-ab16-18a59c6f569d",
+              "event_type": "started",
+              "event_key": "2658e9fe-cd2c-4a8b-9806-0bc4846f00f1",
+              "from_status": "scheduled",
+              "to_status": "in_progress",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-04 lost response preserves exact completion",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "9f27014b-3022-4176-a6c3-10fb121db5bd",
+          "scheduleId": "2b469331-669b-4df9-b5ae-641af8746aef",
+          "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+          "session": {
+            "id": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+            "status": "completed",
+            "completed_at": "2026-11-02T15:06:20.555368+07:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T15:06:20.554177+07:00"
+          },
+          "events": [
+            {
+              "id": "cd126fad-a644-4c02-8180-afc1fd35a571",
+              "event_type": "completed",
+              "event_key": "1144865f-f8af-4388-a36c-671e227a53ca",
+              "from_status": "scheduled",
+              "to_status": "completed",
+              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-05 Attendance dialog supports keyboard and restores focus",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "f7846d5e-3dfa-4db6-8555-ceb6cd548d4c",
+          "scheduleId": "383871fe-24bf-4818-a19e-01924ec16fb0",
+          "sessionId": "b9e0cc47-f6c3-4f61-885e-3d9ca6fe7ab4",
+          "session": {
+            "id": "b9e0cc47-f6c3-4f61-885e-3d9ca6fe7ab4",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:56:23.145+07:00"
+          },
+          "events": [],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-06 mobile Attendance works in EN and VI",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "ed15d111-62eb-4f11-95bf-c788307417a6",
+          "scheduleId": "443c0f64-451a-4a32-820e-1474991cdb37",
+          "sessionId": "10d29bab-b1d5-4af0-afe6-78b6cb777b94",
+          "session": {
+            "id": "10d29bab-b1d5-4af0-afe6-78b6cb777b94",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:56:28.734+07:00"
+          },
+          "events": [],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-07 cross-owner cannot read or mutate Attendance",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "taskId": "d0d01d0e-343f-4bed-b741-f10c6b1316da",
+          "scheduleId": "3e2080d5-97fb-4d36-b6b2-bff1ed8ff339",
+          "sessionId": "f3034f1a-b08f-46a2-9612-15f7471bbabc",
+          "session": {
+            "id": "f3034f1a-b08f-46a2-9612-15f7471bbabc",
+            "status": "scheduled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T14:56:35.814+07:00"
+          },
+          "events": [],
+          "taskStatus": "todo"
+        }
+      ]
+    }
+  ],
+  "sweepGateAfter": false,
+  "userCleanup": "PASS",
+  "remainingSessions": 0,
+  "remainingTasks": 0,
+  "finishedAt": "2026-11-02T08:06:42.375Z",
+  "finalVerification": {
+    "postgresVersion": "17.6",
+    "migrationCount": 84,
+    "sweepGate": false,
+    "remainingAuthFixtures": 0,
+    "remainingReportedTasks": 0,
+    "remainingReportedSchedules": 0,
+    "remainingReportedSessions": 0,
+    "remainingReportedEvents": 0,
+    "remainingActorEvents": 0,
+    "cron": [
+      {
+        "name": "lumivox-learning-schedule-missed-5m",
+        "schedule": "*/5 * * * *",
+        "active": true
+      }
+    ],
+    "attendancePrivileges": [
+      {
+        "function": "ls_complete_study_session",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": true,
+        "serviceExecute": true
+      },
+      {
+        "function": "ls_mark_missed_batch",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": false,
+        "serviceExecute": true
+      },
+      {
+        "function": "ls_recover_study_session",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": true,
+        "serviceExecute": true
+      },
+      {
+        "function": "ls_run_missed_sweep_if_enabled",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": false,
+        "serviceExecute": true
+      },
+      {
+        "function": "ls_skip_study_session",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": true,
+        "serviceExecute": true
+      },
+      {
+        "function": "ls_start_study_session",
+        "securityDefiner": true,
+        "settings": [
+          "search_path=\"\""
+        ],
+        "anonExecute": false,
+        "authenticatedExecute": true,
+        "serviceExecute": true
+      }
+    ],
+    "rlsEnabledTables": 5,
+    "migrationVersionsMatchRepository": true,
+    "verifiedAt": "2026-11-02T08:23:22.8868737Z"
+  }
+}

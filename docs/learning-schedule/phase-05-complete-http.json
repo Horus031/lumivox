@@ -1,0 +1,85 @@
+{
+  "baseline": "3e90ade177779fc1fe7c6117e332768d60aa37fa",
+  "startedAt": "2026-10-31T07:48:22.909Z",
+  "checks": [
+    {
+      "name": "stale-version",
+      "status": "PASS",
+      "http": 409,
+      "sqlstate": "PT409",
+      "elapsedMs": 13
+    },
+    {
+      "name": "cross-owner",
+      "status": "PASS",
+      "http": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "complete-scheduled",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "exact-replay-scheduled",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "changed-key-request-scheduled",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "audit-completion-time-minutes-task-scheduled",
+      "status": "PASS",
+      "wasLate": false
+    },
+    {
+      "name": "complete-in_progress",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "exact-replay-in_progress",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "changed-key-request-in_progress",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "audit-completion-time-minutes-task-in_progress",
+      "status": "PASS",
+      "wasLate": false
+    },
+    {
+      "name": "complete-grace",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "exact-replay-grace",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "changed-key-request-grace",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "audit-completion-time-minutes-task-grace",
+      "status": "PASS",
+      "wasLate": true
+    }
+  ],
+  "status": "PASS",
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T07:48:23.581Z"
+}

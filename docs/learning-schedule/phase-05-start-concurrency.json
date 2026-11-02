@@ -1,0 +1,131 @@
+{
+  "baseline": "89be637e275db37854dc9bacb8e083dbd7f25a4e",
+  "startedAt": "2026-10-31T07:17:24.013Z",
+  "localContainer": "supabase_db_lumivox-proj",
+  "runs": [
+    {
+      "iteration": 1,
+      "name": "double-start-distinct-keys",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "2cfcd4c2-0b3b-4b8e-b83a-1126529db2f7",
+      "secondSqlstate": "22023",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    },
+    {
+      "iteration": 1,
+      "name": "double-start-exact-key",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "70f4d8cf-fb48-461b-91bb-325d51518444",
+      "secondSqlstate": "00000",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    },
+    {
+      "iteration": 2,
+      "name": "double-start-distinct-keys",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "bf898d93-4fb0-46ce-b128-d4f554927cec",
+      "secondSqlstate": "22023",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    },
+    {
+      "iteration": 2,
+      "name": "double-start-exact-key",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "95b8ccf9-dfeb-4e57-825f-ab53d03cf1f7",
+      "secondSqlstate": "00000",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    },
+    {
+      "iteration": 3,
+      "name": "double-start-distinct-keys",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "811c5301-017e-49b5-9e50-2c5c27d1f326",
+      "secondSqlstate": "22023",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    },
+    {
+      "iteration": 3,
+      "name": "double-start-exact-key",
+      "status": "PASS",
+      "blockers": [
+        492
+      ],
+      "firstSessionId": "5f563c69-3f24-47cc-bd85-d09bba19ef01",
+      "secondSqlstate": "00000",
+      "durableReplay": "PASS",
+      "final": {
+        "events": 1,
+        "status": "in_progress",
+        "minutes": null,
+        "taskStatus": "todo",
+        "completedAt": null,
+        "startedEvents": 1
+      }
+    }
+  ],
+  "backendPids": [
+    492,
+    494,
+    495
+  ],
+  "status": "PASS",
+  "openWorkerTransactions": 0,
+  "remainingWorkerLocks": 0,
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T07:17:24.962Z"
+}

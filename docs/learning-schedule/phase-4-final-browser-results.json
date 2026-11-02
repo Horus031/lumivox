@@ -1,0 +1,623 @@
+{
+  "config": {
+    "configFile": "D:\\lumivox-proj\\apps\\web\\playwright.config.ts",
+    "rootDir": "D:/lumivox-proj/apps/web/tests",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "D:/lumivox-proj/apps/web/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "D:/lumivox-proj/apps/web/tests",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list"
+      ],
+      [
+        "html"
+      ],
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.60.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://127.0.0.1:3000",
+      "reuseExistingServer": true,
+      "timeout": 120000
+    }
+  },
+  "suites": [
+    {
+      "title": "learning-schedule.spec.ts",
+      "file": "learning-schedule.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [
+        {
+          "title": "E2E-01 authenticated browser creates Task and Schedule via real Server Actions",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.571Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-0309c8b4de2cd3e9b5f7",
+          "file": "learning-schedule.spec.ts",
+          "line": 55,
+          "column": 5
+        },
+        {
+          "title": "E2E-02 browser reload retains persisted Schedule and local wall-clock times",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.579Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-27fcddd35d12b4347982",
+          "file": "learning-schedule.spec.ts",
+          "line": 69,
+          "column": 5
+        },
+        {
+          "title": "E2E-03 whole revision requires impact confirmation before saving",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.580Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-286410fa870396fb1b91",
+          "file": "learning-schedule.spec.ts",
+          "line": 74,
+          "column": 5
+        },
+        {
+          "title": "E2E-04 revised schedule preserves cancellation history and audit",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.582Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-9a9c0f99fb44c861422c",
+          "file": "learning-schedule.spec.ts",
+          "line": 86,
+          "column": 5
+        },
+        {
+          "title": "E2E-05 reschedules selected ID only and reloads updated time",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.583Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-1ecc7ffc30577608ca69",
+          "file": "learning-schedule.spec.ts",
+          "line": 93,
+          "column": 5
+        },
+        {
+          "title": "E2E-06 two browser tabs reject a stale revision without overwrite",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.584Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-ca149f206721c2a979a2",
+          "file": "learning-schedule.spec.ts",
+          "line": 117,
+          "column": 5
+        },
+        {
+          "title": "E2E-07 Vietnamese UI keeps schedule timezone even on a Tokyo device",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.585Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-91f9d7ab7cca839c45f9",
+          "file": "learning-schedule.spec.ts",
+          "line": 128,
+          "column": 5
+        },
+        {
+          "title": "E2E-08 keyboard opens, traverses and closes Dialog with focus restoration",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.586Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-74ee631c8841956ce6fb",
+          "file": "learning-schedule.spec.ts",
+          "line": 137,
+          "column": 5
+        },
+        {
+          "title": "E2E-09 mobile EN/VI has no document or scheduling horizontal overflow",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.587Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-e724f22079aeca90c37c",
+          "file": "learning-schedule.spec.ts",
+          "line": 149,
+          "column": 5
+        },
+        {
+          "title": "E2E-10 unscheduled Task retains edit, status transition and delete",
+          "ok": true,
+          "tags": [],
+          "tests": [
+            {
+              "timeout": 120000,
+              "annotations": [
+                {
+                  "type": "skip",
+                  "description": "Opt-in: requires Supabase local credentials",
+                  "location": {
+                    "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                    "line": 8,
+                    "column": 6
+                  }
+                }
+              ],
+              "expectedStatus": "skipped",
+              "projectId": "chromium",
+              "projectName": "chromium",
+              "results": [
+                {
+                  "workerIndex": -1,
+                  "parallelIndex": -1,
+                  "status": "skipped",
+                  "duration": 0,
+                  "errors": [],
+                  "stdout": [],
+                  "stderr": [],
+                  "retry": 0,
+                  "startTime": "2026-10-31T06:52:35.588Z",
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "Opt-in: requires Supabase local credentials",
+                      "location": {
+                        "file": "D:\\lumivox-proj\\apps\\web\\tests\\learning-schedule.spec.ts",
+                        "line": 8,
+                        "column": 6
+                      }
+                    }
+                  ],
+                  "attachments": []
+                }
+              ],
+              "status": "skipped"
+            }
+          ],
+          "id": "eb3c68ea0da4caa22ae7-88cc7155a26849b241c5",
+          "file": "learning-schedule.spec.ts",
+          "line": 172,
+          "column": 5
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-10-31T06:52:20.158Z",
+    "duration": 15623.796,
+    "expected": 0,
+    "skipped": 10,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

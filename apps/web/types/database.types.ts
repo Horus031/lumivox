@@ -1,4 +1,4 @@
-﻿
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -461,7 +461,21 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"ml_model_versions": {
+                },"ls_missed_sweep_control": {
+                  Row: {
+                    "enabled": boolean,"singleton": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+
+                  ]
+},"ml_model_versions": {
                   Row: {
                     "algorithm": string,"artifact_path": string,"created_at": string,"explainability_metadata": NonNullable<Json>,"feature_schema": NonNullable<Json>,"id": string,"is_active": boolean,"metrics": NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at": string,"version": string
                   }
@@ -813,6 +827,142 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_schedule_revisions": {
+                  Row: {
+                    "change_reason": string | null,"changed_by": string | null,"created_at": string,"ends_on": string,"id": string,"revision": number,"schedule_id": string,"slots_snapshot": NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on": string,"id"?: string,"revision": number,"schedule_id": string,"slots_snapshot"?: NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  Update: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"schedule_id"?: string,"slots_snapshot"?: NonNullable<Json>,"starts_on"?: string,"timezone"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_rev_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedule_revisions_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_schedule_slots": {
+                  Row: {
+                    "created_at": string,"end_time": string,"id": string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"end_time": string,"id"?: string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  Update: {
+                    "created_at"?: string,"end_time"?: string,"id"?: string,"schedule_id"?: string,"start_time"?: string,"user_id"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_slot_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"task_study_schedules": {
+                  Row: {
+                    "created_at": string,"ends_on": string,"id": string,"revision": number,"starts_on": string,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"ends_on": string,"id"?: string,"revision"?: number,"starts_on": string,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"starts_on"?: string,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_schedule_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedules_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_session_events": {
+                  Row: {
+                    "actor_id": string | null,"created_at": string,"event_key": string,"event_type": string,"from_status": string | null,"id": string,"payload": NonNullable<Json>,"session_id": string,"to_status": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key": string,"event_type": string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id": string,"to_status"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key"?: string,"event_type"?: string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id"?: string,"to_status"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_event_session_owner_fk"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_session_events_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_sessions": {
+                  Row: {
+                    "actual_study_minutes": number | null,"cancellation_reason": string | null,"completed_at": string | null,"created_at": string,"id": string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id": string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id": string | null,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id"?: string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id"?: string | null,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date"?: string,"local_end_time"?: string,"local_start_time"?: string,"logical_occurrence_key"?: string,"replaces_session_id"?: string | null,"schedule_id"?: string,"schedule_revision"?: number,"scheduled_end_at"?: string,"scheduled_start_at"?: string,"source_slot_id"?: string | null,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_session_replaces_owner_fk"
+      columns: ["replaces_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_schedule_task_owner_fk"
+      columns: ["schedule_id","task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","task_id","user_id"]
+    },{
+      foreignKeyName: "ls_session_slot_owner_fk"
+      columns: ["source_slot_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedule_slots"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
     }
                   ]
                 },"tasks": {
@@ -1249,6 +1399,36 @@ isOneToOne: false
                            },
 "leave_study_room":
 { Args: { "p_room_id": string }; Returns: undefined
+                           },
+"ls_complete_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_create_schedule":
+{ Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
+                           },
+"ls_earliest_local_instant":
+{ Args: { "p_local_date": string,"p_local_time": string,"p_timezone": string }; Returns: string
+                           },
+"ls_mark_missed_batch":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_recover_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_reschedule_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_new_end_at": string,"p_new_end_time": string,"p_new_local_date": string,"p_new_start_at": string,"p_new_start_time": string,"p_session_id": string }; Returns: string
+                           },
+"ls_revise_schedule":
+{ Args: { "p_ends_on": string,"p_expected_revision": number,"p_occurrences": Json,"p_schedule_id": string,"p_slots": Json,"p_starts_on": string,"p_timezone": string }; Returns: number
+                           },
+"ls_run_missed_sweep_if_enabled":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"ls_skip_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_reason"?: string,"p_session_id": string }; Returns: string
+                           },
+"ls_start_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
