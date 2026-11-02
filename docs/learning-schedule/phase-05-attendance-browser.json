@@ -1,0 +1,114 @@
+{
+  "baseline": "f69ff4d78bd30b57e1a4c98c9940e357bc6b9ba5",
+  "startedAt": "2026-11-02T07:07:40.184Z",
+  "baseURL": "http://127.0.0.1:3100",
+  "apiOrigin": "http://127.0.0.1:55321",
+  "sweepGateBefore": false,
+  "runs": [
+    {
+      "name": "ATE-01 browser starts then completes one session",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "sessionId": "fa6d2c26-794e-4370-a69e-c7f2fec3e515",
+          "session": {
+            "id": "fa6d2c26-794e-4370-a69e-c7f2fec3e515",
+            "status": "completed",
+            "completed_at": "2026-11-02T07:07:52.775352+00:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T07:07:52.769379+00:00"
+          },
+          "events": [
+            {
+              "id": "6d17ad5e-efee-4119-8c50-3586e975af12",
+              "event_type": "started",
+              "event_key": "a55a9656-2551-4603-ac8d-e803af5d4861",
+              "from_status": "scheduled",
+              "to_status": "in_progress",
+              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+            },
+            {
+              "id": "22a79b1c-e67d-4014-9793-2af8e02b9cfb",
+              "event_type": "completed",
+              "event_key": "5e589bb2-a38c-47e8-a633-9ea8845328b3",
+              "from_status": "in_progress",
+              "to_status": "completed",
+              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-02 browser recovers a skipped session",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "sessionId": "d25c8326-8d93-46d6-b09d-c373fe1c12eb",
+          "session": {
+            "id": "d25c8326-8d93-46d6-b09d-c373fe1c12eb",
+            "status": "completed",
+            "completed_at": "2026-11-02T07:08:03.43664+00:00",
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T07:08:03.413679+00:00"
+          },
+          "events": [
+            {
+              "id": "f6fbfd99-de38-4b5b-9045-71b79c986e0f",
+              "event_type": "skipped",
+              "event_key": "3b28d3f9-327f-44df-98b1-cbf2c42e8203",
+              "from_status": "scheduled",
+              "to_status": "skipped",
+              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+            },
+            {
+              "id": "9c40dd22-492d-43a1-822b-8941bce2c287",
+              "event_type": "recovered",
+              "event_key": "da74d998-f2c2-46c3-98a0-82812536b896",
+              "from_status": "skipped",
+              "to_status": "completed",
+              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    },
+    {
+      "name": "ATE-03 two tabs reject a stale command",
+      "status": "passed",
+      "pageErrors": [],
+      "snapshots": [
+        {
+          "sessionId": "0601b9af-3e82-4b73-b275-2640047fa025",
+          "session": {
+            "id": "0601b9af-3e82-4b73-b275-2640047fa025",
+            "status": "in_progress",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "updated_at": "2026-11-02T07:08:13.588615+00:00"
+          },
+          "events": [
+            {
+              "id": "83cadeff-10ec-43df-88b9-3753a64b02f6",
+              "event_type": "started",
+              "event_key": "0faec564-5982-42aa-a60c-9b396f20f387",
+              "from_status": "scheduled",
+              "to_status": "in_progress",
+              "actor_id": "504eb26f-035d-4716-9ae8-28c2533965bf"
+            }
+          ],
+          "taskStatus": "todo"
+        }
+      ]
+    }
+  ],
+  "sweepGateAfter": false,
+  "userCleanup": "PASS",
+  "remainingSessions": 0,
+  "remainingTasks": 0,
+  "finishedAt": "2026-11-02T07:08:15.294Z"
+}

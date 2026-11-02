@@ -136,6 +136,9 @@ test("E2E-07 Vietnamese UI keeps schedule timezone even on a Tokyo device", asyn
 });
 test("E2E-08 keyboard opens, traverses and closes Dialog with focus restoration", async ({ page }) => {
   await openTask(page); const opener = section(page).getByRole("button", { name: "Reschedule", exact: true }).first();
+  // Wait for the asynchronous session list before positioning keyboard focus.
+  await expect(opener).toBeEnabled();
+  await expect(section(page).getByRole("region", { name: "Study sessions", exact: true })).toHaveAttribute("aria-busy", "false");
   await page.locator("[data-study-sessions-heading]").focus();
   for (let i = 0; i < 20 && !(await opener.evaluate(el => el === document.activeElement)); i++) await page.keyboard.press("Tab");
   await expect(opener).toBeFocused(); await page.keyboard.press("Enter");

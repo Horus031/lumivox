@@ -2,7 +2,13 @@
 import { useRef } from "react";
 /** Controlled dialogs have no Radix Trigger; restore their real opener explicitly. */
 export function useScheduleDialogFocus() {
-  const opener = useRef<HTMLElement | null>(null);
+  // Capture during the first render, before the parent disables sibling
+  // command buttons in the same commit and the browser blurs the opener.
+  const opener = useRef<HTMLElement | null>(
+    typeof document !== "undefined" && document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null,
+  );
   return {
     captureOpener: () => { opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null; },
     dialogProps: {

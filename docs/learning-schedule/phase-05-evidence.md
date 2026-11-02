@@ -1154,3 +1154,82 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Ready for Step 5.7C browser E2E/accessibility: **YES**.
 - Phase 05 completed: **NO**. Production authorized: **NO**.
 - No commit, push, merge or deployment performed.
+
+## Step 5.7C-1 — Real Attendance Browser Workflow
+
+### Environment
+
+- Verification date: **2026-11-02**, local-only execution.
+- Branch: `feature/learning-schedule-foundation`.
+- HEAD SHA: `f69ff4d78bd30b57e1a4c98c9940e357bc6b9ba5`; acceptance below includes the uncommitted test and focus fix in this working tree.
+- Next.js base URL: `http://127.0.0.1:3100`, Next.js **16.2.6**.
+- Supabase local API origin: `http://127.0.0.1:55321`; CLI **2.122.0**, database container `supabase_db_lumivox-proj`.
+- PostgreSQL version: **17.6**, independently queried after regression gates.
+- Migration count: **84** applied migrations. No migration/schema change or clean reset/replay was performed in this browser step.
+- Browser: **Chromium**, device timezone **Asia/Tokyo**.
+- Playwright workers: **1**, serial execution; no browser test counted as PASS when skipped.
+- Sweep gate before/after: **OFF**, checked by the new spec and final SQL query. No Cron activation.
+- Environment isolation: existing `.env.local` resolves to a remote Supabase origin. The test server and build used process-only overrides for the local URL, publishable/anon key and server credentials; `.env.local` was not edited and no remote fixture/mutation was performed. Credentials were captured from local CLI status without printing them.
+- An existing user-owned Next dev server held the normal development lock. A separate local Next server used port 3100 and isolated `.next/attendance-e2e` output with the repository's loaded Next configuration. It was stopped after E2E; its helper/cache were removed. Next's temporary tsconfig includes were restored; `git diff --exit-code -- apps/web/tsconfig.json` exits 0. The existing user-owned Node server was not stopped, and `.next/dev` was not deleted.
+
+### Browser Tests
+
+- New file: `apps/web/tests/learning-schedule-attendance.spec.ts`, independent from the existing ten-test Schedule suite. Login uses the real `submitLoginForm` helper. Local service-role access creates fixtures and reads persisted results; browser commands use actual UI -> Next Server Action -> Auth/PostgREST -> Attendance RPC -> refetched UI. No mocked Attendance response, direct admin Attendance RPC, or post-command SQL timestamp/status rewrite creates the expected final state.
+- Fixtures use a current attendance window (`now - 10 minutes` to `now + 20 minutes`) with matching millisecond local/UTC fields. UTC/Etc-GMT offset selection avoids crossing local midnight; each case owns a separate Task/Schedule/Session. The executed Recovery path is **scheduled -> skipped -> completed**, not a claim of historical missed-session boundary coverage.
+- ATE-01 Start -> Complete: **PASS**. UI shows In progress then Completed for the same Session; persisted events are exactly `started`, `completed`, with the owning actor, distinct event keys and correct transitions.
+- ATE-02 Skip -> Recovery: **PASS**. UI shows Skipped then Completed; persisted events are exactly `skipped`, `recovered`.
+- ATE-03 Two-tab stale version: **PASS**. Both tabs load Scheduled; tab A starts it, tab B submits Complete with its old version, sees the conflict alert and uses Check latest session. Final state remains In progress with exactly one `started` event. The browser verifies the user-visible conflict and persisted effect; it does **not** capture a raw SQLSTATE from the Server Action wire. Source mapping of `PT409` to `conflict` was checked separately.
+- Total: **3/3 PASS, 0 skipped**, exit 0. Initial run: **44.1 seconds**. Final rerun after the focus correction: **38.2 seconds**; recorded interval `2026-11-02T07:07:40.184Z`–`2026-11-02T07:08:15.294Z`.
+- Test failures: **0 in the final Attendance run**. Existing-suite failures and incomplete runner attempts are retained below rather than treated as successful runs.
+- Unexpected page errors: **0**, collected from both tabs in the Attendance spec. Development dashboard Recharts size warnings were observed in server/console output; zero page errors is not a claim of zero console warnings.
+- Persisted snapshots and cleanup: [phase-05-attendance-browser.json](./phase-05-attendance-browser.json). This generated report contains Session/audit identifiers and timestamps, not passwords, JWTs or API keys.
+
+### Persisted Data
+
+- Start audit: **PASS**, one `scheduled -> in_progress` event in ATE-01 and one in ATE-03; **2 started events** in total across separate Sessions.
+- Complete audit: **PASS**, exactly one `in_progress -> completed` event in ATE-01 and a non-null database `completed_at`.
+- Skip audit: **PASS**, exactly one `scheduled -> skipped` event in ATE-02; `completed_at` remains null immediately after Skip.
+- Recovery audit: **PASS**, exactly one `skipped -> completed` event in ATE-02 and a non-null database `completed_at`.
+- Stale command produced no new event: **PASS**, ATE-03 retains exactly `[started]`; no completed event or state overwrite. Across the three fixtures there are **5 events**, with no extra event from the stale command.
+- Parent Task unchanged: **PASS**, persisted snapshots show `todo` for all three Tasks; ATE-01 explicitly asserts this after Complete.
+- Focus minutes unchanged: **PASS**, all three final snapshots have `actual_study_minutes = null`; ATE-01/ATE-02 explicitly assert null after completion/recovery. No Focus session was fabricated or credited.
+- Session updated_at from database: **PASS**, read with the persisted Session rather than generated from the browser clock. Start -> refetch -> Complete succeeds using the refreshed row version, while the unrefreshed second tab conflicts. Final stored values are `2026-11-02T14:07:52.769379+07:00` (ATE-01), `2026-11-02T14:08:03.413679+07:00` (ATE-02), and `2026-11-02T14:08:13.588615+07:00` (ATE-03).
+- Test Auth user cleanup: **PASS**, real cookie-authenticated `/auth/signout` returns **303** after each Attendance case before admin deletion of its test Auth user.
+- Remaining fixtures: **0 Sessions / 0 Tasks** asserted by teardown. Final independent SQL confirms **0 audit events / 0 Sessions / 0 Tasks** for the exact actor ID from the report, and **0 Auth users** matching either browser suite's fixture email prefix. Sweep gate remains false.
+
+### Regression
+
+- Existing Learning Schedule browser suite: `node node_modules/@playwright/test/cli.js test tests/learning-schedule.spec.ts --project=chromium --workers=1 --reporter=line`, **10/10 PASS, 0 skipped**, exit 0, **1.7 minutes**. Separate from the three Attendance cases; executed against the same isolated local server. Covers existing Schedule/Reschedule, keyboard/focus, mobile EN/VI and unscheduled Task behavior.
+- Final Attendance browser command: `node node_modules/@playwright/test/cli.js test tests/learning-schedule-attendance.spec.ts --project=chromium --workers=1 --reporter=line`, **3/3 PASS**. Both commands used `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3100`, local-only `LEARNING_SCHEDULE_TEST_URL` and the local service credential supplied through the process environment.
+- Web/database gates ran **sequentially**: lint -> full Vitest -> standalone TypeScript -> build -> pgTAP. No heavy build ran concurrently with Vitest.
+- Full Vitest: `node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot`, default **fork pool**, executed in a **PTY outside the sandbox**. **Exit 0; 71 files passed / 2 skipped; 672 tests passed / 20 skipped (692 total)**, **224.18 seconds**. No assertions, suite selection or timeouts were weakened. The existing 19 opt-in Phase 04 direct integration tests and 1 Focus integration test remain skipped; they were not separately executed here.
+- Lint: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, **0 errors / 1 existing warning** at `features/focus-sessions/use-focus-v2-audio.ts:104:6` (projection dependency).
+- TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build`, **exit 0**. Actual `next build` compiled in **19.6 seconds**, finished TypeScript in **36.9 seconds**, and generated **98/98** pages in **1639 ms**. Process-only Supabase overrides pointed to local. **Deviation:** the `prebuild` lifecycle hook was **NOT EXECUTED** because it recursively deletes `.next/dev` used by the existing user server. The production build itself ran fully; no package script was changed.
+- pgTAP: local CLI `supabase test db --local`, **exit 0; 26 files / 516 assertions PASS / 0 failures**, **4 wall-clock seconds**. The persistent concurrency fixture remains an intentional TAP skip requiring its separate Node harness; no new concurrency execution is claimed by this step.
+- Final SQL: **PostgreSQL 17.6 / 84 migrations / Sweep OFF / zero browser Auth fixtures**, plus zero remaining Attendance fixture events/Sessions/Tasks.
+- `git diff --check`: PASS after the evidence update. Existing Vite native-config and Supabase deprecated/optional-service notices are non-fatal.
+
+### Failures and Corrections
+
+- The existing browser suite initially failed **E2E-08**: after Escape closed Reschedule, `expect(opener).toBeFocused()` received an inactive element. A rerun that only waited for the session list to finish loading still failed the same close-focus assertion (**7 passed / 1 failed / 2 not run**); this was not accepted as PASS.
+- Cause established from the interaction/source: Step 5.7B disables command openers while either modal is open. Capturing `document.activeElement` only in `onOpenAutoFocus` is too late because disabling the opener blurs it. `use-schedule-dialog-focus.ts` now captures the opener on the dialog's initial render, before that commit disables the buttons, while preserving explicit capture and the existing fallback. The keyboard test also waits for loaded/enabled rows before positioning initial focus. Its Tab/Enter/Escape/focus-restoration assertions remain intact. The final ten-test browser rerun passes without extending timeouts.
+- A local CLI status launch failed under the sandbox (`StandardOutputEncoding is only supported when standard output is redirected`), leaving a setup attempt with **10 skipped browser tests**. That attempt was not counted; the actual accepted executions used successful local credential discovery and ran every browser test.
+- Three non-PTY full Vitest attempts did not produce completed test results: sandbox fork, elevated fork, and elevated thread-pool diagnostic. They were interrupted and are **INCOMPLETE, not PASS**; fork processes were observed restarting, but no root cause or assertion-failure count is inferred from that observation. A PTY diagnostic ran `lib/local-date.test.ts` with one thread worker (**12/12 PASS, 5.49 seconds**), followed by the accepted full run with the original default fork pool and two workers. This establishes the stated PTY execution, not a permanent fix for the earlier worker issue. Vitest configuration and test timeouts were unchanged.
+- Temporary test-cache removal initially hit sandbox access errors; scoped elevated cleanup completed after stopping only the owned test server. No user dev cache was removed. These setup/runner attempts are separate from application acceptance.
+
+### Pending
+
+- Lost-response exact replay through browser: **NOT EXECUTED**, Step 5.7C-2.
+- Keyboard focus restoration and tab order for **Attendance**: **NOT EXECUTED**. The repaired Reschedule keyboard regression is executed; it does not substitute for the separate Attendance accessibility gate.
+- Mobile EN/VI Attendance dialog: **NOT EXECUTED**. Existing Schedule/Reschedule mobile cases passed, but do not establish Attendance mobile acceptance.
+- Anonymous and cross-owner browser restrictions: **NOT EXECUTED**, Step 5.7C-2. Earlier backend authorization evidence is not represented as new protected-browser execution.
+- Backend residual cutoff/DST/Focus risks: exact Recovery cutoff, Recovery lock crossing midnight, controlled DST RPC boundaries, Sweep fairness and in_progress/Focus reconciliation are **NOT newly exercised** by these three current-window browser cases. Earlier evidence remains scoped to its original executions.
+- Production final acceptance: **NOT EXECUTED**; no production authorization.
+
+### Decision
+
+- Step 5.7C-1: **PASS (LOCAL)**, after the real browser focus regression fix, three Attendance workflows, ten existing browser cases and the regression gates above.
+- Ready for 5.7C-2: **YES**.
+- Production authorized: **NO**. Phase 05 completed: **NO**.
+- No commit, push, merge or deployment performed; the user will handle commit/push.
