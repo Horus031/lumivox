@@ -2522,6 +2522,51 @@
       "6": "Sat",
       "7": "Sun"
     },
-    "slotLabel": "Weekly slot {index}"
+    "slotLabel": "Weekly slot {index}",
+
+    "attendance": {
+      "action": {
+        "start": "Start",
+        "complete": "Complete",
+        "skip": "Skip",
+        "recover": "Recover"
+      },
+      "title": {
+        "start": "Start study session",
+        "complete": "Complete study session",
+        "skip": "Skip study session",
+        "recover": "Recover missed study session"
+      },
+      "description": {
+        "start": "Confirm that you want to mark this study session as started.",
+        "complete": "Confirm that you attended this study session. This will not complete the parent Task or create Focus minutes.",
+        "skip": "Confirm that you want to skip this study session. You may optionally explain why.",
+        "recover": "Confirm that you completed this previously missed or skipped session. Recovery is available only during the allowed local-calendar window."
+      },
+      "confirm": {
+        "start": "Confirm start",
+        "complete": "Confirm completion",
+        "skip": "Confirm skip",
+        "recover": "Confirm recovery"
+      },
+      "success": {
+        "start": "Study session started.",
+        "complete": "Study session completed.",
+        "skip": "Study session skipped.",
+        "recover": "Study session recovered."
+      },
+      "skipReason": "Reason (optional, max 500 characters)",
+      "uncertainHelp": "The previous request may have committed. Retry sends the exact same command and event key. You can also check the latest saved session.",
+      "conflictHelp": "This session was changed elsewhere. Reload the latest version before deciding what to do.",
+      "errors": {
+        "invalidInput": "Invalid attendance request.",
+        "notAuthorized": "You do not have permission to change this study session.",
+        "conflict": "This study session changed. Reload its latest version.",
+        "notEligible": "This action is no longer available for this session or its time window.",
+        "uncertain": "The result could not be confirmed. Check the latest session or retry the exact same command.",
+        "saveFailed": "Could not update attendance. Please try again."
+      }
+    },
+    "attendanceActionsLabel": "Attendance actions"
   }
 }

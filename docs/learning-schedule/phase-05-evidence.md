@@ -1087,3 +1087,70 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Ready for Step 5.7B Attendance controls: **YES**, retaining browser/integration acceptance and backend residual risks explicitly.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**.
+
+## Step 5.7B — Attendance UI State & Interaction
+
+### Baseline / Review
+
+- Branch: `feature/learning-schedule-foundation`; reviewed and verified **2026-11-02 (Asia/Bangkok)**.
+- HEAD SHA: **`48ab6fd004628f3ac1333d4cfecbab4677cc68bf`**. Existing user working-tree changes included Session list/Task section wiring, EN/VI translations and new dialog/test files. Preserved those changes; no pull, commit, push, merge or deployment in this verification.
+- Main implementation matches the guide: default canAttend=false, state-specific controls, Task/Schedule eligibility wiring, confirmation with historical local date/time/timezone, stable frozen command identity, no optimistic status transition, exact retry after uncertain result, conflict reload and page-zero refetch.
+- Applied the React component review checklist for hooks, transient refs, stale responses and accessible dialog/group semantics. No server action, generated database type, migration, production RPC or dependency change in this step.
+
+### Files / Corrections
+
+- Reviewed new `session-attendance-dialog.tsx` and `session-attendance-dialog.test.tsx`; retained the production dialog design and expanded its tests.
+- Updated `study-sessions-list.tsx`: added a synchronous shared dialogOpen ref and guarded openReschedule/openAttendance. A second opener cannot win before React commits the first state change. Disabled conflicting Attendance/Reschedule/pagination/retry controls while a dialog is open, and added role=group for the localized Attendance action-group label.
+- Reviewed `task-study-schedule-section.tsx`: canAttend and canReschedule independently receive eligible && Schedule active. Existing user formatting changes preserved; no Task layout/route replacement.
+- Updated `study-sessions-list.test.tsx` to mock the Attendance Server Action and exercise the real list plus dialogs, pagination, latest-version reload and late-result isolation. Expanded `task-scheduling-ui.test.tsx` with active/ineligible/paused/closed capability cases and actual TaskDetailsDrawer cases for completed/cancelled/in_review/subtask with an existing active Schedule.
+- Corrected three callback mock declarations in the new dialog tests: explicit vi.fn<() => void> / vi.fn<(open: boolean) => void> signatures replace broad ReturnType<typeof vi.fn>, which Vitest's constructable/callable union did not satisfy under TypeScript. No as any or runtime behavior change for this correction.
+- Reviewed `messages/en.json` and `messages/vi.json`: Attendance objects match the supplied guide exactly; attendanceActionsLabel exists in both. Existing keys preserved. An additional component test renders actual Vietnamese messages and error/retry labels.
+
+### Component Acceptance — Executed
+
+- Initial supplied dialog/list tests: **16/16 PASS**; they did not cover the required real-list Attendance integration cases.
+- Expanded targeted run: `node node_modules/vitest/vitest.mjs run features/learning-schedule/components/session-attendance-dialog.test.tsx features/learning-schedule/components/study-sessions-list.test.tsx features/learning-schedule/components/task-scheduling-ui.test.tsx`, **61/61 PASS** across three files. Final rerun after callback typing correction: **exit 0, 8.10 seconds**.
+- Final file coverage: **12 dialog tests, 27 list tests, 22 Task scheduling UI tests**. Relative to committed baseline these add **36 tests**: 12 new dialog cases, 16 additional list cases and 8 Task capability/Drawer cases.
+
+| Acceptance | Actual executed evidence | Result |
+| --- | --- | --- |
+| Default capability | Default canAttend=false leaves the existing six-state list without Attendance buttons | PASS |
+| Status mapping | scheduled -> Start/Complete/Skip; in_progress -> Complete; missed -> Recover/Skip; skipped -> Recover; completed/cancelled -> no mutation buttons | PASS, six explicit list cases |
+| Task/Schedule gating | Active eligible parent exposes controls; ineligible parent, paused/closed Schedule hide them; actual Drawer completed/cancelled/in_review/subtask hides controls even with an active Schedule | PASS |
+| Confirmation context | Dialog title/description linked by aria attributes; actual local date, start/end and timezone rendered | PASS, component DOM assertions |
+| Four commands | Actual list/dialog clicks call the mocked Server Action with the right command, Session and saved version; existing Server Action tests reran in full suite | PASS at mocked component/adapter boundaries |
+| Pending double-click | Two immediate confirm clicks dispatch once; Cancel disabled and Escape cannot close pending dialog; no onSaved before result | PASS |
+| Exact uncertain replay | Frozen object retained; original UUID/version/key and normalized Skip reason reused, including object identity on retry | PASS |
+| Locked reason | Textarea disabled after uncertainty; attempted input change cannot change the submitted exact retry reason | PASS |
+| Conflict | Confirm disabled; Check latest closes/reloads without another mutation | PASS |
+| notEligible / thrown request | No automatic retry; localized alert and Check latest/uncertain retry behavior; no optimistic completed status | PASS |
+| Page-one success | Real list discards old pages, reloads page zero, then sends the newly queried updated_at on the next action | PASS |
+| Modal exclusivity | Attendance-first and Reschedule-first opener clicks in the same React act each leave exactly one dialog; Load more/conflicting opener disabled | PASS, both orderings |
+| Schedule/permission change | Old rows/dialog removed; late old mutation result ignored; capability revocation removes controls/dialog | PASS |
+| Unmounted dialog | Late success produces no callback or toast on the new context | PASS |
+| Localization | Guide EN/VI JSON parity checked; Vietnamese dialog/reason/error/retry labels exercised with real messages | PASS |
+
+- The tests mock query/action boundaries while rendering actual components, including the real Task Drawer in gating cases. They do **not** establish browser -> Next Server Action -> Auth/PostgREST -> persisted Session/audit acceptance.
+- Native pointer/outside interaction, full focus restoration/tab order, screen-reader output and mobile visual behavior are not newly proven by jsdom title/alert/Escape assertions. Those remain for browser/a11y Step 5.7C.
+
+### Sequential Quality Gates / Failures Retained
+
+- Quality gates ran **sequentially**, per the guide: lint -> full Vitest -> TypeScript -> build -> database. The full-suite retry/callback typing correction and targeted verification below are recorded separately; no heavy build ran concurrently with Vitest in this turn.
+- Full lint: `node node_modules/eslint/bin/eslint.js .`, **exit 0**, 0 errors and 1 existing projection dependency warning at features/focus-sessions/use-focus-v2-audio.ts:104:6. After callback type correction, targeted ESLint on session-attendance-dialog.test.tsx also exits 0.
+- **Default full Vitest command: FAIL**, **213.27 seconds**. 60 files / 569 tests passed, 2 files / 20 tests skipped, but **11 unhandled forks-worker startup timeouts** prevented other files from running. This was not accepted as a complete suite PASS; the log reports Timeout waiting for worker to respond across unrelated Focus/utility/Workspace files.
+- **Full-suite rerun: PASS**, `node node_modules/vitest/vitest.mjs run --maxWorkers=2`, **exit 0; 71 files passed / 2 skipped; 672 tests passed / 20 skipped (692 total)**, **140.13 seconds**. Only worker concurrency was bounded; no test was excluded, no timeout/expectation weakened and no Vitest configuration changed. This execution establishes the full suite under the stated worker setting; it does not claim the default worker-start issue is permanently fixed or prove its root cause.
+- **Initial TypeScript run: FAIL**, three TS2322 errors in supplied dialog callback mock types. Explicit callback signatures fixed them. Only erased test type annotations changed after the successful full runtime suite; the final targeted 61 tests and standalone TypeScript were rerun afterward.
+- Final TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**. No production/UI logic changed after the successful full-suite run.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build`, including prebuild, **exit 0**. Next.js 16.2.6 compiled in **16.8 seconds**, TypeScript finished in **22.5 seconds**, generated **98/98** pages in **825 ms**.
+- Database: local CLI `supabase test db --local`, **exit 0; 26 files, 516 assertions PASS, 0 failures**, **2 wall-clock seconds**. Persistent concurrency setup remains an intentional TAP skip. No new SQL assertions or migration in this UI step.
+- Independent final query: **PostgreSQL 17.6, 84 migrations, Sweep gate false/OFF**. No Cron activation, production config or .env.local change. Existing Vite config-loader/Supabase notices were non-fatal; git diff --check passed after evidence update.
+- The 20 full-suite skips are the existing 19 opt-in Phase 04 direct integration cases and 1 Focus integration case; they were not separately run. Earlier direct HTTP/concurrency harnesses were not rerun and are not presented as fresh UI integration evidence.
+
+### Remaining / Decision
+
+- **Real browser Attendance flow: NOT EXECUTED**, deferred by the guide to **Step 5.7C**. Controls are now wired into the existing Task detail in code, but no real browser success, two-tab conflict, lost-response transport, persisted audit, keyboard focus, mobile or screen-reader acceptance is marked PASS here.
+- Final backend residual risks remain explicit: exact Recovery cutoff, Recovery lock crossing midnight, controlled DST RPC boundaries, Sweep fairness and in_progress/Focus reconciliation. UI status buttons are hints based on loaded state; PostgreSQL remains the authority for time/ownership/eligibility.
+- Step 5.7B — Attendance UI State & Interaction: **PASS (LOCAL, component scope)** after the synchronous modal guard/test-type fixes, 61 targeted tests, full **672-test** bounded-worker run, final type/build and **516 pgTAP** assertions. Initial default-worker and mock-type failures remain documented above.
+- Ready for Step 5.7C browser E2E/accessibility: **YES**.
+- Phase 05 completed: **NO**. Production authorized: **NO**.
+- No commit, push, merge or deployment performed.

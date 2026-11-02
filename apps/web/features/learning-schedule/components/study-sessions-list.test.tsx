@@ -8,10 +8,11 @@ import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ query: vi.fn(), reschedule: vi.fn() }));
+const mocks = vi.hoisted(() => ({ query: vi.fn(), reschedule: vi.fn(), attendance: vi.fn() }));
 vi.mock("../session.queries.actions", () => ({ getStudySessionsAction: mocks.query }));
 vi.mock("../session-reschedule.actions", () => ({ rescheduleStudySessionAction: mocks.reschedule }));
 vi.mock("sonner", () => ({ toast: { success: vi.fn() } }));
+vi.mock("../session-attendance.actions", () => ({ mutateStudySessionAttendanceAction: mocks.attendance }));
 import { StudySessionsList } from "./study-sessions-list";
 
 function session(index: number, status = "scheduled") {
@@ -37,7 +38,7 @@ describe("Study sessions read-only list", () => {
     host = document.createElement("div"); document.body.append(host); root = createRoot(host);
   });
   afterEach(() => { act(() => root.unmount()); host.remove(); });
-  async function render(scheduleId = "A", canReschedule = false) { await act(async () => { root.render(<StudySessionsList scheduleId={scheduleId} canReschedule={canReschedule} />); }); }
+  async function render(scheduleId = "A", canReschedule = false, canAttend = false) { await act(async () => { root.render(<StudySessionsList scheduleId={scheduleId} canReschedule={canReschedule} canAttend={canAttend} />); }); }
   function button(label: string) { return [...host.querySelectorAll("button")].find(x => x.textContent === label)!; }
   async function click(label: string) { await act(async () => { button(label).click(); }); }
 
@@ -140,5 +141,96 @@ describe("Study sessions read-only list", () => {
     await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Check latest session")!.click(); });
     expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 }); expect(mocks.reschedule).toHaveBeenCalledOnce();
     expect(host.textContent).toContain("2030-01-10");
+  });
+  it.each([
+    ["scheduled", ["Start", "Complete", "Skip"]],
+    ["in_progress", ["Complete"]],
+    ["missed", ["Recover", "Skip"]],
+    ["skipped", ["Recover"]],
+    ["completed", []],
+    ["cancelled", []],
+  ] as const)("offers only the allowed Attendance buttons for %s", async (status, labels) => {
+    mocks.query.mockResolvedValue(page([session(0, status)]));
+    await render("A", false, true);
+    expect([...host.querySelectorAll("li button")].map(x => x.textContent)).toEqual(labels);
+  });
+
+  it.each([
+    ["scheduled", "Start", "Confirm start", "start"],
+    ["scheduled", "Complete", "Confirm completion", "complete"],
+    ["missed", "Skip", "Confirm skip", "skip"],
+    ["skipped", "Recover", "Confirm recovery", "recover"],
+  ])("dispatches %s / %s through the actual list and dialog", async (status, action, confirm, command) => {
+    mocks.query.mockResolvedValue(page([session(0, status)]));
+    mocks.attendance.mockResolvedValue({ success: true, sessionId: "session-0" });
+    await render("A", false, true); await click(action);
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === confirm)!.click(); });
+    expect(mocks.attendance).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ command, sessionId: "session-0", expectedUpdatedAt: session(0).updated_at }));
+    expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 });
+  });
+
+  it("refreshes page zero after Attendance on page one and uses the new authoritative version", async () => {
+    const updated = { ...session(9), updated_at: "2026-11-02T05:00:00Z" };
+    mocks.query.mockResolvedValueOnce(page([session(0)], 2, 0, true))
+      .mockResolvedValueOnce(page([session(1)], 2, 1)).mockResolvedValueOnce(page([updated]));
+    mocks.attendance.mockResolvedValue({ success: true, sessionId: "session-1" });
+    await render("A", false, true); await click("Load more");
+    await act(async () => { [...host.querySelectorAll("button")].filter(x => x.textContent === "Complete")[1].click(); });
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm completion")!.click(); });
+    expect(mocks.query).toHaveBeenLastCalledWith({ scheduleId: "A", page: 0 });
+    expect(host.querySelectorAll("li")).toHaveLength(1);
+    expect(host.textContent).not.toContain("2030-01-02");
+    await click("Start");
+    mocks.attendance.mockResolvedValue({ success: false, code: "notEligible" });
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm start")!.click(); });
+    expect(mocks.attendance).toHaveBeenLastCalledWith(expect.objectContaining({ sessionId: updated.id, expectedUpdatedAt: updated.updated_at }));
+  });
+
+  it.each(["Attendance", "Reschedule"])("serializes same-tick modal openers when %s opens first", async first => {
+    mocks.query.mockResolvedValue(page([session(0)], 2, 0, true));
+    await render("A", true, true);
+    await act(async () => {
+      const attend = button("Complete"), reschedule = button("Reschedule");
+      if (first === "Attendance") { attend.click(); reschedule.click(); }
+      else { reschedule.click(); attend.click(); }
+    });
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1);
+    expect(button("Load more").disabled).toBe(true);
+    expect(button("Reschedule").disabled).toBe(true);
+    expect(document.querySelector('[role="dialog"]')?.textContent).toContain(first === "Attendance" ? "Confirm completion" : "Confirm reschedule");
+  });
+
+  it("clears an open Attendance dialog on schedule change and ignores its late mutation result", async () => {
+    const oldMutation = deferred<{ success: true; sessionId: string }>();
+    mocks.query.mockResolvedValueOnce(page([session(0)])).mockResolvedValueOnce(page([session(9)]));
+    mocks.attendance.mockReturnValue(oldMutation.promise);
+    await render("A", false, true); await click("Complete");
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm completion")!.click(); });
+    await render("B", false, true);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(host.textContent).not.toContain("2030-01-01");
+    await act(async () => { oldMutation.resolve({ success: true, sessionId: "session-0" }); });
+    expect(mocks.query).toHaveBeenCalledTimes(2);
+    expect(host.textContent).toContain("2030-01-10");
+  });
+
+  it("removes controls and the current dialog if canAttend is revoked", async () => {
+    mocks.query.mockResolvedValue(page([session(0)]));
+    await render("A", false, true); await click("Complete");
+    await render("A", false, false);
+    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(host.querySelectorAll("li button")).toHaveLength(0);
+  });
+
+  it("checks latest after notEligible without optimistic status or another mutation", async () => {
+    mocks.query.mockResolvedValueOnce(page([session(0)])).mockResolvedValueOnce(page([session(0, "completed")]));
+    mocks.attendance.mockResolvedValue({ success: false, code: "notEligible" });
+    await render("A", false, true); await click("Complete");
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Confirm completion")!.click(); });
+    expect(host.textContent).toContain("Scheduled");
+    await act(async () => { [...document.querySelectorAll("button")].find(x => x.textContent === "Check latest session")!.click(); });
+    expect(mocks.attendance).toHaveBeenCalledOnce();
+    expect(host.textContent).toContain("Completed");
+    expect(host.querySelectorAll("li button")).toHaveLength(0);
   });
 });

@@ -2522,6 +2522,50 @@
       "6": "Thứ Bảy",
       "7": "Chủ nhật"
     },
-    "slotLabel": "Khung giờ hằng tuần {index}"
+    "slotLabel": "Khung giờ hằng tuần {index}",
+    "attendance": {
+      "action": {
+        "start": "Bắt đầu học",
+        "complete": "Hoàn thành",
+        "skip": "Bỏ qua",
+        "recover": "Ghi nhận học bù"
+      },
+      "title": {
+        "start": "Bắt đầu buổi học",
+        "complete": "Xác nhận hoàn thành buổi học",
+        "skip": "Bỏ qua buổi học",
+        "recover": "Ghi nhận hoàn thành buổi đã bỏ lỡ"
+      },
+      "description": {
+        "start": "Xác nhận rằng bạn muốn bắt đầu buổi học này.",
+        "complete": "Xác nhận bạn đã tham gia buổi học. Thao tác này không tự hoàn thành Task hoặc cộng thêm phút Focus.",
+        "skip": "Xác nhận bạn muốn bỏ qua buổi học này. Bạn có thể nhập lý do nếu muốn.",
+        "recover": "Xác nhận bạn đã hoàn thành buổi học từng bị bỏ lỡ hoặc bỏ qua. Việc ghi nhận chỉ được phép trong thời hạn phục hồi theo ngày địa phương."
+      },
+      "confirm": {
+        "start": "Xác nhận bắt đầu",
+        "complete": "Xác nhận hoàn thành",
+        "skip": "Xác nhận bỏ qua",
+        "recover": "Xác nhận học bù"
+      },
+      "success": {
+        "start": "Đã bắt đầu buổi học.",
+        "complete": "Đã hoàn thành buổi học.",
+        "skip": "Đã bỏ qua buổi học.",
+        "recover": "Đã ghi nhận hoàn thành buổi học."
+      },
+      "skipReason": "Lý do (không bắt buộc, tối đa 500 ký tự)",
+      "uncertainHelp": "Yêu cầu trước có thể đã được lưu. Thử lại sẽ gửi đúng command và event key cũ. Bạn cũng có thể kiểm tra dữ liệu mới nhất.",
+      "conflictHelp": "Buổi học đã thay đổi ở nơi khác. Hãy tải phiên bản mới nhất trước khi quyết định tiếp.",
+      "errors": {
+        "invalidInput": "Yêu cầu điểm danh không hợp lệ.",
+        "notAuthorized": "Bạn không có quyền thay đổi buổi học này.",
+        "conflict": "Buổi học đã được thay đổi. Hãy tải phiên bản mới nhất.",
+        "notEligible": "Thao tác này không còn hợp lệ với trạng thái hoặc thời gian của buổi học.",
+        "uncertain": "Chưa thể xác nhận kết quả. Hãy kiểm tra buổi học mới nhất hoặc thử lại đúng yêu cầu cũ.",
+        "saveFailed": "Không thể cập nhật điểm danh. Hãy thử lại."
+      }
+    },
+    "attendanceActionsLabel": "Các thao tác điểm danh"
   }
 }

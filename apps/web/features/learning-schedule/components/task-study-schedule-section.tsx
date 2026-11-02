@@ -94,8 +94,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
         setLoadError(t(`errors.${result.code ?? "loadFailed"}`));
       }
     } catch {
-      if (request === loadRequest.current)
-        setLoadError(t("errors.loadFailed"));
+      if (request === loadRequest.current) setLoadError(t("errors.loadFailed"));
     } finally {
       if (request === loadRequest.current) setLoading(false);
     }
@@ -144,10 +143,14 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
       aria-label={t("taskSection")}
       className="space-y-4 border-t border-border pt-4"
     >
-      <h3 data-study-schedule-heading tabIndex={-1} className="font-medium">{t("title")}</h3>
+      <h3 data-study-schedule-heading tabIndex={-1} className="font-medium">
+        {t("title")}
+      </h3>
 
       {loading ? (
-        <p role="status" className="text-sm">{t("loadingSchedule")}</p>
+        <p role="status" className="text-sm">
+          {t("loadingSchedule")}
+        </p>
       ) : loadError ? (
         <div role="alert" className="space-y-2">
           <p className="text-sm">{loadError}</p>
@@ -155,17 +158,26 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
             type="button"
             variant="outline"
             onClick={() => void loadSchedule()}
-          >{t("retry")}</Button>
+          >
+            {t("retry")}
+          </Button>
         </div>
       ) : schedule ? (
         <div className="min-w-0 space-y-4 [overflow-wrap:anywhere]">
           <p>
-            {formatStudyDate(schedule.starts_on, locale)} – {formatStudyDate(schedule.ends_on, locale)}
+            {formatStudyDate(schedule.starts_on, locale)} –{" "}
+            {formatStudyDate(schedule.ends_on, locale)}
           </p>
 
-          <p>{t("timezone")}: {schedule.timezone}</p>
-          <p>{t("statusLabel")}: {t(`status.${schedule.status}`)}</p>
-          <p>{t("revisionLabel")}: {schedule.revision}</p>
+          <p>
+            {t("timezone")}: {schedule.timezone}
+          </p>
+          <p>
+            {t("statusLabel")}: {t(`status.${schedule.status}`)}
+          </p>
+          <p>
+            {t("revisionLabel")}: {schedule.revision}
+          </p>
 
           {revising && eligible && schedule.status === "active" ? (
             <ScheduleRevisionEditor
@@ -184,13 +196,16 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
                   type="button"
                   variant="outline"
                   onClick={() => setRevising(true)}
-                >{t("edit")}</Button>
+                >
+                  {t("edit")}
+                </Button>
               )}
 
               <StudySessionsList
                 key={`${schedule.id}-${schedule.revision}`}
                 scheduleId={schedule.id}
                 canReschedule={eligible && schedule.status === "active"}
+                canAttend={eligible && schedule.status === "active"}
               />
             </>
           )}
@@ -222,10 +237,14 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
             disabled={saving}
             onClick={() => setEditing(false)}
             className="mt-3"
-          >{t("cancel")}</Button>
+          >
+            {t("cancel")}
+          </Button>
         </fieldset>
       ) : (
-        <Button type="button" onClick={() => setEditing(true)}>{t("add")}</Button>
+        <Button type="button" onClick={() => setEditing(true)}>
+          {t("add")}
+        </Button>
       )}
     </section>
   );

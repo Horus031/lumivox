@@ -194,4 +194,24 @@ describe("Task scheduling UI", () => {
     expect(button("Add study schedule")).toBeDefined();
     await click("deleteTask"); expect(mocks.remove).toHaveBeenCalledWith(b.id);
   });
+  it.each([
+    [true, "active", 3], [false, "active", 0], [true, "paused", 0], [true, "closed", 0],
+  ] as const)("Attendance capability: eligible=%s / Schedule=%s", async (eligible, status, count) => {
+    mocks.load.mockResolvedValue({ success: true, schedule: { ...summary, status } });
+    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-gate", status: "scheduled", local_date: "2030-01-07",
+      local_start_time: "19:00:00", local_end_time: "20:00:00", timezone: "UTC", scheduled_start_at: "2030-01-07T19:00:00Z", updated_at: "2026-11-02T00:00:00Z" }], total: 1, page: 0, hasMore: false });
+    await render(<TaskStudyScheduleSection taskId={a.id} eligible={eligible} />);
+    const labels = [...host.querySelectorAll('[aria-label="Study sessions"] li button')].map(x => x.textContent);
+    expect(labels.filter(x => ["Start", "Complete", "Skip", "Recover"].includes(x ?? ""))).toHaveLength(count);
+  });
+  it.each(["completed", "cancelled", "in_review", "subtask"] as const)("hides Attendance in the actual drawer for %s even with an active Schedule", async state => {
+    const task = state === "subtask" ? workspaceTask({ parent_task_id: b.id }) : workspaceTask({ status: state });
+    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
+    mocks.load.mockResolvedValue({ success: true, schedule: summary });
+    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-gate", status: "scheduled", local_date: "2030-01-07",
+      local_start_time: "19:00:00", local_end_time: "20:00:00", timezone: "UTC", scheduled_start_at: "2030-01-07T19:00:00Z", updated_at: "2026-11-02T00:00:00Z" }], total: 1, page: 0, hasMore: false });
+    await render(drawer(task));
+    expect(host.querySelector('[aria-label="Study sessions"]')).not.toBeNull();
+    expect(host.querySelectorAll('[aria-label="Study sessions"] li button')).toHaveLength(0);
+  });
 });
