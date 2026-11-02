@@ -1325,3 +1325,33 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Step 5.7C-2: **PASS (LOCAL)** for the four cases and regression scope above.
 - Ready for **Step 5.8 — Final Acceptance & release review: YES**. That final review is **NOT EXECUTED** in this step; Phase 05 completed: **NO**; staging/production authorized: **NO**.
 - No commit, push, merge or deployment performed; the user will handle commit/push.
+
+## Step 5.8A — Acceptance Audit & Risk Register
+
+### Baseline / Read-only Audit
+
+- Review date: **2026-11-02**; branch `feature/learning-schedule-foundation`; tested HEAD **`7d1b0dc2c0d2df33ba782d17ee165b63e292dc8a`**. Initial working tree clean; fast-forward pull already up to date. Fetched comparison refs without checkout/merge. HEAD remained unchanged through all tests and final SQL verification.
+- `origin/product-release` and `origin/main`: **`fb2d8fe5e84fcc19033eba463976550129a8d99a`**; feature is **42 ahead / 0 behind** both. `git merge-base --is-ancestor origin/product-release HEAD`: **exit 0**.
+- Git delta versus product-release: **125 files, 48,828 insertions, 72 deletions**; **14 migration additions**, no migration modifications/deletions. Release-branch repository contains **70** migration files, feature **84**. Final local version-list comparison matches all **84** repository identifiers. These are not verified remote applied/pending counts.
+- Created [phase-05-final-acceptance.md](./phase-05-final-acceptance.md) with requirements traceability, six risk entries (the guide's five groups plus grace contract drift), proposed/unassigned ownership, operational controls, exact 14-file migration inventory, source workflow audit and final decision. Likelihood remains **Unknown**, without fabricated probability or reviewer approval.
+- Confirmed v1 Sweep only automates scheduled -> missed; original conditional in_progress/Focus path is deferred. Original strict `>` grace wording differs from implemented/tested `>=` Sweep semantics. Staging Playwright source does not supply the Learning Schedule local-only opt-in configuration; deployed Attendance coverage cannot be inferred from its generic E2E step. No code/workflow/policy fix was made during this audit.
+- Historical concurrency/HTTP reports were reviewed with their recorded baselines (all checked as ancestors), not newly executed or combined into same-HEAD race acceptance. Exact Recovery midnight/lock crossing, controlled DST RPC, backlog fairness and Focus reconciliation remain open. Remaining environment/CD flags, remote history/preview, rollback and approval belong to 5.8B/5.8C.
+
+### Fresh Final Regression — Same HEAD
+
+- Attendance Playwright: existing spec, Chromium **one worker**, **7/7 PASS, 0 skipped**, exit 0, **1.0 minute**. Updated [machine report](./phase-05-attendance-browser.json) baseline is the tested HEAD; interval **2026-11-02T08:05:41.839Z–08:06:42.375Z**. Real lost-response retry still yields **1 -> 1 event**, identical Complete bodies, four cross-owner **42501 / HTTP 403** denials, and zero unexpected page errors.
+- Existing Schedule Playwright: separate suite and output subdirectory, **10/10 PASS, 0 skipped**, exit 0, **46.9 seconds**. EN/VI Attendance images were reopened/visually inspected and preserved as ignored local artifacts, not added to Git.
+- Full lint: **exit 0**, **0 errors / 1 existing warning** at features/focus-sessions/use-focus-v2-audio.ts:104:6.
+- Full Vitest: `node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot`, default fork pool in PTY outside sandbox, **exit 0; 71 files passed / 2 skipped; 672 tests passed / 20 skipped**, **135.32 seconds**. Existing 19 opt-in Phase 04 integration cases and 1 Focus integration case remain skipped; no expectations/configuration/timeouts changed.
+- Standalone TypeScript: `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`, **exit 0**.
+- Build: `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build`, **exit 0**, compile **12.2s**, TypeScript **21.7s**, **98/98** pages in **857ms**. **Prebuild NOT EXECUTED**, preserving the existing user server's .next/dev; actual Next production build completed.
+- Database: local `supabase test db --local`, **exit 0; 26 files / 516 assertions / 0 failures**, **2 wall-clock seconds**. Persistent concurrency setup remains an intentional TAP skip, not fresh independent-connection execution. Python/AI tests and remote CI were not run in this source-unchanged audit scope.
+- Sequence: Attendance -> Schedule -> lint -> full Vitest -> TypeScript -> build -> pgTAP -> final read-only catalog/cleanup query. No heavy parallel runners. No fresh acceptance failure occurred; Vite/Supabase/Recharts notices and existing warning remain disclosed.
+
+### Controls / Decision
+
+- Final query at **2026-11-02T08:23:22.8868737Z**: **PostgreSQL 17.6 / 84 matching migrations / five RLS-enabled domain tables / Sweep gate false**. Actual RPC privileges/search_path are captured in report finalVerification; ordinary users cannot execute the operational batch/wrapper.
+- Cron job remains **active=true**, `*/5 * * * *`, behind the **OFF processing gate**; no activation or schedule change. These are distinct controls. Zero reported Auth/Task/Schedule/Session/Event fixtures and actor events remain; no broad DELETE was issued.
+- Next/browser/build used process-only local credentials and isolated port 3100/cache; .env.local unchanged. Owned test server/cache/helper removed, tsconfig restored with zero content diff, existing port-3000 server retained. No new migration, production implementation or test logic.
+- Audit deliverable: **COMPLETE (5.8A)**. Phase 05 final decision: **PENDING**. Release disposition: **HOLD FOR STAGING PREFLIGHT**. Staging/production deployment and release-branch merge: **NOT AUTHORIZED**; no reviewer approval or named risk acceptance recorded.
+- `git diff --check`: **PASS** after documentation/report update. No db reset, remote link/query, db push/dry-run, commit, push, merge or deployment performed. The user will commit/push the review artifacts; next gate is **5.8B**, not automatic release approval.
