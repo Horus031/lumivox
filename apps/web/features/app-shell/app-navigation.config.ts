@@ -24,6 +24,11 @@ export const appNavigationItems: AppNavigationItem[] = [
     href: "/focus",
     icon: "focus",
   },
+  {
+    key: "studyPlan",
+    href: "/study-plan",
+    icon: "map",
+  },
 
   {
     key: "rooms",

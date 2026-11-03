@@ -1,0 +1,46 @@
+{
+  "baseline": "6d66a6a33fca0472bb63ba22523994e7b67c146b",
+  "startedAt": "2026-11-03T05:23:36.465Z",
+  "runs": [
+    {
+      "name": "SP-01 real Today across two Tasks/zones; Completed/Skipped and existing Task deep link",
+      "status": "passed"
+    },
+    {
+      "name": "SP-02 real revision/cancellation history and keyboard month rollover",
+      "status": "passed"
+    },
+    {
+      "name": "SP-03 EN/VI mobile, empty/error states and anonymous protection",
+      "status": "passed"
+    }
+  ],
+  "fixtureSummary": {
+    "sessions": [
+      {
+        "id": "0c76a129-7890-49c0-b2a7-765f40995bd5",
+        "taskId": "4ad8e8a7-c263-4efb-9364-c1ec0574a1ee",
+        "title": "Planner Algebra Completed",
+        "date": "2026-11-03",
+        "zone": "Pacific/Kiritimati",
+        "status": "completed"
+      },
+      {
+        "id": "ac737d2a-3e05-4e8b-bb80-096d1e566cf3",
+        "taskId": "d598444e-5b28-425f-9e97-6d3ef14cfdd3",
+        "title": "Planner Languages Skipped",
+        "date": "2026-11-02",
+        "zone": "Etc/GMT+12",
+        "status": "skipped"
+      }
+    ],
+    "revision": 2,
+    "scheduleId": "e2afbfd9-567b-4935-85b1-dd75a2b3ac7f",
+    "browserTimezone": "Europe/London",
+    "baseURL": "http://127.0.0.1:3100",
+    "apiOrigin": "http://127.0.0.1:55321"
+  },
+  "finishedAt": "2026-11-03T05:23:48.225Z",
+  "cleanup": "PASS",
+  "sweepGateAfter": false
+}

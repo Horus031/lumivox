@@ -1,4 +1,17 @@
 {
+  "studyPlan": {
+    "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },
+    "eyebrow": "Lịch học", "title": "Kế hoạch học tập", "description": "Lịch học và tiến độ của bạn",
+    "overview": "Tiến độ học tập", "summaryScope": "Toàn bộ lịch học · trạng thái hiện tại. Buổi học đến hạn khi đã qua giờ kết thúc cộng 60 phút.",
+    "attendance": "Tỷ lệ tham gia", "onTime": "Đúng giờ", "coverage": "Hoàn thành kế hoạch", "na": "Chưa có dữ liệu", "ratio": "{done} / {total} buổi học",
+    "todayTitle": "Kế hoạch học hôm nay", "timezoneHint": "Hôm nay được tính theo múi giờ của từng buổi học. Cùng một thời điểm, các buổi học có thể thuộc những ngày địa phương khác nhau.",
+    "todayEmpty": "Hôm nay không có buổi học nào.", "calendarTitle": "Lịch học theo tháng", "calendarHint": "Ngày dựa trên ngày địa phương đã lưu của từng buổi học. Buổi đã hủy vẫn hiển thị trong lịch sử.",
+    "monthEmpty": "Tháng này không có buổi học nào.", "monthNavigation": "Điều hướng tháng trên lịch", "previousMonth": "Tháng trước", "nextMonth": "Tháng sau", "previous": "Trước", "next": "Sau",
+    "sessionCount": "{count} buổi học", "loading": "Đang tải kế hoạch học tập…", "retry": "Tải lại kế hoạch hiện tại",
+    "asOf": "Dữ liệu trạng thái hiện tại được đọc lúc {instant} (giờ máy chủ ứng dụng).",
+    "status": { "scheduled": "Đã lên lịch", "in_progress": "Đang học", "completed": "Đã hoàn thành", "missed": "Đã bỏ lỡ", "skipped": "Đã bỏ qua", "cancelled": "Đã hủy" },
+    "error": { "invalidInput": "Hãy chọn tháng hợp lệ.", "loadFailed": "Không thể tải kế hoạch học tập. Vui lòng thử lại.", "incompleteData": "Chưa thể xác minh dữ liệu kế hoạch đầy đủ. Hãy tải lại hoặc chọn tháng ít buổi học hơn; hệ thống không hiển thị tổng số liệu thiếu." }
+  },
   "common": {
     "datePicker": {
       "placeholder": "Chọn ngày",
@@ -156,6 +169,7 @@
       "expandSidebar": "Mở rộng thanh bên"
     },
     "navigation": {
+      "studyPlan": { "label": "Kế hoạch học tập", "description": "Lịch học và kế hoạch hôm nay" },
       "more": "Thêm",
       "dashboard": {
         "mobileLabel": "Tổng quan",

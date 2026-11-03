@@ -2,6 +2,7 @@ export type AppNavigationItem = {
   key:
     | "dashboard"
     | "workspace"
+    | "studyPlan"
     | "roadmaps"
     | "focus"
     | "rooms"

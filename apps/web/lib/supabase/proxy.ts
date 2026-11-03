@@ -19,6 +19,7 @@ const PROTECTED_PATH_PREFIXES = [
   "/roadmaps",
   "/rooms",
   "/settings",
+  "/study-plan",
   "/tasks",
   "/workspace",
 ];

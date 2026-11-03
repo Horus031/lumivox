@@ -102,3 +102,77 @@ Build uses process-only Supabase local URL/keys; `.env.local` is unchanged. `--i
 - Local integration uses real future Sessions and cancellation histories; completed/past percentages and 20,000-row limits are unit/mock coverage, not newly seeded equivalent integration datasets.
 - Calendar, Today's Plan UI, UT-032 day grouping, browser E2E, staging/production execution, performance/load tests and remote CI are **NOT EXECUTED** in this checkpoint.
 - Final checkpoint decision: **6A core execution and 6B local adapter checks PASS within the explicitly non-snapshot v1 scope**. All requested local gates executed successfully. Phase 06 overall and snapshot-consistent analytics acceptance remain **PENDING**; this evidence does not approve a release. A strict atomic read path requires a separately reviewed read-only database projection/snapshot design before claiming that guarantee.
+
+## Step 6C — Study Calendar & Today's Plan
+
+**Baseline:** `6d66a6a33fca0472bb63ba22523994e7b67c146b`, branch `feature/learning-schedule-foundation`; clean working tree before implementation. Executed **2026-11-03**, Asia/Bangkok. Results cover this baseline plus the uncommitted changes. No commit/push, remote database access, deployment or new migration.
+
+### Implementation / scope
+
+- Added protected `/[locale]/study-plan`, existing PageHeader/Card/Badge/Link primitives, full EN/VI catalogs, loading/empty/error states, Calendar and Today's Plan components and three whole-history KPI cards. Added Study Planner to navigation and the Supabase proxy protected-path registry. The four existing mobile primary destinations remain Dashboard / Workspace / Roadmaps / Focus; Study Planner is accessible in More.
+- Pure projection uses Temporal for each Session's own IANA-local Today predicate. Calendar groups by persisted `local_date`, retains cancellation history and orders by actual UTC instant then Session ID. The browsing month defaults to UTC on the server; it is never reused as the business-day predicate.
+- New read action validates a strict `month` input, accepts no browser-supplied userId, calls `requireUser()` and owner-scopes every Session, Task-title and audit query. Reads full owner history on the server (500-row pages, 20,000-row bound), including old revisions. This avoids an unproven UTC envelope and supports whole-history KPI calculation.
+- Exact counts, stable ordering, changing counts, duplicate IDs, missing Task titles, invalid statuses/timezones, audit absence/duplicates/truncation/status contradictions and ambiguous logical obligations fail closed. Task titles and audits use 50-ID chunks. A maximum of **2,000 returned Session entries across month and Today** bounds serialized output; excess returns `incompleteData`, without partial totals. The client never receives the full 20,000-obligation analytics input.
+- KPI counts use the same deduplicated obligations across Schedules, not average percentages. Weighted **1/1 + 5/10 = 6/11** is action-tested. Scope text explicitly identifies whole-history/current-state metrics; changing the calendar month does not redefine their denominator.
+- All Session rows display Task title, saved local date/time, IANA timezone and a textual status. Month navigation uses named links; day indicators expose counts and text statuses, not color alone. Task links use existing `/workspace?task=<id>` routing; real E2E opens the correct Task drawer.
+- Best-effort independent PostgREST reads and application-server `asOf` remain the accepted v1 contract from 6B. **No shared PostgreSQL snapshot or historical analytics guarantee is claimed.** No Attendance/Task status is mutated by this feature's read path.
+
+### Execution evidence
+
+| Layer / case | Actual evidence |
+| --- | --- |
+| Pure projection | **15 tests**: UT-032 with coherent Tokyo/New York UTC fixtures, cancelled history, all status handling, invalid/empty months, year rollover, DST spring/fall, actual-instant ordering, cross-Task ID ties and non-mutating input |
+| Mocked read action | **28 tests**: strict/auth input, 501-row pagination and owner predicates across tables, count/truncation/query failures, Task-title isolation, audit integrity, cross-timezone Today independent of month, weighted aggregate KPI, row/output caps and malformed/ambiguous data |
+| EN/VI components | **6 tests**: matching catalogs, N/A/empty states, dates/times/zones, six textual statuses, Task links, table headers and accessible December–January links. Weekdays are asserted against catalog labels |
+| Navigation regression | **3 tests**: nine desktop destinations, Study Planner accessible in mobile More, original four primary destinations retained, active/nested routes and sidebar behavior |
+| Targeted combined | **52/52 PASS**, 4 files, **8.82s** before the final weekday hydration fix; final full-suite execution below includes the updated catalog-label assertion |
+| Real browser + database | `tests/study-plan.spec.ts`, Chromium, one worker, Europe/London browser timezone; **3/3 PASS / 0 skipped** on the final production build, **13.5s**, zero Planner console/page errors |
+| SP-01 | Owner A's two Tasks have actual persisted Completed/Skipped Sessions in **Pacific/Kiritimati** and **Etc/GMT+12**. These zones differ by 26 hours, so Today has two different local dates at the same instant. Authenticated server reads show both, with correct status/time/zone; Task link opens matching drawer |
+| SP-02 | Authenticated `ls_create_schedule` and `ls_revise_schedule` produce revision 2, **4 historical Sessions / 2 cancellation audits** across December 2030 and January 2031. Calendar shows Cancelled and Scheduled for the correct persisted days. Keyboard Enter on Next and Previous navigation cross the year boundary |
+| SP-03 | EN/VI mobile **390×844**, no horizontal document overflow, real screenshots, empty month, localized invalid-input alert and anonymous redirect to login |
+| Owner isolation / cleanup | Separate owner B has its own Task/Schedule/Session. It is absent from A's Today and Calendar. Both fixture users are deleted; teardown asserts 0 owner Tasks, Schedules, Sessions and events. Sweep processing gate checked **OFF** before and after |
+
+The Completed/Skipped states are isolated fixture inserts by the local-only test administrator, not new browser attendance-transition coverage. Generation/revision and cancellation audits are real authenticated RPC/trigger executions. No Auth/DB/action responses are mocked in Playwright. Pure/mock tests cover row limits; no 20,000-row live fixture or load benchmark was run.
+
+Artifacts: [browser report](./phase-06-study-plan-browser.json), [English mobile](./evidence/step-6c/planner-en-mobile.png), [Vietnamese mobile](./evidence/step-6c/planner-vi-mobile.png). The JSON records baseline, fixture IDs/dates/zones, per-case results and cleanup; no credentials.
+
+### Quality gates / commands
+
+From `apps/web`:
+
+```powershell
+node node_modules/vitest/vitest.mjs run features/app-shell/components/app-shell-navigation.test.tsx features/learning-schedule/study-plan-projection.test.ts features/learning-schedule/study-plan.queries.actions.test.ts features/learning-schedule/components/study-plan.test.tsx --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+node node_modules/@playwright/test/cli.js test tests/study-plan.spec.ts --project=chromium --workers=1 --reporter=line --output=test-results/study-plan
+# Repository root:
+supabase test db --local
+```
+
+| Gate | Actual result |
+| --- | --- |
+| ESLint | **PASS**, exit 0; 0 errors / 1 existing Focus `projection` hook-dependency warning |
+| Standalone TypeScript | **PASS**, exit 0 |
+| Full Vitest (final) | **PASS**, exit 0; **763 passed / 22 skipped**, **76 files passed / 3 skipped**, **179.00s**, started **12:21:13 UTC+07:00**, after the weekday hydration fix. Opt-in integration skips remain explicit |
+| Next production build (final) | **PASS**, exit 0; Next **16.2.6**, compile **15.2s**, TypeScript **33.7s**, **100/100** pages in **1212ms**; `/[locale]/study-plan` is dynamic |
+| Playwright production build (final) | **PASS**, exit 0; **3/3**, **13.5s** against `next start` on port 3100; report interval **2026-11-03T05:23:36.465Z–05:23:48.225Z** |
+| pgTAP local regression | **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, 6 wall-clock seconds. Persistent concurrency fixture setup intentionally skipped |
+| Migration replay | **NOT EXECUTED**; no new SQL/migration or schema changes in 6C |
+
+Local test credentials are injected from CLI status into process environment only; `.env.local` is unchanged. Browser testing uses isolated port 3100. The temporary dev cache/helper was removed and tsconfig restored. Build skips only prebuild to retain `.next/dev`; actual `next build` runs. Some test/build runners overlapped, so elapsed times are not performance measurements.
+
+### Failures found and resolved / limits
+
+1. Initial mocked Today fixture had an end instant preceding its new start instant; analytics correctly failed closed. Corrected the fixture's end, preserving interval validation.
+2. Initial browser Task navigation assertion timed out at 5 seconds during cold compilation. Now awaits the actual Workspace URL and drawer readiness with a bounded 30-second assertion. A separate error selector was scoped to `main` to avoid matching Next's route announcer.
+3. Real anonymous navigation initially showed the application error boundary because the new route was absent from `PROTECTED_PATH_PREFIXES`. Added `/study-plan` to the existing auth proxy registry. No data leak occurred; server Auth and owner-scoped reads still rejected unauthenticated data access.
+4. Full regression initially had two app-shell expectation failures for the added navigation entry. Updated the nine-link/More expectations and preserved the original four mobile primary destinations.
+5. Additional production-browser console assertions caught **React hydration error #418** in VI after an earlier visual-only browser run passed. Direct comparison proved Node's weekday abbreviations (`Th 2`) differ from Chromium's (`Thứ 2`). Calendar now uses shared EN/VI catalog weekdays, with no hydration suppression. Final browser run must have zero Planner console/page errors before PASS; afterEach failures are recorded as failures in the report.
+
+**Limits:** no shared snapshot, deterministic live clock/DST mutation, cross-browser matrix beyond Chromium, large-history performance test, staging/production execution, loadFailed/incompleteData UI fault injection or full Phase 06 acceptance. Those action failures are mocked and localized in source; invalid input is exercised through the browser. Loading UI is source-checked, not a timing-based browser acceptance claim. 6D remains next; commit/push and release actions remain with the user.
+
+**Final controls:** final report has three passed cases, fixture cleanup **PASS**, Sweep gate **false**; source inventory remains **84 migrations**. Owned dev/production test servers stopped, temporary dev cache/helper removed, `.next/dev` retained, `tsconfig.json` has zero diff. `git diff --check` and explicit whitespace checks on untracked text files passed. No dependency/lockfile/schema/RPC/Attendance mutation change.
+
+**Decision: Step 6C Local PASS** for projection, owner-scoped read action and real Chromium UI within the accepted best-effort v1 contract. Phase 06 overall acceptance remains **PENDING** for 6D; no release approval. The user will commit/push.

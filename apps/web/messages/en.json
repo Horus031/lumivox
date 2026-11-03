@@ -1,4 +1,17 @@
 {
+  "studyPlan": {
+    "weekdays": { "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat", "7": "Sun" },
+    "eyebrow": "Learning schedule", "title": "Study Planner", "description": "Your learning schedule and progress",
+    "overview": "Study progress", "summaryScope": "Across all your study schedules · current state. Due means session end plus 60 minutes has been reached.",
+    "attendance": "Attendance", "onTime": "On time", "coverage": "Planned coverage", "na": "N/A", "ratio": "{done} / {total} sessions",
+    "todayTitle": "Today's Study Plan", "timezoneHint": "Today follows each session's timezone. Sessions may show different local dates at the same instant.",
+    "todayEmpty": "No study sessions today.", "calendarTitle": "Study calendar", "calendarHint": "Dates follow each session's saved local date. Cancelled sessions remain visible as history.",
+    "monthEmpty": "No study sessions this month.", "monthNavigation": "Calendar month navigation", "previousMonth": "Previous month", "nextMonth": "Next month", "previous": "Previous", "next": "Next",
+    "sessionCount": "{count, plural, one {# session} other {# sessions}}", "loading": "Loading your study plan…", "retry": "Reload current study plan",
+    "asOf": "Current-state data read at {instant} (application-server time).",
+    "status": { "scheduled": "Scheduled", "in_progress": "In progress", "completed": "Completed", "missed": "Missed", "skipped": "Skipped", "cancelled": "Cancelled" },
+    "error": { "invalidInput": "Choose a valid calendar month.", "loadFailed": "Could not load your study plan. Please try again.", "incompleteData": "A complete study plan could not be verified. Reload or choose a smaller month; no partial totals are shown." }
+  },
   "common": {
     "datePicker": {
       "placeholder": "Select date",
@@ -156,6 +169,7 @@
       "expandSidebar": "Expand sidebar"
     },
     "navigation": {
+      "studyPlan": { "label": "Study Planner", "description": "Study calendar and today's plan" },
       "more": "More",
       "dashboard": {
         "mobileLabel": "Home",
