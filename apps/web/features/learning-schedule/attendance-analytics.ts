@@ -97,7 +97,7 @@ export function uniqueEligibleObligations(
 
 /**
  * A current-state projection evaluated at an explicit
- * database-sourced asOf instant.
+ * caller-supplied asOf instant (the read adapter uses application-server time).
  *
  * Historical as-of snapshots would require event replay;
  * this function does not pretend to reconstruct them.

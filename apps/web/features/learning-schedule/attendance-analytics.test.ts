@@ -121,4 +121,85 @@ describe("Attendance analytics", () => {
     expect(result.eligibleDue).toBe(1);
     expect(result.completedDue).toBe(1);
   });
+
+  it("UT-029 counts late completion but not on-time", () => {
+    const result = calculateAttendanceSummary(
+      [
+        session(1, {
+          status: "completed",
+          completedAt: "2026-11-01T09:30:00Z",
+        }),
+      ],
+      asOf,
+    );
+
+    expect(result.completedDue).toBe(1);
+    expect(result.onTimeDue).toBe(0);
+    expect(result.attendanceRate).toBe(100);
+    expect(result.onTimeRate).toBe(0);
+  });
+
+  it("counts grace equality as due", () => {
+    const result = calculateAttendanceSummary(
+      [session(1)],
+      "2026-11-01T10:00:00Z",
+    );
+
+    expect(result.eligibleDue).toBe(1);
+  });
+
+  it("does not credit completion after asOf", () => {
+    const result = calculateAttendanceSummary(
+      [
+        session(1, {
+          status: "completed",
+          completedAt: "2026-11-03T12:00:00Z",
+        }),
+      ],
+      asOf,
+    );
+
+    expect(result.eligibleDue).toBe(1);
+    expect(result.completedDue).toBe(0);
+    expect(result.completedPlanned).toBe(0);
+  });
+
+  it("keeps a cancellation after start eligible", () => {
+    const result = calculateAttendanceSummary(
+      [
+        session(1, {
+          status: "cancelled",
+          cancelledAt: "2026-11-01T08:30:00Z",
+        }),
+      ],
+      asOf,
+    );
+
+    expect(result.eligibleDue).toBe(1);
+    expect(result.completedDue).toBe(0);
+  });
+
+  it("rejects ambiguous active obligation identity", () => {
+    expect(() =>
+      calculateAttendanceSummary(
+        [
+          session(1),
+          session(2, {
+            logicalOccurrenceKey: "occurrence-1",
+          }),
+        ],
+        asOf,
+      ),
+    ).toThrow(/Ambiguous logical obligation/);
+  });
+
+  it("does not infer Missed from a persisted Scheduled status", () => {
+    const result = calculateAttendanceSummary(
+      [session(1, { status: "scheduled" })],
+      asOf,
+    );
+
+    expect(result.eligibleDue).toBe(1);
+    expect(result.completedDue).toBe(0);
+  });
 });
