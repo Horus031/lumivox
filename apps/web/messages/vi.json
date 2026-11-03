@@ -1,5 +1,6 @@
 {
   "studyPlan": {
+    "refreshHint": "Tiến độ học tập được tính từ dữ liệu buổi học mới nhất đã tải. Hãy tải lại trang để xem những thay đổi điểm danh gần đây.",
     "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },
     "eyebrow": "Lịch học", "title": "Kế hoạch học tập", "description": "Lịch học và tiến độ của bạn",
     "overview": "Tiến độ học tập", "summaryScope": "Toàn bộ lịch học · trạng thái hiện tại. Buổi học đến hạn khi đã qua giờ kết thúc cộng 60 phút.",

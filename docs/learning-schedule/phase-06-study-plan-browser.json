@@ -1,6 +1,6 @@
 {
-  "baseline": "6d66a6a33fca0472bb63ba22523994e7b67c146b",
-  "startedAt": "2026-11-03T05:23:36.465Z",
+  "baseline": "1deebfd84f1afc2b165ee0e0ee864fcab20cb20e",
+  "startedAt": "2026-11-03T06:12:28.563Z",
   "runs": [
     {
       "name": "SP-01 real Today across two Tasks/zones; Completed/Skipped and existing Task deep link",
@@ -13,21 +13,41 @@
     {
       "name": "SP-03 EN/VI mobile, empty/error states and anonymous protection",
       "status": "passed"
+    },
+    {
+      "name": "SP-04 real Recovery updates due counts and coverage without on-time/Task/Focus credit",
+      "status": "passed"
+    },
+    {
+      "name": "SP-05 real UI Skip retains planned obligation and never credits completion",
+      "status": "passed"
+    },
+    {
+      "name": "SP-06 authenticated Task-close cancels future obligations with history but no completion",
+      "status": "passed"
+    },
+    {
+      "name": "SP-10 simultaneous real Auth owners see only their own Planner",
+      "status": "passed"
+    },
+    {
+      "name": "SP-11 clean account with no schedules shows N/A and valid empty navigation",
+      "status": "passed"
     }
   ],
   "fixtureSummary": {
     "sessions": [
       {
-        "id": "0c76a129-7890-49c0-b2a7-765f40995bd5",
-        "taskId": "4ad8e8a7-c263-4efb-9364-c1ec0574a1ee",
+        "id": "a3b2dbf3-8411-453f-90d5-e1be37bfc081",
+        "taskId": "e0abad3e-f80b-4956-96ed-919c1e367e66",
         "title": "Planner Algebra Completed",
         "date": "2026-11-03",
         "zone": "Pacific/Kiritimati",
         "status": "completed"
       },
       {
-        "id": "ac737d2a-3e05-4e8b-bb80-096d1e566cf3",
-        "taskId": "d598444e-5b28-425f-9e97-6d3ef14cfdd3",
+        "id": "881f9983-d112-4a82-ad79-a288eac60fb1",
+        "taskId": "4e201f3e-7d24-44ef-9563-7d27b75fb29b",
         "title": "Planner Languages Skipped",
         "date": "2026-11-02",
         "zone": "Etc/GMT+12",
@@ -35,12 +55,216 @@
       }
     ],
     "revision": 2,
-    "scheduleId": "e2afbfd9-567b-4935-85b1-dd75a2b3ac7f",
+    "scheduleId": "70786dba-5824-42de-8a55-a0e1e73a0a1a",
     "browserTimezone": "Europe/London",
     "baseURL": "http://127.0.0.1:3100",
     "apiOrigin": "http://127.0.0.1:55321"
   },
-  "finishedAt": "2026-11-03T05:23:48.225Z",
+  "caseDetails": {
+    "SP-04": {
+      "before": {
+        "attendance": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        },
+        "onTime": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        },
+        "coverage": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        }
+      },
+      "after": {
+        "attendance": {
+          "value": "100%",
+          "ratio": "1 / 1 sessions"
+        },
+        "onTime": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        },
+        "coverage": {
+          "value": "100%",
+          "ratio": "1 / 1 sessions"
+        }
+      },
+      "persisted": {
+        "sessions": [
+          {
+            "id": "bbbf80ed-1c7b-4b75-a904-a0aeef109bd5",
+            "status": "completed",
+            "completed_at": "2026-11-03T06:13:02.973909+00:00",
+            "actual_study_minutes": null,
+            "scheduled_start_at": "2026-11-01T12:00:00+00:00",
+            "scheduled_end_at": "2026-11-01T12:30:00+00:00"
+          }
+        ],
+        "events": [
+          {
+            "id": "1cfa6479-9df2-459f-be90-a594e1d6c0ce",
+            "event_type": "recovered",
+            "from_status": "missed",
+            "to_status": "completed",
+            "actor_id": "8d1a8cc8-7035-46f6-b3f6-b8c732950fad"
+          }
+        ],
+        "task": {
+          "status": "todo"
+        }
+      },
+      "originalLocalDate": "2026-11-01"
+    },
+    "SP-05": {
+      "before": {
+        "attendance": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "onTime": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "coverage": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        }
+      },
+      "after": {
+        "attendance": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "onTime": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "coverage": {
+          "value": "0%",
+          "ratio": "0 / 1 sessions"
+        }
+      },
+      "persisted": {
+        "sessions": [
+          {
+            "id": "98f1a75c-a2cf-4f71-b883-707c53e3974a",
+            "status": "skipped",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "scheduled_start_at": "2026-11-03T06:08:05.598381+00:00",
+            "scheduled_end_at": "2026-11-03T06:38:05.598381+00:00"
+          }
+        ],
+        "events": [
+          {
+            "id": "1e658049-d702-4b0b-915c-011450c0f301",
+            "event_type": "skipped",
+            "from_status": "scheduled",
+            "to_status": "skipped",
+            "actor_id": "8d1a8cc8-7035-46f6-b3f6-b8c732950fad"
+          }
+        ],
+        "task": {
+          "status": "todo"
+        }
+      },
+      "dueAt": "2026-11-03T07:38:05.598Z"
+    },
+    "SP-06": {
+      "before": {
+        "attendance": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "onTime": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "coverage": {
+          "value": "0%",
+          "ratio": "0 / 2 sessions"
+        }
+      },
+      "after": {
+        "attendance": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "onTime": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "coverage": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        }
+      },
+      "persisted": {
+        "sessions": [
+          {
+            "id": "7eeb0022-c4bd-4a32-b95c-9d8928a66acc",
+            "status": "cancelled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "scheduled_start_at": "2026-11-03T06:33:10.333386+00:00",
+            "scheduled_end_at": "2026-11-03T07:03:10.333386+00:00"
+          },
+          {
+            "id": "bc5c4ec0-7f5c-4348-bc9a-ba764657d4d8",
+            "status": "cancelled",
+            "completed_at": null,
+            "actual_study_minutes": null,
+            "scheduled_start_at": "2026-11-03T08:33:10.333386+00:00",
+            "scheduled_end_at": "2026-11-03T09:03:10.333386+00:00"
+          }
+        ],
+        "events": [
+          {
+            "id": "2bb38a27-859f-40f5-b91c-b3d9f0d43440",
+            "event_type": "cancelled",
+            "from_status": "scheduled",
+            "to_status": "cancelled",
+            "actor_id": "8d1a8cc8-7035-46f6-b3f6-b8c732950fad"
+          },
+          {
+            "id": "42508dc1-807e-44af-8c38-cc26ee49879e",
+            "event_type": "cancelled",
+            "from_status": "scheduled",
+            "to_status": "cancelled",
+            "actor_id": "8d1a8cc8-7035-46f6-b3f6-b8c732950fad"
+          }
+        ],
+        "task": {
+          "status": "completed"
+        }
+      }
+    },
+    "SP-10": {
+      "owners": 2,
+      "browserContexts": 2,
+      "reciprocalTitleIsolation": "PASS",
+      "eligiblePlannedPerOwner": 1
+    },
+    "SP-11": {
+      "summary": {
+        "attendance": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "onTime": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        },
+        "coverage": {
+          "value": "N/A",
+          "ratio": "0 / 0 sessions"
+        }
+      },
+      "ownerScheduleCount": 0
+    }
+  },
+  "finishedAt": "2026-11-03T06:13:18.805Z",
   "cleanup": "PASS",
   "sweepGateAfter": false
 }

@@ -1,5 +1,6 @@
 {
   "studyPlan": {
+    "refreshHint": "Study progress reflects the latest available session records. Reload to view recent attendance changes.",
     "weekdays": { "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat", "7": "Sun" },
     "eyebrow": "Learning schedule", "title": "Study Planner", "description": "Your learning schedule and progress",
     "overview": "Study progress", "summaryScope": "Across all your study schedules · current state. Due means session end plus 60 minutes has been reached.",

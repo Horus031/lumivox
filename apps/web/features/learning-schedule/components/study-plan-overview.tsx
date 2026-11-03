@@ -12,6 +12,7 @@ export function StudyPlanOverview({ summary }: { summary: AttendanceSummary }) {
   ] as const;
   return <section aria-label={t("overview")} className="space-y-3">
     <p className="text-sm text-secondary-text">{t("summaryScope")}</p>
+    <p className="text-sm text-secondary-text">{t("refreshHint")}</p>
     <dl className="grid gap-4 sm:grid-cols-3">{metrics.map(metric => <Card key={metric.key} className="p-5">
       <dt className="text-sm text-secondary-text">{t(metric.key)}</dt>
       <dd className="mt-2 text-3xl font-semibold tabular-nums">{metric.value === null ? t("na") :

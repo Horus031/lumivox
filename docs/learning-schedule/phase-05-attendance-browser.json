@@ -1,32 +1,32 @@
 {
-  "baseline": "7d1b0dc2c0d2df33ba782d17ee165b63e292dc8a",
-  "startedAt": "2026-11-02T08:05:41.839Z",
+  "baseline": "1deebfd84f1afc2b165ee0e0ee864fcab20cb20e",
+  "startedAt": "2026-11-03T06:14:08.754Z",
   "baseURL": "http://127.0.0.1:3100",
   "apiOrigin": "http://127.0.0.1:55321",
   "sweepGateBefore": false,
   "caseDetails": {
     "ATE-04": {
       "upstreamHttpStatus": 200,
-      "committedObservedAt": "2026-11-02T08:06:20.582Z",
+      "committedObservedAt": "2026-11-03T06:14:26.905Z",
       "beforeResponseLoss": {
-        "id": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+        "id": "2fd9807f-49ee-4f56-95d0-a51a2202142a",
         "status": "completed",
-        "completed_at": "2026-11-02T15:06:20.555368+07:00",
+        "completed_at": "2026-11-03T06:14:26.882571+00:00",
         "actual_study_minutes": null,
-        "updated_at": "2026-11-02T15:06:20.554177+07:00"
+        "updated_at": "2026-11-03T06:14:26.88013+00:00"
       },
       "eventCountBeforeResponseLoss": 1,
       "originalCommand": {
         "command": "complete",
-        "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
-        "expectedUpdatedAt": "2026-11-02T14:56:18.635+07:00",
-        "eventKey": "1144865f-f8af-4388-a36c-671e227a53ca"
+        "sessionId": "2fd9807f-49ee-4f56-95d0-a51a2202142a",
+        "expectedUpdatedAt": "2026-11-03T06:04:25.405+00:00",
+        "eventKey": "25e6ce0f-2b33-4712-8cf7-aaf7a102add5"
       },
       "retryCommand": {
         "command": "complete",
-        "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
-        "expectedUpdatedAt": "2026-11-02T14:56:18.635+07:00",
-        "eventKey": "1144865f-f8af-4388-a36c-671e227a53ca"
+        "sessionId": "2fd9807f-49ee-4f56-95d0-a51a2202142a",
+        "expectedUpdatedAt": "2026-11-03T06:04:25.405+00:00",
+        "eventKey": "25e6ce0f-2b33-4712-8cf7-aaf7a102add5"
       },
       "requestBodiesIdentical": true,
       "eventCountBeforeRetry": 1,
@@ -34,7 +34,7 @@
       "sessionUnchangedOnReplay": true,
       "auditUnchangedOnReplay": true,
       "interceptedRequests": 2,
-      "retryVerifiedAt": "2026-11-02T08:06:21.083Z"
+      "retryVerifiedAt": "2026-11-03T06:14:27.326Z"
     },
     "ATE-05": {
       "visited": [
@@ -60,7 +60,7 @@
           "renderedWidth": 358,
           "viewportWidth": 390,
           "documentWidth": 390,
-          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-en-mobile.png",
+          "screenshot": "test-results/phase06-regression/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-en-mobile.png",
           "cancelled": true
         },
         {
@@ -74,7 +74,7 @@
           "renderedWidth": 358,
           "viewportWidth": 390,
           "documentWidth": 390,
-          "screenshot": "test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-vi-mobile.png",
+          "screenshot": "test-results/phase06-regression/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-vi-mobile.png",
           "cancelled": true
         }
       ],
@@ -82,7 +82,7 @@
       "sessionUnchanged": true
     },
     "ATE-07": {
-      "otherUserId": "810d5459-2742-4518-b44d-db7f4ee704e7",
+      "otherUserId": "e026da3f-08c7-4db5-a990-8aced73713e0",
       "browserTaskVisible": false,
       "rlsRowsReturned": 0,
       "denials": [
@@ -119,32 +119,32 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "044e0893-daf3-4f93-b1be-c8a0a7ad7ef0",
-          "scheduleId": "9a3a8509-5cd2-441f-92b4-e4aeb3e5073f",
-          "sessionId": "90ddff58-08df-434e-8f6d-8c704d98610c",
+          "taskId": "4caeef5f-d13b-4b11-8f33-45a13a7f706c",
+          "scheduleId": "127f505a-9bac-4d1b-b853-4243e186b11f",
+          "sessionId": "fa1d1ce6-2451-4de4-98d4-ba55417d1f84",
           "session": {
-            "id": "90ddff58-08df-434e-8f6d-8c704d98610c",
+            "id": "fa1d1ce6-2451-4de4-98d4-ba55417d1f84",
             "status": "completed",
-            "completed_at": "2026-11-02T15:06:04.792133+07:00",
+            "completed_at": "2026-11-03T06:14:12.88169+00:00",
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T15:06:04.788986+07:00"
+            "updated_at": "2026-11-03T06:14:12.877974+00:00"
           },
           "events": [
             {
-              "id": "a542cc08-634c-4204-a158-8c7c82b54445",
+              "id": "4a484310-c1ef-4a2d-809e-cb3843a9fd2e",
               "event_type": "started",
-              "event_key": "76771d51-ec22-43da-8fda-088564381cd0",
+              "event_key": "19c1f409-b2bc-418d-bcda-48085661b3a5",
               "from_status": "scheduled",
               "to_status": "in_progress",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             },
             {
-              "id": "358c0241-7764-4158-8665-fd7e349e6c63",
+              "id": "63a3cac6-307d-45d0-aa80-74bcabfc279e",
               "event_type": "completed",
-              "event_key": "535ca088-85de-462f-bfa2-9cab7e7f7c2d",
+              "event_key": "cc481095-67bb-4ffa-973b-d003a94b479d",
               "from_status": "in_progress",
               "to_status": "completed",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             }
           ],
           "taskStatus": "todo"
@@ -157,32 +157,32 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "92076cf0-0a5a-450c-8cfc-14c7bb132a5b",
-          "scheduleId": "3cd79524-2379-4b80-8228-15bb2296c918",
-          "sessionId": "606f68c0-403a-4617-8ca3-b41ea447604c",
+          "taskId": "f41cec0f-cef4-4713-bf78-c1cf64e3d103",
+          "scheduleId": "03824198-81d9-4d78-a5c4-5b23249536dc",
+          "sessionId": "b1fabe8f-816b-413f-8bd9-ae8a676eead2",
           "session": {
-            "id": "606f68c0-403a-4617-8ca3-b41ea447604c",
+            "id": "b1fabe8f-816b-413f-8bd9-ae8a676eead2",
             "status": "completed",
-            "completed_at": "2026-11-02T15:06:11.020055+07:00",
+            "completed_at": "2026-11-03T06:14:18.471328+00:00",
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T15:06:11.015245+07:00"
+            "updated_at": "2026-11-03T06:14:18.468449+00:00"
           },
           "events": [
             {
-              "id": "eaac28ab-9143-4705-a48a-484255ef1254",
+              "id": "f6a00233-f1a6-49d0-a9c4-1b131904ed01",
               "event_type": "skipped",
-              "event_key": "9a312f0c-4e9d-4f42-9539-0a4448125c88",
+              "event_key": "28e45ff7-19fe-45fe-9788-101021bf0062",
               "from_status": "scheduled",
               "to_status": "skipped",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             },
             {
-              "id": "2cd2605e-865b-440d-8767-a9c7e87a9c8f",
+              "id": "bfa15450-3f7a-4873-9231-33f2101a2aa1",
               "event_type": "recovered",
-              "event_key": "f69adcb0-ec8e-43eb-9a44-f78c199f0203",
+              "event_key": "4a611760-6211-4e50-94bf-057b37478fc6",
               "from_status": "skipped",
               "to_status": "completed",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             }
           ],
           "taskStatus": "todo"
@@ -195,24 +195,24 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "2e22ba57-36d8-4e42-95cc-172f7fd43048",
-          "scheduleId": "ed2212f1-68e4-4f77-8ec5-7335e8ca830f",
-          "sessionId": "dbc35ead-1c9b-405e-8c86-9f16e538af39",
+          "taskId": "9ecc66ec-dddb-4567-8572-4f8bee01ff2d",
+          "scheduleId": "506606d1-c42e-449a-9114-1dcdc8f1e8ee",
+          "sessionId": "acb4762c-30d8-4825-ab61-516d2ce70531",
           "session": {
-            "id": "dbc35ead-1c9b-405e-8c86-9f16e538af39",
+            "id": "acb4762c-30d8-4825-ab61-516d2ce70531",
             "status": "in_progress",
             "completed_at": null,
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T15:06:16.13463+07:00"
+            "updated_at": "2026-11-03T06:14:23.347304+00:00"
           },
           "events": [
             {
-              "id": "4ed68679-6b4c-4ed3-ab16-18a59c6f569d",
+              "id": "d0b88dab-e82b-49d8-83e3-b91a3027c037",
               "event_type": "started",
-              "event_key": "2658e9fe-cd2c-4a8b-9806-0bc4846f00f1",
+              "event_key": "1b66d127-a735-474f-8c84-c294fc24e922",
               "from_status": "scheduled",
               "to_status": "in_progress",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             }
           ],
           "taskStatus": "todo"
@@ -225,24 +225,24 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "9f27014b-3022-4176-a6c3-10fb121db5bd",
-          "scheduleId": "2b469331-669b-4df9-b5ae-641af8746aef",
-          "sessionId": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+          "taskId": "2e036bac-d79c-49e4-949b-c8a16440c950",
+          "scheduleId": "399827ba-faa0-4c67-8f63-956ed422fbe5",
+          "sessionId": "2fd9807f-49ee-4f56-95d0-a51a2202142a",
           "session": {
-            "id": "51fd814b-dc7f-4ecd-8bb8-2fb54678c0ed",
+            "id": "2fd9807f-49ee-4f56-95d0-a51a2202142a",
             "status": "completed",
-            "completed_at": "2026-11-02T15:06:20.555368+07:00",
+            "completed_at": "2026-11-03T06:14:26.882571+00:00",
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T15:06:20.554177+07:00"
+            "updated_at": "2026-11-03T06:14:26.88013+00:00"
           },
           "events": [
             {
-              "id": "cd126fad-a644-4c02-8180-afc1fd35a571",
+              "id": "3855650d-4336-4065-b931-f664c6cf4c86",
               "event_type": "completed",
-              "event_key": "1144865f-f8af-4388-a36c-671e227a53ca",
+              "event_key": "25e6ce0f-2b33-4712-8cf7-aaf7a102add5",
               "from_status": "scheduled",
               "to_status": "completed",
-              "actor_id": "3fb87045-ab5e-4157-9dbd-033112f961bb"
+              "actor_id": "6361fc53-d9c1-4e10-b143-89adbda27864"
             }
           ],
           "taskStatus": "todo"
@@ -255,15 +255,15 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "f7846d5e-3dfa-4db6-8555-ceb6cd548d4c",
-          "scheduleId": "383871fe-24bf-4818-a19e-01924ec16fb0",
-          "sessionId": "b9e0cc47-f6c3-4f61-885e-3d9ca6fe7ab4",
+          "taskId": "3fa9edc0-886b-4c7a-9e3a-0f2e0fad8749",
+          "scheduleId": "24c0ae06-4966-41d0-82a2-fdb637196a22",
+          "sessionId": "db0480a5-e1b3-4f10-925f-57799372b4e5",
           "session": {
-            "id": "b9e0cc47-f6c3-4f61-885e-3d9ca6fe7ab4",
+            "id": "db0480a5-e1b3-4f10-925f-57799372b4e5",
             "status": "scheduled",
             "completed_at": null,
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T14:56:23.145+07:00"
+            "updated_at": "2026-11-03T06:04:28.64+00:00"
           },
           "events": [],
           "taskStatus": "todo"
@@ -276,15 +276,15 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "ed15d111-62eb-4f11-95bf-c788307417a6",
-          "scheduleId": "443c0f64-451a-4a32-820e-1474991cdb37",
-          "sessionId": "10d29bab-b1d5-4af0-afe6-78b6cb777b94",
+          "taskId": "98dec75b-d695-46d1-8dbd-ae94aa7af000",
+          "scheduleId": "e090161a-553d-4eee-90e6-dd108e25a2d4",
+          "sessionId": "4913c29a-43f5-41ac-b3d4-c54d371388be",
           "session": {
-            "id": "10d29bab-b1d5-4af0-afe6-78b6cb777b94",
+            "id": "4913c29a-43f5-41ac-b3d4-c54d371388be",
             "status": "scheduled",
             "completed_at": null,
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T14:56:28.734+07:00"
+            "updated_at": "2026-11-03T06:04:31.704+00:00"
           },
           "events": [],
           "taskStatus": "todo"
@@ -297,15 +297,15 @@
       "pageErrors": [],
       "snapshots": [
         {
-          "taskId": "d0d01d0e-343f-4bed-b741-f10c6b1316da",
-          "scheduleId": "3e2080d5-97fb-4d36-b6b2-bff1ed8ff339",
-          "sessionId": "f3034f1a-b08f-46a2-9612-15f7471bbabc",
+          "taskId": "908fbdbe-ddbf-4b3c-a85a-5214f329146a",
+          "scheduleId": "21f2c5de-20cd-4002-b37d-d48b1e3a91fd",
+          "sessionId": "7565867c-38eb-4b77-b457-a2fdf8004a15",
           "session": {
-            "id": "f3034f1a-b08f-46a2-9612-15f7471bbabc",
+            "id": "7565867c-38eb-4b77-b457-a2fdf8004a15",
             "status": "scheduled",
             "completed_at": null,
             "actual_study_minutes": null,
-            "updated_at": "2026-11-02T14:56:35.814+07:00"
+            "updated_at": "2026-11-03T06:04:36.094+00:00"
           },
           "events": [],
           "taskStatus": "todo"
@@ -317,88 +317,5 @@
   "userCleanup": "PASS",
   "remainingSessions": 0,
   "remainingTasks": 0,
-  "finishedAt": "2026-11-02T08:06:42.375Z",
-  "finalVerification": {
-    "postgresVersion": "17.6",
-    "migrationCount": 84,
-    "sweepGate": false,
-    "remainingAuthFixtures": 0,
-    "remainingReportedTasks": 0,
-    "remainingReportedSchedules": 0,
-    "remainingReportedSessions": 0,
-    "remainingReportedEvents": 0,
-    "remainingActorEvents": 0,
-    "cron": [
-      {
-        "name": "lumivox-learning-schedule-missed-5m",
-        "schedule": "*/5 * * * *",
-        "active": true
-      }
-    ],
-    "attendancePrivileges": [
-      {
-        "function": "ls_complete_study_session",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": true,
-        "serviceExecute": true
-      },
-      {
-        "function": "ls_mark_missed_batch",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": false,
-        "serviceExecute": true
-      },
-      {
-        "function": "ls_recover_study_session",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": true,
-        "serviceExecute": true
-      },
-      {
-        "function": "ls_run_missed_sweep_if_enabled",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": false,
-        "serviceExecute": true
-      },
-      {
-        "function": "ls_skip_study_session",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": true,
-        "serviceExecute": true
-      },
-      {
-        "function": "ls_start_study_session",
-        "securityDefiner": true,
-        "settings": [
-          "search_path=\"\""
-        ],
-        "anonExecute": false,
-        "authenticatedExecute": true,
-        "serviceExecute": true
-      }
-    ],
-    "rlsEnabledTables": 5,
-    "migrationVersionsMatchRepository": true,
-    "verifiedAt": "2026-11-02T08:23:22.8868737Z"
-  }
+  "finishedAt": "2026-11-03T06:14:40.294Z"
 }

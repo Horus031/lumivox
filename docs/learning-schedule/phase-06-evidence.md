@@ -176,3 +176,48 @@ Local test credentials are injected from CLI status into process environment onl
 **Final controls:** final report has three passed cases, fixture cleanup **PASS**, Sweep gate **false**; source inventory remains **84 migrations**. Owned dev/production test servers stopped, temporary dev cache/helper removed, `.next/dev` retained, `tsconfig.json` has zero diff. `git diff --check` and explicit whitespace checks on untracked text files passed. No dependency/lockfile/schema/RPC/Attendance mutation change.
 
 **Decision: Step 6C Local PASS** for projection, owner-scoped read action and real Chromium UI within the accepted best-effort v1 contract. Phase 06 overall acceptance remains **PENDING** for 6D; no release approval. The user will commit/push.
+
+## Step 6D — Final Integration
+
+**Baseline:** `1deebfd84f1afc2b165ee0e0ee864fcab20cb20e`, clean `feature/learning-schedule-foundation` before this run; **2026-11-03**, Asia/Bangkok. Results cover the baseline plus uncommitted 6D changes. No new migration or data-layer rewrite. Added the EN/VI reload explanation; extracted the existing server content renderer into `study-plan-content.tsx` to test its real failure UI with a mocked action boundary.
+
+| Acceptance case | Actual execution / outcome |
+| --- | --- |
+| SP-04 Recovery → analytics | **Real browser PASS**: one two-local-days-old Missed obligation; Attendance **0/1 → 1/1**, On-time **0/1 → 0/1**, Coverage **0/1 → 1/1**. Real Recover UI and confirmation, then real navigation back to Planner. Database: Completed, non-null completed_at, exactly **1 recovered event**, parent Task **todo**, actual_study_minutes **null**; Calendar shows Completed on the original date |
+| SP-05 Skip | **Real browser PASS**: Scheduled → Skipped through UI, exactly **1 skipped event**, no completion/time credit. This fixture is before end + 60m, so due counts remain **0/0 (N/A)** and planned coverage remains **0/1**. Calendar and Today show Skipped |
+| SP-06 Task closure | **Real browser + authenticated Task update PASS**: before planned **0/2**, after **0/0 (N/A)**; **2 future Sessions cancelled + 2 cancellation audits**, retained on Calendar, removed from Today. No completion event or actual study minutes. Owner client closes the Task through the existing transactional trigger; no service-role Session update after the command |
+| SP-07 Query failure | **2 component tests PASS (EN/VI)**, mocked action `loadFailed`, real content renderer displays localized error/retry and no KPI/Calendar. Existing action tests separately exercise underlying read-query errors |
+| SP-08 Incomplete data | **2 component tests PASS (EN/VI)**, mocked action `incompleteData`, no partial views. Existing action tests exercise missing/duplicate cancellation audit and page truncation |
+| SP-09 Interleaved read | **Real local integration PASS**: authenticated RPC creates **730 Sessions**. Fetch wrapper waits for page 1's real HTTP response (**500 Scheduled rows**), commits a real authenticated Task-close, then releases that response and reads page 2 (**230 Cancelled rows**). All **730 cancellation audits** exist; mixed status/audit projection returns exactly **incompleteData**, without partial results. Fresh read succeeds with planned denominator **0** and **62** retained January history rows. Only request-cookie binding is mocked; HTTP/RLS/data/mutation are real |
+| SP-10 Owner isolation | **Real browser PASS**: simultaneous A/B Auth contexts open Planner; each sees only its own Task/Session, reciprocal titles absent across Today/Calendar and planned denominator **1** per owner |
+| SP-11 No schedules | **Real browser + component PASS**: owner A's isolated fixtures cleaned to zero Schedules; three N/A KPIs, both empty states, valid month links, no error |
+
+**Browser artifacts:** [Phase 06 report](./phase-06-study-plan-browser.json) now has **8 passed / 0 skipped** browser cases (SP-01–06, SP-10–11), **51.6s**, report interval **2026-11-03T06:12:28Z–06:13:18Z**, with actual KPI strings/persisted mutation outcomes and successful cleanup. SP-07/08/09 are deliberately documented at their component/integration layers, not counted as browser cases. [Attendance regression report](./phase-05-attendance-browser.json) was refreshed at the same HEAD with **7 passed**, including exact retry, stale update, keyboard/focus, mobile and cross-owner HTTP denial. The separate Schedule suite adds **10 passed**; combined regression command **17/17**, **1.2m**. Study Planner EN/VI mobile screenshots were refreshed for the reload explanation.
+
+### Final gates (run sequentially as requested)
+
+- Initial targeted component run: **5/5 PASS**, 4.53s. Opt-in local integration run: **22/22 PASS / 0 skipped**, 3 files, **13.64s** (19 Schedule Server Action tests, 2 analytics integration tests, 1 new interleaved-read test). Credentials were injected from local CLI status, never saved/printed. A skipped test is not counted as a pass.
+- Browser sequence: `study-plan.spec.ts` → combined `learning-schedule-attendance.spec.ts learning-schedule.spec.ts`, Chromium / one worker / local port 3100. **25/25 browser cases PASS**, no Planner console/page errors. Fixture setup uses admin only for seeding/cleanup; commands under test use UI or authenticated owner clients.
+- Then `node node_modules/eslint/bin/eslint.js .`: **PASS**, exit 0, 0 errors / 1 existing Focus `projection` hook-dependency warning.
+- Then `node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot`: **PASS**, exit 0; **77 files passed / 4 skipped**, **768 tests passed / 23 skipped**, **144.85s**, started **13:20:38 UTC+07:00**. The 22 Learning Schedule opt-in tests were separately executed above; the remaining default skip is not claimed as PASS.
+- Then `node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false`: **PASS**, exit 0.
+- Then `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build`: **PASS**, exit 0; compile **13.3s**, TypeScript **22.9s**, **100/100** pages in **928ms**. **Prebuild NOT EXECUTED** to preserve `.next/dev`; actual Next **16.2.6** production build completed with process-only local Supabase configuration. `.env.local` unchanged.
+- Then repository-root `supabase test db --local`: **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, **2 wall-clock seconds**. Persistent concurrency fixture setup is intentionally skipped; it is not counted as new independent-connection coverage.
+- Final read-only local verification: **Sweep gate false / 84 applied migrations / 0 matching Auth fixture users**. Per-suite teardown also asserts zero owned Tasks/Schedules/Sessions/events. Owned server/cache/helper removed, tsconfig restored with zero diff, `.next/dev` retained. `git diff --check` and explicit whitespace checks on new text files **PASS**; no remote query/deploy, schema/RPC/permission or dependency changes.
+
+### Phase 06 acceptance checklist
+
+- [x] UT-027–032 and analytics formulas verified.
+- [x] Owner-scoped reads and multi-Schedule projections verified.
+- [x] Calendar/Today use stored local dates and per-Session IANA timezones.
+- [x] Real Attendance mutation updates Planner KPI counts.
+- [x] Skip/Recovery/Task-close preserve the correct denominators without double counting.
+- [x] Failure/empty UI, EN/VI and mobile verified at the documented layers.
+- [x] Browser suites and all final quality gates passed.
+- [x] Cross-owner isolation verified with simultaneous Auth contexts.
+- [x] Best-effort read limitation explicitly accepted, not mislabeled snapshot consistency.
+- [x] Final Sweep OFF / no remote deployment controls confirmed.
+
+**Limits retained:** independent PostgREST reads plus application-server asOf do **not** form an atomic or historical snapshot. SP-09 characterizes one detectable interleave; it does not guarantee detection of all same-cardinality replacements, reschedules, completions or changes after the last request. No snapshot RPC, controlled live clock/exact-cutoff test, production/staging execution, non-Chromium matrix or new load benchmark. No Realtime subscription: EN/VI copy tells users to reload for later attendance changes. No acceptance test failed in this run. Existing Vite/Supabase deprecation notices and the Focus lint warning remain disclosed.
+
+**Decision: Step 6D and Phase 06 Local v1 PASS — 10/10 acceptance items**, within the explicitly best-effort current-state read contract. This does not mark atomic snapshot analytics or production release approved. Phase 07 not started. No commit/push/deployment; the user handles version control.

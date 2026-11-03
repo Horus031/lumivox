@@ -28,7 +28,7 @@ describe("Study Planner EN/VI accessible components", () => {
     await act(async () => root.render(<NextIntlClientProvider locale={locale} messages={messages} timeZone="UTC">
       <StudyPlanOverview summary={{ ...summary, attendanceRate: null }} /><TodaysStudyPlan sessions={[]} /><StudyCalendar month="2026-12" days={[]} />
     </NextIntlClientProvider>));
-    for (const key of ["attendance", "onTime", "coverage", "na", "todayEmpty", "monthEmpty", "timezoneHint"] as const) expect(host.textContent).toContain(messages.studyPlan[key]);
+    for (const key of ["attendance", "onTime", "coverage", "na", "todayEmpty", "monthEmpty", "timezoneHint", "refreshHint"] as const) expect(host.textContent).toContain(messages.studyPlan[key]);
     expect(host.querySelectorAll("dl dt")).toHaveLength(3); expect(host.textContent).toContain("75");
     expect(host.querySelector("table caption")?.textContent).toContain(messages.studyPlan.calendarTitle);
     expect(host.querySelectorAll('th[scope="col"]')).toHaveLength(7);
