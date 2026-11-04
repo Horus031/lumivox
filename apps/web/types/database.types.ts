@@ -709,14 +709,14 @@ isOneToOne: false
                   ]
                 },"study_notification_jobs": {
                   Row: {
-                    "attempt_count": number,"created_at": string,"due_at": string,"id": string,"idempotency_key": string,"lease_token": string | null,"lease_until": string | null,"next_attempt_at": string,"notification_type": string,"schedule_revision": number,"session_id": string,"status": string,"updated_at": string,"user_id": string
+                    "attempt_count": number,"cancel_requested_at": string | null,"created_at": string,"due_at": string,"id": string,"idempotency_key": string,"lease_token": string | null,"lease_until": string | null,"lifecycle_fingerprint": string | null,"next_attempt_at": string,"notification_type": string,"schedule_revision": number,"session_id": string,"status": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt_count"?: number,"created_at"?: string,"due_at": string,"id"?: string,"idempotency_key": string,"lease_token"?: string | null,"lease_until"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision": number,"session_id": string,"status"?: string,"updated_at"?: string,"user_id": string
+                    "attempt_count"?: number,"cancel_requested_at"?: string | null,"created_at"?: string,"due_at": string,"id"?: string,"idempotency_key": string,"lease_token"?: string | null,"lease_until"?: string | null,"lifecycle_fingerprint"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision": number,"session_id": string,"status"?: string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "attempt_count"?: number,"created_at"?: string,"due_at"?: string,"id"?: string,"idempotency_key"?: string,"lease_token"?: string | null,"lease_until"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision"?: number,"session_id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                    "attempt_count"?: number,"cancel_requested_at"?: string | null,"created_at"?: string,"due_at"?: string,"id"?: string,"idempotency_key"?: string,"lease_token"?: string | null,"lease_until"?: string | null,"lifecycle_fingerprint"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision"?: number,"session_id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -1500,6 +1500,20 @@ isOneToOne: false
 "ls_mark_missed_batch":
 { Args: { "p_batch_size"?: number }; Returns: Json
                            },
+"ls_notification_candidates":
+{ Args: { "p_now": string,"p_task_id": string,"p_user_id": string }; Returns: string[]
+                           },
+"ls_notification_lock_owner":
+{ Args: { "p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_session_policy":
+{ Args: { "p_session_id": string }; Returns: {
+              "due_at": string,"eligible": boolean,"fingerprint": string,"generation": number,"starts_at": string,"user_id": string
+            }[]
+                           },
+"ls_reconcile_study_notifications":
+{ Args: { "p_task_id"?: string,"p_user_id": string }; Returns: undefined
+                           },
 "ls_recover_study_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
                            },
@@ -1550,8 +1564,14 @@ isOneToOne: false
 "ls_start_study_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
                            },
+"ls_study_notification_job_is_current":
+{ Args: { "p_job_id": string }; Returns: boolean
+                           },
 "ls_study_notification_task_enabled":
 { Args: { "p_task_id": string }; Returns: boolean
+                           },
+"ls_sync_study_notification_for_session":
+{ Args: { "p_session_id": string }; Returns: undefined
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {

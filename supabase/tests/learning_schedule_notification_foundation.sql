@@ -12,10 +12,6 @@ INSERT INTO public.tasks(id,user_id,title,status) VALUES
  ('7a100000-0000-4000-8000-000000000002','7a000000-0000-4000-8000-000000000002','Notification B','todo');
 INSERT INTO public.task_study_schedules(id,user_id,task_id,starts_on,ends_on,timezone) VALUES
  ('7a200000-0000-4000-8000-000000000001','7a000000-0000-4000-8000-000000000001','7a100000-0000-4000-8000-000000000001','2030-01-07','2030-01-08','UTC');
-INSERT INTO public.task_study_sessions(id,user_id,task_id,schedule_id,schedule_revision,logical_occurrence_key,
- local_date,local_start_time,local_end_time,timezone,scheduled_start_at,scheduled_end_at) VALUES
- ('7a300000-0000-4000-8000-000000000001','7a000000-0000-4000-8000-000000000001','7a100000-0000-4000-8000-000000000001','7a200000-0000-4000-8000-000000000001',1,'np-1','2030-01-07','10:00','11:00','UTC','2030-01-07T10:00Z','2030-01-07T11:00Z'),
- ('7a300000-0000-4000-8000-000000000002','7a000000-0000-4000-8000-000000000001','7a100000-0000-4000-8000-000000000001','7a200000-0000-4000-8000-000000000001',1,'np-2','2030-01-08','10:00','11:00','UTC','2030-01-08T10:00Z','2030-01-08T11:00Z');
 SELECT is((SELECT count(*)::integer FROM public.study_notification_preferences),0,'NP-01/11: new/existing auth users have no implicit preference rows');
 SELECT is((SELECT enabled FROM public.study_notification_dispatch_control WHERE singleton),false,'NP-10: new independent dispatch gate OFF');
 SELECT is((SELECT enabled FROM public.ls_missed_sweep_control WHERE singleton),false,'NP-10: Attendance gate remains independently OFF');
@@ -58,6 +54,10 @@ SELECT throws_ok($$UPDATE public.study_notification_preferences SET study_email_
 SELECT throws_ok($$INSERT INTO public.study_notification_preferences(user_id,study_email_enabled,consented_at) VALUES ('7a000000-0000-4000-8000-000000000001',true,now())$$,'42501',NULL,'NP-02: direct consent forgery denied');
 SELECT throws_ok($$UPDATE public.study_notification_task_overrides SET enabled=true$$,'42501',NULL,'NP-06: direct override writes denied');
 RESET ROLE;
+INSERT INTO public.task_study_sessions(id,user_id,task_id,schedule_id,schedule_revision,logical_occurrence_key,
+ local_date,local_start_time,local_end_time,timezone,scheduled_start_at,scheduled_end_at) VALUES
+ ('7a300000-0000-4000-8000-000000000001','7a000000-0000-4000-8000-000000000001','7a100000-0000-4000-8000-000000000001','7a200000-0000-4000-8000-000000000001',1,'np-1','2030-01-07','10:00','11:00','UTC','2030-01-07T10:00Z','2030-01-07T11:00Z'),
+ ('7a300000-0000-4000-8000-000000000002','7a000000-0000-4000-8000-000000000001','7a100000-0000-4000-8000-000000000001','7a200000-0000-4000-8000-000000000001',1,'np-2','2030-01-08','10:00','11:00','UTC','2030-01-08T10:00Z','2030-01-08T11:00Z');
 INSERT INTO public.study_notification_jobs(id,user_id,session_id,schedule_revision,due_at,idempotency_key) VALUES
  ('7a400000-0000-4000-8000-000000000001','7a000000-0000-4000-8000-000000000001','7a300000-0000-4000-8000-000000000001',1,'2030-01-07T09:45Z','np-job-1');
 INSERT INTO public.study_notification_deliveries(id,job_id,user_id,attempt_number,status,provider_message_id) VALUES
@@ -87,7 +87,7 @@ SELECT is((SELECT count(*)::integer FROM public.study_notification_deliveries),1
 SELECT throws_ok($$SELECT lease_token FROM public.study_notification_jobs$$,'42501',NULL,'worker lease capability is not browser-readable');
 SELECT throws_ok($$SELECT provider_message_id FROM public.study_notification_deliveries$$,'42501',NULL,'provider internals are not browser-readable');
 SELECT lives_ok($$SELECT public.ls_set_study_notification_preferences(false)$$,'NP-03: opt-out with existing pending job stores effective OFF');
-SELECT is((SELECT status FROM public.study_notification_jobs),'pending','7A limit: pending-job invalidation intentionally deferred to 7B');
+SELECT is((SELECT status FROM public.study_notification_jobs),'suppressed','7B: opt-out now invalidates an existing pending job atomically');
 SELECT throws_ok($$UPDATE public.study_notification_jobs SET status='sent'$$,'42501',NULL,'NP-08: authenticated cannot forge job status');
 SELECT throws_ok($$DELETE FROM public.study_notification_jobs$$,'42501',NULL,'NP-08: authenticated cannot delete jobs');
 SELECT throws_ok($$INSERT INTO public.study_notification_jobs(user_id,session_id,schedule_revision,due_at,idempotency_key) VALUES ('7a000000-0000-4000-8000-000000000001','7a300000-0000-4000-8000-000000000002',1,now(),'forged')$$,'42501',NULL,'NP-08: authenticated cannot enqueue arbitrary jobs');

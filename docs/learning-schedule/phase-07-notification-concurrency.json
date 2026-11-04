@@ -1,0 +1,252 @@
+{
+  "baseline": "5eee59e17a410db529c799d39c25a72eec2047d8",
+  "startedAt": "2026-11-04T06:32:07.465Z",
+  "container": "supabase_db_lumivox-proj",
+  "runs": [
+    {
+      "repeat": 1,
+      "order": "reschedule-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 1,
+      "order": "opt-out-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 2,
+      "order": "reschedule-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 2,
+      "order": "opt-out-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 3,
+      "order": "reschedule-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 3,
+      "order": "opt-out-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 4,
+      "order": "reschedule-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "repeat": 4,
+      "order": "opt-out-first",
+      "blocker": {
+        "waiter": 717,
+        "blocker": 716,
+        "observed": [
+          716
+        ]
+      },
+      "states": [
+        "00000",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 1,
+        "suppressed": 1,
+        "current": 0,
+        "deliveries": 0
+      }
+    },
+    {
+      "order": "opt-in-FK-fail-fast",
+      "blockers": [
+        {
+          "waiter": 717,
+          "blocker": 718,
+          "observed": [
+            718
+          ]
+        },
+        {
+          "waiter": 716,
+          "blocker": 718,
+          "observed": [
+            718,
+            717
+          ]
+        }
+      ],
+      "states": [
+        "55P03",
+        "00000"
+      ],
+      "final": {
+        "enabled": false,
+        "sessionStart": "2030-01-08T18:00:00+00:00",
+        "events": 1,
+        "jobs": 0,
+        "suppressed": 0,
+        "current": 0,
+        "deliveries": 0
+      }
+    }
+  ],
+  "gatesBefore": {
+    "dispatch": false,
+    "sweep": false
+  },
+  "retry": {
+    "pending": 1,
+    "due": "2030-01-08T17:45:00+00:00"
+  },
+  "result": "PASS",
+  "cleanup": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0
+  },
+  "gatesAfter": {
+    "dispatch": false,
+    "sweep": false
+  },
+  "finishedAt": "2026-11-04T06:32:08.648Z"
+}

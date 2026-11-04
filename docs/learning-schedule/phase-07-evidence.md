@@ -63,3 +63,60 @@ supabase db advisors --local --type security --fail-on none --output-format json
 - **7D/08 NOT IMPLEMENTED:** Settings UI/browser acceptance, unsubscribe/webhook/provider suppression, real Resend integration or email sending. No new Cron secret, shared Attendance gate, dispatch activation, remote DB migration or deployment.
 - No acceptance test failure occurred in the executed 7A tests. Docker startup, CLI/Vite deprecation notices, and existing lint/advisor warnings are disclosed above. No dependencies installed or changed.
 - **Decision: Step 7A Local PASS**, within the schema/consent foundation scope above. Phase 07 overall remains **INCOMPLETE** for 7B–7D; job cancellation, dispatcher and provider execution are not accepted by this checkpoint. User handles commit/push; no remote deployment approved or performed.
+
+## Step 7B — Transactional Outbox & Job Lifecycle
+
+- **Baseline HEAD:** `5eee59e17a410db529c799d39c25a72eec2047d8`, branch `feature/learning-schedule-foundation`; execution **2026-11-04**, Asia/Bangkok. Results include uncommitted 7B changes. No commit/push/deployment.
+- **CLI-created forward migration:** `20261104061414_learning_schedule_notification_lifecycle.sql`. Guarded empty-local `supabase db reset --local --no-seed` **PASS**, **86 migrations**. No historical migration changed.
+- Triggers synchronize Session create/reschedule/revision/Attendance, Task closure, consent and overrides in the originating transaction. Eligibility checks owner-consistent parents, root active Task, active/current Schedule generation, scheduled future Session, explicit consent and Task permission. New/replanned jobs require future due time; an unchanged already-queued due reminder may remain pending until Session start. Due = UTC start minus elapsed lead minutes.
+- Same Session/revision retains job identity. Pending jobs with zero attempts/no deliveries can replan. Suppressed/expired jobs re-arm only with **zero attempts AND no delivery records**. Sent/failed jobs never automatically re-arm; delivery history is untouched. Leased jobs retain status/token/expiry/due and acquire `cancel_requested_at`; cancellation is a fence, **not evidence that an email was recalled**.
+- Lock protocol: existing Task → Schedule → Session locks, then per-owner transaction advisory gate, then Job. Consent reconciliation reads parents through MVCC and never waits for Task/Session row locks. New-job FK acquisition uses KEY SHARE **NOWAIT**, returning retryable **55P03** on contention; retry the entire command after rollback. The existing Server Action currently maps this to generic save failure; automatic UI retry is not implemented. Trusted/admin mutations outside these entrypoints are not covered by a universal deadlock guarantee.
+- Reconciliation is synchronous and bounded: at most **5,000 future candidates + 5,000 active jobs**; active-job creation/re-arm is capped at 5,000 per owner. Overflow raises **54000** and rolls back the entire preference/mutation transaction; no silent partial success/backlog. Reduce active schedules/scope and retry. Global OFF and Task OFF invalidate **all** scoped pending jobs and fence all scoped leases through indexed active-job updates, without history pagination. Quiet-hours-only saves retain policy for 7C dispatch checks.
+
+### Executed acceptance
+
+| Cases | Actual result |
+| --- | --- |
+| NJ-01–03 | **PASS**: OFF creates zero jobs; opt-in reconciles existing Sessions; ON Schedule creation creates one job per occurrence; duplicate sync/unchanged save preserve rows |
+| NJ-04–06 | **PASS**: actual reschedule updates due while retaining job ID; actual revision suppresses old generation/enqueues new; Task close cancels Sessions and suppresses future jobs |
+| NJ-07–08 | **PASS**: real Start, Complete from scheduled/in-progress, Skip, Missed batch and Recovery invalidate queued reminders; Recovery creates no new reminder |
+| NJ-09–11 | **PASS**: opt-out leaves zero current jobs; Task disable preserves another Task's pending jobs; re-enable and lead changes reconcile; already-passed lead deadline never enqueues late |
+| NJ-12 | **PASS**: injected audit insert failure restores Session/jobs/events snapshot; injected job update failure rolls back Complete and its audit |
+| NJ-13 | **PASS**, real independent PostgreSQL connections; details below |
+| NJ-14–15 | **PASS**: sent delivery preserved, failed never re-arms, uncertain delivery prevents replan, leases retain ownership plus cancellation fence; owner B/anon internal-helper calls denied **42501** |
+| NJ-16 | **PASS for database scope**: dispatch/Sweep OFF, zero reminder Cron; no provider/network implementation added |
+| Budget/late enqueue | **PASS**: 5,001-future-Session fixture causes **54000**, consent stays OFF and no partial pending jobs; reducing scope then retry succeeds |
+
+- **Full pgTAP: PASS**, exit 0, **28 files / 679 assertions / 0 failures**, **15 wall-clock seconds** (606 baseline + **73 new lifecycle assertions**). Persistent concurrency setup remains an intentional TAP skip, executed instead by the separate harness below. Updated 7A test now expects synchronous suppression rather than the historical deferred behavior.
+- `node scripts/test-learning-schedule-notification-concurrency.mjs`: **PASS**, **9 executions** with two actors and one observer, 5s lock / 10s statement / 15s command timeouts. Both reschedule-first and opt-out-first ran **4 times each**: all actor SQLSTATEs **00000**, observed B blocked by A through `pg_blocking_pids()` in all 8 cases; final consent OFF, moved Session, one reschedule event, one suppressed job, zero current jobs/deliveries. Extra forced opt-in/FK contention observed **2 gate waits**, returned **55P03 / 00000**, left consent OFF/no jobs; full retry succeeded with one pending job at the new due time. No **40P01** deadlock or timeout. Raw results: `phase-07-notification-concurrency.json`.
+- Harness cleanup verified **0 fixture users / Tasks / jobs / deliveries**; gates false before/after. Final local inspection: **86 migrations / 0 Auth users / 0 Tasks / 0 preferences / 0 jobs / 0 deliveries / 0 reminder Cron**, both gates false; authenticated SELECT on new fingerprint/cancellation columns is false.
+
+### Commands / quality gates
+
+```powershell
+supabase migration new learning_schedule_notification_lifecycle
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase test db --local
+node scripts/test-learning-schedule-notification-concurrency.mjs
+supabase gen types typescript --local
+supabase db advisors --local --type security --fail-on none --output-format json
+# apps/web, sequential:
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+```
+
+- Generated types preserve `graphql_public` and `public`, UTF-8 without BOM, existing formatting convention. Security advisor: **1 existing `function_search_path_mutable` WARN**, no new notification finding.
+- Lint **PASS**, exit 0, 0 errors / 1 existing Focus `projection` dependency warning. Full Vitest **PASS**, exit 0: **798 passed / 26 skipped**, **78 files passed / 5 skipped**, **181.68s**, started **13:34:18 UTC+07:00**. Opt-in skips are not counted as executed acceptance. TypeScript `--noEmit --incremental false --pretty false` **PASS**, exit 0.
+- Additional real local HTTP consent regression: `notification-preferences.integration.test.ts` **3/3 PASS / 0 skipped**, **1.39s**, real Auth/PostgREST/RPC (request-user binding mocked); fixture cleanup asserted. `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY`, `LEARNING_SCHEDULE_TEST_SERVICE_KEY` injected from local CLI status into this process only; no credentials printed/persisted. This reruns 7A consent/security HTTP coverage, not a new provider/dispatch acceptance claim.
+- Actual production build **PASS**, exit 0, Next **16.2.6**: compile **13.2s**, TypeScript **25.7s**, **100/100** pages in **1111ms**. Local Supabase variables injected into build process only; `.env.local` unchanged. `--ignore-scripts` skips the destructive prebuild; actual `next build` ran and `.next/dev` was retained.
+- Initial targeted pgTAP failed because the new fixture supplied UUID to the existing **text** event-key argument; fixture corrected and targeted/full suites passed. Initial types write guard rejected quoted schema names in CLI output; guard corrected before writing, both schemas retained. No failed database mutation was accepted as PASS.
+
+### Coverage limits / decision
+
+- `ls_study_notification_job_is_current` is a trusted current-record fence, **not complete send authorization**. 7C must additionally enforce gate, verified destination, current quiet hours, and worker/provider protocol while retaining coordinator/Job transaction through the final submission decision.
+- **NOT EXECUTED / 7C:** fake-provider lease-versus-cancel race, submission response loss/uncertain recovery, claim/retry/backoff/expiry, concurrent dispatchers, final send authorization. These database tests do not prove exactly-once submission, recalled email or inbox delivery. No real email, provider SDK, reminder Cron, gate activation or remote changes.
+- `node --check` on the new harness, `git diff --check`, and explicit whitespace checks for new source files **PASS**. No dependencies installed/changed. Existing lint/advisor and CLI/Vite deprecation notices remain as disclosed.
+- **Decision: Step 7B Local PASS** within transactional outbox/lifecycle scope above. Phase 07 remains incomplete for dispatcher/fake provider and Settings UI/browser acceptance (7C/7D). User handles commit/push.
