@@ -2,7 +2,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-  
+
   "graphql_public": {
           Tables: {
             [_ in never]: never
@@ -35,7 +35,7 @@ export type Database = {
                     "created_at"?: string,"entity_id"?: string,"entity_type"?: string,"error_message"?: string | null,"field_name"?: string,"id"?: string,"model_name"?: string | null,"owner_id"?: string,"provider"?: string | null,"source_hash"?: string,"source_locale"?: string,"status"?: Database["public"]['Enums']["ai_translation_status"],"target_locale"?: string,"translated_text"?: string,"updated_at"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"ai_insight_cards": {
                   Row: {
@@ -81,7 +81,7 @@ isOneToOne: false
                     "created_at"?: string,"description"?: string | null,"key"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
                   }
                   Relationships: [
-                    
+
                   ]
                 },"deadline_risk_feature_attributions": {
                   Row: {
@@ -459,7 +459,7 @@ isOneToOne: false
                     "ai_latency_ms"?: number | null,"ai_model"?: string | null,"ai_provider"?: string | null,"applied_at"?: string | null,"archived_at"?: string | null,"available_weekdays"?: (string)[],"created_at"?: string,"current_level"?: Database["public"]['Enums']["learning_roadmap_level"],"custom_current_level"?: string | null,"custom_target_level"?: string | null,"description"?: string | null,"end_date"?: string,"generation_input"?: NonNullable<Json>,"id"?: string,"minutes_per_study_day"?: number,"preferred_locale"?: string,"source_prompt"?: string | null,"start_date"?: string,"status"?: Database["public"]['Enums']["learning_roadmap_status"],"study_days_per_week"?: number,"subject_name"?: string | null,"target_level"?: Database["public"]['Enums']["learning_roadmap_level"],"title"?: string,"topic"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"ls_missed_sweep_control": {
                   Row: {
@@ -475,7 +475,7 @@ isOneToOne: false
                   Relationships: [
 
                   ]
-},"ml_model_versions": {
+                },"ml_model_versions": {
                   Row: {
                     "algorithm": string,"artifact_path": string,"created_at": string,"explainability_metadata": NonNullable<Json>,"feature_schema": NonNullable<Json>,"id": string,"is_active": boolean,"metrics": NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at": string,"version": string
                   }
@@ -487,7 +487,7 @@ isOneToOne: false
                     "algorithm"?: string,"artifact_path"?: string,"created_at"?: string,"explainability_metadata"?: NonNullable<Json>,"feature_schema"?: NonNullable<Json>,"id"?: string,"is_active"?: boolean,"metrics"?: NonNullable<Json>,"model_key"?: string,"training_dataset"?: string,"updated_at"?: string,"version"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"native_task_risk_assessments": {
                   Row: {
@@ -567,7 +567,7 @@ isOneToOne: true
                     "avatar_url"?: string | null,"created_at"?: string,"display_name"?: string | null,"full_name"?: string | null,"id"?: string,"leaderboard_opt_in"?: boolean,"onboarding_completed"?: boolean,"role"?: Database["public"]['Enums']["app_role"],"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
-                    
+
                   ]
                 },"rag_chat_messages": {
                   Row: {
@@ -671,6 +671,94 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "study_rooms"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"study_notification_deliveries": {
+                  Row: {
+                    "attempt_number": number,"created_at": string,"error_code": string | null,"id": string,"job_id": string,"provider": string,"provider_message_id": string | null,"status": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"id"?: string,"job_id": string,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"id"?: string,"job_id"?: string,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_delivery_owner_fk"
+      columns: ["job_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_jobs"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"study_notification_dispatch_control": {
+                  Row: {
+                    "enabled": boolean,"singleton": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"study_notification_jobs": {
+                  Row: {
+                    "attempt_count": number,"created_at": string,"due_at": string,"id": string,"idempotency_key": string,"lease_token": string | null,"lease_until": string | null,"next_attempt_at": string,"notification_type": string,"schedule_revision": number,"session_id": string,"status": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempt_count"?: number,"created_at"?: string,"due_at": string,"id"?: string,"idempotency_key": string,"lease_token"?: string | null,"lease_until"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision": number,"session_id": string,"status"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attempt_count"?: number,"created_at"?: string,"due_at"?: string,"id"?: string,"idempotency_key"?: string,"lease_token"?: string | null,"lease_until"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision"?: number,"session_id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_job_owner_fk"
+      columns: ["session_id","user_id","schedule_revision"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id","schedule_revision"]
+    }
+                  ]
+                },"study_notification_preferences": {
+                  Row: {
+                    "consented_at": string | null,"created_at": string,"lead_minutes": number,"quiet_end_local": string | null,"quiet_hours_enabled": boolean,"quiet_start_local": string | null,"study_email_enabled": boolean,"timezone": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"study_notification_task_overrides": {
+                  Row: {
+                    "enabled": boolean,"task_id": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"task_id": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"task_id"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_task_overrides_task_id_user_id_fkey"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
     }
                   ]
                 },"study_room_members": {
@@ -1424,11 +1512,46 @@ isOneToOne: false
 "ls_run_missed_sweep_if_enabled":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"ls_set_study_notification_preferences":
+{ Args: { "p_lead_minutes"?: number,"p_quiet_end_local"?: string,"p_quiet_hours_enabled"?: boolean,"p_quiet_start_local"?: string,"p_study_email_enabled": boolean,"p_timezone"?: string }; Returns: {
+              "consented_at": string | null,
+"created_at": string,
+"lead_minutes": number,
+"quiet_end_local": string | null,
+"quiet_hours_enabled": boolean,
+"quiet_start_local": string | null,
+"study_email_enabled": boolean,
+"timezone": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_preferences"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"ls_set_study_notification_task_override":
+{ Args: { "p_enabled": boolean,"p_task_id": string }; Returns: {
+              "enabled": boolean,
+"task_id": string,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_task_overrides"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "ls_skip_study_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_reason"?: string,"p_session_id": string }; Returns: string
                            },
 "ls_start_study_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_study_notification_task_enabled":
+{ Args: { "p_task_id": string }; Returns: boolean
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
@@ -1564,7 +1687,7 @@ export type CompositeTypes<
 export const Constants = {
   "graphql_public": {
           Enums: {
-            
+
           }
         },"public": {
           Enums: {
