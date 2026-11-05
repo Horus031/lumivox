@@ -16,6 +16,7 @@ import { getTaskStudyScheduleAction } from "../schedule.queries.actions";
 
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
 import { StudySessionsList } from "./study-sessions-list";
+import { StudyTaskReminderToggle } from "./study-task-reminder-toggle";
 
 import type { StudyScheduleInput } from "../schedule-engine";
 
@@ -178,6 +179,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           <p>
             {t("revisionLabel")}: {schedule.revision}
           </p>
+          <StudyTaskReminderToggle key={taskId} taskId={taskId} />
 
           {revising && eligible && schedule.status === "active" ? (
             <ScheduleRevisionEditor

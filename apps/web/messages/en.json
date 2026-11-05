@@ -1,4 +1,24 @@
 {
+  "studyNotifications": {
+    "title": "Study reminders", "description": "Choose when to receive email reminders for your study sessions.",
+    "deliveryPaused": "Reminder delivery is not active yet. Saving records your preferences; no reminders are sent.",
+    "optInUnavailable": "New reminder sign-ups are not available yet. You can still turn existing reminders off.",
+    "emailReminders": "Email reminders", "consent": "Off by default. Turn on and save to consent to study reminder emails. You can turn them off anytime.",
+    "leadLegend": "Remind me before a session", "lead": { "5": "5 minutes", "15": "15 minutes", "30": "30 minutes", "60": "1 hour" },
+    "quietHours": "Quiet hours", "quietExplanation": "Reminders during quiet hours are suppressed, not moved to the next morning.",
+    "quietStart": "Quiet hours start", "quietEnd": "Quiet hours end", "timezone": "Quiet hours timezone", "timezoneHint": "Use an IANA timezone, for example Asia/Ho_Chi_Minh or America/New_York.",
+    "save": "Save reminder settings", "saveTask": "Save task reminder setting", "saving": "Saving reminder settings…", "saved": "Reminder settings saved.",
+    "loading": "Loading reminder settings…", "noData": "Reminder settings are unavailable until they can be loaded.",
+    "checkLatest": "Check latest saved settings", "checkLatestHint": "Checking latest settings replaces this draft with the saved values. If saving was interrupted, check before trying again.",
+    "taskTitle": "Task reminders", "useGlobal": "Use global reminder preference for this task", "taskExplanation": "Turn off to suppress reminders for this task only.", "globalOff": "Global reminders are off. This task setting cannot turn them on.",
+    "errors": {
+      "invalidInput": "Check the lead time, different quiet-hour start and end times, and a valid IANA timezone.",
+      "notAuthorized": "Your session is unavailable or you do not own this task. Sign in and check the latest settings.",
+      "loadFailed": "Reminder settings could not be loaded. Check the latest saved settings to try again.",
+      "saveFailed": "We could not confirm that your reminder settings were saved. Your draft is kept. Check the latest saved settings before trying again.",
+      "conflictRetryable": "Your study schedule changed at the same time. Your draft is kept. Check the latest settings and try saving again."
+    }
+  },
   "studyPlan": {
     "refreshHint": "Study progress reflects the latest available session records. Reload to view recent attendance changes.",
     "weekdays": { "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat", "7": "Sun" },

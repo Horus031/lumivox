@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ auth: vi.fn() }));
 vi.mock("@/lib/auth/require-user", () => ({ requireUser: mocks.auth }));
-import { getStudyNotificationPreferencesAction, saveStudyNotificationPreferencesAction, saveStudyNotificationTaskOverrideAction } from "./notification-preferences.actions";
+import { getStudyNotificationPreferencesAction, getStudyNotificationTaskOverrideAction, saveStudyNotificationPreferencesAction, saveStudyNotificationTaskOverrideAction } from "./notification-preferences.actions";
 const taskId = "7a100000-0000-4000-8000-000000000001";
 const input = { studyEmailEnabled: true, leadMinutes: 15, quietHoursEnabled: false, quietStartLocal: null, quietEndLocal: null, timezone: null };
 const row = { user_id: "owner-a", study_email_enabled: true, lead_minutes: 15, quiet_hours_enabled: false,
@@ -68,5 +68,40 @@ describe("Study notification consent Server Actions", () => {
   });
   it.each([{ taskId: "bad", enabled: true }, { taskId, enabled: true, userId: "forged" }, { taskId }])("rejects invalid Task command %j", async raw => {
     expect(await saveStudyNotificationTaskOverrideAction(raw)).toEqual({ success: false, code: "invalidInput" }); expect(mocks.auth).not.toHaveBeenCalled();
+  });
+  it("maps 55P03 to an explicit retryable conflict for both saves", async () => {
+    abort.mockResolvedValue({ data: null, error: { code: "55P03", message: "private lock detail" } });
+    expect(await saveStudyNotificationPreferencesAction(input)).toEqual({ success: false, code: "conflictRetryable" });
+    expect(await saveStudyNotificationTaskOverrideAction({ taskId, enabled: false })).toEqual({ success: false, code: "conflictRetryable" });
+  });
+  function readFixtures(task: unknown, override: unknown, pref: unknown, error: unknown = null) {
+    from.mockImplementation((table: string) => {
+      const chain = { eq: vi.fn(), maybeSingle: vi.fn().mockResolvedValue({ data: table === "tasks" ? task : table === "study_notification_task_overrides" ? override : pref, error }) };
+      chain.eq.mockReturnValue(chain);
+      return { select: vi.fn(() => chain) };
+    });
+  }
+  it("reads a missing override as true independently of global OFF, without writing", async () => {
+    readFixtures({ id: taskId }, null, null);
+    expect(await getStudyNotificationTaskOverrideAction({ taskId })).toEqual({ success: true, override: { taskId, enabled: true }, globalEnabled: false });
+    expect(rpc).not.toHaveBeenCalled();
+    for (const result of from.mock.results) { const chain = result.value.select.mock.results[0].value; expect(chain.eq).toHaveBeenCalledWith("user_id", "owner-a"); }
+  });
+  it("reads an explicit disabled override while global is ON", async () => {
+    readFixtures({ id: taskId }, { enabled: false }, { study_email_enabled: true });
+    expect(await getStudyNotificationTaskOverrideAction({ taskId })).toMatchObject({ success: true, override: { enabled: false }, globalEnabled: true });
+  });
+  it("denies another owner's Task before reading overrides", async () => {
+    readFixtures(null, null, null);
+    expect(await getStudyNotificationTaskOverrideAction({ taskId })).toEqual({ success: false, code: "notAuthorized" }); expect(from).toHaveBeenCalledTimes(1);
+  });
+  it("does not turn override read failure into a default", async () => {
+    readFixtures(null, null, null, { code: "XX000" });
+    expect(await getStudyNotificationTaskOverrideAction({ taskId })).toEqual({ success: false, code: "loadFailed" });
+  });
+  it("rejects forged owner/invalid Task read input before auth", async () => {
+    expect(await getStudyNotificationTaskOverrideAction({ taskId, userId: "forged" })).toEqual({ success: false, code: "invalidInput" });
+    expect(await getStudyNotificationTaskOverrideAction({ taskId: "bad" })).toEqual({ success: false, code: "invalidInput" });
+    expect(mocks.auth).not.toHaveBeenCalled();
   });
 });

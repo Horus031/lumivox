@@ -3,7 +3,7 @@ import { requireUser } from "@/lib/auth/require-user";
 import type { Database } from "@/types/database.types";
 import { studyNotificationPreferencesSchema, studyNotificationTaskOverrideSchema, type StudyNotificationPreferences } from "./notification-preferences.schemas";
 
-type Failure = { success: false; code: "invalidInput" | "notAuthorized" | "loadFailed" | "saveFailed" };
+type Failure = { success: false; code: "invalidInput" | "notAuthorized" | "loadFailed" | "saveFailed" | "conflictRetryable" };
 type PreferencesResult = { success: true; preferences: StudyNotificationPreferences } | Failure;
 type Row = Database["public"]["Tables"]["study_notification_preferences"]["Row"];
 function normalize(row: Row | null): StudyNotificationPreferences {
@@ -13,7 +13,27 @@ function normalize(row: Row | null): StudyNotificationPreferences {
     consentedAt: row?.consented_at ?? null, updatedAt: row?.updated_at ?? null };
 }
 function failure(code: string): Failure {
-  return { success: false, code: code === "42501" ? "notAuthorized" : code.startsWith("22") || code === "23514" ? "invalidInput" : "saveFailed" };
+  return { success: false, code: code === "55P03" ? "conflictRetryable" : code === "42501" ? "notAuthorized" : code.startsWith("22") || code === "23514" ? "invalidInput" : "saveFailed" };
+}
+export async function getStudyNotificationTaskOverrideAction(raw: unknown): Promise<
+  { success: true; override: { taskId: string; enabled: boolean }; globalEnabled: boolean } | Failure
+> {
+  const parsed = studyNotificationTaskOverrideSchema.pick({ taskId: true }).safeParse(raw);
+  if (!parsed.success) return { success: false, code: "invalidInput" };
+  let context;
+  try { context = await requireUser(); } catch { return { success: false, code: "notAuthorized" }; }
+  try {
+    const { supabase, user } = context;
+    const task = await supabase.from("tasks").select("id").eq("user_id", user.id).eq("id", parsed.data.taskId).maybeSingle();
+    if (task.error) return { success: false, code: "loadFailed" };
+    if (!task.data) return { success: false, code: "notAuthorized" };
+    const [override, preference] = await Promise.all([
+      supabase.from("study_notification_task_overrides").select("enabled").eq("user_id", user.id).eq("task_id", parsed.data.taskId).maybeSingle(),
+      supabase.from("study_notification_preferences").select("study_email_enabled").eq("user_id", user.id).maybeSingle(),
+    ]);
+    if (override.error || preference.error) return { success: false, code: "loadFailed" };
+    return { success: true, override: { taskId: parsed.data.taskId, enabled: override.data?.enabled ?? true }, globalEnabled: preference.data?.study_email_enabled ?? false };
+  } catch { return { success: false, code: "loadFailed" }; }
 }
 export async function getStudyNotificationPreferencesAction(): Promise<PreferencesResult> {
   let context;

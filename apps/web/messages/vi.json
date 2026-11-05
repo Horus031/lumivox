@@ -1,4 +1,24 @@
 {
+  "studyNotifications": {
+    "title": "Nhắc lịch học", "description": "Chọn thời điểm nhận email nhắc cho các buổi học của bạn.",
+    "deliveryPaused": "Tính năng gửi lời nhắc chưa hoạt động. Lưu chỉ ghi nhận tùy chọn của bạn; chưa có lời nhắc nào được gửi.",
+    "optInUnavailable": "Hiện chưa mở đăng ký nhận lời nhắc mới. Bạn vẫn có thể tắt các lời nhắc đã đăng ký.",
+    "emailReminders": "Email nhắc lịch học", "consent": "Mặc định tắt. Bật và lưu để đồng ý nhận email nhắc lịch học. Bạn có thể tắt bất cứ lúc nào.",
+    "leadLegend": "Nhắc trước buổi học", "lead": { "5": "5 phút", "15": "15 phút", "30": "30 phút", "60": "1 giờ" },
+    "quietHours": "Giờ yên lặng", "quietExplanation": "Lời nhắc trong giờ yên lặng sẽ bị bỏ qua, không chuyển sang sáng hôm sau.",
+    "quietStart": "Bắt đầu giờ yên lặng", "quietEnd": "Kết thúc giờ yên lặng", "timezone": "Múi giờ yên lặng", "timezoneHint": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh hoặc America/New_York.",
+    "save": "Lưu cài đặt nhắc học", "saveTask": "Lưu lời nhắc của công việc", "saving": "Đang lưu cài đặt nhắc học…", "saved": "Đã lưu cài đặt nhắc học.",
+    "loading": "Đang tải cài đặt nhắc học…", "noData": "Cài đặt nhắc học chưa khả dụng cho đến khi tải được dữ liệu.",
+    "checkLatest": "Kiểm tra cài đặt đã lưu", "checkLatestHint": "Kiểm tra sẽ thay bản nháp bằng dữ liệu đã lưu. Nếu việc lưu bị gián đoạn, hãy kiểm tra trước khi thử lại.",
+    "taskTitle": "Lời nhắc của công việc", "useGlobal": "Dùng tùy chọn nhắc học chung cho công việc này", "taskExplanation": "Tắt để chỉ bỏ qua lời nhắc của công việc này.", "globalOff": "Nhắc học chung đang tắt. Tùy chọn của công việc không thể bật nhắc học chung.",
+    "errors": {
+      "invalidInput": "Kiểm tra thời gian nhắc trước, giờ bắt đầu và kết thúc khác nhau, cùng múi giờ IANA hợp lệ.",
+      "notAuthorized": "Phiên đăng nhập không khả dụng hoặc công việc không thuộc về bạn. Hãy đăng nhập và kiểm tra cài đặt đã lưu.",
+      "loadFailed": "Không tải được cài đặt nhắc học. Hãy kiểm tra cài đặt đã lưu để thử lại.",
+      "saveFailed": "Chưa thể xác nhận cài đặt nhắc học đã được lưu. Bản nháp được giữ lại. Hãy kiểm tra cài đặt đã lưu trước khi thử lại.",
+      "conflictRetryable": "Lịch học vừa thay đổi cùng lúc. Bản nháp được giữ lại. Hãy kiểm tra cài đặt mới nhất rồi thử lưu lại."
+    }
+  },
   "studyPlan": {
     "refreshHint": "Tiến độ học tập được tính từ dữ liệu buổi học mới nhất đã tải. Hãy tải lại trang để xem những thay đổi điểm danh gần đây.",
     "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },

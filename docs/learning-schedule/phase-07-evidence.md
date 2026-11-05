@@ -181,3 +181,55 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 - **NOT EXECUTED / out of local 7C scope:** remote/staging dispatcher or test-recipient allowlist (remote execution is refused), real Resend/SMTP, provider lookup/webhooks/idempotency recovery, real account confirmation-email flow, real network/process-kill/load testing, operational manual resolution UI, Cron scheduling, Settings UI/browser acceptance (7D). Controlled connection disconnect/restart and fixture lease expiry above are not labeled a production process/clock test.
 - Quiet-hour cutoff and DST pure-policy cases use explicit `asOf`; production authorization uses DB `clock_timestamp()` after locks. No claim of exhaustive clock-boundary races, inbox delivery, exactly-once external submission or recall. Uncertain attempts intentionally remain held for review rather than guessed successful/failed.
 - New-source whitespace checks, harness `node --check` and `git diff --check` **PASS**. **Decision: Step 7C Local PASS** within fake-dispatch protocol scope above. Phase 07 still requires 7D; Phase 08 will revisit real-provider submission/reconciliation and staging destination controls. User handles commit/push.
+
+## Step 7D — Reminder Settings UI & Browser Acceptance
+
+- **Baseline HEAD:** `05aa95e801ab8f62e4fa89e656a16877ac50a22a`, `feature/learning-schedule-foundation`, clean initially. Executed **2026-11-05**, Asia/Bangkok; results include uncommitted 7D changes. No migration/schema/type changes in this step: **87 migrations** remain. No commit/push/deploy or remote DB work.
+- Added independent reminder form below the existing Profile/Appearance Settings form, loaded through an independent Suspense boundary and the authenticated preferences action. Read failure renders localized error/Retry, with no fabricated OFF/default editor. Opening Settings does not insert preferences. The existing profile form/action is unchanged.
+- Explicit Save snapshots only the seven command fields; toggle changes alone do not save. In-flight guard + disabled fieldset prevent duplicates; success follows confirmed RPC response only. Failures retain draft; **Check latest saved settings** explicitly replaces it with persisted values. Ambiguous save/transport errors advise checking latest before a manual retry; **55P03 → conflictRetryable** is localized, with no automatic retry. Opt-out uses the last valid stored policy and changes consent only, so an invalid unrelated draft cannot block it.
+- **UI feature flag `STUDY_REMINDER_SETTINGS_ENABLED` defaults OFF** on the server; controls new UI opt-in independently of dispatcher activation. Existing opt-ins can still be turned OFF. This flag governs UI availability, not authorization or the existing authenticated consent RPC contract. Local browser server sets it true in process only. UI explains delivery is not active and quiet-hours reminders are suppressed, not postponed; no provider/lease/operational fields are exposed.
+- Added Task-level control **only when a Task Schedule exists**. Dedicated owner-scoped read action first verifies Task ownership, then reads override + global consent with explicit owner predicates/RLS. Missing override means true independently of global OFF. Labels distinguish “use global preference” from effective sending; global OFF cannot be bypassed. Task controls save separately and retain keyed Task identity/request invalidation. EN/VI catalogs share labels, errors and fixed lead choices; native switches/radios, fieldsets/legends, disabled quiet controls, live status/error and `aria-busy` support keyboard/screen readers. React checklist/source review completed separately from executed tests below.
+
+### Real browser acceptance (local Chromium)
+
+| Case | Actual result |
+| --- | --- |
+| NS-01 | **PASS**: new Settings opens OFF, no preference row/jobs; keyboard Space changes draft without saving; existing profile/theme form remains present |
+| NS-02/03/10 | **PASS**: explicit consent saved with DB timestamp; reload restores ON; keyboard Enter saves; lead 15→30 replans two future jobs, preserving IDs and moving due by −15 minutes |
+| NS-04/09 | **PASS**: 22:00–07:00 + America/New_York persisted; EN/VI **390×844**, no horizontal overflow, keyboard Check latest works; screenshots visually inspected |
+| NS-05 | **PASS**: opt-out persists OFF; both jobs suppressed and trusted current-job check false; enabling Task override while global OFF creates no eligible job |
+| NS-06 | **PASS**: Task disable/read-after-reload persists false; only that Task's job suppressed while the other stays pending |
+| NS-07 | **PASS**: separate B browser shows B's consent/lead; A's rows invisible to B, direct write denied **42501**; B's UI save changes only B |
+| NS-08 | **PASS**: real local SELECT revocation produces visible initial read error/no switches, restored grant + Retry recovers; invalid timezone shows VI validation without saving; real injected **55P03** shows VI conflict, keeps draft, DB remains unchanged; Check latest restores stored OFF |
+| NS-11 | **PASS**: actual Server Action response held **after RPC commit**; UI stays busy/no success, Save disabled; two additional `requestSubmit()` events yield **one** action request and no duplicate jobs. Release produces confirmed success |
+| NS-12 | **PASS**: both gates OFF throughout; **0 delivery attempts**, 0 observed email-provider requests, 0 reminder Cron; anonymous Settings redirects to login |
+
+- **Playwright final PASS**, exit 0, **9/9 tests**, **52.3s**, report **2026-11-05T09:37:23Z–09:38:14Z**. Raw results: `phase-07-reminder-settings-browser.json`; screenshots: `evidence/step-7d/reminders-en-mobile.png`, `reminders-vi-mobile.png`. Cases use real browser/Auth/Server Actions/PostgREST/RPC and persisted jobs; no successful action/Auth/DB responses mocked. Fault injection is limited to disposable local fixtures; response barrier delays a real response. No page errors/hydration errors in final suite; existing dashboard chart-size warnings are outside reminder flow and were not treated as new reminder failures.
+- Docker Desktop was initially stopped; started in background, then started existing local Supabase without reset. Tests guard local URL/ports, both gates OFF and zero initial users/Tasks/jobs before global permission fault injection. Two uniquely owned fixture users were created; teardown restored SELECT grants, dropped fault trigger/function, signed out/deleted both users and asserted zero remaining owned Tasks/Schedules/Sessions/preferences/overrides/jobs/deliveries. Cleanup **PASS**; both gates false, zero reminder Cron/provider requests.
+- Isolated browser server used port **3100**, cache `.next/step-7d`, process-only local Supabase credentials and UI flag. `.env.local` unchanged; temporary Next/TypeScript config backed up/restored after server stopped; `.next/dev` preserved. No remote server, staging email or dispatcher run.
+
+### Commands / quality gates
+
+```powershell
+# apps/web; local credentials injected from CLI status, never printed/persisted
+node node_modules/vitest/vitest.mjs run features/learning-schedule/components/study-notification-settings.test.tsx --maxWorkers=2 --reporter=dot
+node node_modules/@playwright/test/cli.js test tests/study-notification-settings.spec.ts --project=chromium --workers=1 --reporter=line
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+# repository root
+supabase test db --local
+```
+
+- Targeted component + Server Action tests **48/48 PASS** (12 component + 36 action), **7.80s**; final targeted component rerun **12/12 PASS**, **4.74s**. Includes independent flag OFF/existing opt-out, snapshot/duplicate guard, ambiguous/conflict draft preservation, error Retry, overnight validation, opt-out with invalid draft, VI, missing/disabled Task override, forged owner/Task read denial and keyed stale-response isolation.
+- Final lint **PASS**, exit 0, 0 errors / 1 existing Focus `projection` dependency warning. Full Vitest **PASS**, exit 0: **833 passed / 26 skipped**, **80 files passed / 5 skipped**, **197.04s**, started **16:41:02 UTC+07:00** (815 baseline + 18 new tests). Opt-in skips are not claimed as executed acceptance. Final TypeScript `--noEmit --incremental false --pretty false` **PASS**, exit 0.
+- Actual Next **16.2.6** production build **PASS**, exit 0: compile **15.2s**, TypeScript **26.7s**, **100/100** pages in **1114ms**. Local Supabase configuration and UI flag false injected into build process only; `.env.local` unchanged. Skipped only prebuild via `--ignore-scripts`; actual `next build` ran, `.next/dev` retained.
+- Final `supabase test db --local` **PASS**, exit 0: **29 files / 761 assertions / 0 failures**, **25 wall-clock seconds**. Existing persistent concurrency setup remains a TAP skip; no new concurrency-harness execution is claimed. Final local read: **87 migrations / 0 users / 0 Tasks / 0 preferences / 0 overrides / 0 jobs / 0 deliveries / 0 reminder Cron**, dispatch false, Sweep false, authenticated preferences SELECT restored, fault trigger/function absent. `git diff --check` and explicit new-file whitespace checks **PASS**; no dependencies changed.
+- Failures resolved: first browser assertion used generic “Appearance” instead of actual catalog heading “Theme preference”; corrected selector. Initial mobile screenshot injected Playwright caret styles during streamed Suspense hydration; retained strict console checks and used `caret: initial`, then full-page captures to avoid sticky header obscuring section screenshots. Final browser suite clean. Lint found one unused test fixture and a new ref-cleanup warning; resolved the unused argument and replaced cleanup counter with request identity tokens. No SQL implementation failure or real email occurred.
+
+### Limits / decision
+
+- New UI flag OFF behavior is verified by component/source checks; real browser acceptance deliberately enables the UI flag only on local. Browser tests verify semantic labels, native keyboard operation and layout; no external screen-reader audit or accessibility scanner is claimed. Native time-input AM/PM display follows Chromium locale; stored wall-clock values remain 22:00/07:00.
+- **NOT EXECUTED / outside 7D:** remote/staging/production UI, real provider/SMTP/webhooks/unsubscribe, active reminder Cron/dispatcher, real verification emails or inbox delivery. Step 7C's after-handoff cancellation/uncertain limitations remain; saving consent does not activate dispatch. No full clean replay or dispatch harness rerun is claimed for this UI-only step.
+- **Decision: Step 7D Local PASS** for Settings/Task controls, EN/VI mobile browser acceptance and regression gates above. Phase 07 local checkpoints 7A–7D are complete within their recorded scopes; real email/provider/remote release is not approved by this evidence. User handles commit/push; no production activation.
