@@ -675,14 +675,14 @@ isOneToOne: false
                   ]
                 },"study_notification_deliveries": {
                   Row: {
-                    "attempt_number": number,"created_at": string,"error_code": string | null,"id": string,"job_id": string,"provider": string,"provider_message_id": string | null,"status": string,"updated_at": string,"user_id": string
+                    "attempt_number": number,"created_at": string,"error_code": string | null,"handoff_token": string | null,"id": string,"job_id": string,"outcome_fingerprint": string | null,"provider": string,"provider_message_id": string | null,"status": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"id"?: string,"job_id": string,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id": string
+                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id": string,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"id"?: string,"job_id"?: string,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id"?: string
+                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id"?: string,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -1500,11 +1500,29 @@ isOneToOne: false
 "ls_mark_missed_batch":
 { Args: { "p_batch_size"?: number }; Returns: Json
                            },
+"ls_notification_authorize_attempt":
+{ Args: { "p_job_id": string,"p_lease_token": string }; Returns: Json
+                           },
 "ls_notification_candidates":
 { Args: { "p_now": string,"p_task_id": string,"p_user_id": string }; Returns: string[]
                            },
+"ls_notification_claim_batch":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_notification_dispatch_stats":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"ls_notification_in_quiet_hours":
+{ Args: { "p_as_of": string,"p_enabled": boolean,"p_end": string,"p_start": string,"p_timezone": string }; Returns: boolean
+                           },
 "ls_notification_lock_owner":
 { Args: { "p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_reconcile_expired_leases":
+{ Args: { "p_batch_size"?: number }; Returns: number
+                           },
+"ls_notification_record_fake_outcome":
+{ Args: { "p_job_id": string,"p_lease_token": string,"p_outcome": Json }; Returns: Json
                            },
 "ls_notification_session_policy":
 { Args: { "p_session_id": string }; Returns: {

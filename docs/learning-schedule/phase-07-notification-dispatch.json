@@ -1,0 +1,599 @@
+{
+  "baseline": "bd0a9ad0a37ac8c58174ecc11592bbae75481fd6",
+  "startedAt": "2026-11-04T09:36:01.215Z",
+  "container": "supabase_db_lumivox-proj",
+  "localTarget": "http://127.0.0.1:55321",
+  "runs": [
+    {
+      "case": "ND-01 gate OFF",
+      "providerCalls": 0,
+      "final": {
+        "jobs": [
+          {
+            "id": "a0cfe080-9fee-4f71-805d-d634c8e8034a",
+            "status": "pending",
+            "claims": 0,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-03 concurrent claimers",
+      "repeat": 1,
+      "elapsedMs": 8.693099999999959,
+      "firstJobIds": [
+        "f8533399-c9cc-45fb-a8aa-2c64255001ef"
+      ],
+      "secondJobIds": [
+        "8f722d49-4143-4285-9ca2-8a2aa3bede5a"
+      ],
+      "final": {
+        "jobs": [
+          {
+            "id": "8f722d49-4143-4285-9ca2-8a2aa3bede5a",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          },
+          {
+            "id": "f8533399-c9cc-45fb-a8aa-2c64255001ef",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          },
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-03 real Job SKIP LOCKED",
+      "repeat": 1,
+      "elapsedMs": 7.751599999999996,
+      "retrySucceeded": true
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "global-opt-out",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "2fe9b420-1af3-47c6-83e3-297f3377e164",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "task-disable",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "9aa98cc6-0477-41dc-b145-959813ae717d",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-11 concurrent quiet-hours-only save",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      }
+    },
+    {
+      "case": "ND-16 cancellation AFTER durable handoff",
+      "repeat": 1,
+      "cancelMs": 6.746600000000058,
+      "final": {
+        "jobs": [
+          {
+            "id": "50c09ccf-edd2-4890-928d-a5e15323edac",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      },
+      "limitation": "Provider accepted after opt-out commit; handoff already authorized. No recall guarantee."
+    },
+    {
+      "case": "ND-08 accepted response lost",
+      "repeat": 1,
+      "noBlindRetry": true,
+      "final": {
+        "jobs": [
+          {
+            "id": "b0debb37-7119-4156-897a-80702a584efe",
+            "status": "failed",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "uncertain",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-03 concurrent claimers",
+      "repeat": 2,
+      "elapsedMs": 4.9529,
+      "firstJobIds": [
+        "c64272ec-1e5a-4fd2-bc7a-15a3c9f8326c"
+      ],
+      "secondJobIds": [
+        "657c508a-922c-4c0a-be4c-26c4017ba911"
+      ],
+      "final": {
+        "jobs": [
+          {
+            "id": "657c508a-922c-4c0a-be4c-26c4017ba911",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          },
+          {
+            "id": "c64272ec-1e5a-4fd2-bc7a-15a3c9f8326c",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          },
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-03 real Job SKIP LOCKED",
+      "repeat": 2,
+      "elapsedMs": 8.105200000000195,
+      "retrySucceeded": true
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "global-opt-out",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "f1afd4b9-99a3-4aa0-be67-5bcd940f580c",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "task-disable",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "f37b5d8f-dd3c-4c47-9996-6825c661e819",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-11 concurrent quiet-hours-only save",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      }
+    },
+    {
+      "case": "ND-16 cancellation AFTER durable handoff",
+      "repeat": 2,
+      "cancelMs": 7.02800000000002,
+      "final": {
+        "jobs": [
+          {
+            "id": "95549bb4-5059-4697-acf2-2300d393e0eb",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      },
+      "limitation": "Provider accepted after opt-out commit; handoff already authorized. No recall guarantee."
+    },
+    {
+      "case": "ND-08 accepted response lost",
+      "repeat": 2,
+      "noBlindRetry": true,
+      "final": {
+        "jobs": [
+          {
+            "id": "c72e2d33-9d3a-45f7-9225-93cd7857d1ed",
+            "status": "failed",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "uncertain",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-03 concurrent claimers",
+      "repeat": 3,
+      "elapsedMs": 5.895400000000109,
+      "firstJobIds": [
+        "6ea204e0-842f-40e6-8b55-e4cddaa05f16"
+      ],
+      "secondJobIds": [
+        "8fffbf5e-baa8-4e9b-9b78-73b685146933"
+      ],
+      "final": {
+        "jobs": [
+          {
+            "id": "6ea204e0-842f-40e6-8b55-e4cddaa05f16",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          },
+          {
+            "id": "8fffbf5e-baa8-4e9b-9b78-73b685146933",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          },
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-03 real Job SKIP LOCKED",
+      "repeat": 3,
+      "elapsedMs": 6.692600000000084,
+      "retrySucceeded": true
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "global-opt-out",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "7d457fec-fe62-4276-8868-0ff0ec77cfd9",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-05/16 cancellation before handoff",
+      "cancel": "task-disable",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      },
+      "final": {
+        "jobs": [
+          {
+            "id": "bc5413e8-6d3f-4d48-9e0a-5630416d8b54",
+            "status": "suppressed",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": []
+      }
+    },
+    {
+      "case": "ND-11 concurrent quiet-hours-only save",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 509,
+        "blocker": 510,
+        "observed": [
+          510
+        ]
+      },
+      "result": {
+        "claimed": 1,
+        "submissions": 0
+      }
+    },
+    {
+      "case": "ND-16 cancellation AFTER durable handoff",
+      "repeat": 3,
+      "cancelMs": 5.9204000000002,
+      "final": {
+        "jobs": [
+          {
+            "id": "ffd5ece9-9720-4256-99e7-787d1e8c89d2",
+            "status": "sent",
+            "claims": 1,
+            "cancelled": true,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 1
+          }
+        ]
+      },
+      "limitation": "Provider accepted after opt-out commit; handoff already authorized. No recall guarantee."
+    },
+    {
+      "case": "ND-08 accepted response lost",
+      "repeat": 3,
+      "noBlindRetry": true,
+      "final": {
+        "jobs": [
+          {
+            "id": "f0457d83-e3af-4543-ad67-6624578aead7",
+            "status": "failed",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "uncertain",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-12 Auth verification update contention",
+      "sqlstate": "55P03",
+      "retry": {
+        "reason": "unverified_destination",
+        "authorized": false
+      }
+    },
+    {
+      "case": "ND-09/19 restart before handoff",
+      "final": {
+        "jobs": [
+          {
+            "id": "df593880-97ec-4041-a03c-b3734e740186",
+            "status": "sent",
+            "claims": 2,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "accepted",
+            "attempt": 2
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-10/19 restart after handoff",
+      "noBlindRetry": true,
+      "final": {
+        "jobs": [
+          {
+            "id": "688b025c-1c58-419b-b435-49edc72a2f9e",
+            "status": "failed",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "uncertain",
+            "attempt": 1
+          }
+        ]
+      }
+    },
+    {
+      "case": "ND-19 accepted but outcome transaction failed",
+      "sqlstate": "P0001",
+      "noBlindRetry": true,
+      "final": {
+        "jobs": [
+          {
+            "id": "680c4e0b-13e0-4aa8-a515-93d09849c1b3",
+            "status": "failed",
+            "claims": 1,
+            "cancelled": false,
+            "leased": false
+          }
+        ],
+        "deliveries": [
+          {
+            "status": "uncertain",
+            "attempt": 1
+          }
+        ]
+      }
+    }
+  ],
+  "handoffBoundary": "authorization transaction COMMIT, before provider call; post-handoff cancellation cannot recall accepted submission",
+  "initial": {
+    "database": "postgres",
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "dispatch": false,
+    "sweep": false
+  },
+  "providerCalls": 14,
+  "fakeAcceptances": 14,
+  "result": "PASS",
+  "cleanup": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "dispatch": false,
+    "sweep": false
+  },
+  "finishedAt": "2026-11-04T09:36:04.464Z"
+}

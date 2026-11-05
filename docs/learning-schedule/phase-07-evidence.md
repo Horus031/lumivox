@@ -120,3 +120,64 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 - **NOT EXECUTED / 7C:** fake-provider lease-versus-cancel race, submission response loss/uncertain recovery, claim/retry/backoff/expiry, concurrent dispatchers, final send authorization. These database tests do not prove exactly-once submission, recalled email or inbox delivery. No real email, provider SDK, reminder Cron, gate activation or remote changes.
 - `node --check` on the new harness, `git diff --check`, and explicit whitespace checks for new source files **PASS**. No dependencies installed/changed. Existing lint/advisor and CLI/Vite deprecation notices remain as disclosed.
 - **Decision: Step 7B Local PASS** within transactional outbox/lifecycle scope above. Phase 07 remains incomplete for dispatcher/fake provider and Settings UI/browser acceptance (7C/7D). User handles commit/push.
+
+## Step 7C — Dispatcher, Leases & Fake Provider
+
+- **Baseline HEAD:** `bd0a9ad0a37ac8c58174ecc11592bbae75481fd6`, `feature/learning-schedule-foundation`, clean tree initially; execution **2026-11-04**, Asia/Bangkok. Evidence includes uncommitted 7C implementation; no commit/push/deployment or remote mutation.
+- **CLI-created forward migration:** `20261104090451_learning_schedule_notification_dispatch.sql`; guarded **0 users / 0 Tasks / 0 jobs** before clean `db reset --local --no-seed`. **87 migrations replayed, PASS**; historical migrations unchanged. Types regenerated with `graphql_public`/`public`, existing formatting and UTF-8 without BOM retained.
+- Internal claim/authorize/fake-outcome/expiry/stats RPCs revoke PUBLIC/anon/authenticated; service_role only. Definer functions have empty search_path. New delivery handoff token/outcome fingerprint are excluded from existing browser column grants. No browser service client, worker HTTP/Cron route, provider SDK or real email added.
+
+### Protocol and acceptance boundary
+
+- Bounded discovery examines 250 due candidate rows; owner gates are tried in stable order **before** Job `FOR UPDATE SKIP LOCKED`. Claim batch **1..25**, fixed lease **60 seconds**, maximum **3 claims**. `attempt_count` means successful claims, including a worker dying before handoff; delivery rows mean durable handoff intents, not proof of an external request/acceptance. Gaps in delivery attempt numbers are intentional.
+- Authorization checks gate, correct/live lease, cancellation/current fingerprint, parent/session state, due/start clock, trusted `auth.users.email` + `email_confirmed_at`/ban state and current IANA quiet hours. Shared dispatch-control lock serializes gate OFF against short claim/handoff transactions. Quiet-hours-only saves also take the owner coordinator; Auth verification/email updates are fenced through handoff commit by **FOR SHARE NOWAIT**, returning retryable **55P03** on contention. Owner coordinator precedes Job locks; parent records are read without reverse row-lock waits. No email address/content is passed to fake provider/logs; locale defaults to `en` for this local checkpoint.
+- **Durable handoff boundary = authorization transaction COMMIT inserting `submitting`, before fake provider invocation.** Authorization replay returns no new submission capability. Provider runs after DB commit, without holding coordinator/Job transaction. Cancellation committed before handoff prevents submission. **Cancellation after handoff may commit before provider acceptance and still yield `sent`/`accepted`; no recall or absolute no-send-after-opt-out guarantee is claimed.** Outcome recording preserves that real acceptance even if consent/gate changed after handoff.
+- Accepted → job `sent`, delivery `accepted` (never `delivered`). Known nonacceptance/transient → delivery `failed`, bounded exponential backoff (15s × 2^(claim−1), deterministic 0..3s jitter, max 120s including validated retry-after), or expired if retry reaches Session start; claim 3 exhausts retry. Permanent → `failed`; uncertain/thrown provider error → job `failed`, delivery `uncertain`, held for review without automatic requeue.
+- Expired lease without handoff may requeue only while current/uncancelled/before start and below claim cap. Expired `submitting` becomes `uncertain` + failed job, clearing lease. An expired but unreconciled owner may record its durable outcome; after ownership is cleared, late outcome is **PT409** and requires controlled review. Exact outcome replay is idempotent; changed payload **22023**. Stats expose aggregate operational counts only to trusted role.
+
+### Executed tests
+
+| Cases | Actual result |
+| --- | --- |
+| ND-01–04 | **PASS**: gate OFF means zero claims/provider calls, including OFF after claim; due job leases once; two workers claim distinct jobs; wrong/expired token **PT409** |
+| ND-05/16 | **PASS**: global opt-out and Task-disable before handoff prevent provider call; actual cancellation/authorization blockers observed. After-handoff race tested separately with accepted outcome and retained cancellation fence |
+| ND-06–08 | **PASS**: accepted vs transient/permanent/uncertain remain distinct; exact outcome replay/mismatch, exponential/retry-after bounds, max 3 claims, lost accepted response never blindly retried |
+| ND-09/10/19 | **PASS**: controlled disconnect/restart before handoff safely retries; after handoff preserves uncertainty; injected outcome transaction failure **P0001** rolls back delivery/job update and restart makes no second submission |
+| ND-11/12 | **PASS**: overnight/daytime quiet hours, inclusive start/exclusive end, both New York DST fold instants and spring gap; actual dispatch-time quiet suppression. Trusted local Auth fixture with confirmation timestamp permits handoff; clearing it blocks handoff. This is not Resend/account-email verification evidence |
+| ND-13–15 | **PASS**, SQL fixture transitions: completed/skipped/cancelled or old generation cannot handoff; started Session and retry beyond start expire |
+| ND-17/18 | **PASS**: owner B/anon worker calls denied **42501**, handoff token not browser-readable; loopback target guard before DB/provider access, fake submit has no network/API/SMTP implementation, zero reminder Cron |
+| ND-20 | **PASS**: actual 26-job fixture claims 25 then 1; lease fields/terminal clearing, batch/null/negative/excess retry-delay validation |
+
+- **Full pgTAP PASS**, exit 0: **29 files / 761 assertions / 0 failures**, final **13 wall-clock seconds** (**679 baseline + 82 dispatcher assertions**). This was rerun after final SQL lock hardening and clean replay. Persistent concurrency fixture remains an intentional TAP skip; separate harness executes the real concurrency cases.
+- **Dispatch harness PASS**, `node --experimental-strip-types scripts/test-learning-schedule-notification-dispatch.mjs`, final execution **09:36:01–09:36:04 UTC**; raw report `phase-07-notification-dispatch.json`. Uses the actual TypeScript fake provider/dispatcher with service_role RPC transactions through three PostgreSQL connections, 5s lock/10s statement/15s command timeouts and controlled fake-provider barriers. Hard-refuses remote URL and nonempty disposable local DB before enabling gate.
+- **26 executions**: gate OFF ×1; concurrent claimers ×3; actual locked-Job SKIP LOCKED ×3; pre-handoff global opt-out ×3 and Task-disable ×3; concurrent quiet-hours-only save ×3; post-handoff opt-out ×3; accepted response lost ×3; Auth verification update contention ×1; pre-handoff restart ×1; post-handoff restart ×1; accepted/outcome-commit failure ×1. **9 observed `pg_blocking_pids()` waits** for pre-handoff cancellation/quiet changes. Busy-owner/Job skips returned in **4.95–8.70ms**, and processing after release succeeded; these skip cases correctly require no blocker wait. Auth update contention returned **55P03** without handoff, then retry after commit correctly denied unverified destination.
+- Fake provider: **14 calls / 14 simulated acceptances**, including accepted-but-response-lost/fault cases; no real sending. Ordinary SQL commands assert **00000**; injected outcome failure **P0001**. Pre-handoff cancellation ends `suppressed`, zero deliveries/provider calls; two claimers end two sent jobs/two accepted deliveries. After-handoff opt-out commits in **5.92–7.03ms** while fake provider is paused, then acceptance is recorded with cancellation fence retained. Lost-result/restart cases end failed job + one uncertain delivery, no blind retry. Pre-handoff restart consumes claim 2 and creates only one delivery (attempt 2). Lease expiry is advanced on disposable fixture rows, not by altering global DB/system clock or waiting 60s.
+- Harness finally cleanup **PASS**: zero fixture users/Tasks/jobs/deliveries, dispatch and Sweep **false**. Final local inspection: **87 migrations / 0 users / 0 Tasks / 0 jobs / 0 deliveries / 0 reminder Cron**, both gates OFF; browser SELECT on both new delivery internals **false**. Security advisor retains **one baseline `function_search_path_mutable` WARN**, no new notification finding.
+
+### Commands / web gates
+
+```powershell
+supabase migration new learning_schedule_notification_dispatch
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase test db --local
+node --experimental-strip-types scripts/test-learning-schedule-notification-dispatch.mjs
+supabase gen types typescript --local
+supabase db advisors --local --type security --fail-on none --output-format json
+# apps/web, sequential:
+node node_modules/vitest/vitest.mjs run features/learning-schedule/notifications/ --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+```
+
+- Focused fake-provider/worker Vitest **17/17 PASS**, **3.83s**. Lint **PASS**, exit 0, 0 errors / 1 existing Focus `projection` dependency warning. Full Vitest **PASS**, exit 0: **815 passed / 26 skipped**, **79 files passed / 5 skipped**, **181.43s**, started **16:25:26 UTC+07:00**. Opt-in skips are not counted as new acceptance. TypeScript `--noEmit --incremental false --pretty false` **PASS**, exit 0.
+- Actual Next **16.2.6** production build **PASS**, exit 0: compile **16.8s**, TypeScript **29.4s**, **100/100** pages in **1142ms**. Local Supabase variables injected into build process only; `.env.local` unchanged. Prebuild skipped with `--ignore-scripts`, actual `next build` ran, `.next/dev` preserved. Web source/types remained unchanged during subsequent SQL lock hardening; final local type regeneration matched the tested types byte-for-byte. Final replay/pgTAP/concurrency/advisors were rerun against hardened SQL.
+- Initial harness execution stopped at a duplicate `const` declaration before any DB connection/fixture; fixed and final harness passed. No SQL acceptance failures occurred. CLI/Vite and Node type-stripping/module-detection notices are informational; no dependencies/package settings changed to suppress them.
+
+### Limits / decision
+
+- **NOT EXECUTED / out of local 7C scope:** remote/staging dispatcher or test-recipient allowlist (remote execution is refused), real Resend/SMTP, provider lookup/webhooks/idempotency recovery, real account confirmation-email flow, real network/process-kill/load testing, operational manual resolution UI, Cron scheduling, Settings UI/browser acceptance (7D). Controlled connection disconnect/restart and fixture lease expiry above are not labeled a production process/clock test.
+- Quiet-hour cutoff and DST pure-policy cases use explicit `asOf`; production authorization uses DB `clock_timestamp()` after locks. No claim of exhaustive clock-boundary races, inbox delivery, exactly-once external submission or recall. Uncertain attempts intentionally remain held for review rather than guessed successful/failed.
+- New-source whitespace checks, harness `node --check` and `git diff --check` **PASS**. **Decision: Step 7C Local PASS** within fake-dispatch protocol scope above. Phase 07 still requires 7D; Phase 08 will revisit real-provider submission/reconciliation and staging destination controls. User handles commit/push.
