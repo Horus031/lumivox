@@ -22,6 +22,7 @@ export async function POST(request: Request) {
         p_event_id: event.eventId, p_message_id: event.messageId, p_event_type: event.eventType,
         p_event_at: event.eventAt, p_recipient_fingerprint: event.recipientFingerprint,
         p_payload_fingerprint: event.payloadFingerprint,
+        ...(event.bounceKind ? { p_bounce_kind: event.bounceKind } : {}),
       }).abortSignal(AbortSignal.timeout(4000));
       if (error) throw { code: error.code };
     },

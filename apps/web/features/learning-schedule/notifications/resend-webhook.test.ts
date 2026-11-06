@@ -21,6 +21,13 @@ function request(value: unknown = payload, options: { timestamp?: number; signat
 }
 afterEach(() => vi.unstubAllGlobals());
 describe("8B signed webhook boundary (real SDK verifier, local HMAC signatures)", () => {
+  it.each(["Permanent", "Transient", "Undetermined"])("8C retains typed bounce proof %s without raw bounce message", type => {
+    const event = parseStudyReminderEvent({ ...payload, type: "email.bounced", data: { ...payload.data, bounce: { type, message: "private", subType: "General" } } }, "msg", identityKey);
+    expect(event.bounceKind).toBe(type); expect(JSON.stringify(event)).not.toContain("private");
+  });
+  it("8C rejects malformed bounce classification instead of inventing hard bounce", () => {
+    expect(() => parseStudyReminderEvent({ ...payload, type: "email.bounced", data: { ...payload.data, bounce: { type: "unknown" } } }, "msg", identityKey)).toThrow();
+  });
   it("RW-01 rejects forged signature before any DB call", async () => {
     const persist = vi.fn();
     expect((await handleStudyReminderWebhook(request(payload, { signature: "v1,bad" }), { signingSecret, identityKey, persist })).status).toBe(401);

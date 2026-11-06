@@ -8,9 +8,17 @@ import { NextResponse } from "next/server";
 const handleI18nRouting = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
-  // Signed server-to-server endpoint: no user cookies/session refresh or locale
-  // redirect. Authorization is raw-body Svix verification inside the handler.
-  if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders") {
+  if (/^\/(en|vi)\/study-reminders\/unsubscribe\/?$/.test(request.nextUrl.pathname)) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
+  // Public capability endpoints: no session refresh or locale redirect.
+  // Handlers authorize with a raw-body signature or opaque unsubscribe token.
+  if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders" ||
+    request.nextUrl.pathname === "/api/study-reminders/unsubscribe") {
     return NextResponse.next();
   }
   if (isUnlocalizedAppRoute(request.nextUrl.pathname)) {

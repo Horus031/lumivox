@@ -1,0 +1,69 @@
+{
+  "baseline": "2652fdf4cd92782bd9c13b57865588b309b03fa7",
+  "startedAt": "2026-11-06T07:43:27.630Z",
+  "checks": [
+    {
+      "case": "US-01 API GET no mutation",
+      "status": 200
+    },
+    {
+      "case": "US-01 vi page GET/mobile",
+      "status": 200
+    },
+    {
+      "case": "US-01 en page GET/mobile",
+      "status": 200
+    },
+    {
+      "case": "US-02/05/06 actual keyboard form POST -> local DB",
+      "status": 200
+    },
+    {
+      "case": "US-03 replay no-op",
+      "status": 200
+    },
+    {
+      "case": "US-04 expired",
+      "status": 400
+    },
+    {
+      "case": "US-04 revoked",
+      "status": 400
+    },
+    {
+      "case": "US-04 forged",
+      "status": 400
+    },
+    {
+      "case": "US-07 actual signed Permanent bounce",
+      "status": 200
+    },
+    {
+      "case": "US-07 signed bounce replay",
+      "status": 200
+    },
+    {
+      "case": "US-08 late delivered retains suppression",
+      "status": 200
+    }
+  ],
+  "cleanup": true,
+  "externalRequests": 0,
+  "providerRequests": 0,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "tokens": 0,
+    "identities": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "receipts": 0,
+    "suppressions": 0
+  },
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "completedAt": "2026-11-06T07:43:39.911Z"
+}

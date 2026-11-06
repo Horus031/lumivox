@@ -8,11 +8,13 @@ const eventType = z.enum(["email.sent", "email.delivered", "email.delivery_delay
   "email.bounced", "email.complained", "email.failed", "email.suppressed"]);
 const eventSchema = z.object({
   type: eventType, created_at: z.iso.datetime({ offset: true }),
-  data: z.object({ email_id: identifier, to: z.array(z.email().max(254)).length(1) }),
+  data: z.object({ email_id: identifier, to: z.array(z.email().max(254)).length(1),
+    bounce: z.object({ type: z.enum(["Permanent", "Transient", "Undetermined"]) }).optional() }),
 });
 export type StudyReminderEvent = {
   eventId: string; messageId: string; eventType: z.infer<typeof eventType>;
   eventAt: string; recipientFingerprint: string; payloadFingerprint: string;
+  bounceKind?: "Permanent" | "Transient" | "Undetermined";
 };
 
 /** Same versioned HMAC policy must be used by the future trusted handoff.
@@ -57,6 +59,7 @@ export function parseStudyReminderEvent(verifiedPayload: unknown, eventId: strin
     eventType: parsed.type, eventAt: parsed.created_at,
     recipientFingerprint: reminderRecipientFingerprint(parsed.data.to[0], identityKey),
     payloadFingerprint: createHash("sha256").update(canonical(verifiedPayload)).digest("hex"),
+    ...(parsed.type === "email.bounced" && parsed.data.bounce ? { bounceKind: parsed.data.bounce.type } : {}),
   };
 }
 

@@ -741,6 +741,52 @@ isOneToOne: false
                   Relationships: [
 
                   ]
+                },"study_notification_recipient_identities": {
+                  Row: {
+                    "email_hash": string | null,"recipient_fingerprint": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "email_hash"?: string | null,"recipient_fingerprint": string,"user_id": string
+                  }
+                  Update: {
+                    "email_hash"?: string | null,"recipient_fingerprint"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+
+                  ]
+                },"study_notification_suppressions": {
+                  Row: {
+                    "created_at": string,"delivery_id": string | null,"id": string,"reason": string,"recipient_fingerprint": string,"revoked_at": string | null,"source_event_id": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"delivery_id"?: string | null,"id"?: string,"reason": string,"recipient_fingerprint": string,"revoked_at"?: string | null,"source_event_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"delivery_id"?: string | null,"id"?: string,"reason"?: string,"recipient_fingerprint"?: string,"revoked_at"?: string | null,"source_event_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_suppressio_user_id_recipient_fingerprin_fkey"
+      columns: ["user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_recipient_identities"
+      referencedColumns: ["user_id","recipient_fingerprint"]
+    },{
+      foreignKeyName: "study_notification_suppressions_delivery_id_user_id_fkey"
+      columns: ["delivery_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_deliveries"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "study_notification_suppressions_source_event_id_fkey"
+      columns: ["source_event_id"]
+isOneToOne: true
+      referencedRelation: "study_notification_webhook_receipts"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"study_notification_task_overrides": {
                   Row: {
                     "enabled": boolean,"task_id": string,"updated_at": string,"user_id": string
@@ -761,16 +807,36 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
-                },"study_notification_webhook_receipts": {
+                },"study_notification_unsubscribe_tokens": {
                   Row: {
-                    "created_at": string,"event_type": string,"id": string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at": string | null,"processing_status": string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                    "created_at": string,"expires_at": string,"id": string,"recipient_fingerprint": string,"revoked_at": string | null,"token_hash": string,"used_at": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"event_type": string,"id"?: string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                    "created_at"?: string,"expires_at": string,"id"?: string,"recipient_fingerprint": string,"revoked_at"?: string | null,"token_hash": string,"used_at"?: string | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"event_type"?: string,"id"?: string,"payload_fingerprint"?: string,"payload_subset"?: NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider"?: string,"provider_event_at"?: string,"provider_event_id"?: string,"provider_message_id"?: string,"recipient_fingerprint"?: string
+                    "created_at"?: string,"expires_at"?: string,"id"?: string,"recipient_fingerprint"?: string,"revoked_at"?: string | null,"token_hash"?: string,"used_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_unsubscrib_user_id_recipient_fingerprin_fkey"
+      columns: ["user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_recipient_identities"
+      referencedColumns: ["user_id","recipient_fingerprint"]
+    }
+                  ]
+                },"study_notification_webhook_receipts": {
+                  Row: {
+                    "bounce_kind": string | null,"created_at": string,"event_type": string,"id": string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at": string | null,"processing_status": string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bounce_kind"?: string | null,"created_at"?: string,"event_type": string,"id"?: string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  Update: {
+                    "bounce_kind"?: string | null,"created_at"?: string,"event_type"?: string,"id"?: string,"payload_fingerprint"?: string,"payload_subset"?: NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider"?: string,"provider_event_at"?: string,"provider_event_id"?: string,"provider_message_id"?: string,"recipient_fingerprint"?: string
                   }
                   Relationships: [
 
@@ -1517,11 +1583,20 @@ isOneToOne: false
 "ls_notification_authorize_attempt":
 { Args: { "p_job_id": string,"p_lease_token": string }; Returns: Json
                            },
+"ls_notification_authorize_resend_attempt":
+{ Args: { "p_allowlisted"?: boolean,"p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_locale": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_bind_recipient":
+{ Args: { "p_expected_email": string,"p_fingerprint": string,"p_user_id": string }; Returns: undefined
+                           },
 "ls_notification_candidates":
 { Args: { "p_now": string,"p_task_id": string,"p_user_id": string }; Returns: string[]
                            },
 "ls_notification_claim_batch":
 { Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_notification_consume_unsubscribe_token":
+{ Args: { "p_token_hash": string }; Returns: boolean
                            },
 "ls_notification_dispatch_stats":
 { Args: Record<PropertyKey, never>; Returns: Json
@@ -1531,11 +1606,19 @@ isOneToOne: false
                            },
 "ls_notification_ingest_resend":
 { Args: { "p_event_at": string,"p_event_id": string,"p_event_type": string,"p_message_id": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           } |
+{ Args: { "p_bounce_kind": string,"p_event_at": string,"p_event_id": string,"p_event_type": string,"p_message_id": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_issue_unsubscribe_token":
+{ Args: { "p_expected_email": string,"p_fingerprint": string,"p_replace"?: boolean,"p_token_hash": string,"p_user_id": string }; Returns: undefined
                            },
 "ls_notification_lock_owner":
 { Args: { "p_user_id": string }; Returns: undefined
                            },
 "ls_notification_project_resend":
+{ Args: { "p_message_id": string }; Returns: undefined
+                           },
+"ls_notification_project_resend_8b":
 { Args: { "p_message_id": string }; Returns: undefined
                            },
 "ls_notification_reconcile_expired_leases":
@@ -1546,6 +1629,9 @@ isOneToOne: false
                            },
 "ls_notification_record_resend_outcome":
 { Args: { "p_delivery_id": string,"p_handoff_token": string,"p_message_id"?: string,"p_outcome": string,"p_payload_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_revoke_unsubscribe_token":
+{ Args: { "p_token_hash": string }; Returns: undefined
                            },
 "ls_notification_session_policy":
 { Args: { "p_session_id": string }; Returns: {

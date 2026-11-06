@@ -1,5 +1,93 @@
 # Phase 08 — Email Provider Integration Evidence
 
+## Step 8C — One-Click Unsubscribe & Suppression
+
+- **Result: LOCAL PASS**, unsubscribe/suppression readiness only; Phase 08 and real sending remain unapproved.
+- **Baseline HEAD:** `2652fdf4cd92782bd9c13b57865588b309b03fa7`, `feature/learning-schedule-foundation`, clean initially. Execution **2026-11-06**, Asia/Bangkok, including uncommitted 8C changes. No commit/push/deploy, live webhook registration, Cron creation or real provider request.
+- CLI **2.122.0** generated **`20261106070838_learning_schedule_unsubscribe_suppression.sql`**. Forward-only migration, earlier migrations unchanged. Local migration up and final clean replay **PASS: 89 migrations** (88 baseline). Reset used `--no-seed` after verifying an empty disposable local DB.
+
+### Implementation / policy
+
+- Opaque **32-byte / 256-bit** random base64url tokens; only SHA-256 hashes persist. Expiry is **90 days**. Trusted issuer supports explicit replacement; service-only revoke command is idempotent. Issuance checks the exact current verified Auth email under `SHARE NOWAIT`, never grants consent, and stores no raw token/email. Confirmation/one-click links use an explicit HTTPS origin, not Host/browser query input. `renderIssuedReminderEmail` composes successfully persisted issuer links with the existing EN/VI renderer; offline preview rendering remains available.
+- Token consumption discovers owner without a row lock, then owner coordinator → token → preferences → Job invalidation. Valid first use atomically switches global consent OFF, suppresses pending jobs, fences leases and records `used_at`. Exact used-token replay is harmless and never opts in; it also does not undo a later explicit Settings opt-in. Expired/revoked/unknown tokens are refused. Old email links remain user-global capabilities until expiry/revocation, rather than becoming an implicit opt-in for another address.
+- Existing Settings preference RPC now takes the owner coordinator **before** preference row locks; this avoids an owner/preference inversion with unsubscribe. Concurrency cases verify both Settings/unsubscribe commit orders. Explicit Settings opt-in committed after unsubscribe may win, but never removes provider suppression.
+- Private RLS token, suppression and recipient-identity tables; no browser/anonymous access, and no direct service-role writes. Writes go through trusted commands. Composite identity/owner and delivery/owner foreign keys prevent reassignment. A private secondary SHA-256 of the normalized email binds the trusted recipient HMAC to Auth's current address without storing raw email or the HMAC secret in PostgreSQL.
+- Global consent and suppression remain independent. `Permanent` bounce → `hard_bounce`; complaint → `complaint`; provider suppression and unclassified/Transient bounce → conservative `provider_suppressed`. Delayed events create no suppression. Missing historical proof is never invented as hard bounce. Suppression survives late delivered events and Settings opt-in; no self-service unsuppress RPC exists.
+- Receipt → delivery/recipient correlation → suppression fact → pending/lease fence commits atomically. Unmatched/mismatched receipts cannot guess an owner. Late provider-ID correlation applies suppression in the same outcome transaction. Matched historical 8B facts are backfilled conservatively. Full payload hash preserves exact legacy replay even when old receipts lack typed `bounce_kind`.
+- Bulk fencing covers the known current verified identity or attempts already bound to that fingerprint. Historical identities lacking a current Auth binding are not guessed; the new real-provider final authorization still checks suppression after binding the actual verified destination. Existing fake handoffs/outcomes remain separate.
+- **`ls_notification_authorize_resend_attempt`** is service-only and explicitly creates `provider='resend'` with immutable context. In the transaction it rechecks dispatch gate, lease/current Session/consent, current verified Auth email, quiet hours, suppression, and an explicit trusted allowlist attestation (**default false**). This is a DB handoff boundary, not a connected sender. The future worker must derive HMAC/allowlist eligibility from trusted configuration/Auth data; none comes from a public caller. Authorization commit remains the point after which opt-out/suppression cannot promise email recall.
+- Public API **`/api/study-reminders/unsubscribe`**: GET performs no token lookup or mutation; POST accepts URL-encoded `List-Unsubscribe=One-Click`, uses only the opaque capability, never requires login/cookies/Origin, and never redirects. Actual body is bounded to **512 bytes / 3 seconds**. Success **200**, unavailable token **400**, unsupported content type **415**, oversize **413**, persistence failure **503**. Replies contain no user/email/Task/account details; no-store, no-referrer, noindex headers applied.
+- Public EN/VI confirmation pages use a native POST form with explicit button and no mutation on GET. Middleware bypasses session refresh for these exact public paths. Analytics is not mounted on capability landing pages, including initial render; normal app analytics remains intact. Token URLs are intended for full-document email navigation, not internal SPA links. Chromium tests used an inert configured GA fixture ID to avoid testing only an empty configuration.
+
+### Executed acceptance
+
+| Case | Actual result |
+| --- | --- |
+| US-01 | **PASS**, API GET and EN/VI browser GET leave consent ON, one pending Job, token unused. No login/redirect. |
+| US-02 | **PASS**, actual keyboard confirmation POST → Next route → local Supabase atomically changes consent OFF, pending count 1→0, used token count 0→1; DB tests verify leased cancellation marker too. |
+| US-03 | **PASS**, HTTP and DB replay no-op, same generic success, never opts in. |
+| US-04 | **PASS**, expired, explicit-revoked and forged token all return the same **400** body. Replacement revokes older tokens; issuer rejects stale/unverified Auth identity (**PT409**). |
+| US-05/06 | **PASS**, fresh browser/no session and cookie-free one-click POST succeed; responses omit token, user/email and account data, no Location/Set-Cookie. |
+| US-07 | **PASS**, actual Svix-signed Permanent bounce through Next HTTP creates one hard-bounce fact for the exact correlated identity; duplicate remains one. Pending/leased fences verified in pgTAP. |
+| US-08 | **PASS**, complaint plus bounce retained independently; late delivered event cannot clear suppression. Real HTTP late-delivery regression included. |
+| US-09 | **PASS**, delayed event adds no suppression; Transient/missing proof never classified hard bounce. |
+| US-10/11 | **PASS**, unknown/mismatched event creates no guessed suppression; later trusted Email ID correlates and suppresses the correct identity atomically. |
+| US-12 | **PASS**, Settings OFF→ON does not revoke suppression; a new leased Job is denied at real-provider final handoff. |
+| US-13 | **PASS**, fixture changes to a new verified Auth email do not enable global consent; old destination suppression does not automatically attach to the new fingerprint after explicit opt-in. This simulates verified identity, not a live Auth re-verification email flow. |
+| US-14 | **PASS**, **24 real PostgreSQL executions**, eight orders × three repetitions, all **00000**; **21 observed `pg_blocking_pids()` blockers**. The remaining three unsubscribe-first/claim cases correctly skip busy owner and return promptly, without expecting a blocker. |
+| US-15 | **PASS**, Owner B/anon denied private records; browser denied token consumption and real handoff RPCs; direct service-role token mutation denied (**42501**); all three tables have RLS. |
+| US-16 | **PASS**, final dispatch/Sweep OFF, zero reminder Cron, provider requests zero; local fixtures and owned servers cleaned. |
+
+- Additional atomicity checks **PASS**: injected suppression insertion fault rolls back receipt and delivery projection; injected token-mark fault rolls back both consent and pending invalidation (**P0001**). A hash-only replay regression covers receipt schema evolution without conflicting typed metadata.
+- Concurrency orders: unsubscribe/claim, claim/unsubscribe, unsubscribe/handoff, handoff/unsubscribe, Settings/unsubscribe, unsubscribe/Settings, suppression/handoff, handoff/suppression. Handoff-first cases retain one durable submitting attempt plus cancellation fence; no send is performed and no recall guarantee is inferred. Report: [`phase-08-unsubscribe-concurrency.json`](./phase-08-unsubscribe-concurrency.json).
+- **11 actual HTTP/Chromium checks PASS** on owned production server `127.0.0.1:3109`; EN/VI **390×844**, no horizontal overflow, button usable by keyboard, **zero external requests**, including Analytics. Two screenshots under `evidence/step-8c/` visually inspected. Report: [`phase-08-unsubscribe-http.json`](./phase-08-unsubscribe-http.json).
+- Existing 8B regression **PASS**, **6 two-connection races / 6 blockers**, actual signed Next HTTP ingestion and cleanup, zero provider calls. New report [`phase-08-8c-webhook-regression.json`](./phase-08-8c-webhook-regression.json); historical 8B report left intact.
+
+### Commands / quality gates
+
+```powershell
+# repo root; installed Supabase CLI 2.122.0
+supabase migration new learning_schedule_unsubscribe_suppression
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase test db --local
+supabase gen types typescript --local
+node scripts/test-learning-schedule-unsubscribe-concurrency.mjs
+node --experimental-strip-types scripts/test-learning-schedule-unsubscribe-http.mjs
+node --experimental-strip-types scripts/test-learning-schedule-resend-webhooks.mjs --next-http --8c-regression
+supabase db advisors --local --type security --fail-on none --output-format json
+
+# apps/web
+node node_modules/vitest/vitest.mjs run features/learning-schedule/notifications/ --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+```
+
+| Gate | Actual result |
+| --- | --- |
+| Final clean replay | **89 migrations PASS** |
+| Full pgTAP | **851 assertions PASS**, **31 files** reported; one existing fixture-only entry intentionally skipped. New suite **48 assertions**, baseline 803 retained. |
+| Notification Vitest | **164 PASS / 8 files / 8.53s** |
+| Full Vitest | **980 PASS / 26 skipped**, **87 files passed / 5 skipped (92)**, **228.72s**, start **14:32:15 UTC+7** |
+| Lint | **PASS**, zero errors, one existing Focus `use-focus-v2-audio.ts:104` dependency warning |
+| TypeScript | **PASS**, standalone `--noEmit --incremental false --pretty false` |
+| Production build | **PASS**, Next **16.2.6**, compile **17.4s**, TypeScript **38.1s**, **104 pages / 1901ms** |
+| Types | **PASS**, local-generated `public` + `graphql_public`; contents/exit checked before replacing output |
+| Security advisors | One existing `public.set_updated_at` mutable-search-path WARN; no new notification findings |
+
+- Build used local Supabase process env and inert **`G-TESTPRIVACY`** process-only measurement fixture. `.env.local` unchanged; no new dependencies. `--ignore-scripts` skips prebuild cleanup only; actual Next build ran and `.next/dev` was preserved. Unit secrets/token material existed in test memory/process env only; screenshots/reports contain no raw tokens or keys.
+- Final state: **89 applied migrations**, **0 users / Tasks / jobs / deliveries / receipts / tokens / suppressions / identity bindings**, dispatch **OFF**, Sweep **OFF**, **0 reminder Cron**. Test ports **3108/3109** stopped. Concurrency temporarily enabled the DB gate only for fixture claim/handoff tests and restored it in `finally`; no worker/provider was invoked.
+
+### Corrections / limits before 8D
+
+- Privacy review found the shared Analytics component could otherwise see an email capability URL; added the path guard and verified with configured inert GA plus blocked/countable external requests. Initial privacy unit test referenced an uninstalled testing-library package; replaced it with existing React DOM server rendering, without dependency changes. Final full regression passes. Review also hardened exact legacy receipt replay so typed bounce metadata introduced by 8C cannot reject the same full payload hash.
+- **NOT EXECUTED:** real email delivery, Resend API acceptance/deduplication, provider dashboard/webhook registration, actual DKIM coverage of List-Unsubscribe headers, real HTTPS receiver interoperability, recipient allowlist management, live Auth re-verification, key rotation, load/retention tests and production crash tests. Signing/sending headers belongs to **8D**. The allowlist boolean is a required trusted attestation, not a completed allowlist-management service.
+- Suppression reversal remains a separately verified privileged workflow; Settings cannot clear it, and no public unsuppress interface is exposed. Manual-block reason is supported by schema but no admin UI is enabled. Historical/unmatched provider outcomes still require trustworthy correlation; no automatic resend or newly generated idempotency key is allowed on uncertainty.
+- Before exposing capability URLs externally, configure URL-query redaction in deployment/proxy/access logs and keep Analytics/third-party scripts off the landing flow. Tests cover fresh full-document email navigation; an already-loaded third-party script on a previous SPA page cannot be recalled, so no internal SPA links to token URLs are wired. Production URL/origin, HTTPS and sender/DKIM approval remain outside local PASS.
+- References: [RFC 8058 POST/cookie/DKIM contract](https://www.rfc-editor.org/rfc/rfc8058), [Resend bounce classification](https://resend.com/changelog/email-bounce-details). Phase 08 remains incomplete until controlled integration/release requirements are satisfied.
+
 ## Step 8B — Resend Persistence & Signed Webhooks
 
 - **Result: LOCAL PASS**, persistence/webhook acceptance only; Phase 08 and real sending are not approved.
