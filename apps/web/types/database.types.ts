@@ -729,14 +729,14 @@ isOneToOne: false
                   ]
                 },"study_notification_preferences": {
                   Row: {
-                    "consented_at": string | null,"created_at": string,"lead_minutes": number,"quiet_end_local": string | null,"quiet_hours_enabled": boolean,"quiet_start_local": string | null,"study_email_enabled": boolean,"timezone": string | null,"updated_at": string,"user_id": string
+                    "consented_at": string | null,"created_at": string,"lead_minutes": number,"locale_confirmed_at": string | null,"quiet_end_local": string | null,"quiet_hours_enabled": boolean,"quiet_start_local": string | null,"reminder_locale": string | null,"study_email_enabled": boolean,"timezone": string | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id": string
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"locale_confirmed_at"?: string | null,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"reminder_locale"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"locale_confirmed_at"?: string | null,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"reminder_locale"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
 
@@ -754,6 +754,32 @@ isOneToOne: false
                   }
                   Relationships: [
 
+                  ]
+                },"study_notification_resend_payloads": {
+                  Row: {
+                    "context_hash": string,"created_at": string,"encrypted_payload": string,"job_id": string,"locale": string,"payload_fingerprint": string,"recipient_fingerprint": string,"token_hash": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "context_hash": string,"created_at"?: string,"encrypted_payload": string,"job_id": string,"locale": string,"payload_fingerprint": string,"recipient_fingerprint": string,"token_hash": string,"user_id": string
+                  }
+                  Update: {
+                    "context_hash"?: string,"created_at"?: string,"encrypted_payload"?: string,"job_id"?: string,"locale"?: string,"payload_fingerprint"?: string,"recipient_fingerprint"?: string,"token_hash"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_resend_pay_token_hash_user_id_recipient_fkey"
+      columns: ["token_hash","user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_unsubscribe_tokens"
+      referencedColumns: ["token_hash","user_id","recipient_fingerprint"]
+    },{
+      foreignKeyName: "study_notification_resend_payloads_job_id_user_id_fkey"
+      columns: ["job_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_jobs"
+      referencedColumns: ["id","user_id"]
+    }
                   ]
                 },"study_notification_suppressions": {
                   Row: {
@@ -1586,6 +1612,9 @@ isOneToOne: false
 "ls_notification_authorize_resend_attempt":
 { Args: { "p_allowlisted"?: boolean,"p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_locale": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
                            },
+"ls_notification_authorize_resend_payload":
+{ Args: { "p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
 "ls_notification_bind_recipient":
 { Args: { "p_expected_email": string,"p_fingerprint": string,"p_user_id": string }; Returns: undefined
                            },
@@ -1612,8 +1641,17 @@ isOneToOne: false
 "ls_notification_issue_unsubscribe_token":
 { Args: { "p_expected_email": string,"p_fingerprint": string,"p_replace"?: boolean,"p_token_hash": string,"p_user_id": string }; Returns: undefined
                            },
+"ls_notification_load_resend_payload":
+{ Args: { "p_job_id": string,"p_lease_token": string }; Returns: Json
+                           },
 "ls_notification_lock_owner":
 { Args: { "p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_prepare_resend_payload":
+{ Args: { "p_context_hash": string,"p_encrypted_payload": string,"p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_locale": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string,"p_token_hash": string }; Returns: Json
+                           },
+"ls_notification_preview_resend":
+{ Args: { "p_batch_size"?: number }; Returns: Json
                            },
 "ls_notification_project_resend":
 { Args: { "p_message_id": string }; Returns: undefined
@@ -1629,6 +1667,12 @@ isOneToOne: false
                            },
 "ls_notification_record_resend_outcome":
 { Args: { "p_delivery_id": string,"p_handoff_token": string,"p_message_id"?: string,"p_outcome": string,"p_payload_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_resend_context":
+{ Args: { "p_job_id": string }; Returns: Json
+                           },
+"ls_notification_resolve_resend_context":
+{ Args: { "p_job_id": string,"p_lease_token"?: string }; Returns: Json
                            },
 "ls_notification_revoke_unsubscribe_token":
 { Args: { "p_token_hash": string }; Returns: undefined
@@ -1658,9 +1702,11 @@ isOneToOne: false
               "consented_at": string | null,
 "created_at": string,
 "lead_minutes": number,
+"locale_confirmed_at": string | null,
 "quiet_end_local": string | null,
 "quiet_hours_enabled": boolean,
 "quiet_start_local": string | null,
+"reminder_locale": string | null,
 "study_email_enabled": boolean,
 "timezone": string | null,
 "updated_at": string,
@@ -1682,6 +1728,27 @@ isOneToOne: false
                           SetofOptions: {
         from: "*"
         to: "study_notification_task_overrides"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"ls_set_study_reminder_locale":
+{ Args: { "p_locale": string }; Returns: {
+              "consented_at": string | null,
+"created_at": string,
+"lead_minutes": number,
+"locale_confirmed_at": string | null,
+"quiet_end_local": string | null,
+"quiet_hours_enabled": boolean,
+"quiet_start_local": string | null,
+"reminder_locale": string | null,
+"study_email_enabled": boolean,
+"timezone": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_preferences"
         isOneToOne: true
         isSetofReturn: false
       } },

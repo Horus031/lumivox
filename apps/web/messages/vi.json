@@ -1,5 +1,9 @@
 {
   "studyNotifications": {
+    "localeLabel": "Ngôn ngữ email nhắc học",
+    "localePrompt": "Chọn và xác nhận ngôn ngữ",
+    "localeHint": "Bạn cần lưu ngôn ngữ email trước khi có thể nhận nhắc học. Thao tác này không bật nhắc học.",
+    "saveLocale": "Lưu ngôn ngữ email",
     "title": "Nhắc lịch học", "description": "Chọn thời điểm nhận email nhắc cho các buổi học của bạn.",
     "deliveryPaused": "Tính năng gửi lời nhắc chưa hoạt động. Lưu chỉ ghi nhận tùy chọn của bạn; chưa có lời nhắc nào được gửi.",
     "optInUnavailable": "Hiện chưa mở đăng ký nhận lời nhắc mới. Bạn vẫn có thể tắt các lời nhắc đã đăng ký.",

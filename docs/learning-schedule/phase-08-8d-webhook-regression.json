@@ -1,0 +1,142 @@
+{
+  "baseline": "cd41a9956f8de84abb80200f5de8971cb06c3553",
+  "startedAt": "2026-11-06T08:35:00.731Z",
+  "runs": [
+    {
+      "order": "acceptance-first",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    },
+    {
+      "order": "acceptance-first",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    },
+    {
+      "order": "acceptance-first",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    },
+    {
+      "order": "webhook-first",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    },
+    {
+      "order": "webhook-first",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    },
+    {
+      "order": "webhook-first",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 1571,
+        "blocker": 1570,
+        "observed": [
+          1570
+        ]
+      },
+      "sqlstate": "00000",
+      "final": {
+        "delivery": "delivered",
+        "job": "sent",
+        "receipts": 1
+      }
+    }
+  ],
+  "http": [
+    {
+      "case": "actual-next-route-invalid-signature",
+      "status": 401
+    },
+    {
+      "case": "signed-local-postgrest",
+      "status": 200
+    },
+    {
+      "case": "duplicate",
+      "status": 200
+    },
+    {
+      "case": "persistence-failure",
+      "status": 503
+    }
+  ],
+  "cleanup": true,
+  "actualNextHttp": true,
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "providerRequests": 0,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "receipts": 0
+  },
+  "completedAt": "2026-11-06T08:35:06.554Z"
+}

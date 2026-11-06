@@ -1,5 +1,108 @@
 # Phase 08 — Email Provider Integration Evidence
 
+## Step 8D — Trusted Resend Worker & Controlled Acceptance
+
+- **Tier A: MOCK / LOCAL PASS. Tier B: LIVE RESEND NOT EXECUTED.** Phase 08 is **not** marked complete or approved for public sending.
+- **Baseline HEAD:** `cd41a9956f8de84abb80200f5de8971cb06c3553`, `feature/learning-schedule-foundation`, initially clean. Execution **2026-11-06**, Asia/Bangkok; results include uncommitted 8D code. No commit/push/deploy, provider-account changes, live webhook registration or real email.
+- CLI **2.122.0** created **`20261106080118_learning_schedule_controlled_resend_worker.sql`**. Forward-only migration; earlier migrations untouched. Local migration up and clean replay **PASS, 90 applied migrations** (89 baseline), on an empty disposable DB verified before reset. Types regenerated from local with both `public` and `graphql_public` preserved.
+
+### 8D.1 — Trusted context and explicit locale
+
+- Preferences now have nullable `reminder_locale` (`en`/`vi`) plus `locale_confirmed_at`, constrained as a pair. Existing users remain **unconfirmed**, with no English fallback. Separate owner-authenticated locale command and EN/VI Settings select require an explicit save. Locale-only save never enables global consent; existing consent/quiet-hours commands retain their contract.
+- Server resolver joins Job → owned Session/Task/Schedule → Auth → preferences; recipient comes from current Auth, and title/timing/key from persisted rows. No recipient/title/locale/owner override is accepted by the dispatcher API. Verified identity, exact recipient allowlist, explicit locale, eligibility and known suppression are checked before preparation; final handoff rechecks current DB state.
+- Allowlist is server configuration, max **20 exact addresses**, no wildcard/domain entries. Policy matches 8B HMAC identity: domain lowercased, local part case preserved. The public caller cannot supply `p_allowlisted`; the worker uses the trusted allowlist before its service-only authorization command.
+- Context fingerprint captures rendering inputs and lifecycle identity; UTC-normalized timestamp serialization is invariant across tested database connection timezones. Changed context/locale/capability makes an old prepared payload ineligible for handoff rather than silently rebuilding it.
+
+### 8D.2 — Immutable payload and separate worker
+
+- New `resend-reminder-dispatcher.ts`; Phase 07 fake dispatcher/provider left unchanged. Operational store uses committed PostgREST RPCs for claim, trusted resolve, preparation, handoff, outcome and expired-lease reconciliation. No network request runs inside an open database transaction.
+- Private RLS `study_notification_resend_payloads`: one immutable snapshot per Job, composite owner constraints, context/payload fingerprints, explicit locale, token hash and encrypted envelope. Browser/anon cannot read it; service role has SELECT only and writes via trusted commands. UPDATE is rejected. Token-hash issuance and snapshot INSERT commit **atomically** before handoff.
+- Snapshot uses **AES-256-GCM**, random 12-byte IV, 16-byte tag and Job-bound associated data. Strict canonical base64url decoding, authenticated decryption and plaintext SHA-256 verification precede authorization. Raw email/capability is not stored in plaintext; token registry remains hash-only. Ciphertext contains the recoverable email/capability, protected by private access and a separate server-only 32-byte encryption key. This is encryption at the application boundary, not a claim that encrypted capability material does not exist in DB.
+- Concurrent preparation returns the **first stored snapshot**, never the losing candidate. Subsequent attempts load/decrypt that snapshot; they keep the same capability, body, fingerprint and persisted idempotency key. Invalid/revoked capability, changed sender/origin/context or a lost/wrong key holds the Job for investigation, without generating a replacement payload after handoff.
+- Service-only prepared-payload authorization verifies snapshot/current context/capability, then delegates existing real-provider eligibility checks: dispatch gate, live lease, verified Auth destination, Session/current schedule, consent, suppression and quiet hours. Exactly one durable `submitting` attempt grants submission. Authorization replay gives no second capability.
+- Accepted records Email ID through existing outcome persistence. Timeout, 5xx, concurrent-key 409 or failed outcome persistence never trigger another send. An expired submitting lease is reconciled as uncertain, not requeued. **Conservative v1 retry policy:** all confirmed rejections are persisted terminally too; adapter retryability is classified but automated rate-limit/backoff retries are not enabled. Controlled/manual reconciliation and key rotation remain separate work.
+
+### 8D.3 — Headers and authenticated endpoint
+
+- `ReminderEmail` allows a specific `unsubscribeUrl` field, not arbitrary headers. Adapter derives exactly **List-Unsubscribe** and **List-Unsubscribe-Post** from it. HTTPS origin/path/token validation plus raw control-character rejection prevents header injection. No CC/BCC/attachments/private headers are admitted; existing adapter regression retained.
+- Node **POST-only** `/api/internal/study-reminders/dispatch`, independent Bearer secret checked with fixed-size SHA-256 digests and `timingSafeEqual`. No cookies/user session/query token authorize dispatch. JSON command accepts only `dryRun` and `batchSize` (1–5), actual body max **512 bytes / 2 seconds**.
+- Real requests fail closed when `STUDY_REMINDER_REAL_SEND_ENABLED` is not exactly `true`, allowlist/config/key is missing, or DB gate is OFF. SDK construction is lazy and cannot occur for dry-run/OFF/ineligible cases. Dedicated key only; Send API base URL pinned to `https://api.resend.com`. Real dispatch refuses `RESEND_DEBUG=true` to avoid SDK diagnostic leakage.
+- Dry-run is authenticated **read-only inspection**, permitted with sending/DB gates OFF: no claim, token, snapshot, handoff or provider call. Batch logs contain only batch ID, counts, duration and safe classification; API returns aggregate counts, no Job/user/email/provider diagnostics.
+- Per-DB-call timeout **4s**, SDK timeout **10s**, worker soft budget **30s**, with **19s remaining required before handoff**, route max duration **45s**. Unused leases are left for bounded recovery rather than submitted after the budget.
+- Required server-only operational config names: `STUDY_REMINDER_DISPATCH_SECRET`, `STUDY_REMINDER_TEST_RECIPIENTS`, `STUDY_REMINDER_RECIPIENT_HMAC_KEY`, `STUDY_REMINDER_PAYLOAD_ENCRYPTION_KEY` (canonical base64 32 bytes), `STUDY_REMINDER_FROM`, `STUDY_REMINDER_TRUSTED_ORIGIN`, and dedicated `RESEND_STUDY_REMINDER_API_KEY`. HMAC policy/key must remain consistent with 8B–8C. Encryption v1 key must be retained while snapshots need reconciliation; rotation is not an implemented operator workflow. No values were written into Git or operational env files.
+
+### Tier A acceptance — executed
+
+| Case | Actual result |
+| --- | --- |
+| RI-01 | **PASS**, flag OFF produces no claim/preparation/submission; actual authenticated HTTP real request returns **503**. |
+| RI-02 | **PASS**, DB gate OFF yields zero submissions/claims. Authenticated read-only dry-run remains available. |
+| RI-03 | **PASS**, exact-address allowlist rejects unrelated/case-different local parts and wildcard/domain config; no handoff. |
+| RI-04 | **PASS**, real Auth fixture with verification removed is refused before preparation/provider. |
+| RI-05 | **PASS**, active recipient suppression stops the worker; final authorization remains the independent fence. |
+| RI-06 | **PASS**, no implicit locale; actual EN/VI browser Settings actions persist confirmation, and respective deliveries snapshot locale. New unconfirmed user is dry-run ineligible. |
+| RI-07 | **PASS**, actual SDK adapter forwards exactly two fixed headers. Worker-issued capability is GET without mutation, then POSTed through the actual local unsubscribe endpoint. |
+| RI-08 | **PASS**, three two-connection preparation races with different candidates and connection timezones preserve one ciphertext/capability/fingerprint and one token. Final actual worker submits that original snapshot once. |
+| RI-09 | **PASS, MOCK ACCEPTANCE**, injected SDK returns ID; actual outcome RPC persists it. The local signed callback correlates that same ID and projects delivered. This is not live Resend acceptance/delivery. |
+| RI-10 | **PASS**, injected SDK timeout persists uncertain, Job failed/held, no automatic claim/resend. Persistence failure never triggers another provider request. |
+| RI-11 | **PASS**, SDK 409 remains on the persisted key, uncertain for concurrent-key response; no key rotation or blind retry. Existing mismatch-409 adapter coverage retained. |
+| RI-12 | **PASS**, unsubscribe transaction A holds owner coordinator while actual worker B authorizes; after commit B gets no capability/submission. |
+| RI-13 | **PASS**, opt-out after committed handoff preserves cancellation fence and actual mock accepted outcome. HTTP pipeline also consumes the real capability during injected SDK handoff, before accepted outcome persistence. |
+| RI-14 | **PASS**, two actual workers compete at PostgreSQL claim: busy-owner worker promptly skips, first worker commits and alone submits. No blocker is expected for SKIP behavior. |
+| RI-15 | **PASS**, actual HTTP missing/wrong Bearer **401**, GET **405**, caller-selected recipient **400** before DB/SDK activity. |
+| RI-16 | **PASS**, final fixtures zero, dispatch/Sweep OFF, reminder Cron zero, real provider requests zero. |
+
+- [`phase-08-resend-worker.json`](./phase-08-resend-worker.json): **23 case executions** using the actual repository worker/store/SDK adapter with only `emails.send` injected. Includes **12 repeated concurrency cases** (RI-08/12/13/14 ×3), **9 observed `pg_blocking_pids()` blockers**, three prompt SKIP cases, payload/source fingerprints, final states and cleanup. Standalone harness transpiles actual TS modules to ignored `.next/step-8d-runtime`; it does not implement a substitute worker. Full TypeScript checking is a separate gate.
+- [`phase-08-resend-worker-http.json`](./phase-08-resend-worker-http.json): **10 HTTP/Chromium checks PASS** on owned `127.0.0.1:3110`, including locale Settings Server Actions, OFF/auth/body gates, read-only dry-run, full mock worker → real unsubscribe HTTP → accepted persistence → signed callback. Dry-run creates **zero** tokens/snapshots/attempts. One SDK mock submission in the full pipeline; **zero real provider requests**. Two Analytics requests from ordinary Settings pages were intercepted/blocked, not sent externally. Safe batch log fields checked. EN/VI **390×844** screenshots under `evidence/step-8d/` visually inspected; no horizontal overflow.
+- [`phase-08-8d-webhook-regression.json`](./phase-08-8d-webhook-regression.json): existing signed HTTP/webhook regression **6 two-connection races / 6 blockers PASS**, cleanup/OFF/zero provider requests. Historical 8B/8C artifacts retained separately.
+
+### Commands / quality gates
+
+```powershell
+# repo root; local-only Supabase CLI 2.122.0
+supabase migration new learning_schedule_controlled_resend_worker
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase test db --local
+supabase gen types typescript --local
+node scripts/test-learning-schedule-resend-worker.mjs
+node scripts/test-learning-schedule-resend-worker-http.mjs
+node --experimental-strip-types scripts/test-learning-schedule-resend-webhooks.mjs --next-http --8d-regression
+supabase db advisors --local --type security --fail-on none --output-format json
+
+# apps/web
+node node_modules/vitest/vitest.mjs run features/learning-schedule/notifications/ --maxWorkers=2 --reporter=dot
+node node_modules/vitest/vitest.mjs run features/learning-schedule/notifications/ features/learning-schedule/notification-preferences.actions.test.ts features/learning-schedule/components/study-notification-settings.test.tsx --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+```
+
+| Gate | Actual final result |
+| --- | --- |
+| Clean replay | **90 migrations PASS** |
+| pgTAP | **881 PASS / 32 files** reported, one existing fixture-only SQL entry intentionally skipped; new worker suite **30 assertions**, baseline 851 retained |
+| Notifications Vitest | **199 PASS / 9 files / 7.90s** |
+| Notifications + Actions/Settings | **253 PASS / 11 files / 12.09s** |
+| Full Vitest | **1021 PASS / 26 skipped**, **88 files passed / 5 skipped (93)**, **241.66s**, start **15:31:56 UTC+7** |
+| ESLint | **PASS**, zero errors, one existing `use-focus-v2-audio.ts:104` missing-`projection` warning |
+| TypeScript | **PASS**, standalone `--noEmit --incremental false --pretty false` |
+| Production build | **PASS**, Next **16.2.6**, compile **20.7s**, TypeScript **42s**, **105 pages / 1227ms** |
+| Security advisors | One pre-existing `public.set_updated_at` mutable-search-path WARN, no new notification findings |
+
+- Build uses local Supabase process env and inert `G-TESTPRIVACY`; `.env.local` unchanged and `.next/dev` preserved. `--ignore-scripts` skips only prebuild cleanup; actual `next build` ran. No dependency changes.
+- Initial checks caught the expanded missing-row locale contract in an old assertion, a noncanonical base64url envelope edge, PostgREST abort-signal ordering and an overly specific environment test type. Corrected with retained/expanded assertions and final regression above; no test was disabled to obtain PASS.
+- Final DB read: **90 migrations**, **0 users / Tasks / jobs / deliveries / payloads / tokens / receipts / identity bindings / suppressions**, dispatch **OFF**, Sweep **OFF**, **0 reminder Cron**. Owned test servers stopped. Fixture tests temporarily enabled the DB gate only while invoking injected transports; owned HTTP server real-send flag stayed **false** and no operational flags/env were edited.
+
+### Tier B — LIVE RESEND NOT EXECUTED / remaining gates
+
+- The supplied guide requires **“explicit approval cho recipient và môi trường gửi thử.”** No approved live recipient/environment was supplied. Therefore no sending-domain/key provisioning, live send, live webhook setup, deployment or provider account mutation was attempted. Local mock PASS does not satisfy live acceptance or complete Phase 08.
+- **NOT EXECUTED:** verified sending domain, scoped dedicated live API key, approved exact test recipients, real HTTPS webhook/unsubscribe reachability, external reverse-proxy/deployment access-log **query-token redaction**, SPF/DKIM/DMARC, DKIM coverage of both unsubscribe headers from a received email, live bounce/complaint safety and restoration of a real controlled window. Application batch logs are sanitized locally; that is not proof that an external ingress/access log redacts capability URLs.
+- Before Tier B, review the concrete local code/artifacts and the approved environment/recipient list, confirm external log redaction and sender/header infrastructure, then enable flags/gate only for that controlled window and restore OFF afterward. No recurring Cron is created. Accepted must not be called delivered/inbox without corresponding external evidence.
+- Manual uncertain reconciliation, automatic known-nonacceptance backoff, encrypted snapshot key rotation/retention and production process-kill/load tests are not implemented/claimed here. Unknown outcomes never authorize a fresh key/payload or resend after Resend's 24-hour deduplication window. Capability landing privacy limits and separate suppression reversal controls from 8C remain in force.
+- References checked: [Resend Send API/custom headers](https://resend.com/docs/api-reference/emails/send-email), [Resend idempotency window](https://resend.com/docs/dashboard/emails/idempotency-keys). User guide's uncertainty/approval constraints override generic retry recommendations in the email skill.
+
 ## Step 8C — One-Click Unsubscribe & Suppression
 
 - **Result: LOCAL PASS**, unsubscribe/suppression readiness only; Phase 08 and real sending remain unapproved.

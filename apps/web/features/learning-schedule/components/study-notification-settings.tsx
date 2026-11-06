@@ -4,7 +4,7 @@ import { useId, useRef, useState, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { getStudyNotificationPreferencesAction, saveStudyNotificationPreferencesAction } from "../notification-preferences.actions";
+import { getStudyNotificationPreferencesAction, saveStudyNotificationPreferencesAction, saveStudyReminderLocaleAction } from "../notification-preferences.actions";
 import { studyNotificationPreferencesSchema, type StudyNotificationPreferences, type StudyNotificationPreferencesInput } from "../notification-preferences.schemas";
 
 type Props = { initialPreferences?: StudyNotificationPreferences; initialError?: string; allowOptIn?: boolean };
@@ -19,7 +19,8 @@ export function StudyNotificationSettings({ initialPreferences, initialError, al
   const [saved, setSaved] = useState(initialPreferences ?? null);
   const [draft, setDraft] = useState(() => initialPreferences ? command(initialPreferences) : null);
   const [error, setError] = useState(initialError ? "loadFailed" : null);
-  const [busy, setBusy] = useState<"saving" | "loading" | null>(null);
+  const [busy, setBusy] = useState<"saving" | "loading" | "locale" | null>(null);
+  const [localeDraft,setLocaleDraft] = useState(initialPreferences?.reminderLocale ?? "");
   const [success, setSuccess] = useState(false);
   const inFlight = useRef(false);
   const dirty = saved && draft && JSON.stringify(command(saved)) !== JSON.stringify(draft);
@@ -33,6 +34,7 @@ export function StudyNotificationSettings({ initialPreferences, initialError, al
       const result = await getStudyNotificationPreferencesAction();
       if (!result.success) { setError("loadFailed"); return; }
       setSaved(result.preferences); setDraft(command(result.preferences));
+      setLocaleDraft(result.preferences.reminderLocale ?? "");
     } catch { setError("loadFailed"); }
     finally { setBusy(null); inFlight.current = false; }
   }
@@ -53,6 +55,16 @@ export function StudyNotificationSettings({ initialPreferences, initialError, al
       } catch { setError("saveFailed"); }
       finally { inFlight.current = false; setBusy(null); }
     })();
+  }
+  async function saveLocale(event:FormEvent) {
+    event.preventDefault();
+    if(inFlight.current || (localeDraft!=="en"&&localeDraft!=="vi")) return;
+    inFlight.current=true;setBusy("locale");setError(null);setSuccess(false);
+    try {
+      const result=await saveStudyReminderLocaleAction({locale:localeDraft});
+      if(!result.success){setError(result.code);return;}
+      setSaved(result.preferences);setSuccess(true);toast.success(t("saved"));
+    }catch{setError("saveFailed");}finally{inFlight.current=false;setBusy(null);}
   }
   return <section aria-labelledby={`${id}-title`} aria-busy={busy !== null} data-testid="study-notification-settings" className="min-w-0 space-y-4 border-t border-border pt-card [overflow-wrap:anywhere]">
     <h2 id={`${id}-title`} className="text-section font-semibold">{t("title")}</h2>
@@ -87,6 +99,14 @@ export function StudyNotificationSettings({ initialPreferences, initialError, al
         <Button type="submit" disabled={!dirty || busy !== null}>{busy === "saving" ? t("saving") : t("save")}</Button>
       </fieldset>
     </form> : <p role="status" className="text-sm">{busy ? t("loading") : t("noData")}</p>}
+    {saved && <form onSubmit={event=>void saveLocale(event)} className="space-y-3">
+      <label className="block space-y-1"><span className="font-medium">{t("localeLabel")}</span>
+        <select name="reminderLocale" value={localeDraft} disabled={busy!==null} onChange={event=>{setLocaleDraft(event.target.value);setSuccess(false);}} className="w-full rounded-md border border-input bg-background p-2">
+          <option value="">{t("localePrompt")}</option><option value="en">English</option><option value="vi">Tiếng Việt</option>
+        </select>
+      </label><p className="text-sm text-muted-foreground">{t("localeHint")}</p>
+      <Button type="submit" variant="outline" disabled={busy!==null||!localeDraft}>{t("saveLocale")}</Button>
+    </form>}
     <Button type="button" variant="outline" disabled={busy !== null} onClick={() => void reload()}>{busy === "loading" ? t("loading") : t("checkLatest")}</Button>
     <p className="text-sm text-muted-foreground">{t("checkLatestHint")}</p>
     <p role="status" aria-live="polite" className="text-sm">{success ? t("saved") : busy === "saving" ? t("saving") : ""}</p>

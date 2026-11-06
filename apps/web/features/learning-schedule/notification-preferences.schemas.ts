@@ -14,4 +14,4 @@ export const studyNotificationPreferencesSchema = z.object({
 });
 export const studyNotificationTaskOverrideSchema = z.object({ taskId: z.string().uuid(), enabled: z.boolean() }).strict();
 export type StudyNotificationPreferencesInput = z.infer<typeof studyNotificationPreferencesSchema>;
-export type StudyNotificationPreferences = StudyNotificationPreferencesInput & { consentedAt: string | null; updatedAt: string | null };
+export type StudyNotificationPreferences = StudyNotificationPreferencesInput & { consentedAt: string | null; updatedAt: string | null; reminderLocale?: "en"|"vi"|null; localeConfirmedAt?: string|null };

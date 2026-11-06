@@ -18,7 +18,8 @@ export default async function proxy(request: NextRequest) {
   // Public capability endpoints: no session refresh or locale redirect.
   // Handlers authorize with a raw-body signature or opaque unsubscribe token.
   if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders" ||
-    request.nextUrl.pathname === "/api/study-reminders/unsubscribe") {
+    request.nextUrl.pathname === "/api/study-reminders/unsubscribe" ||
+    request.nextUrl.pathname === "/api/internal/study-reminders/dispatch") {
     return NextResponse.next();
   }
   if (isUnlocalizedAppRoute(request.nextUrl.pathname)) {

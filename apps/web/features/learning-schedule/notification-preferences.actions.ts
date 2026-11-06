@@ -2,6 +2,7 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { Database } from "@/types/database.types";
 import { studyNotificationPreferencesSchema, studyNotificationTaskOverrideSchema, type StudyNotificationPreferences } from "./notification-preferences.schemas";
+import { z } from "zod";
 
 type Failure = { success: false; code: "invalidInput" | "notAuthorized" | "loadFailed" | "saveFailed" | "conflictRetryable" };
 type PreferencesResult = { success: true; preferences: StudyNotificationPreferences } | Failure;
@@ -10,7 +11,9 @@ function normalize(row: Row | null): StudyNotificationPreferences {
   return { studyEmailEnabled: row?.study_email_enabled ?? false, leadMinutes: row?.lead_minutes ?? 15,
     quietHoursEnabled: row?.quiet_hours_enabled ?? false, quietStartLocal: row?.quiet_start_local?.slice(0, 5) ?? null,
     quietEndLocal: row?.quiet_end_local?.slice(0, 5) ?? null, timezone: row?.timezone ?? null,
-    consentedAt: row?.consented_at ?? null, updatedAt: row?.updated_at ?? null };
+    consentedAt: row?.consented_at ?? null, updatedAt: row?.updated_at ?? null,
+    reminderLocale: row?.reminder_locale === "en" || row?.reminder_locale === "vi" ? row.reminder_locale : null,
+    localeConfirmedAt: row?.locale_confirmed_at ?? null };
 }
 function failure(code: string): Failure {
   return { success: false, code: code === "55P03" ? "conflictRetryable" : code === "42501" ? "notAuthorized" : code.startsWith("22") || code === "23514" ? "invalidInput" : "saveFailed" };
@@ -44,6 +47,16 @@ export async function getStudyNotificationPreferencesAction(): Promise<Preferenc
     // A missing row is opt-out; reading never inserts a preference or consent.
     return { success: true, preferences: normalize(result.data) };
   } catch { return { success: false, code: "loadFailed" }; }
+}
+export async function saveStudyReminderLocaleAction(raw:unknown):Promise<PreferencesResult> {
+  const parsed=z.object({locale:z.enum(["en","vi"])}).strict().safeParse(raw);
+  if(!parsed.success) return {success:false,code:"invalidInput"};
+  let context;try{context=await requireUser();}catch{return {success:false,code:"notAuthorized"};}
+  try {
+    const {data,error}=await context.supabase.rpc("ls_set_study_reminder_locale",{p_locale:parsed.data.locale}).abortSignal(AbortSignal.timeout(5000));
+    if(error) return failure(error.code);
+    return data?{success:true,preferences:normalize(data)}:{success:false,code:"saveFailed"};
+  }catch{return {success:false,code:"saveFailed"};}
 }
 export async function saveStudyNotificationPreferencesAction(raw: unknown): Promise<PreferencesResult> {
   const parsed = studyNotificationPreferencesSchema.safeParse(raw);

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ auth: vi.fn() }));
 vi.mock("@/lib/auth/require-user", () => ({ requireUser: mocks.auth }));
-import { getStudyNotificationPreferencesAction, getStudyNotificationTaskOverrideAction, saveStudyNotificationPreferencesAction, saveStudyNotificationTaskOverrideAction } from "./notification-preferences.actions";
+import { getStudyNotificationPreferencesAction, getStudyNotificationTaskOverrideAction, saveStudyNotificationPreferencesAction, saveStudyNotificationTaskOverrideAction,saveStudyReminderLocaleAction } from "./notification-preferences.actions";
 const taskId = "7a100000-0000-4000-8000-000000000001";
 const input = { studyEmailEnabled: true, leadMinutes: 15, quietHoursEnabled: false, quietStartLocal: null, quietEndLocal: null, timezone: null };
 const row = { user_id: "owner-a", study_email_enabled: true, lead_minutes: 15, quiet_hours_enabled: false,
@@ -13,8 +13,16 @@ beforeEach(() => {
   mocks.auth.mockResolvedValue({ supabase: { rpc, from }, user: { id: "owner-a" } });
 });
 describe("Study notification consent Server Actions", () => {
+  it.each(["en","vi"])("8D explicit locale %s uses separate owned command",async locale=>{
+    abort.mockResolvedValue({data:{...row,reminder_locale:locale,locale_confirmed_at:row.updated_at},error:null});
+    expect(await saveStudyReminderLocaleAction({locale})).toMatchObject({success:true,preferences:{reminderLocale:locale,localeConfirmedAt:row.updated_at}});
+    expect(rpc).toHaveBeenCalledExactlyOnceWith("ls_set_study_reminder_locale",{p_locale:locale});
+  });
+  it.each([{locale:"fr"},{locale:"en",userId:"forged"},{}])("8D invalid locale command denied %j",async raw=>{
+    expect(await saveStudyReminderLocaleAction(raw)).toEqual({success:false,code:"invalidInput"});expect(rpc).not.toHaveBeenCalled();
+  });
   it("NP-01 missing row returns default OFF without INSERT or consent", async () => {
-    expect(await getStudyNotificationPreferencesAction()).toEqual({ success: true, preferences: { ...input, studyEmailEnabled: false, consentedAt: null, updatedAt: null } });
+    expect(await getStudyNotificationPreferencesAction()).toEqual({ success: true, preferences: { ...input, studyEmailEnabled: false, consentedAt: null, updatedAt: null,reminderLocale:null,localeConfirmedAt:null } });
     expect(from).toHaveBeenCalledExactlyOnceWith("study_notification_preferences"); expect(eq).toHaveBeenCalledExactlyOnceWith("user_id", "owner-a"); expect(rpc).not.toHaveBeenCalled();
   });
   it("reads only the authenticated owner's persisted DB consent", async () => {

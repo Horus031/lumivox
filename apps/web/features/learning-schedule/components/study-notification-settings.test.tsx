@@ -3,9 +3,9 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { StudyNotificationPreferences } from "../notification-preferences.schemas";
 
-const mocks = vi.hoisted(() => ({ save: vi.fn(), read: vi.fn(), taskRead: vi.fn(), taskSave: vi.fn(), success: vi.fn(), locale: "en" }));
+const mocks = vi.hoisted(() => ({ save: vi.fn(), read: vi.fn(), taskRead: vi.fn(), taskSave: vi.fn(), saveLocale:vi.fn(), success: vi.fn(), locale: "en" }));
 vi.mock("../notification-preferences.actions", () => ({ saveStudyNotificationPreferencesAction: mocks.save, getStudyNotificationPreferencesAction: mocks.read,
-  getStudyNotificationTaskOverrideAction: mocks.taskRead, saveStudyNotificationTaskOverrideAction: mocks.taskSave }));
+  getStudyNotificationTaskOverrideAction: mocks.taskRead, saveStudyNotificationTaskOverrideAction: mocks.taskSave,saveStudyReminderLocaleAction:mocks.saveLocale }));
 vi.mock("sonner", () => ({ toast: { success: mocks.success } }));
 vi.mock("next-intl", async original => {
   const actual = await original<typeof import("next-intl")>();
@@ -44,6 +44,14 @@ describe("Reminder settings UI", () => {
     expect(checkbox().checked).toBe(false); expect(button("Save reminder settings").disabled).toBe(true);
     expect(mocks.read).not.toHaveBeenCalled(); expect(mocks.save).not.toHaveBeenCalled();
     expect(host.textContent).toContain("no reminders are sent");
+  });
+  it("8D has no default locale; explicit save does not toggle global consent",async()=>{
+    await render(<StudyNotificationSettings initialPreferences={off} allowOptIn />);
+    const select=host.querySelector<HTMLSelectElement>('[name="reminderLocale"]')!;expect(select.value).toBe("");
+    mocks.saveLocale.mockResolvedValue({success:true,preferences:{...off,reminderLocale:"vi",localeConfirmedAt:"2026-11-06T00:00:00Z"}});
+    await act(async()=>{select.value="vi";select.dispatchEvent(new Event("change",{bubbles:true}));});
+    await click(button("Save email language"));
+    expect(mocks.saveLocale).toHaveBeenCalledWith({locale:"vi"});expect(checkbox().checked).toBe(false);expect(mocks.save).not.toHaveBeenCalled();
   });
   it("independent UI flag disables opt-in by default but allows existing opt-out", async () => {
     await render(<StudyNotificationSettings initialPreferences={off} />); expect(checkbox().disabled).toBe(true);

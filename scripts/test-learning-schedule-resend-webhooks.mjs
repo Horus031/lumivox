@@ -328,7 +328,7 @@ try {
   assert.deepEqual(counts,{users:0,tasks:0,jobs:0,deliveries:0,receipts:0}); report.cleanup=true;report.finalCounts=counts;
  } finally {for(const c of [a,b,observer]) await c.close();}
  report.completedAt=new Date().toISOString();
- const reportName=process.argv.includes('--8c-regression')?'phase-08-8c-webhook-regression.json':'phase-08-resend-webhooks.json';
+ const reportName=process.argv.includes('--8d-regression')?'phase-08-8d-webhook-regression.json':process.argv.includes('--8c-regression')?'phase-08-8c-webhook-regression.json':'phase-08-resend-webhooks.json';
  await writeFile(resolve(root,'docs/learning-schedule',reportName),JSON.stringify(report,null,2)+'\n');
 }
 console.log(`PASS: ${report.runs.length} two-connection races, ${report.runs.length} observed blockers, signed local persistence, clean fixtures, zero provider requests`);

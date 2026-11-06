@@ -10,10 +10,15 @@ const sender = singleLine.max(320).refine(value => {
   const address = value.match(/^[^<>]+ <([^<>\s]+)>$/)?.[1] ?? value;
   return z.email().safeParse(address).success;
 });
-const emailSchema = z.object({
+export const reminderEmailSchema = z.object({
   recipient: z.email().max(254), from: sender, subject: singleLine.max(250),
   html: z.string().min(1).max(100000), text: z.string().min(1).max(100000),
   idempotencyKey: z.string().regex(/^[\x21-\x7e]{1,256}$/),
+  unsubscribeUrl: singleLine.max(2048).refine(value => {
+    try {const url = new URL(value); return url.protocol === "https:" && !url.username && !url.password && !url.hash &&
+      url.pathname === "/api/study-reminders/unsubscribe" && url.searchParams.getAll("token").length === 1 &&
+      [...url.searchParams.keys()].length === 1 && /^[A-Za-z0-9_-]{43}$/.test(url.searchParams.get("token") ?? "");} catch {return false;}
+  }).optional(),
 }).strict();
 const providerError = z.object({ name: z.string(), statusCode: z.number().int().nullable() });
 const messageId = z.string().trim().regex(/^[A-Za-z0-9][A-Za-z0-9_-]{0,255}$/);
@@ -33,7 +38,7 @@ export class ResendReminderProvider implements EmailTransport {
   }
 
   async send(raw: unknown): Promise<SubmissionResult> {
-    const parsed = emailSchema.safeParse(raw);
+    const parsed = reminderEmailSchema.safeParse(raw);
     if (!parsed.success) return { kind: "rejected", code: "invalid_request", retryable: false };
     const email = parsed.data;
     if (email.from !== this.approvedFrom) return { kind: "rejected", code: "sender_not_approved", retryable: false };
@@ -42,6 +47,7 @@ export class ResendReminderProvider implements EmailTransport {
       // headers, document contents or caller-selected endpoint can leak through.
       const result: unknown = await this.client.emails.send({
         from: email.from, to: [email.recipient], subject: email.subject, html: email.html, text: email.text,
+        ...(email.unsubscribeUrl ? { headers: { "List-Unsubscribe": `<${email.unsubscribeUrl}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } } : {}),
       }, { idempotencyKey: email.idempotencyKey, signal: AbortSignal.timeout(10000) });
       if (!result || typeof result !== "object" || !("error" in result) || !("data" in result)) {
         return { kind: "uncertain", code: "invalid_provider_response" };

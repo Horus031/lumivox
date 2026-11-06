@@ -8,6 +8,8 @@ export type ReminderEmail = Readonly<{
   html: string;
   text: string;
   idempotencyKey: string;
+  /** Trusted issuer only. Adapter derives exactly two fixed RFC 8058 headers. */
+  unsubscribeUrl?: string;
 }>;
 
 export type ReminderEmailContent = Pick<ReminderEmail, "subject" | "html" | "text">;

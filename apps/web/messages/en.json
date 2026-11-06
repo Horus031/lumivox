@@ -1,5 +1,9 @@
 {
   "studyNotifications": {
+    "localeLabel": "Reminder email language",
+    "localePrompt": "Choose and confirm a language",
+    "localeHint": "Reminders cannot be sent until you explicitly save an email language. This does not enable reminders.",
+    "saveLocale": "Save email language",
     "title": "Study reminders", "description": "Choose when to receive email reminders for your study sessions.",
     "deliveryPaused": "Reminder delivery is not active yet. Saving records your preferences; no reminders are sent.",
     "optInUnavailable": "New reminder sign-ups are not available yet. You can still turn existing reminders off.",
