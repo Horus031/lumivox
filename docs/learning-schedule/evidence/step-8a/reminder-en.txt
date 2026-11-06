@@ -1,0 +1,21 @@
+Lumivox Study Reminder
+
+Hello,
+
+Your upcoming study session:
+
+Review React Hooks
+
+November 7, 2026
+
+19:00–20:00 · Asia/Ho_Chi_Minh
+
+Reminder 15 minutes before your session.
+
+Open your study task in Lumivox: https://app.lumivox.test/en/workspace?task=7e000000-0000-4000-8000-000000000001
+
+You received this email because you enabled study reminders in Lumivox.
+
+Change reminder settings: https://app.lumivox.test/en/settings
+
+Unsubscribe from study reminders: https://app.lumivox.test/reminder-unsubscribe?token=preview-only
