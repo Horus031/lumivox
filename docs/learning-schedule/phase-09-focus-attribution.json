@@ -1,0 +1,305 @@
+{
+  "baseline": "b794956553d2c9e0e44015f9b0c76ed1955dd7c9",
+  "startedAt": "2026-11-06T19:25:29.998Z",
+  "runs": [
+    {
+      "case": "same-pair",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "8fd0dcd8-329e-414c-bd87-d91b8b91962f",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "same-pair",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "5288279e-696e-49c0-9c8b-abb3763cdba2",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "same-pair",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "2a00b1e0-2e9a-4963-81a2-eebd957cefd5",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "different-study",
+      "repeat": 1,
+      "sqlstate": "23505",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "39f3a9cb-cc41-4848-9e0d-115ca52d8dd5",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "different-study",
+      "repeat": 2,
+      "sqlstate": "23505",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "bf5e156c-358f-47e2-b6b8-e5c26624fb08",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "different-study",
+      "repeat": 3,
+      "sqlstate": "23505",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "a74fa7cd-112a-4241-aeef-4ec90c3d4d89",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "rollback-winner",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "4755db60-5a78-416e-b99f-b9f5e7367809",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "rollback-winner",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "156c5728-9340-4c8a-8674-39b7aead7a97",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "rollback-winner",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "retrySqlstate": null,
+      "blocker": {
+        "waiter": 510,
+        "blocker": 509,
+        "observed": [
+          509
+        ]
+      },
+      "elapsedMs": null,
+      "final": {
+        "links": 1,
+        "study": "ecca1c43-4938-4a4a-9455-01cdcc306478",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "busy-focus",
+      "repeat": 1,
+      "sqlstate": "55P03",
+      "retrySqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 2,
+      "final": {
+        "links": 1,
+        "study": "0b4f500a-f9cd-49cc-a55f-436656917e60",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "busy-focus",
+      "repeat": 2,
+      "sqlstate": "55P03",
+      "retrySqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 2,
+      "final": {
+        "links": 1,
+        "study": "4ca526ff-11aa-4ec6-b38b-3cffb22e432e",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    },
+    {
+      "case": "busy-focus",
+      "repeat": 3,
+      "sqlstate": "55P03",
+      "retrySqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 1,
+      "final": {
+        "links": 1,
+        "study": "5aee3cbc-a211-4fa5-9281-281351f07b7e",
+        "studyStatuses": [
+          "scheduled",
+          "scheduled"
+        ],
+        "focusStatus": "ongoing"
+      }
+    }
+  ],
+  "http": [
+    {
+      "case": "owned link/exact replay",
+      "sqlstate": "00000"
+    },
+    {
+      "case": "different Study conflict",
+      "sqlstate": "23505"
+    },
+    {
+      "case": "cross-owner denial",
+      "sqlstate": "22023"
+    },
+    {
+      "case": "owner read/other isolated",
+      "ownerRows": 1,
+      "otherRows": 0
+    },
+    {
+      "case": "browser mutation denial",
+      "sqlstate": "42501"
+    },
+    {
+      "case": "anonymous denial",
+      "sqlstate": "42501"
+    }
+  ],
+  "cleanup": true,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "studySessions": 0,
+    "focusSessions": 0,
+    "attributions": 0
+  },
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "completedAt": "2026-11-06T19:25:33.440Z"
+}

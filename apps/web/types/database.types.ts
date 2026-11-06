@@ -1023,6 +1023,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_study_focus_attributions": {
+                  Row: {
+                    "attribution_source": string,"created_at": string,"focus_session_id": string,"id": string,"study_session_id": string,"task_id": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attribution_source"?: string,"created_at"?: string,"focus_session_id": string,"id"?: string,"study_session_id": string,"task_id": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attribution_source"?: string,"created_at"?: string,"focus_session_id"?: string,"id"?: string,"study_session_id"?: string,"task_id"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_study_focus_attributions_focus_session_id_user_id_tas_fkey"
+      columns: ["focus_session_id","user_id","task_id"]
+isOneToOne: false
+      referencedRelation: "focus_sessions"
+      referencedColumns: ["id","user_id","task_id"]
+    },{
+      foreignKeyName: "task_study_focus_attributions_study_session_id_user_id_tas_fkey"
+      columns: ["study_session_id","user_id","task_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id","task_id"]
+    }
+                  ]
                 },"task_study_schedule_revisions": {
                   Row: {
                     "change_reason": string | null,"changed_by": string | null,"created_at": string,"ends_on": string,"id": string,"revision": number,"schedule_id": string,"slots_snapshot": NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
@@ -1602,6 +1628,9 @@ isOneToOne: false
                            },
 "ls_earliest_local_instant":
 { Args: { "p_local_date": string,"p_local_time": string,"p_timezone": string }; Returns: string
+                           },
+"ls_link_study_focus":
+{ Args: { "p_focus_session_id": string,"p_study_session_id": string }; Returns: string
                            },
 "ls_mark_missed_batch":
 { Args: { "p_batch_size"?: number }; Returns: Json
