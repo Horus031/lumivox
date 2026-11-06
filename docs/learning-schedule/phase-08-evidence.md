@@ -1,5 +1,80 @@
 # Phase 08 — Email Provider Integration Evidence
 
+## Step 8B — Resend Persistence & Signed Webhooks
+
+- **Result: LOCAL PASS**, persistence/webhook acceptance only; Phase 08 and real sending are not approved.
+- **Baseline HEAD:** `0a0727f2f69a67126cba2f0bebc71a3b960fd1c1`, branch `feature/learning-schedule-foundation`, initially clean. Executed **2026-11-06**, Asia/Bangkok; results include uncommitted 8B changes. No commit/push/deploy or Resend account changes.
+- CLI **2.122.0** created actual migration **`20261106061100_learning_schedule_resend_persistence.sql`**. Inspected the real `pg_constraint` provider CHECK before replacement; migration aborts on an unexpected constraint/baseline rather than retaining the fake-only CHECK silently. No earlier migration modified. Applied locally and completed final clean replay of **88 migrations** (baseline 87); reset used `--no-seed` only after verifying 0 users/Tasks on disposable local DB.
+
+### Implemented persistence / trust boundaries
+
+- Existing fake rows/defaults remain fake. New Resend rows require explicit `provider='resend'`, immutable recipient HMAC, payload SHA-256, handoff token and locale snapshot. Partial unique `(provider, provider_message_id)` rejects duplicate provider IDs. Provider outcome RPC only accepts Resend handoffs; the existing fake outcome RPC now filters `provider='fake'` through this forward migration. No Resend sender/claim/authorization path has been wired into the fake dispatcher.
+- Locale policy **`explicit-trusted-command-v1`**: a future trusted submission command must choose and persist explicit `en` or `vi` with its immutable payload fingerprint. No profile locale column was invented; webhook `Accept-Language`/browser headers and silent English defaults are not locale sources. Actual application locale selection/worker integration remains deferred before sending.
+- Recipient identity uses versioned HMAC-SHA256, preserving email local-part case and normalizing domain case. Dedicated server key `STUDY_REMINDER_RECIPIENT_HMAC_KEY` must match future handoff processing; key rotation needs a reconciliation plan. Raw recipient, subject, Task content and raw webhook are never persisted in receipts. Typed safe event columns plus hashes are stored; bounded `payload_subset` is exactly `{}`. Entire verified JSON is fingerprinted with deterministic property ordering so changed private/provider fields still cause conflicts without storing them.
+- Private RLS receipt table, unique provider/event ID; browser/anonymous have no read or write grants. `service_role` has receipt SELECT only; writes use the trusted ingestion RPC. Duplicate processed receipts return without changing delivery status/timestamps. Same ID with conflicting content raises **22023**; original receipt survives and HTTP emits a sanitized integrity-conflict diagnostic.
+- Unknown IDs remain `unmatched`; outcome persistence reconciles them atomically when a trusted Email ID becomes available. Recipient mismatches are retained as `recipient_mismatch`, never applied to another recipient. No guessing from addresses, titles, timestamps or idempotency-key expiration.
+- Effective state is recomputed from matching append-only facts, independent of arrival order: late sent cannot erase delivered; bounce/complaint facts both survive and later delivery does not erase them. `provider_accepted_at` is local evidence-recording time; `last_provider_event_at` is the maximum matching provider timestamp. Job `sent` means submission accepted, never inbox confirmation. Verified failure/suppression clears leases without requeueing. Unknown attempts remain held; later explicit trusted provider evidence may resolve them without any send/new key.
+- Correlation advisory lock serializes receipt ingestion with acceptance persistence, then owner gate → Job → Delivery locks. Trusted commands must run in fresh transactions, outside parent mutation transactions. This prevents the early-event/ID-commit race in both tested orders.
+- Node route **`/api/webhooks/resend/study-reminders`** bypasses user-session refresh/locale redirects only for that exact path; signature verification is its authorization boundary. Body is streamed with a **32 KiB actual byte limit** and **5-second read deadline**, raw UTF-8 verified once through SDK `webhooks.verify()`, including Svix timestamp validation. Only the seven specified event types and a single valid `data.to` recipient are accepted. `email_id`, not RFC Message-ID, is correlation identity.
+- Dedicated `RESEND_STUDY_REMINDER_WEBHOOK_SECRET` and identity key are server-only config; absent config returns **503**. Privileged DB client is constructed only after successful signature/payload validation; DB command has a 4-second deadline. Invalid signature **401**, invalid event **400**, oversized body **413**, integrity conflict **409**, persistence failure **503**; success **200** waits for commit. Verification constructs an SDK helper using an inert noncredential value, never a real API key; it performs no provider API call.
+
+### Executed acceptance
+
+| Case | Actual result / evidence |
+| --- | --- |
+| RW-01 | **PASS**, real HMAC/Svix verifier rejects forged, expired, future, tampered raw body and malformed headers before DB client/write. Actual Next production route returned **401**, receipt count stayed zero. |
+| RW-02 | **PASS**, seven supported event types parsed after verification. Actual Next POST → local PostgREST → PostgreSQL committed receipt, returned **200**. |
+| RW-03 | **PASS**, exact duplicate returns **200**, one receipt; pgTAP compares entire delivery row including timestamps to prove no-op. |
+| RW-04 | **PASS**, duplicate event ID with changed payload raises **22023**; original fact unchanged. Handler/route contract maps conflict to **409**, with sanitized diagnostic. |
+| RW-05/06 | **PASS**, early receipt remains unmatched then trusted acceptance/ID reconciles to delivered, Job sent. Both real-connection commit orders exercised. |
+| RW-07 | **PASS**, delivered followed by sent remains delivered. |
+| RW-08 | **PASS**, bounce then late delivery retains bounce; complaint retained too; both receipt facts remain. Actual suppression enforcement is 8C, not claimed here. |
+| RW-09 | **PASS**, unknown Email ID stays unmatched; recipient mismatch never changes another delivery. |
+| RW-10 | **PASS**, Owner B and anon denied receipt access; authenticated browser cannot invoke ingestion or read private delivery fingerprints (**42501**). |
+| RW-11 | **PASS**, duplicate real-provider Email ID rejected (**23505**) and assignment rolled back; fake outcome cannot write a Resend attempt (**PT409**). |
+| RW-12 | **PASS**, injected delivery projection failure rolls back inserted receipt; injected Job update failure rolls back provider ID/outcome. Original state remains intact (**P0001** fault injection). |
+| RW-13 | **PASS**, persistence failure returns **503**, no success before commit barrier releases. Faulted persistence port/route mock used; no real DB outage was induced. |
+| RW-14 | **PASS**, SDK verification tests assert zero global fetch/provider requests; actual route only performs local Supabase persistence. No sends, retrieval, key rotation or webhook registration. |
+
+- **pgTAP: 803 PASS**, **30 files** reported (one existing concurrency-fixture SQL entry skipped deliberately); new webhook suite **42 assertions**, baseline **761** retained. Existing NP-10 expectation updated from the Phase 07 fake-only CHECK error to **22023 immutable fake identity** under the expanded 8B provider contract; its coverage was retained, not removed.
+- **Targeted notifications: 121 PASS / 5 files / 4.65s**: 89 existing + **28 signed-boundary/parser tests + 4 actual route-module tests**. Real SDK verification uses locally generated test signatures; no mocked cryptography in signature acceptance.
+- **Concurrency: 6 executions**, three repetitions per order (**acceptance-first**, **webhook-first**), all **00000**, **6 observed `pg_blocking_pids()` blockers**. Each final state: **Delivery delivered, Job sent, exactly 1 receipt**. Final run also exercised the owned Next production server at `127.0.0.1:3108`; signed/duplicate POSTs used the actual route and local PostgREST. Detailed PIDs, results and cleanup are in [`phase-08-resend-webhooks.json`](./phase-08-resend-webhooks.json).
+
+### Commands / quality gates
+
+```powershell
+# repo root; installed Supabase CLI 2.122.0
+supabase migration new learning_schedule_resend_persistence
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase test db --local
+supabase gen types typescript --local
+node --experimental-strip-types scripts/test-learning-schedule-resend-webhooks.mjs --next-http
+supabase db advisors --local --type security --fail-on none --output-format json
+
+# apps/web
+node node_modules/vitest/vitest.mjs run features/learning-schedule/notifications/ --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+```
+
+- **Types PASS**, regenerated from local with both `public` and `graphql_public`, exit/contents checked before replacing output. No schema restriction or partial overwrite.
+- **Lint PASS**, zero errors; one existing `features/focus-sessions/use-focus-v2-audio.ts:104` missing-`projection` dependency warning.
+- **Full Vitest PASS**, **937 passed / 26 skipped**, **84 files passed / 5 skipped (89)**, **204.85s**, start **13:29:26 UTC+7**.
+- **Standalone TypeScript PASS**, `--noEmit --incremental false --pretty false`.
+- **Production build PASS**, Next **16.2.6**, compile **15.8s**, build TypeScript **25.9s**, **101 pages / 979ms**. Local Supabase process env only; `.env.local` unchanged. `--ignore-scripts` skips only destructive prebuild cleanup; the actual `next build` ran and `.next/dev` was retained.
+- **Security advisors:** no new notification findings; one existing `public.set_updated_at` mutable-search-path WARN, captured in [`phase-08-security-advisors.json`](./phase-08-security-advisors.json).
+- **Final local state:** **88 applied migrations**, **0 users / Tasks / jobs / deliveries / receipts**, dispatch **OFF**, Missed Sweep **OFF**, **0 reminder Cron**. Owned test server stopped; temporary keys existed only in test memory/process env. No secret/key files or configuration edits; no Resend outbound requests/account mutations/live webhook setup.
+
+### Failures corrected / remaining limits
+
+- Initial pgTAP run found PostgreSQL's bounded-regex repetition limit (`{1,256}`); changed SQL validation to explicit length + character checks, then clean replayed successfully. First harness target check used `inet_server_port()` on a Unix socket (NULL); switched to server `port` setting before any fixtures. Initial full regression caught obsolete NP-10 CHECK expectation; updated it to verify immutable fake identity. Final full DB regression passes after all migration hardening, including true no-op replay and provider separation.
+- **NOT EXECUTED / deferred to 8C–8D:** real Resend submission/deduplication, live webhook configuration or delivery, external network failures, inbox/client delivery, unsubscribe endpoint/token lifecycle, bounce/complaint suppression enforcement and reversal, persisted application locale selection and real worker/handoff wiring. No suppression table/policy was enabled in 8B. Receipt history is preserved to support that work; this is not production send approval.
+- Uncertain attempts lacking trustworthy Email ID correlation remain held for explicit reconciliation; absence of a webhook or expiry of Resend's 24-hour key window never authorizes resend. No automatic reconciliation Cron, bulk backlog/load test, key-rotation exercise, retention/purge policy or production process-kill test is claimed.
+- Primary references checked: [Resend raw-body verification](https://resend.com/docs/webhooks/verify-webhooks-requests), [per-recipient event contract](https://resend.com/changelog/webhook-event-visibility), pinned SDK **6.37.0** source/types. User guide's commit-before-acknowledgement/raw-body/privacy requirements take precedence over generic skill examples that acknowledge before persistence or reserialize/log full payloads.
+
 ## Step 8A — Resend Adapter & EN/VI Templates
 
 - **Baseline HEAD:** `302843ada6448066a9d496280db81a084b40015c`, `feature/learning-schedule-foundation`, clean initially; execution **2026-11-06**, Asia/Bangkok. Results include uncommitted 8A changes. No commit/push/deploy, Resend account mutation or real email send.

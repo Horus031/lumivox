@@ -675,14 +675,14 @@ isOneToOne: false
                   ]
                 },"study_notification_deliveries": {
                   Row: {
-                    "attempt_number": number,"created_at": string,"error_code": string | null,"handoff_token": string | null,"id": string,"job_id": string,"outcome_fingerprint": string | null,"provider": string,"provider_message_id": string | null,"status": string,"updated_at": string,"user_id": string
+                    "attempt_number": number,"created_at": string,"error_code": string | null,"handoff_token": string | null,"id": string,"job_id": string,"last_provider_event_at": string | null,"locale_policy": string | null,"outcome_fingerprint": string | null,"provider": string,"provider_accepted_at": string | null,"provider_message_id": string | null,"provider_payload_fingerprint": string | null,"recipient_fingerprint": string | null,"status": string,"submission_locale": string | null,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id": string,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id": string
+                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id": string,"last_provider_event_at"?: string | null,"locale_policy"?: string | null,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_accepted_at"?: string | null,"provider_message_id"?: string | null,"provider_payload_fingerprint"?: string | null,"recipient_fingerprint"?: string | null,"status"?: string,"submission_locale"?: string | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id"?: string,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_message_id"?: string | null,"status"?: string,"updated_at"?: string,"user_id"?: string
+                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id"?: string,"last_provider_event_at"?: string | null,"locale_policy"?: string | null,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_accepted_at"?: string | null,"provider_message_id"?: string | null,"provider_payload_fingerprint"?: string | null,"recipient_fingerprint"?: string | null,"status"?: string,"submission_locale"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -760,6 +760,20 @@ isOneToOne: false
       referencedRelation: "tasks"
       referencedColumns: ["id","user_id"]
     }
+                  ]
+                },"study_notification_webhook_receipts": {
+                  Row: {
+                    "created_at": string,"event_type": string,"id": string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at": string | null,"processing_status": string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"event_type": string,"id"?: string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  Update: {
+                    "created_at"?: string,"event_type"?: string,"id"?: string,"payload_fingerprint"?: string,"payload_subset"?: NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider"?: string,"provider_event_at"?: string,"provider_event_id"?: string,"provider_message_id"?: string,"recipient_fingerprint"?: string
+                  }
+                  Relationships: [
+
                   ]
                 },"study_room_members": {
                   Row: {
@@ -1515,14 +1529,23 @@ isOneToOne: false
 "ls_notification_in_quiet_hours":
 { Args: { "p_as_of": string,"p_enabled": boolean,"p_end": string,"p_start": string,"p_timezone": string }; Returns: boolean
                            },
+"ls_notification_ingest_resend":
+{ Args: { "p_event_at": string,"p_event_id": string,"p_event_type": string,"p_message_id": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
 "ls_notification_lock_owner":
 { Args: { "p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_project_resend":
+{ Args: { "p_message_id": string }; Returns: undefined
                            },
 "ls_notification_reconcile_expired_leases":
 { Args: { "p_batch_size"?: number }; Returns: number
                            },
 "ls_notification_record_fake_outcome":
 { Args: { "p_job_id": string,"p_lease_token": string,"p_outcome": Json }; Returns: Json
+                           },
+"ls_notification_record_resend_outcome":
+{ Args: { "p_delivery_id": string,"p_handoff_token": string,"p_message_id"?: string,"p_outcome": string,"p_payload_fingerprint": string }; Returns: Json
                            },
 "ls_notification_session_policy":
 { Args: { "p_session_id": string }; Returns: {

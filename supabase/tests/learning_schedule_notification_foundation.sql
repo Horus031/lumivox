@@ -77,7 +77,8 @@ SELECT lives_ok($$UPDATE public.study_notification_jobs SET status='leased',atte
 UPDATE public.study_notification_jobs SET status='pending',lease_token=NULL,lease_until=NULL;
 SELECT throws_ok($$INSERT INTO public.study_notification_deliveries(job_id,user_id,attempt_number) VALUES ('7a400000-0000-4000-8000-000000000001','7a000000-0000-4000-8000-000000000001',1)$$,'23505',NULL,'delivery attempt uniqueness');
 SELECT throws_ok($$UPDATE public.study_notification_deliveries SET attempt_number=0$$,'23514',NULL,'delivery attempts start at 1');
-SELECT throws_ok($$UPDATE public.study_notification_deliveries SET provider='resend'$$,'23514',NULL,'NP-10: only fake provider represented in Phase 07');
+-- 8B admits new explicit Resend contexts, but never relabels historical fake attempts.
+SELECT throws_ok($$UPDATE public.study_notification_deliveries SET provider='resend'$$,'22023','Immutable submission context','NP-10: historical fake attempts cannot become Resend');
 SELECT is((SELECT status FROM public.study_notification_deliveries),'accepted','accepted submission does not imply delivered');
 SELECT throws_ok($$INSERT INTO public.study_notification_dispatch_control(singleton,enabled) VALUES(false,true)$$,'23514',NULL,'operational singleton constraint');
 SET LOCAL ROLE authenticated;

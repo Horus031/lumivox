@@ -3,10 +3,16 @@ import { type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "@/i18n/routing";
+import { NextResponse } from "next/server";
 
 const handleI18nRouting = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
+  // Signed server-to-server endpoint: no user cookies/session refresh or locale
+  // redirect. Authorization is raw-body Svix verification inside the handler.
+  if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders") {
+    return NextResponse.next();
+  }
   if (isUnlocalizedAppRoute(request.nextUrl.pathname)) {
     return await updateSession(request);
   }
