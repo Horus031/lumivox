@@ -20,7 +20,7 @@ let admin: SupabaseClient<Database>;
 const users: string[] = [];
 
 test.skip(!url || !secret || !key, "Opt-in: isolated Supabase local required");
-test.use({ viewport: { width: 390, height: 844 } });
+test.use({ viewport: { width: 390, height: 844 }, timezoneId: "Pacific/Kiritimati" });
 
 test.afterEach(async () => {
   for (const id of users) expect((await admin.auth.admin.deleteUser(id)).error).toBeNull();
@@ -125,6 +125,9 @@ test("projects real V2 completion and interruption, reschedule and revision in E
   await page.keyboard.press("Enter");
   await expect(oldRow.getByText("Planned study time: 60 minutes")).toBeVisible();
   await expect(oldRow.getByText(/12:00–13:00/)).toBeVisible();
+  // 12:00 UTC is 02:00 on the following day in this browser's timezone.
+  await expect(oldRow.locator("time")).toHaveAttribute("datetime", date);
+  await expect(oldRow.getByText(/12:00–13:00 · UTC/)).toBeVisible();
 
   const next = { ...draft, slots: [{ weekday: day.dayOfWeek, startTime: "14:00", endTime: "15:00" }] };
   const revised = await owner.client.rpc("ls_revise_schedule", { p_schedule_id: schedule.data!, p_expected_revision: 1,

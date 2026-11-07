@@ -91,6 +91,32 @@ SELECT lives_ok($$SELECT focus_v2_create_session('9b000000-0000-4000-8000-000000
  'FL-12 ordinary Focus creation still works');
 SELECT is((SELECT count(*) FROM task_study_focus_attributions), 1::bigint, 'ordinary Focus has no attribution');
 
+-- Replace only the eligibility clock in the installed RPC inside this rolled-back
+-- test transaction. The live definition, permissions and other logic are unchanged.
+DO $$
+DECLARE
+  definition text := pg_get_functiondef('public.ls_create_attributed_focus_v2(uuid,uuid,uuid,integer,integer,integer,integer,integer,boolean,boolean)'::regprocedure);
+  clock_line constant text := 'v_now := clock_timestamp();';
+BEGIN
+  IF array_length(string_to_array(definition, clock_line), 1) <> 2 THEN
+    RAISE EXCEPTION 'Launch clock injection must replace exactly one line';
+  END IF;
+  EXECUTE replace(definition, clock_line, 'v_now := current_setting(''test.launch_time'')::timestamptz;');
+END $$;
+DELETE FROM focus_sessions WHERE task_id IS NULL;
+SELECT set_config('test.launch_time', (scheduled_start_at - interval '15 minutes 1 millisecond')::text, true)
+ FROM task_study_sessions WHERE id = '9b400000-0000-4000-8000-000000000002';
+SELECT throws_ok($$SELECT pg_temp.launch('9b500000-0000-4000-8000-000000000003', '9b400000-0000-4000-8000-000000000002')$$,
+ 'PT422', NULL, 'E2E-14 one millisecond before the launch window is denied');
+SELECT set_config('test.launch_time', scheduled_end_at::text, true)
+ FROM task_study_sessions WHERE id = '9b400000-0000-4000-8000-000000000002';
+SELECT throws_ok($$SELECT pg_temp.launch('9b500000-0000-4000-8000-000000000003', '9b400000-0000-4000-8000-000000000002')$$,
+ 'PT422', NULL, 'E2E-15 exact scheduled end is denied');
+SELECT set_config('test.launch_time', (scheduled_start_at - interval '15 minutes')::text, true)
+ FROM task_study_sessions WHERE id = '9b400000-0000-4000-8000-000000000002';
+SELECT is(pg_temp.launch('9b500000-0000-4000-8000-000000000003', '9b400000-0000-4000-8000-000000000002')->>'replay',
+ 'false', 'E2E-13 exact window opening creates Focus with the same previously rejected key');
+
 SET LOCAL ROLE authenticated;
 SELECT throws_ok($$SELECT public.ls_create_attributed_focus_v2(gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), 5, 1, 15, 1, 4, false, false)$$,
  '42501', NULL, 'authenticated browser cannot supply trusted identity');

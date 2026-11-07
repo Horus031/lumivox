@@ -223,3 +223,70 @@ Final database read showed **92 applied migrations**, zero fixture users, Tasks,
 
 - Step 9C added no migration, so clean replay was not rerun. Full pgTAP ran against the local schema.
 - Cross-request snapshot guarantees, production-scale latency and Phase 09D end-to-end acceptance were not tested. Phase 08D Tier B remains a separate release gate.
+
+## Step 9D — Full Learning Journey and Integration Acceptance
+
+- Status **Local PASS**.
+- Baseline HEAD `9ad106153507ee8b064939630e6761b2fcef2e8c` on `feature/learning-schedule-foundation`. The worktree was clean before implementation. Test-only changes use the existing 92-migration schema.
+- Chromium runs against the production Next.js build, with the existing internal auth boundary to local FastAPI and local Supabase. A loopback proxy forwards real requests and can withhold the upstream response after commit. Each suite requires a disposable local database and checks Dispatch and Missed Sweep before writing fixtures.
+- Exact launch cutoffs run against the installed RPC definition inside the rollback-only pgTAP transaction. The test replaces just the eligibility clock expression with a transaction-local timestamp. It neither waits for a wall-clock cutoff nor persists a clock override. `pg_get_functiondef()` reconstructs the installed definition used by the test. [PostgreSQL system information functions](https://www.postgresql.org/docs/current/functions-info.html)
+
+### Acceptance matrix
+
+| Cases | Actual result |
+| --- | --- |
+| E2E-01–E2E-02 | **PASS**. Browser created a Task and Schedule, opened Pomodoro setup from Today, and launched through the real Next.js → FastAPI → Supabase path. Database assertions verified Task/Study IDs, launch record, plan and segments. After the first Focus completed, Study remained `scheduled` with zero Attendance events. |
+| E2E-03–E2E-06 | **PASS**. Browser completed a two-round Focus with a break, cancelled a second Focus during a round, and completed a third. The persisted sum was **991 Focus seconds**, including **91 interrupted seconds**, plus **60 excluded break seconds**. Study Plan showed **16 minutes** after manual completion, with three attributed Focus IDs and one Attendance event. |
+| E2E-07–E2E-08 | **PASS**. Real reschedule preserved the Study ID and effort. Real revision kept 18 recorded minutes on the cancelled historical occurrence and initially displayed zero on the replacement. |
+| E2E-09 | **PASS**. Task completion while Focus was active closed the schedule. Focus remained `ongoing` and linked to the still-`scheduled` Study occurrence whose scheduled start had passed. That occurrence had no Attendance events. The future occurrence became `cancelled` with reason `task_closed` and one cancellation audit. |
+| E2E-10–E2E-11 | **PASS**. Cross-owner launch returned HTTP 403. The other owner could not read Study, attribution or Focus records through PostgREST. Ordinary Legacy creation through the authenticated Focus insert boundary and ordinary V2 creation produced no attribution. |
+| E2E-12, E2E-17 | **PASS**. The proxy withheld the response after FastAPI returned HTTP 200. Next.js timed out and the browser showed uncertainty. A new browser context with no saved request key reached the existing active timer without issuing a launch. Retry in the original tab sent the identical payload and got the original Focus ID with `replay: true`. |
+| E2E-13–E2E-15 | **PASS**. Exact opening created Focus. One millisecond early and exact scheduled end both returned SQLSTATE `PT422`. The same key succeeded at opening after both denied attempts. |
+| E2E-16 | **PASS**. Two independently authenticated Chromium contexts submitted Start from setup. One opened the timer and the other received the active Focus conflict. Database verified one active Focus, one launch record and one attribution for the winner. |
+| E2E-18 | **PASS**. A separate database connection held the Study row. The browser submitted manual Attendance, and `pg_blocking_pids()` confirmed it waited on that connection. Focus completed through its existing browser timer while Study remained scheduled and event count stayed zero. After release, Study became completed with one manual `completed` event. |
+
+The combined run exercised four lock-wait scenarios with a blocker observed in each. The Task-close launch race returned HTTP 410. The concurrent launch/replay group returned 200/200/423. The ordinary-versus-attributed creation race returned 200/423. The Attendance-versus-Focus case verified both commits from persisted state. Browser actions report HTTP/UI outcomes and do not expose raw SQLSTATEs.
+
+Chromium covered EN/VI at **390 px**, tablet at **768 px**, keyboard launch and detail expansion, pending/uncertain/retry states and saved effort while the timer is active. The Calendar kept the UTC local date and times for a session whose instants corresponded to the next day in the browser's Pacific/Kiritimati timezone. Deleting a fixture segment made Recorded Focus unavailable while leaving Attendance visible.
+
+### Commands and quality gates
+
+```powershell
+# Repo root, verified Supabase local
+supabase status -o json
+supabase test db --local
+
+# services/ai-api, verified local Supabase and test-only internal key
+.venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
+.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8096 --lifespan off
+
+# apps/web, verified local Supabase, Focus V2 creation enabled and real send disabled
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3119
+node node_modules/@playwright/test/cli.js test tests/study-focus-launch.spec.ts tests/study-focus-effort.spec.ts tests/study-learning-journey.spec.ts --project=chromium --workers=1 --reporter=line
+```
+
+The Playwright suites use the local `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`. Set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119`, `STUDY_FOCUS_TEST_BACKEND=http://127.0.0.1:8096`, `STUDY_FOCUS_TEST_PROXY_PORT=8097` and the same test-only `AI_INTERNAL_API_KEY` as both servers. Next.js uses `AI_API_BASE_URL=http://127.0.0.1:8097`.
+
+| Gate | Actual result |
+| --- | --- |
+| Schema | 92 migrations. No migration or generated types change for 9D. |
+| Full pgTAP | **PASS**, 951 assertions across 34 entries, including three new exact-window assertions. Existing fixture-only entry skipped. |
+| Full Vitest | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 195.63s |
+| FastAPI Focus V2 regression | **PASS**, 8 tests |
+| ESLint | **PASS**, zero errors, existing missing-`projection` dependency warning |
+| TypeScript | **PASS**, standalone and build typecheck |
+| Next.js production build | **PASS**, 16.2.6, compiled in 17.5s. The npm prebuild cleanup was skipped. |
+| Combined Playwright Chromium | **PASS**, 5 tests, 1.2 minutes |
+
+The initial browser attempts timed out while locating the new Task in a goal-filtered board and while looking for a standard dialog for the destructive Focus confirmation. The harness now verifies the Task insert and reopens the all-Tasks board, and locates the confirmation by its actual `alertdialog` role. The full combined suite passed afterward.
+
+Final local database read verified 92 applied migrations, zero fixture users, Tasks, Study Sessions, Focus sessions, attributions, launch records and Attendance events. The installed RPC used `clock_timestamp()` again and contained no test clock override. Dispatch and Missed Sweep remained **OFF**, with zero reminder Cron jobs. Both local test servers were stopped.
+
+### Scope limits
+
+- Exact cutoffs use a deterministic database test clock. Browser and HTTP cases use the real local clock with fixture segment start times advanced by backdating the persisted start only.
+- Production-scale performance, shared snapshot guarantees for effort reads, remote Render deployment and Phase 08D Tier B live email remain outside this local acceptance.

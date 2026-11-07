@@ -1,15 +1,16 @@
 import { execFileSync, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
-import { createServer } from "node:http";
 import { createInterface } from "node:readline";
 import { Temporal } from "@js-temporal/polyfill";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { expect, test } from "@playwright/test";
 import type { Database } from "../types/database.types";
 import { submitLoginForm } from "./helpers/auth";
+import { startLocalFocusProxy } from "./helpers/local-focus-proxy";
 
 const api = process.env.LEARNING_SCHEDULE_TEST_URL;
 const service = process.env.LEARNING_SCHEDULE_TEST_SERVICE_KEY;
+const anon = process.env.LEARNING_SCHEDULE_TEST_ANON_KEY;
 const backend = process.env.STUDY_FOCUS_TEST_BACKEND;
 const proxyPort = process.env.STUDY_FOCUS_TEST_PROXY_PORT;
 const internalKey = process.env.AI_INTERNAL_API_KEY;
@@ -25,38 +26,13 @@ const apiPost = (endpoint: string, body: unknown, key = internalKey!) => fetch(`
   body: JSON.stringify(body),
 });
 
-test.skip(!api || !service || !backend || !proxyPort || !internalKey, "Opt-in: isolated local launch stack required");
+test.skip(!api || !service || !anon || !backend || !proxyPort || !internalKey, "Opt-in: isolated local launch stack required");
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 test.use({ viewport: { width: 390, height: 844 } });
 
 let dropNext = false;
 const launches: { request: Record<string, unknown>; response: Record<string, unknown>; dropped: boolean }[] = [];
-const proxy = createServer(async (request, response) => {
-  try {
-    if (!request.url?.startsWith(`${path}/`)) { response.writeHead(404).end(); return; }
-    const chunks = [];
-    for await (const chunk of request) chunks.push(chunk);
-    const body = Buffer.concat(chunks).toString("utf8");
-    const upstream = await fetch(`${backend}${request.url}`, {
-      method: "POST", body, headers: { "content-type": "application/json",
-        "x-lumivox-internal-key": String(request.headers["x-lumivox-internal-key"] ?? "") },
-    });
-    const payload = await upstream.text();
-    if (request.url.endsWith("/create-from-study-session") && upstream.ok) {
-      const dropped = dropNext;
-      dropNext = false;
-      launches.push({ request: JSON.parse(body), response: JSON.parse(payload), dropped });
-      if (dropped) {
-        // The real FastAPI response has arrived, so PostgreSQL committed.
-        // Withhold the response until the Next.js HTTP client times out.
-        return;
-      }
-    }
-    response.writeHead(upstream.status, { "content-type": "application/json" }).end(payload);
-  } catch {
-    response.writeHead(502).end();
-  }
-});
+let stopProxy: (() => Promise<void>) | undefined;
 
 let admin: SupabaseClient<Database>;
 const users = [0, 1].map(() => ({ email: `focus-launch-${randomUUID()}@example.invalid`, password: randomUUID(), id: "" }));
@@ -90,8 +66,11 @@ test.beforeAll(async ({ baseURL }) => {
   expect(new URL(baseURL!).hostname).toBe("127.0.0.1");
   expect(new URL(backend!).hostname).toBe("127.0.0.1");
   expect(sql("SELECT (SELECT count(*) FROM auth.users), (SELECT count(*) FROM public.tasks), (SELECT enabled FROM public.study_notification_dispatch_control), (SELECT enabled FROM public.ls_missed_sweep_control)")).toBe("0|0|f|f");
-  await new Promise<void>((resolve, reject) => {
-    proxy.once("error", reject).listen(Number(proxyPort), "127.0.0.1", resolve);
+  stopProxy = await startLocalFocusProxy(backend!, proxyPort!, (request, response) => {
+    const dropped = dropNext;
+    dropNext = false;
+    launches.push({ request, response, dropped });
+    return dropped;
   });
   admin = createClient<Database>(api!, service!, { auth: { persistSession: false, autoRefreshToken: false } });
   for (const user of users) {
@@ -106,7 +85,7 @@ test.beforeAll(async ({ baseURL }) => {
 });
 
 test.afterAll(async () => {
-  if (proxy.listening) await new Promise<void>(resolve => proxy.close(() => resolve()));
+  await stopProxy?.();
   for (const user of users.filter(user => user.id)) {
     expect((await admin.auth.admin.deleteUser(user.id)).error).toBeNull();
   }
@@ -180,10 +159,20 @@ test("real FastAPI auth, Task-close race, concurrent launch, and ordinary Focus"
   expect((await blockedLaunch).status).toBe(423);
   expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id = '${ordinaryId}'`)).toBe("0");
   expect((await apiPost("transition", { user_id: users[0].id, session_id: ordinaryId, action: "cancel" })).status).toBe(200);
+  const legacyClient = createClient<Database>(api!, anon!, { auth: { persistSession: false } });
+  expect((await legacyClient.auth.signInWithPassword(users[0])).error).toBeNull();
+  const legacy = await legacyClient.from("focus_sessions")
+    .insert({ user_id: users[0].id, task_id: taskId, planned_minutes: 25 }).select("id,session_mode").single();
+  expect(legacy.error).toBeNull();
+  expect(legacy.data?.session_mode).toBe("legacy");
+  expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id='${legacy.data!.id}'`)).toBe("0");
+  expect((await legacyClient.from("focus_sessions").update({ status: "cancelled", ended_at: new Date().toISOString() })
+    .eq("id", legacy.data!.id)).error).toBeNull();
+  await legacyClient.auth.signOut();
   console.log(`Task close: blocker observed, HTTP 410. Concurrent launches: blocker observed, HTTP ${responses.map(response => response.status).join("/")}. Ordinary race: blocker observed, HTTP 200/423.`);
 });
 
-test("browser EN/VI 390px, keyboard launch and recovery after a committed response is lost", async ({ page }) => {
+test("browser EN/VI 390px, keyboard launch and recovery after a committed response is lost", async ({ page, browser, baseURL }) => {
   await page.goto("/en/auth/login");
   await submitLoginForm(page, users[0].email, users[0].password);
   await page.waitForURL("**/en/dashboard");
@@ -212,6 +201,18 @@ test("browser EN/VI 390px, keyboard launch and recovery after a committed respon
   expect(launches[0].dropped).toBe(true);
   const focusId = launches[0].response.session_id;
   expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id = '${focusId}'`)).toBe("1");
+  const fresh = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+  try {
+    const otherTab = await fresh.newPage();
+    await otherTab.goto("/en/auth/login");
+    await submitLoginForm(otherTab, users[0].email, users[0].password);
+    await otherTab.waitForURL("**/en/dashboard");
+    await otherTab.goto(`/en/focus?studySession=${studyId}`);
+    expect(await otherTab.evaluate(key => sessionStorage.getItem(key), `study-focus:${users[0].id}:${studyId}`)).toBeNull();
+    await expect(otherTab.getByText("You already have an active Focus session.")).toBeVisible();
+    await expect(otherTab.getByRole("timer")).toBeVisible();
+    expect(launches).toHaveLength(1);
+  } finally { await fresh.close(); }
   await page.getByRole("button", { name: "Retry the same launch" }).click();
   await page.waitForURL("**/en/focus");
   await expect(page.getByRole("timer")).toBeVisible();
@@ -224,4 +225,49 @@ test("browser EN/VI 390px, keyboard launch and recovery after a committed respon
   await expect(page.getByText("You already have an active Focus session.")).toBeVisible();
   await expect(page.getByRole("timer")).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry the same launch" })).toHaveCount(0);
+});
+
+test("two independent browser contexts submit Start with one active Focus", async ({ page, browser, baseURL }) => {
+  const previous = launches.at(-1)!.response.session_id;
+  expect((await apiPost("transition", { user_id: users[0].id, session_id: previous, action: "cancel" })).status).toBe(200);
+  const second = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+  try {
+    const pages = [page, await second.newPage()];
+    await Promise.all(pages.map(async tab => {
+      await tab.goto("/en/auth/login");
+      await submitLoginForm(tab, users[0].email, users[0].password);
+      await tab.waitForURL("**/en/dashboard");
+      await tab.goto(`/en/focus?studySession=${studyId}`);
+      await expect(tab.getByText("Study session for Study Focus Test Task")).toBeVisible();
+    }));
+    const before = launches.length;
+    await Promise.all(pages.map(tab => tab.locator("form button[type=submit]").click()));
+    await expect.poll(async () => {
+      const timers = await Promise.all(pages.map(tab => tab.getByRole("timer").count()));
+      const conflicts = await Promise.all(pages.map(tab => tab.getByRole("alert").filter({ hasText: "already have an active Focus" }).count()));
+      return [timers.reduce((a, b) => a + b, 0), conflicts.reduce((a, b) => a + b, 0)];
+    }).toEqual([1, 1]);
+    expect(launches).toHaveLength(before + 1);
+    const id = launches.at(-1)!.response.session_id;
+    expect(sql(`SELECT count(*) FROM public.focus_sessions WHERE user_id='${users[0].id}' AND status IN ('ongoing','paused')`)).toBe("1");
+    expect(sql(`SELECT count(*) FROM public.task_study_focus_launches WHERE focus_session_id='${id}'`)).toBe("1");
+    expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id='${id}'`)).toBe("1");
+    const future = sql(`INSERT INTO public.task_study_sessions
+      (user_id, task_id, schedule_id, schedule_revision, logical_occurrence_key, local_date,
+       local_start_time, local_end_time, timezone, scheduled_start_at, scheduled_end_at)
+      SELECT user_id, task_id, schedule_id, schedule_revision, gen_random_uuid()::text, local_date,
+       local_start_time + interval '1 hour', local_end_time + interval '1 hour', timezone,
+       scheduled_start_at + interval '1 hour', scheduled_end_at + interval '1 hour'
+      FROM public.task_study_sessions WHERE id='${studyId}' RETURNING id`);
+    const taskClose = await admin.from("tasks").update({ status: "completed" }).eq("id", taskId);
+    expect(taskClose.error).toBeNull();
+    expect(sql(`SELECT f.status || '|' || s.status || '|' || sc.status
+      FROM public.task_study_focus_attributions a JOIN public.focus_sessions f ON f.id=a.focus_session_id
+      JOIN public.task_study_sessions s ON s.id=a.study_session_id
+      JOIN public.task_study_schedules sc ON sc.id=s.schedule_id WHERE f.id='${id}'`)).toBe("ongoing|scheduled|closed");
+    expect(sql(`SELECT count(*) FROM public.task_study_session_events WHERE session_id='${studyId}'`)).toBe("0");
+    expect(sql(`SELECT s.status || '|' || s.cancellation_reason || '|' || e.event_type
+      FROM public.task_study_sessions s JOIN public.task_study_session_events e ON e.session_id=s.id
+      WHERE s.id='${future}'`)).toBe("cancelled|task_closed|cancelled");
+  } finally { await second.close(); }
 });
