@@ -16,6 +16,13 @@ export function StudyPlanSessions({ sessions, focusEnabled }: Props) {
         href={{ pathname: "/workspace", query: { task: row.taskId } }}>{row.taskTitle}</Link>
       <p className="break-words text-sm text-secondary-text"><time dateTime={row.localDate}>{row.localDate}</time>{" · "}
         {row.localStartTime.slice(0, 5)}–{row.localEndTime.slice(0, 5)}{" · "}{row.timezone}</p>
+      {row.recordedFocus && <details className="text-sm text-secondary-text">
+        <summary className="cursor-pointer rounded-sm focus-visible:outline focus-visible:outline-2">
+          {t("focusEffort.recorded", { minutes: row.recordedFocus.recordedMinutes })}
+        </summary>
+        {row.plannedMinutes !== undefined && <p>{t("focusEffort.planned", { minutes: row.plannedMinutes })}</p>}
+        {row.recordedFocus.hasActiveFocus && <p>{t("focusEffort.active")}</p>}
+      </details>}
     </div>
     <div className="flex flex-wrap items-center gap-2">
       <Badge variant="secondary">{t(`status.${row.status}`)}</Badge>

@@ -1,11 +1,14 @@
 import { Temporal } from "@js-temporal/polyfill";
 import type { AnalyticsObligation } from "./attendance-analytics";
+import type { StudyFocusEffort } from "./study-focus-effort";
 
 export type StudyPlanSession = {
   id: string; taskId: string; taskTitle: string; scheduleId: string;
   localDate: string; localStartTime: string; localEndTime: string;
   timezone: string; scheduledStartAt: string; status: AnalyticsObligation["status"];
   canLaunchFocus?: boolean;
+  plannedMinutes?: number;
+  recordedFocus?: StudyFocusEffort;
 };
 export type CalendarDay = { localDate: string; sessions: StudyPlanSession[] };
 

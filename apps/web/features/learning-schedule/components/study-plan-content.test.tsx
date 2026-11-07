@@ -4,8 +4,9 @@ import { NextIntlClientProvider, createTranslator } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
-const mocks = vi.hoisted(() => ({ action: vi.fn(), locale: "en" as "en" | "vi" }));
+const mocks = vi.hoisted(() => ({ action: vi.fn(), effort: vi.fn(), locale: "en" as "en" | "vi" }));
 vi.mock("../study-plan.queries.actions", () => ({ getStudyPlanAction: mocks.action }));
+vi.mock("../study-focus-effort.queries.actions", () => ({ getStudyFocusEffortAction: mocks.effort }));
 vi.mock("next-intl/server", () => ({ getTranslations: async () => createTranslator({ locale: mocks.locale,
   messages: mocks.locale === "en" ? en : viMessages, namespace: "studyPlan" }) }));
 vi.mock("@/i18n/navigation", () => ({ Link: (props: ComponentProps<"a">) => <a {...props} /> }));
@@ -13,7 +14,7 @@ import { StudyPlanContent } from "./study-plan-content";
 
 describe("Study Planner action-boundary failure UI", () => {
   let root: Root, host: HTMLDivElement;
-  beforeEach(() => { vi.clearAllMocks(); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); host = document.createElement("div"); document.body.append(host); root = createRoot(host); });
+  beforeEach(() => { vi.clearAllMocks(); mocks.effort.mockResolvedValue({ success: true, efforts: [] }); Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true }); host = document.createElement("div"); document.body.append(host); root = createRoot(host); });
   afterEach(() => { act(() => root.unmount()); host.remove(); });
   it.each(["en", "vi"] as const)("SP-07 query failure displays %s error and no partial KPI/Calendar", async locale => {
     mocks.locale = locale; mocks.action.mockResolvedValue({ success: false, code: "loadFailed" });
@@ -40,5 +41,23 @@ describe("Study Planner action-boundary failure UI", () => {
     expect(host.querySelector('[role="alert"]')).toBeNull(); expect(host.querySelectorAll("dl > div")).toHaveLength(3);
     expect(host.textContent).toContain(en.studyPlan.todayEmpty); expect(host.textContent).toContain(en.studyPlan.monthEmpty);
     expect(host.querySelectorAll("dd")[0].textContent).toBe("N/A");
+  });
+  it("keeps Attendance visible and never renders a partial effort total", async () => {
+    mocks.locale = "en";
+    const row = { id: "session", taskId: "task", taskTitle: "Test Task", status: "scheduled",
+      localDate: "2026-11-03", localStartTime: "10:00", localEndTime: "11:00", timezone: "UTC" };
+    mocks.action.mockResolvedValue({ success: true, asOf: "2026-11-03T05:00:00Z", today: [row],
+      calendar: [{ localDate: row.localDate, sessions: [row] }], summary: {
+        eligibleDue: 0, completedDue: 0, onTimeDue: 0, eligiblePlanned: 1, completedPlanned: 0,
+        attendanceRate: null, onTimeRate: null, plannedCoverage: 0,
+      } });
+    mocks.effort.mockResolvedValue({ success: false, code: "incompleteData" });
+    const content = await StudyPlanContent({ month: "2026-11" });
+    await act(async () => root.render(<NextIntlClientProvider locale="en" messages={en} timeZone="UTC">{content}</NextIntlClientProvider>));
+    expect(mocks.effort).toHaveBeenCalledExactlyOnceWith({ studySessionIds: [row.id] });
+    expect(host.textContent).toContain(en.studyPlan.focusEffort.unavailable);
+    expect(host.querySelector("details")).toBeNull();
+    expect(host.querySelectorAll("dl > div")).toHaveLength(3);
+    expect(host.querySelectorAll("[data-study-session]")).toHaveLength(2);
   });
 });

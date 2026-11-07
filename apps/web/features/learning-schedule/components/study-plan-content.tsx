@@ -5,6 +5,8 @@ import { StudyPlanOverview } from "./study-plan-overview";
 import { StudyCalendar } from "./study-calendar";
 import { TodaysStudyPlan } from "./todays-study-plan";
 import { isFocusV2CreationEnabled } from "@/features/focus-sessions/focus-v2-release";
+import { getStudyFocusEffortAction } from "../study-focus-effort.queries.actions";
+import type { StudyPlanSession } from "../study-plan-projection";
 
 export async function StudyPlanContent({ month }: { month: string }) {
   const [result, t] = await Promise.all([getStudyPlanAction({ month }), getTranslations("studyPlan")]);
@@ -12,10 +14,20 @@ export async function StudyPlanContent({ month }: { month: string }) {
     <p>{t(`error.${result.code}`)}</p><Link href="/study-plan" className="mt-3 inline-block underline">{t("retry")}</Link>
   </div>;
   const focusEnabled = isFocusV2CreationEnabled();
+  const studySessionIds = [...new Set([
+    ...result.today.map(row => row.id),
+    ...result.calendar.flatMap(day => day.sessions.map(row => row.id)),
+  ])];
+  const effort = await getStudyFocusEffortAction({ studySessionIds });
+  const byId = new Map(effort.success ? effort.efforts.map(row => [row.studySessionId, row]) : []);
+  const withEffort = (rows: StudyPlanSession[]) => rows.map(row => ({ ...row, recordedFocus: byId.get(row.id) }));
   return <div className="space-y-6">
     <StudyPlanOverview summary={result.summary} />
-    <TodaysStudyPlan sessions={result.today} focusEnabled={focusEnabled} />
-    <StudyCalendar month={month} days={result.calendar} focusEnabled={focusEnabled} />
+    {effort.success
+      ? <p className="text-sm text-secondary-text">{t("focusEffort.hint")}</p>
+      : <p role="status" className="text-sm text-secondary-text">{t("focusEffort.unavailable")}</p>}
+    <TodaysStudyPlan sessions={withEffort(result.today)} focusEnabled={focusEnabled} />
+    <StudyCalendar month={month} days={result.calendar.map(day => ({ ...day, sessions: withEffort(day.sessions) }))} focusEnabled={focusEnabled} />
     <p className="text-xs text-secondary-text">{t("asOf", { instant: result.asOf })}</p>
   </div>;
 }

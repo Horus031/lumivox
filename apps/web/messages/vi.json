@@ -24,6 +24,13 @@
     }
   },
   "studyPlan": {
+    "focusEffort": {
+      "recorded": "Focus đã ghi nhận: {minutes} phút",
+      "planned": "Thời lượng học dự kiến: {minutes} phút",
+      "active": "Đang có phiên Focus. Số liệu chỉ gồm thời gian đã lưu.",
+      "hint": "Focus đã ghi nhận là thời gian tập trung đã lưu. Việc xác nhận buổi học được thực hiện riêng.",
+      "unavailable": "Không tải được thời gian Focus đã ghi nhận."
+    },
     "focusLaunch": {
       "start": "Bắt đầu Focus",
       "forTask": "Buổi học cho công việc {task}",

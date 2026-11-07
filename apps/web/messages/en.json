@@ -24,6 +24,13 @@
     }
   },
   "studyPlan": {
+    "focusEffort": {
+      "recorded": "Recorded Focus: {minutes, plural, one {# minute} other {# minutes}}",
+      "planned": "Planned study time: {minutes, plural, one {# minute} other {# minutes}}",
+      "active": "Focus is active. Only saved time is included.",
+      "hint": "Recorded Focus shows saved focus time. Attendance is confirmed separately.",
+      "unavailable": "Recorded Focus could not be loaded."
+    },
     "focusLaunch": {
       "start": "Start Focus",
       "forTask": "Study session for {task}",

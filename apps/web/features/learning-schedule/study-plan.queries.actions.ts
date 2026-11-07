@@ -87,6 +87,7 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
         id: row.id, taskId: row.task_id, taskTitle: titles.get(row.task_id)!, scheduleId: row.schedule_id,
         localDate: row.local_date, localStartTime: row.local_start_time, localEndTime: row.local_end_time,
         timezone: row.timezone, scheduledStartAt: row.scheduled_start_at, status: row.status,
+        plannedMinutes: Math.floor((Date.parse(row.scheduled_end_at) - Date.parse(row.scheduled_start_at)) / 60_000),
         canLaunchFocus: eligibleTasks.has(row.task_id) && row.schedule?.status === "active" &&
           row.schedule.revision === row.schedule_revision && (row.status === "scheduled" || row.status === "in_progress") &&
           Date.parse(asOf) >= Date.parse(row.scheduled_start_at) - 15 * 60_000 &&

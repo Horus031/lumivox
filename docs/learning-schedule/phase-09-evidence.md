@@ -159,3 +159,67 @@ Final database read showed **92 applied migrations** and **zero** Auth users, Ta
 
 - **NOT EXECUTED:** clock-controlled assertions at the exact launch-window endpoints, multi-browser retry after tab storage is cleared, and remote Render deployment checks.
 - Phase 09C actual study time, Phase 09D integration acceptance, and Phase 08D Tier B remain separate.
+
+## Step 9C — Actual Study Time Projection
+
+- Status **Local PASS**.
+- Baseline HEAD `4289ed27291a551fcf464d99fc31c5d8975e54dd` on `feature/learning-schedule-foundation`. The worktree was clean before implementation. The read projection uses the existing 92-migration schema and RLS policies.
+- Legacy effort uses `focus_sessions.actual_focus_minutes × 60`. Pomodoro effort uses persisted `actual_seconds` from Focus segments, including interrupted segments and any saved time on active segments. Breaks and unstarted segments contribute zero. The pure model sums seconds across attributed Focus sessions before deriving whole minutes with `floor(totalSeconds / 60)`.
+- Today and Calendar share one deduplicated batch. Each row displays Recorded Focus and can expand to show planned duration and an active Focus notice. Planned duration uses the persisted start/end instants. Attendance Rate, On-Time Rate and Planned Coverage keep their existing formulas. Revision retains the old Study ID and its recorded effort. The replacement starts with its own attribution history.
+- The authenticated action first checks Study ownership. It then reads links with exact counts, stable ID ordering and 200-row pages. Parent queries embed the plan and segments so each parent and its children share a query snapshot. Expected segment positions and the plan's round count detect missing children. The action checks owner/Task/IDs and re-reads attribution membership before returning.
+- Caps are 2,000 requested Study IDs and 4,000 links per batch, with up to 60 IDs per filter and a 15-second database read budget. Short pages, changed links and missing or conflicting records yield `incompleteData`. Database failures yield `loadFailed`. The planner shows effort unavailable while retaining the Attendance metrics. [Supabase range reference](https://supabase.com/docs/reference/javascript/range)
+- `asOf` is application-server read completion time. Each PostgREST call has its own snapshot, so a batch can include Focus records read at different instants. Recorded Focus describes persisted data, with no client-clock extrapolation.
+
+### Acceptance matrix
+
+| Case | Executed coverage |
+| --- | --- |
+| FE-01–FE-02 | Unit and local browser verify complete zero without attribution and seven persisted Legacy minutes. |
+| FE-03–FE-07 | Unit and real `focus_v2_create_session` / `focus_v2_transition` RPCs cover completed Focus rounds, a completed break, interrupted Focus, a pending round and aggregation across multiple attributed Focus sessions. |
+| FE-08–FE-09 | Pure model rejects duplicate Focus IDs within one Study or across two Studies. |
+| FE-10 | Local authenticated PostgREST queries from another owner return no Study, attribution or Focus parent/child records. |
+| FE-11–FE-13 | Unit tests cover missing parent/segment, owner/Task mismatch, changing links, a short page and the cap. The browser suite also reads 201 links from local PostgREST and injects one missing segment to verify the unavailable state while Attendance remains visible. |
+| FE-14–FE-16 | Real reschedule keeps the original Study ID and effort. Real revision preserves effort on the cancelled occurrence and leaves the replacement at zero before adding its own fixtures. Focus complete/cancel leaves the original Study scheduled with zero Attendance events. |
+| FE-17 | Chromium uses EN/VI at 390 px and keyboard expansion of the planned duration. |
+| FE-18 | Full pgTAP and Vitest plus FastAPI Focus V2 regression and the local Chromium integration run. |
+
+### Commands and results
+
+```powershell
+# repo root
+supabase test db --local
+
+# apps/web, local Supabase process environment
+node node_modules/vitest/vitest.mjs run features/learning-schedule/study-focus-effort.test.ts features/learning-schedule/study-focus-effort.queries.actions.test.ts features/learning-schedule/components/study-plan-content.test.tsx --maxWorkers=2 --reporter=dot
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3119
+node node_modules/@playwright/test/cli.js test tests/study-focus-effort.spec.ts --reporter=list
+
+# services/ai-api, local Supabase process environment
+.venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
+```
+
+For Playwright, set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119` and provide the verified loopback `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`. The harness requires an empty disposable local database and checks both operational gates before inserting fixtures.
+
+| Gate | Actual result |
+| --- | --- |
+| Targeted Vitest | **PASS**, 24 tests in 3 files |
+| Full Vitest | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 216.85s |
+| Full pgTAP | **PASS**, 948 assertions across 34 entries, including one existing fixture-only skip |
+| FastAPI Focus V2 regression | **PASS**, 8 tests |
+| Playwright Chromium | **PASS**, 1 end-to-end scenario, 8.3s total. Recorded Focus displayed 18 minutes from 1,111 persisted seconds (420 Legacy + 600 completed Pomodoro + 91 interrupted). The 60-second completed break was excluded. |
+| ESLint | **PASS**, zero errors and one existing missing-`projection` dependency warning |
+| TypeScript | **PASS**, standalone typecheck and Next.js build typecheck |
+| Production build | **PASS**, Next.js 16.2.6, 105 pages. Actual `next build` ran with npm prebuild cleanup skipped. |
+
+The first Chromium run reached the missing-segment UI, then failed because the test looked for “Attendance Rate” while the page renders “Attendance”. The locator was corrected to match the existing label.
+
+Final database read showed **92 applied migrations**, zero fixture users, Tasks, Study Sessions, Focus Sessions and attributions. Dispatch and Missed Sweep were **OFF**, with zero reminder Cron jobs. The Next.js test server was stopped after the run.
+
+### Limits
+
+- Step 9C added no migration, so clean replay was not rerun. Full pgTAP ran against the local schema.
+- Cross-request snapshot guarantees, production-scale latency and Phase 09D end-to-end acceptance were not tested. Phase 08D Tier B remains a separate release gate.
