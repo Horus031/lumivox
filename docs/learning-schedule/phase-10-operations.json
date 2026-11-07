@@ -1,0 +1,462 @@
+{
+  "baseline": "910e8dfedee508591bcaf011fe172cd5131a6cad",
+  "startedAt": "2026-11-07T12:47:34.044Z",
+  "cases": {
+    "OR-01": {
+      "dispatch": false,
+      "missedSweep": false,
+      "pendingDue": 0
+    },
+    "OR-02": {
+      "missingSecret": 401,
+      "invalidSecret": 401,
+      "dispatchSecret": 401,
+      "anonRpc": false,
+      "authenticatedRpc": false
+    },
+    "OR-03": {
+      "uncertainAttempts": 1,
+      "submissionsAfterEnable": 0
+    },
+    "OR-04": {
+      "blockerObserved": true,
+      "reconciledState": "pending"
+    },
+    "OR-05": {
+      "fakeSubmissions": 0
+    },
+    "OR-06": {
+      "fakeSubmissions": 1,
+      "delivery": "accepted"
+    },
+    "OR-07": {
+      "unmatchedWebhooks": 1
+    },
+    "OR-08": {
+      "eligible": 1,
+      "marked": 0,
+      "persistedRowsUnchanged": true
+    },
+    "OR-09": {
+      "databasePaused": true,
+      "diagnosticExit": 1,
+      "recovered": true
+    },
+    "OR-10": {
+      "aggregateOnly": true,
+      "credentialsAndFixtureValuesAbsent": true,
+      "persistedRowsUnchanged": true
+    },
+    "OR-11": {
+      "baselineAppRestart": false,
+      "crossVersionSwap": true,
+      "rollbackSha": "e333e30a061e36e1e3c3e9309430dbfd395558ed",
+      "fixtureAndMigrationDigestUnchanged": true
+    }
+  },
+  "realProviderRequests": 0,
+  "realSendGate": {
+    "enabled": false,
+    "http": 503
+  },
+  "notificationCases": [
+    {
+      "case": "disable_idle",
+      "before": null,
+      "after": {
+        "state": {
+          "job": "pending",
+          "attempts": 0,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 1,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": 600,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:39.700228+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0
+    },
+    {
+      "case": "claim_fence_and_pre_handoff_reconcile",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:42.673602+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "pending",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 1,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": 603,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:43.691195+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0,
+      "blockerObserved": true
+    },
+    {
+      "case": "before_handoff",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:45.858728+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:46.568454+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0
+    },
+    {
+      "case": "handoff_committed",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "submitting",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:48.727754+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:49.33577+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1
+    },
+    {
+      "case": "enable_with_uncertain",
+      "before": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:51.688024+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T12:47:53.728047+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "submissionsAfterEnable": 0
+    },
+    {
+      "case": "unmatched_receipt",
+      "before": null,
+      "after": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 1,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": 0
+          },
+          "generatedAt": "2026-11-07T12:47:54.232236+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0
+    }
+  ],
+  "fakeSubmissions": 2,
+  "final": "0|0|0|0|0|f|f|0",
+  "cleanup": {
+    "fixtureRows": 0,
+    "dispatch": false,
+    "missedSweep": false,
+    "reminderCron": 0
+  },
+  "migrations": 94,
+  "finishedAt": "2026-11-07T12:48:06.539Z"
+}

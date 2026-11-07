@@ -343,3 +343,53 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 # services/ai-api, local configuration
 .venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
 ```
+
+## Step 10D — Operational Runbooks & Recovery Operations
+
+**Status: Local PASS (OR-01 through OR-12).**
+
+- Baseline HEAD `910e8dfedee508591bcaf011fe172cd5131a6cad`. The branch was 20 commits ahead and zero behind the local `origin/product-release` tracking ref. Medium heavy p95 was 2,093.65 ms in the recorded Step 10C.1 trial. Step 10D uses this result as historical evidence.
+- [Incident runbooks](operations/incident-runbooks.md), [recovery matrix](operations/recovery-decision-matrix.md), [kill switches and rollback](operations/rollback-and-kill-switches.md), and [release checklist](operations/operational-release-checklist.md) document the operator boundaries.
+- The operator CLI uses the existing internal health endpoint and its dedicated monitoring credential. Commands select aggregate views of the same snapshot. The CLI emits fixed failure messages, disallows redirects, and uses HTTPS outside local loopback. It has no service key, mutation path or raw-record output.
+- The recovery drill uses existing database RPCs and the local fake provider. No migration is needed. The drill uses an independent pair of database connections for the Dispatch claim fence and checks the persisted handoff outcomes. The signed webhook HTTP regression remains part of Vitest. The local operations fixture separately exercises the unmatched-receipt database path.
+
+### Operational acceptance
+
+| Case | Observed result |
+| --- | --- |
+| OR-01 | **PASS**. The CLI read both persisted gates OFF and zero pending due jobs. The real-send endpoint separately returned HTTP 503 `real_send_disabled`. |
+| OR-02 | **PASS**. Missing, wrong and dispatch credentials returned HTTP 401. CLI denial returned exit 3 with empty stdout. Anonymous and authenticated roles lacked snapshot RPC execution privileges. |
+| OR-03 | **PASS**. The fake provider accepted one submission and dropped the response. The attempt became uncertain, appeared in diagnostics and stayed held after gate re-enable with zero additional submissions. |
+| OR-04 | **PASS**. `pg_blocking_pids()` showed the open claim blocking gate disable. Once disable committed, the next claim returned zero jobs. The bounded RPC released the expired pre-handoff lease to pending with zero deliveries and zero submissions. |
+| OR-05 | **PASS**. Disabling Dispatch while idle consumed zero claims. Disabling before durable handoff produced zero deliveries and zero provider submissions. |
+| OR-06 | **PASS**. Disabling after durable handoff allowed the authorized attempt to finish. One fake submission was recorded and the delivery stayed accepted with the job sent. |
+| OR-07 | **PASS**. The CLI reported one unmatched webhook receipt through the existing aggregate. |
+| OR-08 | **PASS**. Sweep was observed ON then OFF. The gated entrypoint returned zero marked sessions with one eligible session present, and persisted rows were unchanged. |
+| OR-09 | **PASS**. Pausing the local DB caused CLI exit 1 with empty stdout. Diagnostics recovered after DB resume. Stopping the Next.js process also failed closed. |
+| OR-10 | **PASS**. All five CLI commands emitted only approved aggregate fields. Injected private fixture values and credentials were absent, and database contents were unchanged by the reads. |
+| OR-11 | **PASS**. Swapped the current Next.js build for the distinct artifact built from `e333e30a061e36e1e3c3e9309430dbfd395558ed`. Health recovered with both gates OFF, one overdue session and one pending reminder still visible. The Task, Schedule, Session, audit, reminder job and migration-history digest matched before and after. |
+| OR-12 | **PASS**. Cleanup verified 94 migrations, zero fixture rows, both database gates OFF, zero reminder Cron jobs and zero harness listeners. All local regressions below passed. |
+
+The [operations report](phase-10-operations.json) contains the final drill observations. The notification cases made two total submissions to the fake provider and zero to real Resend. The rollback exercise covered local artifact compatibility and database persistence. Staging, live Resend Tier B and deployment are outside this evidence.
+
+| Local regression | Observed result |
+| --- | --- |
+| Supabase clean replay and pgTAP | **PASS**, 94 migrations, 983 assertions across 35 files |
+| Vitest | **PASS**, 1,077 passed and 26 skipped |
+| FastAPI Focus V2 | **PASS**, 9 tests |
+| Chromium | **PASS**, 7 tests |
+| Next.js production build and TypeScript | **PASS**, 106 generated pages, standalone TypeScript passed |
+| ESLint | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts` |
+
+### Reproduction on disposable local Supabase
+
+```powershell
+supabase db reset --local --no-seed
+supabase test db --local
+# Export the same loopback test settings as 10C.1. Build Next.js with the
+# Supabase loopback proxy origin http://127.0.0.1:8098.
+node scripts/test-learning-schedule-operations.mjs
+node scripts/test-learning-schedule-load.mjs --browser-regression
+```
+
+For the distinct-artifact rollback check, export `apps/web` from the chosen ancestor SHA into a separate temporary directory, install its locked dependencies and build it with the same loopback settings. Write its full source SHA to `.ops-source-sha` in that web directory, then set `LEARNING_SCHEDULE_OPS_ROLLBACK_WEB` to the directory before running the drill. The harness checks the ancestor and distinct build ID. Without that artifact, the harness records only a baseline restart for OR-11.

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync, fork } from "node:child_process";
+import { execFileSync, fork, spawn } from "node:child_process";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { once } from "node:events";
 import { writeFile } from "node:fs/promises";
@@ -7,7 +7,9 @@ import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { setTimeout as delay } from "node:timers/promises";
 import { loadReminderRuntime } from "./lib/load-learning-schedule-runtime.mjs";
+import { psql } from "./lib/learning-schedule-load-fixtures.mjs";
 
 const file = fileURLToPath(import.meta.url);
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -19,6 +21,7 @@ assert.equal(api, "http://127.0.0.1:55321");
 assert(key, "Local service key required");
 const db = createClient(api, key, { auth: { persistSession: false, autoRefreshToken: false } });
 const email = "recovery-fixture@example.invalid";
+const operations = process.argv.includes("--operations");
 const from = "Lumivox <study@example.invalid>";
 const q = value => `'${String(value).replaceAll("'", "''")}'`;
 const sha = value => createHash("sha256").update(value).digest("hex");
@@ -235,7 +238,110 @@ async function run() {
   const optOut = job => sql(`SELECT public.ls_notification_consume_unsubscribe_token(token_hash)
     FROM public.study_notification_resend_payloads WHERE job_id=${q(job)}`);
 
+  const setDispatch = enabled => sql(`UPDATE public.study_notification_dispatch_control SET enabled=${enabled}`);
+  function diagnostic(command) {
+    return JSON.parse(execFileSync(process.execPath, [resolve(root, "scripts/learning-schedule-ops.mjs"), command],
+      { encoding: "utf8", windowsHide: true }));
+  }
+
+  async function claimFence(job) {
+    function connection() {
+      const process = spawn("docker", psql, { windowsHide: true, stdio: ["pipe", "ignore", "ignore"] });
+      return { process, exited: once(process, "exit") };
+    }
+    async function until(query) {
+      const deadline = Date.now() + 8000;
+      while (Date.now() < deadline) {
+        if (sql(query) === "t") return;
+        await delay(100);
+      }
+      throw new Error("Expected claim fence checkpoint was not observed");
+    }
+    const claim = connection();
+    let disable;
+    try {
+      claim.process.stdin.write("SET application_name='ls_ops_claim'; BEGIN; SET LOCAL ROLE service_role; SELECT public.ls_notification_claim_batch(1);\n");
+      await until("SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE application_name='ls_ops_claim' AND state='idle in transaction')");
+      disable = connection();
+      disable.process.stdin.end("SET application_name='ls_ops_disable'; SET statement_timeout='10s'; UPDATE public.study_notification_dispatch_control SET enabled=false;\n");
+      await until(`SELECT EXISTS(SELECT 1 FROM pg_stat_activity d JOIN pg_stat_activity c
+        ON c.pid=ANY(pg_blocking_pids(d.pid)) WHERE d.application_name='ls_ops_disable' AND c.application_name='ls_ops_claim')`);
+      claim.process.stdin.end("COMMIT;\n");
+      assert.equal((await claim.exited)[0], 0);
+      assert.equal((await disable.exited)[0], 0);
+      assert.equal(state(job).job, "leased");
+      assert.deepEqual(await rpc("ls_notification_claim_batch", { p_batch_size: 1 }), []);
+    } finally {
+      if (!claim.process.stdin.writableEnded) claim.process.stdin.end("ROLLBACK;\n");
+      await claim.exited;
+      if (disable) await disable.exited;
+    }
+  }
+
   try {
+    if (operations) {
+      const idle = fixture();
+      setDispatch(false);
+      assert.equal(diagnostic("verify-gates").dispatchEnabled, false);
+      assert.equal(state(idle).attempts, 0);
+      record("disable_idle", null, await observe(idle), 0);
+
+      const claimed = fixture();
+      await claimFence(claimed);
+      const before = await observe(claimed);
+      assert.equal(diagnostic("inspect-queue").activeLeases, 1);
+      expire(claimed);
+      assert.equal(diagnostic("inspect-queue").expiredLeases, 1);
+      assert.equal(await rpc("ls_notification_reconcile_expired_leases", { p_batch_size: 1 }), 1);
+      const reconciled = await observe(claimed);
+      assert.equal(reconciled.state.job, "pending");
+      assert.equal(reconciled.state.deliveries, 0);
+      assert.equal(reconciled.state.lease, false);
+      assert.equal(observations.length, 0);
+      record("claim_fence_and_pre_handoff_reconcile", before, reconciled, 0, { blockerObserved: true });
+
+      for (const [checkpoint, submissions] of [["before_handoff", 0], ["handoff_committed", 1]]) {
+        const job = fixture(), initial = observations.length;
+        const child = spawnWorker(checkpoint);
+        await child.barrier();
+        const prior = await observe(job);
+        setDispatch(false);
+        child.resume();
+        await child.finish();
+        const after = await observe(job);
+        assert.equal(after.snapshot.dispatch.enabled, false);
+        assert.equal(after.state.delivery, submissions ? "accepted" : null);
+        if (submissions) assert.equal(after.state.job, "sent");
+        assert.equal(observations.length - initial, submissions);
+        record(checkpoint, prior, after, submissions);
+      }
+
+      const uncertain = fixture(), initial = observations.length;
+      loseResponse = true;
+      try { await spawnWorker().finish(); } finally { loseResponse = false; }
+      setDispatch(false);
+      const held = await observe(uncertain);
+      assert.equal(held.state.delivery, "uncertain");
+      assert.equal(diagnostic("inspect-uncertain").uncertainAttempts, 1);
+      setDispatch(true);
+      await spawnWorker().finish();
+      assert.deepEqual(state(uncertain), held.state);
+      assert.equal(observations.length - initial, 1);
+      record("enable_with_uncertain", held, await observe(uncertain), 1, { submissionsAfterEnable: 0 });
+
+      const eventId = `ops-${randomUUID()}`;
+      receiptIds.push(eventId);
+      const result = await rpc("ls_notification_ingest_resend", {
+        p_event_id: eventId, p_message_id: randomUUID(), p_event_type: "email.delivered",
+        p_event_at: new Date().toISOString(),
+        p_recipient_fingerprint: sha("ops recipient"), p_payload_fingerprint: sha("ops event"),
+      });
+      assert.equal(result.status, "unmatched");
+      assert.equal(diagnostic("inspect-webhooks").unmatchedWebhooks, 1);
+      record("unmatched_receipt", null, await observe(uncertain), 0);
+      return;
+    }
+
     for (const [name, checkpoint, sends, stage] of [
       ["FR-01", "claim_committed", 1, null],
       ["FR-02", "payload_prepared", 1, null],
@@ -402,7 +508,8 @@ async function run() {
     report.cleanup = Object.values(report.final).every(value => value === 0 || value === false);
     report.fakeSubmissions = observations.length;
     report.finishedAt = new Date().toISOString();
-    await writeFile(resolve(root, "docs/learning-schedule/phase-10-recovery.json"), JSON.stringify(report, null, 2) + "\n");
+    if (operations) console.log(JSON.stringify(report));
+    else await writeFile(resolve(root, "docs/learning-schedule/phase-10-recovery.json"), JSON.stringify(report, null, 2) + "\n");
     assert(report.cleanup);
   }
 }
