@@ -1652,6 +1652,9 @@ isOneToOne: false
 "ls_earliest_local_instant":
 { Args: { "p_local_date": string,"p_local_time": string,"p_timezone": string }; Returns: string
                            },
+"ls_learning_schedule_operational_snapshot":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
 "ls_link_study_focus":
 { Args: { "p_focus_session_id": string,"p_study_session_id": string }; Returns: string
                            },

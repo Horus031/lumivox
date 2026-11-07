@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from postgrest.exceptions import APIError
 
@@ -19,6 +21,7 @@ from app.services.focus_v2_service import (
 )
 
 router = APIRouter(dependencies=[Depends(verify_internal_api_key)])
+logger = logging.getLogger(__name__)
 
 STUDY_FOCUS_ERRORS = {
     "22023": (400, "invalidInput"),
@@ -51,6 +54,8 @@ def create_from_study_session(payload: CreateStudyFocusRequest):
         if error is None:
             raise
         status, detail = error
+        if status in (409, 423, 429):
+            logger.warning("study_focus_launch_conflict outcome=%s", detail)
         raise HTTPException(status_code=status, detail=detail) from exc
 
 
