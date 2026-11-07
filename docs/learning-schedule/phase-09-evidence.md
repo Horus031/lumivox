@@ -89,3 +89,73 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 - Read action returns the first bounded page with `hasMore`; it must not be treated as a complete aggregate when true. Full history pagination/effort projection remains later work. No production load/deployment checks are claimed.
 - **Phase 08D Tier B remains NOT EXECUTED**, retained as a release gate. No live Resend approval or activation is inferred from continuing Phase 09.
 - Primary references checked for constraints/RLS: [PostgreSQL constraints](https://www.postgresql.org/docs/current/ddl-constraints.html), [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security). Local execution above, not source review alone, supports Step 9A PASS.
+
+## Step 9B — Launch Focus from Study Plan
+
+- Status **Local PASS**.
+- Baseline HEAD `208fcfe6151af6e5a8ee1d6e2d9b63f6f779527e` on `feature/learning-schedule-foundation`. The worktree was clean before implementation.
+- Supabase CLI 2.122.0 generated `20261107062738_learning_schedule_focus_launch.sql`. Clean local replay applied **92 migrations**. The prior Focus V2 and Step 9A migrations were reused as applied.
+- Next.js authenticates the user and passes that identity through the existing internal-key boundary to FastAPI. The service-role-only RPC checks ownership and derives the Task from the Study Session. It creates the existing V2 parent, plan and segments, then writes attribution and the launch record in one transaction.
+- BR-053 and BR-054 in [business-rules.md](./business-rules.md) record the launch window, lifecycle eligibility and replay rules. The window is **[scheduled start − 15 minutes, scheduled end)**. Replay keys are owner-scoped and bind the Study Session plus all seven Pomodoro settings. Physical deletion of the attribution cascades to its launch record.
+
+### PostgreSQL and FastAPI execution
+
+| Case | Actual result |
+| --- | --- |
+| FL-01, FL-02, FL-03, FL-04 | **PASS**. Launch uses the owning Study Session's Task and returns the attributed Focus ID. Cross-owner returns SQLSTATE `PT403` and HTTP 403. FastAPI rejects a supplied `task_id` with 422. A completed Study Session, a launch too early and a launch after scheduled end return `PT422`. An invalid internal key returns 401. |
+| FL-05 | **PASS**. A separate PostgreSQL transaction held the Task close uncommitted. The launch waited, with a blocker observed via `pg_blocking_pids()`. Once Task close committed, the launch returned HTTP 410 and zero Focus rows persisted. |
+| FL-06, FL-07, FL-08 | **PASS**. Exact retry returns the same ID. Changed Study ID or Pomodoro settings with the same key returns `PT409`. Three overlapping HTTP requests produced 200/200/423, one original launch, one replay and one persisted launch record. A Task lock wait was observed. |
+| FL-09 | **PASS**. Injected attribution INSERT failure `P0001` left zero Focus, plan, segment and launch rows. Removing the fault let the same key create Focus successfully. |
+| FL-11, FL-12 | **PASS**. A new key with active Focus returns `PT423`. In a separate ordinary-create race, the Study launch waited on a Task lock while ordinary Focus created successfully with HTTP 200. The Study request then returned 423 and the ordinary Focus had no attribution. |
+| FL-13, FL-16 | **PASS**. An attributed Focus completed through the existing V2 transition RPC and left the Study Session scheduled with zero Attendance events. The FastAPI suite also exercised cancel for both attributed and ordinary Focus. |
+
+### Browser E2E
+
+- **FL-10 PASS.** Chromium submitted the real Next.js Server Action. A loopback proxy forwarded it to the actual FastAPI route backed by local PostgREST, received HTTP 200 after commit, and withheld the response until the Next.js HTTP client timed out. The UI displayed an uncertain result. Retrying sent the same request ID and configuration, received the original Focus ID with `replay: true`, and opened the existing `/focus` timer. The database had one attribution for that Focus, one active Focus for the owner and a Study Session still marked `scheduled`.
+- **FL-14 and FL-15 PASS.** Chromium checked English and Vietnamese planner labels at 390 px, the Today and Calendar entry points, no launch action for a skipped session, and no horizontal overflow. Enter opened the task-bound Pomodoro setup and submitted the form. The submit button was disabled while the HTTP request was pending. A component test also dispatched two submits in the same render and verified that only one request was sent.
+- Opening the Study Focus link again with an active Focus displayed the active-session message and existing timer. Final Playwright run **2 passed in 40.8s**, covering one FastAPI/PostgreSQL integration case and one Chromium E2E case.
+
+### Commands and quality gates
+
+```powershell
+# Repo root, disposable Supabase local
+supabase migration new learning_schedule_focus_launch
+supabase db reset --local --no-seed
+supabase test db --local
+supabase gen types typescript --local
+supabase db advisors --local --type security --fail-on none --output-format json
+
+# services/ai-api, with local SUPABASE_URL, SUPABASE_SECRET_KEY, AI_INTERNAL_API_KEY
+.venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
+.venv/Scripts/python.exe -m uvicorn app.main:app --host 127.0.0.1 --port 8096 --lifespan off
+
+# apps/web, with local Supabase and Focus V2 creation enabled
+node node_modules/eslint/bin/eslint.js .
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+node node_modules/next/dist/bin/next start -H 127.0.0.1 -p 3119
+node node_modules/@playwright/test/cli.js test tests/study-focus-launch.spec.ts --reporter=list
+```
+
+For Playwright, use `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119`, `STUDY_FOCUS_TEST_BACKEND=http://127.0.0.1:8096`, `STUDY_FOCUS_TEST_PROXY_PORT=8097`, the local `LEARNING_SCHEDULE_TEST_URL` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`, and the same test-only `AI_INTERNAL_API_KEY` as both servers. Configure Next.js with `AI_API_BASE_URL=http://127.0.0.1:8097` for the response-loss fixture. Build skipped the npm prebuild cleanup and ran the actual Next.js build.
+
+| Gate | Actual result |
+| --- | --- |
+| Clean migration replay / types | **PASS**, 92 applied migrations and regenerated local TypeScript types |
+| Full pgTAP | **PASS**, 948 assertions across 34 entries, including 29 new Step 9B assertions. Existing fixture-only concurrency entry intentionally skipped. |
+| FastAPI Focus V2 regression | **PASS**, 8 tests |
+| Full Vitest | **PASS**, 1038 passed / 26 skipped, 89 files passed / 5 skipped, 201.37s |
+| Lint | **PASS**, zero errors and one existing missing-`projection` dependency warning in `use-focus-v2-audio.ts` |
+| TypeScript | **PASS**, standalone typecheck and Next.js build typecheck |
+| Production build | **PASS**, Next.js 16.2.6, compiled in 14.1s, generated 105 pages |
+| Security advisors | Existing `public.set_updated_at` mutable search-path warning. No new findings. [Supabase Data API access controls](https://supabase.com/docs/guides/api/securing-your-api) |
+
+The initial standalone typecheck found an untyped Playwright Supabase client. Typing it with the generated `Database` fixed the fixture inserts. Standalone TypeScript and the production build typecheck passed afterward.
+
+Final database read showed **92 applied migrations** and **zero** Auth users, Tasks, Study Sessions, Focus Sessions, attributions and launch records. Dispatch and Missed Sweep were **OFF**, with **zero** reminder Cron jobs. The local Next.js and FastAPI test servers were stopped after the run.
+
+### Limits
+
+- **NOT EXECUTED:** clock-controlled assertions at the exact launch-window endpoints, multi-browser retry after tab storage is cleared, and remote Render deployment checks.
+- Phase 09C actual study time, Phase 09D integration acceptance, and Phase 08D Tier B remain separate.

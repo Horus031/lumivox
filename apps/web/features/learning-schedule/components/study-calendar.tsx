@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { calendarMonth, type CalendarDay } from "../study-plan-projection";
 import { StudyPlanSessions } from "./todays-study-plan";
 
-export function StudyCalendar({ month, days }: { month: string; days: CalendarDay[] }) {
+export function StudyCalendar({ month, days, focusEnabled }: { month: string; days: CalendarDay[]; focusEnabled?: boolean }) {
   const t = useTranslations("studyPlan"), locale = useLocale();
   const parsed = calendarMonth(month), first = parsed.toPlainDate({ day: 1 });
   const offset = first.dayOfWeek - 1;
@@ -44,7 +44,7 @@ export function StudyCalendar({ month, days }: { month: string; days: CalendarDa
       </table>
       {days.length === 0 ? <p className="py-6 text-secondary-text">{t("monthEmpty")}</p> :
         <div className="mt-5 space-y-5">{days.map(day => <section key={day.localDate} id={`study-day-${day.localDate}`} aria-label={day.localDate} className="scroll-mt-24">
-          <h3 className="font-semibold"><time dateTime={day.localDate}>{day.localDate}</time></h3><StudyPlanSessions sessions={day.sessions} />
+          <h3 className="font-semibold"><time dateTime={day.localDate}>{day.localDate}</time></h3><StudyPlanSessions sessions={day.sessions} focusEnabled={focusEnabled} />
         </section>)}</div>}
     </section>
   </Card>;

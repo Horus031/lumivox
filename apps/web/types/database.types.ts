@@ -1049,6 +1049,26 @@ isOneToOne: false
       referencedColumns: ["id","user_id","task_id"]
     }
                   ]
+                },"task_study_focus_launches": {
+                  Row: {
+                    "focus_session_id": string,"launch_request_id": string,"request_payload": NonNullable<Json>,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "focus_session_id": string,"launch_request_id": string,"request_payload": NonNullable<Json>,"user_id": string
+                  }
+                  Update: {
+                    "focus_session_id"?: string,"launch_request_id"?: string,"request_payload"?: NonNullable<Json>,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_study_focus_launches_focus_session_id_fkey"
+      columns: ["focus_session_id"]
+isOneToOne: true
+      referencedRelation: "task_study_focus_attributions"
+      referencedColumns: ["focus_session_id"]
+    }
+                  ]
                 },"task_study_schedule_revisions": {
                   Row: {
                     "change_reason": string | null,"changed_by": string | null,"created_at": string,"ends_on": string,"id": string,"revision": number,"schedule_id": string,"slots_snapshot": NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
@@ -1622,6 +1642,9 @@ isOneToOne: false
                            },
 "ls_complete_study_session":
 { Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_create_attributed_focus_v2":
+{ Args: { "p_auto_start_breaks": boolean,"p_auto_start_focus": boolean,"p_focus_minutes": number,"p_launch_request_id": string,"p_long_break_every": number,"p_long_break_minutes": number,"p_round_count": number,"p_short_break_minutes": number,"p_study_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "ls_create_schedule":
 { Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string

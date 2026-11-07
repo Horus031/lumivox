@@ -24,6 +24,20 @@
     }
   },
   "studyPlan": {
+    "focusLaunch": {
+      "start": "Start Focus",
+      "forTask": "Study session for {task}",
+      "back": "Back to Study Plan",
+      "openFocus": "Open Focus",
+      "retry": "Retry the same launch",
+      "invalidInput": "Check the Pomodoro settings and try again.",
+      "notAuthorized": "This study session is unavailable to your account.",
+      "ineligibleSession": "This study session is no longer eligible for Focus.",
+      "activeFocusConflict": "You already have an active Focus session.",
+      "requestConflict": "This launch request conflicts with an earlier request.",
+      "retryableConflict": "The session is busy. Retry the same launch.",
+      "uncertain": "We could not confirm the launch. Retry the same launch or open Focus to check for an active session."
+    },
     "refreshHint": "Study progress reflects the latest available session records. Reload to view recent attendance changes.",
     "weekdays": { "1": "Mon", "2": "Tue", "3": "Wed", "4": "Thu", "5": "Fri", "6": "Sat", "7": "Sun" },
     "eyebrow": "Learning schedule", "title": "Study Planner", "description": "Your learning schedule and progress",

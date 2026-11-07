@@ -5,7 +5,8 @@ import { getStudyPlanAction } from "./study-plan.queries.actions";
 const uuid = (n: number) => `a0000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
 const row = (i: number) => ({ id: uuid(i), task_id: uuid(100001 + i % 2), schedule_id: uuid(200001 + i % 2), logical_occurrence_key: `key-${i}`,
   local_date: "2026-11-02", local_start_time: "19:00:00", local_end_time: "20:00:00", timezone: "UTC", scheduled_start_at: "2026-11-02T19:00:00Z",
-  scheduled_end_at: "2026-11-02T20:00:00Z", status: "missed", completed_at: null as string | null });
+  scheduled_end_at: "2026-11-02T20:00:00Z", status: "missed", completed_at: null as string | null,
+  schedule_revision: 1, schedule: { status: "active", revision: 1 } });
 type Event = { id: string; session_id: string; created_at: string };
 type Query = { table: string; filters: Record<string, unknown>; orders: string[]; range?: [number, number]; select?: unknown[] };
 type Result = { data: unknown; error: unknown; count?: number | null };
@@ -20,7 +21,7 @@ function client() {
       range: (f: number, t: number) => { q.range = [f, t]; return b; },
       then: (resolve: (r: Result) => unknown) => {
         const data = table === "task_study_sessions" ? rows : table === "tasks" ? [...new Set(rows.map(r => r.task_id))]
-          .filter(id => (q.filters.id as string[]).includes(id)).map(id => ({ id, title: `Task ${id}` })) : events.filter(e => (q.filters.session_id as string[]).includes(e.session_id));
+          .filter(id => (q.filters.id as string[]).includes(id)).map(id => ({ id, title: `Task ${id}`, status: "todo", parent_task_id: null })) : events.filter(e => (q.filters.session_id as string[]).includes(e.session_id));
         const [f, t] = q.range!; return Promise.resolve(override(q, { data: data.slice(f, t + 1), error: null, count: data.length })).then(resolve);
       },
     }; return b;

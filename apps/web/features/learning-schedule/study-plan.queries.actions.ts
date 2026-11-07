@@ -10,6 +10,8 @@ const sessionSchema = z.object({
   logical_occurrence_key: z.string(), local_date: z.string(), local_start_time: z.string(), local_end_time: z.string(),
   timezone: z.string(), scheduled_start_at: z.string(), scheduled_end_at: z.string(), completed_at: z.string().nullable(),
   status: z.enum(["scheduled", "in_progress", "completed", "missed", "skipped", "cancelled"]),
+  schedule_revision: z.number().int(),
+  schedule: z.object({ status: z.string(), revision: z.number().int() }).nullable(),
 });
 const PAGE = 500, MAX_ROWS = 20_000, CHUNK = 50, MAX_OUTPUT = 2_000;
 type FailureCode = "invalidInput" | "loadFailed" | "incompleteData";
@@ -46,20 +48,24 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
     // Read all history to cover Today's Plan across every IANA zone and to
     // aggregate obligations correctly. No unproven UTC envelope or N+1 summaries.
     const fetched = await allPages((from, to) => supabase.from("task_study_sessions")
-      .select("id,task_id,schedule_id,logical_occurrence_key,local_date,local_start_time,local_end_time,timezone,scheduled_start_at,scheduled_end_at,status,completed_at", { count: "exact" })
+      .select("id,task_id,schedule_id,logical_occurrence_key,local_date,local_start_time,local_end_time,timezone,scheduled_start_at,scheduled_end_at,status,completed_at,schedule_revision,schedule:task_study_schedules!ls_session_schedule_task_owner_fk(status,revision)", { count: "exact" })
       .eq("user_id", user.id).order("scheduled_start_at").order("id").range(from, to));
     const parsed = z.array(sessionSchema).safeParse(fetched);
     if (!parsed.success) throw new ReadFailure("incompleteData");
     const rows = parsed.data;
     const titles = new Map<string, string>();
+    const eligibleTasks = new Set<string>();
     const taskIds = [...new Set(rows.map(row => row.task_id))];
     for (let offset = 0; offset < taskIds.length; offset += CHUNK) {
       const ids = taskIds.slice(offset, offset + CHUNK);
-      const tasks = await allPages((from, to) => supabase.from("tasks").select("id,title", { count: "exact" })
+      const tasks = await allPages((from, to) => supabase.from("tasks").select("id,title,status,parent_task_id", { count: "exact" })
         .eq("user_id", user.id).in("id", ids).order("id").range(from, to));
       for (const task of tasks) {
         if (!ids.includes(task.id)) throw new ReadFailure("incompleteData");
         titles.set(task.id, task.title);
+        if (task.parent_task_id === null && (task.status === "todo" || task.status === "in_progress")) {
+          eligibleTasks.add(task.id);
+        }
       }
       if (tasks.length !== ids.length) throw new ReadFailure("incompleteData");
     }
@@ -81,6 +87,10 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
         id: row.id, taskId: row.task_id, taskTitle: titles.get(row.task_id)!, scheduleId: row.schedule_id,
         localDate: row.local_date, localStartTime: row.local_start_time, localEndTime: row.local_end_time,
         timezone: row.timezone, scheduledStartAt: row.scheduled_start_at, status: row.status,
+        canLaunchFocus: eligibleTasks.has(row.task_id) && row.schedule?.status === "active" &&
+          row.schedule.revision === row.schedule_revision && (row.status === "scheduled" || row.status === "in_progress") &&
+          Date.parse(asOf) >= Date.parse(row.scheduled_start_at) - 15 * 60_000 &&
+          Date.parse(asOf) < Date.parse(row.scheduled_end_at),
       }));
       const today = getTodaysStudySessions(sessions, asOf);
       const calendar = groupStudyCalendar(sessions, input.data.month);

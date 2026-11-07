@@ -24,6 +24,20 @@
     }
   },
   "studyPlan": {
+    "focusLaunch": {
+      "start": "Bắt đầu Focus",
+      "forTask": "Buổi học cho công việc {task}",
+      "back": "Về kế hoạch học tập",
+      "openFocus": "Mở Focus",
+      "retry": "Thử lại yêu cầu này",
+      "invalidInput": "Hãy kiểm tra cấu hình Pomodoro rồi thử lại.",
+      "notAuthorized": "Tài khoản của bạn không thể truy cập buổi học này.",
+      "ineligibleSession": "Buổi học này không còn đủ điều kiện để bắt đầu Focus.",
+      "activeFocusConflict": "Bạn đang có một phiên Focus.",
+      "requestConflict": "Yêu cầu bắt đầu xung đột với một yêu cầu trước đó.",
+      "retryableConflict": "Phiên đang bận. Hãy thử lại cùng yêu cầu.",
+      "uncertain": "Chưa xác nhận được kết quả. Hãy thử lại cùng yêu cầu hoặc mở Focus để kiểm tra phiên đang chạy."
+    },
     "refreshHint": "Tiến độ học tập được tính từ dữ liệu buổi học mới nhất đã tải. Hãy tải lại trang để xem những thay đổi điểm danh gần đây.",
     "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },
     "eyebrow": "Lịch học", "title": "Kế hoạch học tập", "description": "Lịch học và tiến độ của bạn",

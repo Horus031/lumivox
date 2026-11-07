@@ -59,6 +59,8 @@
 - BR-050: Today's Study Plan lists sessions whose local scheduled date is today in their own schedule timezone; label displayed timezone. Allow quickly opening Task/Focus/check-in.
 - BR-051: Conflicts across Tasks are warnings: show overlapping date/time and conflicting Task; don't prevent saving. Within the same Task, duplicate/overlapping weekly slots are rejected.
 - BR-052: Client must handle empty state, locale, accessibility and mobile widths.
+- BR-053: A new Study Focus launch is allowed from 15 minutes before the persisted scheduled start (inclusive) until the scheduled end (exclusive). The Study Session must be `scheduled` or `in_progress` in the current revision of an active schedule on a root `todo` or `in_progress` Task. PostgreSQL evaluates these rules using its clock after locking the records. The planner link reflects eligibility at the time the plan was loaded.
+- BR-054: Creating the Focus V2 session, attributing it and recording the launch key are one transaction. Exact retries return the original Focus ID even after the launch window closes, while its attribution is retained. The key is scoped to the owner and binds the Study Session and Pomodoro settings. A second active Focus is disallowed across ordinary and Study launches. Attendance status remains independent.
 
 ## 7. Reminder consent and notifications
 
