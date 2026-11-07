@@ -177,6 +177,9 @@ test("Task and Schedule to multi-round Focus, interrupted Focus and concurrent m
   }
   await expect.poll(status).toBe("completed");
   expect(events()).toBe("completed");
+  const recovery = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(recovery.error).toBeNull();
+  expect(recovery.data).toMatchObject({ focus: { activeSessions: 0 }, missedSweep: { enabled: false } });
   await expect(attendance.getByRole("region", { name: "Task study schedule" }).getByText("Completed", { exact: true })).toBeVisible();
   const saved = sql(`SELECT count(DISTINCT f.id) || '|' || sum(seg.actual_seconds) FILTER (WHERE seg.segment_kind='focus') || '|' ||
     sum(seg.actual_seconds) FILTER (WHERE seg.segment_kind <> 'focus')

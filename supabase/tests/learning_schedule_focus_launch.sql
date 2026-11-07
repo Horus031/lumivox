@@ -57,6 +57,8 @@ SELECT is((SELECT count(*) FROM focus_sessions), 0::bigint, 'no orphan Focus aft
 SELECT is((SELECT count(*) FROM focus_session_plans), 0::bigint, 'no orphan plan after rollback');
 SELECT is((SELECT count(*) FROM focus_session_segments), 0::bigint, 'no orphan segments after rollback');
 SELECT is((SELECT count(*) FROM task_study_focus_launches), 0::bigint, 'no replay record after rollback');
+SELECT is(public.ls_learning_schedule_operational_snapshot()->'focus'->>'activeSessions', '0',
+ 'FR-16 operational snapshot agrees with the attribution rollback');
 DROP TRIGGER test_fail_link ON task_study_focus_attributions;
 
 CREATE TEMP TABLE launched AS SELECT pg_temp.launch() AS result;

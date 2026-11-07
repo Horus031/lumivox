@@ -160,5 +160,8 @@ test("projects real V2 completion and interruption, reschedule and revision in E
   await expect(page.getByText("Recorded Focus could not be loaded.")).toBeVisible();
   await expect(oldRow.getByText("Recorded Focus: 18 minutes")).toHaveCount(0);
   await expect(page.getByText("Attendance", { exact: true })).toBeVisible();
+  const recovery = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(recovery.error).toBeNull();
+  expect(recovery.data).toMatchObject({ focus: { activeSessions: 0 }, missedSweep: { enabled: false } });
   console.log(`Recorded seconds: Legacy 420 + completed V2 600 + interrupted V2 ${interrupted!.actual_seconds}. Break 60 excluded.`);
 });

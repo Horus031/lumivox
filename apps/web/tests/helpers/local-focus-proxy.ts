@@ -1,8 +1,9 @@
 import { createServer } from "node:http";
 
-type LaunchObserver = (request: Record<string, unknown>, response: Record<string, unknown>) => boolean;
+type LaunchObserver = (request: Record<string, unknown>, response: Record<string, unknown>) => boolean | "disconnect";
 
-export async function startLocalFocusProxy(backend: string, port: string, withholdLaunch?: LaunchObserver) {
+export async function startLocalFocusProxy(backend: string, port: string, withholdLaunch?: LaunchObserver,
+  observeTransition?: (status: number) => void) {
   const origin = new URL(backend);
   if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") throw new Error("Focus proxy requires a loopback FastAPI");
   const proxy = createServer(async (request, response) => {
@@ -17,8 +18,12 @@ export async function startLocalFocusProxy(backend: string, port: string, withho
       });
       const payload = await upstream.text();
       // Observe an upstream commit before optionally withholding the response.
-      if (upstream.ok && request.url.endsWith("/create-from-study-session")
-        && withholdLaunch?.(JSON.parse(body), JSON.parse(payload))) return;
+      if (upstream.ok && request.url.endsWith("/create-from-study-session")) {
+        const fault = withholdLaunch?.(JSON.parse(body), JSON.parse(payload));
+        if (fault === "disconnect") response.destroy();
+        if (fault) return;
+      }
+      if (request.url.endsWith("/transition")) observeTransition?.(upstream.status);
       response.writeHead(upstream.status, { "content-type": "application/json" }).end(payload);
     } catch {
       response.writeHead(502).end();

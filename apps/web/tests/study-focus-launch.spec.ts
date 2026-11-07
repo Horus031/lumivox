@@ -30,8 +30,9 @@ test.skip(!api || !service || !anon || !backend || !proxyPort || !internalKey, "
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 test.use({ viewport: { width: 390, height: 844 } });
 
-let dropNext = false;
+let dropNext: boolean | "disconnect" = false;
 const launches: { request: Record<string, unknown>; response: Record<string, unknown>; dropped: boolean }[] = [];
+const transitions: number[] = [];
 let stopProxy: (() => Promise<void>) | undefined;
 
 let admin: SupabaseClient<Database>;
@@ -69,9 +70,9 @@ test.beforeAll(async ({ baseURL }) => {
   stopProxy = await startLocalFocusProxy(backend!, proxyPort!, (request, response) => {
     const dropped = dropNext;
     dropNext = false;
-    launches.push({ request, response, dropped });
+    launches.push({ request, response, dropped: !!dropped });
     return dropped;
-  });
+  }, status => transitions.push(status));
   admin = createClient<Database>(api!, service!, { auth: { persistSession: false, autoRefreshToken: false } });
   for (const user of users) {
     const created = await admin.auth.admin.createUser({ email: user.email, password: user.password, email_confirm: true });
@@ -129,6 +130,9 @@ test("real FastAPI auth, Task-close race, concurrent launch, and ordinary Focus"
   finally { await closeLock.release(); }
   expect((await closedLaunch).status).toBe(410);
   expect(sql("SELECT count(*) FROM public.focus_sessions")).toBe("0");
+  const closedSnapshot = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(closedSnapshot.error).toBeNull();
+  expect(closedSnapshot.data).toMatchObject({ focus: { activeSessions: 0 } });
 
   const raceLock = await heldTask(taskId);
   const first = input();
@@ -201,6 +205,9 @@ test("browser EN/VI 390px, keyboard launch and recovery after a committed respon
   expect(launches[0].dropped).toBe(true);
   const focusId = launches[0].response.session_id;
   expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id = '${focusId}'`)).toBe("1");
+  const uncertainSnapshot = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(uncertainSnapshot.error).toBeNull();
+  expect(uncertainSnapshot.data).toMatchObject({ focus: { activeSessions: 1 } });
   const fresh = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
   try {
     const otherTab = await fresh.newPage();
@@ -210,6 +217,8 @@ test("browser EN/VI 390px, keyboard launch and recovery after a committed respon
     await otherTab.goto(`/en/focus?studySession=${studyId}`);
     expect(await otherTab.evaluate(key => sessionStorage.getItem(key), `study-focus:${users[0].id}:${studyId}`)).toBeNull();
     await expect(otherTab.getByText("You already have an active Focus session.")).toBeVisible();
+    await expect(otherTab.getByRole("timer")).toBeVisible();
+    await otherTab.reload();
     await expect(otherTab.getByRole("timer")).toBeVisible();
     expect(launches).toHaveLength(1);
   } finally { await fresh.close(); }
@@ -221,10 +230,85 @@ test("browser EN/VI 390px, keyboard launch and recovery after a committed respon
   expect(launches[1].response).toEqual({ session_id: focusId, replay: true });
   expect(sql(`SELECT status FROM public.task_study_sessions WHERE id = '${studyId}'`)).toBe("scheduled");
   expect(sql(`SELECT count(*) FROM public.focus_sessions WHERE user_id = '${users[0].id}' AND status IN ('ongoing','paused')`)).toBe("1");
+  const replaySnapshot = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(replaySnapshot.error).toBeNull();
+  expect(replaySnapshot.data).toMatchObject({ focus: { activeSessions: 1 } });
   await page.goto(`/en/focus?studySession=${studyId}`);
   await expect(page.getByText("You already have an active Focus session.")).toBeVisible();
   await expect(page.getByRole("timer")).toBeVisible();
   await expect(page.getByRole("button", { name: "Retry the same launch" })).toHaveCount(0);
+});
+
+test("FR-11 connection loss after commit reconciles the original launch", async ({ page }) => {
+  const previous = launches.at(-1)!.response.session_id;
+  expect((await apiPost("transition", { user_id: users[0].id, session_id: previous, action: "cancel" })).status).toBe(200);
+  await page.goto("/en/auth/login");
+  await submitLoginForm(page, users[0].email, users[0].password);
+  await page.waitForURL("**/en/dashboard");
+  await page.goto(`/en/focus?studySession=${studyId}`);
+  await expect(page.getByText("Study session for Study Focus Test Task")).toBeVisible();
+  const before = launches.length;
+  dropNext = "disconnect";
+  await page.locator("form button[type=submit]").click();
+  await expect(page.getByRole("alert").filter({ hasText: "could not confirm the launch" })).toBeVisible();
+  expect(launches).toHaveLength(before + 1);
+  const { request, response } = launches.at(-1)!;
+  const id = response.session_id;
+  await page.getByRole("button", { name: "Retry the same launch" }).click();
+  await expect(page.getByRole("timer")).toBeVisible();
+  expect(launches).toHaveLength(before + 2);
+  expect(launches.at(-1)).toMatchObject({ request, response: { session_id: id, replay: true } });
+  expect(sql(`SELECT count(*) FROM public.task_study_focus_launches WHERE focus_session_id='${id}'`)).toBe("1");
+  expect(sql(`SELECT count(*) FROM public.task_study_focus_attributions WHERE focus_session_id='${id}'`)).toBe("1");
+  const snapshot = await admin.rpc("ls_learning_schedule_operational_snapshot");
+  expect(snapshot.error).toBeNull();
+  expect(snapshot.data).toMatchObject({ focus: { activeSessions: 1 } });
+});
+
+test("FR-13 two browsers complete the same persisted segment without double effort", async ({ page, browser, baseURL }) => {
+  const id = launches.at(-1)!.response.session_id;
+  const segment = sql(`SELECT id FROM public.focus_session_segments WHERE session_id='${id}' AND position=1 AND status='running'`);
+  expect(segment).toMatch(/^[a-f0-9-]{36}$/);
+  const planned = sql(`SELECT planned_seconds FROM public.focus_session_segments WHERE id='${segment}'`);
+  const second = await browser.newContext({ baseURL, storageState: { cookies: [], origins: [] } });
+  let release!: () => void;
+  const gate = new Promise<void>(resolve => { release = resolve; });
+  try {
+    const tabs = [page, await second.newPage()];
+    let submitted = 0;
+    await Promise.all(tabs.map(async tab => {
+      await tab.goto("/en/auth/login");
+      await submitLoginForm(tab, users[0].email, users[0].password);
+      await tab.waitForURL("**/en/dashboard");
+      await tab.goto("/en/focus");
+      await expect(tab.getByRole("timer")).toBeVisible();
+      await tab.route("**/en/focus**", async route => {
+        const request = route.request();
+        const body = request.postData();
+        if (request.method() === "POST" && request.headers()["next-action"] && body?.includes(segment) && body.includes("complete")) {
+          submitted++;
+          await gate;
+        }
+        await route.continue();
+      });
+    }));
+    const start = transitions.length;
+    sql(`UPDATE public.focus_session_segments SET started_at=clock_timestamp()-(planned_seconds + 5)*interval '1 second' WHERE id='${segment}'`);
+    await Promise.all(tabs.map(tab => tab.reload()));
+    await expect.poll(() => submitted, { timeout: 10_000 }).toBe(2);
+    release();
+    await expect.poll(() => transitions.slice(start).sort()).toEqual([200, 409]);
+    expect(sql(`SELECT status || '|' || actual_seconds FROM public.focus_session_segments WHERE id='${segment}'`)).toBe(`completed|${planned}`);
+    expect(sql(`SELECT count(*) FROM public.focus_session_segments WHERE session_id='${id}' AND status='completed'`)).toBe("1");
+    expect(sql(`SELECT count(*) FROM public.task_study_session_events WHERE session_id='${studyId}'`)).toBe("0");
+    const snapshot = await admin.rpc("ls_learning_schedule_operational_snapshot");
+    expect(snapshot.error).toBeNull();
+    expect(snapshot.data).toMatchObject({ focus: { activeSessions: 1 } });
+    console.log(`FR-13: two browser completions, FastAPI 200/409, one completed ${planned}s segment`);
+  } finally {
+    release();
+    await second.close();
+  }
 });
 
 test("two independent browser contexts submit Start with one active Focus", async ({ page, browser, baseURL }) => {
