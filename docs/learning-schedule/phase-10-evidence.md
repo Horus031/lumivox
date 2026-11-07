@@ -182,3 +182,86 @@ Final database read verified 93 applied migrations, zero fixture users, Tasks, S
 - Lease expiry was advanced on disposable fixture rows. Worker termination was real and limited to the harness's own child processes.
 - Webhook recovery was exercised at the trusted ingestion RPC boundary. Signed webhook HTTP coverage remains in the earlier Phase 08 suites. FR-17 injects a short page at the query adapter boundary.
 - Live provider reconciliation, automatic operator commands, production load and alert collection remain outside this checkpoint.
+
+## Step 10C — Load & Performance
+
+- Status **Local benchmark complete. Medium Study Plan latency target missed.** Small and Medium both finished the four workload groups and passed the persisted correctness assertions. Large was deferred because Medium exceeded its trial latency target.
+- Baseline HEAD `7f0453ffc7fd774d53961dd73b29569fd98fd783` on `feature/learning-schedule-foundation`, with a clean worktree at start. The benchmark uses the existing 93-migration schema.
+- [Performance report](./phase-10-performance.json) records environment, sample counts, latency percentiles, throughput, response size, PostgREST calls/rows, SQL execution time, process memory, observed blockers and persisted invariants.
+- Windows 11 build 26200, Intel Core i7-9850H with 12 logical CPUs, 31.76 GiB host RAM, Docker with 12 CPUs and about 15.5 GiB RAM, Node 22.13.1. All servers, database requests and injected provider responses are local.
+- Study Plan measures complete HTTP bodies on the production Next.js build. After a warm-up, each persona uses three requests per concurrent client. Concurrent clients share one authenticated persona within a batch. The fixture uses separate schedules of at most 50 days and contains completed and cancelled history. The linked persona has 201 Focus attributions on one occurrence.
+- The loopback proxy counts PostgREST calls and rows. SQL execution time is the delta of matching `pg_stat_statements` entries in the isolated window. The residual after subtracting summed PostgREST round trips is approximate because requests can overlap. It is not a measurement of application CPU time. Memory is the Next.js process lifetime peak working set. [PostgreSQL statement statistics](https://www.postgresql.org/docs/current/pgstatstatements.html)
+- Schedule and Focus batches use distinct authorized owners. Separate contention scenarios deliberately share a schedule or hold a database lock. Focus percentiles are measured at FastAPI or PostgREST. A separate Chromium sample measures the browser through Next.js to FastAPI and Supabase.
+- Notification drain uses five concurrent invocations of the actual dispatcher, store and adapter, batch size 5, and 100 jobs spread across 10 owners. Only the SDK send port is replaced. Delay and errors are injected locally. Lease expiry is advanced on fixtures after the harness child exits or after a gate-off interruption.
+
+### Study Plan results
+
+| Profile / persona | Samples | p50 / p95 / p99 (ms) | PostgREST calls / rows per request | Mean HTML bytes |
+| --- | ---: | ---: | ---: | ---: |
+| Small, 12 sessions | 15 | 272.01 / 347.62 / 347.62 | 8 / 22 | 179,732 |
+| Small, 20 sessions and 201 links | 15 | 288.75 / 304.65 / 304.65 | 14 / 634 | 179,794 |
+| Medium, 12 sessions | 60 | 877.96 / 916.76 / 925.06 | 8 / 22 | 179,621 |
+| Medium, 1,500 sessions and 201 links | 60 | 3,386.38 / **3,457.98** / 3,487.35 | 54 / 2,554 | 559,372 |
+
+- Small used **10 owners / 500 Study Sessions / 5 concurrent clients**. Medium used **100 / 10,000 / 20**. The full run reported zero measured Study Plan errors. Both profiles rendered the correct 201-minute effort and showed the incomplete-data state when the proxy shortened a real page while preserving its declared count.
+- The Medium linked owner's peak Next.js working set was **541 MiB**. Across 60 requests, aggregate request time was **197,396 ms**, measured PostgREST round trips were **21,143 ms**, and matching SQL execution time was **2,444 ms**. These are summed measurements from different layers under concurrency.
+- Medium EXPLAIN probes for the Study page and cancellation lookup executed in **0.508 ms** and **0.264 ms**. They show an indexed session lookup with incremental sort and a bitmap index scan for the cancellation query. The probes use simplified query shapes. The aggregate evidence does not isolate a single SQL query or prove a specific index would recover the end-to-end latency. No index, RPC or application read strategy changed.
+
+### Mutation, Focus and queue results
+
+| Workload | Small | Medium |
+| --- | ---: | ---: |
+| Schedule create p95 | 146.90 ms | 285.43 ms |
+| Schedule revise p95 | 62.53 ms | 197.26 ms |
+| Same-schedule reschedule p95 | 32.33 ms | 27.75 ms |
+| Manual Attendance plus exact replay p95 | 21.61 ms | 130.82 ms |
+| Focus ordinary / attributed create p95 | 35.99 / 24.26 ms | 85.52 / 60.47 ms |
+| Focus pause / resume / segment complete p95 | 18.17 / 17.95 / 18.34 ms | 73.87 / 73.27 / 73.44 ms |
+| Focus cancel / active read / replay p95 | 26.24 / 13.64 / 20.67 ms | 60.17 / 22.56 / 58.74 ms |
+| Browser launch via Next.js, one sample | 587.08 ms | 551.84 ms |
+| Queue drain, terminal jobs per second | 13.06 | 15.08 |
+| Queue accepted jobs per second | 12.67 | 14.63 |
+| Queue worker batch p95 | 2,136.87 ms | 1,719.06 ms |
+
+- Real lock waits were observed in both profiles via `pg_blocking_pids()`. Revision versus Attendance finished successfully, with one manual completion event. Task close versus launch returned the expected HTTP 410 with zero attribution. Opt-out versus handoff refused authorization before provider invocation. Per-case statement observations and wall-clock timings are in the JSON.
+- All Focus load samples completed with expected statuses, including HTTP 423 for a new key during active Focus. Exact launch replay returned the original ID with zero extra Focus rows. The transition p95 figures above are below the **500 ms** FastAPI trial target. The one-sample Chromium results represent click-to-timer latency through the full stack.
+- Each queue drained **100 jobs** to **97 sent and 3 failed**, with zero unexpected duplicate submissions. The child process was stopped after claim commit, and the recovered job submitted once within the 3-claim budget. Gate OFF prevented new durable handoffs. Twenty stranded pre-handoff leases were observed in each run and expired on the fixtures before resuming. Five workers used fake delays of 35/350 ms, two injected 429s and one uncertain outcome per profile.
+- The existing worker persisted the two injected 429s as terminal failures, even though the adapter classifies rate limits as retryable. It held the uncertain attempt without sending again. No retry policy change was made in this benchmark.
+- Both profiles ended with zero extra Focus rows, duplicate attributions, lost Attendance events and unexpected duplicate submissions. There were no observed deadlocks or unexpected measured errors in the final run.
+
+### Harness corrections
+
+- Initial read assertions confused strings from the embedded translation catalog with rendered messages. The harness now checks rendered markup. A separate warm-up attempt saw a local profiles HTTP 401. Warm-up failures are tracked separately, and the final run had none.
+- A preliminary queue run expected exactly two claims after a child crash. The gate closed during the recovered job's next lease, so the final claim count was three. The harness now verifies the existing budget and exactly one submission.
+- A preliminary Medium run saw one ordinary Focus transport failure in 20 attempts. The final run used a fresh loopback connection per direct FastAPI request and captured transport error codes. No mutation is retried automatically by the benchmark.
+
+### Reproduction
+
+```powershell
+# Repo root, verified disposable Supabase local
+supabase status -o json
+supabase test db --local
+node scripts/test-learning-schedule-load.mjs
+
+# apps/web
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+
+# services/ai-api, with local Supabase and a test-only internal API key
+.venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
+```
+
+Build Next.js with `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:8098` and the local publishable key so the benchmark can instrument the Data API. The harness expects `LEARNING_SCHEDULE_TEST_URL=http://127.0.0.1:55321`, local anon/service keys in `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`, and a test-only `AI_INTERNAL_API_KEY`. It starts its own Next.js, FastAPI and loopback proxy processes. Optional positional profile names are `small`, `medium` and `large`.
+
+| Regression gate | Actual result |
+| --- | --- |
+| Full pgTAP | **PASS**, 974 assertions across 35 entries |
+| Full Vitest | **PASS**, 1,076 passed / 26 skipped, 94 files passed / 5 skipped, 194.13s |
+| FastAPI Focus V2 regression | **PASS**, 9 tests |
+| ESLint | **PASS**, zero errors, existing missing-`projection` dependency warning |
+| TypeScript | **PASS**, standalone and Next.js build typecheck |
+| Next.js production build | **PASS**, compiled in 14.2s, 106 pages. npm prebuild cleanup was skipped. |
+
+The post-benchmark pgTAP rerun also passed all 974 assertions. The final local database had **93 migrations**, zero fixture users, Tasks, Study Sessions, events, Focus sessions, attributions, jobs, deliveries, payloads, tokens and receipts. Dispatch and Missed Sweep were **OFF**, with zero reminder Cron jobs. The harness ports were closed and the provider used only the injected fake SDK port.

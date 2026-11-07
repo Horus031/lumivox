@@ -1,0 +1,889 @@
+{
+  "baseline": "7f0453ffc7fd774d53961dd73b29569fd98fd783",
+  "environment": "disposable-local",
+  "host": {
+    "os": "win32",
+    "release": "10.0.26200",
+    "cpu": "Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz",
+    "logicalCpus": 12,
+    "ramGiB": 31.76,
+    "node": "v22.13.1",
+    "docker": "12 CPUs / 16640348160 bytes"
+  },
+  "startedAt": "2026-11-07T11:36:21.898Z",
+  "profiles": [
+    {
+      "profile": "small",
+      "users": 10,
+      "sessions": 500,
+      "history": 20,
+      "concurrency": 5,
+      "measurements": {
+        "studyPlan": {
+          "lightOwner": {
+            "sampleCount": 15,
+            "p50Ms": 272.01,
+            "p95Ms": 347.62,
+            "p99Ms": 347.62,
+            "elapsedMs": 860.34,
+            "requestsPerSecond": 17.43,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 15
+            },
+            "ownerSessions": 12,
+            "linksOnOneOccurrence": 0,
+            "postgrest": {
+              "profiles": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_sessions": {
+                "calls": 30,
+                "rows": 285
+              },
+              "tasks": {
+                "calls": 15,
+                "rows": 15
+              },
+              "user_engagement_stats": {
+                "calls": 15,
+                "rows": 0
+              },
+              "task_study_session_events": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_focus_attributions": {
+                "calls": 30,
+                "rows": 0
+              }
+            },
+            "callsPerRequest": 8,
+            "rowsPerRequest": 22,
+            "avgResponseBytes": 179732,
+            "sumRequestMs": 4285.26,
+            "sumPostgrestRoundtripMs": 1123.37,
+            "approximateOtherRequestMs": 3161.89,
+            "pgStatStatements": {
+              "calls": 75,
+              "executionMs": 12.6
+            },
+            "memoryBefore": {
+              "workingSetBytes": 133799936,
+              "processLifetimePeakBytes": 141324288
+            },
+            "memoryAfter": {
+              "workingSetBytes": 182767616,
+              "processLifetimePeakBytes": 186368000
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "linkedHistoryOwner": {
+            "sampleCount": 15,
+            "p50Ms": 288.75,
+            "p95Ms": 304.65,
+            "p99Ms": 304.65,
+            "elapsedMs": 876.35,
+            "requestsPerSecond": 17.12,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 15
+            },
+            "ownerSessions": 20,
+            "linksOnOneOccurrence": 201,
+            "postgrest": {
+              "profiles": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_sessions": {
+                "calls": 30,
+                "rows": 405
+              },
+              "tasks": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_session_events": {
+                "calls": 15,
+                "rows": 30
+              },
+              "user_engagement_stats": {
+                "calls": 15,
+                "rows": 0
+              },
+              "task_study_focus_attributions": {
+                "calls": 60,
+                "rows": 6030
+              },
+              "focus_sessions": {
+                "calls": 60,
+                "rows": 3015
+              }
+            },
+            "callsPerRequest": 14,
+            "rowsPerRequest": 634,
+            "avgResponseBytes": 179794,
+            "sumRequestMs": 4364.68,
+            "sumPostgrestRoundtripMs": 1381.13,
+            "approximateOtherRequestMs": 2983.55,
+            "pgStatStatements": {
+              "calls": 165,
+              "executionMs": 65.39
+            },
+            "memoryBefore": {
+              "workingSetBytes": 186314752,
+              "processLifetimePeakBytes": 186630144
+            },
+            "memoryAfter": {
+              "workingSetBytes": 207347712,
+              "processLifetimePeakBytes": 210616320
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "shortPageFailedClosed": true,
+          "explain": "Limit  (cost=20.68..20.73 rows=20 width=24) (actual time=0.091..0.094 rows=20 loops=1)\n  Buffers: shared hit=20\n  ->  Sort  (cost=20.68..20.73 rows=20 width=24) (actual time=0.090..0.092 rows=20 loops=1)\n        Sort Key: scheduled_start_at, id\n        Sort Method: quicksort  Memory: 26kB\n        Buffers: shared hit=20\n        ->  Seq Scan on task_study_sessions  (cost=0.00..20.25 rows=20 width=24) (actual time=0.009..0.069 rows=20 loops=1)\n              Filter: (user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid)\n              Rows Removed by Filter: 480\n              Buffers: shared hit=14\nPlanning:\n  Buffers: shared hit=296\nPlanning Time: 0.547 ms\nExecution Time: 0.135 ms\nSort  (cost=28.59..28.60 rows=1 width=32) (actual time=0.145..0.147 rows=2 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=19\n  ->  Hash Semi Join  (cost=20.50..28.58 rows=1 width=32) (actual time=0.099..0.138 rows=2 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=19\n        ->  Seq Scan on task_study_session_events  (cost=0.00..8.07 rows=3 width=32) (actual time=0.008..0.046 rows=2 loops=1)\n              Filter: ((user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid) AND (event_type = 'cancelled'::text))\n              Rows Removed by Filter: 203\n              Buffers: shared hit=5\n        ->  Hash  (cost=20.25..20.25 rows=20 width=16) (actual time=0.075..0.076 rows=20 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 9kB\n              Buffers: shared hit=14\n              ->  Limit  (cost=0.00..20.25 rows=20 width=16) (actual time=0.005..0.065 rows=20 loops=1)\n                    Buffers: shared hit=14\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..20.25 rows=20 width=16) (actual time=0.005..0.062 rows=20 loops=1)\n                          Filter: (user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid)\n                          Rows Removed by Filter: 480\n                          Buffers: shared hit=14\nPlanning:\n  Buffers: shared hit=116\nPlanning Time: 0.437 ms\nExecution Time: 0.271 ms"
+        },
+        "schedule": {
+          "create": {
+            "sampleCount": 5,
+            "p50Ms": 142.92,
+            "p95Ms": 146.9,
+            "p99Ms": 146.9,
+            "elapsedMs": 147.19,
+            "requestsPerSecond": 33.97,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "revise": {
+            "sampleCount": 5,
+            "p50Ms": 62,
+            "p95Ms": 62.53,
+            "p99Ms": 62.53,
+            "elapsedMs": 62.68,
+            "requestsPerSecond": 79.77,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "sharedScheduleReschedule": {
+            "sampleCount": 4,
+            "p50Ms": 18.87,
+            "p95Ms": 32.33,
+            "p99Ms": 32.33,
+            "elapsedMs": 32.68,
+            "requestsPerSecond": 122.39,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 4
+            }
+          },
+          "manualAttendanceAndReplay": {
+            "sampleCount": 5,
+            "p50Ms": 20.14,
+            "p95Ms": 21.61,
+            "p99Ms": 21.61,
+            "elapsedMs": 21.82,
+            "requestsPerSecond": 229.12,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "lostAttendanceEvents": 0
+        },
+        "contention": {
+          "revisionVsAttendance": {
+            "blockers": [
+              {
+                "waiter": 14681,
+                "blockers": [
+                  14864
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 151.146
+              }
+            ],
+            "elapsedMs": 635.61,
+            "outcome": "00000"
+          },
+          "closeVsLaunch": {
+            "blockers": [
+              {
+                "waiter": 14676,
+                "blockers": [
+                  14906
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 247.482
+              }
+            ],
+            "elapsedMs": 1500.6,
+            "outcome": 410
+          }
+        },
+        "focus": {
+          "ordinary": {
+            "sampleCount": 5,
+            "p50Ms": 33.77,
+            "p95Ms": 35.99,
+            "p99Ms": 35.99,
+            "elapsedMs": 36.01,
+            "requestsPerSecond": 138.84,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "cancel": {
+            "sampleCount": 5,
+            "p50Ms": 25.22,
+            "p95Ms": 26.24,
+            "p99Ms": 26.24,
+            "elapsedMs": 26.92,
+            "requestsPerSecond": 185.73,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "attributed": {
+            "sampleCount": 5,
+            "p50Ms": 22.1,
+            "p95Ms": 24.26,
+            "p99Ms": 24.26,
+            "elapsedMs": 24.96,
+            "requestsPerSecond": 200.3,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "activeRead": {
+            "sampleCount": 5,
+            "p50Ms": 11.72,
+            "p95Ms": 13.64,
+            "p99Ms": 13.64,
+            "elapsedMs": 13.94,
+            "requestsPerSecond": 358.61,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "replay": {
+            "sampleCount": 5,
+            "p50Ms": 20.33,
+            "p95Ms": 20.67,
+            "p99Ms": 20.67,
+            "elapsedMs": 21.42,
+            "requestsPerSecond": 233.39,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "conflict": {
+            "sampleCount": 5,
+            "p50Ms": 16.68,
+            "p95Ms": 17,
+            "p99Ms": 17,
+            "elapsedMs": 17.99,
+            "requestsPerSecond": 277.98,
+            "errorCount": 0,
+            "outcomes": {
+              "423": 5
+            }
+          },
+          "pause": {
+            "sampleCount": 5,
+            "p50Ms": 17.11,
+            "p95Ms": 18.17,
+            "p99Ms": 18.17,
+            "elapsedMs": 18.75,
+            "requestsPerSecond": 266.65,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "resume": {
+            "sampleCount": 5,
+            "p50Ms": 16.9,
+            "p95Ms": 17.95,
+            "p99Ms": 17.95,
+            "elapsedMs": 18.27,
+            "requestsPerSecond": 273.7,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "complete": {
+            "sampleCount": 5,
+            "p50Ms": 17.29,
+            "p95Ms": 18.34,
+            "p99Ms": 18.34,
+            "elapsedMs": 18.86,
+            "requestsPerSecond": 265.12,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "replayExtraWrites": 0,
+          "nextBrowserLaunch": {
+            "sampleCount": 1,
+            "elapsedMs": 587.08,
+            "observedAttribution": true
+          }
+        },
+        "queue": {
+          "sampleCount": 35,
+          "p50Ms": 568.39,
+          "p95Ms": 2136.87,
+          "p99Ms": 2204.08,
+          "elapsedMs": 7654.53,
+          "requestsPerSecond": 4.57,
+          "errorCount": 0,
+          "outcomes": {
+            "ok": 35
+          },
+          "workers": 5,
+          "jobs": 100,
+          "terminalStates": {
+            "sent": 97,
+            "failed": 3
+          },
+          "drainJobsPerSecond": 13.06,
+          "acceptedJobsPerSecond": 12.67,
+          "unexpectedDuplicateSubmissions": 0,
+          "crashedClaimRecovered": true,
+          "crashedAttempts": 3,
+          "gateFenceVerified": true,
+          "strandedLeases": 20,
+          "fake429": 2,
+          "fakeUncertain": 1,
+          "injectedProviderDelayMs": [
+            35,
+            350
+          ],
+          "before": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 99,
+              "activeLeases": 0,
+              "expiredLeases": 1,
+              "uncertainAttempts": 0,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 0,
+              "oldestDueAgeSeconds": 652,
+              "acceptedSubmissions24h": 0,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:36:52.083762+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "after": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 0,
+              "activeLeases": 0,
+              "expiredLeases": 0,
+              "uncertainAttempts": 1,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 2,
+              "oldestDueAgeSeconds": null,
+              "acceptedSubmissions24h": 97,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:37:00.276139+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "optOutVsHandoff": {
+            "blockers": [
+              {
+                "waiter": 14677,
+                "blockers": [
+                  15145
+                ],
+                "waitEvent": "advisory",
+                "observedStatementMs": 185.771
+              }
+            ],
+            "elapsedMs": 679.23,
+            "outcome": {
+              "authorized": false,
+              "reason": "stale_payload"
+            }
+          }
+        }
+      },
+      "invariants": {
+        "duplicateAttributions": 0,
+        "unexpectedFocusRows": 0,
+        "lostAttendanceEvents": 0,
+        "unexpectedDuplicateSubmissions": 0
+      },
+      "cleanup": "0|0|0|0|0|f|f|0"
+    },
+    {
+      "profile": "medium",
+      "users": 100,
+      "sessions": 10000,
+      "history": 1500,
+      "concurrency": 20,
+      "measurements": {
+        "studyPlan": {
+          "lightOwner": {
+            "sampleCount": 60,
+            "p50Ms": 877.96,
+            "p95Ms": 916.76,
+            "p99Ms": 925.06,
+            "elapsedMs": 2668.95,
+            "requestsPerSecond": 22.48,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 60
+            },
+            "ownerSessions": 12,
+            "linksOnOneOccurrence": 0,
+            "postgrest": {
+              "profiles": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_sessions": {
+                "calls": 120,
+                "rows": 1140
+              },
+              "tasks": {
+                "calls": 60,
+                "rows": 60
+              },
+              "user_engagement_stats": {
+                "calls": 60,
+                "rows": 0
+              },
+              "task_study_session_events": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_focus_attributions": {
+                "calls": 120,
+                "rows": 0
+              }
+            },
+            "callsPerRequest": 8,
+            "rowsPerRequest": 22,
+            "avgResponseBytes": 179621,
+            "sumRequestMs": 53070.74,
+            "sumPostgrestRoundtripMs": 2922.91,
+            "approximateOtherRequestMs": 50147.83,
+            "pgStatStatements": {
+              "calls": 300,
+              "executionMs": 50.5
+            },
+            "memoryBefore": {
+              "workingSetBytes": 174796800,
+              "processLifetimePeakBytes": 210722816
+            },
+            "memoryAfter": {
+              "workingSetBytes": 233156608,
+              "processLifetimePeakBytes": 241836032
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "linkedHistoryOwner": {
+            "sampleCount": 60,
+            "p50Ms": 3386.38,
+            "p95Ms": 3457.98,
+            "p99Ms": 3487.35,
+            "elapsedMs": 9910.86,
+            "requestsPerSecond": 6.05,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 60
+            },
+            "ownerSessions": 1500,
+            "linksOnOneOccurrence": 201,
+            "postgrest": {
+              "profiles": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_sessions": {
+                "calls": 420,
+                "rows": 102600
+              },
+              "user_engagement_stats": {
+                "calls": 60,
+                "rows": 0
+              },
+              "tasks": {
+                "calls": 60,
+                "rows": 1800
+              },
+              "task_study_session_events": {
+                "calls": 1800,
+                "rows": 12600
+              },
+              "task_study_focus_attributions": {
+                "calls": 600,
+                "rows": 24120
+              },
+              "focus_sessions": {
+                "calls": 240,
+                "rows": 12060
+              }
+            },
+            "callsPerRequest": 54,
+            "rowsPerRequest": 2554,
+            "avgResponseBytes": 559372,
+            "sumRequestMs": 197396.04,
+            "sumPostgrestRoundtripMs": 21143.24,
+            "approximateOtherRequestMs": 176252.8,
+            "pgStatStatements": {
+              "calls": 3060,
+              "executionMs": 2444.21
+            },
+            "memoryBefore": {
+              "workingSetBytes": 235868160,
+              "processLifetimePeakBytes": 241836032
+            },
+            "memoryAfter": {
+              "workingSetBytes": 497225728,
+              "processLifetimePeakBytes": 567476224
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "shortPageFailedClosed": true,
+          "explain": "Limit  (cost=24.85..432.70 rows=500 width=24) (actual time=0.145..0.455 rows=500 loops=1)\n  Buffers: shared hit=522\n  ->  Incremental Sort  (cost=24.85..1248.40 rows=1500 width=24) (actual time=0.145..0.429 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=522\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1191.84 rows=1500 width=24) (actual time=0.022..0.276 rows=511 loops=1)\n              Index Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n              Buffers: shared hit=513\nPlanning:\n  Buffers: shared hit=302\nPlanning Time: 0.549 ms\nExecution Time: 0.508 ms\nSort  (cost=142.24..142.25 rows=3 width=32) (actual time=0.231..0.233 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=38\n  ->  Hash Semi Join  (cost=35.19..142.22 rows=3 width=32) (actual time=0.129..0.226 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=38\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=21.06..127.51 rows=210 width=32) (actual time=0.051..0.133 rows=210 loops=1)\n              Recheck Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=16\n              Buffers: shared hit=19\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..21.01 rows=630 width=0) (actual time=0.027..0.027 rows=630 loops=1)\n                    Index Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n                    Buffers: shared hit=3\n        ->  Hash  (cost=13.50..13.50 rows=50 width=16) (actual time=0.053..0.054 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=19\n              ->  Limit  (cost=0.00..13.50 rows=50 width=16) (actual time=0.036..0.045 rows=50 loops=1)\n                    Buffers: shared hit=19\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..405.00 rows=1500 width=16) (actual time=0.036..0.041 rows=50 loops=1)\n                          Filter: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n                          Buffers: shared hit=19\nPlanning:\n  Buffers: shared hit=124\nPlanning Time: 0.315 ms\nExecution Time: 0.264 ms"
+        },
+        "schedule": {
+          "create": {
+            "sampleCount": 20,
+            "p50Ms": 225.76,
+            "p95Ms": 285.43,
+            "p99Ms": 286.81,
+            "elapsedMs": 287.08,
+            "requestsPerSecond": 69.67,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "revise": {
+            "sampleCount": 20,
+            "p50Ms": 111.81,
+            "p95Ms": 197.26,
+            "p99Ms": 198.09,
+            "elapsedMs": 198.28,
+            "requestsPerSecond": 100.87,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "sharedScheduleReschedule": {
+            "sampleCount": 4,
+            "p50Ms": 16.48,
+            "p95Ms": 27.75,
+            "p99Ms": 27.75,
+            "elapsedMs": 27.88,
+            "requestsPerSecond": 143.5,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 4
+            }
+          },
+          "manualAttendanceAndReplay": {
+            "sampleCount": 20,
+            "p50Ms": 128.21,
+            "p95Ms": 130.82,
+            "p99Ms": 130.96,
+            "elapsedMs": 131.18,
+            "requestsPerSecond": 152.46,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "lostAttendanceEvents": 0
+        },
+        "contention": {
+          "revisionVsAttendance": {
+            "blockers": [
+              {
+                "waiter": 15263,
+                "blockers": [
+                  15650
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 134.977
+              }
+            ],
+            "elapsedMs": 640.66,
+            "outcome": "00000"
+          },
+          "closeVsLaunch": {
+            "blockers": [
+              {
+                "waiter": 14677,
+                "blockers": [
+                  15692
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 150.471
+              }
+            ],
+            "elapsedMs": 625.65,
+            "outcome": 410
+          }
+        },
+        "focus": {
+          "ordinary": {
+            "sampleCount": 20,
+            "p50Ms": 81.39,
+            "p95Ms": 85.52,
+            "p99Ms": 85.72,
+            "elapsedMs": 87.62,
+            "requestsPerSecond": 228.26,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "cancel": {
+            "sampleCount": 20,
+            "p50Ms": 54.13,
+            "p95Ms": 60.17,
+            "p99Ms": 60.31,
+            "elapsedMs": 62.89,
+            "requestsPerSecond": 318.04,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "attributed": {
+            "sampleCount": 20,
+            "p50Ms": 54.73,
+            "p95Ms": 60.47,
+            "p99Ms": 61.14,
+            "elapsedMs": 62.23,
+            "requestsPerSecond": 321.36,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "activeRead": {
+            "sampleCount": 20,
+            "p50Ms": 20.79,
+            "p95Ms": 22.56,
+            "p99Ms": 22.68,
+            "elapsedMs": 23.12,
+            "requestsPerSecond": 865.03,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "replay": {
+            "sampleCount": 20,
+            "p50Ms": 50.46,
+            "p95Ms": 58.74,
+            "p99Ms": 59.02,
+            "elapsedMs": 60.03,
+            "requestsPerSecond": 333.14,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "conflict": {
+            "sampleCount": 20,
+            "p50Ms": 50.67,
+            "p95Ms": 59.52,
+            "p99Ms": 59.57,
+            "elapsedMs": 61.29,
+            "requestsPerSecond": 326.3,
+            "errorCount": 0,
+            "outcomes": {
+              "423": 20
+            }
+          },
+          "pause": {
+            "sampleCount": 20,
+            "p50Ms": 63.54,
+            "p95Ms": 73.87,
+            "p99Ms": 74.75,
+            "elapsedMs": 75.51,
+            "requestsPerSecond": 264.87,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "resume": {
+            "sampleCount": 20,
+            "p50Ms": 66.1,
+            "p95Ms": 73.27,
+            "p99Ms": 74.58,
+            "elapsedMs": 75.82,
+            "requestsPerSecond": 263.79,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "complete": {
+            "sampleCount": 20,
+            "p50Ms": 62.75,
+            "p95Ms": 73.44,
+            "p99Ms": 73.93,
+            "elapsedMs": 76.41,
+            "requestsPerSecond": 261.73,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "replayExtraWrites": 0,
+          "nextBrowserLaunch": {
+            "sampleCount": 1,
+            "elapsedMs": 551.84,
+            "observedAttribution": true
+          }
+        },
+        "queue": {
+          "sampleCount": 30,
+          "p50Ms": 532.87,
+          "p95Ms": 1719.06,
+          "p99Ms": 2137.51,
+          "elapsedMs": 6630.63,
+          "requestsPerSecond": 4.52,
+          "errorCount": 0,
+          "outcomes": {
+            "ok": 30
+          },
+          "workers": 5,
+          "jobs": 100,
+          "terminalStates": {
+            "sent": 97,
+            "failed": 3
+          },
+          "drainJobsPerSecond": 15.08,
+          "acceptedJobsPerSecond": 14.63,
+          "unexpectedDuplicateSubmissions": 0,
+          "crashedClaimRecovered": true,
+          "crashedAttempts": 3,
+          "gateFenceVerified": true,
+          "strandedLeases": 20,
+          "fake429": 2,
+          "fakeUncertain": 1,
+          "injectedProviderDelayMs": [
+            35,
+            350
+          ],
+          "before": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 99,
+              "activeLeases": 0,
+              "expiredLeases": 1,
+              "uncertainAttempts": 0,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 0,
+              "oldestDueAgeSeconds": 659,
+              "acceptedSubmissions24h": 0,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:37:59.941101+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "after": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 0,
+              "activeLeases": 0,
+              "expiredLeases": 0,
+              "uncertainAttempts": 1,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 2,
+              "oldestDueAgeSeconds": null,
+              "acceptedSubmissions24h": 97,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:38:07.064599+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "optOutVsHandoff": {
+            "blockers": [
+              {
+                "waiter": 15262,
+                "blockers": [
+                  16017
+                ],
+                "waitEvent": "advisory",
+                "observedStatementMs": 148.064
+              }
+            ],
+            "elapsedMs": 627.78,
+            "outcome": {
+              "authorized": false,
+              "reason": "stale_payload"
+            }
+          }
+        }
+      },
+      "invariants": {
+        "duplicateAttributions": 0,
+        "unexpectedFocusRows": 0,
+        "lostAttendanceEvents": 0,
+        "unexpectedDuplicateSubmissions": 0
+      },
+      "cleanup": "0|0|0|0|0|f|f|0"
+    }
+  ],
+  "realProviderRequests": 0,
+  "finalCleanup": "0|0|0|0|0|f|f|0",
+  "finishedAt": "2026-11-07T11:38:11.861Z"
+}
