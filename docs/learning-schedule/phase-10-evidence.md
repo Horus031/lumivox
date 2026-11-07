@@ -265,3 +265,81 @@ Build Next.js with `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:8098` and the loca
 | Next.js production build | **PASS**, compiled in 14.2s, 106 pages. npm prebuild cleanup was skipped. |
 
 The post-benchmark pgTAP rerun also passed all 974 assertions. The final local database had **93 migrations**, zero fixture users, Tasks, Study Sessions, events, Focus sessions, attributions, jobs, deliveries, payloads, tokens and receipts. Dispatch and Missed Sweep were **OFF**, with zero reminder Cron jobs. The harness ports were closed and the provider used only the injected fake SDK port.
+
+## Step 10C.1 — Performance Remediation
+
+**Status: Local PASS (PE-01 through PE-10).**
+
+- Baseline HEAD `e333e30a061e36e1e3c3e9309430dbfd395558ed`. The benchmark report retains the original Small and Medium results and appends the follow-up under `remediation`.
+- Study Plan now reads the owner's cancellation events in exact-count pages rather than fetching once per 50 session IDs. The read still checks for duplicate, missing and contradictory cancellation events, and rejects audits outside the session snapshot. Attendance formulas and the 201-link effort calculation are unchanged.
+- Today resolves the current date once per timezone. Calendar validates each visible date once. Both retain nanosecond ordering and stable ID tie-breaking, with each visible instant parsed once per list.
+- Opt-in `STUDY_PLAN_PERF_TIMING=true` emits fixed stage names and timings only. The harness records the plan and effort stages, render preparation, response bytes and the full request time. The remainder includes React rendering, serialization, queuing and other app work. It is not a direct CPU profile.
+- The CLI-generated migration `20261107114955_learning_schedule_resend_rate_limit_retry.sql` adds a service-role-only command for confirmed `rate_limit_exceeded`. The adapter routes only that allowlisted, retryable result to the command. Other rejection, accepted and uncertain results keep their existing persistence paths. [Resend API errors](https://resend.com/docs/api-reference/errors)
+- The database validates the original handoff and payload fingerprint under owner → job → delivery locks. A confirmed 429 releases the lease and schedules a new claim in 30 seconds if the job is still eligible, the backoff ends before scheduled start, and fewer than three claims have been consumed. It preserves the payload, unsubscribe token and idempotency key. Replay of the same outcome does not extend the backoff. [PostgreSQL explicit locking](https://www.postgresql.org/docs/current/explicit-locking.html)
+- The first remediation run improved the 60-sample Medium heavy p95 from 3,457.98 ms to 2,679.71 ms and calls per request from 54 to 25. HTML size remained 559,372 bytes. Mean effort time was 904.29 ms across the request stages, with negligible pure calculation time. This motivated raising the bounded Focus read chunk from 60 to 120 and slimming the Today/Calendar props to the fields they display.
+- The local notification fixture verified two 429 jobs stayed pending with a future `next_attempt_at`. After waiting for the persisted backoff, both completed on a second provider call with identical body and idempotency key. Quota, payload mismatch and uncertainty stayed terminal for automatic sending. The database also exercised relevance expiry, claim exhaustion and unauthorized access. The provider was an injected local fake.
+- With the smaller payload and larger Focus batch, the next 60-sample Medium heavy trial reached 2,594.12 ms p95. That still exceeded the unchanged 2,500 ms threshold. The next refinement reads independent Task and audit data concurrently and reads remaining exact-count pages two at a time after the first page establishes the total. It still validates counts, page lengths and duplicate IDs before using the results.
+
+The remediation run uses the same Medium fixture generator, machine, loopback proxy and production build workflow as Step 10C. Auth identities are regenerated for each disposable run. The 20-client comparisons use 60 measured requests for each persona. The JSON also keeps separate 1-client and 5-client measurements.
+
+### Measured results
+
+| Medium clients | Samples per persona | Light p50 / p95 / p99 (ms) | Heavy p50 / p95 / p99 (ms) |
+| ---: | ---: | ---: | ---: |
+| 1 | 3 | 85.92 / 123.74 / 123.74 | 237.17 / 250.44 / 250.44 |
+| 5 | 15 | 255.29 / 280.86 / 280.86 | 639.88 / 748.16 / 748.16 |
+| 20 | 60 | 850.79 / 872.06 / 878.72 | 1,979.12 / 2,093.65 / 2,096.17 |
+
+At 20 clients, heavy p95 improved from 3,457.98 ms to **2,093.65 ms**. PostgREST calls fell from 54 to 17 per request, with 2,554 rows per request in the final trial. Mean response size fell from 559,372 to 511,226 bytes. Mean Study Plan, Focus effort and render preparation times were 718.57, 560.86 and 0.07 ms respectively. The process lifetime peak working set was 474,169,344 bytes. Every measured request returned HTTP 200. The short-page probe still rejected incomplete data.
+
+The final timing run isolated Study Plan reads after the pagination change. The earlier complete Medium runs exercised schedule, contention, Focus and the durable retry path. The notification workload ended with 97 sent jobs and three jobs failed for automatic sending, with zero unexpected duplicate submissions. The browser regression also exercises the exact effort total and the preserved Attendance read paths.
+
+| Checkpoint | Result |
+| --- | --- |
+| PE-01 | **PASS**, 60 heavy samples at 20 clients, p95 2,093.65 ms against the unchanged 2,500 ms gate |
+| PE-02 | **PASS**, zero measured errors and short-page rejection at all three concurrency levels |
+| PE-03 | **PASS**, the heavy fixture includes 201 Focus links on one occurrence and checks the complete effort total |
+| PE-04 | **PASS**, existing Attendance formulas retained and covered by the regressions |
+| PE-05 | **PASS**, two confirmed rate limits requeued durably and retried with identical bodies and keys |
+| PE-06 | **PASS**, quota and payload mismatch stayed terminal and pgTAP covered window and claim exhaustion |
+| PE-07 | **PASS**, uncertain timeout stayed on hold for automatic sending |
+| PE-08 | **PASS**, zero unexpected duplicate submissions to the injected provider |
+| PE-09 | **PASS**, full local regression and quality gates below |
+| PE-10 | **PASS**, fixture data removed, harness listeners closed, Dispatch and Missed Sweep OFF |
+
+| Local gate | Result |
+| --- | --- |
+| Clean migration replay and TypeScript type generation | **PASS**, 94 migrations |
+| pgTAP | **PASS**, 983 assertions across 35 files |
+| Vitest | **PASS**, 1,077 passed and 26 skipped. After the final pagination typecheck fix, all 45 focused Study Plan and Focus effort tests passed again. |
+| FastAPI Focus V2 | **PASS**, 9 tests |
+| Chromium on the final production build | **PASS**, 7 tests in 1.3 minutes |
+| ESLint | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts` |
+| Standalone TypeScript and Next.js production build | **PASS** |
+| Harness syntax and Git diff whitespace | **PASS** |
+
+The database after Chromium contained 94 migrations and zero fixture users, Tasks, Study Sessions, session events, Focus sessions, attributions, notification jobs, deliveries, payloads, unsubscribe tokens and webhook receipts. Dispatch and Missed Sweep were both OFF. There were zero reminder Cron jobs and zero listeners on the three harness ports.
+
+These results apply to the local Medium workload with a fake provider. The benchmark provides no staging or production latency measurement, and Phase 08D Tier B live Resend remains pending.
+
+### Reproduction
+
+```powershell
+# Repo root, verified disposable Supabase local
+supabase migration up --local
+supabase db reset --local --no-seed
+supabase gen types typescript --local
+supabase test db --local
+node scripts/test-learning-schedule-load.mjs --remediation medium
+node scripts/test-learning-schedule-load.mjs --remediation --reads-only medium
+node scripts/test-learning-schedule-load.mjs --browser-regression
+
+# apps/web, with the same loopback build settings as Step 10C
+node node_modules/vitest/vitest.mjs run --maxWorkers=2 --reporter=dot
+node node_modules/eslint/bin/eslint.js .
+node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
+node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
+
+# services/ai-api, local configuration
+.venv/Scripts/python.exe -m pytest -q tests/api/test_focus_v2_routes.py tests/unit/test_focus_v2_service.py
+```

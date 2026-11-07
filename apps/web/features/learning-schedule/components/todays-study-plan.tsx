@@ -4,9 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import type { StudyPlanSession } from "../study-plan-projection";
+import type { StudyPlanDisplaySession } from "../study-plan-projection";
 
-type Props = { sessions: StudyPlanSession[]; focusEnabled?: boolean };
+type Props = { sessions: StudyPlanDisplaySession[]; focusEnabled?: boolean };
 
 export function StudyPlanSessions({ sessions, focusEnabled }: Props) {
   const t = useTranslations("studyPlan");

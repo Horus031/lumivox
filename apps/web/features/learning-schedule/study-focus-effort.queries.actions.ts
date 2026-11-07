@@ -1,5 +1,7 @@
 "use server";
 
+import { studyPlanTiming } from "./study-plan-timing";
+
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import type { Database } from "@/types/database.types";
@@ -22,7 +24,8 @@ const planSchema = z.object({
   segments: z.array(segmentSchema).max(15),
 });
 const LINK_CAP = 4000;
-const CHUNK = 60;
+// UUID filters stay below common proxy URL limits at this batch size.
+const CHUNK = 120;
 type Code = "invalidInput" | "notAuthorized" | "loadFailed" | "incompleteData";
 type Result = { success: true; source: "persisted-focus-records"; asOf: string; efforts: StudyFocusEffort[] }
   | { success: false; code: Code };
@@ -62,7 +65,9 @@ async function readPages<T extends { id: string }>(
 export async function getStudyFocusEffortAction(raw: unknown): Promise<Result> {
   const parsed = inputSchema.safeParse(raw);
   if (!parsed.success) return { success: false, code: "invalidInput" };
+  const timing = studyPlanTiming("effort");
   const auth = await requireUser().catch(() => null);
+  timing.mark("auth");
   if (!auth) return { success: false, code: "notAuthorized" };
   const { supabase, user } = auth;
   const studyIds = [...new Set(parsed.data.studySessionIds)];
@@ -81,6 +86,7 @@ export async function getStudyFocusEffortAction(raw: unknown): Promise<Result> {
       }
     }
 
+    timing.mark("ownership");
     async function readLinks() {
       const all: LinkRow[] = [];
       const seen = new Set<string>();
@@ -99,6 +105,7 @@ export async function getStudyFocusEffortAction(raw: unknown): Promise<Result> {
       return all;
     }
     const links = await readLinks();
+    timing.mark("links");
     const linkByFocus = new Map(links.map(link => [link.focus_session_id, link]));
     const sources: FocusEffortSource[] = [];
     for (const ids of chunks([...linkByFocus.keys()])) {
@@ -132,12 +139,17 @@ export async function getStudyFocusEffortAction(raw: unknown): Promise<Result> {
       }
     }
 
+    timing.mark("parents");
     const confirmed = await readLinks();
+    timing.mark("confirmLinks");
     complete(confirmed.length === links.length && confirmed.every((row, i) =>
       row.id === links[i].id && row.focus_session_id === links[i].focus_session_id && row.study_session_id === links[i].study_session_id));
     const projection = projectStudyFocusEffort(studyIds, sources);
+    timing.mark("projection");
     return projection.success ? { ...projection, source: "persisted-focus-records", asOf: new Date().toISOString() } : projection;
   } catch (error) {
     return { success: false, code: error instanceof ReadFailure ? error.code : "loadFailed" };
+  } finally {
+    timing.finish();
   }
 }

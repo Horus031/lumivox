@@ -3,10 +3,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Card } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
-import { calendarMonth, type CalendarDay } from "../study-plan-projection";
+import { calendarMonth, type StudyPlanDisplayDay } from "../study-plan-projection";
 import { StudyPlanSessions } from "./todays-study-plan";
 
-export function StudyCalendar({ month, days, focusEnabled }: { month: string; days: CalendarDay[]; focusEnabled?: boolean }) {
+export function StudyCalendar({ month, days, focusEnabled }: { month: string; days: StudyPlanDisplayDay[]; focusEnabled?: boolean }) {
   const t = useTranslations("studyPlan"), locale = useLocale();
   const parsed = calendarMonth(month), first = parsed.toPlainDate({ day: 1 });
   const offset = first.dayOfWeek - 1;

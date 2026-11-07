@@ -1723,6 +1723,9 @@ isOneToOne: false
 "ls_notification_record_resend_outcome":
 { Args: { "p_delivery_id": string,"p_handoff_token": string,"p_message_id"?: string,"p_outcome": string,"p_payload_fingerprint": string }; Returns: Json
                            },
+"ls_notification_record_resend_rate_limit":
+{ Args: { "p_delivery_id": string,"p_handoff_token": string,"p_payload_fingerprint": string }; Returns: undefined
+                           },
 "ls_notification_resend_context":
 { Args: { "p_job_id": string }; Returns: Json
                            },

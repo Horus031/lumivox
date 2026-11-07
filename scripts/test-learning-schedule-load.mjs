@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawn } from "node:child_process";
-import { randomBytes, randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { once } from "node:events";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { cpus, totalmem, platform, release } from "node:os";
@@ -32,7 +32,10 @@ const profileOptions = {
   medium: { users: 100, sessions: 10_000, history: 1500, concurrency: 20 },
   large: { users: 500, sessions: 50_000, history: 5000, concurrency: 50 },
 };
-const selected = process.argv.slice(2);
+const remediation = process.argv.includes("--remediation");
+const browserRegression = process.argv.includes("--browser-regression");
+const readsOnly = process.argv.includes("--reads-only");
+const selected = process.argv.slice(2).filter(arg => !["--remediation", "--browser-regression", "--reads-only"].includes(arg));
 const profiles = selected.length ? selected : ["small", "medium"];
 assert(profiles.every(name => Object.hasOwn(profileOptions, name)), "Use small, medium or large");
 const auth = { persistSession: false, autoRefreshToken: false };
@@ -41,6 +44,7 @@ const children = new Set();
 const reports = [];
 let users = [];
 const traffic = [];
+const timingSamples = [];
 let shortPage = false;
 let recordTraffic = false;
 const proxyErrors = [];
@@ -100,7 +104,12 @@ async function startServer(program, args, options, match) {
   const process = child(program, args, options);
   const lines = [createInterface({ input: process.stdout }), createInterface({ input: process.stderr })];
   let ready = false;
-  for (const stream of lines) stream.on("line", line => { if (line.includes(match)) ready = true; });
+  for (const stream of lines) stream.on("line", line => {
+    if (line.includes(match)) ready = true;
+    if (recordTraffic && line.startsWith("study_plan_timing ")) {
+      timingSamples.push(JSON.parse(line.slice("study_plan_timing ".length)));
+    }
+  });
   const deadline = Date.now() + 20_000;
   while (!ready && process.exitCode === null && Date.now() < deadline) await delay(100);
   assert(ready, `Test server failed to start: ${match}`);
@@ -167,10 +176,26 @@ async function reads(profile, lengths, nextProcess) {
     }
     const before = stats(), startMemory = memory(nextProcess.pid);
     traffic.length = 0;
+    timingSamples.length = 0;
     recordTraffic = true;
     const batch = await measure(Array.from({ length: profile.concurrency * 3 }), profile.concurrency, async () =>
       ({ bytes: await read(cookie, index === 0), code: 200 }));
     recordTraffic = false;
+    const timings = {};
+    for (const entry of timingSamples) {
+      const scope = timings[entry.scope] ??= { samples: 0, totalMs: 0, stageTotalsMs: {} };
+      scope.samples++;
+      scope.totalMs += entry.elapsedMs;
+      for (const [stage, elapsed] of Object.entries(entry.stages)) {
+        scope.stageTotalsMs[stage] = (scope.stageTotalsMs[stage] ?? 0) + elapsed;
+      }
+    }
+    for (const scope of Object.values(timings)) {
+      scope.meanMs = rounded(scope.totalMs / scope.samples);
+      scope.stageMeanMs = Object.fromEntries(Object.entries(scope.stageTotalsMs).map(([stage, ms]) => [stage, rounded(ms / scope.samples)]));
+      delete scope.totalMs;
+      delete scope.stageTotalsMs;
+    }
     const after = stats();
     const categories = {};
     for (const t of traffic) {
@@ -188,7 +213,7 @@ async function reads(profile, lengths, nextProcess) {
       approximateOtherRequestMs: rounded(totalMs - restMs),
       pgStatStatements: { calls: after.calls - before.calls, executionMs: rounded(after.execMs - before.execMs) },
       memoryBefore: startMemory, memoryAfter: memory(nextProcess.pid),
-      warmupFailures, firstError: batch.samples.find(sample => sample.failed)?.reason ?? null };
+      timings, warmupFailures, firstError: batch.samples.find(sample => sample.failed)?.reason ?? null };
     assert.equal(batch.errorCount, 0, `${name} errors: ${results[name].firstError}`);
   }
   const { cookie } = await session(users[0], true);
@@ -198,9 +223,8 @@ async function reads(profile, lengths, nextProcess) {
   results.shortPageFailedClosed = true;
   results.explain = sql(`EXPLAIN (ANALYZE, BUFFERS) SELECT id,scheduled_start_at FROM public.task_study_sessions
     WHERE user_id=${q(users[0].id)} ORDER BY scheduled_start_at,id LIMIT 500;
-    EXPLAIN (ANALYZE, BUFFERS) SELECT id,session_id FROM public.task_study_session_events
-    WHERE user_id=${q(users[0].id)} AND event_type='cancelled' AND session_id IN
-    (SELECT id FROM public.task_study_sessions WHERE user_id=${q(users[0].id)} LIMIT 50) ORDER BY id;`);
+    EXPLAIN (ANALYZE, BUFFERS) SELECT id,session_id,created_at FROM public.task_study_session_events
+    WHERE user_id=${q(users[0].id)} AND event_type='cancelled' ORDER BY created_at,id LIMIT 500;`);
   return results;
 }
 
@@ -431,12 +455,19 @@ async function queueWork() {
     from: "Lumivox <study@example.invalid>", trustedOrigin: "https://app.lumivox.test" };
   const makeStore = () => runtime.store.createResendDispatchStore(createClient(api, service, { auth }));
   const calls = new Map();
+  const fingerprints = new Map();
+  const rateLimited = new Set();
   let offAt;
   let gateFenceArmed = true;
-  const transport = new ResendReminderProvider({ emails: { async send(_request, options) {
+  let crashed;
+  const transport = new ResendReminderProvider({ emails: { async send(request, options) {
     const key = options.idempotencyKey;
     assert(keys.includes(key));
-    calls.set(key, (calls.get(key) ?? 0) + 1);
+    const count = (calls.get(key) ?? 0) + 1;
+    calls.set(key, count);
+    const fingerprint = createHash("sha256").update(JSON.stringify(request)).digest("hex");
+    assert(count === 1 || fingerprints.get(key) === fingerprint, "retry changed the immutable request");
+    fingerprints.set(key, fingerprint);
     if (gateFenceArmed && calls.size === 30) {
       offAt = sql("UPDATE public.study_notification_dispatch_control SET enabled=false RETURNING clock_timestamp()");
       gateFenceArmed = false;
@@ -444,7 +475,13 @@ async function queueWork() {
     const index = keys.indexOf(key);
     await delay(index % 10 === 0 ? 350 : 35, undefined, { signal: options.signal });
     if (index === 0) throw new Error("fake provider uncertainty");
-    if (index === 1 || index === 2) return { data: null, error: { name: "rate_limit_exceeded", statusCode: 429 } };
+    if (index === 3) return { data: null, error: { name: "daily_quota_exceeded", statusCode: 429 } };
+    if (index === 4) return { data: null, error: { name: "invalid_idempotent_request", statusCode: 409 } };
+    if (!gateFenceArmed && offAt && count === 1 && rateLimited.size < 2 && key !== crashed && index > 4
+      && sql(`SELECT enabled FROM public.study_notification_dispatch_control`) === "t") {
+      rateLimited.add(key);
+      return { data: null, error: { name: "rate_limit_exceeded", statusCode: 429 } };
+    }
     return { data: { id: randomUUID() }, error: null };
   } } }, config.from);
 
@@ -458,7 +495,7 @@ async function queueWork() {
   `], { cwd: web });
   const lines = createInterface({ input: claimChild.stdout });
   const [line] = await Promise.race([once(lines, "line"), delay(10_000).then(() => { throw new Error("Claim child deadline"); })]);
-  const crashed = JSON.parse(line).jobId;
+  crashed = JSON.parse(line).jobId;
   assert(keys.includes(crashed));
   await stop(claimChild);
   sql(`UPDATE public.study_notification_jobs SET lease_until=clock_timestamp()-interval '1 second' WHERE id=${q(crashed)}`);
@@ -492,14 +529,25 @@ async function queueWork() {
       fenced = true;
     }
   }
-  const elapsed = performance.now() - started;
   assert.equal(calls.size, 100);
-  const duplicates = [...calls.values()].reduce((n, count) => n + count - 1, 0);
+  assert.equal(rateLimited.size, 2);
+  const retries = [...rateLimited].map(q).join(",");
+  assert.equal(sql(`SELECT count(*) FROM public.study_notification_jobs WHERE id IN (${retries})
+    AND status='pending' AND next_attempt_at>clock_timestamp()`), "2");
+  const retryWait = Number(sql(`SELECT greatest(0,ceil(extract(epoch FROM (max(next_attempt_at)-clock_timestamp()))*1000))
+    FROM public.study_notification_jobs WHERE id IN (${retries}) AND status='pending'`));
+  await delay(retryWait + 100);
+  await runWave();
+  const elapsed = performance.now() - started;
+  for (const key of rateLimited) assert.equal(calls.get(key), 2);
+  const duplicates = [...calls].reduce((n, [key, count]) => n + count - (rateLimited.has(key) ? 2 : 1), 0);
   assert.equal(duplicates, 0);
   assert(fenced);
   const statuses = json(`SELECT json_object_agg(status,n) FROM
     (SELECT status,count(*) n FROM public.study_notification_jobs WHERE id IN (${selector}) GROUP BY status) x`);
   assert.deepEqual(statuses, { sent: 97, failed: 3 });
+  assert.equal(sql(`SELECT count(*) FROM public.study_notification_jobs WHERE id IN (${[keys[0], keys[3], keys[4]].map(q).join(",")})
+    AND status='failed'`), "3");
   const crashedAttempts = Number(sql(`SELECT attempt_count FROM public.study_notification_jobs WHERE id=${q(crashed)}`));
   // The recovered job can be leased again just before the gate closes.
   assert(crashedAttempts >= 2 && crashedAttempts <= 3);
@@ -534,7 +582,8 @@ async function queueWork() {
   return { ...summarize(batches, elapsed), workers: 5, jobs: 100, terminalStates: statuses,
     drainJobsPerSecond: rounded(100_000 / elapsed), acceptedJobsPerSecond: rounded(97_000 / elapsed),
     unexpectedDuplicateSubmissions: duplicates, crashedClaimRecovered: true, crashedAttempts, gateFenceVerified: true, strandedLeases,
-    fake429: 2, fakeUncertain: 1, injectedProviderDelayMs: [35, 350], before, after, optOutVsHandoff: consentRace };
+    fake429: 2, confirmedRetries: rateLimited.size, fakeQuota: 1, fakePayloadMismatch: 1, fakeUncertain: 1,
+    retryWaitMs: retryWait, injectedProviderDelayMs: [35, 350], before, after, optOutVsHandoff: consentRace };
 }
 
 function cleanup() {
@@ -557,19 +606,40 @@ const report = {
 try {
   await new Promise((resolveListen, reject) => proxy.once("error", reject).listen(8098, "127.0.0.1", resolveListen));
   const next = await startServer(process.execPath, [resolve(web, "node_modules/next/dist/bin/next"), "start", "-H", "127.0.0.1", "-p", "3119"],
-    { cwd: web, env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: dbProxy, AI_API_BASE_URL: focusUrl,
-      STUDY_REMINDER_REAL_SEND_ENABLED: "false" } }, "Ready in");
+    { cwd: web, env: { ...process.env, NEXT_PUBLIC_SUPABASE_URL: dbProxy,
+      AI_API_BASE_URL: browserRegression ? "http://127.0.0.1:8097" : focusUrl,
+      STUDY_REMINDER_REAL_SEND_ENABLED: "false", STUDY_PLAN_PERF_TIMING: "true" } }, "Ready in");
   await startServer(resolve(root, "services/ai-api/.venv/Scripts/python.exe"), ["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8096", "--lifespan", "off"],
     { cwd: resolve(root, "services/ai-api"), env: { ...process.env, SUPABASE_URL: api, SUPABASE_SECRET_KEY: service } }, "Uvicorn running");
-  for (const name of profiles) {
+  if (browserRegression) {
+    const runner = spawn(process.execPath, [resolve(web, "node_modules/@playwright/test/cli.js"), "test",
+      "tests/study-focus-launch.spec.ts", "tests/study-focus-effort.spec.ts", "tests/study-learning-journey.spec.ts",
+      "--project=chromium", "--workers=1", "--reporter=line"], {
+      cwd: web, stdio: "inherit", windowsHide: true, env: { ...process.env, PLAYWRIGHT_BASE_URL: nextUrl,
+        STUDY_FOCUS_TEST_BACKEND: focusUrl, STUDY_FOCUS_TEST_PROXY_PORT: "8097" },
+    });
+    const [code] = await once(runner, "exit");
+    assert.equal(code, 0);
+  }
+  for (const name of browserRegression ? [] : profiles) {
     const profile = profileOptions[name];
     const run = { profile: name, ...profile, measurements: {}, invariants: {} };
     reports.push(run);
     console.log(`Seeding ${name}: ${profile.users} users / ${profile.sessions} sessions`);
     const sizes = await seedProfile(admin, profile, users);
     assert.equal(Number(sql("SELECT count(*) FROM public.task_study_sessions")), profile.sessions);
+    if (remediation) {
+      run.measurements.studyPlanConcurrency = {};
+      for (const concurrency of [1, 5]) {
+        run.measurements.studyPlanConcurrency[concurrency] = await reads({ ...profile, concurrency }, sizes, next);
+      }
+    }
     run.measurements.studyPlan = await reads(profile, sizes, next);
     console.log(`${name} read p95: ${run.measurements.studyPlan.lightOwner.p95Ms}/${run.measurements.studyPlan.linkedHistoryOwner.p95Ms} ms`);
+    if (readsOnly) {
+      run.cleanup = cleanup();
+      continue;
+    }
     const contexts = await pool(users.slice(0, profile.concurrency), 8, async user => ({ user, ...(await session(user)) }));
     run.measurements.schedule = await scheduleWork(profile, contexts);
     run.measurements.contention = await contention(contexts[0]);
@@ -597,6 +667,17 @@ try {
   try { report.finalCleanup = cleanup(); }
   finally {
     report.finishedAt = new Date().toISOString();
-    await writeFile(resolve(root, "docs/learning-schedule/phase-10-performance.json"), JSON.stringify(report, null, 2) + "\n");
+    const path = resolve(root, "docs/learning-schedule/phase-10-performance.json");
+    if (!browserRegression) {
+      const previous = await readFile(path, "utf8").then(JSON.parse).catch(error => {
+        if (error.code !== "ENOENT") throw error;
+        return null;
+      });
+      const output = previous ? { ...previous, [remediation ? "remediation" : "latestRun"]: report } : report;
+      if (remediation && previous?.remediation) {
+        output.remediationEarlier = [...(previous.remediationEarlier ?? []), previous.remediation];
+      }
+      await writeFile(path, JSON.stringify(output, null, 2) + "\n");
+    }
   }
 }

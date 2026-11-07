@@ -21,7 +21,7 @@ function client() {
       range: (f: number, t: number) => { q.range = [f, t]; return b; },
       then: (resolve: (r: Result) => unknown) => {
         const data = table === "task_study_sessions" ? rows : table === "tasks" ? [...new Set(rows.map(r => r.task_id))]
-          .filter(id => (q.filters.id as string[]).includes(id)).map(id => ({ id, title: `Task ${id}`, status: "todo", parent_task_id: null })) : events.filter(e => (q.filters.session_id as string[]).includes(e.session_id));
+          .filter(id => (q.filters.id as string[]).includes(id)).map(id => ({ id, title: `Task ${id}`, status: "todo", parent_task_id: null })) : events;
         const [f, t] = q.range!; return Promise.resolve(override(q, { data: data.slice(f, t + 1), error: null, count: data.length })).then(resolve);
       },
     }; return b;
@@ -39,7 +39,7 @@ describe("Study Planner owner-scoped action", () => {
   it("reads 501 rows with exact counts, stable ordering, owner predicates and chunked lookups", async () => {
     rows = Array.from({ length: 501 }, (_, i) => row(i)); expect(await call()).toMatchObject({ success: true, summary: { eligibleDue: 501 } });
     const pages = queries.filter(q => q.table === "task_study_sessions"); expect(pages.map(q => q.range)).toEqual([[0, 499], [500, 999]]);
-    pages.forEach(q => expect(q.orders).toEqual(["scheduled_start_at", "id"])); expect(queries.filter(q => q.table === "task_study_session_events")).toHaveLength(11);
+    pages.forEach(q => expect(q.orders).toEqual(["scheduled_start_at", "id"])); expect(queries.filter(q => q.table === "task_study_session_events")).toHaveLength(1);
     queries.forEach(q => { expect(q.filters.user_id).toBe("owner"); expect(q.select?.[1]).toEqual({ count: "exact" }); });
   });
   it("loads Today across zones independently of chosen month", async () => {
@@ -56,6 +56,14 @@ describe("Study Planner owner-scoped action", () => {
     rows = [{ ...row(1), status: "cancelled" }, { ...row(2), schedule_id: row(1).schedule_id, logical_occurrence_key: row(1).logical_occurrence_key }];
     events = [{ id: uuid(300001), session_id: row(1).id, created_at: "2026-11-01T12:00:00Z" }];
     const r = await call(); if (!r.success) throw new Error(r.code); expect(r.calendar[0].sessions).toHaveLength(2); expect(r.summary.eligibleDue).toBe(1);
+  });
+  it("pages the full cancellation stream and rejects an audit outside the owner session snapshot", async () => {
+    rows = Array.from({ length: 501 }, (_, i) => ({ ...row(i), status: "cancelled" }));
+    events = rows.map((row, i) => ({ id: uuid(300001 + i), session_id: row.id, created_at: "2026-11-01T12:00:00Z" }));
+    expect(await call()).toMatchObject({ success: true, summary: { eligibleDue: 0, eligiblePlanned: 0 } });
+    expect(queries.filter(q => q.table === "task_study_session_events").map(q => q.range)).toEqual([[0, 499], [500, 999]]);
+    events[500] = { ...events[500], session_id: uuid(999999) };
+    expect(await call()).toEqual(incomplete);
   });
   it.each(["task_study_sessions", "tasks", "task_study_session_events"])("rejects %s query errors", async table => {
     rows = [row(1)]; override = (q, r) => q.table === table ? { ...r, error: {} } : r; expect(await call()).toEqual(failed); });

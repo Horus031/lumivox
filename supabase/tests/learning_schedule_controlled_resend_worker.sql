@@ -7,9 +7,9 @@ INSERT INTO auth.users(id,email,email_confirmed_at) VALUES('8c000000-0000-4000-8
 SELECT set_config('request.jwt.claim.sub','8c000000-0000-4000-8000-000000000001',true);
 SELECT public.ls_set_study_notification_preferences(true);
 CREATE TEMP TABLE us_ctx(label text PRIMARY KEY,job uuid,token uuid,delivery uuid);
-CREATE FUNCTION pg_temp.us_new(p_label text) RETURNS uuid LANGUAGE plpgsql AS $$
+CREATE FUNCTION pg_temp.us_new(p_label text,p_offset interval DEFAULT interval '5 minutes') RETURNS uuid LANGUAGE plpgsql AS $$
 DECLARE t uuid:=gen_random_uuid();sc uuid:=gen_random_uuid();s uuid:=gen_random_uuid();j uuid:=gen_random_uuid();
- starts timestamptz:=date_trunc('milliseconds',clock_timestamp())+interval '5 minutes';z text;day date;
+ starts timestamptz:=date_trunc('milliseconds',clock_timestamp())+p_offset;z text;day date;
 BEGIN
  z:=CASE WHEN extract(hour FROM clock_timestamp() AT TIME ZONE 'UTC') BETWEEN 2 AND 20 THEN 'UTC' ELSE 'Etc/GMT+12' END;day:=(starts AT TIME ZONE z)::date;
  INSERT INTO public.tasks(id,user_id,title,status) VALUES(t,'8c000000-0000-4000-8000-000000000001',p_label,'todo');
@@ -96,7 +96,48 @@ CREATE TRIGGER pd_fault BEFORE INSERT ON study_notification_resend_payloads FOR 
 SELECT throws_ok($$SELECT pg_temp.pd_prepare('rollback',repeat('5',64))$$,'P0001','injected snapshot fault','snapshot fault aborts preparation');
 SELECT is((SELECT count(*)::int FROM study_notification_unsubscribe_tokens WHERE token_hash=repeat('5',64)),0,'token issuance rolled back with snapshot failure');
 DROP TRIGGER pd_fault ON study_notification_resend_payloads;
+
+CREATE FUNCTION pg_temp.pd_rate(label text) RETURNS void LANGUAGE sql AS $$
+ SELECT public.ls_notification_record_resend_rate_limit(d.id,c.token,repeat('b',64))
+ FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job AND d.handoff_token=c.token WHERE c.label=$1;
+$$;
+SELECT pg_temp.us_new('rate');SELECT pg_temp.us_lease('rate');
+SELECT pg_temp.pd_prepare('rate',repeat('6',64));SELECT pg_temp.pd_auth('rate');
+SELECT throws_ok($$SELECT public.ls_notification_record_resend_rate_limit(d.id,c.token,repeat('c',64))
+ FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job WHERE c.label='rate'$$,
+ 'PT409','Invalid Resend handoff','rate-limit outcome must match immutable payload fingerprint');
+SELECT pg_temp.pd_rate('rate');
+SELECT ok((SELECT j.status='pending' AND j.attempt_count=1 AND j.lease_token IS NULL
+ AND j.next_attempt_at > clock_timestamp()+interval '25 seconds'
+ FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),'PE-05 confirmed 429 commits backoff and releases lease');
+CREATE TEMP TABLE rate_replay AS SELECT j.next_attempt_at FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate';
+SELECT pg_temp.pd_rate('rate');
+SELECT is((SELECT j.next_attempt_at FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),
+ (SELECT next_attempt_at FROM rate_replay),'429 replay does not extend the backoff');
+SELECT is((SELECT count(*)::int FROM study_notification_resend_payloads p JOIN us_ctx c ON c.job=p.job_id WHERE c.label='rate'),1,
+ '429 preserves one payload');
+SELECT ok(NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.ls_notification_claim_batch(25)) x
+ WHERE (x->>'jobId')::uuid=(SELECT job FROM us_ctx WHERE label='rate')),'no claim during backoff');
+
+SELECT pg_temp.us_new('short-window',interval '20 seconds');SELECT pg_temp.us_lease('short-window');
+SELECT pg_temp.pd_prepare('short-window',repeat('7',64));SELECT pg_temp.pd_auth('short-window');SELECT pg_temp.pd_rate('short-window');
+SELECT is((SELECT j.status FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='short-window'),
+ 'expired','429 backoff outside relevance window is terminal');
+SELECT pg_temp.us_new('budget');
+UPDATE study_notification_jobs SET attempt_count=2 WHERE id=(SELECT job FROM us_ctx WHERE label='budget');
+SELECT pg_temp.us_lease('budget');SELECT pg_temp.pd_prepare('budget',repeat('8',64));SELECT pg_temp.pd_auth('budget');SELECT pg_temp.pd_rate('budget');
+SELECT is((SELECT j.status FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='budget'),
+ 'failed','429 does not exceed three claims');
+
+SELECT pg_temp.us_new('unknown');SELECT pg_temp.us_lease('unknown');
+SELECT pg_temp.pd_prepare('unknown',repeat('9',64));SELECT pg_temp.pd_auth('unknown');
+SELECT public.ls_notification_record_resend_outcome(d.id,c.token,repeat('b',64),'uncertain')
+ FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job WHERE c.label='unknown';
+SELECT throws_ok($$SELECT pg_temp.pd_rate('unknown')$$,'PT409','Resend handoff is no longer submitting',
+ 'PE-07 uncertain result cannot be converted into a retry');
 SET LOCAL ROLE authenticated;
+SELECT throws_ok($$SELECT public.ls_notification_record_resend_rate_limit(gen_random_uuid(),gen_random_uuid(),repeat('a',64))$$,'42501',NULL,
+ 'browser cannot record trusted rate-limit outcome');
 SELECT throws_ok($$SELECT * FROM study_notification_resend_payloads$$,'42501',NULL,'browser cannot read encrypted capability');
 SELECT throws_ok($$SELECT public.ls_notification_resolve_resend_context(gen_random_uuid())$$,'42501',NULL,'browser cannot resolve trusted Auth context');
 RESET ROLE;

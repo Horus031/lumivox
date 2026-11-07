@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import { calculateAttendanceSummary, type AttendanceSummary } from "./attendance-analytics";
 import { calendarMonth, getTodaysStudySessions, groupStudyCalendar, type CalendarDay, type StudyPlanSession } from "./study-plan-projection";
+import { studyPlanTiming } from "./study-plan-timing";
 
 const inputSchema = z.object({ month: z.string().regex(/^\d{4}-\d{2}$/) }).strict();
 const sessionSchema = z.object({
@@ -19,20 +20,27 @@ class ReadFailure extends Error { constructor(readonly code: FailureCode) { supe
 type PageResult<T> = { data: T[] | null; error: unknown; count: number | null };
 async function allPages<T extends { id: string }>(fetchPage: (from: number, to: number) => PromiseLike<PageResult<T>>): Promise<T[]> {
   const rows: T[] = [], ids = new Set<string>();
-  let total: number | undefined;
-  for (let from = 0; from <= MAX_ROWS; from += PAGE) {
-    const result = await fetchPage(from, from + PAGE - 1);
+  const first = await fetchPage(0, PAGE - 1);
+  if (first.error || !first.data) throw new ReadFailure("loadFailed");
+  const total = first.count ?? -1;
+  if (total < 0 || total > MAX_ROWS) throw new ReadFailure("incompleteData");
+  function append(result: PageResult<T>, from: number) {
     if (result.error || !result.data) throw new ReadFailure("loadFailed");
-    if (result.count === null || result.count > MAX_ROWS || (total !== undefined && total !== result.count) ||
-        result.data.length !== Math.min(PAGE, Math.max(0, result.count - from))) throw new ReadFailure("incompleteData");
-    total = result.count;
+    if (result.count !== total || result.data.length !== Math.min(PAGE, total - from)) {
+      throw new ReadFailure("incompleteData");
+    }
     for (const row of result.data) {
       if (ids.has(row.id)) throw new ReadFailure("incompleteData");
       ids.add(row.id); rows.push(row);
     }
-    if (rows.length === total) return rows;
   }
-  throw new ReadFailure("incompleteData");
+  append(first, 0);
+  for (let from = PAGE; from < total; from += 2 * PAGE) {
+    const offsets = [from, from + PAGE].filter(offset => offset < total);
+    const pages = await Promise.all(offsets.map(offset => fetchPage(offset, offset + PAGE - 1)));
+    pages.forEach((page, i) => append(page, offsets[i]));
+  }
+  return rows;
 }
 export type StudyPlanResult =
   | { success: true; asOf: string; source: "application-server"; today: StudyPlanSession[]; calendar: CalendarDay[]; summary: AttendanceSummary }
@@ -43,8 +51,10 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
   const input = inputSchema.safeParse(raw);
   if (!input.success) return { success: false, code: "invalidInput" };
   try { calendarMonth(input.data.month); } catch { return { success: false, code: "invalidInput" }; }
+  const timing = studyPlanTiming("plan");
   try {
     const { supabase, user } = await requireUser();
+    timing.mark("auth");
     // Read all history to cover Today's Plan across every IANA zone and to
     // aggregate obligations correctly. No unproven UTC envelope or N+1 summaries.
     const fetched = await allPages((from, to) => supabase.from("task_study_sessions")
@@ -53,34 +63,40 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
     const parsed = z.array(sessionSchema).safeParse(fetched);
     if (!parsed.success) throw new ReadFailure("incompleteData");
     const rows = parsed.data;
+    timing.mark("sessions");
     const titles = new Map<string, string>();
     const eligibleTasks = new Set<string>();
     const taskIds = [...new Set(rows.map(row => row.task_id))];
-    for (let offset = 0; offset < taskIds.length; offset += CHUNK) {
-      const ids = taskIds.slice(offset, offset + CHUNK);
-      const tasks = await allPages((from, to) => supabase.from("tasks").select("id,title,status,parent_task_id", { count: "exact" })
-        .eq("user_id", user.id).in("id", ids).order("id").range(from, to));
-      for (const task of tasks) {
-        if (!ids.includes(task.id)) throw new ReadFailure("incompleteData");
-        titles.set(task.id, task.title);
-        if (task.parent_task_id === null && (task.status === "todo" || task.status === "in_progress")) {
-          eligibleTasks.add(task.id);
+    const [, events] = await Promise.all([
+      timing.measure("tasks", async () => {
+        for (let offset = 0; offset < taskIds.length; offset += CHUNK) {
+          const ids = taskIds.slice(offset, offset + CHUNK);
+          const tasks = await allPages((from, to) => supabase.from("tasks").select("id,title,status,parent_task_id", { count: "exact" })
+            .eq("user_id", user.id).in("id", ids).order("id").range(from, to));
+          for (const task of tasks) {
+            if (!ids.includes(task.id)) throw new ReadFailure("incompleteData");
+            titles.set(task.id, task.title);
+            if (task.parent_task_id === null && (task.status === "todo" || task.status === "in_progress")) {
+              eligibleTasks.add(task.id);
+            }
+          }
+          if (tasks.length !== ids.length) throw new ReadFailure("incompleteData");
         }
-      }
-      if (tasks.length !== ids.length) throw new ReadFailure("incompleteData");
-    }
-    const cancellations = new Map<string, string>();
-    for (let offset = 0; offset < rows.length; offset += CHUNK) {
-      const ids = rows.slice(offset, offset + CHUNK).map(row => row.id);
-      const events = await allPages((from, to) => supabase.from("task_study_session_events")
+      }),
+      // Include contradictory audits on non-cancelled sessions so the same
+      // completeness checks apply without one request per chunk of Study IDs.
+      timing.measure("audits", () => allPages((from, to) => supabase.from("task_study_session_events")
         .select("id,session_id,created_at", { count: "exact" }).eq("user_id", user.id).eq("event_type", "cancelled")
-        .in("session_id", ids).order("created_at").order("id").range(from, to));
-      for (const event of events) {
-        if (!ids.includes(event.session_id) || cancellations.has(event.session_id)) throw new ReadFailure("incompleteData");
-        cancellations.set(event.session_id, event.created_at);
-      }
+        .order("created_at").order("id").range(from, to))),
+    ]);
+    const cancellations = new Map<string, string>();
+    const sessionIds = new Set(rows.map(row => row.id));
+    for (const event of events) {
+      if (!sessionIds.has(event.session_id) || cancellations.has(event.session_id)) throw new ReadFailure("incompleteData");
+      cancellations.set(event.session_id, event.created_at);
     }
     if (rows.some(row => (row.status === "cancelled") !== cancellations.has(row.id))) throw new ReadFailure("incompleteData");
+    timing.mark("related");
     const asOf = new Date().toISOString();
     try {
       const sessions: StudyPlanSession[] = rows.map(row => ({
@@ -103,7 +119,9 @@ export async function getStudyPlanAction(raw: unknown): Promise<StudyPlanResult>
         scheduledEndAt: row.scheduled_end_at, status: row.status, completedAt: row.completed_at,
         cancelledAt: cancellations.get(row.id) ?? null,
       })), asOf);
+      timing.mark("projection");
       return { success: true, asOf, source: "application-server", today, calendar, summary };
     } catch { throw new ReadFailure("incompleteData"); }
   } catch (error) { return { success: false, code: error instanceof ReadFailure ? error.code : "loadFailed" }; }
+  finally { timing.finish(); }
 }

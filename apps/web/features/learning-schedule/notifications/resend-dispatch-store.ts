@@ -20,10 +20,20 @@ export function createResendDispatchStore(db:SupabaseClient<Database>):ResendDis
       p_recipient_fingerprint:c.recipientFingerprint,p_payload_fingerprint:input.fingerprint,p_encrypted_payload:input.envelope,p_token_hash:input.tokenHash,p_locale:c.locale,
     }).abortSignal(AbortSignal.timeout(4000));fail(error);return payloadSnapshotSchema.parse(data);},
     async authorize(claim,c){const {data,error}=await db.rpc("ls_notification_authorize_resend_payload",{p_job_id:claim.jobId,p_lease_token:claim.leaseToken,p_expected_email:c.recipient,p_recipient_fingerprint:c.recipientFingerprint}).abortSignal(AbortSignal.timeout(4000));fail(error);return handoff.parse(data);},
-    async record(claim,deliveryId,fingerprint,result){const {error}=await db.rpc("ls_notification_record_resend_outcome",{
-      p_delivery_id:deliveryId,p_handoff_token:claim.leaseToken,p_payload_fingerprint:fingerprint,
-      p_outcome:result.kind,...(result.kind==="accepted"?{p_message_id:result.providerMessageId}:{}),
-    }).abortSignal(AbortSignal.timeout(4000));fail(error);},
+    async record(claim,deliveryId,fingerprint,result){
+      if (result.kind === "rejected" && result.code === "rate_limited" && result.retryable) {
+        const { error } = await db.rpc("ls_notification_record_resend_rate_limit", {
+          p_delivery_id: deliveryId, p_handoff_token: claim.leaseToken, p_payload_fingerprint: fingerprint,
+        }).abortSignal(AbortSignal.timeout(4000));
+        fail(error);
+        return;
+      }
+      const { error } = await db.rpc("ls_notification_record_resend_outcome", {
+        p_delivery_id: deliveryId, p_handoff_token: claim.leaseToken, p_payload_fingerprint: fingerprint,
+        p_outcome: result.kind, ...(result.kind === "accepted" ? { p_message_id: result.providerMessageId } : {}),
+      }).abortSignal(AbortSignal.timeout(4000));
+      fail(error);
+    },
     async reconcile(){const {error}=await db.rpc("ls_notification_reconcile_expired_leases",{p_batch_size:5}).abortSignal(AbortSignal.timeout(4000));fail(error);},
   };
 }
