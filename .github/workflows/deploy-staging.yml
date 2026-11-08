@@ -45,16 +45,16 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: "2.122.0"
 
       - name: Link staging Supabase project
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID"
 
       - name: Preview staging migrations
-        run: supabase db push --dry-run
+        run: supabase db push --linked --dry-run
 
       - name: Apply staging migrations
-        run: supabase db push
+        run: supabase db push --linked
 
       - name: Trigger Render staging deployment
         env:
