@@ -3,10 +3,25 @@ import { type NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 
 import { routing } from "@/i18n/routing";
+import { NextResponse } from "next/server";
 
 const handleI18nRouting = createMiddleware(routing);
 
 export default async function proxy(request: NextRequest) {
+  if (/^\/(en|vi)\/study-reminders\/unsubscribe\/?$/.test(request.nextUrl.pathname)) {
+    const response = NextResponse.next();
+    response.headers.set("Cache-Control", "no-store");
+    response.headers.set("Referrer-Policy", "no-referrer");
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return response;
+  }
+  // Capability endpoints authorize in their handlers without a session refresh.
+  if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders" ||
+    request.nextUrl.pathname === "/api/study-reminders/unsubscribe" ||
+    request.nextUrl.pathname === "/api/internal/study-reminders/dispatch" ||
+    request.nextUrl.pathname === "/api/internal/learning-schedule/health") {
+    return NextResponse.next();
+  }
   if (isUnlocalizedAppRoute(request.nextUrl.pathname)) {
     return await updateSession(request);
   }

@@ -1,0 +1,3321 @@
+{
+  "baseline": "7f0453ffc7fd774d53961dd73b29569fd98fd783",
+  "environment": "disposable-local",
+  "host": {
+    "os": "win32",
+    "release": "10.0.26200",
+    "cpu": "Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz",
+    "logicalCpus": 12,
+    "ramGiB": 31.76,
+    "node": "v22.13.1",
+    "docker": "12 CPUs / 16640348160 bytes"
+  },
+  "startedAt": "2026-11-07T11:36:21.898Z",
+  "profiles": [
+    {
+      "profile": "small",
+      "users": 10,
+      "sessions": 500,
+      "history": 20,
+      "concurrency": 5,
+      "measurements": {
+        "studyPlan": {
+          "lightOwner": {
+            "sampleCount": 15,
+            "p50Ms": 272.01,
+            "p95Ms": 347.62,
+            "p99Ms": 347.62,
+            "elapsedMs": 860.34,
+            "requestsPerSecond": 17.43,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 15
+            },
+            "ownerSessions": 12,
+            "linksOnOneOccurrence": 0,
+            "postgrest": {
+              "profiles": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_sessions": {
+                "calls": 30,
+                "rows": 285
+              },
+              "tasks": {
+                "calls": 15,
+                "rows": 15
+              },
+              "user_engagement_stats": {
+                "calls": 15,
+                "rows": 0
+              },
+              "task_study_session_events": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_focus_attributions": {
+                "calls": 30,
+                "rows": 0
+              }
+            },
+            "callsPerRequest": 8,
+            "rowsPerRequest": 22,
+            "avgResponseBytes": 179732,
+            "sumRequestMs": 4285.26,
+            "sumPostgrestRoundtripMs": 1123.37,
+            "approximateOtherRequestMs": 3161.89,
+            "pgStatStatements": {
+              "calls": 75,
+              "executionMs": 12.6
+            },
+            "memoryBefore": {
+              "workingSetBytes": 133799936,
+              "processLifetimePeakBytes": 141324288
+            },
+            "memoryAfter": {
+              "workingSetBytes": 182767616,
+              "processLifetimePeakBytes": 186368000
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "linkedHistoryOwner": {
+            "sampleCount": 15,
+            "p50Ms": 288.75,
+            "p95Ms": 304.65,
+            "p99Ms": 304.65,
+            "elapsedMs": 876.35,
+            "requestsPerSecond": 17.12,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 15
+            },
+            "ownerSessions": 20,
+            "linksOnOneOccurrence": 201,
+            "postgrest": {
+              "profiles": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_sessions": {
+                "calls": 30,
+                "rows": 405
+              },
+              "tasks": {
+                "calls": 15,
+                "rows": 15
+              },
+              "task_study_session_events": {
+                "calls": 15,
+                "rows": 30
+              },
+              "user_engagement_stats": {
+                "calls": 15,
+                "rows": 0
+              },
+              "task_study_focus_attributions": {
+                "calls": 60,
+                "rows": 6030
+              },
+              "focus_sessions": {
+                "calls": 60,
+                "rows": 3015
+              }
+            },
+            "callsPerRequest": 14,
+            "rowsPerRequest": 634,
+            "avgResponseBytes": 179794,
+            "sumRequestMs": 4364.68,
+            "sumPostgrestRoundtripMs": 1381.13,
+            "approximateOtherRequestMs": 2983.55,
+            "pgStatStatements": {
+              "calls": 165,
+              "executionMs": 65.39
+            },
+            "memoryBefore": {
+              "workingSetBytes": 186314752,
+              "processLifetimePeakBytes": 186630144
+            },
+            "memoryAfter": {
+              "workingSetBytes": 207347712,
+              "processLifetimePeakBytes": 210616320
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "shortPageFailedClosed": true,
+          "explain": "Limit  (cost=20.68..20.73 rows=20 width=24) (actual time=0.091..0.094 rows=20 loops=1)\n  Buffers: shared hit=20\n  ->  Sort  (cost=20.68..20.73 rows=20 width=24) (actual time=0.090..0.092 rows=20 loops=1)\n        Sort Key: scheduled_start_at, id\n        Sort Method: quicksort  Memory: 26kB\n        Buffers: shared hit=20\n        ->  Seq Scan on task_study_sessions  (cost=0.00..20.25 rows=20 width=24) (actual time=0.009..0.069 rows=20 loops=1)\n              Filter: (user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid)\n              Rows Removed by Filter: 480\n              Buffers: shared hit=14\nPlanning:\n  Buffers: shared hit=296\nPlanning Time: 0.547 ms\nExecution Time: 0.135 ms\nSort  (cost=28.59..28.60 rows=1 width=32) (actual time=0.145..0.147 rows=2 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=19\n  ->  Hash Semi Join  (cost=20.50..28.58 rows=1 width=32) (actual time=0.099..0.138 rows=2 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=19\n        ->  Seq Scan on task_study_session_events  (cost=0.00..8.07 rows=3 width=32) (actual time=0.008..0.046 rows=2 loops=1)\n              Filter: ((user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid) AND (event_type = 'cancelled'::text))\n              Rows Removed by Filter: 203\n              Buffers: shared hit=5\n        ->  Hash  (cost=20.25..20.25 rows=20 width=16) (actual time=0.075..0.076 rows=20 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 9kB\n              Buffers: shared hit=14\n              ->  Limit  (cost=0.00..20.25 rows=20 width=16) (actual time=0.005..0.065 rows=20 loops=1)\n                    Buffers: shared hit=14\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..20.25 rows=20 width=16) (actual time=0.005..0.062 rows=20 loops=1)\n                          Filter: (user_id = 'fbe4e16c-732c-45e3-a563-690596bbc34e'::uuid)\n                          Rows Removed by Filter: 480\n                          Buffers: shared hit=14\nPlanning:\n  Buffers: shared hit=116\nPlanning Time: 0.437 ms\nExecution Time: 0.271 ms"
+        },
+        "schedule": {
+          "create": {
+            "sampleCount": 5,
+            "p50Ms": 142.92,
+            "p95Ms": 146.9,
+            "p99Ms": 146.9,
+            "elapsedMs": 147.19,
+            "requestsPerSecond": 33.97,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "revise": {
+            "sampleCount": 5,
+            "p50Ms": 62,
+            "p95Ms": 62.53,
+            "p99Ms": 62.53,
+            "elapsedMs": 62.68,
+            "requestsPerSecond": 79.77,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "sharedScheduleReschedule": {
+            "sampleCount": 4,
+            "p50Ms": 18.87,
+            "p95Ms": 32.33,
+            "p99Ms": 32.33,
+            "elapsedMs": 32.68,
+            "requestsPerSecond": 122.39,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 4
+            }
+          },
+          "manualAttendanceAndReplay": {
+            "sampleCount": 5,
+            "p50Ms": 20.14,
+            "p95Ms": 21.61,
+            "p99Ms": 21.61,
+            "elapsedMs": 21.82,
+            "requestsPerSecond": 229.12,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 5
+            }
+          },
+          "lostAttendanceEvents": 0
+        },
+        "contention": {
+          "revisionVsAttendance": {
+            "blockers": [
+              {
+                "waiter": 14681,
+                "blockers": [
+                  14864
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 151.146
+              }
+            ],
+            "elapsedMs": 635.61,
+            "outcome": "00000"
+          },
+          "closeVsLaunch": {
+            "blockers": [
+              {
+                "waiter": 14676,
+                "blockers": [
+                  14906
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 247.482
+              }
+            ],
+            "elapsedMs": 1500.6,
+            "outcome": 410
+          }
+        },
+        "focus": {
+          "ordinary": {
+            "sampleCount": 5,
+            "p50Ms": 33.77,
+            "p95Ms": 35.99,
+            "p99Ms": 35.99,
+            "elapsedMs": 36.01,
+            "requestsPerSecond": 138.84,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "cancel": {
+            "sampleCount": 5,
+            "p50Ms": 25.22,
+            "p95Ms": 26.24,
+            "p99Ms": 26.24,
+            "elapsedMs": 26.92,
+            "requestsPerSecond": 185.73,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "attributed": {
+            "sampleCount": 5,
+            "p50Ms": 22.1,
+            "p95Ms": 24.26,
+            "p99Ms": 24.26,
+            "elapsedMs": 24.96,
+            "requestsPerSecond": 200.3,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "activeRead": {
+            "sampleCount": 5,
+            "p50Ms": 11.72,
+            "p95Ms": 13.64,
+            "p99Ms": 13.64,
+            "elapsedMs": 13.94,
+            "requestsPerSecond": 358.61,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "replay": {
+            "sampleCount": 5,
+            "p50Ms": 20.33,
+            "p95Ms": 20.67,
+            "p99Ms": 20.67,
+            "elapsedMs": 21.42,
+            "requestsPerSecond": 233.39,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "conflict": {
+            "sampleCount": 5,
+            "p50Ms": 16.68,
+            "p95Ms": 17,
+            "p99Ms": 17,
+            "elapsedMs": 17.99,
+            "requestsPerSecond": 277.98,
+            "errorCount": 0,
+            "outcomes": {
+              "423": 5
+            }
+          },
+          "pause": {
+            "sampleCount": 5,
+            "p50Ms": 17.11,
+            "p95Ms": 18.17,
+            "p99Ms": 18.17,
+            "elapsedMs": 18.75,
+            "requestsPerSecond": 266.65,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "resume": {
+            "sampleCount": 5,
+            "p50Ms": 16.9,
+            "p95Ms": 17.95,
+            "p99Ms": 17.95,
+            "elapsedMs": 18.27,
+            "requestsPerSecond": 273.7,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "complete": {
+            "sampleCount": 5,
+            "p50Ms": 17.29,
+            "p95Ms": 18.34,
+            "p99Ms": 18.34,
+            "elapsedMs": 18.86,
+            "requestsPerSecond": 265.12,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 5
+            }
+          },
+          "replayExtraWrites": 0,
+          "nextBrowserLaunch": {
+            "sampleCount": 1,
+            "elapsedMs": 587.08,
+            "observedAttribution": true
+          }
+        },
+        "queue": {
+          "sampleCount": 35,
+          "p50Ms": 568.39,
+          "p95Ms": 2136.87,
+          "p99Ms": 2204.08,
+          "elapsedMs": 7654.53,
+          "requestsPerSecond": 4.57,
+          "errorCount": 0,
+          "outcomes": {
+            "ok": 35
+          },
+          "workers": 5,
+          "jobs": 100,
+          "terminalStates": {
+            "sent": 97,
+            "failed": 3
+          },
+          "drainJobsPerSecond": 13.06,
+          "acceptedJobsPerSecond": 12.67,
+          "unexpectedDuplicateSubmissions": 0,
+          "crashedClaimRecovered": true,
+          "crashedAttempts": 3,
+          "gateFenceVerified": true,
+          "strandedLeases": 20,
+          "fake429": 2,
+          "fakeUncertain": 1,
+          "injectedProviderDelayMs": [
+            35,
+            350
+          ],
+          "before": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 99,
+              "activeLeases": 0,
+              "expiredLeases": 1,
+              "uncertainAttempts": 0,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 0,
+              "oldestDueAgeSeconds": 652,
+              "acceptedSubmissions24h": 0,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:36:52.083762+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "after": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 0,
+              "activeLeases": 0,
+              "expiredLeases": 0,
+              "uncertainAttempts": 1,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 2,
+              "oldestDueAgeSeconds": null,
+              "acceptedSubmissions24h": 97,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:37:00.276139+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "optOutVsHandoff": {
+            "blockers": [
+              {
+                "waiter": 14677,
+                "blockers": [
+                  15145
+                ],
+                "waitEvent": "advisory",
+                "observedStatementMs": 185.771
+              }
+            ],
+            "elapsedMs": 679.23,
+            "outcome": {
+              "authorized": false,
+              "reason": "stale_payload"
+            }
+          }
+        }
+      },
+      "invariants": {
+        "duplicateAttributions": 0,
+        "unexpectedFocusRows": 0,
+        "lostAttendanceEvents": 0,
+        "unexpectedDuplicateSubmissions": 0
+      },
+      "cleanup": "0|0|0|0|0|f|f|0"
+    },
+    {
+      "profile": "medium",
+      "users": 100,
+      "sessions": 10000,
+      "history": 1500,
+      "concurrency": 20,
+      "measurements": {
+        "studyPlan": {
+          "lightOwner": {
+            "sampleCount": 60,
+            "p50Ms": 877.96,
+            "p95Ms": 916.76,
+            "p99Ms": 925.06,
+            "elapsedMs": 2668.95,
+            "requestsPerSecond": 22.48,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 60
+            },
+            "ownerSessions": 12,
+            "linksOnOneOccurrence": 0,
+            "postgrest": {
+              "profiles": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_sessions": {
+                "calls": 120,
+                "rows": 1140
+              },
+              "tasks": {
+                "calls": 60,
+                "rows": 60
+              },
+              "user_engagement_stats": {
+                "calls": 60,
+                "rows": 0
+              },
+              "task_study_session_events": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_focus_attributions": {
+                "calls": 120,
+                "rows": 0
+              }
+            },
+            "callsPerRequest": 8,
+            "rowsPerRequest": 22,
+            "avgResponseBytes": 179621,
+            "sumRequestMs": 53070.74,
+            "sumPostgrestRoundtripMs": 2922.91,
+            "approximateOtherRequestMs": 50147.83,
+            "pgStatStatements": {
+              "calls": 300,
+              "executionMs": 50.5
+            },
+            "memoryBefore": {
+              "workingSetBytes": 174796800,
+              "processLifetimePeakBytes": 210722816
+            },
+            "memoryAfter": {
+              "workingSetBytes": 233156608,
+              "processLifetimePeakBytes": 241836032
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "linkedHistoryOwner": {
+            "sampleCount": 60,
+            "p50Ms": 3386.38,
+            "p95Ms": 3457.98,
+            "p99Ms": 3487.35,
+            "elapsedMs": 9910.86,
+            "requestsPerSecond": 6.05,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 60
+            },
+            "ownerSessions": 1500,
+            "linksOnOneOccurrence": 201,
+            "postgrest": {
+              "profiles": {
+                "calls": 60,
+                "rows": 60
+              },
+              "task_study_sessions": {
+                "calls": 420,
+                "rows": 102600
+              },
+              "user_engagement_stats": {
+                "calls": 60,
+                "rows": 0
+              },
+              "tasks": {
+                "calls": 60,
+                "rows": 1800
+              },
+              "task_study_session_events": {
+                "calls": 1800,
+                "rows": 12600
+              },
+              "task_study_focus_attributions": {
+                "calls": 600,
+                "rows": 24120
+              },
+              "focus_sessions": {
+                "calls": 240,
+                "rows": 12060
+              }
+            },
+            "callsPerRequest": 54,
+            "rowsPerRequest": 2554,
+            "avgResponseBytes": 559372,
+            "sumRequestMs": 197396.04,
+            "sumPostgrestRoundtripMs": 21143.24,
+            "approximateOtherRequestMs": 176252.8,
+            "pgStatStatements": {
+              "calls": 3060,
+              "executionMs": 2444.21
+            },
+            "memoryBefore": {
+              "workingSetBytes": 235868160,
+              "processLifetimePeakBytes": 241836032
+            },
+            "memoryAfter": {
+              "workingSetBytes": 497225728,
+              "processLifetimePeakBytes": 567476224
+            },
+            "warmupFailures": 0,
+            "firstError": null
+          },
+          "shortPageFailedClosed": true,
+          "explain": "Limit  (cost=24.85..432.70 rows=500 width=24) (actual time=0.145..0.455 rows=500 loops=1)\n  Buffers: shared hit=522\n  ->  Incremental Sort  (cost=24.85..1248.40 rows=1500 width=24) (actual time=0.145..0.429 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=522\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1191.84 rows=1500 width=24) (actual time=0.022..0.276 rows=511 loops=1)\n              Index Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n              Buffers: shared hit=513\nPlanning:\n  Buffers: shared hit=302\nPlanning Time: 0.549 ms\nExecution Time: 0.508 ms\nSort  (cost=142.24..142.25 rows=3 width=32) (actual time=0.231..0.233 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=38\n  ->  Hash Semi Join  (cost=35.19..142.22 rows=3 width=32) (actual time=0.129..0.226 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=38\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=21.06..127.51 rows=210 width=32) (actual time=0.051..0.133 rows=210 loops=1)\n              Recheck Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=16\n              Buffers: shared hit=19\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..21.01 rows=630 width=0) (actual time=0.027..0.027 rows=630 loops=1)\n                    Index Cond: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n                    Buffers: shared hit=3\n        ->  Hash  (cost=13.50..13.50 rows=50 width=16) (actual time=0.053..0.054 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=19\n              ->  Limit  (cost=0.00..13.50 rows=50 width=16) (actual time=0.036..0.045 rows=50 loops=1)\n                    Buffers: shared hit=19\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..405.00 rows=1500 width=16) (actual time=0.036..0.041 rows=50 loops=1)\n                          Filter: (user_id = 'cd495086-0b2c-45e3-b4c1-ab47ce92a05a'::uuid)\n                          Buffers: shared hit=19\nPlanning:\n  Buffers: shared hit=124\nPlanning Time: 0.315 ms\nExecution Time: 0.264 ms"
+        },
+        "schedule": {
+          "create": {
+            "sampleCount": 20,
+            "p50Ms": 225.76,
+            "p95Ms": 285.43,
+            "p99Ms": 286.81,
+            "elapsedMs": 287.08,
+            "requestsPerSecond": 69.67,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "revise": {
+            "sampleCount": 20,
+            "p50Ms": 111.81,
+            "p95Ms": 197.26,
+            "p99Ms": 198.09,
+            "elapsedMs": 198.28,
+            "requestsPerSecond": 100.87,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "sharedScheduleReschedule": {
+            "sampleCount": 4,
+            "p50Ms": 16.48,
+            "p95Ms": 27.75,
+            "p99Ms": 27.75,
+            "elapsedMs": 27.88,
+            "requestsPerSecond": 143.5,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 4
+            }
+          },
+          "manualAttendanceAndReplay": {
+            "sampleCount": 20,
+            "p50Ms": 128.21,
+            "p95Ms": 130.82,
+            "p99Ms": 130.96,
+            "elapsedMs": 131.18,
+            "requestsPerSecond": 152.46,
+            "errorCount": 0,
+            "outcomes": {
+              "00000": 20
+            }
+          },
+          "lostAttendanceEvents": 0
+        },
+        "contention": {
+          "revisionVsAttendance": {
+            "blockers": [
+              {
+                "waiter": 15263,
+                "blockers": [
+                  15650
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 134.977
+              }
+            ],
+            "elapsedMs": 640.66,
+            "outcome": "00000"
+          },
+          "closeVsLaunch": {
+            "blockers": [
+              {
+                "waiter": 14677,
+                "blockers": [
+                  15692
+                ],
+                "waitEvent": "transactionid",
+                "observedStatementMs": 150.471
+              }
+            ],
+            "elapsedMs": 625.65,
+            "outcome": 410
+          }
+        },
+        "focus": {
+          "ordinary": {
+            "sampleCount": 20,
+            "p50Ms": 81.39,
+            "p95Ms": 85.52,
+            "p99Ms": 85.72,
+            "elapsedMs": 87.62,
+            "requestsPerSecond": 228.26,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "cancel": {
+            "sampleCount": 20,
+            "p50Ms": 54.13,
+            "p95Ms": 60.17,
+            "p99Ms": 60.31,
+            "elapsedMs": 62.89,
+            "requestsPerSecond": 318.04,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "attributed": {
+            "sampleCount": 20,
+            "p50Ms": 54.73,
+            "p95Ms": 60.47,
+            "p99Ms": 61.14,
+            "elapsedMs": 62.23,
+            "requestsPerSecond": 321.36,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "activeRead": {
+            "sampleCount": 20,
+            "p50Ms": 20.79,
+            "p95Ms": 22.56,
+            "p99Ms": 22.68,
+            "elapsedMs": 23.12,
+            "requestsPerSecond": 865.03,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "replay": {
+            "sampleCount": 20,
+            "p50Ms": 50.46,
+            "p95Ms": 58.74,
+            "p99Ms": 59.02,
+            "elapsedMs": 60.03,
+            "requestsPerSecond": 333.14,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "conflict": {
+            "sampleCount": 20,
+            "p50Ms": 50.67,
+            "p95Ms": 59.52,
+            "p99Ms": 59.57,
+            "elapsedMs": 61.29,
+            "requestsPerSecond": 326.3,
+            "errorCount": 0,
+            "outcomes": {
+              "423": 20
+            }
+          },
+          "pause": {
+            "sampleCount": 20,
+            "p50Ms": 63.54,
+            "p95Ms": 73.87,
+            "p99Ms": 74.75,
+            "elapsedMs": 75.51,
+            "requestsPerSecond": 264.87,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "resume": {
+            "sampleCount": 20,
+            "p50Ms": 66.1,
+            "p95Ms": 73.27,
+            "p99Ms": 74.58,
+            "elapsedMs": 75.82,
+            "requestsPerSecond": 263.79,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "complete": {
+            "sampleCount": 20,
+            "p50Ms": 62.75,
+            "p95Ms": 73.44,
+            "p99Ms": 73.93,
+            "elapsedMs": 76.41,
+            "requestsPerSecond": 261.73,
+            "errorCount": 0,
+            "outcomes": {
+              "200": 20
+            }
+          },
+          "replayExtraWrites": 0,
+          "nextBrowserLaunch": {
+            "sampleCount": 1,
+            "elapsedMs": 551.84,
+            "observedAttribution": true
+          }
+        },
+        "queue": {
+          "sampleCount": 30,
+          "p50Ms": 532.87,
+          "p95Ms": 1719.06,
+          "p99Ms": 2137.51,
+          "elapsedMs": 6630.63,
+          "requestsPerSecond": 4.52,
+          "errorCount": 0,
+          "outcomes": {
+            "ok": 30
+          },
+          "workers": 5,
+          "jobs": 100,
+          "terminalStates": {
+            "sent": 97,
+            "failed": 3
+          },
+          "drainJobsPerSecond": 15.08,
+          "acceptedJobsPerSecond": 14.63,
+          "unexpectedDuplicateSubmissions": 0,
+          "crashedClaimRecovered": true,
+          "crashedAttempts": 3,
+          "gateFenceVerified": true,
+          "strandedLeases": 20,
+          "fake429": 2,
+          "fakeUncertain": 1,
+          "injectedProviderDelayMs": [
+            35,
+            350
+          ],
+          "before": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 99,
+              "activeLeases": 0,
+              "expiredLeases": 1,
+              "uncertainAttempts": 0,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 0,
+              "oldestDueAgeSeconds": 659,
+              "acceptedSubmissions24h": 0,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:37:59.941101+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "after": {
+            "focus": {
+              "activeSessions": 0
+            },
+            "capped": [],
+            "dispatch": {
+              "enabled": true,
+              "pendingDue": 0,
+              "activeLeases": 0,
+              "expiredLeases": 0,
+              "uncertainAttempts": 1,
+              "unmatchedWebhooks": 0,
+              "deliveryFailures24h": 2,
+              "oldestDueAgeSeconds": null,
+              "acceptedSubmissions24h": 97,
+              "oldestUnmatchedAgeSeconds": null
+            },
+            "generatedAt": "2026-11-07T11:38:07.064599+00:00",
+            "missedSweep": {
+              "enabled": false,
+              "eligibleBacklog": 0
+            }
+          },
+          "optOutVsHandoff": {
+            "blockers": [
+              {
+                "waiter": 15262,
+                "blockers": [
+                  16017
+                ],
+                "waitEvent": "advisory",
+                "observedStatementMs": 148.064
+              }
+            ],
+            "elapsedMs": 627.78,
+            "outcome": {
+              "authorized": false,
+              "reason": "stale_payload"
+            }
+          }
+        }
+      },
+      "invariants": {
+        "duplicateAttributions": 0,
+        "unexpectedFocusRows": 0,
+        "lostAttendanceEvents": 0,
+        "unexpectedDuplicateSubmissions": 0
+      },
+      "cleanup": "0|0|0|0|0|f|f|0"
+    }
+  ],
+  "realProviderRequests": 0,
+  "finalCleanup": "0|0|0|0|0|f|f|0",
+  "finishedAt": "2026-11-07T11:38:11.861Z",
+  "remediation": {
+    "baseline": "e333e30a061e36e1e3c3e9309430dbfd395558ed",
+    "environment": "disposable-local",
+    "host": {
+      "os": "win32",
+      "release": "10.0.26200",
+      "cpu": "Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz",
+      "logicalCpus": 12,
+      "ramGiB": 31.76,
+      "node": "v22.13.1",
+      "docker": "12 CPUs / 16640348160 bytes"
+    },
+    "startedAt": "2026-11-07T12:22:50.332Z",
+    "profiles": [
+      {
+        "profile": "medium",
+        "users": 100,
+        "sessions": 10000,
+        "history": 1500,
+        "concurrency": 20,
+        "measurements": {
+          "studyPlanConcurrency": {
+            "1": {
+              "lightOwner": {
+                "sampleCount": 3,
+                "p50Ms": 85.92,
+                "p95Ms": 123.74,
+                "p99Ms": 123.74,
+                "elapsedMs": 293.07,
+                "requestsPerSecond": 10.24,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 3
+                },
+                "ownerSessions": 12,
+                "linksOnOneOccurrence": 0,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 3,
+                    "rows": 3
+                  },
+                  "task_study_sessions": {
+                    "calls": 6,
+                    "rows": 57
+                  },
+                  "user_engagement_stats": {
+                    "calls": 3,
+                    "rows": 0
+                  },
+                  "task_study_session_events": {
+                    "calls": 3,
+                    "rows": 3
+                  },
+                  "tasks": {
+                    "calls": 3,
+                    "rows": 3
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 6,
+                    "rows": 0
+                  }
+                },
+                "callsPerRequest": 8,
+                "rowsPerRequest": 22,
+                "avgResponseBytes": 178163,
+                "sumRequestMs": 292.99,
+                "sumPostgrestRoundtripMs": 175.25,
+                "approximateOtherRequestMs": 117.74,
+                "pgStatStatements": {
+                  "calls": 15,
+                  "executionMs": 2.91
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 132694016,
+                  "processLifetimePeakBytes": 136278016
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 143736832,
+                  "processLifetimePeakBytes": 147083264
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 3,
+                    "meanMs": 48.67,
+                    "stageMeanMs": {
+                      "auth": 13.69,
+                      "sessions": 21.1,
+                      "audits": 11.11,
+                      "tasks": 12.49,
+                      "related": 12.52,
+                      "projection": 1.33
+                    }
+                  },
+                  "effort": {
+                    "samples": 3,
+                    "meanMs": 20.96,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 6.99,
+                      "links": 7.11,
+                      "parents": 0.02,
+                      "confirmLinks": 6.72,
+                      "projection": 0.08
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 3,
+                    "meanMs": 0.04,
+                    "stageMeanMs": {
+                      "prepare": 0.03
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "linkedHistoryOwner": {
+                "sampleCount": 3,
+                "p50Ms": 237.17,
+                "p95Ms": 250.44,
+                "p99Ms": 250.44,
+                "elapsedMs": 705.02,
+                "requestsPerSecond": 4.26,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 3
+                },
+                "ownerSessions": 1500,
+                "linksOnOneOccurrence": 201,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 3,
+                    "rows": 3
+                  },
+                  "task_study_sessions": {
+                    "calls": 15,
+                    "rows": 5130
+                  },
+                  "user_engagement_stats": {
+                    "calls": 3,
+                    "rows": 0
+                  },
+                  "task_study_session_events": {
+                    "calls": 3,
+                    "rows": 630
+                  },
+                  "tasks": {
+                    "calls": 3,
+                    "rows": 90
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 18,
+                    "rows": 1206
+                  },
+                  "focus_sessions": {
+                    "calls": 6,
+                    "rows": 603
+                  }
+                },
+                "callsPerRequest": 17,
+                "rowsPerRequest": 2554,
+                "avgResponseBytes": 511384,
+                "sumRequestMs": 705,
+                "sumPostgrestRoundtripMs": 393.98,
+                "approximateOtherRequestMs": 311.02,
+                "pgStatStatements": {
+                  "calls": 42,
+                  "executionMs": 67.59
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 153739264,
+                  "processLifetimePeakBytes": 157032448
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 169308160,
+                  "processLifetimePeakBytes": 174862336
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 3,
+                    "meanMs": 86.43,
+                    "stageMeanMs": {
+                      "auth": 9.57,
+                      "sessions": 53.04,
+                      "audits": 8.04,
+                      "tasks": 8.78,
+                      "related": 9.76,
+                      "projection": 14.04
+                    }
+                  },
+                  "effort": {
+                    "samples": 3,
+                    "meanMs": 89.87,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 18.5,
+                      "links": 24.18,
+                      "parents": 23.71,
+                      "confirmLinks": 23.28,
+                      "projection": 0.16
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 3,
+                    "meanMs": 0.11,
+                    "stageMeanMs": {
+                      "prepare": 0.1
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "shortPageFailedClosed": true,
+              "explain": "Limit  (cost=23.72..413.02 rows=500 width=24) (actual time=0.122..0.426 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=23.72..1191.61 rows=1500 width=24) (actual time=0.122..0.399 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1135.06 rows=1500 width=24) (actual time=0.017..0.231 rows=511 loops=1)\n              Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=284\nPlanning Time: 0.524 ms\nExecution Time: 0.483 ms\nLimit  (cost=140.61..141.13 rows=210 width=40) (actual time=0.191..0.210 rows=210 loops=1)\n  Buffers: shared hit=17\n  ->  Sort  (cost=140.61..141.13 rows=210 width=40) (actual time=0.191..0.199 rows=210 loops=1)\n        Sort Key: created_at, id\n        Sort Method: quicksort  Memory: 39kB\n        Buffers: shared hit=17\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=40) (actual time=0.038..0.141 rows=210 loops=1)\n              Recheck Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.024..0.024 rows=630 loops=1)\n                    Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n                    Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=84\nPlanning Time: 0.170 ms\nExecution Time: 0.237 ms"
+            },
+            "5": {
+              "lightOwner": {
+                "sampleCount": 15,
+                "p50Ms": 255.29,
+                "p95Ms": 280.86,
+                "p99Ms": 280.86,
+                "elapsedMs": 774.62,
+                "requestsPerSecond": 19.36,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 15
+                },
+                "ownerSessions": 12,
+                "linksOnOneOccurrence": 0,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 15,
+                    "rows": 15
+                  },
+                  "task_study_sessions": {
+                    "calls": 30,
+                    "rows": 285
+                  },
+                  "task_study_session_events": {
+                    "calls": 15,
+                    "rows": 15
+                  },
+                  "tasks": {
+                    "calls": 15,
+                    "rows": 15
+                  },
+                  "user_engagement_stats": {
+                    "calls": 15,
+                    "rows": 0
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 30,
+                    "rows": 0
+                  }
+                },
+                "callsPerRequest": 8,
+                "rowsPerRequest": 22,
+                "avgResponseBytes": 178118,
+                "sumRequestMs": 3853.79,
+                "sumPostgrestRoundtripMs": 711.1,
+                "approximateOtherRequestMs": 3142.69,
+                "pgStatStatements": {
+                  "calls": 75,
+                  "executionMs": 13.18
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 168529920,
+                  "processLifetimePeakBytes": 175890432
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 181092352,
+                  "processLifetimePeakBytes": 184627200
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 15,
+                    "meanMs": 97.85,
+                    "stageMeanMs": {
+                      "auth": 36.09,
+                      "sessions": 32.29,
+                      "audits": 28.11,
+                      "tasks": 28.83,
+                      "related": 28.85,
+                      "projection": 0.63
+                    }
+                  },
+                  "effort": {
+                    "samples": 15,
+                    "meanMs": 67.04,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 30.14,
+                      "links": 23.25,
+                      "parents": 0.01,
+                      "confirmLinks": 13.61,
+                      "projection": 0.01
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 15,
+                    "meanMs": 0.01,
+                    "stageMeanMs": {
+                      "prepare": 0.01
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "linkedHistoryOwner": {
+                "sampleCount": 15,
+                "p50Ms": 639.88,
+                "p95Ms": 748.16,
+                "p99Ms": 748.16,
+                "elapsedMs": 1981.1,
+                "requestsPerSecond": 7.57,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 15
+                },
+                "ownerSessions": 1500,
+                "linksOnOneOccurrence": 201,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 15,
+                    "rows": 15
+                  },
+                  "task_study_sessions": {
+                    "calls": 75,
+                    "rows": 25650
+                  },
+                  "user_engagement_stats": {
+                    "calls": 15,
+                    "rows": 0
+                  },
+                  "tasks": {
+                    "calls": 15,
+                    "rows": 450
+                  },
+                  "task_study_session_events": {
+                    "calls": 15,
+                    "rows": 3150
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 90,
+                    "rows": 6030
+                  },
+                  "focus_sessions": {
+                    "calls": 30,
+                    "rows": 3015
+                  }
+                },
+                "callsPerRequest": 17,
+                "rowsPerRequest": 2554,
+                "avgResponseBytes": 511342,
+                "sumRequestMs": 9862.08,
+                "sumPostgrestRoundtripMs": 2426.46,
+                "approximateOtherRequestMs": 7435.62,
+                "pgStatStatements": {
+                  "calls": 210,
+                  "executionMs": 499.11
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 182247424,
+                  "processLifetimePeakBytes": 184758272
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 234721280,
+                  "processLifetimePeakBytes": 234885120
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 15,
+                    "meanMs": 270.43,
+                    "stageMeanMs": {
+                      "auth": 48.36,
+                      "sessions": 136.15,
+                      "tasks": 75.72,
+                      "audits": 75.57,
+                      "related": 76.99,
+                      "projection": 8.93
+                    }
+                  },
+                  "effort": {
+                    "samples": 15,
+                    "meanMs": 187.45,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 53.28,
+                      "links": 38.71,
+                      "parents": 37.46,
+                      "confirmLinks": 57.74,
+                      "projection": 0.22
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 15,
+                    "meanMs": 0.12,
+                    "stageMeanMs": {
+                      "prepare": 0.11
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "shortPageFailedClosed": true,
+              "explain": "Limit  (cost=23.72..413.02 rows=500 width=24) (actual time=0.121..0.422 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=23.72..1191.61 rows=1500 width=24) (actual time=0.120..0.395 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1135.06 rows=1500 width=24) (actual time=0.016..0.227 rows=511 loops=1)\n              Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=284\nPlanning Time: 0.560 ms\nExecution Time: 0.476 ms\nLimit  (cost=140.61..141.13 rows=210 width=40) (actual time=0.189..0.208 rows=210 loops=1)\n  Buffers: shared hit=17\n  ->  Sort  (cost=140.61..141.13 rows=210 width=40) (actual time=0.189..0.197 rows=210 loops=1)\n        Sort Key: created_at, id\n        Sort Method: quicksort  Memory: 39kB\n        Buffers: shared hit=17\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=40) (actual time=0.039..0.139 rows=210 loops=1)\n              Recheck Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.025..0.025 rows=630 loops=1)\n                    Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n                    Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=84\nPlanning Time: 0.156 ms\nExecution Time: 0.230 ms"
+            }
+          },
+          "studyPlan": {
+            "lightOwner": {
+              "sampleCount": 60,
+              "p50Ms": 850.79,
+              "p95Ms": 872.06,
+              "p99Ms": 878.72,
+              "elapsedMs": 2540.56,
+              "requestsPerSecond": 23.62,
+              "errorCount": 0,
+              "outcomes": {
+                "200": 60
+              },
+              "ownerSessions": 12,
+              "linksOnOneOccurrence": 0,
+              "postgrest": {
+                "profiles": {
+                  "calls": 60,
+                  "rows": 60
+                },
+                "task_study_sessions": {
+                  "calls": 120,
+                  "rows": 1140
+                },
+                "task_study_session_events": {
+                  "calls": 60,
+                  "rows": 60
+                },
+                "tasks": {
+                  "calls": 60,
+                  "rows": 60
+                },
+                "user_engagement_stats": {
+                  "calls": 60,
+                  "rows": 0
+                },
+                "task_study_focus_attributions": {
+                  "calls": 120,
+                  "rows": 0
+                }
+              },
+              "callsPerRequest": 8,
+              "rowsPerRequest": 22,
+              "avgResponseBytes": 178001,
+              "sumRequestMs": 50386.62,
+              "sumPostgrestRoundtripMs": 3216.1,
+              "approximateOtherRequestMs": 47170.52,
+              "pgStatStatements": {
+                "calls": 300,
+                "executionMs": 42.75
+              },
+              "memoryBefore": {
+                "workingSetBytes": 231297024,
+                "processLifetimePeakBytes": 236294144
+              },
+              "memoryAfter": {
+                "workingSetBytes": 325648384,
+                "processLifetimePeakBytes": 325648384
+              },
+              "timings": {
+                "plan": {
+                  "samples": 60,
+                  "meanMs": 339.12,
+                  "stageMeanMs": {
+                    "auth": 138.24,
+                    "sessions": 103.72,
+                    "audits": 95.74,
+                    "tasks": 95.58,
+                    "related": 96.81,
+                    "projection": 0.35
+                  }
+                },
+                "effort": {
+                  "samples": 60,
+                  "meanMs": 201.87,
+                  "stageMeanMs": {
+                    "auth": 0.01,
+                    "ownership": 99.11,
+                    "links": 64.92,
+                    "parents": 0.01,
+                    "confirmLinks": 37.8,
+                    "projection": 0.01
+                  }
+                },
+                "renderPreparation": {
+                  "samples": 60,
+                  "meanMs": 0.01,
+                  "stageMeanMs": {
+                    "prepare": 0.01
+                  }
+                }
+              },
+              "warmupFailures": 0,
+              "firstError": null
+            },
+            "linkedHistoryOwner": {
+              "sampleCount": 60,
+              "p50Ms": 1979.12,
+              "p95Ms": 2093.65,
+              "p99Ms": 2096.17,
+              "elapsedMs": 6035.56,
+              "requestsPerSecond": 9.94,
+              "errorCount": 0,
+              "outcomes": {
+                "200": 60
+              },
+              "ownerSessions": 1500,
+              "linksOnOneOccurrence": 201,
+              "postgrest": {
+                "profiles": {
+                  "calls": 60,
+                  "rows": 60
+                },
+                "task_study_sessions": {
+                  "calls": 300,
+                  "rows": 102600
+                },
+                "task_study_session_events": {
+                  "calls": 60,
+                  "rows": 12600
+                },
+                "tasks": {
+                  "calls": 60,
+                  "rows": 1800
+                },
+                "user_engagement_stats": {
+                  "calls": 60,
+                  "rows": 0
+                },
+                "task_study_focus_attributions": {
+                  "calls": 360,
+                  "rows": 24120
+                },
+                "focus_sessions": {
+                  "calls": 120,
+                  "rows": 12060
+                }
+              },
+              "callsPerRequest": 17,
+              "rowsPerRequest": 2554,
+              "avgResponseBytes": 511226,
+              "sumRequestMs": 119959.32,
+              "sumPostgrestRoundtripMs": 10533.79,
+              "approximateOtherRequestMs": 109425.53,
+              "pgStatStatements": {
+                "calls": 840,
+                "executionMs": 2016.71
+              },
+              "memoryBefore": {
+                "workingSetBytes": 324493312,
+                "processLifetimePeakBytes": 327127040
+              },
+              "memoryAfter": {
+                "workingSetBytes": 462888960,
+                "processLifetimePeakBytes": 474169344
+              },
+              "timings": {
+                "plan": {
+                  "samples": 60,
+                  "meanMs": 718.57,
+                  "stageMeanMs": {
+                    "auth": 135.5,
+                    "sessions": 363.51,
+                    "audits": 211.56,
+                    "tasks": 212.17,
+                    "related": 213.28,
+                    "projection": 6.28
+                  }
+                },
+                "effort": {
+                  "samples": 60,
+                  "meanMs": 560.86,
+                  "stageMeanMs": {
+                    "auth": 0.01,
+                    "ownership": 209.34,
+                    "links": 116.21,
+                    "parents": 78.65,
+                    "confirmLinks": 156.5,
+                    "projection": 0.14
+                  }
+                },
+                "renderPreparation": {
+                  "samples": 60,
+                  "meanMs": 0.07,
+                  "stageMeanMs": {
+                    "prepare": 0.07
+                  }
+                }
+              },
+              "warmupFailures": 0,
+              "firstError": null
+            },
+            "shortPageFailedClosed": true,
+            "explain": "Limit  (cost=23.72..413.02 rows=500 width=24) (actual time=0.118..0.407 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=23.72..1191.61 rows=1500 width=24) (actual time=0.117..0.381 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1135.06 rows=1500 width=24) (actual time=0.016..0.230 rows=511 loops=1)\n              Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=284\nPlanning Time: 0.511 ms\nExecution Time: 0.475 ms\nLimit  (cost=140.61..141.13 rows=210 width=40) (actual time=0.186..0.205 rows=210 loops=1)\n  Buffers: shared hit=17\n  ->  Sort  (cost=140.61..141.13 rows=210 width=40) (actual time=0.186..0.194 rows=210 loops=1)\n        Sort Key: created_at, id\n        Sort Method: quicksort  Memory: 39kB\n        Buffers: shared hit=17\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=40) (actual time=0.036..0.136 rows=210 loops=1)\n              Recheck Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.023..0.023 rows=630 loops=1)\n                    Index Cond: (user_id = '2db09c04-5750-4627-874f-4473c25704d7'::uuid)\n                    Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=84\nPlanning Time: 0.154 ms\nExecution Time: 0.227 ms"
+          }
+        },
+        "invariants": {},
+        "cleanup": "0|0|0|0|0|f|f|0"
+      }
+    ],
+    "realProviderRequests": 0,
+    "finalCleanup": "0|0|0|0|0|f|f|0",
+    "finishedAt": "2026-11-07T12:23:56.381Z"
+  },
+  "remediationEarlier": [
+    {
+      "baseline": "e333e30a061e36e1e3c3e9309430dbfd395558ed",
+      "environment": "disposable-local",
+      "host": {
+        "os": "win32",
+        "release": "10.0.26200",
+        "cpu": "Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz",
+        "logicalCpus": 12,
+        "ramGiB": 31.76,
+        "node": "v22.13.1",
+        "docker": "12 CPUs / 16640348160 bytes"
+      },
+      "startedAt": "2026-11-07T12:07:52.262Z",
+      "profiles": [
+        {
+          "profile": "medium",
+          "users": 100,
+          "sessions": 10000,
+          "history": 1500,
+          "concurrency": 20,
+          "measurements": {
+            "studyPlanConcurrency": {
+              "1": {
+                "lightOwner": {
+                  "sampleCount": 3,
+                  "p50Ms": 98.88,
+                  "p95Ms": 131.75,
+                  "p99Ms": 131.75,
+                  "elapsedMs": 316.08,
+                  "requestsPerSecond": 9.49,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 3
+                  },
+                  "ownerSessions": 12,
+                  "linksOnOneOccurrence": 0,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_sessions": {
+                      "calls": 6,
+                      "rows": 57
+                    },
+                    "tasks": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "user_engagement_stats": {
+                      "calls": 3,
+                      "rows": 0
+                    },
+                    "task_study_session_events": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 6,
+                      "rows": 0
+                    }
+                  },
+                  "callsPerRequest": 8,
+                  "rowsPerRequest": 22,
+                  "avgResponseBytes": 179823,
+                  "sumRequestMs": 315.98,
+                  "sumPostgrestRoundtripMs": 136.68,
+                  "approximateOtherRequestMs": 179.3,
+                  "pgStatStatements": {
+                    "calls": 15,
+                    "executionMs": 2.65
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 133939200,
+                    "processLifetimePeakBytes": 138723328
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 146817024,
+                    "processLifetimePeakBytes": 151605248
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 3,
+                      "meanMs": 50.46,
+                      "stageMeanMs": {
+                        "auth": 15.1,
+                        "sessions": 13.22,
+                        "tasks": 10.66,
+                        "audits": 10.24,
+                        "projection": 1.22
+                      }
+                    },
+                    "effort": {
+                      "samples": 3,
+                      "meanMs": 21.33,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 7.62,
+                        "links": 7.17,
+                        "parents": 0.02,
+                        "confirmLinks": 6.41,
+                        "projection": 0.06
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 3,
+                      "meanMs": 0.04,
+                      "stageMeanMs": {
+                        "prepare": 0.03
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "linkedHistoryOwner": {
+                  "sampleCount": 3,
+                  "p50Ms": 364.88,
+                  "p95Ms": 398.64,
+                  "p99Ms": 398.64,
+                  "elapsedMs": 1064.1,
+                  "requestsPerSecond": 2.82,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 3
+                  },
+                  "ownerSessions": 1500,
+                  "linksOnOneOccurrence": 201,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_sessions": {
+                      "calls": 21,
+                      "rows": 5130
+                    },
+                    "user_engagement_stats": {
+                      "calls": 3,
+                      "rows": 0
+                    },
+                    "tasks": {
+                      "calls": 3,
+                      "rows": 90
+                    },
+                    "task_study_session_events": {
+                      "calls": 3,
+                      "rows": 630
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 30,
+                      "rows": 1206
+                    },
+                    "focus_sessions": {
+                      "calls": 12,
+                      "rows": 603
+                    }
+                  },
+                  "callsPerRequest": 25,
+                  "rowsPerRequest": 2554,
+                  "avgResponseBytes": 559558,
+                  "sumRequestMs": 1064.07,
+                  "sumPostgrestRoundtripMs": 558.95,
+                  "approximateOtherRequestMs": 505.13,
+                  "pgStatStatements": {
+                    "calls": 66,
+                    "executionMs": 78.13
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 164786176,
+                    "processLifetimePeakBytes": 166494208
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 174952448,
+                    "processLifetimePeakBytes": 178249728
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 3,
+                      "meanMs": 121.21,
+                      "stageMeanMs": {
+                        "auth": 12.88,
+                        "sessions": 73.59,
+                        "tasks": 9.48,
+                        "audits": 9.39,
+                        "projection": 15.85
+                      }
+                    },
+                    "effort": {
+                      "samples": 3,
+                      "meanMs": 164.96,
+                      "stageMeanMs": {
+                        "auth": 0.02,
+                        "ownership": 40.22,
+                        "links": 42.69,
+                        "parents": 42.28,
+                        "confirmLinks": 39.57,
+                        "projection": 0.16
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 3,
+                      "meanMs": 0.09,
+                      "stageMeanMs": {
+                        "prepare": 0.08
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "shortPageFailedClosed": true,
+                "explain": "Limit  (cost=23.54..409.94 rows=500 width=24) (actual time=0.478..1.141 rows=500 loops=1)\n  Buffers: shared hit=522\n  ->  Incremental Sort  (cost=23.54..1182.76 rows=1500 width=24) (actual time=0.476..1.096 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=522\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1126.20 rows=1500 width=24) (actual time=0.085..0.816 rows=511 loops=1)\n              Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Buffers: shared hit=513\nPlanning:\n  Buffers: shared hit=275\nPlanning Time: 0.568 ms\nExecution Time: 1.247 ms\nSort  (cost=134.71..134.72 rows=3 width=32) (actual time=0.321..0.323 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=53\n  ->  Hash Semi Join  (cost=34.65..134.69 rows=3 width=32) (actual time=0.137..0.314 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=53\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=21.06..120.51 rows=210 width=32) (actual time=0.033..0.195 rows=210 loops=1)\n              Recheck Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=38\n              Buffers: shared hit=40\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..21.01 rows=630 width=0) (actual time=0.023..0.024 rows=630 loops=1)\n                    Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                    Buffers: shared hit=2\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.085..0.085 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=13\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.066..0.076 rows=50 loops=1)\n                    Buffers: shared hit=13\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.065..0.072 rows=50 loops=1)\n                          Filter: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                          Rows Removed by Filter: 394\n                          Buffers: shared hit=13\nPlanning:\n  Buffers: shared hit=95\nPlanning Time: 0.588 ms\nExecution Time: 0.367 ms"
+              },
+              "5": {
+                "lightOwner": {
+                  "sampleCount": 15,
+                  "p50Ms": 294.2,
+                  "p95Ms": 314.73,
+                  "p99Ms": 314.73,
+                  "elapsedMs": 872.05,
+                  "requestsPerSecond": 17.2,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 15
+                  },
+                  "ownerSessions": 12,
+                  "linksOnOneOccurrence": 0,
+                  "postgrest": {
+                    "task_study_sessions": {
+                      "calls": 30,
+                      "rows": 285
+                    },
+                    "profiles": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "tasks": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "task_study_session_events": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "user_engagement_stats": {
+                      "calls": 15,
+                      "rows": 0
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 30,
+                      "rows": 0
+                    }
+                  },
+                  "callsPerRequest": 8,
+                  "rowsPerRequest": 22,
+                  "avgResponseBytes": 179710,
+                  "sumRequestMs": 4343.51,
+                  "sumPostgrestRoundtripMs": 654.39,
+                  "approximateOtherRequestMs": 3689.12,
+                  "pgStatStatements": {
+                    "calls": 75,
+                    "executionMs": 11.77
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 175636480,
+                    "processLifetimePeakBytes": 180940800
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 190296064,
+                    "processLifetimePeakBytes": 192528384
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 15,
+                      "meanMs": 132.08,
+                      "stageMeanMs": {
+                        "auth": 40.42,
+                        "sessions": 30.42,
+                        "tasks": 28.21,
+                        "audits": 32.45,
+                        "projection": 0.58
+                      }
+                    },
+                    "effort": {
+                      "samples": 15,
+                      "meanMs": 51.94,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 24.25,
+                        "links": 13.25,
+                        "parents": 0.01,
+                        "confirmLinks": 14.39,
+                        "projection": 0.01
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 15,
+                      "meanMs": 0.02,
+                      "stageMeanMs": {
+                        "prepare": 0.01
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "linkedHistoryOwner": {
+                  "sampleCount": 15,
+                  "p50Ms": 697.69,
+                  "p95Ms": 738.12,
+                  "p99Ms": 738.12,
+                  "elapsedMs": 2064.2,
+                  "requestsPerSecond": 7.27,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 15
+                  },
+                  "ownerSessions": 1500,
+                  "linksOnOneOccurrence": 201,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "task_study_sessions": {
+                      "calls": 105,
+                      "rows": 25650
+                    },
+                    "user_engagement_stats": {
+                      "calls": 15,
+                      "rows": 0
+                    },
+                    "tasks": {
+                      "calls": 15,
+                      "rows": 450
+                    },
+                    "task_study_session_events": {
+                      "calls": 15,
+                      "rows": 3150
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 150,
+                      "rows": 6030
+                    },
+                    "focus_sessions": {
+                      "calls": 60,
+                      "rows": 3015
+                    }
+                  },
+                  "callsPerRequest": 25,
+                  "rowsPerRequest": 2554,
+                  "avgResponseBytes": 559516,
+                  "sumRequestMs": 10275.21,
+                  "sumPostgrestRoundtripMs": 2768.5,
+                  "approximateOtherRequestMs": 7506.71,
+                  "pgStatStatements": {
+                    "calls": 330,
+                    "executionMs": 439.72
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 191422464,
+                    "processLifetimePeakBytes": 193413120
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 247791616,
+                    "processLifetimePeakBytes": 247791616
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 15,
+                      "meanMs": 254.75,
+                      "stageMeanMs": {
+                        "auth": 39.81,
+                        "sessions": 141.57,
+                        "tasks": 31.8,
+                        "audits": 33.15,
+                        "projection": 8.42
+                      }
+                    },
+                    "effort": {
+                      "samples": 15,
+                      "meanMs": 234.19,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 62.74,
+                        "links": 54.39,
+                        "parents": 49.23,
+                        "confirmLinks": 67.59,
+                        "projection": 0.22
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 15,
+                      "meanMs": 0.09,
+                      "stageMeanMs": {
+                        "prepare": 0.08
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "shortPageFailedClosed": true,
+                "explain": "Limit  (cost=23.54..409.94 rows=500 width=24) (actual time=0.165..0.496 rows=500 loops=1)\n  Buffers: shared hit=522\n  ->  Incremental Sort  (cost=23.54..1182.76 rows=1500 width=24) (actual time=0.164..0.466 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=522\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1126.20 rows=1500 width=24) (actual time=0.025..0.307 rows=511 loops=1)\n              Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Buffers: shared hit=513\nPlanning:\n  Buffers: shared hit=275\nPlanning Time: 0.491 ms\nExecution Time: 0.550 ms\nSort  (cost=134.71..134.72 rows=3 width=32) (actual time=0.293..0.294 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=53\n  ->  Hash Semi Join  (cost=34.65..134.69 rows=3 width=32) (actual time=0.120..0.287 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=53\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=21.06..120.51 rows=210 width=32) (actual time=0.032..0.185 rows=210 loops=1)\n              Recheck Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=38\n              Buffers: shared hit=40\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..21.01 rows=630 width=0) (actual time=0.023..0.024 rows=630 loops=1)\n                    Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                    Buffers: shared hit=2\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.074..0.075 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=13\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.057..0.065 rows=50 loops=1)\n                    Buffers: shared hit=13\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.056..0.062 rows=50 loops=1)\n                          Filter: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                          Rows Removed by Filter: 394\n                          Buffers: shared hit=13\nPlanning:\n  Buffers: shared hit=95\nPlanning Time: 0.317 ms\nExecution Time: 0.325 ms"
+              }
+            },
+            "studyPlan": {
+              "lightOwner": {
+                "sampleCount": 60,
+                "p50Ms": 1106.47,
+                "p95Ms": 1250.08,
+                "p99Ms": 1254.45,
+                "elapsedMs": 3396.99,
+                "requestsPerSecond": 17.66,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 60
+                },
+                "ownerSessions": 12,
+                "linksOnOneOccurrence": 0,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_sessions": {
+                    "calls": 120,
+                    "rows": 1140
+                  },
+                  "tasks": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_session_events": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "user_engagement_stats": {
+                    "calls": 60,
+                    "rows": 0
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 120,
+                    "rows": 0
+                  }
+                },
+                "callsPerRequest": 8,
+                "rowsPerRequest": 22,
+                "avgResponseBytes": 179651,
+                "sumRequestMs": 67596.26,
+                "sumPostgrestRoundtripMs": 2936.85,
+                "approximateOtherRequestMs": 64659.41,
+                "pgStatStatements": {
+                  "calls": 300,
+                  "executionMs": 60.25
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 247025664,
+                  "processLifetimePeakBytes": 248893440
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 350269440,
+                  "processLifetimePeakBytes": 355835904
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 60,
+                    "meanMs": 524.12,
+                    "stageMeanMs": {
+                      "auth": 174.05,
+                      "sessions": 138.97,
+                      "tasks": 86.19,
+                      "audits": 124.43,
+                      "projection": 0.48
+                    }
+                  },
+                  "effort": {
+                    "samples": 60,
+                    "meanMs": 210.37,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 100.8,
+                      "links": 61.61,
+                      "parents": 0.01,
+                      "confirmLinks": 47.9,
+                      "projection": 0.02
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 60,
+                    "meanMs": 0.01,
+                    "stageMeanMs": {
+                      "prepare": 0.01
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "linkedHistoryOwner": {
+                "sampleCount": 60,
+                "p50Ms": 2547.21,
+                "p95Ms": 2679.71,
+                "p99Ms": 2700.26,
+                "elapsedMs": 7779.48,
+                "requestsPerSecond": 7.71,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 60
+                },
+                "ownerSessions": 1500,
+                "linksOnOneOccurrence": 201,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_sessions": {
+                    "calls": 420,
+                    "rows": 102600
+                  },
+                  "user_engagement_stats": {
+                    "calls": 60,
+                    "rows": 0
+                  },
+                  "tasks": {
+                    "calls": 60,
+                    "rows": 1800
+                  },
+                  "task_study_session_events": {
+                    "calls": 60,
+                    "rows": 12600
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 600,
+                    "rows": 24120
+                  },
+                  "focus_sessions": {
+                    "calls": 240,
+                    "rows": 12060
+                  }
+                },
+                "callsPerRequest": 25,
+                "rowsPerRequest": 2554,
+                "avgResponseBytes": 559372,
+                "sumRequestMs": 154443.97,
+                "sumPostgrestRoundtripMs": 13313.43,
+                "approximateOtherRequestMs": 141130.54,
+                "pgStatStatements": {
+                  "calls": 1320,
+                  "executionMs": 2143.79
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 353566720,
+                  "processLifetimePeakBytes": 355835904
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 498667520,
+                  "processLifetimePeakBytes": 498667520
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 60,
+                    "meanMs": 952.55,
+                    "stageMeanMs": {
+                      "auth": 150.93,
+                      "sessions": 512.75,
+                      "tasks": 154.55,
+                      "audits": 127.23,
+                      "projection": 7.07
+                    }
+                  },
+                  "effort": {
+                    "samples": 60,
+                    "meanMs": 904.29,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 241.36,
+                      "links": 211.49,
+                      "parents": 204.29,
+                      "confirmLinks": 247.01,
+                      "projection": 0.12
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 60,
+                    "meanMs": 0.12,
+                    "stageMeanMs": {
+                      "prepare": 0.11
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "shortPageFailedClosed": true,
+              "explain": "Limit  (cost=23.54..409.94 rows=500 width=24) (actual time=0.162..0.643 rows=500 loops=1)\n  Buffers: shared hit=522\n  ->  Incremental Sort  (cost=23.54..1182.76 rows=1500 width=24) (actual time=0.161..0.604 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=522\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1126.20 rows=1500 width=24) (actual time=0.025..0.362 rows=511 loops=1)\n              Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Buffers: shared hit=513\nPlanning:\n  Buffers: shared hit=275\nPlanning Time: 0.997 ms\nExecution Time: 0.709 ms\nSort  (cost=134.71..134.72 rows=3 width=32) (actual time=0.331..0.333 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=53\n  ->  Hash Semi Join  (cost=34.65..134.69 rows=3 width=32) (actual time=0.124..0.325 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=53\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=21.06..120.51 rows=210 width=32) (actual time=0.032..0.216 rows=210 loops=1)\n              Recheck Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=38\n              Buffers: shared hit=40\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..21.01 rows=630 width=0) (actual time=0.023..0.024 rows=630 loops=1)\n                    Index Cond: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                    Buffers: shared hit=2\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.077..0.078 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=13\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.060..0.068 rows=50 loops=1)\n                    Buffers: shared hit=13\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.059..0.065 rows=50 loops=1)\n                          Filter: (user_id = 'a23fd70c-67f2-4473-b32d-0ec28988fec8'::uuid)\n                          Rows Removed by Filter: 394\n                          Buffers: shared hit=13\nPlanning:\n  Buffers: shared hit=95\nPlanning Time: 0.387 ms\nExecution Time: 0.367 ms"
+            },
+            "schedule": {
+              "create": {
+                "sampleCount": 20,
+                "p50Ms": 251.53,
+                "p95Ms": 330.89,
+                "p99Ms": 331.76,
+                "elapsedMs": 333.03,
+                "requestsPerSecond": 60.05,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "revise": {
+                "sampleCount": 20,
+                "p50Ms": 134.53,
+                "p95Ms": 240.58,
+                "p99Ms": 242.47,
+                "elapsedMs": 242.89,
+                "requestsPerSecond": 82.34,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "sharedScheduleReschedule": {
+                "sampleCount": 4,
+                "p50Ms": 27.43,
+                "p95Ms": 37.34,
+                "p99Ms": 37.34,
+                "elapsedMs": 37.56,
+                "requestsPerSecond": 106.5,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 4
+                }
+              },
+              "manualAttendanceAndReplay": {
+                "sampleCount": 20,
+                "p50Ms": 73.51,
+                "p95Ms": 76.52,
+                "p99Ms": 76.6,
+                "elapsedMs": 76.95,
+                "requestsPerSecond": 259.9,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "lostAttendanceEvents": 0
+            },
+            "contention": {
+              "revisionVsAttendance": {
+                "blockers": [
+                  {
+                    "waiter": 1220,
+                    "blockers": [
+                      1685
+                    ],
+                    "waitEvent": "transactionid",
+                    "observedStatementMs": 180.025
+                  }
+                ],
+                "elapsedMs": 669.05,
+                "outcome": "00000"
+              },
+              "closeVsLaunch": {
+                "blockers": [
+                  {
+                    "waiter": 1472,
+                    "blockers": [
+                      1727
+                    ],
+                    "waitEvent": "transactionid",
+                    "observedStatementMs": 195.512
+                  }
+                ],
+                "elapsedMs": 1555.11,
+                "outcome": 410
+              }
+            },
+            "focus": {
+              "ordinary": {
+                "sampleCount": 20,
+                "p50Ms": 86.02,
+                "p95Ms": 89.63,
+                "p99Ms": 89.82,
+                "elapsedMs": 92.08,
+                "requestsPerSecond": 217.21,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "cancel": {
+                "sampleCount": 20,
+                "p50Ms": 70.23,
+                "p95Ms": 75.46,
+                "p99Ms": 75.67,
+                "elapsedMs": 77.11,
+                "requestsPerSecond": 259.35,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "attributed": {
+                "sampleCount": 20,
+                "p50Ms": 69.87,
+                "p95Ms": 75.33,
+                "p99Ms": 77.05,
+                "elapsedMs": 77.76,
+                "requestsPerSecond": 257.2,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "activeRead": {
+                "sampleCount": 20,
+                "p50Ms": 31.39,
+                "p95Ms": 32.9,
+                "p99Ms": 33.06,
+                "elapsedMs": 34.82,
+                "requestsPerSecond": 574.45,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "replay": {
+                "sampleCount": 20,
+                "p50Ms": 60.69,
+                "p95Ms": 69.62,
+                "p99Ms": 69.79,
+                "elapsedMs": 70.78,
+                "requestsPerSecond": 282.56,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "conflict": {
+                "sampleCount": 20,
+                "p50Ms": 60.25,
+                "p95Ms": 69.84,
+                "p99Ms": 71.47,
+                "elapsedMs": 72.97,
+                "requestsPerSecond": 274.09,
+                "errorCount": 0,
+                "outcomes": {
+                  "423": 20
+                }
+              },
+              "pause": {
+                "sampleCount": 20,
+                "p50Ms": 65.96,
+                "p95Ms": 76.5,
+                "p99Ms": 77.13,
+                "elapsedMs": 78.82,
+                "requestsPerSecond": 253.75,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "resume": {
+                "sampleCount": 20,
+                "p50Ms": 67.11,
+                "p95Ms": 73.57,
+                "p99Ms": 74.97,
+                "elapsedMs": 75.87,
+                "requestsPerSecond": 263.6,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "complete": {
+                "sampleCount": 20,
+                "p50Ms": 74.9,
+                "p95Ms": 82.86,
+                "p99Ms": 84.17,
+                "elapsedMs": 85.48,
+                "requestsPerSecond": 233.98,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "replayExtraWrites": 0,
+              "nextBrowserLaunch": {
+                "sampleCount": 1,
+                "elapsedMs": 742.18,
+                "observedAttribution": true
+              }
+            },
+            "queue": {
+              "sampleCount": 35,
+              "p50Ms": 709.58,
+              "p95Ms": 1743.14,
+              "p99Ms": 2241.41,
+              "elapsedMs": 34463.84,
+              "requestsPerSecond": 1.02,
+              "errorCount": 0,
+              "outcomes": {
+                "ok": 35
+              },
+              "workers": 5,
+              "jobs": 100,
+              "terminalStates": {
+                "sent": 97,
+                "failed": 3
+              },
+              "drainJobsPerSecond": 2.9,
+              "acceptedJobsPerSecond": 2.81,
+              "unexpectedDuplicateSubmissions": 0,
+              "crashedClaimRecovered": true,
+              "crashedAttempts": 3,
+              "gateFenceVerified": true,
+              "strandedLeases": 20,
+              "fake429": 2,
+              "confirmedRetries": 2,
+              "fakeQuota": 1,
+              "fakePayloadMismatch": 1,
+              "fakeUncertain": 1,
+              "retryWaitMs": 24839,
+              "injectedProviderDelayMs": [
+                35,
+                350
+              ],
+              "before": {
+                "focus": {
+                  "activeSessions": 0
+                },
+                "capped": [],
+                "dispatch": {
+                  "enabled": true,
+                  "pendingDue": 99,
+                  "activeLeases": 0,
+                  "expiredLeases": 1,
+                  "uncertainAttempts": 0,
+                  "unmatchedWebhooks": 0,
+                  "deliveryFailures24h": 0,
+                  "oldestDueAgeSeconds": 611,
+                  "acceptedSubmissions24h": 0,
+                  "oldestUnmatchedAgeSeconds": null
+                },
+                "generatedAt": "2026-11-07T12:09:11.4282+00:00",
+                "missedSweep": {
+                  "enabled": false,
+                  "eligibleBacklog": 228
+                }
+              },
+              "after": {
+                "focus": {
+                  "activeSessions": 0
+                },
+                "capped": [],
+                "dispatch": {
+                  "enabled": true,
+                  "pendingDue": 0,
+                  "activeLeases": 0,
+                  "expiredLeases": 0,
+                  "uncertainAttempts": 1,
+                  "unmatchedWebhooks": 0,
+                  "deliveryFailures24h": 4,
+                  "oldestDueAgeSeconds": null,
+                  "acceptedSubmissions24h": 97,
+                  "oldestUnmatchedAgeSeconds": null
+                },
+                "generatedAt": "2026-11-07T12:09:46.857738+00:00",
+                "missedSweep": {
+                  "enabled": false,
+                  "eligibleBacklog": 228
+                }
+              },
+              "optOutVsHandoff": {
+                "blockers": [
+                  {
+                    "waiter": 1472,
+                    "blockers": [
+                      2157
+                    ],
+                    "waitEvent": "advisory",
+                    "observedStatementMs": 182.328
+                  }
+                ],
+                "elapsedMs": 767.64,
+                "outcome": {
+                  "authorized": false,
+                  "reason": "stale_payload"
+                }
+              }
+            }
+          },
+          "invariants": {
+            "duplicateAttributions": 0,
+            "unexpectedFocusRows": 0,
+            "lostAttendanceEvents": 0,
+            "unexpectedDuplicateSubmissions": 0
+          },
+          "cleanup": "0|0|0|0|0|f|f|0"
+        }
+      ],
+      "realProviderRequests": 0,
+      "finalCleanup": "0|0|0|0|0|f|f|0",
+      "finishedAt": "2026-11-07T12:09:52.740Z"
+    },
+    {
+      "baseline": "e333e30a061e36e1e3c3e9309430dbfd395558ed",
+      "environment": "disposable-local",
+      "host": {
+        "os": "win32",
+        "release": "10.0.26200",
+        "cpu": "Intel(R) Core(TM) i7-9850H CPU @ 2.60GHz",
+        "logicalCpus": 12,
+        "ramGiB": 31.76,
+        "node": "v22.13.1",
+        "docker": "12 CPUs / 16640348160 bytes"
+      },
+      "startedAt": "2026-11-07T12:15:05.077Z",
+      "profiles": [
+        {
+          "profile": "medium",
+          "users": 100,
+          "sessions": 10000,
+          "history": 1500,
+          "concurrency": 20,
+          "measurements": {
+            "studyPlanConcurrency": {
+              "1": {
+                "lightOwner": {
+                  "sampleCount": 3,
+                  "p50Ms": 102.25,
+                  "p95Ms": 130.63,
+                  "p99Ms": 130.63,
+                  "elapsedMs": 331.65,
+                  "requestsPerSecond": 9.05,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 3
+                  },
+                  "ownerSessions": 12,
+                  "linksOnOneOccurrence": 0,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_sessions": {
+                      "calls": 6,
+                      "rows": 57
+                    },
+                    "tasks": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "user_engagement_stats": {
+                      "calls": 3,
+                      "rows": 0
+                    },
+                    "task_study_session_events": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 6,
+                      "rows": 0
+                    }
+                  },
+                  "callsPerRequest": 8,
+                  "rowsPerRequest": 22,
+                  "avgResponseBytes": 178163,
+                  "sumRequestMs": 331.55,
+                  "sumPostgrestRoundtripMs": 179.25,
+                  "approximateOtherRequestMs": 152.31,
+                  "pgStatStatements": {
+                    "calls": 15,
+                    "executionMs": 2.54
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 132595712,
+                    "processLifetimePeakBytes": 136515584
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 145903616,
+                    "processLifetimePeakBytes": 150204416
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 3,
+                      "meanMs": 55.95,
+                      "stageMeanMs": {
+                        "auth": 14.22,
+                        "sessions": 21.36,
+                        "tasks": 10.94,
+                        "audits": 7.99,
+                        "projection": 1.41
+                      }
+                    },
+                    "effort": {
+                      "samples": 3,
+                      "meanMs": 22.38,
+                      "stageMeanMs": {
+                        "auth": 0.02,
+                        "ownership": 7.33,
+                        "links": 7.41,
+                        "parents": 0.02,
+                        "confirmLinks": 7.48,
+                        "projection": 0.09
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 3,
+                      "meanMs": 0.05,
+                      "stageMeanMs": {
+                        "prepare": 0.03
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "linkedHistoryOwner": {
+                  "sampleCount": 3,
+                  "p50Ms": 251.71,
+                  "p95Ms": 266.84,
+                  "p99Ms": 266.84,
+                  "elapsedMs": 764.47,
+                  "requestsPerSecond": 3.92,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 3
+                  },
+                  "ownerSessions": 1500,
+                  "linksOnOneOccurrence": 201,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 3,
+                      "rows": 3
+                    },
+                    "task_study_sessions": {
+                      "calls": 15,
+                      "rows": 5130
+                    },
+                    "user_engagement_stats": {
+                      "calls": 3,
+                      "rows": 0
+                    },
+                    "tasks": {
+                      "calls": 3,
+                      "rows": 90
+                    },
+                    "task_study_session_events": {
+                      "calls": 3,
+                      "rows": 630
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 18,
+                      "rows": 1206
+                    },
+                    "focus_sessions": {
+                      "calls": 6,
+                      "rows": 603
+                    }
+                  },
+                  "callsPerRequest": 17,
+                  "rowsPerRequest": 2554,
+                  "avgResponseBytes": 511384,
+                  "sumRequestMs": 764.44,
+                  "sumPostgrestRoundtripMs": 374.73,
+                  "approximateOtherRequestMs": 389.71,
+                  "pgStatStatements": {
+                    "calls": 42,
+                    "executionMs": 62.73
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 158244864,
+                    "processLifetimePeakBytes": 163647488
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 175988736,
+                    "processLifetimePeakBytes": 179642368
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 3,
+                      "meanMs": 103.44,
+                      "stageMeanMs": {
+                        "auth": 9.26,
+                        "sessions": 62.23,
+                        "tasks": 8,
+                        "audits": 8.8,
+                        "projection": 15.14
+                      }
+                    },
+                    "effort": {
+                      "samples": 3,
+                      "meanMs": 90.73,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 18.1,
+                        "links": 25.17,
+                        "parents": 23.53,
+                        "confirmLinks": 23.67,
+                        "projection": 0.23
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 3,
+                      "meanMs": 0.13,
+                      "stageMeanMs": {
+                        "prepare": 0.11
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "shortPageFailedClosed": true,
+                "explain": "Limit  (cost=22.51..392.11 rows=500 width=24) (actual time=0.165..0.465 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=22.51..1131.30 rows=1500 width=24) (actual time=0.164..0.436 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1074.74 rows=1500 width=24) (actual time=0.022..0.274 rows=511 loops=1)\n              Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=278\nPlanning Time: 0.544 ms\nExecution Time: 0.531 ms\nSort  (cost=146.71..146.72 rows=3 width=32) (actual time=0.213..0.215 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=20\n  ->  Hash Semi Join  (cost=46.65..146.69 rows=3 width=32) (actual time=0.102..0.207 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=20\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=32) (actual time=0.040..0.129 rows=210 loops=1)\n              Recheck Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.029..0.029 rows=630 loops=1)\n                    Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                    Buffers: shared hit=3\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.028..0.029 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=3\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.011..0.020 rows=50 loops=1)\n                    Buffers: shared hit=3\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.010..0.016 rows=50 loops=1)\n                          Filter: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                          Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=99\nPlanning Time: 0.391 ms\nExecution Time: 0.251 ms"
+              },
+              "5": {
+                "lightOwner": {
+                  "sampleCount": 15,
+                  "p50Ms": 258.3,
+                  "p95Ms": 342.49,
+                  "p99Ms": 342.49,
+                  "elapsedMs": 844.08,
+                  "requestsPerSecond": 17.77,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 15
+                  },
+                  "ownerSessions": 12,
+                  "linksOnOneOccurrence": 0,
+                  "postgrest": {
+                    "task_study_sessions": {
+                      "calls": 30,
+                      "rows": 285
+                    },
+                    "profiles": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "tasks": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "user_engagement_stats": {
+                      "calls": 15,
+                      "rows": 0
+                    },
+                    "task_study_session_events": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 30,
+                      "rows": 0
+                    }
+                  },
+                  "callsPerRequest": 8,
+                  "rowsPerRequest": 22,
+                  "avgResponseBytes": 178093,
+                  "sumRequestMs": 4195.75,
+                  "sumPostgrestRoundtripMs": 623.25,
+                  "approximateOtherRequestMs": 3572.5,
+                  "pgStatStatements": {
+                    "calls": 75,
+                    "executionMs": 9.81
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 178429952,
+                    "processLifetimePeakBytes": 182513664
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 187748352,
+                    "processLifetimePeakBytes": 191709184
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 15,
+                      "meanMs": 131.59,
+                      "stageMeanMs": {
+                        "auth": 42.42,
+                        "sessions": 28.39,
+                        "tasks": 27.83,
+                        "audits": 32.32,
+                        "projection": 0.63
+                      }
+                    },
+                    "effort": {
+                      "samples": 15,
+                      "meanMs": 46.25,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 23.45,
+                        "links": 11.68,
+                        "parents": 0.01,
+                        "confirmLinks": 11.07,
+                        "projection": 0.01
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 15,
+                      "meanMs": 0.01,
+                      "stageMeanMs": {
+                        "prepare": 0.01
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "linkedHistoryOwner": {
+                  "sampleCount": 15,
+                  "p50Ms": 611.82,
+                  "p95Ms": 678.16,
+                  "p99Ms": 678.16,
+                  "elapsedMs": 1896.7,
+                  "requestsPerSecond": 7.91,
+                  "errorCount": 0,
+                  "outcomes": {
+                    "200": 15
+                  },
+                  "ownerSessions": 1500,
+                  "linksOnOneOccurrence": 201,
+                  "postgrest": {
+                    "profiles": {
+                      "calls": 15,
+                      "rows": 15
+                    },
+                    "task_study_sessions": {
+                      "calls": 75,
+                      "rows": 25650
+                    },
+                    "user_engagement_stats": {
+                      "calls": 15,
+                      "rows": 0
+                    },
+                    "tasks": {
+                      "calls": 15,
+                      "rows": 450
+                    },
+                    "task_study_session_events": {
+                      "calls": 15,
+                      "rows": 3150
+                    },
+                    "task_study_focus_attributions": {
+                      "calls": 90,
+                      "rows": 6030
+                    },
+                    "focus_sessions": {
+                      "calls": 30,
+                      "rows": 3015
+                    }
+                  },
+                  "callsPerRequest": 17,
+                  "rowsPerRequest": 2554,
+                  "avgResponseBytes": 511314,
+                  "sumRequestMs": 9425.25,
+                  "sumPostgrestRoundtripMs": 2112.04,
+                  "approximateOtherRequestMs": 7313.21,
+                  "pgStatStatements": {
+                    "calls": 210,
+                    "executionMs": 404.59
+                  },
+                  "memoryBefore": {
+                    "workingSetBytes": 192290816,
+                    "processLifetimePeakBytes": 194084864
+                  },
+                  "memoryAfter": {
+                    "workingSetBytes": 233558016,
+                    "processLifetimePeakBytes": 233693184
+                  },
+                  "timings": {
+                    "plan": {
+                      "samples": 15,
+                      "meanMs": 262.12,
+                      "stageMeanMs": {
+                        "auth": 34.45,
+                        "sessions": 151.8,
+                        "tasks": 32.64,
+                        "audits": 32.92,
+                        "projection": 10.29
+                      }
+                    },
+                    "effort": {
+                      "samples": 15,
+                      "meanMs": 168.31,
+                      "stageMeanMs": {
+                        "auth": 0.01,
+                        "ownership": 39.27,
+                        "links": 38.73,
+                        "parents": 31.34,
+                        "confirmLinks": 58.73,
+                        "projection": 0.22
+                      }
+                    },
+                    "renderPreparation": {
+                      "samples": 15,
+                      "meanMs": 0.11,
+                      "stageMeanMs": {
+                        "prepare": 0.11
+                      }
+                    }
+                  },
+                  "warmupFailures": 0,
+                  "firstError": null
+                },
+                "shortPageFailedClosed": true,
+                "explain": "Limit  (cost=22.51..392.11 rows=500 width=24) (actual time=0.126..0.414 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=22.51..1131.30 rows=1500 width=24) (actual time=0.125..0.385 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1074.74 rows=1500 width=24) (actual time=0.021..0.232 rows=511 loops=1)\n              Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=278\nPlanning Time: 0.524 ms\nExecution Time: 0.472 ms\nSort  (cost=146.71..146.72 rows=3 width=32) (actual time=0.183..0.185 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=20\n  ->  Hash Semi Join  (cost=46.65..146.69 rows=3 width=32) (actual time=0.076..0.178 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=20\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=32) (actual time=0.037..0.124 rows=210 loops=1)\n              Recheck Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.027..0.027 rows=630 loops=1)\n                    Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                    Buffers: shared hit=3\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.026..0.026 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=3\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.008..0.017 rows=50 loops=1)\n                    Buffers: shared hit=3\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.008..0.014 rows=50 loops=1)\n                          Filter: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                          Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=99\nPlanning Time: 0.324 ms\nExecution Time: 0.219 ms"
+              }
+            },
+            "studyPlan": {
+              "lightOwner": {
+                "sampleCount": 60,
+                "p50Ms": 965.16,
+                "p95Ms": 1021.62,
+                "p99Ms": 1030.34,
+                "elapsedMs": 2921.81,
+                "requestsPerSecond": 20.54,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 60
+                },
+                "ownerSessions": 12,
+                "linksOnOneOccurrence": 0,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_sessions": {
+                    "calls": 120,
+                    "rows": 1140
+                  },
+                  "tasks": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_session_events": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "user_engagement_stats": {
+                    "calls": 60,
+                    "rows": 0
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 120,
+                    "rows": 0
+                  }
+                },
+                "callsPerRequest": 8,
+                "rowsPerRequest": 22,
+                "avgResponseBytes": 177980,
+                "sumRequestMs": 58030.31,
+                "sumPostgrestRoundtripMs": 2618.56,
+                "approximateOtherRequestMs": 55411.74,
+                "pgStatStatements": {
+                  "calls": 300,
+                  "executionMs": 45.23
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 232779776,
+                  "processLifetimePeakBytes": 236527616
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 333111296,
+                  "processLifetimePeakBytes": 333111296
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 60,
+                    "meanMs": 470.31,
+                    "stageMeanMs": {
+                      "auth": 150.53,
+                      "sessions": 103.59,
+                      "tasks": 114.28,
+                      "audits": 101.51,
+                      "projection": 0.4
+                    }
+                  },
+                  "effort": {
+                    "samples": 60,
+                    "meanMs": 164.4,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 74.94,
+                      "links": 51.24,
+                      "parents": 0.01,
+                      "confirmLinks": 38.17,
+                      "projection": 0.01
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 60,
+                    "meanMs": 0.01,
+                    "stageMeanMs": {
+                      "prepare": 0.01
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "linkedHistoryOwner": {
+                "sampleCount": 60,
+                "p50Ms": 2077.52,
+                "p95Ms": 2594.12,
+                "p99Ms": 2616.86,
+                "elapsedMs": 6732.82,
+                "requestsPerSecond": 8.91,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 60
+                },
+                "ownerSessions": 1500,
+                "linksOnOneOccurrence": 201,
+                "postgrest": {
+                  "profiles": {
+                    "calls": 60,
+                    "rows": 60
+                  },
+                  "task_study_sessions": {
+                    "calls": 300,
+                    "rows": 102600
+                  },
+                  "user_engagement_stats": {
+                    "calls": 60,
+                    "rows": 0
+                  },
+                  "tasks": {
+                    "calls": 60,
+                    "rows": 1800
+                  },
+                  "task_study_session_events": {
+                    "calls": 60,
+                    "rows": 12600
+                  },
+                  "task_study_focus_attributions": {
+                    "calls": 360,
+                    "rows": 24120
+                  },
+                  "focus_sessions": {
+                    "calls": 120,
+                    "rows": 12060
+                  }
+                },
+                "callsPerRequest": 17,
+                "rowsPerRequest": 2554,
+                "avgResponseBytes": 511198,
+                "sumRequestMs": 133910.68,
+                "sumPostgrestRoundtripMs": 9572.17,
+                "approximateOtherRequestMs": 124338.51,
+                "pgStatStatements": {
+                  "calls": 840,
+                  "executionMs": 1944.03
+                },
+                "memoryBefore": {
+                  "workingSetBytes": 329621504,
+                  "processLifetimePeakBytes": 335671296
+                },
+                "memoryAfter": {
+                  "workingSetBytes": 456896512,
+                  "processLifetimePeakBytes": 472698880
+                },
+                "timings": {
+                  "plan": {
+                    "samples": 60,
+                    "meanMs": 938.52,
+                    "stageMeanMs": {
+                      "auth": 163.74,
+                      "sessions": 498.41,
+                      "tasks": 147.62,
+                      "audits": 121.69,
+                      "projection": 7.06
+                    }
+                  },
+                  "effort": {
+                    "samples": 60,
+                    "meanMs": 540.2,
+                    "stageMeanMs": {
+                      "auth": 0.01,
+                      "ownership": 152.49,
+                      "links": 124.77,
+                      "parents": 95.81,
+                      "confirmLinks": 166.97,
+                      "projection": 0.13
+                    }
+                  },
+                  "renderPreparation": {
+                    "samples": 60,
+                    "meanMs": 0.08,
+                    "stageMeanMs": {
+                      "prepare": 0.08
+                    }
+                  }
+                },
+                "warmupFailures": 0,
+                "firstError": null
+              },
+              "shortPageFailedClosed": true,
+              "explain": "Limit  (cost=22.51..392.11 rows=500 width=24) (actual time=0.153..0.455 rows=500 loops=1)\n  Buffers: shared hit=523\n  ->  Incremental Sort  (cost=22.51..1131.30 rows=1500 width=24) (actual time=0.152..0.427 rows=500 loops=1)\n        Sort Key: scheduled_start_at, id\n        Presorted Key: scheduled_start_at\n        Full-sort Groups: 9  Sort Method: quicksort  Average Memory: 29kB  Peak Memory: 29kB\n        Buffers: shared hit=523\n        ->  Index Scan using ls_sessions_user_start_idx on task_study_sessions  (cost=0.29..1074.74 rows=1500 width=24) (actual time=0.024..0.253 rows=511 loops=1)\n              Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Buffers: shared hit=514\nPlanning:\n  Buffers: shared hit=278\nPlanning Time: 0.510 ms\nExecution Time: 0.560 ms\nSort  (cost=146.71..146.72 rows=3 width=32) (actual time=0.217..0.219 rows=7 loops=1)\n  Sort Key: task_study_session_events.id\n  Sort Method: quicksort  Memory: 25kB\n  Buffers: shared hit=20\n  ->  Hash Semi Join  (cost=46.65..146.69 rows=3 width=32) (actual time=0.104..0.211 rows=7 loops=1)\n        Hash Cond: (task_study_session_events.session_id = task_study_sessions.id)\n        Buffers: shared hit=20\n        ->  Bitmap Heap Scan on task_study_session_events  (cost=33.06..132.51 rows=210 width=32) (actual time=0.065..0.158 rows=210 loops=1)\n              Recheck Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n              Filter: (event_type = 'cancelled'::text)\n              Rows Removed by Filter: 420\n              Heap Blocks: exact=14\n              Buffers: shared hit=17\n              ->  Bitmap Index Scan on ls_events_user_created_idx  (cost=0.00..33.01 rows=630 width=0) (actual time=0.027..0.027 rows=630 loops=1)\n                    Index Cond: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                    Buffers: shared hit=3\n        ->  Hash  (cost=12.97..12.97 rows=50 width=16) (actual time=0.026..0.026 rows=50 loops=1)\n              Buckets: 1024  Batches: 1  Memory Usage: 11kB\n              Buffers: shared hit=3\n              ->  Limit  (cost=0.00..12.97 rows=50 width=16) (actual time=0.009..0.017 rows=50 loops=1)\n                    Buffers: shared hit=3\n                    ->  Seq Scan on task_study_sessions  (cost=0.00..389.00 rows=1500 width=16) (actual time=0.009..0.014 rows=50 loops=1)\n                          Filter: (user_id = '0ce95652-8f70-4282-a1bd-4416ab261bd5'::uuid)\n                          Buffers: shared hit=3\nPlanning:\n  Buffers: shared hit=99\nPlanning Time: 0.454 ms\nExecution Time: 0.250 ms"
+            },
+            "schedule": {
+              "create": {
+                "sampleCount": 20,
+                "p50Ms": 209.99,
+                "p95Ms": 299.53,
+                "p99Ms": 302.38,
+                "elapsedMs": 304.02,
+                "requestsPerSecond": 65.78,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "revise": {
+                "sampleCount": 20,
+                "p50Ms": 126.94,
+                "p95Ms": 220.67,
+                "p99Ms": 220.85,
+                "elapsedMs": 221.43,
+                "requestsPerSecond": 90.32,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "sharedScheduleReschedule": {
+                "sampleCount": 4,
+                "p50Ms": 17.11,
+                "p95Ms": 28,
+                "p99Ms": 28,
+                "elapsedMs": 28.23,
+                "requestsPerSecond": 141.7,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 4
+                }
+              },
+              "manualAttendanceAndReplay": {
+                "sampleCount": 20,
+                "p50Ms": 65.73,
+                "p95Ms": 67.34,
+                "p99Ms": 67.55,
+                "elapsedMs": 67.89,
+                "requestsPerSecond": 294.59,
+                "errorCount": 0,
+                "outcomes": {
+                  "00000": 20
+                }
+              },
+              "lostAttendanceEvents": 0
+            },
+            "contention": {
+              "revisionVsAttendance": {
+                "blockers": [
+                  {
+                    "waiter": 3076,
+                    "blockers": [
+                      3581
+                    ],
+                    "waitEvent": "transactionid",
+                    "observedStatementMs": 151.608
+                  }
+                ],
+                "elapsedMs": 637.91,
+                "outcome": "00000"
+              },
+              "closeVsLaunch": {
+                "blockers": [
+                  {
+                    "waiter": 3064,
+                    "blockers": [
+                      3623
+                    ],
+                    "waitEvent": "transactionid",
+                    "observedStatementMs": 238.484
+                  }
+                ],
+                "elapsedMs": 1463.23,
+                "outcome": 410
+              }
+            },
+            "focus": {
+              "ordinary": {
+                "sampleCount": 20,
+                "p50Ms": 73.77,
+                "p95Ms": 79.34,
+                "p99Ms": 79.46,
+                "elapsedMs": 81.86,
+                "requestsPerSecond": 244.33,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "cancel": {
+                "sampleCount": 20,
+                "p50Ms": 70.36,
+                "p95Ms": 76.92,
+                "p99Ms": 77.83,
+                "elapsedMs": 79.52,
+                "requestsPerSecond": 251.52,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "attributed": {
+                "sampleCount": 20,
+                "p50Ms": 67.64,
+                "p95Ms": 74.43,
+                "p99Ms": 76.38,
+                "elapsedMs": 77.3,
+                "requestsPerSecond": 258.74,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "activeRead": {
+                "sampleCount": 20,
+                "p50Ms": 22.93,
+                "p95Ms": 25.09,
+                "p99Ms": 25.33,
+                "elapsedMs": 27.37,
+                "requestsPerSecond": 730.67,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "replay": {
+                "sampleCount": 20,
+                "p50Ms": 66.05,
+                "p95Ms": 75.29,
+                "p99Ms": 76.08,
+                "elapsedMs": 77.77,
+                "requestsPerSecond": 257.16,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "conflict": {
+                "sampleCount": 20,
+                "p50Ms": 61.54,
+                "p95Ms": 72.68,
+                "p99Ms": 73.09,
+                "elapsedMs": 75.74,
+                "requestsPerSecond": 264.07,
+                "errorCount": 0,
+                "outcomes": {
+                  "423": 20
+                }
+              },
+              "pause": {
+                "sampleCount": 20,
+                "p50Ms": 69.03,
+                "p95Ms": 75.34,
+                "p99Ms": 75.88,
+                "elapsedMs": 77.34,
+                "requestsPerSecond": 258.59,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "resume": {
+                "sampleCount": 20,
+                "p50Ms": 61.88,
+                "p95Ms": 67.04,
+                "p99Ms": 67.38,
+                "elapsedMs": 69.16,
+                "requestsPerSecond": 289.19,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "complete": {
+                "sampleCount": 20,
+                "p50Ms": 69.08,
+                "p95Ms": 83.22,
+                "p99Ms": 83.99,
+                "elapsedMs": 86.36,
+                "requestsPerSecond": 231.6,
+                "errorCount": 0,
+                "outcomes": {
+                  "200": 20
+                }
+              },
+              "replayExtraWrites": 0,
+              "nextBrowserLaunch": {
+                "sampleCount": 1,
+                "elapsedMs": 510.88,
+                "observedAttribution": true
+              }
+            },
+            "queue": {
+              "sampleCount": 35,
+              "p50Ms": 574.76,
+              "p95Ms": 1947.74,
+              "p99Ms": 2202.19,
+              "elapsedMs": 35708.31,
+              "requestsPerSecond": 0.98,
+              "errorCount": 0,
+              "outcomes": {
+                "ok": 35
+              },
+              "workers": 5,
+              "jobs": 100,
+              "terminalStates": {
+                "sent": 97,
+                "failed": 3
+              },
+              "drainJobsPerSecond": 2.8,
+              "acceptedJobsPerSecond": 2.72,
+              "unexpectedDuplicateSubmissions": 0,
+              "crashedClaimRecovered": true,
+              "crashedAttempts": 3,
+              "gateFenceVerified": true,
+              "strandedLeases": 20,
+              "fake429": 2,
+              "confirmedRetries": 2,
+              "fakeQuota": 1,
+              "fakePayloadMismatch": 1,
+              "fakeUncertain": 1,
+              "retryWaitMs": 27239,
+              "injectedProviderDelayMs": [
+                35,
+                350
+              ],
+              "before": {
+                "focus": {
+                  "activeSessions": 0
+                },
+                "capped": [],
+                "dispatch": {
+                  "enabled": true,
+                  "pendingDue": 99,
+                  "activeLeases": 0,
+                  "expiredLeases": 1,
+                  "uncertainAttempts": 0,
+                  "unmatchedWebhooks": 0,
+                  "deliveryFailures24h": 0,
+                  "oldestDueAgeSeconds": 626,
+                  "acceptedSubmissions24h": 0,
+                  "oldestUnmatchedAgeSeconds": null
+                },
+                "generatedAt": "2026-11-07T12:16:26.209058+00:00",
+                "missedSweep": {
+                  "enabled": false,
+                  "eligibleBacklog": 228
+                }
+              },
+              "after": {
+                "focus": {
+                  "activeSessions": 0
+                },
+                "capped": [],
+                "dispatch": {
+                  "enabled": true,
+                  "pendingDue": 0,
+                  "activeLeases": 0,
+                  "expiredLeases": 0,
+                  "uncertainAttempts": 1,
+                  "unmatchedWebhooks": 0,
+                  "deliveryFailures24h": 4,
+                  "oldestDueAgeSeconds": null,
+                  "acceptedSubmissions24h": 97,
+                  "oldestUnmatchedAgeSeconds": null
+                },
+                "generatedAt": "2026-11-07T12:17:02.688585+00:00",
+                "missedSweep": {
+                  "enabled": false,
+                  "eligibleBacklog": 228
+                }
+              },
+              "optOutVsHandoff": {
+                "blockers": [
+                  {
+                    "waiter": 3061,
+                    "blockers": [
+                      4065
+                    ],
+                    "waitEvent": "advisory",
+                    "observedStatementMs": 136.221
+                  }
+                ],
+                "elapsedMs": 628.08,
+                "outcome": {
+                  "authorized": false,
+                  "reason": "stale_payload"
+                }
+              }
+            }
+          },
+          "invariants": {
+            "duplicateAttributions": 0,
+            "unexpectedFocusRows": 0,
+            "lostAttendanceEvents": 0,
+            "unexpectedDuplicateSubmissions": 0
+          },
+          "cleanup": "0|0|0|0|0|f|f|0"
+        }
+      ],
+      "realProviderRequests": 0,
+      "finalCleanup": "0|0|0|0|0|f|f|0",
+      "finishedAt": "2026-11-07T12:17:07.136Z"
+    }
+  ]
+}

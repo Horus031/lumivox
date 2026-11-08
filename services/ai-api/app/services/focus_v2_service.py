@@ -1,7 +1,7 @@
 from postgrest.exceptions import APIError
 
 from app.clients.supabase_client import get_supabase_client
-from app.schemas.focus_v2 import CreateFocusV2Request, TransitionFocusV2Request
+from app.schemas.focus_v2 import CreateFocusV2Request, CreateStudyFocusRequest, TransitionFocusV2Request
 
 
 class FocusV2Conflict(Exception):
@@ -38,6 +38,13 @@ def create_focus_v2(payload: CreateFocusV2Request) -> dict:
         "p_auto_start_focus": payload.auto_start_focus,
     })
     return {"session_id": data}
+
+
+def create_study_focus(payload: CreateStudyFocusRequest) -> dict:
+    arguments = {
+        f"p_{key}": value for key, value in payload.model_dump(mode="json").items()
+    }
+    return get_supabase_client().rpc("ls_create_attributed_focus_v2", arguments).execute().data
 
 
 def transition_focus_v2(payload: TransitionFocusV2Request) -> dict:

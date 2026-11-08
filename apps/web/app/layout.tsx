@@ -4,7 +4,7 @@ import { ThemeProvider } from "next-themes";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { PrivacyAwareAnalytics } from "@/components/privacy-aware-analytics";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ConfirmationProvider } from "@/components/ui/confirmation-dialog";
 
@@ -68,7 +68,7 @@ export default function RootLayout({
         </ThemeProvider>
       </body>
 
-      {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+      {gaId ? <PrivacyAwareAnalytics gaId={gaId} /> : null}
     </html>
   );
 }

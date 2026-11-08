@@ -42,20 +42,23 @@ describe("app shell navigation", () => {
     const current = container.querySelector('a[aria-current="page"]')!;
     expect(current.getAttribute("href")).toBe("/workspace");
     expect(current.getAttribute("aria-label")).toBe("workspace.label");
-    expect(container.querySelectorAll("a")).toHaveLength(8);
+    expect(container.querySelectorAll("a")).toHaveLength(9);
+    expect(container.querySelector('a[href="/study-plan"]')?.getAttribute("aria-label")).toBe("studyPlan.label");
   });
 
   it("keeps secondary mobile destinations accessible in More", async () => {
     route.pathname = "/vi/groups/example";
     act(() => root.render(<AppNavigation variant="mobile" />));
     expect(container.querySelectorAll("a")).toHaveLength(4);
+    expect(Array.from(container.querySelectorAll("a"), item => item.getAttribute("href")))
+      .toEqual(["/dashboard", "/workspace", "/roadmaps", "/focus"]);
     const trigger = container.querySelector("button")!;
     await act(async () => {
       trigger.dispatchEvent(new MouseEvent("pointerdown", { button: 0, bubbles: true }));
     });
     const items = document.querySelectorAll('[role="menuitem"]');
     expect(Array.from(items, (item) => item.getAttribute("href")))
-      .toEqual(["/rooms", "/groups", "/leaderboard", "/reflections"]);
+      .toEqual(["/study-plan", "/rooms", "/groups", "/leaderboard", "/reflections"]);
     expect(document.querySelector('[role="menuitem"][aria-current="page"]')?.getAttribute("href"))
       .toBe("/groups");
   });

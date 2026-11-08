@@ -1,0 +1,21 @@
+Lumivox — Nhắc lịch học
+
+Xin chào,
+
+Bạn có một buổi học sắp diễn ra:
+
+Ôn tập React Hooks
+
+7 tháng 11, 2026
+
+19:00–20:00 · Asia/Ho_Chi_Minh
+
+Nhắc trước buổi học 15 phút.
+
+Mở công việc học trong Lumivox: https://app.lumivox.test/vi/workspace?task=7e000000-0000-4000-8000-000000000001
+
+Bạn nhận email này vì đã bật nhắc lịch học trong Lumivox.
+
+Thay đổi cài đặt nhắc học: https://app.lumivox.test/vi/settings
+
+Ngừng nhận email nhắc học: https://app.lumivox.test/reminder-unsubscribe?token=preview-only

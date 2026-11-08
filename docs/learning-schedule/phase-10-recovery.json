@@ -1,0 +1,1020 @@
+{
+  "baseline": "8fc249cf3dfdb159f06524e80f1d15afd804993b",
+  "startedAt": "2026-11-07T08:26:15.936Z",
+  "notificationCases": [
+    {
+      "case": "FR-01",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 1,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:18.099211+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 2,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:19.380404+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "checkpoint": "claim_committed",
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "payloadPreserved": false
+    },
+    {
+      "case": "FR-02",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 1,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:21.708904+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 2,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:23.1553+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "checkpoint": "payload_prepared",
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "payloadPreserved": true
+    },
+    {
+      "case": "FR-03",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "submitting",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 1,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:26.039595+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:27.556081+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0,
+      "checkpoint": "handoff_committed",
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "payloadPreserved": true
+    },
+    {
+      "case": "FR-04",
+      "before": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:30.708819+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:32.499486+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "held": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:31.94707+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "outcome": {
+        "counts": {
+          "inspected": 1,
+          "eligible": 1,
+          "accepted": 0,
+          "rejected": 0,
+          "uncertain": 1,
+          "held": 0
+        },
+        "sqlstates": []
+      },
+      "payloadPreserved": true
+    },
+    {
+      "case": "FR-05",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "submitting",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 1,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:36.203817+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:38.048547+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "held": {
+        "state": {
+          "job": "failed",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "uncertain",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 1,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:37.44568+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "outcome": {
+        "counts": {
+          "inspected": 1,
+          "eligible": 1,
+          "accepted": 0,
+          "rejected": 0,
+          "uncertain": 0,
+          "held": 1
+        },
+        "sqlstates": [
+          "P0001"
+        ]
+      },
+      "payloadPreserved": true
+    },
+    {
+      "case": "FR-06",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "submitting",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 1,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": 0
+          },
+          "generatedAt": "2026-11-07T08:26:40.591766+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "delivered",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:40.906537+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1
+    },
+    {
+      "case": "FR-07",
+      "before": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "delivered",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:40.906537+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "delivered",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:41.178312+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0,
+      "receipts": 2
+    },
+    {
+      "case": "FR-08",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:43.316089+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": true,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": false
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:43.848542+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0,
+      "checkpoint": "before_handoff"
+    },
+    {
+      "case": "FR-08",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "submitting",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:45.648934+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 1,
+          "lease": false,
+          "cancelled": true,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": false
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:46.202753+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "checkpoint": "handoff_committed"
+    },
+    {
+      "case": "FR-09",
+      "before": {
+        "state": {
+          "job": "pending",
+          "attempts": 0,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 1,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": 600,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:49.056564+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "pending",
+          "attempts": 0,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 0,
+          "tokens": 0,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": false,
+            "pendingDue": 1,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": 601,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:50.467562+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 0
+    },
+    {
+      "case": "FR-10",
+      "before": {
+        "state": {
+          "job": "leased",
+          "attempts": 1,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 1,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:52.697459+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "after": {
+        "state": {
+          "job": "sent",
+          "attempts": 3,
+          "lease": false,
+          "cancelled": false,
+          "deliveries": 1,
+          "delivery": "accepted",
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 0,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 1,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:55.504176+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "fakeSubmissions": 1,
+      "blocked": {
+        "state": {
+          "job": "leased",
+          "attempts": 2,
+          "lease": true,
+          "cancelled": false,
+          "deliveries": 0,
+          "delivery": null,
+          "payloads": 1,
+          "tokens": 1,
+          "consent": true
+        },
+        "snapshot": {
+          "focus": {
+            "activeSessions": 0
+          },
+          "capped": [],
+          "dispatch": {
+            "enabled": true,
+            "pendingDue": 0,
+            "activeLeases": 1,
+            "expiredLeases": 0,
+            "uncertainAttempts": 0,
+            "unmatchedWebhooks": 0,
+            "deliveryFailures24h": 0,
+            "oldestDueAgeSeconds": null,
+            "acceptedSubmissions24h": 0,
+            "oldestUnmatchedAgeSeconds": null
+          },
+          "generatedAt": "2026-11-07T08:26:53.852046+00:00",
+          "missedSweep": {
+            "enabled": false,
+            "eligibleBacklog": 0
+          }
+        }
+      },
+      "processExit": {
+        "code": null,
+        "signal": "SIGTERM"
+      },
+      "payloadPreserved": true
+    }
+  ],
+  "realProviderRequests": 0,
+  "cleanup": true,
+  "final": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "payloads": 0,
+    "tokens": 0,
+    "receipts": 0,
+    "identities": 0,
+    "suppressions": 0,
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "fakeSubmissions": 8,
+  "finishedAt": "2026-11-07T08:26:56.804Z"
+}

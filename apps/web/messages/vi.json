@@ -1,4 +1,63 @@
 {
+  "studyNotifications": {
+    "localeLabel": "Ngôn ngữ email nhắc học",
+    "localePrompt": "Chọn và xác nhận ngôn ngữ",
+    "localeHint": "Bạn cần lưu ngôn ngữ email trước khi có thể nhận nhắc học. Thao tác này không bật nhắc học.",
+    "saveLocale": "Lưu ngôn ngữ email",
+    "title": "Nhắc lịch học", "description": "Chọn thời điểm nhận email nhắc cho các buổi học của bạn.",
+    "deliveryPaused": "Tính năng gửi lời nhắc chưa hoạt động. Lưu chỉ ghi nhận tùy chọn của bạn; chưa có lời nhắc nào được gửi.",
+    "optInUnavailable": "Hiện chưa mở đăng ký nhận lời nhắc mới. Bạn vẫn có thể tắt các lời nhắc đã đăng ký.",
+    "emailReminders": "Email nhắc lịch học", "consent": "Mặc định tắt. Bật và lưu để đồng ý nhận email nhắc lịch học. Bạn có thể tắt bất cứ lúc nào.",
+    "leadLegend": "Nhắc trước buổi học", "lead": { "5": "5 phút", "15": "15 phút", "30": "30 phút", "60": "1 giờ" },
+    "quietHours": "Giờ yên lặng", "quietExplanation": "Lời nhắc trong giờ yên lặng sẽ bị bỏ qua, không chuyển sang sáng hôm sau.",
+    "quietStart": "Bắt đầu giờ yên lặng", "quietEnd": "Kết thúc giờ yên lặng", "timezone": "Múi giờ yên lặng", "timezoneHint": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh hoặc America/New_York.",
+    "save": "Lưu cài đặt nhắc học", "saveTask": "Lưu lời nhắc của công việc", "saving": "Đang lưu cài đặt nhắc học…", "saved": "Đã lưu cài đặt nhắc học.",
+    "loading": "Đang tải cài đặt nhắc học…", "noData": "Cài đặt nhắc học chưa khả dụng cho đến khi tải được dữ liệu.",
+    "checkLatest": "Kiểm tra cài đặt đã lưu", "checkLatestHint": "Kiểm tra sẽ thay bản nháp bằng dữ liệu đã lưu. Nếu việc lưu bị gián đoạn, hãy kiểm tra trước khi thử lại.",
+    "taskTitle": "Lời nhắc của công việc", "useGlobal": "Dùng tùy chọn nhắc học chung cho công việc này", "taskExplanation": "Tắt để chỉ bỏ qua lời nhắc của công việc này.", "globalOff": "Nhắc học chung đang tắt. Tùy chọn của công việc không thể bật nhắc học chung.",
+    "errors": {
+      "invalidInput": "Kiểm tra thời gian nhắc trước, giờ bắt đầu và kết thúc khác nhau, cùng múi giờ IANA hợp lệ.",
+      "notAuthorized": "Phiên đăng nhập không khả dụng hoặc công việc không thuộc về bạn. Hãy đăng nhập và kiểm tra cài đặt đã lưu.",
+      "loadFailed": "Không tải được cài đặt nhắc học. Hãy kiểm tra cài đặt đã lưu để thử lại.",
+      "saveFailed": "Chưa thể xác nhận cài đặt nhắc học đã được lưu. Bản nháp được giữ lại. Hãy kiểm tra cài đặt đã lưu trước khi thử lại.",
+      "conflictRetryable": "Lịch học vừa thay đổi cùng lúc. Bản nháp được giữ lại. Hãy kiểm tra cài đặt mới nhất rồi thử lưu lại."
+    }
+  },
+  "studyPlan": {
+    "focusEffort": {
+      "recorded": "Focus đã ghi nhận: {minutes} phút",
+      "planned": "Thời lượng học dự kiến: {minutes} phút",
+      "active": "Đang có phiên Focus. Số liệu chỉ gồm thời gian đã lưu.",
+      "hint": "Focus đã ghi nhận là thời gian tập trung đã lưu. Việc xác nhận buổi học được thực hiện riêng.",
+      "unavailable": "Không tải được thời gian Focus đã ghi nhận."
+    },
+    "focusLaunch": {
+      "start": "Bắt đầu Focus",
+      "forTask": "Buổi học cho công việc {task}",
+      "back": "Về kế hoạch học tập",
+      "openFocus": "Mở Focus",
+      "retry": "Thử lại yêu cầu này",
+      "invalidInput": "Hãy kiểm tra cấu hình Pomodoro rồi thử lại.",
+      "notAuthorized": "Tài khoản của bạn không thể truy cập buổi học này.",
+      "ineligibleSession": "Buổi học này không còn đủ điều kiện để bắt đầu Focus.",
+      "activeFocusConflict": "Bạn đang có một phiên Focus.",
+      "requestConflict": "Yêu cầu bắt đầu xung đột với một yêu cầu trước đó.",
+      "retryableConflict": "Phiên đang bận. Hãy thử lại cùng yêu cầu.",
+      "uncertain": "Chưa xác nhận được kết quả. Hãy thử lại cùng yêu cầu hoặc mở Focus để kiểm tra phiên đang chạy."
+    },
+    "refreshHint": "Tiến độ học tập được tính từ dữ liệu buổi học mới nhất đã tải. Hãy tải lại trang để xem những thay đổi điểm danh gần đây.",
+    "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },
+    "eyebrow": "Lịch học", "title": "Kế hoạch học tập", "description": "Lịch học và tiến độ của bạn",
+    "overview": "Tiến độ học tập", "summaryScope": "Toàn bộ lịch học · trạng thái hiện tại. Buổi học đến hạn khi đã qua giờ kết thúc cộng 60 phút.",
+    "attendance": "Tỷ lệ tham gia", "onTime": "Đúng giờ", "coverage": "Hoàn thành kế hoạch", "na": "Chưa có dữ liệu", "ratio": "{done} / {total} buổi học",
+    "todayTitle": "Kế hoạch học hôm nay", "timezoneHint": "Hôm nay được tính theo múi giờ của từng buổi học. Cùng một thời điểm, các buổi học có thể thuộc những ngày địa phương khác nhau.",
+    "todayEmpty": "Hôm nay không có buổi học nào.", "calendarTitle": "Lịch học theo tháng", "calendarHint": "Ngày dựa trên ngày địa phương đã lưu của từng buổi học. Buổi đã hủy vẫn hiển thị trong lịch sử.",
+    "monthEmpty": "Tháng này không có buổi học nào.", "monthNavigation": "Điều hướng tháng trên lịch", "previousMonth": "Tháng trước", "nextMonth": "Tháng sau", "previous": "Trước", "next": "Sau",
+    "sessionCount": "{count} buổi học", "loading": "Đang tải kế hoạch học tập…", "retry": "Tải lại kế hoạch hiện tại",
+    "asOf": "Dữ liệu trạng thái hiện tại được đọc lúc {instant} (giờ máy chủ ứng dụng).",
+    "status": { "scheduled": "Đã lên lịch", "in_progress": "Đang học", "completed": "Đã hoàn thành", "missed": "Đã bỏ lỡ", "skipped": "Đã bỏ qua", "cancelled": "Đã hủy" },
+    "error": { "invalidInput": "Hãy chọn tháng hợp lệ.", "loadFailed": "Không thể tải kế hoạch học tập. Vui lòng thử lại.", "incompleteData": "Chưa thể xác minh dữ liệu kế hoạch đầy đủ. Hãy tải lại hoặc chọn tháng ít buổi học hơn; hệ thống không hiển thị tổng số liệu thiếu." }
+  },
   "common": {
     "datePicker": {
       "placeholder": "Chọn ngày",
@@ -156,6 +215,7 @@
       "expandSidebar": "Mở rộng thanh bên"
     },
     "navigation": {
+      "studyPlan": { "label": "Kế hoạch học tập", "description": "Lịch học và kế hoạch hôm nay" },
       "more": "Thêm",
       "dashboard": {
         "mobileLabel": "Tổng quan",

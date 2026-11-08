@@ -1,0 +1,19 @@
+# Environment configuration matrix
+
+Vercel connector metadata was read without decrypting values. Preview and Production are configuration scopes. A variable listed as present does not establish its effective value, equality to a paired service or separation from another environment. `UNKNOWN` indicates the evidence is unavailable. No credential values were collected.
+
+| Configuration | Staging | Production | Evidence and closure |
+| --- | --- | --- | --- |
+| Focus V2 | `present`, effective value UNKNOWN | `present`, effective value UNKNOWN | Vercel Preview and Production key names. Verify the exact deployment behavior. |
+| Study Schedule public release | UNKNOWN | UNKNOWN | Candidate is on the feature branch. The examined production schema lacks Study Sessions. Confirm rollout controls for the deployment candidate. |
+| Supabase public URL and publishable key | `present`, deployed public ref `atbdbbamqjmfkvahqidj` | `present`, deployed public ref `lslybjylsxtnznghrtyj` | Both deployed web bundles and owner confirmation of the Render and GitHub Actions staging bindings. |
+| Dispatch and Missed Sweep database gates | Dispatch `not_applicable` on current schema. Sweep **OFF**. | `not_applicable` on inspected schema | Linked staging catalog and Sweep singleton checked on 2026-11-08. Verify both OFF after the authorized migration and before activation. |
+| Real-send setting and recipient allowlist | `missing` in Preview metadata, effective state UNKNOWN | `missing` in Production metadata, effective state UNKNOWN | Verify real-send OFF on running staging, allowlist test-only, and production allowlist inactive. |
+| Monitoring and Dispatch secrets | `missing` in Preview metadata | `missing` in Production metadata | Confirm required settings, per-environment isolation and distinct monitoring/dispatch credentials in the authorized secret stores. |
+| Payload encryption and recipient HMAC | `missing` in Preview metadata | `missing` in Production metadata | Verify proper format and environment separation without exporting values. |
+| Resend API key, webhook secret, From and trusted origin | `missing` in Preview metadata | `missing` in Production metadata | Account domain is verified, but zero webhooks were listed. Confirm provider and exact endpoint wiring before 11C. |
+| Server-side Supabase credential | `missing` in Preview metadata | `missing` in Production metadata | Neither `SUPABASE_SECRET_KEY` nor `SUPABASE_SERVICE_ROLE_KEY` was listed for Vercel. Required for the operational snapshot. |
+| FastAPI URL and internal key | Vercel `present`, Render counterpart UNKNOWN | Vercel `present`, Render counterpart UNKNOWN | Verify that the staging web points to staging FastAPI and a paired key through the approved restricted operator path. |
+| GitHub deployment secrets, flags and E2E identity | UNKNOWN | UNKNOWN | Verify environment-scoped credential names, target binding, required reviewers and effective CD flags. |
+
+The inspected application boundaries use server-side variables for privileged Supabase, provider, monitoring and internal API credentials. The public deployment asset probe was limited to project refs. Absence of secrets across deployed browser assets and environment separation require a separate release check.

@@ -1,0 +1,552 @@
+{
+  "baseline": "2652fdf4cd92782bd9c13b57865588b309b03fa7",
+  "startedAt": "2026-11-06T07:43:23.253Z",
+  "runs": [
+    {
+      "order": "unsubscribe-claim",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 5,
+      "returned": [],
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-claim",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 2,
+      "returned": [],
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-claim",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": null,
+      "elapsedMs": 3,
+      "returned": [],
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "claim-unsubscribe",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "claim-unsubscribe",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "claim-unsubscribe",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-handoff",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-handoff",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-handoff",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "handoff-unsubscribe",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "f921978a-5d34-4045-8368-98147eed2877",
+        "idempotencyKey": "e74fcc52-99c2-44c3-9bf2-953c7c0bf2d0"
+      },
+      "final": {
+        "consent": false,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "handoff-unsubscribe",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "8eebe967-7ac0-4df9-a7ce-f788d2ee63cf",
+        "idempotencyKey": "edf3d83f-9de0-4d57-ae7f-c4e3f5983fff"
+      },
+      "final": {
+        "consent": false,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "handoff-unsubscribe",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "bc54eede-a21e-4ff2-94f7-a89e9761b911",
+        "idempotencyKey": "c1c7c918-97ee-4a37-b2d7-be98b14270dc"
+      },
+      "final": {
+        "consent": false,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "settings-unsubscribe",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "settings-unsubscribe",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "settings-unsubscribe",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": false,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-settings",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-settings",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "unsubscribe-settings",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": null,
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 0
+      }
+    },
+    {
+      "order": "suppression-handoff",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 1
+      }
+    },
+    {
+      "order": "suppression-handoff",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 1
+      }
+    },
+    {
+      "order": "suppression-handoff",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "reason": "stale_or_cancelled",
+        "authorized": false
+      },
+      "final": {
+        "consent": true,
+        "job": "suppressed",
+        "cancelled": true,
+        "deliveries": 0,
+        "suppressed": 1
+      }
+    },
+    {
+      "order": "handoff-suppression",
+      "repeat": 1,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "16feefa5-7e12-4273-8cbf-63b10eca6e5c",
+        "idempotencyKey": "9313f824-f486-4ceb-b25d-bf039a85933f"
+      },
+      "final": {
+        "consent": true,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 1
+      }
+    },
+    {
+      "order": "handoff-suppression",
+      "repeat": 2,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "e6e46d48-09bb-42a3-af40-b98387d122e3",
+        "idempotencyKey": "371a69f5-6ffe-4bb5-9835-e713c024ecba"
+      },
+      "final": {
+        "consent": true,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 1
+      }
+    },
+    {
+      "order": "handoff-suppression",
+      "repeat": 3,
+      "sqlstate": "00000",
+      "blocker": {
+        "waiter": 494,
+        "blocker": 493,
+        "observed": [
+          493
+        ]
+      },
+      "elapsedMs": null,
+      "returned": {
+        "authorized": true,
+        "deliveryId": "53b62c8d-56c9-4fb2-81d0-f9877ff89fdf",
+        "idempotencyKey": "e5c4d8b9-763b-4997-b12e-38f9154ab8a7"
+      },
+      "final": {
+        "consent": true,
+        "job": "leased",
+        "cancelled": true,
+        "deliveries": 1,
+        "suppressed": 1
+      }
+    }
+  ],
+  "providerRequests": 0,
+  "cleanup": true,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "tokens": 0,
+    "suppressions": 0,
+    "identities": 0,
+    "receipts": 0
+  },
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "completedAt": "2026-11-06T07:43:25.425Z"
+}

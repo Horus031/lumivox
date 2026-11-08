@@ -1,0 +1,66 @@
+{
+  "baseline": "cd41a9956f8de84abb80200f5de8971cb06c3553",
+  "startedAt": "2026-11-06T08:34:42.156Z",
+  "checks": [
+    {
+      "case": "POST only",
+      "status": 405
+    },
+    {
+      "case": "RI-15 missing/wrong auth",
+      "status": 401
+    },
+    {
+      "case": "RI-01 actual feature OFF",
+      "status": 503
+    },
+    {
+      "case": "no caller-selected identity",
+      "status": 400
+    },
+    {
+      "case": "unconfirmed locale dry-run ineligible",
+      "status": 200
+    },
+    {
+      "case": "RI-06 actual en Settings action persists explicit locale",
+      "status": 200
+    },
+    {
+      "case": "RI-06 actual vi Settings action persists explicit locale",
+      "status": 200
+    },
+    {
+      "case": "authenticated dry-run after explicit locale",
+      "status": 200
+    },
+    {
+      "case": "RI-07/09/13 actual worker -> injected SDK -> real one-click POST -> accepted outcome",
+      "status": 200
+    },
+    {
+      "case": "actual signed callback correlates same worker Email ID",
+      "status": 200
+    }
+  ],
+  "cleanup": true,
+  "realProviderRequests": 0,
+  "safeLogEntries": 2,
+  "blockedExternalRequests": 2,
+  "dryRunWrites": 0,
+  "mockSubmissions": 1,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "payloads": 0,
+    "tokens": 0
+  },
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "completedAt": "2026-11-06T08:34:58.022Z"
+}

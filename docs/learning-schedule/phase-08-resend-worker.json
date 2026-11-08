@@ -1,0 +1,447 @@
+{
+  "baseline": "cd41a9956f8de84abb80200f5de8971cb06c3553",
+  "startedAt": "2026-11-06T08:34:30.991Z",
+  "workerSourceSha256": "25a2b303e2fef2d520b465d79eb0e3c3af3135e5b884fff6388e9284bc5a01b3",
+  "runs": [
+    {
+      "case": "flag-off",
+      "counts": {
+        "inspected": 0,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 0
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "pending",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "gate-off",
+      "counts": {
+        "inspected": 0,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 0
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "pending",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "allowlist",
+      "counts": {
+        "inspected": 1,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 1
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "unverified",
+      "counts": {
+        "inspected": 1,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 1
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "unconfirmed-locale",
+      "counts": {
+        "inspected": 1,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 1
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "suppression",
+      "counts": {
+        "inspected": 1,
+        "eligible": 0,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 1
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "dry-run",
+      "counts": {
+        "inspected": 1,
+        "eligible": 1,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 0
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "pending",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "en",
+      "counts": {
+        "inspected": 1,
+        "eligible": 1,
+        "accepted": 1,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 0
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "vi",
+      "counts": {
+        "inspected": 1,
+        "eligible": 1,
+        "accepted": 1,
+        "rejected": 0,
+        "uncertain": 0,
+        "held": 0
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "timeout",
+      "counts": {
+        "inspected": 1,
+        "eligible": 1,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 1,
+        "held": 0
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "failed",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "uncertain"
+      }
+    },
+    {
+      "case": "409",
+      "counts": {
+        "inspected": 1,
+        "eligible": 1,
+        "accepted": 0,
+        "rejected": 0,
+        "uncertain": 1,
+        "held": 0
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "failed",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "uncertain"
+      }
+    },
+    {
+      "case": "RI-08",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "immutablePayload": true,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-12",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "RI-13",
+      "repeat": 1,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-14",
+      "repeat": 1,
+      "skipElapsedMs": 18,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-08",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "immutablePayload": true,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-12",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "RI-13",
+      "repeat": 2,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-14",
+      "repeat": 2,
+      "skipElapsedMs": 58,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-08",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "immutablePayload": true,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-12",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 0,
+      "final": {
+        "job": "leased",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 0,
+        "delivery": null
+      }
+    },
+    {
+      "case": "RI-13",
+      "repeat": 3,
+      "blocker": {
+        "waiter": 1387,
+        "blocker": 1388,
+        "observed": [
+          1388
+        ]
+      },
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": true,
+        "consent": false,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    },
+    {
+      "case": "RI-14",
+      "repeat": 3,
+      "skipElapsedMs": 25,
+      "mockSubmissions": 1,
+      "final": {
+        "job": "sent",
+        "cancelled": false,
+        "consent": true,
+        "deliveries": 1,
+        "delivery": "accepted"
+      }
+    }
+  ],
+  "cleanup": true,
+  "realProviderRequests": 0,
+  "finalCounts": {
+    "users": 0,
+    "tasks": 0,
+    "jobs": 0,
+    "deliveries": 0,
+    "payloads": 0,
+    "tokens": 0,
+    "identities": 0,
+    "suppressions": 0
+  },
+  "gates": {
+    "dispatch": false,
+    "sweep": false,
+    "reminderCron": 0
+  },
+  "completedAt": "2026-11-06T08:34:36.544Z"
+}

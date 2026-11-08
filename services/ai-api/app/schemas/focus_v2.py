@@ -1,12 +1,11 @@
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
-class CreateFocusV2Request(BaseModel):
+class FocusV2Configuration(BaseModel):
     user_id: UUID
-    task_id: UUID | None = None
     focus_minutes: int = Field(ge=5, le=120)
     short_break_minutes: int = Field(ge=1, le=30)
     long_break_minutes: int = Field(ge=5, le=60)
@@ -16,8 +15,23 @@ class CreateFocusV2Request(BaseModel):
     auto_start_focus: bool
 
 
+class CreateFocusV2Request(FocusV2Configuration):
+    task_id: UUID | None = None
+
+
+class CreateStudyFocusRequest(FocusV2Configuration):
+    model_config = ConfigDict(extra="forbid")
+
+    study_session_id: UUID
+    launch_request_id: UUID
+
+
 class CreateFocusV2Response(BaseModel):
     session_id: UUID
+
+
+class CreateStudyFocusResponse(CreateFocusV2Response):
+    replay: bool
 
 
 class TransitionFocusV2Request(BaseModel):
