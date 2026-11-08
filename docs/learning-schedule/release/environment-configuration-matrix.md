@@ -6,8 +6,8 @@ Vercel connector metadata was read without decrypting values. Preview and Produc
 | --- | --- | --- | --- |
 | Focus V2 | `present`, effective value UNKNOWN | `present`, effective value UNKNOWN | Vercel Preview and Production key names. Verify the exact deployment behavior. |
 | Study Schedule public release | UNKNOWN | UNKNOWN | Candidate is on the feature branch. The examined production schema lacks Study Sessions. Confirm rollout controls for the deployment candidate. |
-| Supabase public URL and publishable key | `present`, deployed public ref `atbdbbamqjmfkvahqidj` | `present`, deployed public ref `lslybjylsxtnznghrtyj` | Vercel key metadata and both deployed web bundles. Confirm Render and GitHub migration target the staging ref. |
-| Dispatch and Missed Sweep database gates | UNKNOWN | `not_applicable` on inspected schema | Both control tables were absent in production. Staging gates must be verified OFF before activation. |
+| Supabase public URL and publishable key | `present`, deployed public ref `atbdbbamqjmfkvahqidj` | `present`, deployed public ref `lslybjylsxtnznghrtyj` | Both deployed web bundles and owner confirmation of the Render and GitHub Actions staging bindings. |
+| Dispatch and Missed Sweep database gates | Dispatch `not_applicable` on current schema. Sweep **OFF**. | `not_applicable` on inspected schema | Linked staging catalog and Sweep singleton checked on 2026-11-08. Verify both OFF after the authorized migration and before activation. |
 | Real-send setting and recipient allowlist | `missing` in Preview metadata, effective state UNKNOWN | `missing` in Production metadata, effective state UNKNOWN | Verify real-send OFF on running staging, allowlist test-only, and production allowlist inactive. |
 | Monitoring and Dispatch secrets | `missing` in Preview metadata | `missing` in Production metadata | Confirm required settings, per-environment isolation and distinct monitoring/dispatch credentials in the authorized secret stores. |
 | Payload encryption and recipient HMAC | `missing` in Preview metadata | `missing` in Production metadata | Verify proper format and environment separation without exporting values. |
