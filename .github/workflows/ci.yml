@@ -69,7 +69,7 @@ jobs:
 
   ai-api:
     name: AI API · Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
 
     defaults:
@@ -126,16 +126,16 @@ jobs:
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: "2.122.0"
 
       - name: Start local database and apply migrations
         run: supabase db start
 
       - name: Replay migrations from a clean database
-        run: supabase db reset
+        run: supabase db reset --local
 
       - name: Database tests
-        run: supabase test db
+        run: supabase test db --local
 
       - name: Stop local database
         if: always()
