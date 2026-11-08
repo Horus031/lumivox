@@ -52,6 +52,26 @@
       "crossVersionSwap": true,
       "rollbackSha": "e333e30a061e36e1e3c3e9309430dbfd395558ed",
       "fixtureAndMigrationDigestUnchanged": true
+    },
+    "OR-12": {
+      "status": "PASS",
+      "source": "phase-10-evidence.md#step-10d--operational-runbooks--recovery-operations",
+      "migrations": 94,
+      "fixtureRows": 0,
+      "dispatch": false,
+      "missedSweep": false,
+      "reminderCron": 0,
+      "harnessListeners": 0,
+      "regressions": {
+        "pgTapPassed": 983,
+        "vitestPassed": 1077,
+        "vitestSkipped": 26,
+        "fastApiPassed": 9,
+        "chromiumPassed": 7,
+        "lint": "PASS",
+        "typeScript": "PASS",
+        "build": "PASS"
+      }
     }
   },
   "realProviderRequests": 0,

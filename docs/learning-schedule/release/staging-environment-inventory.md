@@ -1,0 +1,15 @@
+# Staging environment inventory
+
+Read-only observations on 2026-11-07 for `Horus031/lumivox`.
+
+| Component | Staging | Production |
+| --- | --- | --- |
+| GitHub branch | `product-release` at `ea12a8ca3023fdc1f9977c3d5387f3277f7cafd0` | `main` at `fb2d8fe5e84fcc19033eba463976550129a8d99a` |
+| Vercel | Project `lumivox`, `prj_SE0K3y3prJEcNFdUugAHZblAtyEq`. Verified alias `lumivox-nine.vercel.app` maps to `product-release` as Preview. No custom environment was listed. Latest READY branch record `dpl_AADyrHoPD4W5RLPUP4UfbwiCncgV`, SHA `fb2d8fe5`. | Same project. Verified aliases `lumivox.it.com` and `www.lumivox.it.com`. Latest READY main record `dpl_H2pCUCY7AH3TC5KAPZmibkCoVA6J`, SHA `fb2d8fe5`. Public health returned production and that SHA. |
+| Render | `lumivox-ai-api-staging`, `srv-daqdto0jo6nc73e3kme0`, `product-release`, `services/ai-api/`, auto-deploy off, Free, Singapore. Live deploy `dep-dbg33oajnfac73f4dv7g`, SHA `fb2d8fe5`. | `lumivox-ai-api`, `srv-d87k12rtqb8s73c0ih10`, `main`, `services/ai-api`, auto-deploy off, Standard, Singapore. Live deploy `dep-dbnc41e8bjmc73a3ko9g`, SHA `fb2d8fe5`. |
+| Supabase | The authenticated staging login bundle exposed public ref `atbdbbamqjmfkvahqidj`. The connector denied management access. Render and migration workflow target bindings remain **UNKNOWN**. | `lumivox`, `lslybjylsxtnznghrtyj`, ap-south-1, PostgreSQL 17.6. The deployed production login assets exposed this public project ref. |
+| Resend | Connected account lists verified sending domain `lumivox.it.com` and zero webhooks. Effective staging sender, provider account binding and allowlist **UNKNOWN**. | Same verified account domain was observed. Effective production sender, provider account binding and allowlist **UNKNOWN**. |
+
+Both Render health endpoints returned HTTP 200, the expected environment labels and revision `fb2d8fe5`. Native task-risk reported ready and the legacy model reported degraded on both. Vercel staging requests without credentials redirected to SSO. The authenticated Vercel connector received HTTP 200 from `/api/health` with environment `preview` and revision `fb2d8fe5`. The current Preview returned HTTP 404 for `/api/internal/learning-schedule/health`. The effective Vercel-to-Render URL, paired FastAPI credential, deployed Vercel runtime limit and staging operator access remain **UNKNOWN**.
+
+References: [GitHub repository](https://github.com/Horus031/lumivox), [Vercel project](https://vercel.com/horus-projects-672b8c47/lumivox), [Render staging](https://dashboard.render.com/web/srv-daqdto0jo6nc73e3kme0), [Render production](https://dashboard.render.com/web/srv-d87k12rtqb8s73c0ih10), [Supabase staging web target](https://supabase.com/dashboard/project/atbdbbamqjmfkvahqidj), [Supabase production project](https://supabase.com/dashboard/project/lslybjylsxtnznghrtyj).

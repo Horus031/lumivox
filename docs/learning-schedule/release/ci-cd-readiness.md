@@ -1,0 +1,11 @@
+# CI/CD readiness
+
+The reviewed CI workflow targets pull requests and pushes for `product-release` and `main`. Its web job runs lint, Vitest, Next.js type generation, TypeScript and build. The FastAPI job runs compile, artifact verification and pytest. The database job checks migration coverage, starts disposable Supabase, resets, runs pgTAP and stops the stack. These are source checks. The GitHub workflow-run lookup returned no records for the observed `product-release` tip or candidate SHA. Required check enforcement remains **UNKNOWN**.
+
+The public branch rules API returned an empty rule list for both branches. The classic protection endpoint required authentication. Confirm classic branch protection, required CI checks and GitHub environment reviewers in the repository settings.
+
+The staging deployment workflow requires a successful CI push on `product-release` and `STAGING_CD_ENABLED == 'true'`. It checks out the tested SHA, links the environment-scoped project, previews then applies migrations, invokes the two deploy hooks and waits for both health endpoints to report the expected SHA. Production has a separate workflow gated on `main` and `PRODUCTION_CD_ENABLED`. These branch filters do not prove that the target project credentials and hooks are isolated.
+
+Render's deploy hook includes the expected SHA as its ref. The Vercel hook targets its configured branch without a SHA in the request, so the workflow's post-deploy health comparison is essential. The reviewed Vercel config disables Git auto-deploy for `main` and `product-release`. Staging Playwright uploads a report for 14 days. The Learning Schedule local integration and operations drills require opt-in local environment variables and are not executed by this pipeline. Generic staging Playwright success cannot establish those cases or replace explicit staging acceptance. Keep the Medium benchmark as a separate release check.
+
+The Vercel alias is SSO-protected. Confirm that the runner can access the health endpoint and E2E routes with an authorized runner identity. Retention of deployable rollback artifacts and compatibility with the new schema are open. [Vercel deployments](https://vercel.com/docs/deployments)
