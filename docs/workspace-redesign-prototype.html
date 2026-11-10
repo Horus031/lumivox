@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="vi">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lumivox · Workspace prototype</title>
+<style>
+:root { color-scheme:dark; font: 15px system-ui,sans-serif; background:#121516; color:#edf1ef; --border:#343b3b; --muted:#aebbb8; --accent:#a4e5c1; }
+* { box-sizing:border-box; }
+body { margin:0; }
+button, input, select { font:inherit; }
+button, input, select { border:1px solid var(--border); border-radius:8px; padding:.6rem .8rem; background:#1b2021; color:inherit; }
+button { cursor:pointer; }
+button:hover { border-color:var(--muted); }
+:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+[aria-current=true], [aria-pressed=true] { background:#253d33; color:var(--accent); }
+header { border-bottom:1px solid var(--border); padding:1rem max(1rem, calc((100vw - 1180px)/2)); display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+strong { color:var(--accent); }
+.layout { max-width:1180px; margin:0 auto; padding:2rem 1rem; display:grid; grid-template-columns:210px minmax(0,1fr); gap:2rem; }
+nav { display:grid; align-content:start; gap:.45rem; }
+nav button { text-align:left; }
+small, .muted { color:var(--muted); }
+h1 { font-size:clamp(1.8rem,4vw,2.7rem); margin:.25rem 0; }
+h2 { font-size:1.1rem; }
+.toolbar { display:flex; flex-wrap:wrap; align-items:center; gap:.5rem; margin:1.25rem 0; }
+.toolbar input { flex:1 1 12rem; min-width:0; }
+.surface { border:1px solid var(--border); border-radius:12px; background:#191d1e; overflow:hidden; }
+.row { display:grid; grid-template-columns:minmax(0,1fr) 10rem 9rem 7rem; gap:.6rem; align-items:center; padding:.65rem; }
+.row + .row { border-top:1px solid var(--border); }
+.title { border-color:transparent; background:transparent; text-align:left; overflow-wrap:anywhere; }
+.title small { display:block; margin-top:.25rem; }
+.late { color:#ffc1ac; }
+.document { padding:1rem; }
+dialog { color:inherit; background:#191e1f; border:1px solid var(--border); padding:1.5rem; border-radius:14px; max-width:calc(100% - 2rem); }
+dialog::backdrop { background:#0008; }
+#detail { margin:0 0 0 auto; width:450px; height:100%; max-height:100%; border-radius:14px 0 0 14px; }
+#detail form { display:flex; justify-content:flex-end; }
+#deadline label, #deadline input { display:block; margin:0 0 .75rem; }
+.primary { background:var(--accent); color:#102b20; font-weight:650; }
+#status { margin-top:1rem; min-height:1.5rem; }
+@media(max-width:720px) {
+ .layout { grid-template-columns:minmax(0,1fr); gap:1.25rem; padding-top:1rem; }
+ nav { display:flex; flex-wrap:wrap; }
+ .row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .title { grid-column:1/-1; }
+ #detail { width:100%; max-width:100%; border-radius:0; }
+}
+</style>
+<header><strong>Lumivox</strong><small>Workspace · Prototype tương tác</small></header>
+<div class="layout">
+<nav aria-label="Phạm vi công việc">
+  <button data-view="focus">Tập trung</button>
+  <button data-view="all">Tất cả task</button>
+  <button data-view="goal">AWS Cloud Practice</button>
+</nav>
+<main>
+  <small id="eyebrow">LEARNING WORKSPACE</small>
+  <h1 id="heading"></h1>
+  <p class="muted" id="description"></p>
+  <div class="toolbar" id="toolbar"></div>
+  <div id="content"></div>
+  <div id="status" role="status"></div>
+</main>
+</div>
+<dialog id="detail" aria-labelledby="detail-title">
+  <form method="dialog"><button>Đóng</button></form>
+  <small id="detail-goal"></small>
+  <h2 id="detail-title"></h2>
+  <p id="detail-meta"></p>
+  <h3>Mô tả</h3>
+  <p id="detail-description"></p>
+  <h3>Checklist</h3>
+  <label><input type="checkbox" id="checklist"> Ghi lại một ví dụ thực tế</label>
+  <h3>Tài liệu</h3>
+  <button id="detail-docs">Tài liệu của goal</button>
+</dialog>
+<dialog id="deadline" aria-labelledby="deadline-title">
+  <form method="dialog">
+    <h2 id="deadline-title">Đổi deadline</h2>
+    <label for="due">Ngày đến hạn</label>
+    <input type="date" id="due" required>
+    <button value="cancel" formnovalidate>Hủy</button>
+    <button value="save" class="primary">Lưu</button>
+  </form>
+</dialog>
+<dialog id="document" aria-labelledby="document-title">
+  <form method="dialog"><button>Đóng</button></form>
+  <h2 id="document-title">Ghi chú AWS Networking</h2>
+  <p>VPC là mạng ảo cô lập. Application Load Balancer phân phối yêu cầu HTTP theo quy tắc listener.</p>
+</dialog>
+<script>
+const goal = "AWS Cloud Practice";
+const tasks = [
+  { id:1, title:"Ôn Application Load Balancer", state:"Cần làm", due:"2026-11-08", priority:"Cao", description:"So sánh listener, target group và health check." },
+  { id:2, title:"Thiết kế VPC hai vùng sẵn sàng", state:"Đang làm", due:"2026-11-12", priority:"Cao", description:"Vẽ public subnet, private subnet và route table." },
+  { id:3, title:"Đọc về NAT Gateway", state:"Cần làm", due:"2026-11-15", priority:"Vừa", description:"Ghi chú luồng outbound từ private subnet." },
+  { id:4, title:"Hoàn thành lab Security Groups", state:"Hoàn thành", due:"2026-11-05", priority:"Thấp", description:"So sánh Security Group và Network ACL." },
+];
+const today = "2026-11-10";
+const get = (id) => document.getElementById(id);
+const toolbar = get("toolbar");
+const content = get("content");
+let query = "";
+let editing;
+function route() {
+  const [view, tab] = location.hash.slice(1).split("/");
+  return { view:["all","goal"].includes(view) ? view : "focus", docs:view === "goal" && tab === "docs" };
+}
+function go(view, docs = false) {
+  if (view !== "all") query = "";
+  location.hash = view + (docs ? "/docs" : "");
+}
+function button(label, action) {
+  const element = document.createElement("button");
+  element.type = "button";
+  element.textContent = label;
+  element.onclick = action;
+  return element;
+}
+function late(task) { return task.state !== "Hoàn thành" && task.due < today; }
+function rank(task) { return late(task) ? 0 : task.state === "Đang làm" ? 1 : 2; }
+function formatDue(task) { return task.due.split("-").reverse().join("/"); }
+function openTask(task) {
+  get("detail-goal").textContent = goal;
+  get("detail-title").textContent = task.title;
+  get("detail-meta").textContent = [task.state, formatDue(task), task.priority].join(" · ");
+  get("detail-description").textContent = task.description;
+  get("checklist").checked = !!task.checked;
+  get("checklist").onchange = (event) => { task.checked = event.target.checked; };
+  get("detail").showModal();
+}
+function renderRows(list) {
+  content.replaceChildren();
+  if (!list.length) { content.textContent = "Không có task phù hợp."; return; }
+  const surface = document.createElement("section");
+  surface.className = "surface";
+  surface.setAttribute("aria-label", "Danh sách task");
+  for (const task of list) {
+    const row = document.createElement("div");
+    row.className = "row";
+    const title = button(task.title, () => openTask(task));
+    title.className = "title";
+    const subtitle = document.createElement("small");
+    subtitle.textContent = goal;
+    title.append(subtitle);
+    const state = document.createElement("span");
+    state.textContent = task.state;
+    const deadline = button((late(task) ? "Quá hạn · " : "") + formatDue(task), () => {
+      editing = task;
+      get("due").value = task.due;
+      get("deadline").returnValue = "";
+      get("deadline").showModal();
+    });
+    deadline.className = late(task) ? "late" : "";
+    deadline.dataset.task = task.id;
+    deadline.setAttribute("aria-label", "Đổi deadline: " + task.title + ", " + deadline.textContent);
+    const priority = document.createElement("span");
+    priority.textContent = task.priority;
+    row.append(title, state, deadline, priority);
+    surface.append(row);
+  }
+  content.append(surface);
+}
+function render() {
+  const { view, docs } = route();
+  get("heading").textContent = { focus:"Tập trung", all:"Tất cả task", goal }[view];
+  get("description").textContent = { focus:"Việc cần chú ý, theo thứ tự ưu tiên.", all:"Tìm trong mọi công việc của bạn.", goal:"1 / 4 task hoàn thành · 25%" }[view];
+  document.querySelectorAll("[data-view]").forEach((item) => item.setAttribute("aria-current", item.dataset.view === view));
+  toolbar.replaceChildren();
+  const filtered = () => tasks.filter((task) => task.title.toLocaleLowerCase("vi").includes(query.toLocaleLowerCase("vi")));
+  if (view === "goal") {
+    const work = button("Công việc", () => go("goal"));
+    const documents = button("Tài liệu", () => go("goal", true));
+    work.setAttribute("aria-pressed", !docs);
+    documents.setAttribute("aria-pressed", docs);
+    toolbar.append(work, documents);
+  }
+  if (docs) {
+    const link = button("Ghi chú AWS Networking", () => get("document").showModal());
+    link.className = "document";
+    content.replaceChildren(link);
+    return;
+  }
+  if (view === "all") {
+    const search = document.createElement("input");
+    search.type = "search";
+    search.placeholder = "Tìm theo tiêu đề";
+    search.setAttribute("aria-label", search.placeholder);
+    search.value = query;
+    search.oninput = () => { query = search.value; renderRows(filtered()); };
+    toolbar.append(search);
+  }
+  renderRows(view === "focus" ? tasks.filter((task) => task.state !== "Hoàn thành").sort((a,b) => rank(a) - rank(b) || a.due.localeCompare(b.due)) : filtered());
+}
+document.querySelectorAll("[data-view]").forEach((item) => item.onclick = () => go(item.dataset.view));
+get("detail-docs").onclick = () => { get("detail").close(); go("goal", true); };
+get("deadline").onclose = () => {
+  if (get("deadline").returnValue !== "save") return;
+  editing.due = get("due").value;
+  render();
+  content.querySelector('[data-task="' + editing.id + '"]')?.focus();
+  get("status").textContent = "Đã lưu deadline · " + editing.title;
+};
+window.addEventListener("hashchange", () => { get("status").textContent = ""; render(); });
+render();
+</script>
+</html>
