@@ -50,6 +50,7 @@ type TaskDetailsDrawerProps = {
   initialTab?: TaskDrawerTab;
 
   initialEditMode?: boolean;
+  searchableGoals?: boolean;
 };
 
 export function TaskDetailsDrawer({
@@ -58,6 +59,7 @@ export function TaskDetailsDrawer({
   onClose,
   initialTab,
   initialEditMode,
+  searchableGoals,
 }: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
   const confirm = useConfirmDialog();
@@ -304,6 +306,7 @@ export function TaskDetailsDrawer({
             {isEditing ? (
               <div className="min-w-0">
                 <TaskEditForm
+                  searchableGoals={searchableGoals}
                   key={currentTask.updated_at}
                   task={currentTask}
                   goals={goals}

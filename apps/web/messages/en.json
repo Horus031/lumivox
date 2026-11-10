@@ -2437,6 +2437,36 @@
     }
   },
   "workspace": {
+    "preview": {
+      "description": "Paged Workspace preview",
+      "taskSearch": "Search task titles",
+      "goal": "Goal",
+      "allGoals": "All goals",
+      "unassigned": "No goal",
+      "status": "Status",
+      "priority": "Priority",
+      "deadline": "Deadline",
+      "any": "Any",
+      "deadlines": {
+        "overdue": "Overdue",
+        "upcoming": "Next 7 days",
+        "none": "No deadline"
+      },
+      "apply": "Apply filters",
+      "reset": "Clear filters",
+      "taskUnavailable": "This task is unavailable.",
+      "tasks": "Tasks",
+      "total": "{count, plural, one {# matching task} other {# matching tasks}}",
+      "checklist": "Checklist {completed}/{total}",
+      "empty": "No matching tasks.",
+      "first": "First page",
+      "next": "Next page",
+      "goalSearch": "Search goals",
+      "search": "Search",
+      "searching": "Searching…",
+      "goalSearchError": "Could not search goals. Try again.",
+      "goalResults": "{count, plural, one {# goal shown} other {# goals shown}}"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Learning Workspace",

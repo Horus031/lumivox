@@ -24,16 +24,19 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskDatePicker } from "./task-date-picker";
+import { WorkspaceGoalPicker } from "@/features/workspace/components/workspace-goal-picker";
 import { Label } from "@/components/ui/label";
 
 type CreateTaskModalProps = {
   goals: GoalOption[];
   defaultGoalId?: string;
+  searchableGoals?: boolean;
 };
 
 export function CreateTaskModal({
   goals,
   defaultGoalId,
+  searchableGoals = false,
 }: CreateTaskModalProps) {
   const t = useTranslations("tasks.form");
   const commonT = useTranslations("common");
@@ -156,6 +159,16 @@ export function CreateTaskModal({
             <div className="space-y-2">
               <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}
               </Label>
+              {searchableGoals ? (
+                <WorkspaceGoalPicker
+                  id={`${id}-linkedGoal`}
+                  value={goalId}
+                  onChange={setGoalId}
+                  goals={goals}
+                  emptyOptions={<option value="">{t("noGoal")}</option>}
+                  disabled={isPending}
+                />
+              ) : (
               <Select
                 disabled={isPending}
                 value={goalId || "no-goal"}
@@ -177,6 +190,7 @@ export function CreateTaskModal({
                   </SelectGroup>
                 </SelectContent>
               </Select>
+              )}
             </div>
 
             <div className="space-y-2">

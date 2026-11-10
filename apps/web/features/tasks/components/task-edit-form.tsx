@@ -34,6 +34,7 @@ import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { updateTaskAction } from "@/features/tasks/task.actions";
 
 import { TaskDatePicker } from "./task-date-picker";
+import { WorkspaceGoalPicker } from "@/features/workspace/components/workspace-goal-picker";
 
 type TaskEditFormProps = {
   task: TaskWithGoal;
@@ -45,6 +46,7 @@ type TaskEditFormProps = {
   onCancel: () => void;
 
   allowGoalChange?: boolean;
+  searchableGoals?: boolean;
 };
 
 function initialDueTime(dueAt: string | null) {
@@ -67,6 +69,7 @@ export function TaskEditForm({
   onSaved,
   onCancel,
   allowGoalChange = true,
+  searchableGoals = false,
 }: TaskEditFormProps) {
   const t = useTranslations("tasks.form");
 
@@ -175,6 +178,16 @@ export function TaskEditForm({
           <div className="space-y-2">
             <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
 
+            {searchableGoals ? (
+              <WorkspaceGoalPicker
+                id={`${id}-linkedGoal`}
+                value={goalId}
+                onChange={setGoalId}
+                goals={task.goals && !goals.some((goal) => goal.id === task.goals?.id) ? [task.goals, ...goals] : goals}
+                emptyOptions={<option value="">{t("noGoal")}</option>}
+                disabled={isPending}
+              />
+            ) : (
             <Select
             disabled={isPending}
               value={goalId || "no-goal"}
@@ -197,6 +210,7 @@ export function TaskEditForm({
                 </SelectGroup>
               </SelectContent>
             </Select>
+            )}
           </div>
         ) : null}
 

@@ -11,6 +11,7 @@ import { CreateTaskModal } from "@/features/tasks/components/create-task-modal";
 import { WorkspaceBoard } from "@/features/workspace/components/workspace-board";
 
 import { WorkspaceGoalRail } from "@/features/workspace/components/workspace-goal-rail";
+import { WorkspacePreviewPage } from "@/features/workspace/components/workspace-preview-page";
 
 import { getWorkspaceTasks } from "@/features/workspace/workspace.queries";
 
@@ -22,6 +23,7 @@ import {
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
 type WorkspacePageProps = {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<{
     goal?: string;
 
@@ -47,8 +49,14 @@ function resolveTaskTab(value: string | undefined): TaskDrawerTab {
 }
 
 export default async function WorkspacePage({
+  params: routeParams,
   searchParams,
 }: WorkspacePageProps) {
+  if (process.env.WORKSPACE_PAGED_PREVIEW_ENABLED === "true") {
+    const [{ locale }, params] = await Promise.all([routeParams, searchParams]);
+    return <WorkspacePreviewPage params={params} locale={locale} />;
+  }
+
   const [t, params, goals] = await Promise.all([
     getTranslations("workspace.page"),
 

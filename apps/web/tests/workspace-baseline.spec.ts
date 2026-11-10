@@ -8,6 +8,7 @@ const apiUrl = process.env.WORKSPACE_TEST_SUPABASE_URL;
 const serviceKey = process.env.WORKSPACE_TEST_SERVICE_KEY;
 const publicKey = process.env.WORKSPACE_TEST_ANON_KEY;
 const appUrl = process.env.PLAYWRIGHT_BASE_URL?.replace(/\/$/, "");
+const expectPreview = process.env.WORKSPACE_BASELINE_EXPECT_PREVIEW === "1";
 const loopback = /^http:\/\/(?:127\.0\.0\.1|localhost):\d+\/?$/;
 const enabled =
   process.env.WORKSPACE_BASELINE === "1" &&
@@ -123,9 +124,15 @@ for (const rootCount of [50, 500, 5000]) {
             });
             const response = await page.goto(`${appUrl}/en/workspace`, { waitUntil: "load" });
             await expect(page).toHaveURL(`${appUrl}/en/workspace`);
-            const cards = page.locator("[data-status] article");
+            const cards = expectPreview
+              ? page.getByTestId("workspace-preview-task")
+              : page.locator("[data-status] article");
             const errorState = page.locator("section[role=alert]");
             await expect(cards.first().or(errorState).first()).toBeVisible();
+            if (expectPreview) {
+              await expect(cards).toHaveCount(25);
+              await expect(page.getByTestId("workspace-preview-total")).toHaveText(`${rootCount.toLocaleString("en")} matching tasks`);
+            }
             await page.evaluate(() => document.fonts.ready.then(() => undefined));
             await page.evaluate(() => new Promise<void>((resolve) =>
               requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
@@ -134,7 +141,7 @@ for (const rootCount of [50, 500, 5000]) {
               profile: profile.name,
               run,
               httpStatus: response?.status(),
-              outcome: await errorState.isVisible() ? "route-error" : "board",
+              outcome: await errorState.isVisible() ? "route-error" : expectPreview ? "preview" : "board",
               cards: await cards.count(),
               ...await page.evaluate(() => {
                 const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
@@ -158,6 +165,82 @@ for (const rootCount of [50, 500, 5000]) {
       const report = JSON.stringify({ rootCount, goalCount, childCount: children.length, samples }, null, 2);
       console.log(report);
       await testInfo.attach("workspace-baseline.json", { body: report, contentType: "application/json" });
+
+      if (expectPreview && rootCount === 500) {
+        const page = await browser.newPage({ storageState: session });
+        try {
+          const initial = await page.goto(`${appUrl}/en/workspace`);
+          const html = await initial!.text();
+          expect(html).not.toContain("Sample description for the Workspace baseline.");
+          expect(html).not.toContain("Baseline checklist 1");
+          const taskLinks = page.getByTestId("workspace-preview-task").getByRole("link");
+          await expect(taskLinks).toHaveCount(25);
+          const firstTitles = await taskLinks.allTextContents();
+          await page.getByRole("link", { name: "Next page" }).click();
+          await expect(page).toHaveURL(/after=/);
+          await expect(taskLinks).toHaveCount(25);
+          expect((await taskLinks.allTextContents()).some((title) => firstTitles.includes(title))).toBe(false);
+
+          const outsidePage = roots.find((root) => !firstTitles.includes(root.title))!;
+          await page.goto(`${appUrl}/en/workspace?task=${outsidePage.id}&tab=overview&edit=1`);
+          const drawer = page.getByRole("dialog");
+          await expect(drawer.getByRole("heading", { name: outsidePage.title })).toBeVisible();
+          await expect(drawer.getByRole("textbox", { name: "Task title" })).toHaveValue(outsidePage.title);
+          await page.keyboard.press("Escape");
+          await expect(page).not.toHaveURL(/task=/);
+
+          await page.getByRole("textbox", { name: "Search task titles" }).fill("Baseline task 1");
+          await page.locator('select[name="status"]').selectOption("cancelled");
+          await page.getByRole("button", { name: "Apply filters" }).click();
+          const matching = roots.filter((task) => task.title.includes("Baseline task 1") && task.status === "cancelled");
+          await expect(page.getByTestId("workspace-preview-total")).toHaveText(`${matching.length} matching tasks`);
+          await expect(taskLinks).toHaveCount(Math.min(25, matching.length));
+
+          await page.getByRole("link", { name: "Clear filters" }).click();
+          await expect(page).toHaveURL(`${appUrl}/en/workspace`);
+          await expect(page.getByTestId("workspace-preview-total")).toHaveText("500 matching tasks");
+          const goalPicker = page.getByLabel("Goal", { exact: true });
+          await expect(goalPicker.locator("option")).toHaveCount(10);
+          await page.getByRole("textbox", { name: "Search goals", exact: true }).fill("Baseline goal 50");
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(goalPicker.locator(`option[value="${goals[49].id}"]`)).toHaveText("Baseline goal 50");
+          await goalPicker.selectOption(goals[49].id);
+          await expect(goalPicker).toHaveValue(goals[49].id);
+          await page.getByRole("button", { name: "Apply filters" }).click();
+          await expect(page).toHaveURL(new RegExp(`[?&]goal=${goals[49].id}(?:&|$)`));
+          const goalTasks = roots.filter((task) => task.goal_id === goals[49].id);
+          await expect(page.getByTestId("workspace-preview-total")).toHaveText(`${goalTasks.length} matching tasks`);
+          await expect(taskLinks).toHaveCount(goalTasks.length);
+          const anonymous = createClient<Database>(apiUrl!, publicKey!, { auth });
+          const anonymousPage = await anonymous.rpc("get_workspace_task_page");
+          expect(anonymousPage.error).not.toBeNull();
+
+          const other = await admin.auth.admin.createUser({
+            email: `workspace-other-${randomUUID()}@example.test`,
+            password: randomUUID(),
+            email_confirm: true,
+          });
+          if (other.error) throw other.error;
+          try {
+            const foreignTaskId = randomUUID();
+            const foreignTask = await admin.from("tasks").insert({
+              id: foreignTaskId,
+              user_id: other.data.user.id,
+              title: "Foreign private task",
+            });
+            if (foreignTask.error) throw foreignTask.error;
+            await page.goto(`${appUrl}/en/workspace?task=${foreignTaskId}&q=Foreign+private+task`);
+            await expect(page.getByText("This task is unavailable.")).toBeVisible();
+            await expect(page.getByTestId("workspace-preview-total")).toHaveText("0 matching tasks");
+            await expect(page.getByRole("dialog")).toHaveCount(0);
+          } finally {
+            const removed = await admin.auth.admin.deleteUser(other.data.user.id);
+            if (removed.error) throw removed.error;
+          }
+        } finally {
+          await page.close();
+        }
+      }
     } finally {
       const removed = await admin.auth.admin.deleteUser(userId);
       if (removed.error) throw removed.error;

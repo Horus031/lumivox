@@ -1581,6 +1581,9 @@ isOneToOne: false
 "get_my_goals_with_progress":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"get_workspace_task_page":
+{ Args: { p_goal_id?: string; p_unassigned?: boolean; p_search?: string; p_status?: Database["public"]["Enums"]["task_status"]; p_priority?: Database["public"]["Enums"]["task_priority"]; p_deadline?: string; p_after_created_at?: string; p_after_id?: string; p_reference_now?: string }; Returns: Json
+                           },
 "get_my_latest_native_task_risk_alerts":
 { Args: { "p_limit"?: number }; Returns: {
               "algorithm": string,"days_until_due": number,"decision_threshold": number,"due_at": string,"goal_id": string,"goal_title": string,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"reason_summaries": Json,"recommended_actions": Json,"risk_band": string,"risk_probability": number,"risk_score": number,"task_id": string,"task_title": string,"top_attributions": Json

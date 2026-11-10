@@ -2437,6 +2437,36 @@
     }
   },
   "workspace": {
+    "preview": {
+      "description": "Bản xem trước Workspace phân trang",
+      "taskSearch": "Tìm theo tiêu đề task",
+      "goal": "Goal",
+      "allGoals": "Tất cả goal",
+      "unassigned": "Không thuộc goal",
+      "status": "Trạng thái",
+      "priority": "Ưu tiên",
+      "deadline": "Hạn chót",
+      "any": "Tất cả",
+      "deadlines": {
+        "overdue": "Quá hạn",
+        "upcoming": "Trong 7 ngày tới",
+        "none": "Không có hạn chót"
+      },
+      "apply": "Áp dụng bộ lọc",
+      "reset": "Xóa bộ lọc",
+      "taskUnavailable": "Không thể mở task này.",
+      "tasks": "Công việc",
+      "total": "{count, number} task phù hợp",
+      "checklist": "Checklist {completed}/{total}",
+      "empty": "Không có task phù hợp.",
+      "first": "Trang đầu",
+      "next": "Trang tiếp theo",
+      "goalSearch": "Tìm goal",
+      "search": "Tìm",
+      "searching": "Đang tìm…",
+      "goalSearchError": "Không thể tìm goal. Hãy thử lại.",
+      "goalResults": "Đang hiển thị {count, number} goal"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Không gian học tập",
