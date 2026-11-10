@@ -22,14 +22,14 @@ const cursorSchema = z.object({
   filters: z.string(),
 });
 
-type TaskSummary = Pick<Task, "id" | "title" | "goal_id" | "status" | "priority" | "due_at" | "created_at" | "updated_at"> & {
+export type TaskSummary = Pick<Task, "id" | "title" | "goal_id" | "status" | "priority" | "due_at" | "created_at" | "updated_at"> & {
   effective_status: Task["status"];
   goal_title: string | null;
   subtask_count: number;
   completed_subtask_count: number;
 };
 
-type TaskPage = { tasks: TaskSummary[]; total: number; hasMore: boolean };
+type TaskPage = { tasks: TaskSummary[]; total: number; hasMore: boolean; reviewCount: number };
 
 function readCursor(value: string | undefined) {
   if (!value || value.length > 1600) return undefined;
@@ -60,12 +60,15 @@ export async function getWorkspacePreview(params: Record<string, string | string
   if (task?.error) throw task.error;
 
   const scope = resolveWorkspaceScope(filters.goal, goal?.data ? [goal.data.id] : []);
+  const focus = !filters.goal && !filters.q && !filters.status && !filters.priority && !filters.deadline
+    && raw.view !== "all" && raw.view !== "goals";
+  const documents = scope.type === "goal" && raw.section === "documents";
   const key = JSON.stringify([scope, filters.q || null, filters.status, filters.priority, filters.deadline]);
   const candidate = readCursor(raw.after);
-  const cursor = candidate?.filters === key ? candidate : undefined;
+  const cursor = !focus && candidate?.filters === key ? candidate : undefined;
   const referenceNow = cursor?.referenceNow ?? new Date().toISOString();
 
-  const { data, error } = await supabase.rpc("get_workspace_task_page", {
+  const request = documents || raw.view === "goals" ? null : supabase.rpc("get_workspace_task_page", {
     ...(scope.type === "goal" ? { p_goal_id: scope.goalId } : {}),
     p_unassigned: scope.type === "unassigned",
     p_search: filters.q || undefined,
@@ -75,14 +78,48 @@ export async function getWorkspacePreview(params: Record<string, string | string
     p_after_created_at: cursor?.createdAt,
     p_after_id: cursor?.id,
     p_reference_now: referenceNow,
+    p_focus: focus,
   });
-  if (error) throw new Error(`Failed to load Workspace page: ${error.message}`);
+  const goalTasks = () => supabase.from("tasks").select("id", { count: "exact", head: true })
+    .eq("user_id", user.id).eq("goal_id", goal?.data?.id ?? "");
+  const [result, totalGoalTasks, completedGoalTasks] = await Promise.all([
+    request,
+    goal?.data ? goalTasks() : null,
+    goal?.data ? goalTasks().eq("status", "completed") : null,
+  ]);
+  if (result?.error) throw new Error(`Failed to load Workspace page: ${result.error.message}`);
+  if (totalGoalTasks?.error) throw totalGoalTasks.error;
+  if (completedGoalTasks?.error) throw completedGoalTasks.error;
 
-  const page = data as TaskPage;
+  const page = result ? result.data as TaskPage : { tasks: [], total: 0, hasMore: false, reviewCount: 0 };
   const last = page.tasks.at(-1);
   const next = page.hasMore && last
     ? Buffer.from(JSON.stringify({ id: last.id, createdAt: last.created_at, referenceNow, filters: key })).toString("base64url")
     : null;
 
-  return { ...page, next, after: cursor ? raw.after : undefined, scope, filters, goal: goal?.data, task: task?.data, missingTask: !!raw.task && !task?.data };
+  const progress = { total: totalGoalTasks?.count ?? 0, completed: completedGoalTasks?.count ?? 0 };
+  return { ...page, next, after: cursor ? raw.after : undefined, scope, filters, focus, documents, progress, goal: goal?.data, task: task?.data, missingTask: !!raw.task && !task?.data };
+}
+
+export async function getWorkspaceGoalsDirectory(params: Record<string, string | string[] | undefined>) {
+  const { supabase, user } = await requireUser();
+  const parsed = z.object({
+    goalSearch: z.string().trim().max(120).catch("").optional(),
+    goalStatus: z.enum(["active", "completed", "paused", "archived"]).optional().catch(undefined),
+    page: z.coerce.number().int().min(1).max(10000).catch(1).optional(),
+  }).parse(params);
+  const search = parsed.goalSearch ?? "";
+  const status = parsed.goalStatus;
+  const page = parsed.page ?? 1;
+  const limit = 20;
+  const start = (page - 1) * limit;
+  let query = supabase.from("goals").select("id,title,status", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false }).order("id", { ascending: false })
+    .range(start, start + limit - 1);
+  if (search) query = query.ilike("title", `%${search.replace(/[\\%_]/g, "\\$&")}%`);
+  if (status) query = query.eq("status", status);
+  const { data, error, count } = await query;
+  if (error) throw error;
+  return { goals: data, search, status, page, hasNext: start + limit < (count ?? 0) };
 }

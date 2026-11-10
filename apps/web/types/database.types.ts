@@ -1582,7 +1582,7 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
 "get_workspace_task_page":
-{ Args: { p_goal_id?: string; p_unassigned?: boolean; p_search?: string; p_status?: Database["public"]["Enums"]["task_status"]; p_priority?: Database["public"]["Enums"]["task_priority"]; p_deadline?: string; p_after_created_at?: string; p_after_id?: string; p_reference_now?: string }; Returns: Json
+{ Args: { p_goal_id?: string; p_unassigned?: boolean; p_search?: string; p_status?: Database["public"]["Enums"]["task_status"]; p_priority?: Database["public"]["Enums"]["task_priority"]; p_deadline?: string; p_after_created_at?: string; p_after_id?: string; p_reference_now?: string; p_focus?: boolean }; Returns: Json
                            },
 "get_my_latest_native_task_risk_alerts":
 { Args: { "p_limit"?: number }; Returns: {

@@ -9,6 +9,7 @@ const serviceKey = process.env.WORKSPACE_TEST_SERVICE_KEY;
 const publicKey = process.env.WORKSPACE_TEST_ANON_KEY;
 const appUrl = process.env.PLAYWRIGHT_BASE_URL?.replace(/\/$/, "");
 const expectPreview = process.env.WORKSPACE_BASELINE_EXPECT_PREVIEW === "1";
+const allTasksUrl = `${appUrl}/en/workspace${expectPreview ? "?goal=all" : ""}`;
 const loopback = /^http:\/\/(?:127\.0\.0\.1|localhost):\d+\/?$/;
 const enabled =
   process.env.WORKSPACE_BASELINE === "1" &&
@@ -122,8 +123,8 @@ for (const rootCount of [50, 500, 5000]) {
                 }
               }).observe({ type: "layout-shift", buffered: true });
             });
-            const response = await page.goto(`${appUrl}/en/workspace`, { waitUntil: "load" });
-            await expect(page).toHaveURL(`${appUrl}/en/workspace`);
+            const response = await page.goto(allTasksUrl, { waitUntil: "load" });
+            await expect(page).toHaveURL(allTasksUrl);
             const cards = expectPreview
               ? page.getByTestId("workspace-preview-task")
               : page.locator("[data-status] article");
@@ -166,10 +167,23 @@ for (const rootCount of [50, 500, 5000]) {
       console.log(report);
       await testInfo.attach("workspace-baseline.json", { body: report, contentType: "application/json" });
 
+      if (expectPreview) {
+        const focusPage = await browser.newPage({ viewport: profiles[1].viewport, storageState: session });
+        try {
+          await focusPage.goto(`${appUrl}/en/workspace`);
+          await expect(focusPage.getByRole("heading", { name: "Focus", exact: true })).toBeVisible();
+          await expect(focusPage.getByTestId("workspace-preview-task")).toHaveCount(25);
+          await expect(focusPage.getByRole("link", { name: "Next page" })).toHaveCount(0);
+          expect(await focusPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        } finally {
+          await focusPage.close();
+        }
+      }
+
       if (expectPreview && rootCount === 500) {
         const page = await browser.newPage({ storageState: session });
         try {
-          const initial = await page.goto(`${appUrl}/en/workspace`);
+          const initial = await page.goto(allTasksUrl);
           const html = await initial!.text();
           expect(html).not.toContain("Sample description for the Workspace baseline.");
           expect(html).not.toContain("Baseline checklist 1");
@@ -182,7 +196,7 @@ for (const rootCount of [50, 500, 5000]) {
           expect((await taskLinks.allTextContents()).some((title) => firstTitles.includes(title))).toBe(false);
 
           const outsidePage = roots.find((root) => !firstTitles.includes(root.title))!;
-          await page.goto(`${appUrl}/en/workspace?task=${outsidePage.id}&tab=overview&edit=1`);
+          await page.goto(`${allTasksUrl}&task=${outsidePage.id}&tab=overview&edit=1`);
           const drawer = page.getByRole("dialog");
           await expect(drawer.getByRole("heading", { name: outsidePage.title })).toBeVisible();
           await expect(drawer.getByRole("textbox", { name: "Task title" })).toHaveValue(outsidePage.title);
@@ -197,7 +211,7 @@ for (const rootCount of [50, 500, 5000]) {
           await expect(taskLinks).toHaveCount(Math.min(25, matching.length));
 
           await page.getByRole("link", { name: "Clear filters" }).click();
-          await expect(page).toHaveURL(`${appUrl}/en/workspace`);
+          await expect(page).toHaveURL(allTasksUrl);
           await expect(page.getByTestId("workspace-preview-total")).toHaveText("500 matching tasks");
           const goalPicker = page.getByLabel("Goal", { exact: true });
           await expect(goalPicker.locator("option")).toHaveCount(10);
@@ -211,6 +225,68 @@ for (const rootCount of [50, 500, 5000]) {
           const goalTasks = roots.filter((task) => task.goal_id === goals[49].id);
           await expect(page.getByTestId("workspace-preview-total")).toHaveText(`${goalTasks.length} matching tasks`);
           await expect(taskLinks).toHaveCount(goalTasks.length);
+          const documentName = "Phase 2 goal notes.txt";
+          const doc = await admin.from("learning_documents").insert({
+            goal_id: goals[49].id, owner_id: userId, file_name: documentName,
+            file_path: `${userId}/${documentName}`, file_size_bytes: 40, mime_type: "text/plain",
+          });
+          if (doc.error) throw doc.error;
+          await expect(page.getByText(documentName, { exact: true })).toHaveCount(0);
+          await page.getByRole("link", { name: "Documents", exact: true }).click();
+          await expect(page).toHaveURL(/section=documents/);
+          await expect(page.locator('input[type="file"]')).toBeVisible();
+          await expect(page.getByText(documentName, { exact: true })).toBeVisible();
+          await expect(taskLinks).toHaveCount(0);
+          await page.goBack();
+          await expect(taskLinks).toHaveCount(goalTasks.length);
+
+          await page.goto(`${appUrl}/en/workspace`);
+          await expect(page.getByRole("heading", { name: "Focus", exact: true })).toBeVisible();
+          await expect(taskLinks).toHaveCount(25);
+          await expect(page.getByTestId("workspace-preview-task").first()).toContainText("Overdue");
+          expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+          await page.getByRole("textbox", { name: "Search task titles" }).fill("Baseline task 2");
+          await page.getByRole("button", { name: "Search all tasks" }).click();
+          await expect(page).toHaveURL(/[?&]goal=all&/);
+          await expect(taskLinks.first()).toContainText("Baseline task 2");
+
+          const quickTask = roots[1];
+          const quickTitle = "Phase 2 quick edit fixture";
+          const rename = await user.from("tasks").update({ title: quickTitle }).eq("id", quickTask.id);
+          if (rename.error) throw rename.error;
+          await page.goto(`${appUrl}/en/workspace?goal=all&q=Phase+2+quick+edit+fixture&status=in_progress`);
+          const quickRow = page.getByTestId("workspace-preview-task").filter({ has: page.getByRole("link", { name: quickTitle, exact: true }) });
+          const priority = quickRow.getByRole("combobox", { name: /Change priority/ });
+          await priority.selectOption("high");
+          await expect(priority).toHaveValue("high");
+          await quickRow.getByRole("button", { name: /Change deadline/ }).click();
+          const future = new Date(Date.now() + 86_400_000 * 2);
+          const local = new Date(future.getTime() - future.getTimezoneOffset() * 60_000).toISOString().slice(0, 16);
+          await quickRow.getByLabel("Deadline date and time").fill(local);
+          await quickRow.getByRole("button", { name: "Save", exact: true }).click();
+          await expect(quickRow.getByLabel("Deadline date and time")).toHaveCount(0);
+          const saved = await user.from("tasks").select("due_at,priority").eq("id", quickTask.id).single();
+          expect(saved.error).toBeNull();
+          expect(saved.data?.priority).toBe("high");
+          expect(new Date(saved.data?.due_at ?? "").getTime()).toBe(new Date(local).getTime());
+          await quickRow.getByRole("combobox", { name: /Change status/ }).selectOption("todo");
+          await expect(quickRow).toHaveCount(0);
+          await expect(page.getByTestId("workspace-preview-total")).toHaveText("0 matching tasks");
+
+          await page.getByRole("link", { name: "Goals", exact: true }).click();
+          await expect(page).toHaveURL(/view=goals/);
+          await page.getByRole("textbox", { name: "Search goal titles" }).fill("Baseline goal 50");
+          await page.getByRole("button", { name: "Search", exact: true }).click();
+          await expect(page).toHaveURL(/goalSearch=/);
+          await page.getByRole("main").getByRole("link", { name: "Baseline goal 50", exact: true }).last().click();
+          await expect(page.getByRole("heading", { name: "Baseline goal 50" })).toBeVisible();
+          await page.getByRole("button", { name: "Add task", exact: true }).click();
+          await page.getByRole("textbox", { name: "Task title", exact: true }).fill("Phase 2 quick create fixture");
+          await page.getByRole("button", { name: "Add task", exact: true }).click();
+          await expect(page.getByRole("link", { name: "Phase 2 quick create fixture" })).toBeVisible();
+          const quickCreated = await user.from("tasks").select("goal_id").eq("title", "Phase 2 quick create fixture").single();
+          expect(quickCreated.error).toBeNull();
+          expect(quickCreated.data?.goal_id).toBe(goals[49].id);
           const anonymous = createClient<Database>(apiUrl!, publicKey!, { auth });
           const anonymousPage = await anonymous.rpc("get_workspace_task_page");
           expect(anonymousPage.error).not.toBeNull();
