@@ -6,7 +6,9 @@ import { writeFile } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const container='supabase_db_lumivox-proj',owner=randomUUID();
+const includeReconsent = process.argv.includes("--reconsent");
+const container = includeReconsent ? "supabase_db_lumivox-11c4e" : "supabase_db_lumivox-proj";
+const owner = randomUUID();
 const q=value=>`'${String(value).replaceAll("'","''")}'`;
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 // LOCAL ONLY. Temporarily enables the DB gate for fixture authorization. Never
@@ -291,6 +293,40 @@ try {
   if(order.includes('suppression')) {assert.equal(final.suppressed,1);assert.equal(final.consent,true,'Suppression does not rewrite consent');}
   report.runs.push({order,repeat,sqlstate:'00000',blocker,elapsedMs,returned,final});
  }
+ if (includeReconsent) {
+  const setConsent = "SELECT public.ls_set_study_notification_preferences(true);";
+  for (const order of ["reconsent-old-token", "old-token-reconsent"]) {
+   const reconsentFirst = order === "reconsent-old-token";
+   for (let repeat = 1; repeat <= 3; repeat++) {
+    await resetFixtures();
+    const f = await fixture();
+    await a.begin("authenticated");
+    await a.ok("SELECT public.ls_set_study_notification_preferences(false);");
+    await a.ok("COMMIT;");
+
+    await a.begin(reconsentFirst ? "authenticated" : "service_role");
+    await b.begin(reconsentFirst ? "service_role" : "authenticated");
+    if (reconsentFirst) await a.ok(setConsent);
+    else assert.equal(await a.ok(consume(f)), "t");
+
+    const pending = b.exec(reconsentFirst ? consume(f) : setConsent);
+    const blocker = await blocked(b, a);
+    await a.ok("COMMIT;");
+    const result = await finishPending(pending);
+    if (reconsentFirst) assert.equal(result.text, "f");
+
+    const token = await observer.json(`
+      SELECT json_build_object('used', used_at IS NOT NULL, 'revoked', revoked_at IS NOT NULL)
+      FROM public.study_notification_unsubscribe_tokens WHERE token_hash = ${q(f.hash)};
+    `);
+    assert.deepEqual(token, {used: !reconsentFirst, revoked: reconsentFirst});
+    const final = await snapshot(f);
+    assert.equal(final.consent, true);
+    assert.equal(final.deliveries, 0);
+    report.runs.push({order, repeat, sqlstate: result.state, blocker, token, final});
+   }
+  }
+ }
 } finally {
  for(const c of [a,b]) {try{await c.ok('ROLLBACK;');}catch{}}
  try {
@@ -307,7 +343,13 @@ try {
   assert.deepEqual(report.gates,{dispatch:false,sweep:false,reminderCron:0});
  } finally {for(const c of [a,b,observer]) await c.close();}
  report.completedAt=new Date().toISOString();
- await writeFile(resolve(root,'docs/learning-schedule/phase-08-unsubscribe-concurrency.json'),JSON.stringify(report,null,2)+'\n');
+ if (!includeReconsent) {
+  await writeFile(resolve(root,'docs/learning-schedule/phase-08-unsubscribe-concurrency.json'),JSON.stringify(report,null,2)+'\n');
+ }
 }
 console.log(`PASS: ${report.runs.length} executions; ${report.runs.filter(x=>x.blocker).length} observed blockers; prompt SKIP LOCKED; no provider requests; clean/OFF`);
+if (includeReconsent) {
+ const runs = report.runs.filter(run => run.token);
+ console.log(`Re-consent: ${runs.length} executions; SQLSTATE ${[...new Set(runs.map(run => run.sqlstate))].join(", ")}; ${runs.filter(run => run.blocker).length} observed blockers`);
+}
 
