@@ -2437,6 +2437,31 @@
     }
   },
   "workspace": {
+    "compact": {
+      "task": "Công việc",
+      "filters": "Bộ lọc",
+      "filtersActive": "Đang áp dụng bộ lọc"
+    },
+    "phase3": {
+      "properties": "Thông tin task",
+      "layout": "Cách hiển thị task",
+      "list": "Danh sách",
+      "board": "Board",
+      "loadMore": "Tải thêm ở cột {lane}",
+      "boardFailed": "Không thể cập nhật Board. Hãy thử lại.",
+      "documentsFailed": "Không thể tải tài liệu của task.",
+      "goalDocuments": "Tài liệu của goal",
+      "retry": "Thử lại",
+      "loading": "Đang tải thông tin task…",
+      "taskDetail": "Chi tiết task",
+      "taskSections": "Các mục của task",
+      "overview": "Tổng quan",
+      "documents": "Tài liệu của task",
+      "review": "AI review",
+      "checklist": "Checklist",
+      "schedule": "Lịch học",
+      "moreActions": "Thao tác khác"
+    },
     "mvp": {
       "focus": "Tập trung",
       "focusDescription": "Bắt đầu với những việc cần bạn chú ý.",

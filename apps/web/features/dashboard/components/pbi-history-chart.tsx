@@ -26,7 +26,7 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
   const t = useTranslations("dashboard.pbiHistory");
 
   return (
-    <section className="h-full min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <section className="app-panel h-full min-w-0">
       <div className="mb-3">
         <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
         <p className="mt-1 text-caption text-secondary-text">

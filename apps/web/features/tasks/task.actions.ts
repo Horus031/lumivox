@@ -17,6 +17,7 @@ import {
   type UpdateTaskInput,
 } from "./task.schemas";
 import type { TaskDetailsData } from "./task.types";
+import type { LearningDocumentListItem } from "@/features/learning-documents/learning-document.types";
 import type { TaskStatus } from "./task-status";
 import {
   canDirectlyTransitionTask,
@@ -34,6 +35,7 @@ type TransitionTaskResult = {
 
 export async function getTaskDetailsAction(
   taskId: string,
+  includeDocuments = true,
 ): Promise<ActionResult<TaskDetailsData>> {
   try {
     const { supabase, user } = await requireUser();
@@ -89,23 +91,7 @@ export async function getTaskDetailsAction(
           ascending: true,
         }),
 
-      supabase
-        .from("learning_documents")
-        .select(
-          `
-            id,
-            file_name,
-            mime_type,
-            file_size_bytes,
-            visibility,
-            extracted_text_status
-          `,
-        )
-        .eq("owner_id", user.id)
-        .eq("task_id", task.id)
-        .order("created_at", {
-          ascending: false,
-        }),
+      includeDocuments ? queryTaskDocuments(supabase, user.id, task.id) : null,
     ]);
 
     if (subtasksResult.error) {
@@ -115,7 +101,7 @@ export async function getTaskDetailsAction(
       };
     }
 
-    if (documentsResult.error) {
+    if (documentsResult?.error) {
       return {
         success: false,
         message: `Failed to load task documents: ${documentsResult.error.message}`,
@@ -128,7 +114,7 @@ export async function getTaskDetailsAction(
       data: {
         task,
         subtasks: subtasksResult.data ?? [],
-        documents: documentsResult.data ?? [],
+        documents: documentsResult?.data ?? [],
       },
     };
   } catch (error) {
@@ -139,6 +125,26 @@ export async function getTaskDetailsAction(
           ? error.message
           : "Unexpected error while loading task details.",
     };
+  }
+}
+
+function queryTaskDocuments(supabase: Awaited<ReturnType<typeof requireUser>>["supabase"], userId: string, taskId: string) {
+  return supabase.from("learning_documents")
+    .select("id,file_name,mime_type,file_size_bytes,visibility,extracted_text_status")
+    .eq("owner_id", userId)
+    .eq("task_id", taskId)
+    .order("created_at", { ascending: false });
+}
+
+export async function getTaskDocumentsAction(taskId: string): Promise<ActionResult<LearningDocumentListItem[]>> {
+  try {
+    const { supabase, user } = await requireUser();
+    const { data, error } = await queryTaskDocuments(supabase, user.id, taskId);
+    if (error) throw error;
+    return { success: true, message: "", data };
+  } catch {
+    const t = await getTranslations("workspace.phase3");
+    return { success: false, message: t("documentsFailed") };
   }
 }
 

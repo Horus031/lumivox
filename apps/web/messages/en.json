@@ -2437,6 +2437,31 @@
     }
   },
   "workspace": {
+    "compact": {
+      "task": "Task",
+      "filters": "Filters",
+      "filtersActive": "Active filters"
+    },
+    "phase3": {
+      "properties": "Details",
+      "layout": "Task layout",
+      "list": "List",
+      "board": "Board",
+      "loadMore": "Load more in {lane}",
+      "boardFailed": "Could not update the board. Try again.",
+      "documentsFailed": "Could not load task documents.",
+      "goalDocuments": "Goal documents",
+      "retry": "Try again",
+      "loading": "Loading task information…",
+      "taskDetail": "Task details",
+      "taskSections": "Task sections",
+      "overview": "Overview",
+      "documents": "Task documents",
+      "review": "AI review",
+      "checklist": "Checklist",
+      "schedule": "Study schedule",
+      "moreActions": "More actions"
+    },
     "mvp": {
       "focus": "Focus",
       "focusDescription": "Start with the work that needs your attention.",

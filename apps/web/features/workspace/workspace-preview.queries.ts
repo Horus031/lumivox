@@ -3,17 +3,8 @@ import { requireUser } from "@/lib/auth/require-user";
 import { TASK_BOARD_LANES } from "@/features/tasks/task-status";
 import type { Task } from "@/features/tasks/task.types";
 import { resolveWorkspaceScope } from "./workspace.utils";
-
-export const workspacePriorities = ["low", "medium", "high", "critical"] as const;
-export const workspaceDeadlines = ["overdue", "upcoming", "none"] as const;
-
-const filtersSchema = z.object({
-  goal: z.string().optional(),
-  q: z.string().trim().transform((value) => value.slice(0, 120)).optional(),
-  status: z.enum(TASK_BOARD_LANES).optional().catch(undefined),
-  priority: z.enum(workspacePriorities).optional().catch(undefined),
-  deadline: z.enum(workspaceDeadlines).optional().catch(undefined),
-});
+import { getWorkspaceBoardPages } from "./workspace-board-pages.queries";
+import { isInitiallyOpenLane, workspaceFiltersSchema } from "./workspace-board-pages";
 
 const cursorSchema = z.object({
   createdAt: z.iso.datetime({ offset: true }),
@@ -43,7 +34,7 @@ function readCursor(value: string | undefined) {
 
 export async function getWorkspacePreview(params: Record<string, string | string[] | undefined>) {
   const raw = Object.fromEntries(Object.entries(params).filter(([, value]) => typeof value === "string")) as Record<string, string>;
-  const filters = filtersSchema.parse(raw);
+  const filters = workspaceFiltersSchema.parse(raw);
   const { supabase, user } = await requireUser();
 
   const goalId = z.uuid().safeParse(filters.goal);
@@ -60,15 +51,16 @@ export async function getWorkspacePreview(params: Record<string, string | string
   if (task?.error) throw task.error;
 
   const scope = resolveWorkspaceScope(filters.goal, goal?.data ? [goal.data.id] : []);
+  const board = raw.layout === "board" && raw.view !== "goals";
   const focus = !filters.goal && !filters.q && !filters.status && !filters.priority && !filters.deadline
-    && raw.view !== "all" && raw.view !== "goals";
+    && raw.view !== "all" && raw.view !== "goals" && !board;
   const documents = scope.type === "goal" && raw.section === "documents";
   const key = JSON.stringify([scope, filters.q || null, filters.status, filters.priority, filters.deadline]);
   const candidate = readCursor(raw.after);
-  const cursor = !focus && candidate?.filters === key ? candidate : undefined;
+  const cursor = !focus && !board && candidate?.filters === key ? candidate : undefined;
   const referenceNow = cursor?.referenceNow ?? new Date().toISOString();
 
-  const request = documents || raw.view === "goals" ? null : supabase.rpc("get_workspace_task_page", {
+  const request = documents || board || raw.view === "goals" ? null : supabase.rpc("get_workspace_task_page", {
     ...(scope.type === "goal" ? { p_goal_id: scope.goalId } : {}),
     p_unassigned: scope.type === "unassigned",
     p_search: filters.q || undefined,
@@ -82,10 +74,12 @@ export async function getWorkspacePreview(params: Record<string, string | string
   });
   const goalTasks = () => supabase.from("tasks").select("id", { count: "exact", head: true })
     .eq("user_id", user.id).eq("goal_id", goal?.data?.id ?? "");
-  const [result, totalGoalTasks, completedGoalTasks] = await Promise.all([
+  const boardFilters = { ...filters, goal: scope.type === "goal" ? scope.goalId : scope.type };
+  const [result, totalGoalTasks, completedGoalTasks, lanes] = await Promise.all([
     request,
     goal?.data ? goalTasks() : null,
     goal?.data ? goalTasks().eq("status", "completed") : null,
+    board && !documents ? getWorkspaceBoardPages(boardFilters, referenceNow, TASK_BOARD_LANES.filter((lane) => isInitiallyOpenLane(lane, filters.status))) : null,
   ]);
   if (result?.error) throw new Error(`Failed to load Workspace page: ${result.error.message}`);
   if (totalGoalTasks?.error) throw totalGoalTasks.error;
@@ -98,7 +92,7 @@ export async function getWorkspacePreview(params: Record<string, string | string
     : null;
 
   const progress = { total: totalGoalTasks?.count ?? 0, completed: completedGoalTasks?.count ?? 0 };
-  return { ...page, next, after: cursor ? raw.after : undefined, scope, filters, focus, documents, progress, goal: goal?.data, task: task?.data, missingTask: !!raw.task && !task?.data };
+  return { ...page, next, after: cursor ? raw.after : undefined, scope, filters, focus, documents, board, lanes, boardFilters, referenceNow, progress, goal: goal?.data, task: task?.data, missingTask: !!raw.task && !task?.data };
 }
 
 export async function getWorkspaceGoalsDirectory(params: Record<string, string | string[] | undefined>) {

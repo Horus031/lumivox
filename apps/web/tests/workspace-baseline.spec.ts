@@ -175,6 +175,13 @@ for (const rootCount of [50, 500, 5000]) {
           await expect(focusPage.getByTestId("workspace-preview-task")).toHaveCount(25);
           await expect(focusPage.getByRole("link", { name: "Next page" })).toHaveCount(0);
           expect(await focusPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+          if (rootCount === 5000) {
+            await focusPage.goto(`${allTasksUrl}&layout=board`);
+            await expect(focusPage.locator('[data-status="todo"] article')).toHaveCount(12);
+            const completed = focusPage.locator('[data-status="completed"]');
+            await expect(completed.getByTestId("workspace-lane-total")).toHaveText("1250");
+            await expect(completed.locator("article")).toHaveCount(0);
+          }
         } finally {
           await focusPage.close();
         }
@@ -184,6 +191,8 @@ for (const rootCount of [50, 500, 5000]) {
         const page = await browser.newPage({ storageState: session });
         try {
           const initial = await page.goto(allTasksUrl);
+          await expect(page.getByRole("columnheader", { name: "Task", exact: true })).toBeVisible();
+          await expect(page.getByLabel("Goal", { exact: true })).toBeHidden();
           const html = await initial!.text();
           expect(html).not.toContain("Sample description for the Workspace baseline.");
           expect(html).not.toContain("Baseline checklist 1");
@@ -204,6 +213,7 @@ for (const rootCount of [50, 500, 5000]) {
           await expect(page).not.toHaveURL(/task=/);
 
           await page.getByRole("textbox", { name: "Search task titles" }).fill("Baseline task 1");
+          await page.getByText("Filters", { exact: true }).click();
           await page.locator('select[name="status"]').selectOption("cancelled");
           await page.getByRole("button", { name: "Apply filters" }).click();
           const matching = roots.filter((task) => task.title.includes("Baseline task 1") && task.status === "cancelled");
@@ -213,6 +223,7 @@ for (const rootCount of [50, 500, 5000]) {
           await page.getByRole("link", { name: "Clear filters" }).click();
           await expect(page).toHaveURL(allTasksUrl);
           await expect(page.getByTestId("workspace-preview-total")).toHaveText("500 matching tasks");
+          await page.getByText("Filters", { exact: true }).click();
           const goalPicker = page.getByLabel("Goal", { exact: true });
           await expect(goalPicker.locator("option")).toHaveCount(10);
           await page.getByRole("textbox", { name: "Search goals", exact: true }).fill("Baseline goal 50");
@@ -239,6 +250,24 @@ for (const rootCount of [50, 500, 5000]) {
           await expect(taskLinks).toHaveCount(0);
           await page.goBack();
           await expect(taskLinks).toHaveCount(goalTasks.length);
+
+          const duplicateKeyErrors: string[] = [];
+          page.on("console", (message) => {
+            if (message.type() === "error" && message.text().includes("same key")) {
+              duplicateKeyErrors.push(message.text());
+            }
+          });
+          const taskSearch = page.getByRole("textbox", { name: "Search task titles", exact: true });
+          const filterButton = page.getByText("Filters", { exact: true });
+          for (const tab of ["Board", "Documents", "List", "Board", "List"]) {
+            const link = page.getByRole("link", { name: tab, exact: true });
+            await link.click();
+            await expect(link).toHaveAttribute("aria-current", "page");
+            await expect(taskSearch).toHaveCount(tab === "Documents" ? 0 : 1);
+            await expect(filterButton).toHaveCount(tab === "Documents" ? 0 : 1);
+          }
+          await expect(taskLinks).toHaveCount(goalTasks.length);
+          expect(duplicateKeyErrors).toEqual([]);
 
           await page.goto(`${appUrl}/en/workspace`);
           await expect(page.getByRole("heading", { name: "Focus", exact: true })).toBeVisible();
@@ -284,9 +313,104 @@ for (const rootCount of [50, 500, 5000]) {
           await page.getByRole("textbox", { name: "Task title", exact: true }).fill("Phase 2 quick create fixture");
           await page.getByRole("button", { name: "Add task", exact: true }).click();
           await expect(page.getByRole("link", { name: "Phase 2 quick create fixture" })).toBeVisible();
-          const quickCreated = await user.from("tasks").select("goal_id").eq("title", "Phase 2 quick create fixture").single();
+          const quickCreated = await user.from("tasks").select("id,goal_id").eq("title", "Phase 2 quick create fixture").single();
           expect(quickCreated.error).toBeNull();
           expect(quickCreated.data?.goal_id).toBe(goals[49].id);
+
+          await page.setViewportSize({ width: 1600, height: 1000 });
+          await page.goto(`${allTasksUrl}&layout=board`);
+          const lane = (status: string) => page.locator(`[data-status="${status}"]`);
+          const completed = lane("completed");
+          await expect(lane("todo").locator("article")).toHaveCount(12);
+          await expect(completed.getByTestId("workspace-lane-total")).toHaveText("125");
+          await expect(completed.locator("article")).toHaveCount(0);
+          await completed.getByRole("button", { name: /Completed/ }).click();
+          await expect(completed.locator("article")).toHaveCount(12);
+          await completed.getByRole("button", { name: "Load more in Completed" }).click();
+          await expect(completed.locator("article")).toHaveCount(24);
+
+          await page.goto(`${allTasksUrl}&q=Phase+2+quick+create+fixture`);
+          await page.getByRole("link", { name: "Board", exact: true }).click();
+          await expect(page).toHaveURL(/[?&]q=Phase\+2\+quick\+create\+fixture.*[&]layout=board/);
+          const handle = lane("todo").getByRole("button", { name: "Drag task", exact: true });
+          await expect(handle).toHaveAttribute("aria-describedby", /dnd/);
+          await handle.focus();
+          await page.keyboard.press("Space");
+          await expect(handle).toHaveAttribute("aria-grabbed", "true");
+          for (let index = 0; index < 6; index++) await page.keyboard.press("Shift+ArrowRight");
+          await page.keyboard.press("Space");
+          await expect(lane("in_progress").locator("article")).toHaveCount(1);
+          await expect(lane("todo").getByTestId("workspace-lane-total")).toHaveText("0");
+
+          async function pointerDrop(from: string, to: string) {
+            const dragHandle = lane(from).getByRole("button", { name: "Drag task", exact: true });
+            await expect(dragHandle).toBeEnabled();
+            await dragHandle.scrollIntoViewIfNeeded();
+            await lane(to).scrollIntoViewIfNeeded();
+            const source = await dragHandle.boundingBox();
+            const target = await lane(to).boundingBox();
+            if (!source || !target) throw new Error("Missing pointer drop coordinates");
+            const x = source.x + source.width / 2;
+            const y = source.y + source.height / 2;
+            await page.mouse.move(x, y);
+            await page.mouse.down();
+            await page.mouse.move(x - 12, y, { steps: 5 });
+            await expect(dragHandle).toHaveAttribute("aria-grabbed", "true");
+            await page.mouse.move(target.x + target.width / 2, target.y + 65, { steps: 20 });
+            await expect(lane(to)).toHaveClass(/ring-2/);
+            await page.mouse.up();
+          }
+
+          await pointerDrop("in_progress", "todo");
+          await expect(lane("todo").locator("article")).toHaveCount(1);
+          await expect(lane("in_progress").getByTestId("workspace-lane-total")).toHaveText("0");
+
+          const concurrent = await user.from("tasks").update({ priority: "high" }).eq("id", quickCreated.data!.id).select("priority").single();
+          if (concurrent.error) throw concurrent.error;
+          expect(concurrent.data.priority).toBe("high");
+          await pointerDrop("todo", "in_progress");
+          await expect(page.getByText("Task changed somewhere else. Refresh and try again.", { exact: true })).toBeVisible();
+          await expect(lane("todo").getByRole("article")).toContainText("High");
+          await expect(lane("in_progress").locator("article")).toHaveCount(0);
+
+          await lane("todo").getByRole("button", { name: /Phase 2 quick create fixture/ }).click();
+          await expect(page).toHaveURL(/[&]layout=board&task=/);
+          await expect(page.getByRole("dialog").getByRole("heading", { name: "Checklist" })).toBeVisible();
+          await expect.poll(async () => (await page.getByRole("dialog").boundingBox())?.width ?? 0).toBeGreaterThan(900);
+          await page.getByRole("dialog").getByRole("button", { name: "Task documents" }).click();
+          await expect(page.getByRole("dialog").getByRole("link", { name: "Goal documents" })).toBeVisible();
+          await expect(page.getByRole("dialog").locator('input[type="file"]')).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(page).not.toHaveURL(/[?&]task=/);
+          await expect(lane("todo").locator("article")).toHaveCount(1);
+
+          await page.setViewportSize({ width: 390, height: 844 });
+          await page.goto(`${appUrl}/en/tasks?parentTaskId=${outsidePage.id}&action=create-subtask`);
+          await expect(page).toHaveURL(/\/workspace\?task=.*&tab=subtasks/);
+          const mobileDetail = page.getByRole("dialog");
+          await expect(mobileDetail.getByRole("heading", { name: "Checklist" })).toBeVisible();
+          await expect.poll(async () => (await mobileDetail.boundingBox())?.width ?? 0).toBeGreaterThanOrEqual(389);
+          await page.goto(`${allTasksUrl}&task=${quickCreated.data!.id}&tab=review`);
+          await expect(mobileDetail.getByRole("button", { name: "AI review" })).toHaveAttribute("aria-pressed", "true");
+          await expect(mobileDetail.getByText("Move this task into In Progress before requesting AI Review.")).toBeVisible();
+          await page.goto(`${allTasksUrl}&q=Phase+2+quick+create+fixture`);
+          const lifecycleRow = page.getByTestId("workspace-preview-task");
+          const lifecycleStatus = lifecycleRow.getByRole("combobox", { name: /Change status/ });
+          await lifecycleStatus.selectOption("cancelled");
+          await expect(lifecycleStatus).toHaveValue("cancelled");
+          await expect(lifecycleStatus).toBeEnabled();
+          await lifecycleStatus.selectOption("todo");
+          await expect(lifecycleStatus).toHaveValue("todo");
+          const overdue = await user.from("tasks").update({ due_at: new Date(Date.now() - 86_400_000).toISOString() })
+            .eq("id", quickCreated.data!.id);
+          if (overdue.error) throw overdue.error;
+          await page.reload();
+          await expect(lifecycleRow.getByText("Overdue", { exact: true })).toBeVisible();
+          await lifecycleRow.getByRole("button", { name: /Change deadline/ }).click();
+          await lifecycleRow.getByLabel("Deadline date and time").fill(local);
+          await lifecycleRow.getByRole("button", { name: "Save", exact: true }).click();
+          await expect(lifecycleRow.getByText("Overdue", { exact: true })).toHaveCount(0);
+
           const anonymous = createClient<Database>(apiUrl!, publicKey!, { auth });
           const anonymousPage = await anonymous.rpc("get_workspace_task_page");
           expect(anonymousPage.error).not.toBeNull();

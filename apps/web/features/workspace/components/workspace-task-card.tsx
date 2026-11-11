@@ -27,6 +27,26 @@ export function WorkspaceTaskCard({
   onOpen,
   disabled = false,
 }: WorkspaceTaskCardProps) {
+  return <WorkspaceSummaryCard
+    task={task}
+    goalTitle={task.goals?.title}
+    subtaskCount={task.subtasks.length}
+    completedSubtasks={task.subtasks.filter((subtask) => subtask.status === "completed").length}
+    onOpen={() => onOpen(task)}
+    disabled={disabled}
+  />;
+}
+
+export function WorkspaceSummaryCard({
+  task, goalTitle, subtaskCount, completedSubtasks, onOpen, disabled = false,
+}: {
+  task: Pick<WorkspaceTask, "id" | "title" | "priority" | "due_at">;
+  goalTitle?: string | null;
+  subtaskCount: number;
+  completedSubtasks: number;
+  onOpen: () => void;
+  disabled?: boolean;
+}) {
   const t = useTranslations("workspace.board");
   const taskT = useTranslations("tasks.form");
   const draggable = useDraggable({
@@ -35,10 +55,6 @@ export function WorkspaceTaskCard({
     disabled,
     data: { taskId: task.id },
   });
-
-  const completedSubtasks = task.subtasks.filter(
-    (subtask) => subtask.status === "completed",
-  ).length;
 
   return (
     <article
@@ -50,7 +66,7 @@ export function WorkspaceTaskCard({
     >
       <button
         type="button"
-        onClick={() => onOpen(task)}
+        onClick={onOpen}
         className="block min-h-touch w-full rounded-lg p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <h3 title={task.title} className="min-h-touch pr-10 text-body font-medium text-foreground line-clamp-2 [overflow-wrap:anywhere] lg:min-h-control-sm">
@@ -61,14 +77,14 @@ export function WorkspaceTaskCard({
           <Badge variant="secondary" className={cn("shrink-0", PRIORITY_TONES[task.priority])}>
             {taskT(`priorities.${task.priority}`)}
           </Badge>
-          {task.goals ? (
-            <p title={task.goals.title} className="min-w-0 truncate text-caption text-muted-foreground">
-              {task.goals.title}
+          {goalTitle ? (
+            <p title={goalTitle} className="min-w-0 truncate text-caption text-muted-foreground">
+              {goalTitle}
             </p>
           ) : null}
         </div>
 
-        {(task.due_at || task.subtasks.length > 0) ? <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
+        {(task.due_at || subtaskCount > 0) ? <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
           {task.due_at ? (
             <span className="flex items-center gap-1">
               <CalendarClock aria-hidden="true" className="size-icon-sm shrink-0" />
@@ -77,13 +93,13 @@ export function WorkspaceTaskCard({
             </span>
           ) : null}
 
-          {task.subtasks.length > 0 ? (
+          {subtaskCount > 0 ? (
             <span className="flex items-center gap-1">
               <CheckSquare2 aria-hidden="true" className="size-icon-sm shrink-0" />
 
               {t("subtaskProgress", {
                 completed: completedSubtasks,
-                total: task.subtasks.length,
+                total: subtaskCount,
               })}
             </span>
           ) : null}

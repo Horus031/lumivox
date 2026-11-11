@@ -16,9 +16,11 @@ const priorities = ["low", "medium", "high", "critical"] as const;
 export function WorkspaceQuickCreateTask({
   goalId,
   withOptions = false,
+  compact = false,
 }: {
   goalId: string | null;
   withOptions?: boolean;
+  compact?: boolean;
 }) {
   const t = useTranslations("workspace.board");
   const commonT = useTranslations("common");
@@ -65,7 +67,7 @@ export function WorkspaceQuickCreateTask({
   }
 
   return (
-    <div className="mb-3">
+    <div className={compact ? "min-w-0" : "mb-3"}>
       {open ? (
         <form onSubmit={submit} className="space-y-2">
           <label htmlFor={inputId} className="sr-only">
@@ -124,6 +126,7 @@ export function WorkspaceQuickCreateTask({
         <Button
           type="button"
           variant="ghost"
+          size={compact ? "sm" : "default"}
           className="w-full justify-start gap-2 text-secondary-text"
           onClick={() => setOpen(true)}
         >

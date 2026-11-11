@@ -13,7 +13,7 @@ type TaskModalShellProps = {
   onClose: () => void;
   children: ReactNode;
   footer?: ReactNode;
-  align?: "center" | "right";
+  align?: "center" | "right" | "workspace";
 };
 
 export function TaskModalShell({ open, title, description, onClose, children, footer, align = "center" }: TaskModalShellProps) {
@@ -21,7 +21,9 @@ export function TaskModalShell({ open, title, description, onClose, children, fo
   const returnFocus = useRef<HTMLElement | null>(null);
   const alignment = align === "right"
     ? "top-0 right-0 left-auto h-dvh max-h-dvh max-w-full translate-x-0 translate-y-0 rounded-none border-y-0 border-r-0 sm:max-w-[36rem]"
-    : "max-h-[calc(100dvh-2rem)] rounded-lg sm:max-w-2xl";
+    : align === "workspace"
+      ? "h-dvh max-h-dvh max-w-full rounded-none sm:h-auto sm:max-h-[calc(100dvh-3rem)] sm:max-w-[min(64rem,calc(100%-3rem))] sm:rounded-xl"
+      : "max-h-[calc(100dvh-2rem)] rounded-lg sm:max-w-2xl";
 
   return (
     <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onClose(); }}>

@@ -28,7 +28,7 @@ export function BehaviourTrendChart({ data }: BehaviourTrendChartProps) {
   const t = useTranslations("dashboard.behaviourTrend");
 
   return (
-    <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
+    <section className="app-panel min-w-0">
       <div className="mb-4">
         <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
         <p className="mt-1 text-caption text-secondary-text">

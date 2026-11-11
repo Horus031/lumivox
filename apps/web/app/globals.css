@@ -95,7 +95,7 @@
   --text-label: 0.8125rem;
   --text-label--line-height: 1.125rem;
   --text-body: 0.875rem;
-  --text-body--line-height: 1.375rem;
+  --text-body--line-height: 1.25rem;
   --text-section: 1rem;
   --text-section--line-height: 1.5rem;
   --text-page: 1.5rem;
@@ -104,7 +104,7 @@
   --text-metric--line-height: 2.125rem;
 
   --spacing-control-sm: 2rem;
-  --spacing-control: 2.25rem;
+  --spacing-control: 2.125rem;
   --spacing-control-lg: 2.5rem;
   --spacing-touch: 2.75rem;
   --spacing-card: 1rem;
@@ -823,6 +823,10 @@
 }
 
 @layer utilities {
+  .app-panel {
+    @apply rounded-lg border border-border bg-card p-card;
+  }
+
   .font-mono {
     font-family: var(--font-mono);
   }

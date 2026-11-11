@@ -38,7 +38,7 @@ export function WorkspaceTaskQuickEdit({
   const status = task.status === "overdue" ? "in_progress" : task.status;
   const targets = DIRECT_TASK_STATUS_TARGETS.filter((target) => target !== status && canDirectlyTransitionTask(task.effective_status, target));
   const expected = { taskId: task.id, expectedStatus: task.status, expectedUpdatedAt: task.updated_at };
-  const selectClass = "min-h-9 rounded-md border bg-background px-2 text-sm disabled:opacity-70";
+  const selectClass = "h-9 w-full min-w-0 rounded border border-transparent bg-transparent px-1 text-xs hover:border-border focus-visible:border-ring disabled:opacity-70 sm:h-7";
 
   function closeDeadline() {
     setDraft(null);
@@ -82,8 +82,8 @@ export function WorkspaceTaskQuickEdit({
   }
 
   return (
-    <div className="min-w-0 space-y-2" aria-busy={pending}>
-      <div className="flex flex-wrap items-center gap-2">
+    <>
+      <div role="cell" className="min-w-0" aria-busy={pending}>
         <select
           aria-label={t("editStatus", { title: task.title })}
           className={selectClass}
@@ -97,6 +97,8 @@ export function WorkspaceTaskQuickEdit({
           <option value={status}>{taskT(`statuses.${status}`)}</option>
           {targets.map((target) => <option key={target} value={target}>{taskT(`statuses.${target}`)}</option>)}
         </select>
+      </div>
+      <div role="cell" className="min-w-0">
         <select
           aria-label={t("editPriority", { title: task.title })}
           className={selectClass}
@@ -109,11 +111,14 @@ export function WorkspaceTaskQuickEdit({
         >
           {priorities.map((priority) => <option key={priority} value={priority}>{taskT(`priorities.${priority}`)}</option>)}
         </select>
+      </div>
+      <div role="cell" className="min-w-0">
         <Button
           ref={deadlineButton}
           type="button"
-          variant="outline"
+          variant="ghost"
           size="sm"
+          className="h-9 w-full justify-start truncate px-1 text-xs sm:h-7"
           aria-expanded={!!draft}
           aria-label={t("editDeadline", { title: task.title })}
           aria-disabled={pending}
@@ -128,9 +133,8 @@ export function WorkspaceTaskQuickEdit({
         >
           {deadlineLabel}
         </Button>
-      </div>
       {draft && (
-        <form className="flex flex-wrap items-end gap-2" onSubmit={saveDeadline} onKeyDown={(event) => {
+        <form className="absolute inset-x-2 top-full z-10 flex flex-wrap items-end gap-2 rounded-md border bg-popover p-2 shadow-md sm:left-auto" onSubmit={saveDeadline} onKeyDown={(event) => {
           if (event.key === "Escape" && !pending) closeDeadline();
         }}>
           <label htmlFor={deadlineId} className="grid min-w-0 gap-1 text-sm">
@@ -141,6 +145,7 @@ export function WorkspaceTaskQuickEdit({
           <Button type="button" size="sm" variant="ghost" disabled={pending} onClick={closeDeadline}>{common("cancel")}</Button>
         </form>
       )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -20,9 +20,9 @@ export function PageHeader({
           {eyebrow}
         </p>
       ) : null}
-      <div className="flex flex-wrap items-start gap-x-section gap-y-3">
+      <div className="flex flex-wrap items-start gap-x-section gap-y-2">
         <div className="min-w-0 flex-1 basis-80">
-          <h1 className="text-page font-semibold tracking-normal text-foreground [overflow-wrap:anywhere]">
+          <h1 className="text-page font-semibold tracking-tight text-foreground [overflow-wrap:anywhere]">
             {title}
           </h1>
           {description ? (

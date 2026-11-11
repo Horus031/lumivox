@@ -48,7 +48,7 @@ export function AppShellFrame({
   return (
     <div
       data-sidebar-collapsed={isSidebarCollapsed}
-      className="group/sidebar-shell flex min-h-[calc(100svh-var(--spacing-topbar))] lg:min-h-svh"
+      className="group/sidebar-shell flex min-h-[calc(100svh-var(--spacing-topbar))] lg:min-h-svh lg:[--spacing-topbar:3.125rem]"
     >
       {sidebar}
 
@@ -86,7 +86,7 @@ export function AppShellFrame({
           isSidebarCollapsed ? "lg:pl-sidebar-collapsed" : "lg:pl-sidebar",
         )}
       >
-        <div className="min-w-0 px-card py-page pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-page lg:pb-page">
+        <div className="min-w-0 px-card py-page pb-[calc(6rem+env(safe-area-inset-bottom))] md:px-page lg:py-4">
           {children}
         </div>
       </main>

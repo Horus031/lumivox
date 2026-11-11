@@ -45,7 +45,7 @@ export function DashboardSummaryCards({
       {cards.map((card) => (
         <article
           key={card.key}
-          className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm"
+          className="app-panel min-w-0"
         >
           <div className="flex items-start justify-between gap-2">
             <p className="min-w-0 text-label text-secondary-text">
