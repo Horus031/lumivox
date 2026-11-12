@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { randomBytes } from "node:crypto";
+import { createClient } from "@supabase/supabase-js";
 import { describe,expect,it,vi } from "vitest";
+import type { Database } from "@/types/database.types";
 import { dispatchResendReminders,type ResendDispatchStore,type ResendDispatchConfig } from "./resend-reminder-dispatcher";
 import { configuredReminderRecipients,resolveReminderContext } from "./resolve-reminder-context";
 import { decryptReminderPayload,reminderEncryptionKey,type PayloadSnapshot } from "./resend-payload";
@@ -207,10 +209,12 @@ describe("11C.5B rate-limit outcome recording", () => {
     const f = fixture();
     const send = vi.fn().mockResolvedValue({ data: null, error: { name, statusCode } });
     const adapter = new ResendReminderProvider({ emails: { send } }, f.config.from);
-    const rpc = vi.fn().mockReturnValue({
-      abortSignal: vi.fn().mockResolvedValue({ error: null }),
+    const request = vi.fn<typeof fetch>().mockImplementation(async () => Response.json(null));
+    const db = createClient<Database>("https://supabase.example.invalid", "test-key", {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { fetch: request },
     });
-    const store = createResendDispatchStore({ rpc } as Parameters<typeof createResendDispatchStore>[0]);
+    const store = createResendDispatchStore(db);
     f.store.record.mockImplementation(store.record);
 
     const counts = await dispatchResendReminders(f.store, adapter, f.config);
@@ -224,10 +228,13 @@ describe("11C.5B rate-limit outcome recording", () => {
     expect(f.store.record).toHaveBeenCalledExactlyOnceWith(
       { jobId: uuid, leaseToken: lease }, uuid, handoff.p_payload_fingerprint, { kind, code, ...rejection },
     );
-    if (code === "rate_limited") {
-      expect(rpc).toHaveBeenCalledExactlyOnceWith("ls_notification_record_resend_rate_limit", handoff);
-    } else {
-      expect(rpc).toHaveBeenCalledExactlyOnceWith("ls_notification_record_resend_outcome", { ...handoff, p_outcome: kind });
-    }
+    const expected = code === "rate_limited"
+      ? { rpc: "ls_notification_record_resend_rate_limit", body: handoff }
+      : { rpc: "ls_notification_record_resend_outcome", body: { ...handoff, p_outcome: kind } };
+    expect(request).toHaveBeenCalledTimes(1);
+    const [url, init] = request.mock.calls[0];
+    expect(String(url)).toBe(`https://supabase.example.invalid/rest/v1/rpc/${expected.rpc}`);
+    expect(init?.method).toBe("POST");
+    expect(JSON.parse(String(init?.body))).toEqual(expected.body);
   });
 });
