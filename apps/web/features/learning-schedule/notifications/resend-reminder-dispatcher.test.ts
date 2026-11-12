@@ -129,3 +129,68 @@ describe("8D authenticated dispatcher boundary",()=>{
   const f=setup();f.env.STUDY_REMINDER_REAL_SEND_ENABLED="false";const response=await handleResendDispatch(request(f.env.STUDY_REMINDER_DISPATCH_SECRET,{dryRun:true}),f.env,f.ports);expect(response.status).toBe(200);expect(f.ports.transport).not.toHaveBeenCalled();
  });
 });
+
+describe("11C.5A uncertain provider outcomes", () => {
+  const claim = { jobId: uuid, leaseToken: lease };
+
+  function authorizedFixture() {
+    const f = fixture();
+    // Model the committed delivery returned by the store. Database durability
+    // and lease recovery are covered separately from this dispatcher test.
+    const handoff = { status: "unclaimed", deliveryId: uuid };
+    f.store.authorize.mockImplementation(async () => {
+      if (handoff.status !== "unclaimed") return { authorized: false };
+      handoff.status = "submitting";
+      return { authorized: true, deliveryId: handoff.deliveryId };
+    });
+    const send = vi.fn();
+    const adapter = new ResendReminderProvider({ emails: { send } }, f.config.from);
+    return { ...f, handoff, send, adapter };
+  }
+
+  it.each([
+    { name: "T01 timeout", fault: () => Promise.reject(new DOMException("SDK timed out", "TimeoutError")), code: "transport_error" },
+    { name: "T02 connection reset", fault: () => Promise.reject(Object.assign(new Error("Connection reset"), { code: "ECONNRESET" })), code: "transport_error" },
+    { name: "T03 HTTP 503", fault: async () => ({ data: null, error: { name: "application_error", statusCode: 503 } }), code: "provider_unavailable" },
+    { name: "T04 missing message ID", fault: async () => ({ data: {}, error: null }), code: "invalid_provider_response" },
+  ])("$name records uncertainty once against the committed handoff", async ({ fault, code }) => {
+    const f = authorizedFixture();
+    f.send.mockImplementation(fault);
+    f.store.record.mockImplementation(async () => {
+      expect(f.handoff.status).toBe("submitting");
+      f.handoff.status = "uncertain";
+    });
+
+    const result = await dispatchResendReminders(f.store, f.adapter, f.config);
+    expect(result).toMatchObject({ accepted: 0, rejected: 0, uncertain: 1, held: 0 });
+    expect(f.store.authorize).toHaveBeenCalledBefore(f.send);
+    expect(f.store.record).toHaveBeenCalledExactlyOnceWith(
+      claim, uuid, f.getSnapshot()?.payload_fingerprint, { kind: "uncertain", code },
+    );
+    expect(f.handoff.status).toBe("uncertain");
+    expect((await dispatchResendReminders(f.store, f.adapter, f.config)).held).toBe(1);
+    expect(f.send).toHaveBeenCalledTimes(1);
+    expect(f.store.record).toHaveBeenCalledTimes(1);
+  });
+
+  it("T05 keeps the committed handoff when recording an accepted outcome fails", async () => {
+    const f = authorizedFixture();
+    f.send.mockResolvedValue({ data: { id: "resend-fixture" }, error: null });
+    f.store.record.mockRejectedValue(new Error("Injected database write failure"));
+
+    const result = await dispatchResendReminders(f.store, f.adapter, f.config);
+    expect(result).toMatchObject({ accepted: 0, rejected: 0, uncertain: 0, held: 1 });
+    expect(f.store.authorize).toHaveBeenCalledBefore(f.send);
+    const snapshot = f.getSnapshot();
+    expect(snapshot).not.toBeNull();
+    expect(f.store.record).toHaveBeenCalledExactlyOnceWith(
+      claim, uuid, snapshot?.payload_fingerprint, { kind: "accepted", providerMessageId: "resend-fixture" },
+    );
+    expect((await dispatchResendReminders(f.store, f.adapter, f.config)).held).toBe(1);
+    expect(f.handoff).toEqual({ status: "submitting", deliveryId: uuid });
+    expect(f.getSnapshot()).toBe(snapshot);
+    expect(f.store.prepare).toHaveBeenCalledTimes(1);
+    expect(f.send).toHaveBeenCalledTimes(1);
+    expect(f.store.record).toHaveBeenCalledTimes(1);
+  });
+});

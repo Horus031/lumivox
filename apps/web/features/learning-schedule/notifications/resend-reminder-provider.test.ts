@@ -38,6 +38,11 @@ describe("8A injected Resend transport (no real sends)",()=>{
     send.mockRejectedValue(new Error("timeout with PRIVATE recipient verified-fixture@example.invalid"));
     expect(await provider().send(email)).toEqual({kind:"uncertain",code:"transport_error"});expect(send).toHaveBeenCalledTimes(1);
   });
+  it("T02 treats a connection reset as uncertain after one SDK call", async () => {
+    send.mockRejectedValue(Object.assign(new Error("Connection reset"), { code: "ECONNRESET" }));
+    expect(await provider().send(email)).toEqual({ kind: "uncertain", code: "transport_error" });
+    expect(send).toHaveBeenCalledTimes(1);
+  });
   it("RE-08 SDK transport error with null status is uncertain, not a malformed rejection",async()=>{
     send.mockResolvedValue({data:null,error:{name:"application_error",statusCode:null,message:"PRIVATE network detail"},headers:null});
     expect(await provider().send(email)).toEqual({kind:"uncertain",code:"transport_error"});expect(send).toHaveBeenCalledTimes(1);
@@ -62,6 +67,7 @@ describe("8A injected Resend transport (no real sends)",()=>{
   });
   it.each([undefined,null,{}, {data:null,error:null},{data:{id:""},error:null},{data:{id:"bad\nID"},error:null}, {data:{id},error:{name:"validation_error",statusCode:422}}, {data:null,error:{name:"unknown"}}])("malformed/ambiguous provider response %j never claims acceptance",async response=>{
     send.mockResolvedValue(response);expect(await provider().send(email)).toEqual({kind:"uncertain",code:"invalid_provider_response"});
+    expect(send).toHaveBeenCalledTimes(1);
   });
   it.each([{recipient:"bad"},{recipient:[email.recipient]},{subject:"Subject\r\nBcc: private@example.invalid"},{idempotencyKey:""},{idempotencyKey:"x".repeat(257)},
     {headers:{"X-Private":"SECRET"}},{documentContent:"SECRET"},{attachments:[]},{privateNotes:"SECRET"}])("RE-10 rejects invalid/private input before client %j",async patch=>{
