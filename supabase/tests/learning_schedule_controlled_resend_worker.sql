@@ -101,33 +101,72 @@ CREATE FUNCTION pg_temp.pd_rate(label text) RETURNS void LANGUAGE sql AS $$
  SELECT public.ls_notification_record_resend_rate_limit(d.id,c.token,repeat('b',64))
  FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job AND d.handoff_token=c.token WHERE c.label=$1;
 $$;
+CREATE FUNCTION pg_temp.rl_claim(p_label text) RETURNS uuid LANGUAGE sql AS $$
+ UPDATE us_ctx SET token=(claim->>'leaseToken')::uuid
+ FROM jsonb_array_elements(public.ls_notification_claim_batch(25)) claim
+ WHERE label=p_label AND job=(claim->>'jobId')::uuid
+ RETURNING token;
+$$;
 SELECT pg_temp.us_new('rate');SELECT pg_temp.us_lease('rate');
 SELECT pg_temp.pd_prepare('rate',repeat('6',64));SELECT pg_temp.pd_auth('rate');
 SELECT throws_ok($$SELECT public.ls_notification_record_resend_rate_limit(d.id,c.token,repeat('c',64))
  FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job WHERE c.label='rate'$$,
  'PT409','Invalid Resend handoff','rate-limit outcome must match immutable payload fingerprint');
+CREATE TEMP TABLE rate_clock AS SELECT clock_timestamp() AS before_record;
 SELECT pg_temp.pd_rate('rate');
-SELECT ok((SELECT j.status='pending' AND j.attempt_count=1 AND j.lease_token IS NULL
- AND j.next_attempt_at > clock_timestamp()+interval '25 seconds'
- FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),'PE-05 confirmed 429 commits backoff and releases lease');
+SELECT ok((SELECT j.status='pending' AND j.attempt_count=1 AND j.lease_token IS NULL AND j.lease_until IS NULL
+ AND j.next_attempt_at BETWEEN (SELECT before_record FROM rate_clock)+interval '30 seconds' AND clock_timestamp()+interval '30 seconds'
+ FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),'RL-01 confirmed 429 commits 30-second backoff and releases both lease fields');
+SELECT ok((SELECT d.status='failed' AND d.error_code='rate_limited' AND d.provider_message_id IS NULL AND d.provider_accepted_at IS NULL
+ FROM study_notification_deliveries d JOIN us_ctx c ON c.job=d.job_id WHERE c.label='rate'),'RL-01 delivery records a definitive rejection without provider acceptance');
 CREATE TEMP TABLE rate_replay AS SELECT j.next_attempt_at FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate';
+CREATE TEMP TABLE rate_original AS
+ SELECT j.due_at,j.idempotency_key,c.token,p.encrypted_payload,p.payload_fingerprint
+ FROM us_ctx c JOIN study_notification_jobs j ON j.id=c.job JOIN study_notification_resend_payloads p ON p.job_id=c.job
+ WHERE c.label='rate';
 SELECT pg_temp.pd_rate('rate');
 SELECT is((SELECT j.next_attempt_at FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),
  (SELECT next_attempt_at FROM rate_replay),'429 replay does not extend the backoff');
 SELECT is((SELECT count(*)::int FROM study_notification_resend_payloads p JOIN us_ctx c ON c.job=p.job_id WHERE c.label='rate'),1,
  '429 preserves one payload');
-SELECT ok(NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.ls_notification_claim_batch(25)) x
- WHERE (x->>'jobId')::uuid=(SELECT job FROM us_ctx WHERE label='rate')),'no claim during backoff');
+SELECT ok(pg_temp.rl_claim('rate') IS NULL,'RL-02 no claim during backoff even though reminder is due');
+
+-- Shift only the fixture's retry time. The claim RPC still uses the real clock.
+UPDATE study_notification_jobs SET next_attempt_at=clock_timestamp()-interval '1 second'
+ WHERE id=(SELECT job FROM us_ctx WHERE label='rate');
+CREATE TEMP TABLE rate_retry_claim AS SELECT pg_temp.rl_claim('rate') AS token;
+SELECT ok(c.token IS NOT NULL AND c.token IS DISTINCT FROM o.token,'RL-03 due retry receives a new lease token')
+ FROM rate_retry_claim c CROSS JOIN rate_original o;
+SELECT ok((SELECT j.status='leased' AND j.attempt_count=2 AND j.due_at=o.due_at AND j.idempotency_key=o.idempotency_key
+ FROM us_ctx c JOIN study_notification_jobs j ON j.id=c.job CROSS JOIN rate_original o WHERE c.label='rate'),
+ 'RL-03 claim increments attempt count and retains due time and idempotency key');
+SELECT public.ls_notification_record_resend_rate_limit(d.id,o.token,o.payload_fingerprint)
+ FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job AND d.attempt_number=1 CROSS JOIN rate_original o WHERE c.label='rate';
+SELECT ok((SELECT j.status='leased' AND j.attempt_count=2 AND j.lease_token=c.token
+ FROM us_ctx c JOIN study_notification_jobs j ON j.id=c.job WHERE c.label='rate'),'RL-03 replay of attempt 1 cannot release attempt 2');
+SELECT is(pg_temp.pd_auth('rate')->>'authorized','true','RL-03 retry is authorized using the original snapshot');
+SELECT is(pg_temp.pd_auth('rate')->>'reason','handoff_already_started','RL-03 replay cannot authorize a second send for the retry lease');
+SELECT ok((SELECT p.encrypted_payload=o.encrypted_payload AND p.payload_fingerprint=o.payload_fingerprint
+ FROM us_ctx c JOIN study_notification_resend_payloads p ON p.job_id=c.job CROSS JOIN rate_original o WHERE c.label='rate'),
+ 'RL-03 retry preserves the original immutable payload');
+SELECT pg_temp.pd_rate('rate');
+SELECT ok((SELECT j.status='pending' AND j.attempt_count=2 AND j.next_attempt_at>clock_timestamp()
+ FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),'RL-04 second rejection schedules backoff within budget');
+UPDATE study_notification_jobs SET next_attempt_at=clock_timestamp()-interval '1 second'
+ WHERE id=(SELECT job FROM us_ctx WHERE label='rate');
+SELECT ok(pg_temp.rl_claim('rate') IS NOT NULL,'RL-04 third attempt can be claimed');
+SELECT is(pg_temp.pd_auth('rate')->>'authorized','true','RL-04 third attempt can be authorized');
+SELECT pg_temp.pd_rate('rate');
+SELECT ok((SELECT j.status='failed' AND j.attempt_count=3 AND j.lease_token IS NULL AND j.lease_until IS NULL
+ FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='rate'),'RL-04 third rejection exhausts the retry budget');
+SELECT is((SELECT count(*) FROM study_notification_deliveries d JOIN us_ctx c ON c.job=d.job_id
+ WHERE c.label='rate' AND d.status='failed' AND d.error_code='rate_limited'),3::bigint,
+ 'RL-04 exactly one rate-limited delivery per attempt');
 
 SELECT pg_temp.us_new('short-window',interval '20 seconds');SELECT pg_temp.us_lease('short-window');
 SELECT pg_temp.pd_prepare('short-window',repeat('7',64));SELECT pg_temp.pd_auth('short-window');SELECT pg_temp.pd_rate('short-window');
 SELECT is((SELECT j.status FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='short-window'),
- 'expired','429 backoff outside relevance window is terminal');
-SELECT pg_temp.us_new('budget');
-UPDATE study_notification_jobs SET attempt_count=2 WHERE id=(SELECT job FROM us_ctx WHERE label='budget');
-SELECT pg_temp.us_lease('budget');SELECT pg_temp.pd_prepare('budget',repeat('8',64));SELECT pg_temp.pd_auth('budget');SELECT pg_temp.pd_rate('budget');
-SELECT is((SELECT j.status FROM study_notification_jobs j JOIN us_ctx c ON c.job=j.id WHERE c.label='budget'),
- 'failed','429 does not exceed three claims');
+ 'expired','RL-05 429 backoff outside relevance window is terminal');
 
 SELECT pg_temp.us_new('unknown');SELECT pg_temp.us_lease('unknown');
 SELECT pg_temp.pd_prepare('unknown',repeat('9',64));SELECT pg_temp.pd_auth('unknown');
@@ -135,6 +174,23 @@ SELECT public.ls_notification_record_resend_outcome(d.id,c.token,repeat('b',64),
  FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job WHERE c.label='unknown';
 SELECT throws_ok($$SELECT pg_temp.pd_rate('unknown')$$,'PT409','Resend handoff is no longer submitting',
  'PE-07 uncertain result cannot be converted into a retry');
+SELECT pg_temp.us_new('quota');SELECT pg_temp.us_lease('quota');
+SELECT pg_temp.pd_prepare('quota',repeat('8',64));SELECT pg_temp.pd_auth('quota');
+SELECT public.ls_notification_record_resend_outcome(d.id,c.token,repeat('b',64),'rejected')
+ FROM us_ctx c JOIN study_notification_deliveries d ON d.job_id=c.job WHERE c.label='quota';
+SELECT throws_ok($$SELECT pg_temp.pd_rate('quota')$$,'PT409','Resend handoff is no longer submitting',
+ 'RL-06 terminal rejection cannot be converted into a rate-limit retry');
+SELECT public.ls_notification_reconcile_expired_leases();
+SELECT public.ls_reconcile_study_notifications(auth.uid());
+SELECT results_eq(
+ $$SELECT c.label,j.status,d.status FROM us_ctx c JOIN study_notification_jobs j ON j.id=c.job
+   JOIN study_notification_deliveries d ON d.job_id=j.id AND d.attempt_number=j.attempt_count
+   WHERE c.label IN ('quota','rate','short-window','unknown') ORDER BY c.label$$,
+ $$VALUES ('quota','failed','failed'),('rate','failed','failed'),('short-window','expired','failed'),('unknown','failed','uncertain')$$,
+ 'RL-04/05/06 terminal jobs and outcomes survive reconciliation');
+SELECT ok(NOT EXISTS(SELECT 1 FROM jsonb_array_elements(public.ls_notification_claim_batch(25)) x
+ JOIN us_ctx c ON c.job=(x->>'jobId')::uuid WHERE c.label IN ('quota','rate','short-window','unknown')),
+ 'RL-04/05/06 terminal jobs cannot be claimed again after reconciliation');
 SET LOCAL ROLE authenticated;
 SELECT throws_ok($$SELECT public.ls_notification_record_resend_rate_limit(gen_random_uuid(),gen_random_uuid(),repeat('a',64))$$,'42501',NULL,
  'browser cannot record trusted rate-limit outcome');
