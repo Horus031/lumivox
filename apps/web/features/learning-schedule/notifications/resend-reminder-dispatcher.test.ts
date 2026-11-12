@@ -5,6 +5,7 @@ import { dispatchResendReminders,type ResendDispatchStore,type ResendDispatchCon
 import { configuredReminderRecipients,resolveReminderContext } from "./resolve-reminder-context";
 import { decryptReminderPayload,reminderEncryptionKey,type PayloadSnapshot } from "./resend-payload";
 import { handleResendDispatch } from "./resend-dispatch-endpoint";
+import { createResendDispatchStore } from "./resend-dispatch-store";
 import { ResendReminderProvider } from "./resend-reminder-provider";
 
 const uuid="8d000000-0000-4000-8000-000000000001",lease="8d000000-0000-4000-8000-000000000002";
@@ -192,5 +193,41 @@ describe("11C.5A uncertain provider outcomes", () => {
     expect(f.store.prepare).toHaveBeenCalledTimes(1);
     expect(f.send).toHaveBeenCalledTimes(1);
     expect(f.store.record).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("11C.5B rate-limit outcome recording", () => {
+  it.each([
+    { statusCode: 429, name: "rate_limit_exceeded", kind: "rejected", code: "rate_limited", retryable: true },
+    { statusCode: 429, name: "daily_quota_exceeded", kind: "rejected", code: "quota_exceeded", retryable: false },
+    { statusCode: 429, name: "monthly_quota_exceeded", kind: "rejected", code: "quota_exceeded", retryable: false },
+    { statusCode: 409, name: "concurrent_idempotent_requests", kind: "uncertain", code: "idempotency_in_flight" },
+    { statusCode: 503, name: "application_error", kind: "uncertain", code: "provider_unavailable" },
+  ] as const)("routes $statusCode/$name through the correct outcome RPC", async ({ statusCode, name, kind, code, ...rejection }) => {
+    const f = fixture();
+    const send = vi.fn().mockResolvedValue({ data: null, error: { name, statusCode } });
+    const adapter = new ResendReminderProvider({ emails: { send } }, f.config.from);
+    const rpc = vi.fn().mockReturnValue({
+      abortSignal: vi.fn().mockResolvedValue({ error: null }),
+    });
+    const store = createResendDispatchStore({ rpc } as Parameters<typeof createResendDispatchStore>[0]);
+    f.store.record.mockImplementation(store.record);
+
+    const counts = await dispatchResendReminders(f.store, adapter, f.config);
+    expect(counts).toMatchObject({ accepted: 0, held: 0, [kind]: 1 });
+    expect(send).toHaveBeenCalledTimes(1);
+    const handoff = {
+      p_delivery_id: uuid,
+      p_handoff_token: lease,
+      p_payload_fingerprint: f.getSnapshot()?.payload_fingerprint,
+    };
+    expect(f.store.record).toHaveBeenCalledExactlyOnceWith(
+      { jobId: uuid, leaseToken: lease }, uuid, handoff.p_payload_fingerprint, { kind, code, ...rejection },
+    );
+    if (code === "rate_limited") {
+      expect(rpc).toHaveBeenCalledExactlyOnceWith("ls_notification_record_resend_rate_limit", handoff);
+    } else {
+      expect(rpc).toHaveBeenCalledExactlyOnceWith("ls_notification_record_resend_outcome", { ...handoff, p_outcome: kind });
+    }
   });
 });

@@ -71,3 +71,26 @@ In T01–T05, authorization preceded submission. The dispatcher ran again with t
 - `npm run lint` passed with the existing React hook warning in `use-focus-v2-audio.ts`. `npm --ignore-scripts run build` passed with the Next.js TypeScript check. The build skipped the prebuild script to preserve the running dev server's artifacts.
 
 11C.5B–11C.5E remain pending, including database lease expiry and crash recovery after the T05 failure. Gmail Spam and Staging one-click unsubscribe ingress remain open.
+
+## Step 11C.5B — Rate Limit & Durable Retry
+
+**Local PASS.**
+
+Baseline `6485974857aa80bfd17de4cda0ec3d0238155e3c` on `phase11c5/rate-limit-retry-validation`, matching the local and tracking refs for `product-release` after PR #127 merged 11C.5A. The operator verified the Staging alias on READY deployment `dpl_WdMof1Abv7jUchxGPmsTkty4eJk4` at that SHA. A fresh read-only Supabase Staging query found Dispatch and Missed Sweep OFF, zero deliveries, zero webhook receipts, and token migration `20261111071219` installed.
+
+| Case | Expected | Observed |
+| --- | --- | --- |
+| RL-01 | Confirmed HTTP 429 rejection records a 30-second backoff | The adapter and dispatcher routed `rate_limit_exceeded` to `ls_notification_record_resend_rate_limit`. PostgreSQL recorded a failed delivery with `error_code=rate_limited`, no provider message ID or acceptance timestamp, and a pending job with both lease fields cleared. The retry timestamp fell within the measured 30-second window and replay preserved it. |
+| RL-02 | A due reminder cannot be claimed before `next_attempt_at` | The claim RPC returned no lease for the fixture during backoff. |
+| RL-03 | The due retry can claim again and increment the attempt | Moving the fixture retry timestamp into the past let the real claim RPC issue a fresh lease and increment the attempt to 2. The original due time, idempotency key, ciphertext and payload fingerprint were retained. Replaying the first 429 left the new lease intact, and repeating authorization on the new lease yielded `handoff_already_started`. |
+| RL-04 | Three attempts exhaust the budget | The second rejection scheduled backoff. The third returned the same job to `failed` with both lease fields cleared and exactly three failed delivery rows. Reconciliation left it terminal and the claim RPC returned no further lease. |
+| RL-05 | A backoff crossing session start expires the job | With fewer than 30 seconds until the session, the rejection moved the job to `expired`. Reconciliation preserved that state and no further claim was granted. |
+| RL-06 | Quota 429, concurrent 409, and 503 bypass the short retry | Both quota variants used the generic rejected outcome RPC. The 409 and 503 used the generic uncertain outcome RPC. PostgreSQL kept the rejected and uncertain fixtures terminal after reconciliation, and converting either to a short retry returned `PT409`. |
+
+The dispatcher tests exercised the real provider adapter and store RPC routing with mocked SDK and database clients. Each of the five provider fixtures made exactly one mock SDK call and one outcome RPC call. The SQL tests used fixture timestamps and the real PostgreSQL claim and reconciliation functions. These checks cover replay and the per-lease duplicate fence. The dedicated multi-connection race scenarios remain pending under 11C.5D.
+
+- The two Resend suites passed 90 tests. The full `npm run test:unit -- --exclude '**/.next/**' --reporter=dot` run passed 1,088 tests with 26 skipped. The exclusion omits the prior Playwright scratch copy.
+- `supabase test db --local` passed 1,015 assertions across 36 files on the isolated stack, with 14 added assertions in the controlled worker SQL suite. After rollback, the stack had zero Auth fixtures, jobs, and deliveries, and both gates were OFF.
+- `npm run lint` passed with the existing React hook warning in `use-focus-v2-audio.ts`. `npm --ignore-scripts run build` passed, including the Next.js TypeScript check.
+
+The existing SQL suite changes the local Dispatch gate only inside its rollback transaction. The standalone worker harness was skipped in this checkpoint because it commits a temporary Dispatch gate change. Fault injection used local mocks and made zero real Resend requests. No production TypeScript or migration change was needed. 11C.5C–11C.5E and 11C.6 remain pending. Gmail Spam and Staging one-click unsubscribe ingress remain open.
