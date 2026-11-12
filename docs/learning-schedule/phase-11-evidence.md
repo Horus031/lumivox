@@ -49,3 +49,25 @@ Replaying the already-used unsubscribe token returned HTTP 200 and left consent 
 - `node scripts/test-learning-schedule-unsubscribe-concurrency.mjs --reconsent` passed 30 executions with 27 observed blockers and three prompt `SKIP LOCKED` returns. In all six new runs, `pg_blocking_pids()` identified the first transaction and the waiting RPC completed with SQLSTATE `00000`. When re-consent committed first, the old token returned false and was revoked without being marked used. In reverse order, the token was used before re-consent. Both orders ended with consent enabled and zero deliveries for the fixture. Cleanup verified zero fixture rows, Dispatch and Missed Sweep OFF, and zero reminder Cron jobs.
 - Web gates passed. `npm run lint` reported one existing React hook warning in `use-focus-v2-audio.ts`. `npm run test:unit` reported 1,077 passed and 26 skipped. `npm --ignore-scripts run build`, including Next.js's TypeScript check, passed on retry with write access to `.next` after the first run failed on `.next/trace-build`.
 - Scope is local database and automated tests. Staging deployment and HTTP replay with an unused token are **NOT EXECUTED**. No provider requests or new emails were made. Step 11C.5 remains pending. Gmail Spam remains tracked as technical debt.
+
+## Step 11C.5A — Provider Timeout & Uncertain Outcome
+
+**Local PASS.**
+
+Baseline `e12d55585bdf7a81d35a7da3ba3ffda2e270c4df` on `phase11c5/provider-uncertain-validation`, matching the local and tracking refs for `product-release`. A read-only check of Supabase Staging on 2026-11-12 found migration `20261111071219` installed, Dispatch and Missed Sweep OFF, zero deliveries, and zero webhook receipts. The earlier 11C.4D counts are historical. The reason for the difference in counts and the latest PR CI result were not independently verified in this step.
+
+| Case | Expected | Observed |
+| --- | --- | --- |
+| T01 · SDK timeout | `uncertain / transport_error` | Provider deadline and controlled `TimeoutError` covered. Dispatcher recorded uncertainty against the handoff. One SDK call. |
+| T02 · Connection reset | `uncertain / transport_error` | Injected `ECONNRESET` returned the expected classification at both layers. Dispatcher recorded uncertainty. One SDK call. |
+| T03 · HTTP 503 | `uncertain / provider_unavailable` | Adapter classified the mocked 503 as uncertain. Dispatcher recorded uncertainty. One SDK call. |
+| T04 · Missing message ID | `uncertain / invalid_provider_response` | Dispatcher recorded uncertainty. Provider tests also verified malformed response variants. One SDK call per fixture. |
+| T05 · Accepted, then record fails | Preserve handoff and avoid resend | Dispatcher reported one held item. The mocked store retained the same submitting delivery and payload snapshot. One SDK call and one failed outcome write. |
+
+In T01–T05, authorization preceded submission. The dispatcher ran again with the same claim in each test. The stateful mock denied a second handoff and the SDK call count stayed at one. The existing deferred-authorization test also verified that submission waits for authorization to resolve. Both Resend suites passed all 85 tests. Fault injection used mocks on the local machine and sent zero real provider requests. This checkpoint needed no migration or runtime code change.
+
+- `supabase test db --local` passed 1,001 pgTAP assertions across 36 files on the isolated stack, including the controlled Resend worker SQL suite. The existing worker harness passed 23 executions with nine observed lock blockers using the real worker, local Supabase, and injected SDK. Its timeout case recorded an `uncertain` delivery and a `failed` job, then returned no claim for that job. Cleanup verified zero fixture rows, both local gates OFF, and zero reminder Cron jobs.
+- The first Vitest invocation hit Windows module resolution errors and collected duplicate tests from a prior Playwright scratch copy in `.next`. The rerun with local filesystem access and `npm run test:unit -- --exclude '**/.next/**' --reporter=dot` passed 1,083 tests with 26 skipped across 99 source suites.
+- `npm run lint` passed with the existing React hook warning in `use-focus-v2-audio.ts`. `npm --ignore-scripts run build` passed with the Next.js TypeScript check. The build skipped the prebuild script to preserve the running dev server's artifacts.
+
+11C.5B–11C.5E remain pending, including database lease expiry and crash recovery after the T05 failure. Gmail Spam and Staging one-click unsubscribe ingress remain open.
