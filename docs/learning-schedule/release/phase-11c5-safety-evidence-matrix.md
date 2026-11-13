@@ -1,0 +1,28 @@
+# Phase 11C.5 safety evidence matrix
+
+Audit date **2026-11-13**. Candidate `39177f576f87b0ef8210817f3fdb4ef3c85e153d` matches the local and remote-tracking `product-release` merge of PR #130.
+
+## SE-01 · Executed reliability evidence
+
+| Checkpoint | Tested baseline | Results and environment | Coverage limit |
+| --- | --- | --- | --- |
+| [11C.5A · T01–T05](../phase-11-evidence.md#step-11c5a--provider-timeout--uncertain-outcome) | `e12d55585bdf7a81d35a7da3ba3ffda2e270c4df` | Local PASS. 85 Resend tests, 1,083 Vitest passes, 1,001 pgTAP assertions, 23 worker harness runs. Timeout, reset, 503 and malformed response produced uncertain outcomes. Acceptance followed by a failed write produced one SDK call. | T05 used a mock store. Committed handoff recovery was exercised in 5C. |
+| [11C.5B · RL-01–RL-06](../phase-11-evidence.md#step-11c5b--rate-limit--durable-retry) | `6485974857aa80bfd17de4cda0ec3d0238155e3c` | Local PASS. 90 Resend tests, 1,088 Vitest passes and 1,015 pgTAP assertions. Confirmed 429 scheduled a 30-second retry. Replay, attempt budget and session cutoff held. Quota and uncertain outcomes bypassed short retry. | Timing used local fixtures. The standalone worker harness was skipped for this checkpoint. The subsequent typed-client test fix is included in the audited candidate. |
+| [11C.5C · CR-01–CR-06](../phase-11-evidence.md#step-11c5c--lease-expiry--crash-recovery) | `12a1e9d1affe76bef8082a07ff9f7dd204f85521` | Local PASS. 1,015 pgTAP assertions, 28 harness runs. Committed handoff survived SQLSTATE `22012` and rollback of outcome recording. Recovery held uncertain jobs. Reconciliation replay was stable. | Crash and lease expiry were injected in disposable Supabase using the mock SDK. |
+| [11C.5D · CC-01–CC-08](../phase-11-evidence.md#step-11c5d--duplicate-dispatch--multi-worker-concurrency) | `ddf415f610894e43f8c43e7effcc221d85f8b6d3` | Local PASS. 39 new races in 62 harness executions, 18 expected blockers in the new runs, six expected `22023` conflicts, zero duplicate submissions for the same handoff. 1,015 pgTAP assertions. | Three executions per contention variant, with two workers and an observer. Production traffic and load behavior are outside these runs. |
+
+These local runs used no real Resend requests. The GitHub checks below ran on the merged candidate. [PR #130](https://github.com/Horus031/lumivox/pull/130)
+
+## SE-02 · CI and Staging provenance
+
+| Run or job | Verified result |
+| --- | --- |
+| [CI · push to product-release](https://github.com/Horus031/lumivox/actions/runs/43394822299) | `success` at full candidate SHA. |
+| [Web](https://github.com/Horus031/lumivox/actions/runs/43394822299/job/131783090119) | Lint, unit tests, TypeScript typecheck and production build all succeeded. |
+| [AI API](https://github.com/Horus031/lumivox/actions/runs/43394822299/job/131783090058) | Compile, model artifact verification and unit tests succeeded. |
+| [Supabase Migration Replay](https://github.com/Horus031/lumivox/actions/runs/43394822299/job/131783089797) | Required migration check, clean replay and database tests succeeded. |
+| [Deploy Staging](https://github.com/Horus031/lumivox/actions/runs/43395108986) · [Staging job and logs](https://github.com/Horus031/lumivox/actions/runs/43395108986/job/131784022242) | Workflow and job `success`. Checkout log confirms `39177f5`. Migration preview and apply succeeded and reported the database up to date. Both revision checks logged the full candidate SHA, with the AI model verified. Playwright Chromium ran **56 passed, 47 skipped**. Report upload succeeded. |
+| [Vercel Staging](https://vercel.com/horus-projects-672b8c47/lumivox/FrsatHsmF6PTEatgWVCrJgFh9XQV) | Alias lookup returned deployment `dpl_FrsatHsmF6PTEatgWVCrJgFh9XQV`, READY, with the full candidate SHA and `product-release` metadata. |
+| [Render Staging](https://dashboard.render.com/web/srv-daqdto0jo6nc73e3kme0) | Deploy `dep-dbrcqatbedkc73d816jg` was live at the full candidate SHA, triggered by deploy hook. |
+
+The CD run's API `head_sha` is the workflow revision `a2701edc7ead686c4e1882e380a571dca5007f9a`. The checkout and both health log entries establish the application revision. No CI or deployment rerun was triggered for this audit.

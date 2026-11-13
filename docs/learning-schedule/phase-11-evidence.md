@@ -134,3 +134,13 @@ The existing SQL suite changes the local Dispatch gate only inside its rollback 
 - The disposable stack replayed 96 migrations. `supabase test db --local` passed 1,015 assertions across 36 files. `node --check scripts/test-learning-schedule-resend-worker.mjs` and `git diff --check` passed. Web lint, Vitest and build were not rerun for this harness-only change.
 - Reproduce with `node scripts/test-learning-schedule-resend-worker.mjs --multiworker`. Set `LUMIVOX_RESEND_TEST_WORKDIR` to the disposable stack configured as `lumivox-11c5d` with local API port 56321 and DB port 56322, and `SUPABASE_CLI_PATH` to the local CLI executable if needed. The harness checked the project, endpoints, empty Auth fixtures, gates OFF and no reminder Cron before enabling fixture dispatch locally. Cleanup verified zero fixture users, tasks, jobs, deliveries, payloads, tokens, identities and suppressions, both gates OFF and zero reminder Cron jobs.
 - 11C.5E and 11C.6 remain pending. Public one-click unsubscribe ingress and Gmail deliverability remain open.
+
+## Step 11C.5E — Safety Evidence & Release Gate
+
+**Audit CONDITIONAL. Production email activation NO-GO.** Candidate `39177f576f87b0ef8210817f3fdb4ef3c85e153d` after PR #130. On November 13, 2026, GitHub API results and job logs confirmed CI and Deploy Staging success for this candidate, including both revision checks and Playwright (56 passed, 47 skipped). Direct provider metadata confirmed Vercel READY and Render LIVE at that SHA.
+
+Read-only Supabase checks found both Staging gates OFF, zero reminder Cron jobs, zero deliveries and receipts, and exact parity across 96 migration versions. Vercel Preview configuration returned real-send `false`; direct runtime evidence remains open. The preceding paired rollback artifacts and source compatibility were verified. Live rollback, named operator access and authenticated monitor delivery remain unverified. Public one-click unsubscribe and Gmail deliverability remain open for 11C.6.
+
+- [SE-01–02 · Safety evidence matrix and CI/CD links](release/phase-11c5-safety-evidence-matrix.md)
+- [SE-03–06 · Operational readiness](release/phase-11c5-operational-readiness.md)
+- [SE-07–08 · Release decision and blockers](release/phase-11c5-release-decision.md)
