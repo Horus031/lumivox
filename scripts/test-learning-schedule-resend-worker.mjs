@@ -8,7 +8,9 @@ import { fileURLToPath } from 'node:url';
 import { writeFile,readFile } from 'node:fs/promises';
 import { loadReminderRuntime } from './lib/load-learning-schedule-runtime.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const container='supabase_db_lumivox-proj',owner=randomUUID();
+const crashRecovery = process.argv.includes('--crash-recovery');
+const container = crashRecovery ? 'supabase_db_lumivox-11c5c' : 'supabase_db_lumivox-proj';
+const owner = randomUUID();
 const q=value=>`'${String(value).replaceAll("'","''")}'`;
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 // LOCAL ONLY. Actual repository worker/store/SDK adapter, injected mock SDK send;
@@ -199,9 +201,17 @@ class Connection {
 
 const runtime=await loadReminderRuntime(root);
 const require=createRequire(resolve(root,'apps/web/package.json')),{createClient}=require('@supabase/supabase-js');
-const cli='C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
-const status=JSON.parse(execFileSync(cli,['status','--output','json'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
-assert.equal(status.API_URL,'http://127.0.0.1:55321');
+const cli=process.env.SUPABASE_CLI_PATH ?? 'C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
+const cliArgs = ['status','--output','json'];
+if (crashRecovery) {
+ const workdir = process.env.LUMIVOX_RESEND_TEST_WORKDIR;
+ assert(workdir, 'Set LUMIVOX_RESEND_TEST_WORKDIR to the disposable lumivox-11c5c stack');
+ const localConfig = await readFile(resolve(workdir,'supabase/config.toml'),'utf8');
+ assert.match(localConfig,/^project_id\s*=\s*"lumivox-11c5c"\s*$/m);
+ cliArgs.push('--workdir', workdir);
+}
+const status=JSON.parse(execFileSync(cli,cliArgs,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
+assert.equal(status.API_URL, crashRecovery ? 'http://127.0.0.1:56321' : 'http://127.0.0.1:55321');
 const makeStore=()=>runtime.store.createResendDispatchStore(createClient(status.API_URL,status.SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}));
 const [a,b,observer]=['8d-A','8d-B','8d-observer'].map(name=>new Connection(name));
 const email='WorkerCase@example.invalid';
@@ -229,12 +239,14 @@ async function fixture(locale='en') {
  return {job};
 }
 let calls=[];
+let sdkCalls = 0;
 function transport(mode='accepted',callback) {
  // Execute the actual SDK adapter; only the SDK emails.send port is replaced.
  return {send:async payload=>{
   calls.push({fingerprint:runtime.payload.reminderPayloadFingerprint(runtime.payload.serializeReminderPayload(payload)),key:payload.idempotencyKey});
   assert.equal(new URL(payload.unsubscribeUrl).pathname,'/api/study-reminders/unsubscribe');
   const send=async(request,options)=>{
+   sdkCalls++;
    assert.equal(options.idempotencyKey,payload.idempotencyKey);
    assert.deepEqual(Object.keys(request.headers).sort(),['List-Unsubscribe','List-Unsubscribe-Post']);
    assert.equal(request.headers['List-Unsubscribe-Post'],'List-Unsubscribe=One-Click');
@@ -260,10 +272,146 @@ const prepareSql=(c,x,input)=>`SELECT public.ls_notification_prepare_resend_payl
 const authSql=(c,x)=>`SELECT public.ls_notification_authorize_resend_payload(${q(c.jobId)},${q(c.leaseToken)},${q(x.recipient)},${q(x.recipientFingerprint)});`;
 const consumeSql=s=>`SELECT public.ls_notification_consume_unsubscribe_token(${q(s.token_hash)});`;
 async function warm(c) {const store=makeStore();await runtime.worker.dispatchResendReminders({...store,claim:async()=>[c],authorize:async()=>({authorized:false})},transport(),config);return snapshot(c.jobId);}
+async function recoverySnapshot(job) {
+ return observer.json(`SELECT json_build_object(
+  'job',j.status,'attempts',j.attempt_count,'leaseToken',j.lease_token,'leaseUntil',j.lease_until,
+  'cancelled',j.cancel_requested_at IS NOT NULL,
+  'consent',(SELECT study_email_enabled FROM public.study_notification_preferences WHERE user_id=j.user_id),
+  'deliveries',(SELECT count(*) FROM public.study_notification_deliveries WHERE job_id=j.id),
+  'deliveryId',d.id,'delivery',d.status,'errorCode',d.error_code,'messageId',d.provider_message_id,
+  'nextAttemptAt',j.next_attempt_at)
+ FROM public.study_notification_jobs j
+ LEFT JOIN public.study_notification_deliveries d ON d.job_id=j.id AND d.attempt_number=j.attempt_count
+ WHERE j.id=${q(job)};`);
+}
+
+async function runCrashRecovery() {
+ const dispatch = (store = makeStore()) => runtime.worker.dispatchResendReminders(store,transport(),config,{batchSize:1});
+ const reconcile = () => observer.json('SELECT public.ls_notification_reconcile_expired_leases(25);');
+ const scenarios = [
+  {name:'CR-01', beforeDelivery:null, afterJob:'pending'},
+  {name:'CR-02', beforeDelivery:'submitting', afterJob:'failed'},
+  {name:'CR-03', beforeDelivery:'submitting', afterJob:'failed'},
+  {name:'CR-04', beforeDelivery:'uncertain', afterJob:'failed'},
+  {name:'CR-01 opt-out', beforeDelivery:null, afterJob:'suppressed'},
+ ];
+
+ for (const scenario of scenarios) {
+  const {name,beforeDelivery,afterJob} = scenario;
+  const f = await fixture();
+  const store = makeStore();
+  calls = [];
+  sdkCalls = 0;
+  let recordSqlstate = null;
+  if (name === 'CR-03') {
+   const result = await dispatch({...store, record:async (claim,deliveryId,fingerprint,outcome) => {
+    assert.equal(outcome.kind,'accepted');
+    await b.begin('service_role');
+    try {
+     await b.ok(`SELECT public.ls_notification_record_resend_outcome(
+      ${q(deliveryId)},${q(claim.leaseToken)},${q(fingerprint)},'accepted',${q(outcome.providerMessageId)});`);
+     const failure = await b.exec('SELECT 1/0;');
+     recordSqlstate = failure.state;
+     assert.equal(recordSqlstate,'22012');
+     throw new Error('Injected failure before outcome commit');
+    } finally {
+     await b.ok('ROLLBACK;');
+    }
+   }});
+   assert.equal(result.held,1);
+   assert.equal(recordSqlstate,'22012');
+  } else {
+   const c = await claim(f);
+   if (beforeDelivery || name === 'CR-01 opt-out') {
+    const payload = await warm(c);
+    assert(payload);
+    if (name === 'CR-01 opt-out') {
+     assert.equal(await observer.ok(consumeSql(payload)),'t');
+    } else {
+     const context = runtime.resolver.resolveReminderContext(
+      await store.resolve(f.job,c.leaseToken),config.allowlist,config.identityKey);
+     assert(context.success);
+     const handoff = await store.authorize(c,context.context);
+     assert.equal(handoff.authorized,true);
+     assert(handoff.deliveryId);
+     if (name === 'CR-04') {
+      await observer.ok(`UPDATE public.study_notification_deliveries SET status='uncertain',error_code='transport_error'
+       WHERE id=${q(handoff.deliveryId)};`);
+     }
+    }
+   }
+  }
+
+  const before = await recoverySnapshot(f.job);
+  assert.equal(before.job,'leased');
+  assert.equal(before.attempts,1);
+  assert(before.leaseToken && before.leaseUntil);
+  assert.equal(before.delivery,beforeDelivery);
+  assert.equal(before.deliveries,beforeDelivery ? 1 : 0);
+  assert.equal(before.messageId,null);
+  assert.equal(before.consent,name !== 'CR-01 opt-out');
+  assert.equal(sdkCalls,name === 'CR-03' ? 1 : 0);
+  const sdkCallsBeforeRecovery = sdkCalls;
+  await observer.ok(`UPDATE public.study_notification_jobs SET lease_until=clock_timestamp()-interval '1 second'
+   WHERE id=${q(f.job)} AND user_id=${q(owner)} AND status='leased';`);
+  const reconciled = await reconcile();
+  assert.equal(reconciled,1);
+  const after = await recoverySnapshot(f.job);
+  assert.equal(after.job,afterJob);
+  assert.equal(after.attempts,before.attempts);
+  assert.equal(after.leaseToken,null);
+  assert.equal(after.leaseUntil,null);
+  assert.equal(after.deliveries,before.deliveries);
+  assert.equal(after.deliveryId,before.deliveryId);
+  assert.equal(after.delivery,beforeDelivery ? 'uncertain' : null);
+  assert.equal(after.errorCode,name === 'CR-04' ? 'transport_error' : beforeDelivery ? 'lease_expired_after_handoff' : null);
+  assert.equal(after.messageId,null);
+  assert.equal(after.consent,before.consent);
+  assert.equal(after.cancelled,name === 'CR-01 opt-out');
+  const replayReconciled = await reconcile();
+  assert.equal(replayReconciled,0); // CR-05
+  assert.deepEqual(await recoverySnapshot(f.job),after);
+
+  const nextWorker = makeStore();
+  const observedClaims = [];
+  const worker = await dispatch({...nextWorker,claim:async size => {
+   const claims = await nextWorker.claim(size);
+   observedClaims.push(...claims);
+   return claims;
+  }});
+  if (afterJob === 'pending') {
+   assert.equal(observedClaims.length,1);
+   assert.equal(observedClaims[0].jobId,f.job);
+   assert.notEqual(observedClaims[0].leaseToken,before.leaseToken);
+   assert.equal(worker.accepted,1);
+   assert.equal(sdkCalls,1);
+  } else {
+   assert.deepEqual(observedClaims,[]); // CR-06
+   assert.equal(worker.inspected,0);
+   assert.equal(sdkCalls,sdkCallsBeforeRecovery);
+   assert.deepEqual(await recoverySnapshot(f.job),after);
+  }
+  const finalState = await recoverySnapshot(f.job);
+  if (afterJob === 'pending') {
+   assert.equal(finalState.job,'sent');
+   assert.equal(finalState.attempts,2);
+   assert.equal(finalState.deliveries,1);
+   assert.equal(finalState.delivery,'accepted');
+   assert(finalState.messageId);
+  }
+  report.runs.push({case:name,before,after,final:finalState,recordSqlstate,reconciled,replayReconciled,
+   sdkCallsBeforeRecovery,sdkCalls,workerClaims:observedClaims.length});
+ }
+}
+
+let fixtureOwnerCreated = false;
 try {
  for(const c of [a,b,observer]) await c.init();
  assert.equal(await observer.ok('SELECT count(*) FROM auth.users;'),'0');assert.equal(await observer.ok('SELECT enabled FROM public.study_notification_dispatch_control;'),'f');
- await observer.ok(`INSERT INTO auth.users(id,email,email_confirmed_at) VALUES(${q(owner)},${q(email)},clock_timestamp());UPDATE public.study_notification_dispatch_control SET enabled=true;`);
+ assert.equal(await observer.ok('SELECT enabled FROM public.ls_missed_sweep_control;'),'f');
+ await observer.ok(`INSERT INTO auth.users(id,email,email_confirmed_at) VALUES(${q(owner)},${q(email)},clock_timestamp());`);
+ fixtureOwnerCreated = true;
+ await observer.ok('UPDATE public.study_notification_dispatch_control SET enabled=true;');
  for(const type of ['flag-off','gate-off','allowlist','unverified','unconfirmed-locale','suppression','dry-run','en','vi','timeout','409']) {
   const f=await fixture(type==='vi'?'vi':'en');calls=[];let cfg={...config},options={};
   if(type==='flag-off') cfg.enabled=false;
@@ -330,10 +478,11 @@ try {
   const elapsedMs=Date.now()-start;assert(elapsedMs<2000);assert.equal(calls.length,0);commit.resolve();await first;assert.equal(calls.length,1);
   report.runs.push({case:'RI-14',repeat,skipElapsedMs:elapsedMs,mockSubmissions:1,final:await final(f.job)});
  }
+ if (crashRecovery) await runCrashRecovery();
 } finally {
  for(const c of [a,b]){try{await c.ok('ROLLBACK;');}catch{}}
  try {
-  await observer.ok(`UPDATE public.study_notification_dispatch_control SET enabled=false;
+  if (fixtureOwnerCreated) await observer.ok(`UPDATE public.study_notification_dispatch_control SET enabled=false;
    DELETE FROM public.study_notification_suppressions WHERE user_id=${q(owner)};
    DELETE FROM public.tasks WHERE user_id=${q(owner)} AND title='8D fixture';DELETE FROM auth.users WHERE id=${q(owner)};`);
   report.finalCounts=await observer.json(`SELECT json_build_object('users',(SELECT count(*) FROM auth.users),'tasks',(SELECT count(*) FROM public.tasks),'jobs',(SELECT count(*) FROM public.study_notification_jobs),'deliveries',(SELECT count(*) FROM public.study_notification_deliveries),'payloads',(SELECT count(*) FROM public.study_notification_resend_payloads),'tokens',(SELECT count(*) FROM public.study_notification_unsubscribe_tokens),'identities',(SELECT count(*) FROM public.study_notification_recipient_identities),'suppressions',(SELECT count(*) FROM public.study_notification_suppressions));`);
@@ -341,7 +490,12 @@ try {
   report.gates=await observer.json(`SELECT json_build_object('dispatch',(SELECT enabled FROM public.study_notification_dispatch_control),'sweep',(SELECT enabled FROM public.ls_missed_sweep_control),'reminderCron',(SELECT count(*) FROM cron.job WHERE jobname ILIKE '%remind%'));`);
   assert.deepEqual(report.gates,{dispatch:false,sweep:false,reminderCron:0});
  } finally {for(const c of [a,b,observer])await c.close();}
- report.completedAt=new Date().toISOString();await writeFile(resolve(root,'docs/learning-schedule/phase-08-resend-worker.json'),JSON.stringify(report,null,2)+'\n');
+ report.completedAt=new Date().toISOString();
+ if (!crashRecovery) await writeFile(resolve(root,'docs/learning-schedule/phase-08-resend-worker.json'),JSON.stringify(report,null,2)+'\n');
 }
 console.log(`PASS: actual worker/adapter ${report.runs.length} executions; ${report.runs.filter(x=>x.blocker).length} observed blockers; no real provider requests; clean/OFF`);
+if (crashRecovery) {
+ for (const run of report.runs.filter(entry=>entry.case.startsWith('CR-'))) console.log(JSON.stringify(run));
+ console.log(JSON.stringify({baseline:report.baseline,finalCounts:report.finalCounts,gates:report.gates}));
+}
 
