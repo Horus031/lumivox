@@ -4,14 +4,16 @@ import { randomBytes, randomUUID, createHash, createHmac } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { writeFile, mkdir } from 'node:fs/promises';
+import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { reminderRecipientFingerprint } from '../apps/web/features/learning-schedule/notifications/resend-webhook.ts';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const container='supabase_db_lumivox-proj',owner=randomUUID(),task=randomUUID(),schedule=randomUUID(),session=randomUUID();
+const ingress=process.argv.includes('--public-ingress');
+const container=ingress?'supabase_db_lumivox-11c5d':'supabase_db_lumivox-proj';
+const owner=randomUUID(),task=randomUUID(),schedule=randomUUID(),session=randomUUID();
 const q=value=>`'${String(value).replaceAll("'","''")}'`;
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 const sql=command=>execFileSync('docker',['exec',container,'psql','-X','-At','-v','ON_ERROR_STOP=1','-U','postgres','-d','postgres','-c',command],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
-const cli='C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
+const cli=process.env.SUPABASE_CLI_PATH ?? 'C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
 const report={baseline:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),startedAt:new Date().toISOString(),checks:[],cleanup:false};
 let server,browser;
 const identityKey=randomBytes(32).toString('hex'),email='unsubscribe-http@example.invalid';
@@ -21,9 +23,20 @@ const tokenPair=()=>{const token=randomBytes(32).toString('base64url');return {t
 const issue=()=>{const result=tokenPair();sql(`SELECT public.ls_notification_issue_unsubscribe_token(${q(owner)},${q(email)},${q(fp)},${q(result.hash)});`);return result;};
 const state=()=>JSON.parse(sql(`SELECT json_build_object('consent',(SELECT study_email_enabled FROM public.study_notification_preferences WHERE user_id=${q(owner)}),'pending',(SELECT count(*) FROM public.study_notification_jobs WHERE user_id=${q(owner)} AND status='pending'),'used',(SELECT count(*) FROM public.study_notification_unsubscribe_tokens WHERE user_id=${q(owner)} AND used_at IS NOT NULL));`));
 try {
- const status=JSON.parse(execFileSync(cli,['status','--output','json'],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
- assert.equal(status.API_URL,'http://127.0.0.1:55321');assert.equal(sql('SELECT count(*) FROM auth.users;'),'0');
+ const args=['status','--output','json'];
+ if(ingress){
+  const workdir=process.env.LUMIVOX_RESEND_TEST_WORKDIR;
+  assert(workdir,'Set LUMIVOX_RESEND_TEST_WORKDIR to the disposable stack');
+  const config=await readFile(resolve(workdir,'supabase/config.toml'),'utf8');
+  assert.match(config,/^project_id\s*=\s*"lumivox-11c5d"\s*$/m);
+  args.push('--workdir',workdir);
+ }
+ const status=JSON.parse(execFileSync(cli,args,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
+ assert.equal(status.API_URL,ingress?'http://127.0.0.1:56321':'http://127.0.0.1:55321');
+ if(ingress) assert.match(status.DB_URL,/@127\.0\.0\.1:56322\//);
+ assert.equal(sql('SELECT count(*) FROM auth.users;'),'0');
  assert.equal(sql('SELECT enabled FROM public.study_notification_dispatch_control;'),'f');
+ assert.equal(sql('SELECT enabled FROM public.ls_missed_sweep_control;'),'f');
  sql(`BEGIN;INSERT INTO auth.users(id,email,email_confirmed_at) VALUES(${q(owner)},${q(email)},clock_timestamp());
  SELECT set_config('request.jwt.claim.sub',${q(owner)},true);SELECT public.ls_set_study_notification_preferences(true);
  INSERT INTO public.tasks(id,user_id,title,status) VALUES(${q(task)},${q(owner)},'8C HTTP fixture','todo');
@@ -35,7 +48,9 @@ try {
  cwd:resolve(root,'apps/web'),windowsHide:true,stdio:['ignore','pipe','pipe'],env:{...process.env,
  NEXT_PUBLIC_SUPABASE_URL:status.API_URL,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:status.ANON_KEY,NEXT_PUBLIC_SUPABASE_ANON_KEY:status.ANON_KEY,
  SUPABASE_SECRET_KEY:status.SERVICE_ROLE_KEY,SUPABASE_SERVICE_ROLE_KEY:status.SERVICE_ROLE_KEY,
- STUDY_REMINDER_RECIPIENT_HMAC_KEY:identityKey,RESEND_STUDY_REMINDER_WEBHOOK_SECRET:signingSecret,RESEND_API_KEY:'',STUDY_REMINDER_SETTINGS_ENABLED:'false'}});
+ STUDY_REMINDER_RECIPIENT_HMAC_KEY:identityKey,RESEND_STUDY_REMINDER_WEBHOOK_SECRET:signingSecret,RESEND_API_KEY:'',
+ RESEND_STUDY_REMINDER_API_KEY:'',STUDY_REMINDER_REAL_SEND_ENABLED:'false',STUDY_REMINDER_DISPATCH_SECRET:identityKey,
+ STUDY_REMINDER_SETTINGS_ENABLED:'false'}});
  server.stdout.on('data',data=>{if(data.toString().includes('Ready in')) ownReady=true;});server.stderr.resume();
  const base='http://127.0.0.1:3109',deadline=Date.now()+15000;
  while(!ownReady&&Date.now()<deadline){assert.equal(server.exitCode,null);await wait(100);}assert(ownReady);
@@ -44,6 +59,44 @@ try {
  const before=state();assert.deepEqual(before,{consent:true,pending:1,used:0});
  const get=await fetch(endpoint(pair.token));assert.equal(get.status,200);assert.deepEqual(state(),before);
  report.checks.push({case:'US-01 API GET no mutation',status:200});
+ if(ingress){
+  const getWithoutToken=await fetch(`${base}/api/study-reminders/unsubscribe`,{redirect:'manual'});
+  assert.equal(getWithoutToken.status,200);
+  assert.equal(getWithoutToken.headers.get('referrer-policy'),'no-referrer');
+  assert.equal((await post('invalid')).status,400);
+  const malformed=await fetch(endpoint(pair.token),{method:'POST',headers:{'Content-Type':'application/json'},body:'{}',redirect:'manual'});
+  assert.equal(malformed.status,415);
+  assert.deepEqual(state(),before);
+  const old=issue();
+  const form=new FormData();
+  form.set('List-Unsubscribe','One-Click');
+  const multipart=await fetch(endpoint(pair.token),{method:'POST',body:form,redirect:'manual'});
+  assert.equal(multipart.status,200);
+  assert.equal(multipart.headers.get('location'),null);
+  assert.equal(multipart.headers.get('set-cookie'),null);
+  assert.deepEqual(state(),{consent:false,pending:0,used:1});
+  sql(`BEGIN;SELECT set_config('request.jwt.claim.sub',${q(owner)},true);
+   SELECT public.ls_set_study_notification_preferences(true);COMMIT;`);
+  const restored=state();
+  assert.deepEqual(restored,{consent:true,pending:1,used:1});
+  const pref=()=>sql(`SELECT updated_at FROM public.study_notification_preferences WHERE user_id=${q(owner)};`);
+  const updatedAt=pref();
+  assert.equal((await post(pair.token)).status,200);
+  assert.equal((await post(old.token)).status,400);
+  assert.deepEqual(state(),restored);
+  assert.equal(pref(),updatedAt);
+  const dispatch=(authorization)=>fetch(`${base}/api/internal/study-reminders/dispatch`,{
+   method:'POST',headers:{'Content-Type':'application/json',...(authorization?{Authorization:authorization}:{})},
+   body:'{"dryRun":false,"batchSize":1}',redirect:'manual',
+  });
+  assert.equal((await dispatch()).status,401);
+  const disabled=await dispatch(`Bearer ${identityKey}`);
+  assert.equal(disabled.status,503);
+  assert.deepEqual(await disabled.json(),{error:'real_send_disabled'});
+  assert.deepEqual(state(),restored);
+  console.log(JSON.stringify({get:200,invalid:400,malformed:415,multipart:200,replay:200,oldUnused:400,
+   before,afterOptOut:{consent:false,pending:0,used:1},afterReconsent:restored,dispatchUnauthorized:401,dispatchDisabled:503}));
+ } else {
  const require=createRequire(resolve(root,'apps/web/package.json'));const {chromium}=require('@playwright/test');
  browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
  const external=[];await context.route('**/*',route=>{
@@ -101,6 +154,7 @@ try {
  assert.equal(sql(`SELECT reason FROM public.study_notification_suppressions WHERE user_id=${q(owner)};`),'hard_bounce');
  report.checks.push({case:'US-08 late delivered retains suppression',status:200});
  report.externalRequests=external.length;report.providerRequests=0;
+ }
 } finally {
  if(browser) await browser.close();
  if(server){server.kill();await Promise.race([new Promise(done=>server.once('exit',done)),wait(3000)]);}
@@ -112,6 +166,10 @@ try {
   assert(Object.values(counts).every(x=>x===0));report.cleanup=true;report.finalCounts=counts;
   report.gates=JSON.parse(sql(`SELECT json_build_object('dispatch',(SELECT enabled FROM public.study_notification_dispatch_control),'sweep',(SELECT enabled FROM public.ls_missed_sweep_control),'reminderCron',(SELECT count(*) FROM cron.job WHERE jobname ILIKE '%remind%'));`));
   assert.deepEqual(report.gates,{dispatch:false,sweep:false,reminderCron:0});
- } finally {report.completedAt=new Date().toISOString();await writeFile(resolve(root,'docs/learning-schedule/phase-08-unsubscribe-http.json'),JSON.stringify(report,null,2)+'\n');}
+ } finally {
+  report.completedAt=new Date().toISOString();
+  if(!ingress) await writeFile(resolve(root,'docs/learning-schedule/phase-08-unsubscribe-http.json'),JSON.stringify(report,null,2)+'\n');
+ }
 }
-console.log(`PASS: ${report.checks.length} HTTP/browser checks, zero external/provider requests, clean/OFF`);
+console.log(ingress ? 'PASS: local public-ingress HTTP contract, zero provider requests, clean/OFF'
+ : `PASS: ${report.checks.length} HTTP/browser checks, zero external/provider requests, clean/OFF`);
