@@ -94,3 +94,22 @@ The dispatcher tests exercised the real provider adapter and store RPC routing w
 - `npm run lint` passed with the existing React hook warning in `use-focus-v2-audio.ts`. `npm --ignore-scripts run build` passed, including the Next.js TypeScript check.
 
 The existing SQL suite changes the local Dispatch gate only inside its rollback transaction. The standalone worker harness was skipped in this checkpoint because it commits a temporary Dispatch gate change. Fault injection used local mocks and made zero real Resend requests. No production TypeScript or migration change was needed. 11C.5C–11C.5E and 11C.6 remain pending. Gmail Spam and Staging one-click unsubscribe ingress remain open.
+
+## Step 11C.5C — Lease Expiry & Crash Recovery
+
+**Local PASS.** Baseline `12a1e9d1affe76bef8082a07ff9f7dd204f85521` on `phase11c5/crash-recovery-validation`, matching fetched `origin/product-release` after PR #128. The operator reported Vercel Staging READY (`dpl_DAv2twcPBoS8ArZ1v3BwR7bGx2F3`) and Render Staging LIVE (`dep-dbqn2mafngtc738466o0`) at that SHA. GitHub Actions job results and the Production database ledger remain unverified. A read-only Staging query confirmed migration `20261111071219` installed, Dispatch and Missed Sweep OFF, zero deliveries, and zero webhook receipts.
+
+| Case | Before recovery | After recovery and next worker | Mock SDK calls before → total |
+| --- | --- | --- | --- |
+| CR-01 | Job `leased`, attempt 1, zero deliveries | Reconciled to `pending` at attempt 1. Next worker got a fresh lease, submitted once, and finished `sent` at attempt 2 with one accepted delivery. | 0 → 1 |
+| CR-02 | Job `leased`, committed `submitting` delivery, SDK never entered | Same delivery became `uncertain` with `lease_expired_after_handoff`. Job became `failed`; no further claim. | 0 → 0 |
+| CR-03 | SDK accepted. Outcome RPC executed inside a separate transaction, then injected SQLSTATE `22012` forced rollback. Observer saw `leased/submitting` with no provider message ID. | Same delivery became `uncertain` with `lease_expired_after_handoff`. Job became `failed`; no further claim. | 1 → 1 |
+| CR-04 | Job `leased`, delivery injected as `uncertain` with `transport_error` | Job became `failed`. Delivery ID, status and error code were preserved; no further claim. | 0 → 0 |
+| CR-05 | Each fixture had one expired lease to reconcile | First reconciliation returned 1 and cleared both lease fields without changing attempts or delivery count. Second reconciliation returned 0 and preserved each observed snapshot. | No added calls |
+| CR-06 | Fresh worker after CR-02, CR-03 and CR-04 | Claim RPC returned zero claims in each case. Job and delivery snapshots stayed unchanged. | No added calls |
+| Consent safety | Token consumed after claim and before handoff; consent OFF and cancellation requested | Job became `suppressed`, consent stayed OFF and the next worker got no claim. | 0 → 0 |
+
+- `supabase test db --local` passed 1,015 assertions across 36 files on the fresh isolated stack. `node --check scripts/test-learning-schedule-resend-worker.mjs` passed.
+- `node scripts/test-learning-schedule-resend-worker.mjs --crash-recovery` passed 28 executions. This includes 23 existing worker checks with nine observed blockers and five new recovery fixtures covering CR-01–CR-06 plus consent safety. The recovery mode uses `LUMIVOX_RESEND_TEST_WORKDIR` for a disposable Supabase project named `lumivox-11c5c`, with API port 56321 and database port 56322. Set `SUPABASE_CLI_PATH` if using a different CLI location.
+- The harness committed fixture handoffs on local Supabase before expiry and ran the production dispatcher and store with an injected Resend SDK. Cleanup verified zero fixture users, tasks, jobs, deliveries, payloads, tokens, identities and suppressions. Local Dispatch and Missed Sweep were OFF, and there were zero reminder Cron jobs. No real provider requests were made. Staging access was read-only.
+- Changes are limited to the Node harness and evidence. Web Vitest, lint, and build were not rerun for this harness-only change. The dedicated 11C.5D concurrency scenarios, 11C.5E safety evidence and 11C.6 production readiness remain pending.
