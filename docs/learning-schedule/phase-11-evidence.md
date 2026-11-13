@@ -144,3 +144,9 @@ Read-only Supabase checks found both Staging gates OFF, zero reminder Cron jobs,
 - [SE-01–02 · Safety evidence matrix and CI/CD links](release/phase-11c5-safety-evidence-matrix.md)
 - [SE-03–06 · Operational readiness](release/phase-11c5-operational-readiness.md)
 - [SE-07–08 · Release decision and blockers](release/phase-11c5-release-decision.md)
+
+## Step 11C.6A — Public One-Click Unsubscribe Ingress
+
+**Local protocol PASS. Public Staging ingress BLOCKED. Production email activation NO-GO.** At baseline `f98b45f146bd2500c4107b85e08b1d93d56c14f4`, unauthenticated GET and a correctly formed invalid-token POST returned Vercel SSO redirects. The local application accepted both RFC 8058 form encodings, preserved re-consent after replay, and enforced internal dispatch authorization and real-send OFF. A dedicated, path-scoped public ingress is the selected design. Hosting and verification on a public endpoint remain pending.
+
+Read-only Staging checks verified both database gates OFF, zero reminder Cron jobs, deliveries and receipts, and Preview real-send configuration `false`. [Public ingress evidence and next validation steps](release/phase-11c6-public-ingress.md)

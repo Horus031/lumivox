@@ -38,6 +38,35 @@ describe("8C public unsubscribe protocol",()=>{
   it("requires form content type",async()=>{
     const consume=vi.fn();expect((await handleUnsubscribePost(post(undefined,undefined,"application/json"),consume)).status).toBe(415);expect(consume).not.toHaveBeenCalled();
   });
+  it("accepts the RFC 8058 multipart form with no session", async () => {
+    const form = new FormData();
+    form.append("List-Unsubscribe", "One-Click");
+    const consume = vi.fn().mockResolvedValue(true);
+    const request = new Request(post().url, { method: "POST", body: form });
+    expect((await handleUnsubscribePost(request, consume)).status).toBe(200);
+    expect(consume).toHaveBeenCalledExactlyOnceWith(hash);
+  });
+  it.each([
+    ["malformed", "--other--", 400],
+    ["oversized", "x".repeat(513), 413],
+  ] as const)("rejects %s multipart before persistence", async (_label, body, status) => {
+    const consume = vi.fn();
+    const request = post(body, undefined, "multipart/form-data; boundary=fixture");
+    expect((await handleUnsubscribePost(request, consume)).status).toBe(status);
+    expect(consume).not.toHaveBeenCalled();
+  });
+  it("rejects duplicate multipart action fields and files", async () => {
+    const consume = vi.fn();
+    const form = new FormData();
+    form.append("List-Unsubscribe", "One-Click");
+    form.append("List-Unsubscribe", "One-Click");
+    const request = () => new Request(post().url, { method: "POST", body: form });
+    expect((await handleUnsubscribePost(request(), consume)).status).toBe(400);
+    form.set("List-Unsubscribe", "One-Click");
+    form.append("locale", new Blob(["en"]), "locale.txt");
+    expect((await handleUnsubscribePost(request(), consume)).status).toBe(400);
+    expect(consume).not.toHaveBeenCalled();
+  });
   it("bounds actual body bytes",async()=>{
     const consume=vi.fn();expect((await handleUnsubscribePost(post("x".repeat(513)),consume)).status).toBe(413);expect(consume).not.toHaveBeenCalled();
   });
