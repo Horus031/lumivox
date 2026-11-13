@@ -9,8 +9,13 @@ import { writeFile,readFile } from 'node:fs/promises';
 import { loadReminderRuntime } from './lib/load-learning-schedule-runtime.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const crashRecovery = process.argv.includes('--crash-recovery');
-const container = crashRecovery ? 'supabase_db_lumivox-11c5c' : 'supabase_db_lumivox-proj';
+const multiworker = process.argv.includes('--multiworker');
+assert(!(crashRecovery && multiworker), 'Select one checkpoint mode');
+const project = multiworker ? 'lumivox-11c5d' : crashRecovery ? 'lumivox-11c5c' : 'lumivox-proj';
+const isolated = crashRecovery || multiworker;
+const container = `supabase_db_${project}`;
 const owner = randomUUID();
+const secondOwner = randomUUID();
 const q=value=>`'${String(value).replaceAll("'","''")}'`;
 const wait=ms=>new Promise(done=>setTimeout(done,ms));
 // LOCAL ONLY. Actual repository worker/store/SDK adapter, injected mock SDK send;
@@ -203,24 +208,31 @@ const runtime=await loadReminderRuntime(root);
 const require=createRequire(resolve(root,'apps/web/package.json')),{createClient}=require('@supabase/supabase-js');
 const cli=process.env.SUPABASE_CLI_PATH ?? 'C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
 const cliArgs = ['status','--output','json'];
-if (crashRecovery) {
+if (isolated) {
  const workdir = process.env.LUMIVOX_RESEND_TEST_WORKDIR;
- assert(workdir, 'Set LUMIVOX_RESEND_TEST_WORKDIR to the disposable lumivox-11c5c stack');
+ assert(workdir, `Set LUMIVOX_RESEND_TEST_WORKDIR to the disposable ${project} stack`);
  const localConfig = await readFile(resolve(workdir,'supabase/config.toml'),'utf8');
- assert.match(localConfig,/^project_id\s*=\s*"lumivox-11c5c"\s*$/m);
+ assert.equal(localConfig.match(/^project_id\s*=\s*"([^"]+)"/m)?.[1],project);
  cliArgs.push('--workdir', workdir);
 }
 const status=JSON.parse(execFileSync(cli,cliArgs,{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}));
-assert.equal(status.API_URL, crashRecovery ? 'http://127.0.0.1:56321' : 'http://127.0.0.1:55321');
+assert.equal(status.API_URL, isolated ? 'http://127.0.0.1:56321' : 'http://127.0.0.1:55321');
+if (isolated) {
+ const dbUrl = new URL(status.DB_URL);
+ assert.equal(dbUrl.hostname,'127.0.0.1');
+ assert.equal(dbUrl.port,'56322');
+}
 const makeStore=()=>runtime.store.createResendDispatchStore(createClient(status.API_URL,status.SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}}));
 const [a,b,observer]=['8d-A','8d-B','8d-observer'].map(name=>new Connection(name));
 const email='WorkerCase@example.invalid';
+const secondEmail='SecondWorkerCase@example.invalid';
 const config={enabled:true,allowlist:runtime.resolver.configuredReminderRecipients(email),identityKey:randomBytes(32).toString('hex'),encryptionKey:randomBytes(32),from:'Lumivox <study@example.invalid>',trustedOrigin:'https://app.lumivox.test'};
 const report={baseline:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),startedAt:new Date().toISOString(),
  workerSourceSha256:createHash('sha256').update(await readFile(resolve(root,'apps/web/features/learning-schedule/notifications/resend-reminder-dispatcher.ts'))).digest('hex'),runs:[],cleanup:false,realProviderRequests:0};
 const deferred=()=>{let resolve;const promise=new Promise(done=>{resolve=done;});return {promise,resolve};};
 async function deadline(promise){return Promise.race([promise,wait(5000).then(()=>{throw new Error('Controlled barrier deadline');})]);}
-async function fixture(locale='en') {
+async function fixture(locale='en', userId=owner) {
+ const owner = userId;
  await observer.ok(`DELETE FROM public.study_notification_suppressions WHERE user_id=${q(owner)};
  DELETE FROM public.tasks WHERE user_id=${q(owner)} AND title='8D fixture';
  DELETE FROM public.study_notification_unsubscribe_tokens WHERE user_id=${q(owner)};
@@ -253,6 +265,7 @@ function transport(mode='accepted',callback) {
    if(callback) await callback();
    if(mode==='timeout') throw new Error('controlled timeout');
    if(mode==='409') return {data:null,error:{name:'concurrent_idempotent_requests',statusCode:409}};
+   if(mode==='429') return {data:null,error:{name:'rate_limit_exceeded',statusCode:429}};
    return {data:{id:randomUUID()},error:null};
   };
   const {ResendReminderProvider}=await import(new URL('../apps/web/.next/step-8d-runtime/resend-reminder-provider.mjs',import.meta.url));
@@ -404,11 +417,241 @@ async function runCrashRecovery() {
  }
 }
 
+async function runMultiworker() {
+ const store = makeStore();
+ const dispatch = (ports = store, mode = 'accepted', callback) =>
+  runtime.worker.dispatchResendReminders(ports,transport(mode,callback),config,{batchSize:1});
+ const claimSql = 'SELECT public.ls_notification_claim_batch(1);';
+ const reconcileSql = 'SELECT public.ls_notification_reconcile_expired_leases(25);';
+ const expire = job => observer.ok(`UPDATE public.study_notification_jobs SET lease_until=clock_timestamp()-interval '1 second'
+  WHERE id=${q(job)} AND user_id=${q(owner)} AND status='leased';`);
+ const prepare = async f => {
+  const c = await claim(f);
+  const payload = await warm(c);
+  const context = runtime.resolver.resolveReminderContext(await store.resolve(f.job,c.leaseToken),config.allowlist,config.identityKey);
+  assert(context.success);
+  return {c,payload,authorize:authSql(c,context.context)};
+ };
+ const recordSql = (id,c,payload,outcome,message = null) =>
+  `SELECT public.ls_notification_record_resend_outcome(${q(id)},${q(c.leaseToken)},
+   ${q(payload.payload_fingerprint)},${q(outcome)},${message ? q(message) : 'NULL'});`;
+ const outcome = async (first,second) => {
+  await a.begin('service_role');
+  await b.begin('service_role');
+  const winner = await a.exec(first);
+  assert.equal(winner.state,'00000',winner.message);
+  const start = Date.now();
+  const pending = b.exec(second);
+  const blocker = await blocked(b,a);
+  await a.ok('COMMIT;');
+  const loser = await pending;
+  await b.ok(loser.state === '00000' ? 'COMMIT;' : 'ROLLBACK;');
+  return {winner,loser,blocker,waitMs:Date.now()-start};
+ };
+ const prompt = async sql => {
+  const start = Date.now();
+  const value = await b.json(sql);
+  const elapsedMs = Date.now()-start;
+  assert(elapsedMs<2000,`Expected prompt result, observed ${elapsedMs}ms`);
+  return {value,elapsedMs};
+ };
+ const cases = [
+  ['CC-01 claim',async f => {
+   await a.begin('service_role');
+   const leases = await a.json(claimSql);
+   assert.equal(leases.length,1);
+   assert.equal(leases[0].jobId,f.job);
+   const skipped = await prompt(claimSql);
+   assert.deepEqual(skipped.value,[]);
+   await a.ok('COMMIT;');
+   assert.equal((await recoverySnapshot(f.job)).leaseToken,leases[0].leaseToken);
+   assert.equal((await dispatch({...store,claim:async()=>leases})).accepted,1);
+   assert.deepEqual(await store.claim(1),[]);
+   return {leases:1,elapsedMs:skipped.elapsedMs,expected:['sent','accepted',1,1,1]};
+  }],
+  ['CC-02 authorize',async f => {
+   const {c,authorize} = await prepare(f);
+   const race = await outcome(authorize,authorize);
+   const winner = JSON.parse(race.winner.text);
+   assert.equal(winner.authorized,true);
+   assert.equal(race.loser.state,'00000');
+   assert.equal(JSON.parse(race.loser.text).reason,'handoff_already_started');
+   assert.equal((await dispatch({...store,claim:async()=>[c],authorize:async()=>winner})).accepted,1);
+   return {...race,leases:1,expected:['sent','accepted',1,1,1]};
+  }],
+  ...[false,true].map(expired => [`CC-03 ${expired ? 'expired' : 'active'} submission`,async f => {
+   const entered = deferred(), release = deferred();
+   const inFlight = dispatch(store,'accepted',async()=>{entered.resolve();await deadline(release.promise);});
+   await deadline(entered.promise);
+   let reconciled;
+   try {
+    assert.equal((await recoverySnapshot(f.job)).delivery,'submitting');
+    if (expired) await expire(f.job);
+    reconciled = await b.json(reconcileSql);
+    assert.equal(reconciled,expired ? 1 : 0);
+    assert.deepEqual(await b.json(claimSql),[]);
+    assert.equal((await recoverySnapshot(f.job)).delivery,expired ? 'uncertain' : 'submitting');
+    assert.equal(sdkCalls,1);
+   } finally {
+    release.resolve();
+    assert.equal((await inFlight).accepted,1);
+   }
+   assert.equal(await b.json(reconcileSql),0);
+   return {leases:1,reconciled,expected:['sent','accepted',1,1,1]};
+  }]),
+  ['CC-03 outcome first',async f => {
+   let skipped;
+   const worker = await dispatch({...store,record:async (c,id,fingerprint,submission) => {
+    assert.equal(submission.kind,'accepted');
+    await expire(f.job);
+    await a.begin('service_role');
+    await a.ok(recordSql(id,c,{payload_fingerprint:fingerprint},'accepted',submission.providerMessageId));
+    assert.equal((await recoverySnapshot(f.job)).delivery,'submitting');
+    skipped = await prompt(reconcileSql);
+    assert.equal(skipped.value,0);
+    await a.ok('COMMIT;');
+   }});
+   assert.equal(worker.accepted,1);
+   assert.equal(await b.json(reconcileSql),0);
+   assert.deepEqual(await b.json(claimSql),[]);
+   return {leases:1,elapsedMs:skipped.elapsedMs,reconciled:0,expected:['sent','accepted',1,1,1]};
+  }],
+  ['CC-04 rate-limit and retry claim',async f => {
+   let duringRecord;
+   const result = await dispatch({...store,record:async (c,id,fingerprint,submission) => {
+    assert.deepEqual(submission,{kind:'rejected',code:'rate_limited',retryable:true});
+    await a.begin('service_role');
+    await a.ok(`SELECT public.ls_notification_record_resend_rate_limit(${q(id)},${q(c.leaseToken)},${q(fingerprint)});`);
+    duringRecord = await prompt(claimSql);
+    assert.deepEqual(duringRecord.value,[]);
+    await a.ok('COMMIT;');
+   }},'429');
+   assert.equal(result.rejected,1);
+   const backoff = await recoverySnapshot(f.job);
+   assert.equal(backoff.job,'pending');
+   assert.equal(backoff.delivery,'failed');
+   assert.equal(backoff.errorCode,'rate_limited');
+   assert.equal(backoff.attempts,1);
+   assert.deepEqual(await store.claim(1),[]);
+   await observer.ok(`UPDATE public.study_notification_jobs SET next_attempt_at=clock_timestamp()-interval '1 second'
+    WHERE id=${q(f.job)} AND user_id=${q(owner)};`);
+   await a.begin('service_role');
+   const leases = await a.json(claimSql);
+   assert.equal(leases.length,1);
+   assert.equal(leases[0].jobId,f.job);
+   const skipped = await prompt(claimSql);
+   assert.deepEqual(skipped.value,[]);
+   await a.ok('COMMIT;');
+   assert.equal((await dispatch({...store,claim:async()=>leases})).accepted,1);
+   assert.equal(calls.length,2);
+   assert.deepEqual(calls[1],calls[0]);
+   assert.deepEqual(await store.claim(1),[]);
+   return {leases:2,elapsedMs:skipped.elapsedMs,recordOverlapMs:duringRecord.elapsedMs,expected:['sent','accepted',2,2,2]};
+  }],
+  ...[true,false].map(optOutFirst => [`CC-05 ${optOutFirst ? 'unsubscribe' : 'authorize'} first`,async f => {
+   const {c,payload,authorize} = await prepare(f);
+   const consume = consumeSql(payload);
+   const race = optOutFirst ? await outcome(consume,authorize) : await outcome(authorize,consume);
+   assert.equal(race.loser.state,'00000');
+   const decision = JSON.parse(optOutFirst ? race.loser.text : race.winner.text);
+   assert.equal(decision.authorized,!optOutFirst);
+   assert.equal(optOutFirst ? race.winner.text : race.loser.text,'t');
+   // A committed handoff may finish, even when opt-out commits before the outcome.
+   if (!optOutFirst) {
+    const email = runtime.payload.decryptReminderPayload(payload,config.encryptionKey);
+    const result = await transport().send(email);
+    assert.equal(result.kind,'accepted');
+    await store.record(c,decision.deliveryId,payload.payload_fingerprint,result);
+   } else {
+    await expire(f.job);
+    assert.equal(await b.json(reconcileSql),1);
+   }
+   const state = await recoverySnapshot(f.job);
+   assert.equal(state.consent,false);
+   assert.equal(state.cancelled,true);
+   assert.deepEqual(await store.claim(1),[]);
+   return {...race,leases:1,expected:optOutFirst ? ['suppressed',null,1,0,0] : ['sent','accepted',1,1,1]};
+  }]),
+  ...[true,false].map(acceptedFirst => [`CC-06 ${acceptedFirst ? 'accepted' : 'rejected'} first`,async f => {
+   const {c,payload,authorize} = await prepare(f);
+   const decision = await a.json(authorize);
+   assert.equal(decision.authorized,true);
+   const accepted = recordSql(decision.deliveryId,c,payload,'accepted',randomUUID());
+   const rejected = recordSql(decision.deliveryId,c,payload,'rejected');
+   const [first,second] = acceptedFirst ? [accepted,rejected] : [rejected,accepted];
+   const race = await outcome(first,second);
+   assert.equal(race.loser.state,'22023');
+   assert.equal(race.loser.message,'Outcome replay mismatch');
+   const beforeReplay = await recoverySnapshot(f.job);
+   assert.equal((await a.json(first)).replay,true);
+   assert.deepEqual(await recoverySnapshot(f.job),beforeReplay);
+   return {...race,leases:1,expected:acceptedFirst ? ['sent','accepted',1,1,0] : ['failed','failed',1,1,0]};
+  }]),
+  ...[true,false].map(optOutFirst => [`CC-07 ${optOutFirst ? 'unsubscribe' : 'reconcile'} first`,async f => {
+   const c = await claim(f);
+   const payload = await warm(c);
+   await expire(f.job);
+   let metrics;
+   if (optOutFirst) {
+    await a.begin('service_role');
+    assert.equal(await a.ok(consumeSql(payload)),'t');
+    const skipped = await prompt(reconcileSql);
+    assert.equal(skipped.value,0);
+    await a.ok('COMMIT;');
+    assert.equal(await b.json(reconcileSql),1);
+    metrics = {elapsedMs:skipped.elapsedMs};
+   } else {
+    const race = await outcome(reconcileSql,consumeSql(payload));
+    assert.equal(race.winner.text,'1');
+    assert.equal(race.loser.state,'00000');
+    assert.equal(race.loser.text,'t');
+    metrics = race;
+   }
+   assert.equal(await b.json(reconcileSql),0);
+   assert.deepEqual(await store.claim(1),[]);
+   assert.equal((await recoverySnapshot(f.job)).consent,false);
+   return {...metrics,leases:1,expected:['suppressed',null,1,0,0]};
+  }]),
+  ['CC-08 independent owners',async f => {
+   const second = await fixture('en',secondOwner);
+   await a.begin('service_role');
+   await a.ok(`SELECT public.ls_notification_lock_owner(${q(owner)});`);
+   const claimed = await prompt(claimSql);
+   assert.equal(claimed.value.length,1);
+   assert.equal(claimed.value[0].jobId,second.job);
+   assert.equal((await recoverySnapshot(f.job)).job,'pending');
+   const both = {...config,allowlist:runtime.resolver.configuredReminderRecipients(`${email},${secondEmail}`)};
+   const worker = await runtime.worker.dispatchResendReminders({...store,claim:async()=>claimed.value},transport(),both,{batchSize:1});
+   assert.equal(worker.accepted,1);
+   await a.ok('COMMIT;');
+   const secondFinal = await recoverySnapshot(second.job);
+   assert.equal(secondFinal.job,'sent');
+   assert.equal(secondFinal.deliveries,1);
+   assert.equal(secondFinal.attempts,1);
+   assert.equal(secondFinal.delivery,'accepted');
+   return {leases:1,elapsedMs:claimed.elapsedMs,secondFinal,expected:['pending',null,0,0,1]};
+  }],
+ ];
+
+ for (const [name,run] of cases) {
+  for (let repeat=1;repeat<=3;repeat++) {
+   const f = await fixture();
+   calls = [];
+   sdkCalls = 0;
+   const {expected,winner,loser,...metrics} = await run(f);
+   const state = await recoverySnapshot(f.job);
+   assert.deepEqual([state.job,state.delivery,state.attempts,state.deliveries,sdkCalls],expected,name);
+   report.runs.push({case:name,repeat,...metrics,sqlstates:[winner?.state ?? '00000',loser?.state ?? '00000'],sdkCalls,final:state});
+  }
+ }
+}
+
 let fixtureOwnerCreated = false;
 try {
  for(const c of [a,b,observer]) await c.init();
  assert.equal(await observer.ok('SELECT count(*) FROM auth.users;'),'0');assert.equal(await observer.ok('SELECT enabled FROM public.study_notification_dispatch_control;'),'f');
  assert.equal(await observer.ok('SELECT enabled FROM public.ls_missed_sweep_control;'),'f');
+ if (isolated) assert.equal(await observer.ok("SELECT count(*) FROM cron.job WHERE jobname ILIKE '%remind%';"),'0');
  await observer.ok(`INSERT INTO auth.users(id,email,email_confirmed_at) VALUES(${q(owner)},${q(email)},clock_timestamp());`);
  fixtureOwnerCreated = true;
  await observer.ok('UPDATE public.study_notification_dispatch_control SET enabled=true;');
@@ -479,23 +722,29 @@ try {
   report.runs.push({case:'RI-14',repeat,skipElapsedMs:elapsedMs,mockSubmissions:1,final:await final(f.job)});
  }
  if (crashRecovery) await runCrashRecovery();
+ if (multiworker) {
+  await observer.ok(`INSERT INTO auth.users(id,email,email_confirmed_at)
+   VALUES(${q(secondOwner)},${q(secondEmail)},clock_timestamp());`);
+  await runMultiworker();
+ }
 } finally {
  for(const c of [a,b]){try{await c.ok('ROLLBACK;');}catch{}}
  try {
   if (fixtureOwnerCreated) await observer.ok(`UPDATE public.study_notification_dispatch_control SET enabled=false;
    DELETE FROM public.study_notification_suppressions WHERE user_id=${q(owner)};
-   DELETE FROM public.tasks WHERE user_id=${q(owner)} AND title='8D fixture';DELETE FROM auth.users WHERE id=${q(owner)};`);
+   DELETE FROM public.tasks WHERE user_id IN (${q(owner)},${q(secondOwner)}) AND title='8D fixture';
+   DELETE FROM auth.users WHERE id IN (${q(owner)},${q(secondOwner)});`);
   report.finalCounts=await observer.json(`SELECT json_build_object('users',(SELECT count(*) FROM auth.users),'tasks',(SELECT count(*) FROM public.tasks),'jobs',(SELECT count(*) FROM public.study_notification_jobs),'deliveries',(SELECT count(*) FROM public.study_notification_deliveries),'payloads',(SELECT count(*) FROM public.study_notification_resend_payloads),'tokens',(SELECT count(*) FROM public.study_notification_unsubscribe_tokens),'identities',(SELECT count(*) FROM public.study_notification_recipient_identities),'suppressions',(SELECT count(*) FROM public.study_notification_suppressions));`);
   assert(Object.values(report.finalCounts).every(x=>x===0));report.cleanup=true;
   report.gates=await observer.json(`SELECT json_build_object('dispatch',(SELECT enabled FROM public.study_notification_dispatch_control),'sweep',(SELECT enabled FROM public.ls_missed_sweep_control),'reminderCron',(SELECT count(*) FROM cron.job WHERE jobname ILIKE '%remind%'));`);
   assert.deepEqual(report.gates,{dispatch:false,sweep:false,reminderCron:0});
  } finally {for(const c of [a,b,observer])await c.close();}
  report.completedAt=new Date().toISOString();
- if (!crashRecovery) await writeFile(resolve(root,'docs/learning-schedule/phase-08-resend-worker.json'),JSON.stringify(report,null,2)+'\n');
+ if (!isolated) await writeFile(resolve(root,'docs/learning-schedule/phase-08-resend-worker.json'),JSON.stringify(report,null,2)+'\n');
 }
 console.log(`PASS: actual worker/adapter ${report.runs.length} executions; ${report.runs.filter(x=>x.blocker).length} observed blockers; no real provider requests; clean/OFF`);
-if (crashRecovery) {
- for (const run of report.runs.filter(entry=>entry.case.startsWith('CR-'))) console.log(JSON.stringify(run));
+if (isolated) {
+ for (const run of report.runs.filter(entry=>entry.case.startsWith(multiworker ? 'CC-' : 'CR-'))) console.log(JSON.stringify(run));
  console.log(JSON.stringify({baseline:report.baseline,finalCounts:report.finalCounts,gates:report.gates}));
 }
 
