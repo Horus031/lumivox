@@ -4,17 +4,32 @@
     "localePrompt": "Chọn và xác nhận ngôn ngữ",
     "localeHint": "Bạn cần lưu ngôn ngữ email trước khi có thể nhận nhắc học. Thao tác này không bật nhắc học.",
     "saveLocale": "Lưu ngôn ngữ email",
-    "title": "Nhắc lịch học", "description": "Chọn thời điểm nhận email nhắc cho các buổi học của bạn.",
+    "title": "Nhắc lịch học",
+    "description": "Chọn thời điểm nhận email nhắc cho các buổi học của bạn.",
     "deliveryPaused": "Tính năng gửi lời nhắc chưa hoạt động. Lưu chỉ ghi nhận tùy chọn của bạn; chưa có lời nhắc nào được gửi.",
     "optInUnavailable": "Hiện chưa mở đăng ký nhận lời nhắc mới. Bạn vẫn có thể tắt các lời nhắc đã đăng ký.",
-    "emailReminders": "Email nhắc lịch học", "consent": "Mặc định tắt. Bật và lưu để đồng ý nhận email nhắc lịch học. Bạn có thể tắt bất cứ lúc nào.",
-    "leadLegend": "Nhắc trước buổi học", "lead": { "5": "5 phút", "15": "15 phút", "30": "30 phút", "60": "1 giờ" },
-    "quietHours": "Giờ yên lặng", "quietExplanation": "Lời nhắc trong giờ yên lặng sẽ bị bỏ qua, không chuyển sang sáng hôm sau.",
-    "quietStart": "Bắt đầu giờ yên lặng", "quietEnd": "Kết thúc giờ yên lặng", "timezone": "Múi giờ yên lặng", "timezoneHint": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh hoặc America/New_York.",
-    "save": "Lưu cài đặt nhắc học", "saveTask": "Lưu lời nhắc của công việc", "saving": "Đang lưu cài đặt nhắc học…", "saved": "Đã lưu cài đặt nhắc học.",
-    "loading": "Đang tải cài đặt nhắc học…", "noData": "Cài đặt nhắc học chưa khả dụng cho đến khi tải được dữ liệu.",
-    "checkLatest": "Kiểm tra cài đặt đã lưu", "checkLatestHint": "Kiểm tra sẽ thay bản nháp bằng dữ liệu đã lưu. Nếu việc lưu bị gián đoạn, hãy kiểm tra trước khi thử lại.",
-    "taskTitle": "Lời nhắc của công việc", "useGlobal": "Dùng tùy chọn nhắc học chung cho công việc này", "taskExplanation": "Tắt để chỉ bỏ qua lời nhắc của công việc này.", "globalOff": "Nhắc học chung đang tắt. Tùy chọn của công việc không thể bật nhắc học chung.",
+    "emailReminders": "Email nhắc lịch học",
+    "consent": "Mặc định tắt. Bật và lưu để đồng ý nhận email nhắc lịch học. Bạn có thể tắt bất cứ lúc nào.",
+    "leadLegend": "Nhắc trước buổi học",
+    "lead": { "5": "5 phút", "15": "15 phút", "30": "30 phút", "60": "1 giờ" },
+    "quietHours": "Giờ yên lặng",
+    "quietExplanation": "Lời nhắc trong giờ yên lặng sẽ bị bỏ qua, không chuyển sang sáng hôm sau.",
+    "quietStart": "Bắt đầu giờ yên lặng",
+    "quietEnd": "Kết thúc giờ yên lặng",
+    "timezone": "Múi giờ yên lặng",
+    "timezoneHint": "Dùng múi giờ IANA, ví dụ Asia/Ho_Chi_Minh hoặc America/New_York.",
+    "save": "Lưu cài đặt nhắc học",
+    "saveTask": "Lưu lời nhắc của công việc",
+    "saving": "Đang lưu cài đặt nhắc học…",
+    "saved": "Đã lưu cài đặt nhắc học.",
+    "loading": "Đang tải cài đặt nhắc học…",
+    "noData": "Cài đặt nhắc học chưa khả dụng cho đến khi tải được dữ liệu.",
+    "checkLatest": "Kiểm tra cài đặt đã lưu",
+    "checkLatestHint": "Kiểm tra sẽ thay bản nháp bằng dữ liệu đã lưu. Nếu việc lưu bị gián đoạn, hãy kiểm tra trước khi thử lại.",
+    "taskTitle": "Lời nhắc của công việc",
+    "useGlobal": "Dùng tùy chọn nhắc học chung cho công việc này",
+    "taskExplanation": "Tắt để chỉ bỏ qua lời nhắc của công việc này.",
+    "globalOff": "Nhắc học chung đang tắt. Tùy chọn của công việc không thể bật nhắc học chung.",
     "errors": {
       "invalidInput": "Kiểm tra thời gian nhắc trước, giờ bắt đầu và kết thúc khác nhau, cùng múi giờ IANA hợp lệ.",
       "notAuthorized": "Phiên đăng nhập không khả dụng hoặc công việc không thuộc về bạn. Hãy đăng nhập và kiểm tra cài đặt đã lưu.",
@@ -46,17 +61,53 @@
       "uncertain": "Chưa xác nhận được kết quả. Hãy thử lại cùng yêu cầu hoặc mở Focus để kiểm tra phiên đang chạy."
     },
     "refreshHint": "Tiến độ học tập được tính từ dữ liệu buổi học mới nhất đã tải. Hãy tải lại trang để xem những thay đổi điểm danh gần đây.",
-    "weekdays": { "1": "T2", "2": "T3", "3": "T4", "4": "T5", "5": "T6", "6": "T7", "7": "CN" },
-    "eyebrow": "Lịch học", "title": "Kế hoạch học tập", "description": "Lịch học và tiến độ của bạn",
-    "overview": "Tiến độ học tập", "summaryScope": "Toàn bộ lịch học · trạng thái hiện tại. Buổi học đến hạn khi đã qua giờ kết thúc cộng 60 phút.",
-    "attendance": "Tỷ lệ tham gia", "onTime": "Đúng giờ", "coverage": "Hoàn thành kế hoạch", "na": "Chưa có dữ liệu", "ratio": "{done} / {total} buổi học",
-    "todayTitle": "Kế hoạch học hôm nay", "timezoneHint": "Hôm nay được tính theo múi giờ của từng buổi học. Cùng một thời điểm, các buổi học có thể thuộc những ngày địa phương khác nhau.",
-    "todayEmpty": "Hôm nay không có buổi học nào.", "calendarTitle": "Lịch học theo tháng", "calendarHint": "Ngày dựa trên ngày địa phương đã lưu của từng buổi học. Buổi đã hủy vẫn hiển thị trong lịch sử.",
-    "monthEmpty": "Tháng này không có buổi học nào.", "monthNavigation": "Điều hướng tháng trên lịch", "previousMonth": "Tháng trước", "nextMonth": "Tháng sau", "previous": "Trước", "next": "Sau",
-    "sessionCount": "{count} buổi học", "loading": "Đang tải kế hoạch học tập…", "retry": "Tải lại kế hoạch hiện tại",
+    "weekdays": {
+      "1": "T2",
+      "2": "T3",
+      "3": "T4",
+      "4": "T5",
+      "5": "T6",
+      "6": "T7",
+      "7": "CN"
+    },
+    "eyebrow": "Lịch học",
+    "title": "Kế hoạch học tập",
+    "description": "Lịch học và tiến độ của bạn",
+    "overview": "Tiến độ học tập",
+    "summaryScope": "Toàn bộ lịch học · trạng thái hiện tại. Buổi học đến hạn khi đã qua giờ kết thúc cộng 60 phút.",
+    "attendance": "Tỷ lệ tham gia",
+    "onTime": "Đúng giờ",
+    "coverage": "Hoàn thành kế hoạch",
+    "na": "Chưa có dữ liệu",
+    "ratio": "{done} / {total} buổi học",
+    "todayTitle": "Kế hoạch học hôm nay",
+    "timezoneHint": "Hôm nay được tính theo múi giờ của từng buổi học. Cùng một thời điểm, các buổi học có thể thuộc những ngày địa phương khác nhau.",
+    "todayEmpty": "Hôm nay không có buổi học nào.",
+    "calendarTitle": "Lịch học theo tháng",
+    "calendarHint": "Ngày dựa trên ngày địa phương đã lưu của từng buổi học. Buổi đã hủy vẫn hiển thị trong lịch sử.",
+    "monthEmpty": "Tháng này không có buổi học nào.",
+    "monthNavigation": "Điều hướng tháng trên lịch",
+    "previousMonth": "Tháng trước",
+    "nextMonth": "Tháng sau",
+    "previous": "Trước",
+    "next": "Sau",
+    "sessionCount": "{count} buổi học",
+    "loading": "Đang tải kế hoạch học tập…",
+    "retry": "Tải lại kế hoạch hiện tại",
     "asOf": "Dữ liệu trạng thái hiện tại được đọc lúc {instant} (giờ máy chủ ứng dụng).",
-    "status": { "scheduled": "Đã lên lịch", "in_progress": "Đang học", "completed": "Đã hoàn thành", "missed": "Đã bỏ lỡ", "skipped": "Đã bỏ qua", "cancelled": "Đã hủy" },
-    "error": { "invalidInput": "Hãy chọn tháng hợp lệ.", "loadFailed": "Không thể tải kế hoạch học tập. Vui lòng thử lại.", "incompleteData": "Chưa thể xác minh dữ liệu kế hoạch đầy đủ. Hãy tải lại hoặc chọn tháng ít buổi học hơn; hệ thống không hiển thị tổng số liệu thiếu." }
+    "status": {
+      "scheduled": "Đã lên lịch",
+      "in_progress": "Đang học",
+      "completed": "Đã hoàn thành",
+      "missed": "Đã bỏ lỡ",
+      "skipped": "Đã bỏ qua",
+      "cancelled": "Đã hủy"
+    },
+    "error": {
+      "invalidInput": "Hãy chọn tháng hợp lệ.",
+      "loadFailed": "Không thể tải kế hoạch học tập. Vui lòng thử lại.",
+      "incompleteData": "Chưa thể xác minh dữ liệu kế hoạch đầy đủ. Hãy tải lại hoặc chọn tháng ít buổi học hơn; hệ thống không hiển thị tổng số liệu thiếu."
+    }
   },
   "common": {
     "datePicker": {
@@ -215,7 +266,10 @@
       "expandSidebar": "Mở rộng thanh bên"
     },
     "navigation": {
-      "studyPlan": { "label": "Kế hoạch học tập", "description": "Lịch học và kế hoạch hôm nay" },
+      "studyPlan": {
+        "label": "Kế hoạch học tập",
+        "description": "Lịch học và kế hoạch hôm nay"
+      },
       "more": "Thêm",
       "dashboard": {
         "mobileLabel": "Tổng quan",
@@ -2627,5 +2681,71 @@
       }
     },
     "attendanceActionsLabel": "Các thao tác điểm danh"
+  },
+  "taskRiskRecovery": {
+    "status": {
+      "high": "Nguy cơ cao",
+      "elevated": "Cần chú ý",
+      "moderate": "Nên theo dõi",
+      "low": "Nguy cơ thấp",
+      "stale": "Cần cập nhật",
+      "loading": "Đang kiểm tra"
+    },
+    "summary": {
+      "title": "Nguy cơ trễ hạn Task",
+      "subtitle": "Dự báo dựa trên hoạt động học tập của bạn",
+      "loading": "Đang kiểm tra nguy cơ trễ hạn của Task này.",
+      "stale": "Dự báo này cần được cập nhật trước khi sử dụng.",
+      "unavailable": "Hiện chưa có dự báo nguy cơ đủ tin cậy cho Task này.",
+      "ineligible": "Task này không thuộc phạm vi dự báo nguy cơ trễ hạn.",
+      "estimateLabel": "Mức nguy cơ mô hình ước lượng",
+      "invalidEstimate": "Hiện chưa thể hiển thị mức nguy cơ.",
+      "disclaimer": "Đây là kết quả ước lượng của mô hình dự báo, không phải kết luận chắc chắn Task sẽ trễ hạn.",
+      "daysRemaining": "Còn {days} ngày",
+      "updated": "Cập nhật lúc {date}",
+      "reasonsTitle": "Vì sao Task này cần chú ý?",
+      "noReasons": "Chưa có giải thích chi tiết cho dự báo này."
+    },
+    "actions": {
+      "title": "Gợi ý để hoàn thành đúng tiến độ",
+      "subtitle": "Hãy xem xét từng gợi ý trước khi thay đổi Task hoặc lịch học.",
+      "empty": "Hiện chưa có hành động khắc phục phù hợp cho Task này.",
+      "choose": "Xem hành động",
+      "label": {
+        "start_focus": "Bắt đầu Focus",
+        "split_task": "Chia nhỏ thành Subtask",
+        "increase_study_frequency": "Tăng số buổi học",
+        "reschedule": "Xem lại deadline",
+        "reduce_scope": "Giảm khối lượng Task",
+        "view_task": "Xem Task"
+      },
+      "description": {
+        "start_focus": "Chuẩn bị một phiên tập trung được liên kết với Task này.",
+        "split_task": "Xem đề xuất chia công việc lớn thành những bước nhỏ hơn.",
+        "increase_study_frequency": "Xem xét bổ sung các buổi học trước thời hạn hoàn thành.",
+        "reschedule": "Xem trước phương án điều chỉnh deadline trước khi lưu.",
+        "reduce_scope": "Xem xét điều chỉnh khối lượng công việc để dễ hoàn thành hơn.",
+        "view_task": "Mở Task để xem thông tin chi tiết."
+      }
+    },
+    "preview": {
+      "eyebrow": "Bản xem trước giao diện nội bộ",
+      "title": "Task Risk Recovery",
+      "description": "Kiểm tra giao diện cảnh báo, giải thích, trạng thái và hành động khắc phục trước khi kết nối dữ liệu thật.",
+      "disclaimer": "Trang này sử dụng dữ liệu giả lập cố định. Chọn hành động chỉ thay đổi bản xem trước, không lưu hoặc chỉnh sửa Task.",
+      "scenarios": "Các trạng thái dự báo",
+      "details": "Trạng thái đang chọn",
+      "actionSelected": "Đã chọn để xem trước: {action}. Không có thay đổi nào được lưu.",
+      "cases": {
+        "high": "Task có nguy cơ cao",
+        "elevated": "Task cần chú ý",
+        "moderate": "Task nên theo dõi",
+        "low": "Task có nguy cơ thấp",
+        "stale": "Dự báo đã cũ",
+        "loading": "Đang tải dự báo",
+        "unavailable": "Không có dự báo",
+        "ineligible": "Task không đủ điều kiện"
+      }
+    }
   }
 }
