@@ -1,0 +1,8 @@
+{
+  "framework": null,
+  "buildCommand": "node -e \"require('node:fs').mkdirSync('public', { recursive: true })\"",
+  "outputDirectory": "public",
+  "functions": {
+    "api/study-reminders/unsubscribe.ts": { "maxDuration": 12 }
+  }
+}

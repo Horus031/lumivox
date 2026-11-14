@@ -23,6 +23,24 @@ function fixture() {
  return {config,store,transport,getSnapshot:()=>snapshot};
 }
 describe("8D trusted context / immutable worker",()=>{
+ it("PI-07 writes a direct public one-click header and holds snapshots from the previous origin", async () => {
+   const f = fixture();
+   const send = vi.fn().mockResolvedValue({ data: { id: "ingress-fixture" }, error: null });
+   const provider = new ResendReminderProvider({ emails: { send } }, f.config.from);
+   f.config.publicUnsubscribeOrigin = "https://unsubscribe.example.invalid";
+   expect((await dispatchResendReminders(f.store, provider, f.config)).accepted).toBe(1);
+   const header = send.mock.calls[0][0].headers["List-Unsubscribe"];
+   const url = new URL(header.slice(1, -1));
+   expect(url.origin).toBe(f.config.publicUnsubscribeOrigin);
+   expect(url.pathname).toBe("/api/study-reminders/unsubscribe");
+   expect([...url.searchParams.keys()]).toEqual(["token"]);
+   expect(url.searchParams.get("token")).toMatch(/^[\w-]{43}$/);
+   expect(send.mock.calls[0][0].html).toContain(`${f.config.trustedOrigin}/vi/study-reminders/unsubscribe`);
+   f.config.publicUnsubscribeOrigin = "https://replacement.example.invalid";
+   expect((await dispatchResendReminders(f.store, provider, f.config)).held).toBe(1);
+   expect(send).toHaveBeenCalledTimes(1);
+   expect(f.store.authorize).toHaveBeenCalledTimes(1);
+ });
  it.each(["", "*@gmail.com", "example.com", "a@example.invalid,", "user@example.invalid,*@example.invalid"])("rejects invalid/wildcard allowlist %s",raw=>expect(()=>configuredReminderRecipients(raw)).toThrow());
  it("identity matching preserves local part case and normalizes domain",()=>{
   const f=fixture();const list=configuredReminderRecipients(" Owner@EXAMPLE.invalid ");

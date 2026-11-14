@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn, execFileSync } from 'node:child_process';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
 import { randomBytes, randomUUID, createHash, createHmac } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { resolve, dirname } from 'node:path';
@@ -7,7 +9,8 @@ import { fileURLToPath } from 'node:url';
 import { writeFile, mkdir, readFile } from 'node:fs/promises';
 import { reminderRecipientFingerprint } from '../apps/web/features/learning-schedule/notifications/resend-webhook.ts';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const ingress=process.argv.includes('--public-ingress');
+const dedicated=process.argv.includes('--dedicated-ingress');
+const ingress=dedicated || process.argv.includes('--public-ingress');
 const container=ingress?'supabase_db_lumivox-11c5d':'supabase_db_lumivox-proj';
 const owner=randomUUID(),task=randomUUID(),schedule=randomUUID(),session=randomUUID();
 const q=value=>`'${String(value).replaceAll("'","''")}'`;
@@ -15,7 +18,8 @@ const wait=ms=>new Promise(done=>setTimeout(done,ms));
 const sql=command=>execFileSync('docker',['exec',container,'psql','-X','-At','-v','ON_ERROR_STOP=1','-U','postgres','-d','postgres','-c',command],{cwd:root,encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim();
 const cli=process.env.SUPABASE_CLI_PATH ?? 'C:\\Users\\Dell\\AppData\\Local\\npm-cache\\_npx\\aa8e5c70f9d8d161\\node_modules\\@supabase\\cli-windows-x64\\bin\\supabase.exe';
 const report={baseline:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),startedAt:new Date().toISOString(),checks:[],cleanup:false};
-let server,browser;
+let server,browser,publicServer;
+const bridgeSecret=randomBytes(32).toString('hex');
 const identityKey=randomBytes(32).toString('hex'),email='unsubscribe-http@example.invalid';
 const signingBytes=randomBytes(32),signingSecret=`whsec_${signingBytes.toString('base64')}`,receiptIds=[];
 const fp=reminderRecipientFingerprint(email,identityKey);
@@ -50,17 +54,48 @@ try {
  SUPABASE_SECRET_KEY:status.SERVICE_ROLE_KEY,SUPABASE_SERVICE_ROLE_KEY:status.SERVICE_ROLE_KEY,
  STUDY_REMINDER_RECIPIENT_HMAC_KEY:identityKey,RESEND_STUDY_REMINDER_WEBHOOK_SECRET:signingSecret,RESEND_API_KEY:'',
  RESEND_STUDY_REMINDER_API_KEY:'',STUDY_REMINDER_REAL_SEND_ENABLED:'false',STUDY_REMINDER_DISPATCH_SECRET:identityKey,
- STUDY_REMINDER_SETTINGS_ENABLED:'false'}});
+ STUDY_REMINDER_SETTINGS_ENABLED:'false',UNSUBSCRIBE_BRIDGE_SECRET:bridgeSecret}});
  server.stdout.on('data',data=>{if(data.toString().includes('Ready in')) ownReady=true;});server.stderr.resume();
  const base='http://127.0.0.1:3109',deadline=Date.now()+15000;
  while(!ownReady&&Date.now()<deadline){assert.equal(server.exitCode,null);await wait(100);}assert(ownReady);
- const endpoint=token=>`${base}/api/study-reminders/unsubscribe?token=${encodeURIComponent(token)}`;
+ let publicBase=base;
+ if(dedicated){
+  const requireIngress=createRequire(resolve(root,'apps/unsubscribe-ingress/package.json'));
+  const bundle=await requireIngress('esbuild').build({
+   stdin:{contents:'export * from "./handler"; export * from "./bridge";',resolveDir:resolve(root,'apps/unsubscribe-ingress')},
+   platform:'node',format:'esm',bundle:true,write:false,
+  });
+  const {handleIngress,consumeThroughBridge}=await import(`data:text/javascript;base64,${Buffer.from(bundle.outputFiles[0].text).toString('base64')}`);
+  publicServer=createServer(async(req,res)=>{
+   const request=new Request(`http://127.0.0.1${req.url}`,{
+    method:req.method,headers:req.headers,...(req.method==='POST'?{body:req,duplex:'half'}:{}),
+   });
+   const response=await handleIngress(request,{
+    isRateLimited:async()=>false,
+    consume:hash=>consumeThroughBridge(hash,{UNSUBSCRIBE_BRIDGE_ORIGIN:'https://protected.example.invalid',UNSUBSCRIBE_BRIDGE_SECRET:bridgeSecret},
+     async()=>'local-oidc-fixture',async(url,options)=>{
+      const upstream=await fetch(new URL(url.pathname,base),options);
+      if(![204,404].includes(upstream.status)) console.error(`Unexpected local bridge status ${upstream.status}`);
+      return upstream;
+     }),
+   });
+   res.writeHead(response.status,Object.fromEntries(response.headers));
+   res.end(await response.text());
+  });
+  publicServer.listen(0,'127.0.0.1');
+  await once(publicServer,'listening');
+  publicBase=`http://127.0.0.1:${publicServer.address().port}`;
+  const internal=`${base}/api/internal/study-reminders/unsubscribe`;
+  assert.equal((await fetch(internal,{method:'POST',headers:{Authorization:`Bearer ${identityKey}`}})).status,401);
+  assert.equal((await fetch(internal,{method:'POST',headers:{Authorization:`Bearer ${bridgeSecret}`,'x-lumivox-unsubscribe-hash':'invalid'}})).status,400);
+ }
+ const endpoint=token=>`${publicBase}/api/study-reminders/unsubscribe?token=${encodeURIComponent(token)}`;
  const post=token=>fetch(endpoint(token),{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'List-Unsubscribe=One-Click',redirect:'manual'});
  const before=state();assert.deepEqual(before,{consent:true,pending:1,used:0});
  const get=await fetch(endpoint(pair.token));assert.equal(get.status,200);assert.deepEqual(state(),before);
  report.checks.push({case:'US-01 API GET no mutation',status:200});
  if(ingress){
-  const getWithoutToken=await fetch(`${base}/api/study-reminders/unsubscribe`,{redirect:'manual'});
+  const getWithoutToken=await fetch(`${publicBase}/api/study-reminders/unsubscribe`,{redirect:'manual'});
   assert.equal(getWithoutToken.status,200);
   assert.equal(getWithoutToken.headers.get('referrer-policy'),'no-referrer');
   assert.equal((await post('invalid')).status,400);
@@ -156,6 +191,7 @@ try {
  report.externalRequests=external.length;report.providerRequests=0;
  }
 } finally {
+ if(publicServer) await new Promise((resolve,reject)=>publicServer.close(error=>error?reject(error):resolve()));
  if(browser) await browser.close();
  if(server){server.kill();await Promise.race([new Promise(done=>server.once('exit',done)),wait(3000)]);}
  try {
