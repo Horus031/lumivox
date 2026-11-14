@@ -492,9 +492,7 @@
           "uncertain": 0,
           "held": 1
         },
-        "sqlstates": [
-          "P0001"
-        ]
+        "sqlstates": ["P0001"]
       },
       "payloadPreserved": true
     },

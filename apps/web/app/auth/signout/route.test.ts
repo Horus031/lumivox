@@ -13,7 +13,9 @@ describe("sign out route", () => {
 
   it("signs out before redirecting to the home page with GET", async () => {
     signOut.mockResolvedValue({ error: null });
-    const response = await POST(new Request("https://lumivox.test/auth/signout", { method: "POST" }));
+    const response = await POST(
+      new Request("https://lumivox.test/auth/signout", { method: "POST" }),
+    );
     expect(signOut).toHaveBeenCalledTimes(1);
     expect(response.status).toBe(303);
     expect(response.headers.get("location")).toBe("https://lumivox.test/");
@@ -21,7 +23,9 @@ describe("sign out route", () => {
 
   it("does not report successful sign out when Supabase fails", async () => {
     signOut.mockResolvedValue({ error: { message: "Upstream unavailable" } });
-    const response = await POST(new Request("https://lumivox.test/auth/signout", { method: "POST" }));
+    const response = await POST(
+      new Request("https://lumivox.test/auth/signout", { method: "POST" }),
+    );
     expect(response.status).toBe(500);
     expect(response.headers.has("location")).toBe(false);
   });

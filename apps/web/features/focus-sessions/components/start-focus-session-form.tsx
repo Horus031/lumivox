@@ -7,7 +7,13 @@ import { Play } from "lucide-react";
 import { toast } from "sonner";
 
 import { createFocusSessionAction } from "@/features/focus-sessions/focus-session.actions";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,8 +55,11 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
       <form onSubmit={handleSubmit} aria-busy={isPending} className="space-y-card">
         <div>
           <Label htmlFor={`${id}-task`}>{t("linkedTask")}</Label>
-          <Select value={taskId || "no-task"} disabled={isPending}
-            onValueChange={(value) => setTaskId(value === "no-task" ? "" : value)}>
+          <Select
+            value={taskId || "no-task"}
+            disabled={isPending}
+            onValueChange={(value) => setTaskId(value === "no-task" ? "" : value)}
+          >
             <SelectTrigger id={`${id}-task`} className="w-full sm:h-touch lg:h-control">
               <SelectValue placeholder={t("chooseTask")} />
             </SelectTrigger>
@@ -69,21 +78,44 @@ export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
           <p id={`${id}-duration-hint`} className="mb-3 text-caption text-muted-foreground">
             {t("plannedDurationSub")}
           </p>
-          <div role="group" aria-label={t("plannedDuration")} className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1">
+          <div
+            role="group"
+            aria-label={t("plannedDuration")}
+            className="grid grid-cols-3 gap-1 rounded-lg bg-muted p-1"
+          >
             {["25", "45", "60"].map((value) => (
-              <Button key={value} type="button" variant="ghost" size="sm"
-                disabled={isPending} aria-pressed={plannedMinutes === value}
+              <Button
+                key={value}
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={isPending}
+                aria-pressed={plannedMinutes === value}
                 onClick={() => setPlannedMinutes(value)}
-                className={plannedMinutes === value ? "bg-background text-foreground shadow-sm hover:bg-background" : undefined}>
+                className={
+                  plannedMinutes === value
+                    ? "bg-background text-foreground shadow-sm hover:bg-background"
+                    : undefined
+                }
+              >
                 {t("minutes", { value: Number(value) })}
               </Button>
             ))}
           </div>
-          <Input id={`${id}-minutes`} type="number" min={1} max={240} step={1} required
-            aria-describedby={`${id}-duration-hint`} placeholder={t("plannedMinutesPlaceholder")}
-            value={plannedMinutes} disabled={isPending}
+          <Input
+            id={`${id}-minutes`}
+            type="number"
+            min={1}
+            max={240}
+            step={1}
+            required
+            aria-describedby={`${id}-duration-hint`}
+            placeholder={t("plannedMinutesPlaceholder")}
+            value={plannedMinutes}
+            disabled={isPending}
             onChange={(event) => setPlannedMinutes(event.target.value)}
-            className="mt-3 sm:h-touch lg:h-control" />
+            className="mt-3 sm:h-touch lg:h-control"
+          />
         </div>
         <Button type="submit" disabled={isPending} className="sm:min-h-touch lg:min-h-control">
           <Play aria-hidden="true" />

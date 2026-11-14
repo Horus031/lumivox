@@ -7,8 +7,13 @@ describe("date-only form values", () => {
     expect(date.getHours()).toBe(0);
     expect(formatLocalDate(date)).toBe(value);
   });
-  it.each(["", null, undefined, "2027-02-29", "2030-13-01", "2030-02-30", "2030-1-1", "invalid"])("rejects invalid or missing dates: %s", (value) => {
-    expect(parseLocalDate(value)).toBeUndefined();
+  it.each(["", null, undefined, "2027-02-29", "2030-13-01", "2030-02-30", "2030-1-1", "invalid"])(
+    "rejects invalid or missing dates: %s",
+    (value) => {
+      expect(parseLocalDate(value)).toBeUndefined();
+    },
+  );
+  it("clears optional form values", () => {
+    expect(formatLocalDate(undefined)).toBe("");
   });
-  it("clears optional form values", () => { expect(formatLocalDate(undefined)).toBe(""); });
 });

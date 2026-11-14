@@ -24,12 +24,8 @@
       "case": "ND-03 concurrent claimers",
       "repeat": 1,
       "elapsedMs": 8.693099999999959,
-      "firstJobIds": [
-        "f8533399-c9cc-45fb-a8aa-2c64255001ef"
-      ],
-      "secondJobIds": [
-        "8f722d49-4143-4285-9ca2-8a2aa3bede5a"
-      ],
+      "firstJobIds": ["f8533399-c9cc-45fb-a8aa-2c64255001ef"],
+      "secondJobIds": ["8f722d49-4143-4285-9ca2-8a2aa3bede5a"],
       "final": {
         "jobs": [
           {
@@ -72,9 +68,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -100,9 +94,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -127,9 +119,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -185,12 +175,8 @@
       "case": "ND-03 concurrent claimers",
       "repeat": 2,
       "elapsedMs": 4.9529,
-      "firstJobIds": [
-        "c64272ec-1e5a-4fd2-bc7a-15a3c9f8326c"
-      ],
-      "secondJobIds": [
-        "657c508a-922c-4c0a-be4c-26c4017ba911"
-      ],
+      "firstJobIds": ["c64272ec-1e5a-4fd2-bc7a-15a3c9f8326c"],
+      "secondJobIds": ["657c508a-922c-4c0a-be4c-26c4017ba911"],
       "final": {
         "jobs": [
           {
@@ -233,9 +219,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -261,9 +245,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -288,9 +270,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -346,12 +326,8 @@
       "case": "ND-03 concurrent claimers",
       "repeat": 3,
       "elapsedMs": 5.895400000000109,
-      "firstJobIds": [
-        "6ea204e0-842f-40e6-8b55-e4cddaa05f16"
-      ],
-      "secondJobIds": [
-        "8fffbf5e-baa8-4e9b-9b78-73b685146933"
-      ],
+      "firstJobIds": ["6ea204e0-842f-40e6-8b55-e4cddaa05f16"],
+      "secondJobIds": ["8fffbf5e-baa8-4e9b-9b78-73b685146933"],
       "final": {
         "jobs": [
           {
@@ -394,9 +370,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -422,9 +396,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,
@@ -449,9 +421,7 @@
       "blocker": {
         "waiter": 509,
         "blocker": 510,
-        "observed": [
-          510
-        ]
+        "observed": [510]
       },
       "result": {
         "claimed": 1,

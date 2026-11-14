@@ -1,15 +1,9 @@
 import { describe, expect, it } from "vitest";
-import {
-  calculateAttendanceSummary,
-  type AnalyticsObligation,
-} from "./attendance-analytics";
+import { calculateAttendanceSummary, type AnalyticsObligation } from "./attendance-analytics";
 
 const asOf = "2026-11-02T12:00:00Z";
 
-function session(
-  index: number,
-  overrides: Partial<AnalyticsObligation> = {},
-): AnalyticsObligation {
+function session(index: number, overrides: Partial<AnalyticsObligation> = {}): AnalyticsObligation {
   return {
     id: `session-${index}`,
     scheduleId: "schedule-1",
@@ -50,8 +44,7 @@ describe("Attendance analytics", () => {
         i < 8
           ? {
               status: "completed",
-              completedAt:
-                i < 5 ? "2026-11-01T08:45:00Z" : "2026-11-01T09:30:00Z",
+              completedAt: i < 5 ? "2026-11-01T08:45:00Z" : "2026-11-01T09:30:00Z",
             }
           : {},
       ),
@@ -98,9 +91,9 @@ describe("Attendance analytics", () => {
   });
 
   it("does not invent an audit time", () => {
-    expect(() =>
-      calculateAttendanceSummary([session(1, { status: "cancelled" })], asOf),
-    ).toThrow(/Missing cancellation audit/);
+    expect(() => calculateAttendanceSummary([session(1, { status: "cancelled" })], asOf)).toThrow(
+      /Missing cancellation audit/,
+    );
   });
 
   it("does not double-count proactive replacements", () => {
@@ -140,10 +133,7 @@ describe("Attendance analytics", () => {
   });
 
   it("counts grace equality as due", () => {
-    const result = calculateAttendanceSummary(
-      [session(1)],
-      "2026-11-01T10:00:00Z",
-    );
+    const result = calculateAttendanceSummary([session(1)], "2026-11-01T10:00:00Z");
 
     expect(result.eligibleDue).toBe(1);
   });
@@ -194,10 +184,7 @@ describe("Attendance analytics", () => {
   });
 
   it("does not infer Missed from a persisted Scheduled status", () => {
-    const result = calculateAttendanceSummary(
-      [session(1, { status: "scheduled" })],
-      asOf,
-    );
+    const result = calculateAttendanceSummary([session(1, { status: "scheduled" })], asOf);
 
     expect(result.eligibleDue).toBe(1);
     expect(result.completedDue).toBe(0);

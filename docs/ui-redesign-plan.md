@@ -12,10 +12,10 @@ with neutral surfaces, clear hierarchy, restrained borders and shadows.
 - [x] 4. PageHeader: consistent title, description and action alignment.
 - [x] 5. Dashboard: summary metrics, charts and information hierarchy.
 - [x] 6. Workspace: goal rail, lanes and task cards. Tasks/goals redirects
-  belong to this workflow.
+      belong to this workflow.
 - [x] 7. Focus, Roadmaps, Rooms/Groups and form-heavy screens.
 - [ ] 8. Admin and remaining secondary pages; remove remaining hard-coded
-  visual values as each screen is migrated.
+      visual values as each screen is migrated.
 
 Deliver one phase at a time. Record implementation and verification here.
 Do not migrate unrelated screens while working on a foundation phase.
@@ -60,23 +60,23 @@ Keep 8d open until all three monitoring deliveries are complete.
 Source of truth: `apps/web/app/globals.css`, using Tailwind v4 `@theme inline`.
 Retain existing semantic color names and the 4px default spacing scale.
 
-| Role | Value | Utility example |
-| --- | --- | --- |
-| Caption | 12px / 16px | `text-caption` |
-| Label / navigation | 13px / 18px | `text-label` |
-| Body / description | 14px / 22px | `text-body` |
-| Section title | 16px / 24px | `text-section` |
-| Page title | 24px / 32px | `text-page` |
-| Metric | 28px / 34px | `text-metric` |
-| Small / default / large control | 32 / 36 / 40px | `h-control` |
-| Minimum mobile touch target | 44px | `min-h-touch min-w-touch` |
-| Card padding | 16px | `p-card` |
-| Section gap / page padding | 24px | `gap-section`, `p-page` |
-| Expanded sidebar / topbar | 240 / 56px | `w-sidebar`, `h-topbar` |
-| Small / default / large icon | 14 / 16 / 20px | `size-icon` |
-| Small / medium / large radius | 4 / 6 / 8px | `rounded-sm/md/lg` |
-| Overlay radius | 10px | `rounded-xl` |
-| Compatibility radii | 14 / 18px | `rounded-2xl/3xl` |
+| Role                            | Value          | Utility example           |
+| ------------------------------- | -------------- | ------------------------- |
+| Caption                         | 12px / 16px    | `text-caption`            |
+| Label / navigation              | 13px / 18px    | `text-label`              |
+| Body / description              | 14px / 22px    | `text-body`               |
+| Section title                   | 16px / 24px    | `text-section`            |
+| Page title                      | 24px / 32px    | `text-page`               |
+| Metric                          | 28px / 34px    | `text-metric`             |
+| Small / default / large control | 32 / 36 / 40px | `h-control`               |
+| Minimum mobile touch target     | 44px           | `min-h-touch min-w-touch` |
+| Card padding                    | 16px           | `p-card`                  |
+| Section gap / page padding      | 24px           | `gap-section`, `p-page`   |
+| Expanded sidebar / topbar       | 240 / 56px     | `w-sidebar`, `h-topbar`   |
+| Small / default / large icon    | 14 / 16 / 20px | `size-icon`               |
+| Small / medium / large radius   | 4 / 6 / 8px    | `rounded-sm/md/lg`        |
+| Overlay radius                  | 10px           | `rounded-xl`              |
+| Compatibility radii             | 14 / 18px      | `rounded-2xl/3xl`         |
 
 Sizes are expressed in rem and do not scale with viewport width. Preserve
 normal tracking. Prefer weights 400 for body, 500 for labels, 600 for titles.
@@ -922,8 +922,7 @@ Next delivery: phase 8d.3, Native Task Risk monitoring and prediction details.
   typography after inspecting wrapping and reran the browser matrix. Fixtures use
   a sans-serif fallback and simplified shell insets; production font rendering
   and full authenticated RSC composition were not exercised.
-- Existing localhost:3000 monitoring/detail and login requests still return HTTP
-  500. The existing server/generated cache was not stopped, deleted or repaired.
+- Existing localhost:3000 monitoring/detail and login requests still return HTTP 500. The existing server/generated cache was not stopped, deleted or repaired.
   Real Admin access/query flows and model execution were not exercised; no real
   predictions, model versions, attributions or user records were modified.
 

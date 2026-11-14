@@ -12,9 +12,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 74,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "",
       "secondResult": {
         "state": "22023",
@@ -52,9 +50,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 145,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "9708c90d-7686-4d18-8616-52aa36103ce4",
       "secondResult": {
         "state": "23505",
@@ -158,9 +154,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 100,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "dafddd94-87b2-404c-891b-ee5622847cd4",
       "secondResult": {
         "state": "00000",
@@ -284,9 +278,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 106,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "40001",
@@ -450,9 +442,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 95,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "22023",
@@ -616,9 +606,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 119,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "18e2360b-174d-43b5-9b38-3edcf4c0c2cd",
       "secondResult": {
         "state": "00000",
@@ -810,9 +798,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 58,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "a71002ae-10b0-41b1-a9db-42ea3f65b37e",
       "secondResult": {
         "state": "40001",
@@ -945,9 +931,7 @@
       "iteration": 1,
       "status": "PASS",
       "elapsedMs": 60,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "cf4dc1b1-9424-4dcc-946f-6f90fb8b394c",
       "secondResult": {
         "state": "00000",
@@ -1507,9 +1491,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 62,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "",
       "secondResult": {
         "state": "22023",
@@ -1547,9 +1529,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 133,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "fd3efb2a-225c-4781-8dcd-7abc7698ede3",
       "secondResult": {
         "state": "23505",
@@ -1653,9 +1633,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 104,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "b95e0ff7-e73b-4ef7-8a05-9310f3e15650",
       "secondResult": {
         "state": "00000",
@@ -1779,9 +1757,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 95,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "40001",
@@ -1945,9 +1921,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 96,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "22023",
@@ -2111,9 +2085,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 114,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "9277a477-294e-46cf-8e0e-e3f163e08dd8",
       "secondResult": {
         "state": "00000",
@@ -2305,9 +2277,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 57,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "cbd71034-8623-47af-9f7f-2e5cdf2b6ebb",
       "secondResult": {
         "state": "40001",
@@ -2440,9 +2410,7 @@
       "iteration": 2,
       "status": "PASS",
       "elapsedMs": 59,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "a8f34d18-1c2f-4f50-ba26-97de594dab23",
       "secondResult": {
         "state": "00000",
@@ -3002,9 +2970,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 55,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "",
       "secondResult": {
         "state": "22023",
@@ -3042,9 +3008,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 145,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "df834076-a8cc-4170-b8f7-19c66c741b3a",
       "secondResult": {
         "state": "23505",
@@ -3148,9 +3112,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 102,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "da52b15c-3c04-41b3-b17e-3e9031897ce9",
       "secondResult": {
         "state": "00000",
@@ -3274,9 +3236,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 125,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "40001",
@@ -3440,9 +3400,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 106,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "2",
       "secondResult": {
         "state": "22023",
@@ -3606,9 +3564,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 126,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "5ab97d27-248e-4978-81fd-f98b0191e3a1",
       "secondResult": {
         "state": "00000",
@@ -3800,9 +3756,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 50,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "7cffa91d-3466-43ee-b58b-4e611ef4566e",
       "secondResult": {
         "state": "40001",
@@ -3935,9 +3889,7 @@
       "iteration": 3,
       "status": "PASS",
       "elapsedMs": 53,
-      "blockers": [
-        520
-      ],
+      "blockers": [520],
       "firstResult": "7b3aed97-9b6f-45fa-839c-fb8d66e74c84",
       "secondResult": {
         "state": "00000",

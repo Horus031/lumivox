@@ -12,10 +12,7 @@ const owner = randomUUID();
 const email = `attendance-cc-${owner}@example.invalid`;
 const title = "Attendance concurrency verification fixture";
 
-const reportPath = resolve(
-  root,
-  "docs/learning-schedule/phase-05-attendance-first-sweep.json",
-);
+const reportPath = resolve(root, "docs/learning-schedule/phase-05-attendance-first-sweep.json");
 
 const q = (value) => `'${String(value).replaceAll("'", "''")}'`;
 
@@ -30,20 +27,7 @@ class Connection {
 
     this.child = spawn(
       "docker",
-      [
-        "exec",
-        "-i",
-        container,
-        "psql",
-        "-X",
-        "-A",
-        "-t",
-        "-q",
-        "-U",
-        "postgres",
-        "-d",
-        "postgres",
-      ],
+      ["exec", "-i", container, "psql", "-X", "-A", "-t", "-q", "-U", "postgres", "-d", "postgres"],
       {
         cwd: root,
         windowsHide: true,
@@ -68,9 +52,7 @@ class Connection {
       }
     });
 
-    createInterface({ input: this.child.stderr }).on("line", (line) =>
-      this.stderr.push(line),
-    );
+    createInterface({ input: this.child.stderr }).on("line", (line) => this.stderr.push(line));
 
     this.child.on("error", (error) => this.fail(error));
 
@@ -119,9 +101,7 @@ class Connection {
     }).then((result) => {
       const lines = result.text.split("\n");
 
-      const state = lines
-        .findLast((x) => x.startsWith("__LS_SQLSTATE "))
-        ?.split(" ")[1];
+      const state = lines.findLast((x) => x.startsWith("__LS_SQLSTATE "))?.split(" ")[1];
 
       const message = lines
         .findLast((x) => x.startsWith("__LS_LAST_ERROR "))
@@ -131,11 +111,7 @@ class Connection {
         state,
         message: state === "00000" ? null : message,
         text: lines
-          .filter(
-            (x) =>
-              !x.startsWith("__LS_SQLSTATE ") &&
-              !x.startsWith("__LS_LAST_ERROR "),
-          )
+          .filter((x) => !x.startsWith("__LS_SQLSTATE ") && !x.startsWith("__LS_LAST_ERROR "))
           .join("\n")
           .trim(),
         errors: result.errors,
@@ -149,8 +125,7 @@ class Connection {
     assert.equal(
       result.state,
       "00000",
-      `${this.name}: ${result.state}: ` +
-        `${result.message ?? ""}\n${result.errors.join("\n")}`,
+      `${this.name}: ${result.state}: ` + `${result.message ?? ""}\n${result.errors.join("\n")}`,
     );
 
     return result.text;
@@ -174,10 +149,7 @@ class Connection {
   }
 
   async begin(role = "authenticated") {
-    assert(
-      ["authenticated", "service_role"].includes(role),
-      "Unexpected test role",
-    );
+    assert(["authenticated", "service_role"].includes(role), "Unexpected test role");
 
     await this.ok(`
       BEGIN;
@@ -204,10 +176,7 @@ class Connection {
 
     this.child.stdin.end("ROLLBACK;\n\\q\n");
 
-    await Promise.race([
-      new Promise((done) => this.child.once("exit", done)),
-      wait(2000),
-    ]);
+    await Promise.race([new Promise((done) => this.child.once("exit", done)), wait(2000)]);
 
     if (this.child.exitCode === null) {
       this.child.kill();
@@ -215,11 +184,7 @@ class Connection {
   }
 }
 
-const [a, b, observer] = [
-  new Connection("A"),
-  new Connection("B"),
-  new Connection("observer"),
-];
+const [a, b, observer] = [new Connection("A"), new Connection("B"), new Connection("observer")];
 
 const report = {
   baseline: execFileSync("git", ["rev-parse", "HEAD"], {
@@ -327,11 +292,7 @@ async function setup(sourceStatus) {
     FROM public.task_study_schedules s
     CROSS JOIN LATERAL (
       SELECT
-        ${
-          historical
-            ? "now() - interval '2 days'"
-            : "now() - interval '20 minutes'"
-        } AS starts_at,
+        ${historical ? "now() - interval '2 days'" : "now() - interval '20 minutes'"} AS starts_at,
         ${
           historical
             ? "now() - interval '2 days' + interval '30 minutes'"
@@ -419,7 +380,6 @@ async function observeBlocker() {
   throw new Error("Worker B was not observed waiting for worker A");
 }
 
-
 async function prepareBeforeSweepDeadline(fixture) {
   // The grace cutoff is six seconds after the captured
   // PostgreSQL clock instant.
@@ -470,17 +430,16 @@ async function prepareBeforeSweepDeadline(fixture) {
 
   assert(timing, "Fixture not found");
 
-  const remaining = Number(await observer.ok(`
+  const remaining = Number(
+    await observer.ok(`
     SELECT EXTRACT(EPOCH FROM (
       ${q(timing.deadline)}::timestamptz
       - pg_catalog.clock_timestamp()
     ));
-  `));
-
-  assert(
-    remaining > 1,
-    "Fixture deadline too close for a valid pre-cutoff command",
+  `),
   );
+
+  assert(remaining > 1, "Fixture deadline too close for a valid pre-cutoff command");
 
   return {
     ...fixture,
@@ -490,31 +449,23 @@ async function prepareBeforeSweepDeadline(fixture) {
   };
 }
 
-
-
 async function assertNoOtherOverdueCandidates(fixture) {
-  const count = Number(await observer.ok(`
+  const count = Number(
+    await observer.ok(`
     SELECT count(*)
     FROM public.task_study_sessions
     WHERE status = 'scheduled'
       AND scheduled_end_at <=
         pg_catalog.clock_timestamp() - interval '60 minutes'
       AND id <> ${q(fixture.sessionId)};
-  `));
-
-  assert.equal(
-    count,
-    0,
-    "Refusing trusted Sweep: unrelated overdue local sessions exist",
+  `),
   );
+
+  assert.equal(count, 0, "Refusing trusted Sweep: unrelated overdue local sessions exist");
 }
 
-
-
 async function runAttendanceFirstSweep(commandName, iteration) {
-  const fixture = await prepareBeforeSweepDeadline(
-    await setup("scheduled"),
-  );
+  const fixture = await prepareBeforeSweepDeadline(await setup("scheduled"));
 
   const name = `SWR-${commandName}-${iteration}`;
   const eventKey = randomUUID();
@@ -526,23 +477,16 @@ async function runAttendanceFirstSweep(commandName, iteration) {
 
   // Attendance must complete before the grace deadline,
   // while A keeps its transaction open afterward.
-  const returnedId = await a.ok(
-    command(commandName, fixture, eventKey),
-  );
+  const returnedId = await a.ok(command(commandName, fixture, eventKey));
 
-  assert.equal(
-    returnedId,
-    fixture.sessionId,
-    `${name}: command returned a different Session ID`,
-  );
+  assert.equal(returnedId, fixture.sessionId, `${name}: command returned a different Session ID`);
 
   const attendanceFinishedAt = await a.ok(`
     SELECT pg_catalog.clock_timestamp();
   `);
 
   assert(
-    Date.parse(attendanceFinishedAt)
-      < Date.parse(fixture.deadline),
+    Date.parse(attendanceFinishedAt) < Date.parse(fixture.deadline),
     `${name}: Attendance did not finish before cutoff`,
   );
 
@@ -579,8 +523,7 @@ async function runAttendanceFirstSweep(commandName, iteration) {
   `);
 
   assert(
-    Date.parse(crossing.afterDeadline)
-      >= Date.parse(crossing.deadline),
+    Date.parse(crossing.afterDeadline) >= Date.parse(crossing.deadline),
     `${name}: grace cutoff has not passed`,
   );
 
@@ -599,22 +542,11 @@ async function runAttendanceFirstSweep(commandName, iteration) {
 
   const elapsedMs = performance.now() - started;
 
-  assert.equal(
-    skipped.marked,
-    0,
-    `${name}: Sweep changed a locked attendance Session`,
-  );
+  assert.equal(skipped.marked, 0, `${name}: Sweep changed a locked attendance Session`);
 
-  assert.equal(
-    skipped.examined,
-    1,
-    `${name}: Sweep did not examine the overdue candidate`,
-  );
+  assert.equal(skipped.examined, 1, `${name}: Sweep did not examine the overdue candidate`);
 
-  assert(
-    elapsedMs < 2000,
-    `${name}: SKIP LOCKED unexpectedly waited ${elapsedMs} ms`,
-  );
+  assert(elapsedMs < 2000, `${name}: SKIP LOCKED unexpectedly waited ${elapsedMs} ms`);
 
   await b.ok("COMMIT;");
 
@@ -649,27 +581,15 @@ async function runAttendanceFirstSweep(commandName, iteration) {
   assert.equal(afterAttendance.session.status, expected.status);
   assert.equal(afterAttendance.events.length, 1);
 
-  assert.equal(
-    afterAttendance.events[0].event_type,
-    expected.eventType,
-  );
+  assert.equal(afterAttendance.events[0].event_type, expected.eventType);
 
-  assert.equal(
-    afterAttendance.events[0].event_key,
-    eventKey,
-  );
+  assert.equal(afterAttendance.events[0].event_key, eventKey);
 
-  assert.equal(
-    afterAttendance.session.actual_study_minutes,
-    null,
-  );
+  assert.equal(afterAttendance.session.actual_study_minutes, null);
 
   assert.equal(afterAttendance.taskStatus, "todo");
 
-  assert.equal(
-    afterAttendance.session.completed_at !== null,
-    commandName === "complete",
-  );
+  assert.equal(afterAttendance.session.completed_at !== null, commandName === "complete");
 
   // After A commits, a new Sweep pass must still
   // preserve the already-committed Attendance outcome.
@@ -687,14 +607,10 @@ async function runAttendanceFirstSweep(commandName, iteration) {
 
   // Comparing full persisted data catches changes to
   // updated_at, completed_at and audit payloads.
-  assert.deepEqual(
-    final,
-    afterAttendance,
-    `${name}: repeated Sweep mutated attendance history`,
-  );
+  assert.deepEqual(final, afterAttendance, `${name}: repeated Sweep mutated attendance history`);
 
   assert(
-    !final.events.some(e => e.event_type === "marked_missed"),
+    !final.events.some((e) => e.event_type === "marked_missed"),
     `${name}: a false missed audit was generated`,
   );
 
@@ -716,8 +632,6 @@ async function runAttendanceFirstSweep(commandName, iteration) {
 
   process.stdout.write(`PASS ${name}\n`);
 }
-
-
 
 try {
   await Promise.all([a, b, observer].map((connection) => connection.init()));
@@ -741,7 +655,7 @@ try {
 
   userCreated = true;
 
-const gate = await observer.json(`
+  const gate = await observer.json(`
   SELECT pg_catalog.jsonb_build_object(
     'enabled', enabled
   )
@@ -749,29 +663,23 @@ const gate = await observer.json(`
   WHERE singleton = true;
 `);
 
-assert.deepEqual(
-  gate,
-  { enabled: false },
-  "Cron gate must remain OFF",
-);
+  assert.deepEqual(gate, { enabled: false }, "Cron gate must remain OFF");
 
-report.backendPids = {
-  a: a.pid,
-  b: b.pid,
-  observer: observer.pid,
-};
+  report.backendPids = {
+    a: a.pid,
+    b: b.pid,
+    observer: observer.pid,
+  };
 
-report.sweepGateBefore = false;
+  report.sweepGateBefore = false;
 
-for (let iteration = 1; iteration <= 3; iteration++) {
-  await runAttendanceFirstSweep("start", iteration);
-  await runAttendanceFirstSweep("complete", iteration);
-  await runAttendanceFirstSweep("skip", iteration);
-}
+  for (let iteration = 1; iteration <= 3; iteration++) {
+    await runAttendanceFirstSweep("start", iteration);
+    await runAttendanceFirstSweep("complete", iteration);
+    await runAttendanceFirstSweep("skip", iteration);
+  }
 
-report.status = "PASS";
-
-
+  report.status = "PASS";
 } catch (error) {
   failure = error;
   report.status = "FAIL";

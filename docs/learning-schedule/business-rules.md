@@ -49,7 +49,7 @@
 - BR-041: For a reporting period, eligible due occurrences are original planned obligations whose grace cutoff falls at/before `as_of`, excluding those proactively cancelled due to schedule change or Task closure before their start; count each logical obligation once.
 - BR-042: `completed_due` = eligible due occurrences whose latest state is `completed` (including approved late recovery). `attendance_rate = completed_due / eligible_due` as a percentage. If denominator 0, display `N/A`, not 100% or 0%.
 - BR-043: `on_time_rate` = eligible due occurrences completed by their scheduled end divided by eligible due; late completions remain completed for attendance but not on-time.
-- BR-044: `planned_coverage` = total completed *eligible* scheduled occurrences divided by all eligible planned occurrences in the selected full schedule period; upcoming entries remain in denominator in this distinct metric. UI explicitly labels the difference from attendance rate.
+- BR-044: `planned_coverage` = total completed _eligible_ scheduled occurrences divided by all eligible planned occurrences in the selected full schedule period; upcoming entries remain in denominator in this distinct metric. UI explicitly labels the difference from attendance rate.
 - BR-045: `missed`, `skipped`, `scheduled`, `in_progress`, `completed`, `cancelled` have distinguishable presentation. Future sessions are never marked `missed` just for being incomplete.
 - BR-046: A later correction can change historical reported analytics; keep audit records and do not imply that an earlier snapshot has never changed.
 - BR-047: Task completion, attendance, Focus minutes and Engagement streak are **distinct** metrics. Phase 09 defines any coupling explicitly; no implicit scoring changes.

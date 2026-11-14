@@ -30,13 +30,12 @@ export function GenerateWeeklyReflectionButton() {
   }
 
   return (
-    <Button
-      type="button"
-      onClick={handleGenerate}
-      disabled={isPending}
-      aria-busy={isPending}
-    >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <RefreshCw aria-hidden="true" />}
+    <Button type="button" onClick={handleGenerate} disabled={isPending} aria-busy={isPending}>
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <RefreshCw aria-hidden="true" />
+      )}
       {isPending ? t("generating") : t("generate")}
     </Button>
   );

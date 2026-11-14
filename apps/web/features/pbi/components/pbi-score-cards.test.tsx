@@ -32,15 +32,26 @@ describe("dashboard PBI scores", () => {
     const container = render({ snapshot });
     expect(container.textContent).toContain("72,5");
     expect(container.textContent).toContain("64,5");
-    expect(Array.from(container.querySelectorAll('[role="meter"]'), (meter) => meter.getAttribute("aria-valuenow")))
-      .toEqual(["80", "65", "0", "100", "40"]);
+    expect(
+      Array.from(container.querySelectorAll('[role="meter"]'), (meter) =>
+        meter.getAttribute("aria-valuenow"),
+      ),
+    ).toEqual(["80", "65", "0", "100", "40"]);
     expect(container.textContent).toContain("Thấp");
     expect(container.textContent).toContain("Mạnh");
   });
 
   it("uses supplied explanations and keeps visual meters within their bounds", () => {
     const explanation = {
-      component_explanations: [{ key: "focus", title: "Custom focus", score: 1.2, level: "strong", message: "Focus insight" }],
+      component_explanations: [
+        {
+          key: "focus",
+          title: "Custom focus",
+          score: 1.2,
+          level: "strong",
+          message: "Focus insight",
+        },
+      ],
     } as PbiExplanationPayload;
     const container = render({ snapshot, explanation });
     const meter = container.querySelector('[role="meter"]')!;

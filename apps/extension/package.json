@@ -3,9 +3,6 @@
   "version": "0.4.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "node": ">=22"
-  },
   "scripts": {
     "build": "node scripts/build.mjs production",
     "build:dev": "node scripts/build.mjs development",
@@ -13,13 +10,16 @@
     "test": "vitest run",
     "verify": "npm run typecheck && npm run test && npm run build"
   },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.4"
+  },
   "devDependencies": {
     "@types/chrome": "^0.1.0",
     "esbuild": "0.28.2",
     "typescript": "^5.9.0",
     "vitest": "^4.1.0"
   },
-  "dependencies": {
-    "@supabase/supabase-js": "^2.105.4"
+  "engines": {
+    "node": ">=22"
   }
 }

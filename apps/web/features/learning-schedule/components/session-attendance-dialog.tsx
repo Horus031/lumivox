@@ -52,14 +52,7 @@ export function SessionAttendanceDialog(props: Props) {
   );
 }
 
-function AttendanceForm({
-  session,
-  kind,
-  open,
-  onOpenChange,
-  onSaved,
-  onReload,
-}: Props) {
+function AttendanceForm({ session, kind, open, onOpenChange, onSaved, onReload }: Props) {
   const t = useTranslations("learningSchedule");
   const locale = useLocale();
   const dialogFocus = useScheduleDialogFocus();
@@ -199,14 +192,10 @@ function AttendanceForm({
       >
         <DialogTitle>{t(`attendance.title.${kind}`)}</DialogTitle>
 
-        <DialogDescription>
-          {t(`attendance.description.${kind}`)}
-        </DialogDescription>
+        <DialogDescription>{t(`attendance.description.${kind}`)}</DialogDescription>
 
         <div className="space-y-1 rounded-md border p-3 text-sm">
-          <p className="font-medium">
-            {formatStudyDate(session.local_date, locale)}
-          </p>
+          <p className="font-medium">{formatStudyDate(session.local_date, locale)}</p>
 
           <p>
             {session.local_start_time.slice(0, 5)}
@@ -216,16 +205,11 @@ function AttendanceForm({
 
           <p className="text-muted-foreground">{session.timezone}</p>
 
-          <p className="text-muted-foreground">
-            {t(`status.${session.status}`)}
-          </p>
+          <p className="text-muted-foreground">{t(`status.${session.status}`)}</p>
         </div>
 
         {kind === "skip" && (
-          <fieldset
-            disabled={saving || uncertain || conflict}
-            aria-busy={saving}
-          >
+          <fieldset disabled={saving || uncertain || conflict} aria-busy={saving}>
             <label className="block space-y-2 text-sm">
               <span>{t("attendance.skipReason")}</span>
 
@@ -266,52 +250,30 @@ function AttendanceForm({
         )}
 
         {uncertain && (
-          <p className="text-sm text-muted-foreground">
-            {t("attendance.uncertainHelp")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("attendance.uncertainHelp")}</p>
         )}
 
         {conflict && (
-          <p className="text-sm text-muted-foreground">
-            {t("attendance.conflictHelp")}
-          </p>
+          <p className="text-sm text-muted-foreground">{t("attendance.conflictHelp")}</p>
         )}
 
         {(uncertain || conflict || errorCode === "notEligible") && (
-          <Button
-            type="button"
-            variant="outline"
-            disabled={saving}
-            onClick={checkLatest}
-          >
+          <Button type="button" variant="outline" disabled={saving} onClick={checkLatest}>
             {t("checkLatest")}
           </Button>
         )}
 
         <DialogFooter>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={saving}
-            onClick={close}
-          >
+          <Button type="button" variant="outline" disabled={saving} onClick={close}>
             {t("cancel")}
           </Button>
 
           {uncertain ? (
-            <Button
-              type="button"
-              disabled={saving}
-              onClick={() => submit(true)}
-            >
+            <Button type="button" disabled={saving} onClick={() => submit(true)}>
               {saving ? t("saving") : t("retryExact")}
             </Button>
           ) : (
-            <Button
-              type="button"
-              disabled={saving || conflict}
-              onClick={() => submit()}
-            >
+            <Button type="button" disabled={saving || conflict} onClick={() => submit()}>
               {saving ? t("saving") : t(`attendance.confirm.${kind}`)}
             </Button>
           )}

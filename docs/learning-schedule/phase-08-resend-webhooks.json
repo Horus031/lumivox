@@ -8,9 +8,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {
@@ -25,9 +23,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {
@@ -42,9 +38,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {
@@ -59,9 +53,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {
@@ -76,9 +68,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {
@@ -93,9 +83,7 @@
       "blocker": {
         "waiter": 665,
         "blocker": 663,
-        "observed": [
-          663
-        ]
+        "observed": [663]
       },
       "sqlstate": "00000",
       "final": {

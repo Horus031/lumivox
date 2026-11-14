@@ -7,16 +7,9 @@ const OFFICE_PREVIEW_MIME_TYPES = new Set([
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ]);
 
-export type LearningDocumentPreviewMode =
-  | "pdf"
-  | "image"
-  | "text"
-  | "office"
-  | "download";
+export type LearningDocumentPreviewMode = "pdf" | "image" | "text" | "office" | "download";
 
-export function getLearningDocumentPreviewMode(
-  mimeType: string,
-): LearningDocumentPreviewMode {
+export function getLearningDocumentPreviewMode(mimeType: string): LearningDocumentPreviewMode {
   if (mimeType === "application/pdf") {
     return "pdf";
   }

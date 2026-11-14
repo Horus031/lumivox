@@ -24,16 +24,23 @@ for (const { locale, messages, width } of [
       for (const product of ["analytics", "focus", "rooms"]) {
         const chapter = page.locator(`[data-product-chapter="${product}"]`);
         await chapter.scrollIntoViewIfNeeded();
-        const image = width === 390
-          ? chapter.locator("img")
-          : page.locator(`[data-product-visual="${product}"] img`);
+        const image =
+          width === 390
+            ? chapter.locator("img")
+            : page.locator(`[data-product-visual="${product}"] img`);
         const filename = product === "rooms" ? "room" : product;
-        await expect.poll(() => image.evaluate((element: HTMLImageElement) =>
-          decodeURIComponent(element.currentSrc),
-        )).toContain(`landing-${filename}-${theme}.`);
-        await expect.poll(() => image.evaluate((element: HTMLImageElement) =>
-          element.complete && element.naturalWidth > 0,
-        )).toBe(true);
+        await expect
+          .poll(() =>
+            image.evaluate((element: HTMLImageElement) => decodeURIComponent(element.currentSrc)),
+          )
+          .toContain(`landing-${filename}-${theme}.`);
+        await expect
+          .poll(() =>
+            image.evaluate(
+              (element: HTMLImageElement) => element.complete && element.naturalWidth > 0,
+            ),
+          )
+          .toBe(true);
         await expect(image).toHaveAttribute("alt", /\S/);
         await expect(image).toHaveAttribute("loading", "lazy");
       }
@@ -42,18 +49,22 @@ for (const { locale, messages, width } of [
       expect(imageRequests.length).toBeGreaterThan(0);
       expect(imageRequests.filter((url) => url.includes(`-${opposite}.`))).toEqual([]);
 
-      const visibleImage = width === 390
-        ? page.locator('[data-product-chapter="rooms"] img')
-        : page.locator('[data-product-visual="rooms"] img');
+      const visibleImage =
+        width === 390
+          ? page.locator('[data-product-chapter="rooms"] img')
+          : page.locator('[data-product-visual="rooms"] img');
       // Measure layout size without the existing scroll-transition transforms.
       const before = await visibleImage.evaluate((element: HTMLImageElement) => ({
         width: element.offsetWidth,
         height: element.offsetHeight,
       }));
-      await page.locator(".marketing-navbar__theme-control").getByRole("button", {
-        name: messages.common.theme,
-        exact: true,
-      }).click();
+      await page
+        .locator(".marketing-navbar__theme-control")
+        .getByRole("button", {
+          name: messages.common.theme,
+          exact: true,
+        })
+        .click();
       const targetTheme = page.getByRole("menuitemradio", {
         name: messages.settings.theme[opposite],
         exact: true,
@@ -61,13 +72,19 @@ for (const { locale, messages, width } of [
       await expect(targetTheme).toBeVisible();
       await targetTheme.click();
       await expect(page.locator("html")).toHaveClass(new RegExp(`\\b${opposite}\\b`));
-      await expect.poll(() => visibleImage.evaluate((element: HTMLImageElement) =>
-        decodeURIComponent(element.currentSrc),
-      )).toContain(`landing-room-${opposite}.`);
-      expect(await visibleImage.evaluate((element: HTMLImageElement) => ({
-        width: element.offsetWidth,
-        height: element.offsetHeight,
-      }))).toEqual(before);
+      await expect
+        .poll(() =>
+          visibleImage.evaluate((element: HTMLImageElement) =>
+            decodeURIComponent(element.currentSrc),
+          ),
+        )
+        .toContain(`landing-room-${opposite}.`);
+      expect(
+        await visibleImage.evaluate((element: HTMLImageElement) => ({
+          width: element.offsetWidth,
+          height: element.offsetHeight,
+        })),
+      ).toEqual(before);
     });
   }
 }

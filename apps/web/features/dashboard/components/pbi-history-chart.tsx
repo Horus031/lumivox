@@ -29,9 +29,7 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
     <section className="h-full min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="mb-3">
         <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-        <p className="mt-1 text-caption text-secondary-text">
-          {t("description")}
-        </p>
+        <p className="mt-1 text-caption text-secondary-text">{t("description")}</p>
       </div>
 
       {data.length === 0 ? (
@@ -40,21 +38,13 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
         </div>
       ) : (
         <div className="h-48 min-w-0 w-full">
-          <ResponsiveContainer
-            width="100%"
-            height="100%"
-            minWidth={0}
-            minHeight={192}
-          >
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={192}>
             <LineChart
               accessibilityLayer
               data={data}
               margin={{ top: 10, right: 18, left: 0, bottom: 0 }}
             >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="hsl(var(--chart-grid))"
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--chart-grid))" />
               <XAxis
                 dataKey="label"
                 tick={{ fill: "var(--text-muted)", fontSize: 12 }}
@@ -78,7 +68,9 @@ export function PbiHistoryChart({ data }: PbiHistoryChartProps) {
                 labelStyle={{ color: "var(--foreground)", fontWeight: 600 }}
               />
               <Legend
-                formatter={(value) => <span style={{ color: "var(--text-secondary)" }}>{value}</span>}
+                formatter={(value) => (
+                  <span style={{ color: "var(--text-secondary)" }}>{value}</span>
+                )}
                 wrapperStyle={{
                   color: "var(--text-secondary)",
                   fontSize: 12,

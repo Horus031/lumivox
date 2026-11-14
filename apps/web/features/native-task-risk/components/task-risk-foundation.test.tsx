@@ -6,10 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
 
-import {
-  TASK_RISK_UI_ACTIONS,
-  TASK_RISK_UI_FIXTURES,
-} from "../task-risk-ui.fixtures";
+import { TASK_RISK_UI_ACTIONS, TASK_RISK_UI_FIXTURES } from "../task-risk-ui.fixtures";
 
 import { TaskRiskIndicator } from "./task-risk-indicator";
 import { TaskRiskRecoveryPanel } from "./task-risk-recovery-panel";
@@ -58,17 +55,13 @@ describe("Task Risk UI Foundation", () => {
     });
   }
 
-  it.each(["en", "vi"] as const)(
-    "renders localized high-risk labels in %s",
-    (locale) => {
-      render(<TaskRiskIndicator state={fixture("high")} />, locale);
+  it.each(["en", "vi"] as const)("renders localized high-risk labels in %s", (locale) => {
+    render(<TaskRiskIndicator state={fixture("high")} />, locale);
 
-      const messages =
-        locale === "en" ? en.taskRiskRecovery : viMessages.taskRiskRecovery;
+    const messages = locale === "en" ? en.taskRiskRecovery : viMessages.taskRiskRecovery;
 
-      expect(container.textContent).toContain(messages.status.high);
-    },
-  );
+    expect(container.textContent).toContain(messages.status.high);
+  });
 
   it("does not show warnings for low-risk or ineligible tasks", () => {
     render(<TaskRiskIndicator state={fixture("low")} />);
@@ -83,15 +76,11 @@ describe("Task Risk UI Foundation", () => {
   it("distinguishes loading and stale states", () => {
     render(<TaskRiskIndicator state={fixture("loading")} />);
 
-    expect(
-      container.querySelector('[data-task-risk-indicator="loading"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('[data-task-risk-indicator="loading"]')).not.toBeNull();
 
     render(<TaskRiskIndicator state={fixture("stale")} />);
 
-    expect(
-      container.querySelector('[data-task-risk-indicator="stale"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('[data-task-risk-indicator="stale"]')).not.toBeNull();
   });
 
   it("hides the previous probability when a snapshot is stale", () => {
@@ -101,9 +90,7 @@ describe("Task Risk UI Foundation", () => {
 
     render(<TaskRiskSummary state={fixture("stale")} />);
 
-    expect(
-      container.querySelector('[data-risk-view-state="stale"]'),
-    ).not.toBeNull();
+    expect(container.querySelector('[data-risk-view-state="stale"]')).not.toBeNull();
 
     expect(container.textContent).not.toContain("76%");
     expect(container.textContent).not.toContain("Deadline is approaching");
@@ -112,26 +99,16 @@ describe("Task Risk UI Foundation", () => {
   it("shows a moderate band without claiming certain lateness", () => {
     render(<TaskRiskSummary state={fixture("moderate")} />);
 
-    expect(container.textContent).toContain(
-      en.taskRiskRecovery.status.moderate,
-    );
+    expect(container.textContent).toContain(en.taskRiskRecovery.status.moderate);
 
     expect(container.textContent).toContain("37%");
-    expect(container.textContent).toContain(
-      en.taskRiskRecovery.summary.disclaimer,
-    );
+    expect(container.textContent).toContain(en.taskRiskRecovery.summary.disclaimer);
   });
 
   it("disables actions when no callback is provided", () => {
-    render(
-      <TaskRiskRecoveryPanel
-        state={fixture("high")}
-        actions={TASK_RISK_UI_ACTIONS}
-      />,
-    );
+    render(<TaskRiskRecoveryPanel state={fixture("high")} actions={TASK_RISK_UI_ACTIONS} />);
 
-    const buttons =
-      container.querySelectorAll<HTMLButtonElement>("[data-risk-action]");
+    const buttons = container.querySelectorAll<HTMLButtonElement>("[data-risk-action]");
 
     expect(buttons.length).toBe(TASK_RISK_UI_ACTIONS.length);
 

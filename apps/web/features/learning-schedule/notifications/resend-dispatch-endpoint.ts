@@ -14,16 +14,8 @@ const command = z
     batchSize: z.number().int().min(1).max(5).default(5),
   })
   .strict();
-export function authenticateReminderDispatcher(
-  header: string | null,
-  secret: string | undefined,
-) {
-  if (
-    !secret ||
-    secret.length < 32 ||
-    !header?.startsWith("Bearer ") ||
-    header.length > 512
-  )
+export function authenticateReminderDispatcher(header: string | null, secret: string | undefined) {
+  if (!secret || secret.length < 32 || !header?.startsWith("Bearer ") || header.length > 512)
     return false;
   const hash = (value: string) => createHash("sha256").update(value).digest();
   return timingSafeEqual(hash(header.slice(7)), hash(secret));
@@ -44,10 +36,7 @@ export async function handleResendDispatch(
   ports: Ports,
 ): Promise<Response> {
   const response = (status: number, error: string) =>
-    Response.json(
-      { error },
-      { status, headers: { "Cache-Control": "no-store" } },
-    );
+    Response.json({ error }, { status, headers: { "Cache-Control": "no-store" } });
   if (
     !authenticateReminderDispatcher(
       request.headers.get("authorization"),
@@ -65,10 +54,7 @@ export async function handleResendDispatch(
   }, 2000);
   let input: z.infer<typeof command>;
   try {
-    if (
-      !reader ||
-      request.headers.get("content-type")?.split(";")[0] !== "application/json"
-    )
+    if (!reader || request.headers.get("content-type")?.split(";")[0] !== "application/json")
       throw new Error();
     for (;;) {
       const part = await reader.read();
@@ -111,28 +97,28 @@ export async function handleResendDispatch(
     )
       throw new Error();
     const publicOrigin = env.STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN
-      ? new URL(env.STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN) : undefined;
-    if (publicOrigin && (
-      publicOrigin.protocol !== "https:" || publicOrigin.username || publicOrigin.password ||
-      publicOrigin.pathname !== "/" || publicOrigin.search || publicOrigin.hash
-    )) throw new Error();
+      ? new URL(env.STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN)
+      : undefined;
+    if (
+      publicOrigin &&
+      (publicOrigin.protocol !== "https:" ||
+        publicOrigin.username ||
+        publicOrigin.password ||
+        publicOrigin.pathname !== "/" ||
+        publicOrigin.search ||
+        publicOrigin.hash)
+    )
+      throw new Error();
     config = {
       enabled: env.STUDY_REMINDER_REAL_SEND_ENABLED === "true",
-      allowlist: configuredReminderRecipients(
-        env.STUDY_REMINDER_TEST_RECIPIENTS ?? "",
-      ),
+      allowlist: configuredReminderRecipients(env.STUDY_REMINDER_TEST_RECIPIENTS ?? ""),
       identityKey: env.STUDY_REMINDER_RECIPIENT_HMAC_KEY,
-      encryptionKey: reminderEncryptionKey(
-        env.STUDY_REMINDER_PAYLOAD_ENCRYPTION_KEY ?? "",
-      ),
+      encryptionKey: reminderEncryptionKey(env.STUDY_REMINDER_PAYLOAD_ENCRYPTION_KEY ?? ""),
       from: env.STUDY_REMINDER_FROM,
       trustedOrigin: origin.origin,
       publicUnsubscribeOrigin: publicOrigin?.origin,
     };
-    if (
-      !input.dryRun &&
-      (!env.RESEND_STUDY_REMINDER_API_KEY || env.RESEND_DEBUG === "true")
-    )
+    if (!input.dryRun && (!env.RESEND_STUDY_REMINDER_API_KEY || env.RESEND_DEBUG === "true"))
       throw new Error();
   } catch {
     return response(503, "not_configured");
@@ -144,27 +130,16 @@ export async function handleResendDispatch(
     // Lazy transport: even construction cannot occur unless a committed handoff
     // is ready; dry-run, DB-OFF and ineligible contexts never construct SDK.
     const transport: EmailTransport = {
-      send: (email) =>
-        ports
-          .transport(env.RESEND_STUDY_REMINDER_API_KEY!, config.from)
-          .send(email),
+      send: (email) => ports.transport(env.RESEND_STUDY_REMINDER_API_KEY!, config.from).send(email),
     };
-    const counts = await dispatchResendReminders(
-      store,
-      transport,
-      config,
-      input,
-    );
+    const counts = await dispatchResendReminders(store, transport, config, input);
     ports.log?.({
       batchId,
       durationMs: Date.now() - started,
       classification: input.dryRun ? "dry_run" : "completed",
       counts,
     });
-    return Response.json(
-      { batchId, counts },
-      { headers: { "Cache-Control": "no-store" } },
-    );
+    return Response.json({ batchId, counts }, { headers: { "Cache-Control": "no-store" } });
   } catch {
     ports.log?.({
       batchId,

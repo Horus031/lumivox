@@ -14,8 +14,7 @@ type RagMarkdownMessageProps = {
   className?: string;
 };
 
-const SPECIAL_BLOCK_PATTERN =
-  /^(#{1,3}\s+|```|>\s?|[-*]\s+|\d+\.\s+)/;
+const SPECIAL_BLOCK_PATTERN = /^(#{1,3}\s+|```|>\s?|[-*]\s+|\d+\.\s+)/;
 
 function parseMarkdownBlocks(content: string): MarkdownBlock[] {
   const blocks: MarkdownBlock[] = [];
@@ -122,8 +121,7 @@ function getSafeHref(rawHref: string) {
 }
 
 function renderInlineMarkdown(text: string): ReactNode[] {
-  const pattern =
-    /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|\[[^\]]+\]\([^)]+\))/g;
+  const pattern = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|\[[^\]]+\]\([^)]+\))/g;
   const nodes: ReactNode[] = [];
   let lastIndex = 0;
 
@@ -189,19 +187,11 @@ function renderInlineMarkdown(text: string): ReactNode[] {
   return nodes;
 }
 
-export function RagMarkdownMessage({
-  content,
-  className,
-}: RagMarkdownMessageProps) {
+export function RagMarkdownMessage({ content, className }: RagMarkdownMessageProps) {
   const blocks = parseMarkdownBlocks(content);
 
   return (
-    <div
-      className={cn(
-        "space-y-3 text-sm leading-6 text-foreground",
-        className,
-      )}
-    >
+    <div className={cn("space-y-3 text-sm leading-6 text-foreground", className)}>
       {blocks.map((block, index) => {
         if (block.type === "heading") {
           const Heading = `h${block.level}` as "h2" | "h3" | "h4";
@@ -240,15 +230,10 @@ export function RagMarkdownMessage({
           return (
             <List
               key={`${block.type}-${index}`}
-              className={cn(
-                "space-y-1 pl-5",
-                block.ordered ? "list-decimal" : "list-disc",
-              )}
+              className={cn("space-y-1 pl-5", block.ordered ? "list-decimal" : "list-disc")}
             >
               {block.items.map((item, itemIndex) => (
-                <li key={`${itemIndex}-${item}`}>
-                  {renderInlineMarkdown(item)}
-                </li>
+                <li key={`${itemIndex}-${item}`}>{renderInlineMarkdown(item)}</li>
               ))}
             </List>
           );

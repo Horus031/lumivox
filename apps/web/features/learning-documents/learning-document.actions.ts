@@ -70,10 +70,7 @@ async function uploadLearningDocument(
     if (!contextId || typeof contextId !== "string") {
       return {
         success: false,
-        message:
-          contextKind === "goal"
-            ? "Goal ID is required."
-            : "Task ID is required.",
+        message: contextKind === "goal" ? "Goal ID is required." : "Task ID is required.",
       };
     }
 
@@ -165,29 +162,27 @@ async function uploadLearningDocument(
       };
     }
 
-    const { error: insertError } = await supabase
-      .from("learning_documents")
-      .insert({
-        id: documentId,
+    const { error: insertError } = await supabase.from("learning_documents").insert({
+      id: documentId,
 
-        owner_id: user.id,
+      owner_id: user.id,
 
-        goal_id: context.kind === "goal" ? context.id : null,
+      goal_id: context.kind === "goal" ? context.id : null,
 
-        task_id: context.kind === "task" ? context.id : null,
+      task_id: context.kind === "task" ? context.id : null,
 
-        file_name: fileRaw.name,
+      file_name: fileRaw.name,
 
-        file_path: filePath,
+      file_path: filePath,
 
-        mime_type: fileRaw.type,
+      mime_type: fileRaw.type,
 
-        file_size_bytes: fileRaw.size,
+      file_size_bytes: fileRaw.size,
 
-        visibility: "private",
+      visibility: "private",
 
-        extracted_text_status: "pending",
-      });
+      extracted_text_status: "pending",
+    });
 
     if (insertError) {
       await supabase.storage.from(LEARNING_DOCUMENT_BUCKET).remove([filePath]);
@@ -222,21 +217,15 @@ async function uploadLearningDocument(
   }
 }
 
-export async function uploadGoalLearningDocumentAction(
-  formData: FormData,
-): Promise<ActionResult> {
+export async function uploadGoalLearningDocumentAction(formData: FormData): Promise<ActionResult> {
   return uploadLearningDocument(formData, "goal");
 }
 
-export async function uploadTaskLearningDocumentAction(
-  formData: FormData,
-): Promise<ActionResult> {
+export async function uploadTaskLearningDocumentAction(formData: FormData): Promise<ActionResult> {
   return uploadLearningDocument(formData, "task");
 }
 
-export async function deleteLearningDocumentAction(
-  documentId: string,
-): Promise<ActionResult> {
+export async function deleteLearningDocumentAction(documentId: string): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
 

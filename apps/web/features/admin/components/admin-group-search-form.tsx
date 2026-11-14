@@ -47,18 +47,14 @@ export function AdminGroupSearchForm({
       params.set("status", status);
     }
 
-    router.push(
-      `/admin/groups${params.toString() ? `?${params.toString()}` : ""}`,
-    );
+    router.push(`/admin/groups${params.toString() ? `?${params.toString()}` : ""}`);
   }
 
   return (
     <form onSubmit={handleSubmit} className="min-w-0">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
         <div className="col-span-2 grid min-w-0 gap-2 md:col-span-1">
-          <Label htmlFor={`${id}-query`}>
-            {t("label")}
-          </Label>
+          <Label htmlFor={`${id}-query`}>{t("label")}</Label>
 
           <Input
             id={`${id}-query`}
@@ -70,9 +66,7 @@ export function AdminGroupSearchForm({
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor={`${id}-status`}>
-            {commonT("status")}
-          </Label>
+          <Label htmlFor={`${id}-status`}>{commonT("status")}</Label>
 
           <Select value={status} onValueChange={(value) => setStatus(value)}>
             <SelectTrigger id={`${id}-status`} className="w-full">
@@ -82,23 +76,14 @@ export function AdminGroupSearchForm({
               <SelectGroup>
                 <SelectLabel>{commonT("status")}</SelectLabel>
                 <SelectItem value="all">{commonT("all")}</SelectItem>
-                <SelectItem value="active">
-                  {commonT("groupStatus.active")}
-                </SelectItem>
-                <SelectItem value="archived">
-                  {commonT("groupStatus.archived")}
-                </SelectItem>
+                <SelectItem value="active">{commonT("groupStatus.active")}</SelectItem>
+                <SelectItem value="archived">{commonT("groupStatus.archived")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <Button
-          type="submit"
-          size="icon"
-          aria-label={commonT("search")}
-          title={commonT("search")}
-        >
+        <Button type="submit" size="icon" aria-label={commonT("search")} title={commonT("search")}>
           <Search aria-hidden="true" />
         </Button>
       </div>

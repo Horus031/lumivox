@@ -6,7 +6,9 @@ export async function getFocusV2Snapshot(sessionId: string): Promise<FocusV2Snap
   const { supabase, user } = await requireUser();
   const parentResult = await supabase
     .from("focus_sessions")
-    .select("id,user_id,task_id,session_mode,status,planned_minutes,actual_focus_minutes,started_at,ended_at")
+    .select(
+      "id,user_id,task_id,session_mode,status,planned_minutes,actual_focus_minutes,started_at,ended_at",
+    )
     .eq("id", sessionId)
     .eq("user_id", user.id)
     .eq("session_mode", "pomodoro")
@@ -16,7 +18,11 @@ export async function getFocusV2Snapshot(sessionId: string): Promise<FocusV2Snap
 
   const [planResult, segmentResult] = await Promise.all([
     supabase.from("focus_session_plans").select("*").eq("session_id", sessionId).maybeSingle(),
-    supabase.from("focus_session_segments").select("*").eq("session_id", sessionId).order("position"),
+    supabase
+      .from("focus_session_segments")
+      .select("*")
+      .eq("session_id", sessionId)
+      .order("position"),
   ]);
   if (planResult.error || segmentResult.error || !planResult.data || !segmentResult.data?.length) {
     throw new Error("Focus V2 session data is incomplete.");

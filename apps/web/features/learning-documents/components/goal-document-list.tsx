@@ -29,9 +29,7 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
   return (
     <section className="min-w-0 border-t border-border pt-card">
       <div>
-        <p className="text-caption font-medium text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+        <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
         <h3 className="mt-1 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
           {t("title")}
@@ -55,16 +53,13 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
                 </p>
 
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {document.mime_type} -{" "}
-                  {formatFileSize(Number(document.file_size_bytes))}
+                  {document.mime_type} - {formatFileSize(Number(document.file_size_bytes))}
                 </p>
 
                 <p className="mt-1 text-caption text-muted-foreground">
                   {t("metadata", {
                     visibility: t(`visibility.${document.visibility}`),
-                    status: t(
-                      `aiStatus.${document.extracted_text_status ?? "pending"}`,
-                    ),
+                    status: t(`aiStatus.${document.extracted_text_status ?? "pending"}`),
                   })}
                 </p>
               </div>
@@ -78,7 +73,10 @@ export async function GoalDocumentList({ documents }: GoalDocumentListProps) {
                 <DocumentPreviewLink document={document} />
 
                 <Button asChild variant="outline" size="sm">
-                  <Link href={`/documents/${document.id}/share`}><Share2 aria-hidden="true" />{t("share")}</Link>
+                  <Link href={`/documents/${document.id}/share`}>
+                    <Share2 aria-hidden="true" />
+                    {t("share")}
+                  </Link>
                 </Button>
 
                 <DeleteLearningDocumentButton documentId={document.id} />

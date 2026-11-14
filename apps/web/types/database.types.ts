@@ -2,7 +2,7 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
-
+  
   "graphql_public": {
           Tables: {
             [_ in never]: never
@@ -35,7 +35,7 @@ export type Database = {
                     "created_at"?: string,"entity_id"?: string,"entity_type"?: string,"error_message"?: string | null,"field_name"?: string,"id"?: string,"model_name"?: string | null,"owner_id"?: string,"provider"?: string | null,"source_hash"?: string,"source_locale"?: string,"status"?: Database["public"]['Enums']["ai_translation_status"],"target_locale"?: string,"translated_text"?: string,"updated_at"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"ai_insight_cards": {
                   Row: {
@@ -81,7 +81,7 @@ isOneToOne: false
                     "created_at"?: string,"description"?: string | null,"key"?: string,"updated_at"?: string,"updated_by"?: string | null,"value"?: NonNullable<Json>
                   }
                   Relationships: [
-
+                    
                   ]
                 },"deadline_risk_feature_attributions": {
                   Row: {
@@ -459,7 +459,7 @@ isOneToOne: false
                     "ai_latency_ms"?: number | null,"ai_model"?: string | null,"ai_provider"?: string | null,"applied_at"?: string | null,"archived_at"?: string | null,"available_weekdays"?: (string)[],"created_at"?: string,"current_level"?: Database["public"]['Enums']["learning_roadmap_level"],"custom_current_level"?: string | null,"custom_target_level"?: string | null,"description"?: string | null,"end_date"?: string,"generation_input"?: NonNullable<Json>,"id"?: string,"minutes_per_study_day"?: number,"preferred_locale"?: string,"source_prompt"?: string | null,"start_date"?: string,"status"?: Database["public"]['Enums']["learning_roadmap_status"],"study_days_per_week"?: number,"subject_name"?: string | null,"target_level"?: Database["public"]['Enums']["learning_roadmap_level"],"title"?: string,"topic"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"ls_missed_sweep_control": {
                   Row: {
@@ -473,7 +473,7 @@ isOneToOne: false
                     "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"ml_model_versions": {
                   Row: {
@@ -487,7 +487,7 @@ isOneToOne: false
                     "algorithm"?: string,"artifact_path"?: string,"created_at"?: string,"explainability_metadata"?: NonNullable<Json>,"feature_schema"?: NonNullable<Json>,"id"?: string,"is_active"?: boolean,"metrics"?: NonNullable<Json>,"model_key"?: string,"training_dataset"?: string,"updated_at"?: string,"version"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"native_task_risk_assessments": {
                   Row: {
@@ -511,6 +511,26 @@ isOneToOne: false
       foreignKeyName: "native_task_risk_assessments_user_id_fkey"
       columns: ["user_id"]
 isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"native_task_risk_input_revisions": {
+                  Row: {
+                    "revision": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "revision"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "revision"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "native_task_risk_input_revisions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
@@ -567,7 +587,7 @@ isOneToOne: true
                     "avatar_url"?: string | null,"created_at"?: string,"display_name"?: string | null,"full_name"?: string | null,"id"?: string,"leaderboard_opt_in"?: boolean,"onboarding_completed"?: boolean,"role"?: Database["public"]['Enums']["app_role"],"timezone"?: string,"updated_at"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"rag_chat_messages": {
                   Row: {
@@ -705,7 +725,7 @@ isOneToOne: false
                     "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"study_notification_jobs": {
                   Row: {
@@ -739,7 +759,7 @@ isOneToOne: false
                     "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"locale_confirmed_at"?: string | null,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"reminder_locale"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"study_notification_recipient_identities": {
                   Row: {
@@ -753,7 +773,7 @@ isOneToOne: false
                     "email_hash"?: string | null,"recipient_fingerprint"?: string,"user_id"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"study_notification_resend_payloads": {
                   Row: {
@@ -865,7 +885,7 @@ isOneToOne: false
                     "bounce_kind"?: string | null,"created_at"?: string,"event_type"?: string,"id"?: string,"payload_fingerprint"?: string,"payload_subset"?: NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider"?: string,"provider_event_at"?: string,"provider_event_id"?: string,"provider_message_id"?: string,"recipient_fingerprint"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"study_room_members": {
                   Row: {
@@ -1591,6 +1611,11 @@ isOneToOne: false
               "days_until_due": number,"due_at": string,"goal_id": string,"goal_title": string,"priority": string,"status": string,"task_id": string,"task_title": string
             }[]
                            },
+"get_my_native_task_risk_snapshots_for_tasks":
+{ Args: { "p_task_ids": (string)[] }; Returns: {
+              "algorithm": string,"current_input_revision": number,"decision_threshold": number,"effective_due_at": string,"goal_id": string,"goal_title": string,"model_active": boolean,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"prediction_metadata": Json,"risk_probability": number,"task_completed_at": string,"task_id": string,"task_status": string,"task_title": string,"task_updated_at": string,"top_attributions": Json
+            }[]
+                           },
 "get_native_task_risk_system_candidates":
 { Args: { "p_horizon_days"?: number,"p_max_tasks_per_user"?: number,"p_max_users"?: number,"p_skip_recent_hours"?: number }; Returns: {
               "days_until_due": number,"effective_due_at": string,"task_id": string,"user_id": string
@@ -1959,7 +1984,7 @@ export type CompositeTypes<
 export const Constants = {
   "graphql_public": {
           Enums: {
-
+            
           }
         },"public": {
           Enums: {

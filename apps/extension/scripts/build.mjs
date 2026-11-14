@@ -63,8 +63,7 @@ if (target === "production") {
   }
 }
 
-const publishableKey =
-  process.env.LUMIVOX_EXTENSION_SUPABASE_PUBLISHABLE_KEY?.trim();
+const publishableKey = process.env.LUMIVOX_EXTENSION_SUPABASE_PUBLISHABLE_KEY?.trim();
 
 if (!supabaseUrl || !publishableKey) {
   throw new Error("Missing public Supabase configuration.");
@@ -72,10 +71,7 @@ if (!supabaseUrl || !publishableKey) {
 
 const parsedSupabaseUrl = new URL(supabaseUrl);
 
-if (
-  parsedSupabaseUrl.origin !== supabaseUrl ||
-  parsedSupabaseUrl.protocol !== "https:"
-) {
+if (parsedSupabaseUrl.origin !== supabaseUrl || parsedSupabaseUrl.protocol !== "https:") {
   throw new Error("Supabase URL must be an exact HTTPS origin.");
 }
 
@@ -98,16 +94,11 @@ const hostPermissions = [
   ]),
 ];
 
-const packageJson = JSON.parse(
-  await readFile(resolve(root, "package.json"), "utf8"),
-);
+const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
 
 const extensionVersion = packageJson.version;
 
-if (
-  typeof extensionVersion !== "string" ||
-  !/^\d+\.\d+\.\d+$/.test(extensionVersion)
-) {
+if (typeof extensionVersion !== "string" || !/^\d+\.\d+\.\d+$/.test(extensionVersion)) {
   throw new Error("Extension package version must use major.minor.patch.");
 }
 
@@ -185,10 +176,7 @@ const manifest = {
   },
 };
 
-await writeFile(
-  resolve(output, "manifest.json"),
-  JSON.stringify(manifest, null, 2) + "\n",
-);
+await writeFile(resolve(output, "manifest.json"), JSON.stringify(manifest, null, 2) + "\n");
 
 console.log(`Built Lumivox Extension (${target}).`);
 

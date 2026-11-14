@@ -1,5 +1,15 @@
 import type { AppNavigationItem } from "@/features/app-shell/app-shell.types";
-import { BookOpenCheck, Goal, LayoutDashboard, Map, MessageSquare, Timer, TrendingUp, Trophy, Users } from "lucide-react";
+import {
+  BookOpenCheck,
+  Goal,
+  LayoutDashboard,
+  Map,
+  MessageSquare,
+  Timer,
+  TrendingUp,
+  Trophy,
+  Users,
+} from "lucide-react";
 
 type AppNavigationIconProps = {
   icon: AppNavigationItem["icon"];
@@ -7,57 +17,39 @@ type AppNavigationIconProps = {
 
 export function AppNavigationIcon({ icon }: AppNavigationIconProps) {
   if (icon === "dashboard") {
-    return (
-      <LayoutDashboard size={"20"}/>
-    );
+    return <LayoutDashboard size={"20"} />;
   }
 
   if (icon === "goals") {
-    return (
-      <Goal size={"20"}/>
-    );
+    return <Goal size={"20"} />;
   }
 
   if (icon === "tasks") {
-    return (
-      <BookOpenCheck size={"20"}/>
-    );
+    return <BookOpenCheck size={"20"} />;
   }
 
   if (icon === "map") {
-    return (
-      <Map size={"20"}/>
-    );
+    return <Map size={"20"} />;
   }
 
   if (icon === "focus") {
-    return (
-      <Timer size={"20"}/>
-    );
+    return <Timer size={"20"} />;
   }
 
   if (icon === "rooms") {
-    return (
-      <Users size={"20"}/>
-    );
+    return <Users size={"20"} />;
   }
 
   if (icon === "groups") {
-    return (
-      <MessageSquare size={"20"}/>
-    );
+    return <MessageSquare size={"20"} />;
   }
 
   if (icon === "leaderboard") {
-    return (
-      <Trophy size={"20"}/>
-    );
+    return <Trophy size={"20"} />;
   }
 
   if (icon === "reflections") {
-    return (
-      <TrendingUp size={"20"}/>
-    );
+    return <TrendingUp size={"20"} />;
   }
 
   return (

@@ -56,21 +56,21 @@ Không áp dụng lên remote. Không đổi DB enum, không rewrite existing ta
 
 ## Verification
 
-| Yêu cầu | Kết quả kiểm tra |
-| --- | --- |
-| Derived Overdue, Review precedence, legacy fallback | Unit tests và SQL assertions |
-| Toàn bộ transition matrix, no-op/invalid direct targets | Unit tests |
-| Ownership, stale fetch và atomic race | Server-action tests; SQL stale UPDATE |
-| Completion timestamp và engagement scheduling | Server-action/domain tests |
-| Optimistic move, rollback, request rejection | Component tests |
-| Card click và sibling drag handle | Component tests và Playwright |
-| Todo → Progress → Completed → reopen | Playwright và DB polling |
-| Cancel/restore, keyboard drag | Playwright |
-| Quick create scope Goal/All/No Goal | Component tests; Goal persistence qua Playwright |
-| Deadline precedence và future reschedule | Unit, action, SQL và Playwright |
-| Legacy dropdown khóa managed stages, Goals không regress | Playwright |
-| EN/VI, desktop/mobile layout | Playwright và screenshots |
-| Dashboard 6 counts, summary, grants | PostgreSQL assertions dưới role authenticated |
+| Yêu cầu                                                  | Kết quả kiểm tra                                 |
+| -------------------------------------------------------- | ------------------------------------------------ |
+| Derived Overdue, Review precedence, legacy fallback      | Unit tests và SQL assertions                     |
+| Toàn bộ transition matrix, no-op/invalid direct targets  | Unit tests                                       |
+| Ownership, stale fetch và atomic race                    | Server-action tests; SQL stale UPDATE            |
+| Completion timestamp và engagement scheduling            | Server-action/domain tests                       |
+| Optimistic move, rollback, request rejection             | Component tests                                  |
+| Card click và sibling drag handle                        | Component tests và Playwright                    |
+| Todo → Progress → Completed → reopen                     | Playwright và DB polling                         |
+| Cancel/restore, keyboard drag                            | Playwright                                       |
+| Quick create scope Goal/All/No Goal                      | Component tests; Goal persistence qua Playwright |
+| Deadline precedence và future reschedule                 | Unit, action, SQL và Playwright                  |
+| Legacy dropdown khóa managed stages, Goals không regress | Playwright                                       |
+| EN/VI, desktop/mobile layout                             | Playwright và screenshots                        |
+| Dashboard 6 counts, summary, grants                      | PostgreSQL assertions dưới role authenticated    |
 
 - Lint toàn bộ `apps/web`: PASS.
 - Vitest: **79 tests, 7 files PASS**.

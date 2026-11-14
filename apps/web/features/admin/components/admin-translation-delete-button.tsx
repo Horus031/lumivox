@@ -18,9 +18,7 @@ type AdminTranslationDeleteButtonProps = {
   translationId: string;
 };
 
-export function AdminTranslationDeleteButton({
-  translationId,
-}: AdminTranslationDeleteButtonProps) {
+export function AdminTranslationDeleteButton({ translationId }: AdminTranslationDeleteButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.translations.actions");
   const confirm = useConfirmDialog();
@@ -59,7 +57,11 @@ export function AdminTranslationDeleteButton({
       title={isPending ? t("deleting") : t("delete")}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Trash2 aria-hidden="true" />
+      )}
     </Button>
   );
 }
@@ -111,7 +113,11 @@ export function AdminClearEntityTranslationsButton({
       title={isPending ? t("clearing") : t("clearEntityCache")}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Eraser aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Eraser aria-hidden="true" />
+      )}
     </Button>
   );
 }

@@ -18,8 +18,7 @@ export function GenerateNativeTaskInsightButton({
 
   function handleGenerate() {
     startTransition(async () => {
-      const result =
-        await generateNativeTaskRiskInsightAction(assessmentId);
+      const result = await generateNativeTaskRiskInsightAction(assessmentId);
 
       if (!result.success) {
         toast.error(result.message);

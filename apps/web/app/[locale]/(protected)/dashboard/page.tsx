@@ -30,9 +30,7 @@ type DashboardPageProps = {
   }>;
 };
 
-type ActivityOverview = Awaited<
-  ReturnType<typeof getDashboardActivityOverview>
->;
+type ActivityOverview = Awaited<ReturnType<typeof getDashboardActivityOverview>>;
 type PbiOverview = Awaited<ReturnType<typeof getDashboardPbiOverview>>;
 // type NativeRiskAlerts = Awaited<ReturnType<typeof getMyNativeTaskRiskAlerts>>;
 
@@ -58,15 +56,10 @@ async function DashboardSummarySection({
   return <DashboardSummaryCards {...summary} />;
 }
 
-async function DashboardPbiScoreSection({
-  pbiPromise,
-}: {
-  pbiPromise: Promise<PbiOverview>;
-}) {
+async function DashboardPbiScoreSection({ pbiPromise }: { pbiPromise: Promise<PbiOverview> }) {
   const { latestSnapshot } = await pbiPromise;
   const explanation =
-    latestSnapshot?.explanation_payload &&
-    typeof latestSnapshot.explanation_payload === "object"
+    latestSnapshot?.explanation_payload && typeof latestSnapshot.explanation_payload === "object"
       ? (latestSnapshot.explanation_payload as PbiExplanationPayload)
       : null;
 
@@ -83,8 +76,7 @@ async function DashboardPbiExplanationSection({
   const { latestSnapshot } = await pbiPromise;
 
   const sourceExplanation =
-    latestSnapshot?.explanation_payload &&
-    typeof latestSnapshot.explanation_payload === "object"
+    latestSnapshot?.explanation_payload && typeof latestSnapshot.explanation_payload === "object"
       ? (latestSnapshot.explanation_payload as PbiExplanationPayload)
       : null;
 
@@ -106,11 +98,7 @@ async function DashboardBehaviourSection({
   return <BehaviourTrendChart data={behaviourTrend} />;
 }
 
-async function DashboardPbiHistorySection({
-  pbiPromise,
-}: {
-  pbiPromise: Promise<PbiOverview>;
-}) {
+async function DashboardPbiHistorySection({ pbiPromise }: { pbiPromise: Promise<PbiOverview> }) {
   const { pbiHistory } = await pbiPromise;
   return <PbiHistoryChart data={pbiHistory} />;
 }
@@ -155,19 +143,28 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           eyebrow={headerT("eyebrow")}
           title={headerT("title")}
           description={headerT("description")}
-          action={<>
-            <Button asChild><Link href="/focus"><Play aria-hidden="true" />{focusT("start")}</Link></Button>
-            <RefreshPbiButton />
-          </>}
+          action={
+            <>
+              <Button asChild>
+                <Link href="/focus">
+                  <Play aria-hidden="true" />
+                  {focusT("start")}
+                </Link>
+              </Button>
+              <RefreshPbiButton />
+            </>
+          }
         />
 
-        <Suspense fallback={
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-            {Array.from({ length: 4 }, (_, index) => (
-              <DashboardSectionSkeleton key={index} height="h-36" />
-            ))}
-          </div>
-        }>
+        <Suspense
+          fallback={
+            <div className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+              {Array.from({ length: 4 }, (_, index) => (
+                <DashboardSectionSkeleton key={index} height="h-36" />
+              ))}
+            </div>
+          }
+        >
           <DashboardSummarySection activityPromise={activityPromise} />
         </Suspense>
 

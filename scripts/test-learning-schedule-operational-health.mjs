@@ -8,22 +8,44 @@ const dispatchSecret = process.env.STUDY_REMINDER_DISPATCH_SECRET;
 assert.equal(base, "http://127.0.0.1:3119");
 assert.equal(process.env.NEXT_PUBLIC_SUPABASE_URL, "http://127.0.0.1:55321");
 assert(secret && dispatchSecret && secret !== dispatchSecret);
-const db = "supabase_db_lumivox-proj", rest = "supabase_rest_lumivox-proj";
+const db = "supabase_db_lumivox-proj",
+  rest = "supabase_rest_lumivox-proj";
 const owner = "100a0000-0000-4000-8000-000000000010";
-const docker = (...args) => execFileSync("docker", args, { encoding: "utf8", windowsHide: true }).trim();
-const sql = query => docker("exec", db, "psql", "-X", "-qAt", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", "postgres", "-c", query);
-const counts = () => sql(`SELECT (SELECT count(*) FROM auth.users), (SELECT count(*) FROM public.tasks),
+const docker = (...args) =>
+  execFileSync("docker", args, { encoding: "utf8", windowsHide: true }).trim();
+const sql = (query) =>
+  docker(
+    "exec",
+    db,
+    "psql",
+    "-X",
+    "-qAt",
+    "-v",
+    "ON_ERROR_STOP=1",
+    "-U",
+    "postgres",
+    "-d",
+    "postgres",
+    "-c",
+    query,
+  );
+const counts = () =>
+  sql(`SELECT (SELECT count(*) FROM auth.users), (SELECT count(*) FROM public.tasks),
   (SELECT count(*) FROM public.study_notification_jobs), (SELECT count(*) FROM public.study_notification_deliveries),
   (SELECT enabled FROM public.study_notification_dispatch_control), (SELECT enabled FROM public.ls_missed_sweep_control)`);
-const digest = () => sql(`SELECT md5(jsonb_build_array(
+const digest = () =>
+  sql(`SELECT md5(jsonb_build_array(
   (SELECT jsonb_agg(j ORDER BY id) FROM public.study_notification_jobs j),
   (SELECT jsonb_agg(d ORDER BY id) FROM public.study_notification_deliveries d),
   (SELECT jsonb_agg(r ORDER BY id) FROM public.study_notification_webhook_receipts r),
   (SELECT jsonb_agg(s ORDER BY id) FROM public.task_study_sessions s),
   (SELECT jsonb_agg(e ORDER BY id) FROM public.task_study_session_events e))::text)`);
-const read = (token, method = "GET") => fetch(`${base}/api/internal/learning-schedule/health`, {
-  method, headers: token ? { authorization: `Bearer ${token}` } : {}, signal: AbortSignal.timeout(8000),
-});
+const read = (token, method = "GET") =>
+  fetch(`${base}/api/internal/learning-schedule/health`, {
+    method,
+    headers: token ? { authorization: `Bearer ${token}` } : {},
+    signal: AbortSignal.timeout(8000),
+  });
 
 assert.equal(counts(), "0|0|0|0|f|f", "expected empty, gates-OFF local database");
 assert.equal(docker("inspect", "--format", "{{.State.Status}}", rest), "running");
@@ -67,7 +89,12 @@ try {
   assert.equal(response.status, 200);
   assert.equal(response.headers.get("cache-control"), "no-store");
   const raw = await response.text();
-  for (const privateValue of [owner, "Private health fixture", "health-http@example.invalid", "PRIVATE-FIXTURE-ERROR"]) {
+  for (const privateValue of [
+    owner,
+    "Private health fixture",
+    "health-http@example.invalid",
+    "PRIVATE-FIXTURE-ERROR",
+  ]) {
     assert(!raw.includes(privateValue));
   }
   const body = JSON.parse(raw);
@@ -88,7 +115,10 @@ try {
     const outage = await read(secret);
     assert.equal(outage.status, 503);
     assert.deepEqual(await outage.json(), {
-      liveness: "live", readiness: "unavailable", operational: "unknown", error: "snapshot_unavailable",
+      liveness: "live",
+      readiness: "unavailable",
+      operational: "unknown",
+      error: "snapshot_unavailable",
     });
   } finally {
     docker("unpause", rest);
@@ -100,7 +130,9 @@ try {
   }
   assert(recovered);
   assert.equal(digest(), before);
-  console.log("PASS: 401/405, 200 aggregate, 503 PostgREST unavailable, 200 recovered, rows unchanged");
+  console.log(
+    "PASS: 401/405, 200 aggregate, 503 PostgREST unavailable, 200 recovered, rows unchanged",
+  );
 } finally {
   sql(`DELETE FROM auth.users WHERE id='${owner}'`);
   assert.equal(counts(), "0|0|0|0|f|f");

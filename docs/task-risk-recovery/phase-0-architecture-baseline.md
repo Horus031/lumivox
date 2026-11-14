@@ -1,4 +1,3 @@
-
 # Task Risk Recovery — Phase 0 Architecture Baseline
 
 ## 1. Purpose
@@ -21,6 +20,7 @@ feature into a task-first risk warning and recovery journey.
 ## 2. Scope
 
 In scope:
+
 - Native Lumivox task-delay prediction.
 - Risk indicators inside Workspace task cards.
 - Risk explanation inside Task Details.
@@ -32,6 +32,7 @@ In scope:
 - Testing, staging, and production readiness.
 
 Out of scope for Phase 0:
+
 - Model retraining.
 - Changing model thresholds.
 - Database schema migrations.
@@ -81,6 +82,7 @@ Do not replace this artifact with the native-task-risk model.
 ## 4. Current Native ML Contract
 
 Model:
+
 - Algorithm: logistic_regression_balanced
 - Feature schema: native-task-risk-v2
 - Prediction horizon: 14 days
@@ -92,6 +94,7 @@ services/ai-api/ml/artifacts/native-task-risk/
 logistic_regression_balanced_metadata.json
 
 The trained model currently exposes:
+
 - risk_probability
 - risk_score
 - risk_band
@@ -123,6 +126,7 @@ Manual refresh:
 8. Web retrieves the latest stored alerts.
 
 Relevant Web files:
+
 - features/native-task-risk/native-task-risk.actions.ts
 - features/native-task-risk/native-task-risk.queries.ts
 - features/native-task-risk/native-task-risk.types.ts
@@ -130,6 +134,7 @@ Relevant Web files:
 All Web paths above are relative to apps/web.
 
 Current manual refresh defaults:
+
 - Horizon: 14 days
 - Candidate limit: 8 tasks
 
@@ -145,6 +150,7 @@ AI API route:
 /api/v1/native-task-risk/cron-refresh
 
 Current request parameters:
+
 - horizon_days: 14
 - max_users: 50
 - max_tasks_per_user: 8
@@ -160,6 +166,7 @@ Scheduler configuration must be verified before release.
 ## 7. Current Persistence
 
 Primary stored prediction data:
+
 - deadline_risk_predictions
 - deadline_risk_feature_attributions
 - ml_model_versions
@@ -168,6 +175,7 @@ Current user-facing RPC:
 public.get_my_latest_native_task_risk_alerts(integer)
 
 Relevant migrations:
+
 - 20260905054045_add_native_task_risk_web_alerts.sql
 - 20260905060909_add_actionable_native_task_risk_alerts.sql
 - 20260905061841_add_native_task_risk_cron_candidates.sql
@@ -202,6 +210,7 @@ The Workspace currently loads root tasks with subtasks.
 It does not attach native risk snapshots to each task card.
 
 The existing drawer supports:
+
 - overview
 - subtasks
 - documents
@@ -224,6 +233,7 @@ The Focus page currently handles studySession input,
 but does not consume this taskId deep link.
 
 Required future work:
+
 - Validate the selected task.
 - Preselect the task in Focus V2.
 - Handle active session conflicts.
@@ -239,6 +249,7 @@ TaskSubtasksPanel
 Current native risk action opens the subtasks tab.
 
 Required future work:
+
 - Reviewable split suggestions.
 - User confirmation.
 - Safe multi-subtask persistence.
@@ -247,6 +258,7 @@ Required future work:
 ### 9.3 Study Schedule
 
 Existing capabilities:
+
 - createStudyScheduleAction
 - reviseStudyScheduleAction
 - generateStudyOccurrences
@@ -255,6 +267,7 @@ Existing capabilities:
 Schedules support revision checks and timezone-aware occurrences.
 
 Required future work:
+
 - Estimate feasible additional study time.
 - Compare old and proposed schedules.
 - Validate conflicts and deadlines.
@@ -273,6 +286,7 @@ The native prediction endpoints must enforce the same
 internal API key contract.
 
 Phase 0 adds this dependency to:
+
 - POST /api/v1/native-task-risk/predict
 - POST /api/v1/native-task-risk/batch-predict
 
@@ -284,6 +298,7 @@ Never log or commit API secrets.
 ## 11. Required Data Contract for Phase 2
 
 Every task risk snapshot must be associated with:
+
 - user ownership
 - task_id
 - prediction_id
@@ -296,11 +311,13 @@ Every task risk snapshot must be associated with:
 - reasons and recommended actions
 
 Future eligibility states:
+
 - eligible
 - ineligible
 - unavailable
 
 Future freshness states:
+
 - fresh
 - stale
 - unavailable
@@ -316,6 +333,7 @@ Overdue status must remain distinct from future delay risk.
 Actions are suggestions, not commands.
 
 Each action must have:
+
 - validated task context
 - eligibility checks
 - a clear user-facing explanation
@@ -332,9 +350,11 @@ model-based recalculation or separately validated estimate.
 ## 13. Risk Register
 
 P0:
+
 - Missing internal authentication on prediction endpoints.
 
 P1:
+
 - Limited task coverage during refresh.
 - Stale predictions after input changes.
 - Missing task-level warning UI.
@@ -344,6 +364,7 @@ P1:
 - No intervention lifecycle.
 
 P2:
+
 - Incomplete localization.
 - Missing user-facing prediction freshness.
 - Limited recommendation personalization.

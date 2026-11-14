@@ -17,7 +17,7 @@ const updateLeaderboardVisibilitySchema = z.object({
 });
 
 export async function updateAdminUserRoleAction(
-  input: z.infer<typeof updateUserRoleSchema>
+  input: z.infer<typeof updateUserRoleSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -56,15 +56,13 @@ export async function updateAdminUserRoleAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating user role.",
+        error instanceof Error ? error.message : "Unexpected error while updating user role.",
     };
   }
 }
 
 export async function updateAdminUserLeaderboardVisibilityAction(
-  input: z.infer<typeof updateLeaderboardVisibilitySchema>
+  input: z.infer<typeof updateLeaderboardVisibilitySchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -78,13 +76,10 @@ export async function updateAdminUserLeaderboardVisibilityAction(
       };
     }
 
-    const { error } = await supabase.rpc(
-      "admin_update_user_leaderboard_visibility",
-      {
-        p_user_id: parsed.data.userId,
-        p_leaderboard_opt_in: parsed.data.leaderboardOptIn,
-      }
-    );
+    const { error } = await supabase.rpc("admin_update_user_leaderboard_visibility", {
+      p_user_id: parsed.data.userId,
+      p_leaderboard_opt_in: parsed.data.leaderboardOptIn,
+    });
 
     if (error) {
       return {

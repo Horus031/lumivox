@@ -203,9 +203,7 @@
             "blockers": [
               {
                 "waiter": 14681,
-                "blockers": [
-                  14864
-                ],
+                "blockers": [14864],
                 "waitEvent": "transactionid",
                 "observedStatementMs": 151.146
               }
@@ -217,9 +215,7 @@
             "blockers": [
               {
                 "waiter": 14676,
-                "blockers": [
-                  14906
-                ],
+                "blockers": [14906],
                 "waitEvent": "transactionid",
                 "observedStatementMs": 247.482
               }
@@ -370,10 +366,7 @@
           "strandedLeases": 20,
           "fake429": 2,
           "fakeUncertain": 1,
-          "injectedProviderDelayMs": [
-            35,
-            350
-          ],
+          "injectedProviderDelayMs": [35, 350],
           "before": {
             "focus": {
               "activeSessions": 0
@@ -424,9 +417,7 @@
             "blockers": [
               {
                 "waiter": 14677,
-                "blockers": [
-                  15145
-                ],
+                "blockers": [15145],
                 "waitEvent": "advisory",
                 "observedStatementMs": 185.771
               }
@@ -638,9 +629,7 @@
             "blockers": [
               {
                 "waiter": 15263,
-                "blockers": [
-                  15650
-                ],
+                "blockers": [15650],
                 "waitEvent": "transactionid",
                 "observedStatementMs": 134.977
               }
@@ -652,9 +641,7 @@
             "blockers": [
               {
                 "waiter": 14677,
-                "blockers": [
-                  15692
-                ],
+                "blockers": [15692],
                 "waitEvent": "transactionid",
                 "observedStatementMs": 150.471
               }
@@ -805,10 +792,7 @@
           "strandedLeases": 20,
           "fake429": 2,
           "fakeUncertain": 1,
-          "injectedProviderDelayMs": [
-            35,
-            350
-          ],
+          "injectedProviderDelayMs": [35, 350],
           "before": {
             "focus": {
               "activeSessions": 0
@@ -859,9 +843,7 @@
             "blockers": [
               {
                 "waiter": 15262,
-                "blockers": [
-                  16017
-                ],
+                "blockers": [16017],
                 "waitEvent": "advisory",
                 "observedStatementMs": 148.064
               }
@@ -2156,9 +2138,7 @@
                 "blockers": [
                   {
                     "waiter": 1220,
-                    "blockers": [
-                      1685
-                    ],
+                    "blockers": [1685],
                     "waitEvent": "transactionid",
                     "observedStatementMs": 180.025
                   }
@@ -2170,9 +2150,7 @@
                 "blockers": [
                   {
                     "waiter": 1472,
-                    "blockers": [
-                      1727
-                    ],
+                    "blockers": [1727],
                     "waitEvent": "transactionid",
                     "observedStatementMs": 195.512
                   }
@@ -2327,10 +2305,7 @@
               "fakePayloadMismatch": 1,
               "fakeUncertain": 1,
               "retryWaitMs": 24839,
-              "injectedProviderDelayMs": [
-                35,
-                350
-              ],
+              "injectedProviderDelayMs": [35, 350],
               "before": {
                 "focus": {
                   "activeSessions": 0
@@ -2381,9 +2356,7 @@
                 "blockers": [
                   {
                     "waiter": 1472,
-                    "blockers": [
-                      2157
-                    ],
+                    "blockers": [2157],
                     "waitEvent": "advisory",
                     "observedStatementMs": 182.328
                   }
@@ -3064,9 +3037,7 @@
                 "blockers": [
                   {
                     "waiter": 3076,
-                    "blockers": [
-                      3581
-                    ],
+                    "blockers": [3581],
                     "waitEvent": "transactionid",
                     "observedStatementMs": 151.608
                   }
@@ -3078,9 +3049,7 @@
                 "blockers": [
                   {
                     "waiter": 3064,
-                    "blockers": [
-                      3623
-                    ],
+                    "blockers": [3623],
                     "waitEvent": "transactionid",
                     "observedStatementMs": 238.484
                   }
@@ -3235,10 +3204,7 @@
               "fakePayloadMismatch": 1,
               "fakeUncertain": 1,
               "retryWaitMs": 27239,
-              "injectedProviderDelayMs": [
-                35,
-                350
-              ],
+              "injectedProviderDelayMs": [35, 350],
               "before": {
                 "focus": {
                   "activeSessions": 0
@@ -3289,9 +3255,7 @@
                 "blockers": [
                   {
                     "waiter": 3061,
-                    "blockers": [
-                      4065
-                    ],
+                    "blockers": [4065],
                     "waitEvent": "advisory",
                     "observedStatementMs": 136.221
                   }

@@ -2,13 +2,20 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_FOCUS_V2_CONFIG } from "./focus-v2-config.schemas";
 
 const mocks = vi.hoisted(() => ({
-  requireUser: vi.fn(), fetchApi: vi.fn(), loadSnapshot: vi.fn(), schedule: vi.fn(),
+  requireUser: vi.fn(),
+  fetchApi: vi.fn(),
+  loadSnapshot: vi.fn(),
+  schedule: vi.fn(),
 }));
 vi.mock("@/lib/auth/require-user", () => ({ requireUser: mocks.requireUser }));
 vi.mock("@/lib/ai-api/fetch-ai-api", () => ({
   fetchAiApi: mocks.fetchApi,
   AiApiError: class AiApiError extends Error {
-    constructor(message: string, public status: number, public requestId: string) {
+    constructor(
+      message: string,
+      public status: number,
+      public requestId: string,
+    ) {
       super(message);
     }
   },
@@ -52,22 +59,32 @@ describe("Phase 9 drain-mode server-side enforcement", () => {
 
   it("permits pause/resume/cancel transitions of existing sessions", async () => {
     mocks.fetchApi.mockResolvedValue({
-      parentStatus: "paused", segmentId, nextSegmentId: null, parentCompleted: false,
+      parentStatus: "paused",
+      segmentId,
+      nextSegmentId: null,
+      parentCompleted: false,
     });
     const result = await transitionFocusV2Action({
-      sessionId, action: "pause", expectedSegmentId: segmentId,
+      sessionId,
+      action: "pause",
+      expectedSegmentId: segmentId,
     });
     expect(result.success).toBe(true);
-    expect(mocks.fetchApi).toHaveBeenCalledWith(expect.objectContaining({
-      path: "/api/v1/focus-v2/transition", retries: 0,
-      body: expect.objectContaining({ user_id: userId, session_id: sessionId, action: "pause" }),
-    }));
+    expect(mocks.fetchApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        path: "/api/v1/focus-v2/transition",
+        retries: 0,
+        body: expect.objectContaining({ user_id: userId, session_id: sessionId, action: "pause" }),
+      }),
+    );
   });
 
   it("hard-off blocks transitions (only allowed when all sessions drained)", async () => {
     vi.stubEnv("FOCUS_V2_ENABLED", "false");
     const result = await transitionFocusV2Action({
-      sessionId, action: "cancel", expectedSegmentId: segmentId,
+      sessionId,
+      action: "cancel",
+      expectedSegmentId: segmentId,
     });
     expect(result.success).toBe(false);
     expect(mocks.fetchApi).not.toHaveBeenCalled();

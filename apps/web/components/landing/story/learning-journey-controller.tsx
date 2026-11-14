@@ -13,15 +13,11 @@ export default function LearningJourneyController() {
   });
 
   useEffect(() => {
-    const root = trackRef.current?.closest<HTMLElement>(
-      "[data-learning-journey]",
-    );
+    const root = trackRef.current?.closest<HTMLElement>("[data-learning-journey]");
 
     if (!root) return;
 
-    const chapters = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-journey-step]"),
-    );
+    const chapters = Array.from(root.querySelectorAll<HTMLElement>("[data-journey-step]"));
 
     const visible = new Map<Element, number>();
 
@@ -31,10 +27,7 @@ export default function LearningJourneyController() {
       root.dataset.activeStep = step;
 
       chapters.forEach((chapter) => {
-        chapter.toggleAttribute(
-          "data-active",
-          chapter.dataset.journeyStep === step,
-        );
+        chapter.toggleAttribute("data-active", chapter.dataset.journeyStep === step);
       });
 
       window.dispatchEvent(
@@ -61,8 +54,7 @@ export default function LearningJourneyController() {
         const active = [...visible.entries()].sort(
           (a, b) =>
             b[1] - a[1] ||
-            chapters.indexOf(a[0] as HTMLElement) -
-              chapters.indexOf(b[0] as HTMLElement),
+            chapters.indexOf(a[0] as HTMLElement) - chapters.indexOf(b[0] as HTMLElement),
         )[0]?.[0] as HTMLElement | undefined;
 
         const step = active?.dataset.journeyStep;
@@ -81,9 +73,7 @@ export default function LearningJourneyController() {
   }, []);
 
   useEffect(() => {
-    const root = trackRef.current?.closest<HTMLElement>(
-      "[data-learning-journey]",
-    );
+    const root = trackRef.current?.closest<HTMLElement>("[data-learning-journey]");
 
     root?.style.setProperty(
       "--journey-progress",
@@ -94,23 +84,14 @@ export default function LearningJourneyController() {
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     if (reduceMotion) return;
 
-    const root = trackRef.current?.closest<HTMLElement>(
-      "[data-learning-journey]",
-    );
+    const root = trackRef.current?.closest<HTMLElement>("[data-learning-journey]");
 
     if (!root) return;
 
-    root.style.setProperty(
-      "--journey-progress",
-      String(Math.min(Math.max(value, 0), 1)),
-    );
+    root.style.setProperty("--journey-progress", String(Math.min(Math.max(value, 0), 1)));
   });
 
   return (
-    <span
-      ref={trackRef}
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-    />
+    <span ref={trackRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
   );
 }

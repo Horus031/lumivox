@@ -23,12 +23,8 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
   if (!explanation) {
     return (
       <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
-        <h2 className="text-section font-semibold text-foreground">
-          {t("emptyTitle")}
-        </h2>
-        <p className="mt-1 text-body text-secondary-text">
-          {t("emptyDescription")}
-        </p>
+        <h2 className="text-section font-semibold text-foreground">{t("emptyTitle")}</h2>
+        <p className="mt-1 text-body text-secondary-text">{t("emptyDescription")}</p>
       </section>
     );
   }
@@ -37,9 +33,7 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
     <section className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-caption font-medium text-muted-foreground">
-            {t("eyebrow")}
-          </p>
+          <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
           <h2 className="mt-1 text-section font-semibold text-foreground [overflow-wrap:anywhere]">
             {explanation.pbi_band}
@@ -71,7 +65,9 @@ export function PbiExplanationPanel({ explanation }: PbiExplanationPanelProps) {
                   {t(`insightTypes.${insight.type}`)}
                 </span>
               </div>
-              <p className="mt-1 text-body text-secondary-text [overflow-wrap:anywhere]">{insight.body}</p>
+              <p className="mt-1 text-body text-secondary-text [overflow-wrap:anywhere]">
+                {insight.body}
+              </p>
             </article>
           ))}
         </div>

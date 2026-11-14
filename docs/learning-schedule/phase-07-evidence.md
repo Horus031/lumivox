@@ -18,20 +18,20 @@
 
 ### Required acceptance
 
-| Case | Actual result |
-| --- | --- |
-| NP-01 new user | **PASS**, SQL + HTTP: missing row/default row remain OFF, no fabricated consent |
-| NP-02 explicit opt-in | **PASS**, SQL + HTTP: timestamp from DB; identical affirmative save preserves timestamp; direct timestamp/owner injection rejected |
-| NP-03 opt-out | **PASS for stored consent/effective OFF**. Pending-job invalidation is explicitly **NOT IMPLEMENTED / NOT ACCEPTED until 7B** |
-| NP-04 lead values | **PASS**, all four allowed values and invalid/null/noninteger inputs tested |
-| NP-05 quiet hours | **PASS for configuration/validation**: overnight/daytime accepted; equal/missing endpoints, 24:00, blank/unknown/numeric-offset zone rejected. Send-time quiet-hours suppression is deferred to 7C |
-| NP-06 Task override | **PASS**, Task disable wins over global ON; Task true cannot override global OFF |
-| NP-07 owner B | **PASS**, four-table row isolation; cannot alter A consent/override. Composite FKs reject cross-owner jobs/deliveries/overrides with **23503** |
-| NP-08 direct job mutation | **PASS**, authenticated INSERT/UPDATE/DELETE/provider forgery/control changes denied with **42501**; worker lease/provider internals excluded from browser reads |
-| NP-09 logical duplicate | **PASS**, both logical tuple and idempotency key duplicates rejected with **23505**; wrong generation revision rejected |
-| NP-10 operations | **PASS for 7A foundation**: dedicated gate OFF, Attendance gate independently OFF, no reminder Cron/provider call; `resend` cannot be stored as provider |
-| NP-11 existing users | **PASS**, actual pre-migration Auth fixture remained without preferences after forward apply; no backfill of opt-in |
-| NP-12 clean replay | **PASS**, all 85 migrations replayed on verified empty local, no seed |
+| Case                      | Actual result                                                                                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NP-01 new user            | **PASS**, SQL + HTTP: missing row/default row remain OFF, no fabricated consent                                                                                                                    |
+| NP-02 explicit opt-in     | **PASS**, SQL + HTTP: timestamp from DB; identical affirmative save preserves timestamp; direct timestamp/owner injection rejected                                                                 |
+| NP-03 opt-out             | **PASS for stored consent/effective OFF**. Pending-job invalidation is explicitly **NOT IMPLEMENTED / NOT ACCEPTED until 7B**                                                                      |
+| NP-04 lead values         | **PASS**, all four allowed values and invalid/null/noninteger inputs tested                                                                                                                        |
+| NP-05 quiet hours         | **PASS for configuration/validation**: overnight/daytime accepted; equal/missing endpoints, 24:00, blank/unknown/numeric-offset zone rejected. Send-time quiet-hours suppression is deferred to 7C |
+| NP-06 Task override       | **PASS**, Task disable wins over global ON; Task true cannot override global OFF                                                                                                                   |
+| NP-07 owner B             | **PASS**, four-table row isolation; cannot alter A consent/override. Composite FKs reject cross-owner jobs/deliveries/overrides with **23503**                                                     |
+| NP-08 direct job mutation | **PASS**, authenticated INSERT/UPDATE/DELETE/provider forgery/control changes denied with **42501**; worker lease/provider internals excluded from browser reads                                   |
+| NP-09 logical duplicate   | **PASS**, both logical tuple and idempotency key duplicates rejected with **23505**; wrong generation revision rejected                                                                            |
+| NP-10 operations          | **PASS for 7A foundation**: dedicated gate OFF, Attendance gate independently OFF, no reminder Cron/provider call; `resend` cannot be stored as provider                                           |
+| NP-11 existing users      | **PASS**, actual pre-migration Auth fixture remained without preferences after forward apply; no backfill of opt-in                                                                                |
+| NP-12 clean replay        | **PASS**, all 85 migrations replayed on verified empty local, no seed                                                                                                                              |
 
 ### Commands and actual gates
 
@@ -75,17 +75,17 @@ supabase db advisors --local --type security --fail-on none --output-format json
 
 ### Executed acceptance
 
-| Cases | Actual result |
-| --- | --- |
-| NJ-01–03 | **PASS**: OFF creates zero jobs; opt-in reconciles existing Sessions; ON Schedule creation creates one job per occurrence; duplicate sync/unchanged save preserve rows |
-| NJ-04–06 | **PASS**: actual reschedule updates due while retaining job ID; actual revision suppresses old generation/enqueues new; Task close cancels Sessions and suppresses future jobs |
-| NJ-07–08 | **PASS**: real Start, Complete from scheduled/in-progress, Skip, Missed batch and Recovery invalidate queued reminders; Recovery creates no new reminder |
-| NJ-09–11 | **PASS**: opt-out leaves zero current jobs; Task disable preserves another Task's pending jobs; re-enable and lead changes reconcile; already-passed lead deadline never enqueues late |
-| NJ-12 | **PASS**: injected audit insert failure restores Session/jobs/events snapshot; injected job update failure rolls back Complete and its audit |
-| NJ-13 | **PASS**, real independent PostgreSQL connections; details below |
-| NJ-14–15 | **PASS**: sent delivery preserved, failed never re-arms, uncertain delivery prevents replan, leases retain ownership plus cancellation fence; owner B/anon internal-helper calls denied **42501** |
-| NJ-16 | **PASS for database scope**: dispatch/Sweep OFF, zero reminder Cron; no provider/network implementation added |
-| Budget/late enqueue | **PASS**: 5,001-future-Session fixture causes **54000**, consent stays OFF and no partial pending jobs; reducing scope then retry succeeds |
+| Cases               | Actual result                                                                                                                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NJ-01–03            | **PASS**: OFF creates zero jobs; opt-in reconciles existing Sessions; ON Schedule creation creates one job per occurrence; duplicate sync/unchanged save preserve rows                            |
+| NJ-04–06            | **PASS**: actual reschedule updates due while retaining job ID; actual revision suppresses old generation/enqueues new; Task close cancels Sessions and suppresses future jobs                    |
+| NJ-07–08            | **PASS**: real Start, Complete from scheduled/in-progress, Skip, Missed batch and Recovery invalidate queued reminders; Recovery creates no new reminder                                          |
+| NJ-09–11            | **PASS**: opt-out leaves zero current jobs; Task disable preserves another Task's pending jobs; re-enable and lead changes reconcile; already-passed lead deadline never enqueues late            |
+| NJ-12               | **PASS**: injected audit insert failure restores Session/jobs/events snapshot; injected job update failure rolls back Complete and its audit                                                      |
+| NJ-13               | **PASS**, real independent PostgreSQL connections; details below                                                                                                                                  |
+| NJ-14–15            | **PASS**: sent delivery preserved, failed never re-arms, uncertain delivery prevents replan, leases retain ownership plus cancellation fence; owner B/anon internal-helper calls denied **42501** |
+| NJ-16               | **PASS for database scope**: dispatch/Sweep OFF, zero reminder Cron; no provider/network implementation added                                                                                     |
+| Budget/late enqueue | **PASS**: 5,001-future-Session fixture causes **54000**, consent stays OFF and no partial pending jobs; reducing scope then retry succeeds                                                        |
 
 - **Full pgTAP: PASS**, exit 0, **28 files / 679 assertions / 0 failures**, **15 wall-clock seconds** (606 baseline + **73 new lifecycle assertions**). Persistent concurrency setup remains an intentional TAP skip, executed instead by the separate harness below. Updated 7A test now expects synchronous suppression rather than the historical deferred behavior.
 - `node scripts/test-learning-schedule-notification-concurrency.mjs`: **PASS**, **9 executions** with two actors and one observer, 5s lock / 10s statement / 15s command timeouts. Both reschedule-first and opt-out-first ran **4 times each**: all actor SQLSTATEs **00000**, observed B blocked by A through `pg_blocking_pids()` in all 8 cases; final consent OFF, moved Session, one reschedule event, one suppressed job, zero current jobs/deliveries. Extra forced opt-in/FK contention observed **2 gate waits**, returned **55P03 / 00000**, left consent OFF/no jobs; full retry succeeded with one pending job at the new due time. No **40P01** deadlock or timeout. Raw results: `phase-07-notification-concurrency.json`.
@@ -137,16 +137,16 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Executed tests
 
-| Cases | Actual result |
-| --- | --- |
-| ND-01–04 | **PASS**: gate OFF means zero claims/provider calls, including OFF after claim; due job leases once; two workers claim distinct jobs; wrong/expired token **PT409** |
-| ND-05/16 | **PASS**: global opt-out and Task-disable before handoff prevent provider call; actual cancellation/authorization blockers observed. After-handoff race tested separately with accepted outcome and retained cancellation fence |
-| ND-06–08 | **PASS**: accepted vs transient/permanent/uncertain remain distinct; exact outcome replay/mismatch, exponential/retry-after bounds, max 3 claims, lost accepted response never blindly retried |
-| ND-09/10/19 | **PASS**: controlled disconnect/restart before handoff safely retries; after handoff preserves uncertainty; injected outcome transaction failure **P0001** rolls back delivery/job update and restart makes no second submission |
-| ND-11/12 | **PASS**: overnight/daytime quiet hours, inclusive start/exclusive end, both New York DST fold instants and spring gap; actual dispatch-time quiet suppression. Trusted local Auth fixture with confirmation timestamp permits handoff; clearing it blocks handoff. This is not Resend/account-email verification evidence |
-| ND-13–15 | **PASS**, SQL fixture transitions: completed/skipped/cancelled or old generation cannot handoff; started Session and retry beyond start expire |
-| ND-17/18 | **PASS**: owner B/anon worker calls denied **42501**, handoff token not browser-readable; loopback target guard before DB/provider access, fake submit has no network/API/SMTP implementation, zero reminder Cron |
-| ND-20 | **PASS**: actual 26-job fixture claims 25 then 1; lease fields/terminal clearing, batch/null/negative/excess retry-delay validation |
+| Cases       | Actual result                                                                                                                                                                                                                                                                                                              |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ND-01–04    | **PASS**: gate OFF means zero claims/provider calls, including OFF after claim; due job leases once; two workers claim distinct jobs; wrong/expired token **PT409**                                                                                                                                                        |
+| ND-05/16    | **PASS**: global opt-out and Task-disable before handoff prevent provider call; actual cancellation/authorization blockers observed. After-handoff race tested separately with accepted outcome and retained cancellation fence                                                                                            |
+| ND-06–08    | **PASS**: accepted vs transient/permanent/uncertain remain distinct; exact outcome replay/mismatch, exponential/retry-after bounds, max 3 claims, lost accepted response never blindly retried                                                                                                                             |
+| ND-09/10/19 | **PASS**: controlled disconnect/restart before handoff safely retries; after handoff preserves uncertainty; injected outcome transaction failure **P0001** rolls back delivery/job update and restart makes no second submission                                                                                           |
+| ND-11/12    | **PASS**: overnight/daytime quiet hours, inclusive start/exclusive end, both New York DST fold instants and spring gap; actual dispatch-time quiet suppression. Trusted local Auth fixture with confirmation timestamp permits handoff; clearing it blocks handoff. This is not Resend/account-email verification evidence |
+| ND-13–15    | **PASS**, SQL fixture transitions: completed/skipped/cancelled or old generation cannot handoff; started Session and retry beyond start expire                                                                                                                                                                             |
+| ND-17/18    | **PASS**: owner B/anon worker calls denied **42501**, handoff token not browser-readable; loopback target guard before DB/provider access, fake submit has no network/API/SMTP implementation, zero reminder Cron                                                                                                          |
+| ND-20       | **PASS**: actual 26-job fixture claims 25 then 1; lease fields/terminal clearing, batch/null/negative/excess retry-delay validation                                                                                                                                                                                        |
 
 - **Full pgTAP PASS**, exit 0: **29 files / 761 assertions / 0 failures**, final **13 wall-clock seconds** (**679 baseline + 82 dispatcher assertions**). This was rerun after final SQL lock hardening and clean replay. Persistent concurrency fixture remains an intentional TAP skip; separate harness executes the real concurrency cases.
 - **Dispatch harness PASS**, `node --experimental-strip-types scripts/test-learning-schedule-notification-dispatch.mjs`, final execution **09:36:01–09:36:04 UTC**; raw report `phase-07-notification-dispatch.json`. Uses the actual TypeScript fake provider/dispatcher with service_role RPC transactions through three PostgreSQL connections, 5s lock/10s statement/15s command timeouts and controlled fake-provider barriers. Hard-refuses remote URL and nonempty disposable local DB before enabling gate.
@@ -192,17 +192,17 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Real browser acceptance (local Chromium)
 
-| Case | Actual result |
-| --- | --- |
-| NS-01 | **PASS**: new Settings opens OFF, no preference row/jobs; keyboard Space changes draft without saving; existing profile/theme form remains present |
-| NS-02/03/10 | **PASS**: explicit consent saved with DB timestamp; reload restores ON; keyboard Enter saves; lead 15→30 replans two future jobs, preserving IDs and moving due by −15 minutes |
-| NS-04/09 | **PASS**: 22:00–07:00 + America/New_York persisted; EN/VI **390×844**, no horizontal overflow, keyboard Check latest works; screenshots visually inspected |
-| NS-05 | **PASS**: opt-out persists OFF; both jobs suppressed and trusted current-job check false; enabling Task override while global OFF creates no eligible job |
-| NS-06 | **PASS**: Task disable/read-after-reload persists false; only that Task's job suppressed while the other stays pending |
-| NS-07 | **PASS**: separate B browser shows B's consent/lead; A's rows invisible to B, direct write denied **42501**; B's UI save changes only B |
-| NS-08 | **PASS**: real local SELECT revocation produces visible initial read error/no switches, restored grant + Retry recovers; invalid timezone shows VI validation without saving; real injected **55P03** shows VI conflict, keeps draft, DB remains unchanged; Check latest restores stored OFF |
-| NS-11 | **PASS**: actual Server Action response held **after RPC commit**; UI stays busy/no success, Save disabled; two additional `requestSubmit()` events yield **one** action request and no duplicate jobs. Release produces confirmed success |
-| NS-12 | **PASS**: both gates OFF throughout; **0 delivery attempts**, 0 observed email-provider requests, 0 reminder Cron; anonymous Settings redirects to login |
+| Case        | Actual result                                                                                                                                                                                                                                                                                |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| NS-01       | **PASS**: new Settings opens OFF, no preference row/jobs; keyboard Space changes draft without saving; existing profile/theme form remains present                                                                                                                                           |
+| NS-02/03/10 | **PASS**: explicit consent saved with DB timestamp; reload restores ON; keyboard Enter saves; lead 15→30 replans two future jobs, preserving IDs and moving due by −15 minutes                                                                                                               |
+| NS-04/09    | **PASS**: 22:00–07:00 + America/New_York persisted; EN/VI **390×844**, no horizontal overflow, keyboard Check latest works; screenshots visually inspected                                                                                                                                   |
+| NS-05       | **PASS**: opt-out persists OFF; both jobs suppressed and trusted current-job check false; enabling Task override while global OFF creates no eligible job                                                                                                                                    |
+| NS-06       | **PASS**: Task disable/read-after-reload persists false; only that Task's job suppressed while the other stays pending                                                                                                                                                                       |
+| NS-07       | **PASS**: separate B browser shows B's consent/lead; A's rows invisible to B, direct write denied **42501**; B's UI save changes only B                                                                                                                                                      |
+| NS-08       | **PASS**: real local SELECT revocation produces visible initial read error/no switches, restored grant + Retry recovers; invalid timezone shows VI validation without saving; real injected **55P03** shows VI conflict, keeps draft, DB remains unchanged; Check latest restores stored OFF |
+| NS-11       | **PASS**: actual Server Action response held **after RPC commit**; UI stays busy/no success, Save disabled; two additional `requestSubmit()` events yield **one** action request and no duplicate jobs. Release produces confirmed success                                                   |
+| NS-12       | **PASS**: both gates OFF throughout; **0 delivery attempts**, 0 observed email-provider requests, 0 reminder Cron; anonymous Settings redirects to login                                                                                                                                     |
 
 - **Playwright final PASS**, exit 0, **9/9 tests**, **52.3s**, report **2026-11-05T09:37:23Z–09:38:14Z**. Raw results: `phase-07-reminder-settings-browser.json`; screenshots: `evidence/step-7d/reminders-en-mobile.png`, `reminders-vi-mobile.png`. Cases use real browser/Auth/Server Actions/PostgREST/RPC and persisted jobs; no successful action/Auth/DB responses mocked. Fault injection is limited to disposable local fixtures; response barrier delays a real response. No page errors/hydration errors in final suite; existing dashboard chart-size warnings are outside reminder flow and were not treated as new reminder failures.
 - Docker Desktop was initially stopped; started in background, then started existing local Supabase without reset. Tests guard local URL/ports, both gates OFF and zero initial users/Tasks/jobs before global permission fault injection. Two uniquely owned fixture users were created; teardown restored SELECT grants, dropped fault trigger/function, signed out/deleted both users and asserted zero remaining owned Tasks/Schedules/Sessions/preferences/overrides/jobs/deliveries. Cleanup **PASS**; both gates false, zero reminder Cron/provider requests.

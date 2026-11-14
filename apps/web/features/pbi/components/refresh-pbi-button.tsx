@@ -29,12 +29,11 @@ export function RefreshPbiButton() {
   }
 
   return (
-    <Button
-      onClick={handleRefresh}
-      disabled={isPending}
-      aria-busy={isPending}
-    >
-      <RefreshCw aria-hidden="true" className={isPending ? "animate-spin motion-reduce:animate-none" : undefined} />
+    <Button onClick={handleRefresh} disabled={isPending} aria-busy={isPending}>
+      <RefreshCw
+        aria-hidden="true"
+        className={isPending ? "animate-spin motion-reduce:animate-none" : undefined}
+      />
       {isPending ? t("calculating") : t("button")}
     </Button>
   );

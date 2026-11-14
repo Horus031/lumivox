@@ -29,9 +29,20 @@ export function AdminUsersTable({ users }: { users: AdminUser[] }) {
   const commonT = useTranslations("admin.common");
 
   return (
-    <AdminTableSection title={t("title")} empty={users.length === 0} emptyMessage={t("empty")} className="min-w-240">
+    <AdminTableSection
+      title={t("title")}
+      empty={users.length === 0}
+      emptyMessage={t("empty")}
+      className="min-w-240"
+    >
       <thead className="border-b border-border bg-muted text-label text-secondary-text">
-        <tr>{["user", "role", "leaderboard", "activity", "created", "actions"].map((key) => <th key={key} scope="col">{commonT(key)}</th>)}</tr>
+        <tr>
+          {["user", "role", "leaderboard", "activity", "created", "actions"].map((key) => (
+            <th key={key} scope="col">
+              {commonT(key)}
+            </th>
+          ))}
+        </tr>
       </thead>
       <tbody className="divide-y divide-border">
         {users.map((user) => {
@@ -39,19 +50,53 @@ export function AdminUsersTable({ users }: { users: AdminUser[] }) {
           return (
             <tr key={user.user_id} className="hover:bg-muted/50">
               <td className="max-w-64 [overflow-wrap:anywhere]">
-                <Link href={`/admin/users/${user.user_id}`} className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">{name}</Link>
-                <p className="mt-1 text-caption text-muted-foreground">{user.email ?? commonT("noEmail")}</p>
+                <Link
+                  href={`/admin/users/${user.user_id}`}
+                  className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {name}
+                </Link>
+                <p className="mt-1 text-caption text-muted-foreground">
+                  {user.email ?? commonT("noEmail")}
+                </p>
                 <p className="mt-1 text-caption text-muted-foreground">{user.user_id}</p>
               </td>
-              <td><AdminUserRoleSelect userId={user.user_id} currentRole={user.role as "user" | "admin"} /></td>
-              <td><AdminUserLeaderboardToggle userId={user.user_id} currentValue={user.leaderboard_opt_in} /></td>
+              <td>
+                <AdminUserRoleSelect
+                  userId={user.user_id}
+                  currentRole={user.role as "user" | "admin"}
+                />
+              </td>
+              <td>
+                <AdminUserLeaderboardToggle
+                  userId={user.user_id}
+                  currentValue={user.leaderboard_opt_in}
+                />
+              </td>
               <td className="text-caption tabular-nums text-secondary-text">
                 <p>{t("activity.focusMinutes", { count: user.total_focus_minutes })}</p>
-                <p>{t("activity.tasks", { completed: user.completed_tasks, total: user.total_tasks })}</p>
+                <p>
+                  {t("activity.tasks", {
+                    completed: user.completed_tasks,
+                    total: user.total_tasks,
+                  })}
+                </p>
                 <p>{t("activity.docs", { count: user.uploaded_documents })}</p>
               </td>
-              <td className="text-caption tabular-nums text-secondary-text">{user.created_at ? new Date(user.created_at).toLocaleString(locale) : commonT("na")}</td>
-              <td><Button asChild variant="ghost" size="icon"><Link href={`/admin/users/${user.user_id}`} aria-label={`${commonT("view")}: ${name}`} title={commonT("view")}><ArrowUpRight aria-hidden="true" /></Link></Button></td>
+              <td className="text-caption tabular-nums text-secondary-text">
+                {user.created_at ? new Date(user.created_at).toLocaleString(locale) : commonT("na")}
+              </td>
+              <td>
+                <Button asChild variant="ghost" size="icon">
+                  <Link
+                    href={`/admin/users/${user.user_id}`}
+                    aria-label={`${commonT("view")}: ${name}`}
+                    title={commonT("view")}
+                  >
+                    <ArrowUpRight aria-hidden="true" />
+                  </Link>
+                </Button>
+              </td>
             </tr>
           );
         })}

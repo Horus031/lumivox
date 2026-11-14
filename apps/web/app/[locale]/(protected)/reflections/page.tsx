@@ -19,10 +19,7 @@ function normalizeAiLocale(locale: string) {
 }
 
 async function ReflectionCardsSection({ locale }: { locale: string }) {
-  const cards = await getLatestWeeklyReflectionCards(
-    20,
-    normalizeAiLocale(locale),
-  );
+  const cards = await getLatestWeeklyReflectionCards(20, normalizeAiLocale(locale));
 
   return <WeeklyReflectionSection cards={cards} />;
 }
@@ -32,13 +29,8 @@ function ReflectionCardsFallback() {
   return <PageLoading label={t("loading")} />;
 }
 
-export default async function ReflectionsPage({
-  params,
-}: ReflectionsPageProps) {
-  const [{ locale }, t] = await Promise.all([
-    params,
-    getTranslations("reflections.page"),
-  ]);
+export default async function ReflectionsPage({ params }: ReflectionsPageProps) {
+  const [{ locale }, t] = await Promise.all([params, getTranslations("reflections.page")]);
 
   return (
     <section>

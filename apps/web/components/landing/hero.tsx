@@ -108,12 +108,8 @@ export default function Hero() {
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
-          <span className="hero-signal__label">
-            {t("floating.aiSuggested.title")}
-          </span>
-          <span className="hero-signal__meta">
-            {t("floating.aiSuggested.subtitle")}
-          </span>
+          <span className="hero-signal__label">{t("floating.aiSuggested.title")}</span>
+          <span className="hero-signal__meta">{t("floating.aiSuggested.subtitle")}</span>
         </div>
       </div>
 
@@ -121,12 +117,8 @@ export default function Hero() {
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
-          <span className="hero-signal__label">
-            {t("floating.focusTimer.title")}
-          </span>
-          <span className="hero-signal__meta">
-            {t("floating.focusTimer.subtitle")}
-          </span>
+          <span className="hero-signal__label">{t("floating.focusTimer.title")}</span>
+          <span className="hero-signal__meta">{t("floating.focusTimer.subtitle")}</span>
         </div>
       </div>
 
@@ -134,12 +126,8 @@ export default function Hero() {
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
-          <span className="hero-signal__label">
-            {t("floating.streak.title")}
-          </span>
-          <span className="hero-signal__meta">
-            {t("floating.streak.subtitle")}
-          </span>
+          <span className="hero-signal__label">{t("floating.streak.title")}</span>
+          <span className="hero-signal__meta">{t("floating.streak.subtitle")}</span>
         </div>
       </div>
 
@@ -147,20 +135,12 @@ export default function Hero() {
         <span className="hero-signal__dot" />
         <span className="hero-signal__line" />
         <div className="hero-signal__content">
-          <span className="hero-signal__label">
-            {t("floating.consistency.title")}
-          </span>
-          <span className="hero-signal__meta">
-            {t("floating.consistency.subtitle")}
-          </span>
+          <span className="hero-signal__label">{t("floating.consistency.title")}</span>
+          <span className="hero-signal__meta">{t("floating.consistency.subtitle")}</span>
         </div>
       </div>
 
-      <div
-        aria-hidden="true"
-        data-landing-motion="decorative"
-        className="hero-filament"
-      >
+      <div aria-hidden="true" data-landing-motion="decorative" className="hero-filament">
         <span className="hero-filament__origin" />
         <span className="hero-filament__beam" />
       </div>

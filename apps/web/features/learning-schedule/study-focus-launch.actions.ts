@@ -4,17 +4,22 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import { AiApiError, fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { isFocusV2CreationEnabled } from "@/features/focus-sessions/focus-v2-release";
-import { focusV2PreferencesSchema, type FocusV2Preferences } from "@/features/focus-sessions/focus-v2-preferences";
+import {
+  focusV2PreferencesSchema,
+  type FocusV2Preferences,
+} from "@/features/focus-sessions/focus-v2-preferences";
 
 type StartStudyFocusInput = FocusV2Preferences & {
   studySessionId: string;
   launchRequestId: string;
 };
 
-const inputSchema = focusV2PreferencesSchema.extend({
-  studySessionId: z.uuid(),
-  launchRequestId: z.uuid(),
-}).strict();
+const inputSchema = focusV2PreferencesSchema
+  .extend({
+    studySessionId: z.uuid(),
+    launchRequestId: z.uuid(),
+  })
+  .strict();
 const responseSchema = z.object({ session_id: z.uuid(), replay: z.boolean() });
 const errorCodes = {
   400: "invalidInput",
@@ -30,7 +35,9 @@ type StartStudyFocusResult =
   | { success: true; focusSessionId: string; replay: boolean }
   | { success: false; code: ErrorCode };
 
-export async function startStudyFocusAction(input: StartStudyFocusInput): Promise<StartStudyFocusResult> {
+export async function startStudyFocusAction(
+  input: StartStudyFocusInput,
+): Promise<StartStudyFocusResult> {
   const auth = await requireUser().catch(() => null);
   if (!auth) return { success: false, code: "notAuthorized" };
   if (!isFocusV2CreationEnabled()) return { success: false, code: "ineligibleSession" };
@@ -58,7 +65,8 @@ export async function startStudyFocusAction(input: StartStudyFocusInput): Promis
     const response = responseSchema.parse(raw);
     return { success: true, focusSessionId: response.session_id, replay: response.replay };
   } catch (error) {
-    const code = error instanceof AiApiError ? errorCodes[error.status as keyof typeof errorCodes] : undefined;
+    const code =
+      error instanceof AiApiError ? errorCodes[error.status as keyof typeof errorCodes] : undefined;
     return { success: false, code: code ?? "uncertain" };
   }
 }

@@ -1,4 +1,7 @@
-import { handleUnsubscribePost, unsubscribeGet } from "../web/features/learning-schedule/notifications/unsubscribe-service";
+import {
+  handleUnsubscribePost,
+  unsubscribeGet,
+} from "../web/features/learning-schedule/notifications/unsubscribe-service";
 
 export const unsubscribePath = "/api/study-reminders/unsubscribe";
 
@@ -11,7 +14,12 @@ export async function handleIngress(request: Request, ports: Ports) {
   const reply = (body: string, status: number, extra?: Record<string, string>) =>
     new Response(body, {
       status,
-      headers: { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Robots-Tag": "noindex, nofollow", ...extra },
+      headers: {
+        "Cache-Control": "no-store",
+        "Referrer-Policy": "no-referrer",
+        "X-Robots-Tag": "noindex, nofollow",
+        ...extra,
+      },
     });
 
   if (new URL(request.url).pathname !== unsubscribePath) return reply("Not found.", 404);

@@ -1,15 +1,8 @@
-'use client'
+"use client";
 
 import React, { useState } from "react";
 import { useConfirmation } from "@/components/ui/confirmation-dialog";
-import {
-  Heart,
-  User,
-  MessageSquare,
-  ArrowRight,
-  ShieldCheck,
-  Sparkles,
-} from "lucide-react";
+import { Heart, User, MessageSquare, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
 
 export default function BuyMeCoffeeSePay() {
   const showConfirmation = useConfirmation();
@@ -35,9 +28,7 @@ export default function BuyMeCoffeeSePay() {
     const numericValue = parseInt(rawValue) || 0;
 
     setAmount(numericValue);
-    setCustomAmountText(
-      numericValue > 0 ? numericValue.toLocaleString("vi-VN") : "",
-    );
+    setCustomAmountText(numericValue > 0 ? numericValue.toLocaleString("vi-VN") : "");
   };
 
   const handlePayment = async () => {
@@ -75,9 +66,7 @@ export default function BuyMeCoffeeSePay() {
                 <User className="w-12 h-12 text-primary" />
               </div>
 
-              <h1 className="mt-4 text-xl font-bold font-sans tracking-tight">
-                Nghĩa Võ
-              </h1>
+              <h1 className="mt-4 text-xl font-bold font-sans tracking-tight">Nghĩa Võ</h1>
               <p className="text-sm text-secondary mt-1">
                 Đang xây dựng các ứng dụng và nội dung sáng tạo
               </p>
@@ -94,10 +83,9 @@ export default function BuyMeCoffeeSePay() {
                   Về dự án
                 </h3>
                 <p className="text-sm text-secondary leading-relaxed">
-                  Chào bạn! Mình đang phát triển ứng dụng và viết blog công
-                  nghệ. Mọi sự ủng hộ dù lớn hay nhỏ từ bạn đều là nguồn động
-                  lực và kinh phí to lớn giúp mình duy trì hệ thống máy chủ và
-                  tiếp tục sáng tạo.
+                  Chào bạn! Mình đang phát triển ứng dụng và viết blog công nghệ. Mọi sự ủng hộ dù
+                  lớn hay nhỏ từ bạn đều là nguồn động lực và kinh phí to lớn giúp mình duy trì hệ
+                  thống máy chủ và tiếp tục sáng tạo.
                 </p>
               </div>
             </div>
@@ -137,9 +125,7 @@ export default function BuyMeCoffeeSePay() {
 
                 <div className="relative mt-2 rounded-md shadow-sm">
                   <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <span className="text-muted-foreground font-mono font-bold text-base">
-                      ₫
-                    </span>
+                    <span className="text-muted-foreground font-mono font-bold text-base">₫</span>
                   </div>
                   <input
                     type="text"
@@ -161,9 +147,7 @@ export default function BuyMeCoffeeSePay() {
                   <input
                     type="text"
                     disabled={isAnonymous}
-                    placeholder={
-                      isAnonymous ? "Người bạn ẩn danh" : "Nhập tên của bạn..."
-                    }
+                    placeholder={isAnonymous ? "Người bạn ẩn danh" : "Nhập tên của bạn..."}
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full px-4 py-3 bg-input border border-border rounded-md text-sm focus:outline-hidden focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-50 text-foreground"
@@ -220,9 +204,7 @@ export default function BuyMeCoffeeSePay() {
 
               <div className="mt-4 flex items-center justify-center gap-1.5 text-xs text-muted-foreground">
                 <ShieldCheck className="w-4 h-4 text-success" />
-                <span>
-                  Mã VietQR được sinh tự động an toàn thông qua cổng SePay
-                </span>
+                <span>Mã VietQR được sinh tự động an toàn thông qua cổng SePay</span>
               </div>
             </div>
 
@@ -236,19 +218,15 @@ export default function BuyMeCoffeeSePay() {
               <div className="space-y-3 divide-y divide-border">
                 <div className="pt-3 first:pt-0">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold">
-                      Anh Hoàng Nguyễn
-                    </span>
+                    <span className="text-sm font-semibold">Anh Hoàng Nguyễn</span>
                     <span className="text-xs text-primary font-mono font-bold bg-accent-soft px-2.5 py-0.5 rounded-full">
                       +150.000đ
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    2 giờ trước
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">2 giờ trước</p>
                   <p className="text-sm text-secondary mt-2 italic">
-                    &quot;App chạy mượt lắm em ơi, cố gắng phát triển thêm nhiều tính
-                    năng hay nữa nhe!&quot;
+                    &quot;App chạy mượt lắm em ơi, cố gắng phát triển thêm nhiều tính năng hay nữa
+                    nhe!&quot;
                   </p>
                 </div>
 
@@ -261,12 +239,10 @@ export default function BuyMeCoffeeSePay() {
                       +50.000đ
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    1 ngày trước
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">1 ngày trước</p>
                   <p className="text-sm text-secondary mt-2 italic">
-                    &quot;Cảm ơn những bài viết chia sẻ kinh nghiệm làm UI/UX rất chi
-                    tiết và trực quan của bạn.&quot;
+                    &quot;Cảm ơn những bài viết chia sẻ kinh nghiệm làm UI/UX rất chi tiết và trực
+                    quan của bạn.&quot;
                   </p>
                 </div>
               </div>

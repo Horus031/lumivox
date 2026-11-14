@@ -6,8 +6,17 @@ export async function consumeThroughBridge(
 ): Promise<boolean> {
   const origin = new URL(env.UNSUBSCRIBE_BRIDGE_ORIGIN ?? "");
   const secret = env.UNSUBSCRIBE_BRIDGE_SECRET;
-  if (origin.protocol !== "https:" || origin.username || origin.password || origin.pathname !== "/" ||
-    origin.search || origin.hash || !secret || secret.length < 32) throw new Error("Bridge unavailable");
+  if (
+    origin.protocol !== "https:" ||
+    origin.username ||
+    origin.password ||
+    origin.pathname !== "/" ||
+    origin.search ||
+    origin.hash ||
+    !secret ||
+    secret.length < 32
+  )
+    throw new Error("Bridge unavailable");
 
   const response = await send(new URL("/api/internal/study-reminders/unsubscribe", origin), {
     method: "POST",

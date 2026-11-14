@@ -97,9 +97,7 @@ export async function processLearningDocumentAction(
       success: false,
 
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while processing document.",
+        error instanceof Error ? error.message : "Unexpected error while processing document.",
     };
   }
 }

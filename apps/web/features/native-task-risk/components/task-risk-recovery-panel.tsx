@@ -1,13 +1,9 @@
-
 "use client";
 
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
-import type {
-  TaskRiskRecoveryUiAction,
-  TaskRiskViewState,
-} from "../task-risk-presentation.types";
+import type { TaskRiskRecoveryUiAction, TaskRiskViewState } from "../task-risk-presentation.types";
 
 type TaskRiskRecoveryPanelProps = {
   state: TaskRiskViewState;
@@ -22,10 +18,7 @@ export function TaskRiskRecoveryPanel({
 }: TaskRiskRecoveryPanelProps) {
   const t = useTranslations("taskRiskRecovery");
 
-  if (
-    state.status !== "ready" ||
-    state.alert.risk_band === "low"
-  ) {
+  if (state.status !== "ready" || state.alert.risk_band === "low") {
     return null;
   }
 
@@ -34,18 +27,12 @@ export function TaskRiskRecoveryPanel({
       aria-label={t("actions.title")}
       className="min-w-0 rounded-lg border border-border bg-card p-card"
     >
-      <h3 className="text-section font-semibold text-foreground">
-        {t("actions.title")}
-      </h3>
+      <h3 className="text-section font-semibold text-foreground">{t("actions.title")}</h3>
 
-      <p className="mt-1 text-body text-secondary-text">
-        {t("actions.subtitle")}
-      </p>
+      <p className="mt-1 text-body text-secondary-text">{t("actions.subtitle")}</p>
 
       {actions.length === 0 ? (
-        <p className="mt-4 text-body text-muted-foreground">
-          {t("actions.empty")}
-        </p>
+        <p className="mt-4 text-body text-muted-foreground">{t("actions.empty")}</p>
       ) : (
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {actions.map((action) => (

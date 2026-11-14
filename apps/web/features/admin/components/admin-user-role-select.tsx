@@ -21,10 +21,7 @@ type AdminUserRoleSelectProps = {
   currentRole: "user" | "admin";
 };
 
-export function AdminUserRoleSelect({
-  userId,
-  currentRole,
-}: AdminUserRoleSelectProps) {
+export function AdminUserRoleSelect({ userId, currentRole }: AdminUserRoleSelectProps) {
   const router = useRouter();
   const t = useTranslations("admin.common.roles");
   const commonT = useTranslations("admin.common");
@@ -56,7 +53,11 @@ export function AdminUserRoleSelect({
         disabled={isPending}
         onValueChange={(value) => handleChange(value as "user" | "admin")}
       >
-        <SelectTrigger aria-label={`${commonT("role")}: ${userId}`} aria-busy={isPending} className="w-full min-w-40">
+        <SelectTrigger
+          aria-label={`${commonT("role")}: ${userId}`}
+          aria-busy={isPending}
+          className="w-full min-w-40"
+        >
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

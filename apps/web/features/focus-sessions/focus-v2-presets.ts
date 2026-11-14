@@ -32,6 +32,4 @@ export const FOCUS_V2_PRESETS = {
 
 export type FocusV2PresetName = keyof typeof FOCUS_V2_PRESETS;
 
-export const FOCUS_V2_PRESET_ORDER: FocusV2PresetName[] = [
-  "classic", "balanced", "deepWork",
-];
+export const FOCUS_V2_PRESET_ORDER: FocusV2PresetName[] = ["classic", "balanced", "deepWork"];

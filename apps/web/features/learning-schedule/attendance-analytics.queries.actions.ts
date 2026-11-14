@@ -2,10 +2,7 @@
 
 import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
-import {
-  calculateAttendanceSummary,
-  type AnalyticsObligation,
-} from "./attendance-analytics";
+import { calculateAttendanceSummary, type AnalyticsObligation } from "./attendance-analytics";
 
 const inputSchema = z
   .object({
@@ -18,7 +15,9 @@ const MAX_ROWS = 20_000;
 const EVENT_CHUNK = 50;
 
 function isSessionStatus(value: string): value is AnalyticsObligation["status"] {
-  return ["scheduled", "in_progress", "completed", "missed", "skipped", "cancelled"].includes(value);
+  return ["scheduled", "in_progress", "completed", "missed", "skipped", "cancelled"].includes(
+    value,
+  );
 }
 
 type ProjectionResult =
@@ -33,9 +32,7 @@ type ProjectionResult =
       code: "invalidInput" | "notAuthorized" | "loadFailed" | "incompleteData";
     };
 
-export async function getAttendanceSummaryAction(
-  raw: unknown,
-): Promise<ProjectionResult> {
+export async function getAttendanceSummaryAction(raw: unknown): Promise<ProjectionResult> {
   const parsed = inputSchema.safeParse(raw);
 
   if (!parsed.success) {
@@ -80,7 +77,10 @@ export async function getAttendanceSummaryAction(
     for (let from = 0; from <= MAX_ROWS; from += PAGE_SIZE) {
       const result = await supabase
         .from("task_study_sessions")
-        .select("id,schedule_id,logical_occurrence_key,local_date,timezone,scheduled_start_at,scheduled_end_at,status,completed_at", { count: "exact" })
+        .select(
+          "id,schedule_id,logical_occurrence_key,local_date,timezone,scheduled_start_at,scheduled_end_at,status,completed_at",
+          { count: "exact" },
+        )
         .eq("schedule_id", parsed.data.scheduleId)
         .eq("user_id", user.id)
         .order("scheduled_start_at", { ascending: true })
@@ -91,8 +91,11 @@ export async function getAttendanceSummaryAction(
         return { success: false, code: "loadFailed" };
       }
 
-      if (result.count === null || result.count > MAX_ROWS ||
-          (total !== undefined && result.count !== total)) {
+      if (
+        result.count === null ||
+        result.count > MAX_ROWS ||
+        (total !== undefined && result.count !== total)
+      ) {
         return { success: false, code: "incompleteData" };
       }
       total = result.count;
@@ -134,9 +137,12 @@ export async function getAttendanceSummaryAction(
         if (events.error || !events.data) {
           return { success: false, code: "loadFailed" };
         }
-        if (events.count === null || events.count > MAX_ROWS ||
-            (eventTotal !== undefined && eventTotal !== events.count) ||
-            events.data.length !== Math.min(PAGE_SIZE, Math.max(0, events.count - from))) {
+        if (
+          events.count === null ||
+          events.count > MAX_ROWS ||
+          (eventTotal !== undefined && eventTotal !== events.count) ||
+          events.data.length !== Math.min(PAGE_SIZE, Math.max(0, events.count - from))
+        ) {
           return { success: false, code: "incompleteData" };
         }
         eventTotal = events.count;
@@ -156,7 +162,7 @@ export async function getAttendanceSummaryAction(
 
     // A cancellation observed on only one side of these independent reads
     // indicates a partial/inconsistent projection; request a fresh read.
-    if (rows.some(row => (row.status === "cancelled") !== cancellations.has(row.id))) {
+    if (rows.some((row) => (row.status === "cancelled") !== cancellations.has(row.id))) {
       return { success: false, code: "incompleteData" };
     }
 

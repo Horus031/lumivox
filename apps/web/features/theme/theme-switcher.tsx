@@ -25,7 +25,16 @@ const ThemeSwitcher = ({ compact = false }: { compact?: boolean }) => {
   }, []);
 
   if (!mounted) {
-    return <span aria-hidden="true" className={compact ? "inline-block size-touch lg:size-control" : "inline-block size-touch sm:size-control"} />;
+    return (
+      <span
+        aria-hidden="true"
+        className={
+          compact
+            ? "inline-block size-touch lg:size-control"
+            : "inline-block size-touch sm:size-control"
+        }
+      />
+    );
   }
 
   const ICON_SIZE = 16;
@@ -33,38 +42,41 @@ const ThemeSwitcher = ({ compact = false }: { compact?: boolean }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={compact ? "ghost" : "outline"} size="icon" aria-label={commonT("theme")} title={commonT("theme")} className={compact ? "sm:size-touch lg:size-control" : undefined}>
+        <Button
+          variant={compact ? "ghost" : "outline"}
+          size="icon"
+          aria-label={commonT("theme")}
+          title={commonT("theme")}
+          className={compact ? "sm:size-touch lg:size-control" : undefined}
+        >
           {theme === "light" ? (
-            <Sun
-              key="light"
-            />
+            <Sun key="light" />
           ) : theme === "dark" ? (
-            <Moon
-              key="dark"
-            />
+            <Moon key="dark" />
           ) : (
-            <Laptop
-              key="system"
-            />
+            <Laptop key="system" />
           )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="end">
-        <DropdownMenuRadioGroup
-          value={theme}
-          onValueChange={(e) => setTheme(e)}
-        >
-          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="light">
-            <Sun size={ICON_SIZE} />{" "}
-            <span>{t("light")}</span>
+        <DropdownMenuRadioGroup value={theme} onValueChange={(e) => setTheme(e)}>
+          <DropdownMenuRadioItem
+            className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"}
+            value="light"
+          >
+            <Sun size={ICON_SIZE} /> <span>{t("light")}</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="dark">
-            <Moon size={ICON_SIZE} />{" "}
-            <span>{t("dark")}</span>
+          <DropdownMenuRadioItem
+            className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"}
+            value="dark"
+          >
+            <Moon size={ICON_SIZE} /> <span>{t("dark")}</span>
           </DropdownMenuRadioItem>
-          <DropdownMenuRadioItem className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"} value="system">
-            <Laptop size={ICON_SIZE} />{" "}
-            <span>{t("system")}</span>
+          <DropdownMenuRadioItem
+            className={compact ? "min-h-touch gap-2 lg:min-h-control" : "flex gap-2"}
+            value="system"
+          >
+            <Laptop size={ICON_SIZE} /> <span>{t("system")}</span>
           </DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

@@ -1,4 +1,3 @@
-
 import assert from "node:assert/strict";
 import { spawn, execFileSync } from "node:child_process";
 import { createInterface } from "node:readline";
@@ -13,16 +12,11 @@ const owner = randomUUID();
 const email = `attendance-cc-${owner}@example.invalid`;
 const title = "Attendance concurrency verification fixture";
 
-const reportPath = resolve(
-  root,
-  "docs/learning-schedule/phase-05-attendance-concurrency.json",
-);
+const reportPath = resolve(root, "docs/learning-schedule/phase-05-attendance-concurrency.json");
 
-const q = value =>
-  `'${String(value).replaceAll("'", "''")}'`;
+const q = (value) => `'${String(value).replaceAll("'", "''")}'`;
 
-const wait = ms =>
-  new Promise(resolveWait => setTimeout(resolveWait, ms));
+const wait = (ms) => new Promise((resolveWait) => setTimeout(resolveWait, ms));
 
 class Connection {
   constructor(name) {
@@ -33,11 +27,7 @@ class Connection {
 
     this.child = spawn(
       "docker",
-      [
-        "exec", "-i", container,
-        "psql", "-X", "-A", "-t", "-q",
-        "-U", "postgres", "-d", "postgres",
-      ],
+      ["exec", "-i", container, "psql", "-X", "-A", "-t", "-q", "-U", "postgres", "-d", "postgres"],
       {
         cwd: root,
         windowsHide: true,
@@ -45,34 +35,30 @@ class Connection {
       },
     );
 
-    createInterface({ input: this.child.stdout })
-      .on("line", line => {
-        if (!this.active) return;
+    createInterface({ input: this.child.stdout }).on("line", (line) => {
+      if (!this.active) return;
 
-        if (line === this.active.marker) {
-          const pending = this.active;
-          this.active = null;
-          clearTimeout(pending.timer);
+      if (line === this.active.marker) {
+        const pending = this.active;
+        this.active = null;
+        clearTimeout(pending.timer);
 
-          pending.resolve({
-            text: pending.lines.join("\n"),
-            errors: this.stderr.splice(0),
-          });
-        } else {
-          this.active.lines.push(line);
-        }
-      });
+        pending.resolve({
+          text: pending.lines.join("\n"),
+          errors: this.stderr.splice(0),
+        });
+      } else {
+        this.active.lines.push(line);
+      }
+    });
 
-    createInterface({ input: this.child.stderr })
-      .on("line", line => this.stderr.push(line));
+    createInterface({ input: this.child.stderr }).on("line", (line) => this.stderr.push(line));
 
-    this.child.on("error", error => this.fail(error));
+    this.child.on("error", (error) => this.fail(error));
 
-    this.child.on("exit", code => {
+    this.child.on("exit", (code) => {
       if (!this.closed) {
-        this.fail(
-          new Error(`${name}: psql exited with code ${code}`),
-        );
+        this.fail(new Error(`${name}: psql exited with code ${code}`));
       }
     });
   }
@@ -90,13 +76,10 @@ class Connection {
     assert(!this.active, `${this.name}: command already active`);
 
     return new Promise((resolveCommand, reject) => {
-      const marker =
-        `__LS_DONE_${randomUUID().replaceAll("-", "")}`;
+      const marker = `__LS_DONE_${randomUUID().replaceAll("-", "")}`;
 
       const timer = setTimeout(() => {
-        this.fail(
-          new Error(`${this.name}: command exceeded 15 seconds`),
-        );
+        this.fail(new Error(`${this.name}: command exceeded 15 seconds`));
       }, 15000);
 
       this.active = {
@@ -111,28 +94,26 @@ class Connection {
 
       this.child.stdin.write(
         `${sql}\n` +
-        "\\echo __LS_SQLSTATE :SQLSTATE\n" +
-        "\\echo __LS_LAST_ERROR :LAST_ERROR_MESSAGE\n" +
-        `\\echo ${marker}\n`,
+          "\\echo __LS_SQLSTATE :SQLSTATE\n" +
+          "\\echo __LS_LAST_ERROR :LAST_ERROR_MESSAGE\n" +
+          `\\echo ${marker}\n`,
       );
-    }).then(result => {
+    }).then((result) => {
       const lines = result.text.split("\n");
 
-      const state = lines
-        .findLast(x => x.startsWith("__LS_SQLSTATE "))
-        ?.split(" ")[1];
+      const state = lines.findLast((x) => x.startsWith("__LS_SQLSTATE "))?.split(" ")[1];
 
       const message = lines
-        .findLast(x => x.startsWith("__LS_LAST_ERROR "))
+        .findLast((x) => x.startsWith("__LS_LAST_ERROR "))
         ?.slice("__LS_LAST_ERROR ".length);
 
       return {
         state,
         message: state === "00000" ? null : message,
-        text: lines.filter(
-          x => !x.startsWith("__LS_SQLSTATE ") &&
-               !x.startsWith("__LS_LAST_ERROR "),
-        ).join("\n").trim(),
+        text: lines
+          .filter((x) => !x.startsWith("__LS_SQLSTATE ") && !x.startsWith("__LS_LAST_ERROR "))
+          .join("\n")
+          .trim(),
         errors: result.errors,
       };
     });
@@ -144,8 +125,7 @@ class Connection {
     assert.equal(
       result.state,
       "00000",
-      `${this.name}: ${result.state}: ` +
-        `${result.message ?? ""}\n${result.errors.join("\n")}`,
+      `${this.name}: ${result.state}: ` + `${result.message ?? ""}\n${result.errors.join("\n")}`,
     );
 
     return result.text;
@@ -165,24 +145,23 @@ class Connection {
       SET statement_timeout = '10s';
     `);
 
-    this.pid = Number(
-      await this.ok("SELECT pg_backend_pid();"),
-    );
+    this.pid = Number(await this.ok("SELECT pg_backend_pid();"));
   }
 
   async begin(role = "authenticated") {
-    assert(
-      ["authenticated", "service_role"].includes(role),
-      "Unexpected test role",
-    );
+    assert(["authenticated", "service_role"].includes(role), "Unexpected test role");
 
     await this.ok(`
       BEGIN;
       SET LOCAL ROLE ${role};
-      ${role === "authenticated" ? `
+      ${
+        role === "authenticated"
+          ? `
         SET LOCAL "request.jwt.claim.sub" = ${q(owner)};
         SET LOCAL "request.jwt.claim.role" = 'authenticated';
-      ` : ""}
+      `
+          : ""
+      }
     `);
   }
 
@@ -197,10 +176,7 @@ class Connection {
 
     this.child.stdin.end("ROLLBACK;\n\\q\n");
 
-    await Promise.race([
-      new Promise(done => this.child.once("exit", done)),
-      wait(2000),
-    ]);
+    await Promise.race([new Promise((done) => this.child.once("exit", done)), wait(2000)]);
 
     if (this.child.exitCode === null) {
       this.child.kill();
@@ -208,17 +184,10 @@ class Connection {
   }
 }
 
-const [a, b, observer] = [
-  new Connection("A"),
-  new Connection("B"),
-  new Connection("observer"),
-];
+const [a, b, observer] = [new Connection("A"), new Connection("B"), new Connection("observer")];
 
 const report = {
-  baseline: execFileSync(
-    "git", ["rev-parse", "HEAD"],
-    { cwd: root, encoding: "utf8" },
-  ).trim(),
+  baseline: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
   startedAt: new Date().toISOString(),
   container,
   runs: [],
@@ -243,8 +212,7 @@ async function cleanupTask() {
   `);
 
   assert(
-    !existing ||
-    (existing.user_id === owner && existing.title === title),
+    !existing || (existing.user_id === owner && existing.title === title),
     "Refusing to delete a Task outside this fixture",
   );
 
@@ -321,11 +289,7 @@ async function setup(sourceStatus) {
     FROM public.task_study_schedules s
     CROSS JOIN LATERAL (
       SELECT
-        ${
-          historical
-            ? "now() - interval '2 days'"
-            : "now() - interval '20 minutes'"
-        } AS starts_at,
+        ${historical ? "now() - interval '2 days'" : "now() - interval '20 minutes'"} AS starts_at,
         ${
           historical
             ? "now() - interval '2 days' + interval '30 minutes'"
@@ -410,9 +374,7 @@ async function observeBlocker() {
     await wait(30);
   }
 
-  throw new Error(
-    "Worker B was not observed waiting for worker A",
-  );
+  throw new Error("Worker B was not observed waiting for worker A");
 }
 
 async function runRace({
@@ -441,21 +403,13 @@ async function runRace({
     FOR UPDATE;
   `);
 
-  const firstId = await a.ok(
-    command(first, fixture, keyA),
-  );
+  const firstId = await a.ok(command(first, fixture, keyA));
 
-  assert.equal(
-    firstId,
-    fixture.sessionId,
-    `${name}: first command returned unexpected ID`,
-  );
+  assert.equal(firstId, fixture.sessionId, `${name}: first command returned unexpected ID`);
 
   await b.begin();
 
-  const pending = b.exec(
-    command(second, fixture, keyB),
-  );
+  const pending = b.exec(command(second, fixture, keyB));
 
   // Prevent unhandled rejection while awaiting the blocker.
   pending.catch(() => {});
@@ -469,16 +423,11 @@ async function runRace({
   assert.equal(
     secondResult.state,
     expectedStatus,
-    `${name}: unexpected SQLSTATE ` +
-      JSON.stringify(secondResult),
+    `${name}: unexpected SQLSTATE ` + JSON.stringify(secondResult),
   );
 
   if (secondResult.state === "00000") {
-    assert.equal(
-      secondResult.text,
-      fixture.sessionId,
-      `${name}: retry returned different ID`,
-    );
+    assert.equal(secondResult.text, fixture.sessionId, `${name}: retry returned different ID`);
 
     await b.ok("COMMIT;");
   } else {
@@ -487,49 +436,22 @@ async function runRace({
 
   const final = await snapshot(fixture);
 
-  assert.equal(
-    final.session.status,
-    expectedFinalStatus,
-    `${name}: incorrect final Session state`,
-  );
+  assert.equal(final.session.status, expectedFinalStatus, `${name}: incorrect final Session state`);
 
-  assert.equal(
-    final.events.length,
-    expectedEvents,
-    `${name}: incorrect audit count`,
-  );
+  assert.equal(final.events.length, expectedEvents, `${name}: incorrect audit count`);
 
-  assert.equal(
-    final.taskStatus,
-    "todo",
-    `${name}: Task status unexpectedly changed`,
-  );
+  assert.equal(final.taskStatus, "todo", `${name}: Task status unexpectedly changed`);
 
-  assert.equal(
-    final.session.actual_study_minutes,
-    null,
-    `${name}: fake Focus minutes recorded`,
-  );
+  assert.equal(final.session.actual_study_minutes, null, `${name}: fake Focus minutes recorded`);
 
-  const keys = final.events.map(event => event.event_key);
+  const keys = final.events.map((event) => event.event_key);
 
-  assert.equal(
-    new Set(keys).size,
-    keys.length,
-    `${name}: duplicate event key`,
-  );
+  assert.equal(new Set(keys).size, keys.length, `${name}: duplicate event key`);
 
   if (expectedFinalStatus === "completed") {
-    assert(
-      final.session.completed_at,
-      `${name}: missing completed_at`,
-    );
+    assert(final.session.completed_at, `${name}: missing completed_at`);
   } else {
-    assert.equal(
-      final.session.completed_at,
-      null,
-      `${name}: unexpected completed_at`,
-    );
+    assert.equal(final.session.completed_at, null, `${name}: unexpected completed_at`);
   }
 
   report.runs.push({
@@ -540,7 +462,7 @@ async function runRace({
     second,
     secondSqlstate: secondResult.state,
     finalStatus: final.session.status,
-    eventTypes: final.events.map(e => e.event_type),
+    eventTypes: final.events.map((e) => e.event_type),
     final,
   });
 
@@ -625,9 +547,7 @@ const scenarios = [
 ];
 
 try {
-  await Promise.all(
-    [a, b, observer].map(connection => connection.init()),
-  );
+  await Promise.all([a, b, observer].map((connection) => connection.init()));
 
   assert.equal(
     new Set([a.pid, b.pid, observer.pid]).size,
@@ -676,20 +596,24 @@ try {
           AND email = ${q(email)};
       `);
 
-      const remaining = Number(await observer.ok(`
+      const remaining = Number(
+        await observer.ok(`
         SELECT count(*)
         FROM auth.users
         WHERE id = ${q(owner)};
-      `));
+      `),
+      );
 
       assert.equal(remaining, 0);
 
-      const transactions = Number(await observer.ok(`
+      const transactions = Number(
+        await observer.ok(`
         SELECT count(*)
         FROM pg_stat_activity
         WHERE pid IN (${a.pid},${b.pid})
           AND xact_start IS NOT NULL;
-      `));
+      `),
+      );
 
       assert.equal(transactions, 0);
 
@@ -703,23 +627,16 @@ try {
     }
   }
 
-  await Promise.all(
-    [a, b, observer].map(connection => connection.close()),
-  );
+  await Promise.all([a, b, observer].map((connection) => connection.close()));
 
   report.finishedAt = new Date().toISOString();
 
-  await writeFile(
-    reportPath,
-    JSON.stringify(report, null, 2) + "\n",
-  );
+  await writeFile(reportPath, JSON.stringify(report, null, 2) + "\n");
 }
 
 if (failure) {
   process.stderr.write(String(failure.stack ?? failure) + "\n");
   process.exitCode = 1;
 } else {
-  process.stdout.write(
-    `PASS: ${report.runs.length} attendance races\n`,
-  );
+  process.stdout.write(`PASS: ${report.runs.length} attendance races\n`);
 }

@@ -15,9 +15,7 @@ export default function Footer() {
         <div className="md:col-span-2">
           <div className="flex items-center gap-2 mb-3">
             <Image src="/logo.png" alt="" width={28} height={28} />
-            <span className="font-semibold tracking-tight">
-              {common("appName")}
-            </span>
+            <span className="font-semibold tracking-tight">{common("appName")}</span>
           </div>
           <p className="text-[13.5px] text-secondary max-w-sm leading-relaxed">
             {t("description")}

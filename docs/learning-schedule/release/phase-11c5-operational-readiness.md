@@ -4,11 +4,11 @@ Staging audit on 2026-11-13 for `39177f576f87b0ef8210817f3fdb4ef3c85e153d`. Host
 
 ## SE-03 · Runtime safety gates
 
-| Check | Observed |
-| --- | --- |
-| Supabase Staging | Dispatch OFF, Missed Sweep OFF, zero reminder Cron matches by job name or command, zero deliveries and zero webhook receipts. |
-| Vercel Preview configuration | The project-wide Preview variable `STUDY_REMINDER_REAL_SEND_ENABLED` returned `false`. Its last update predates the active deployment, and the branch-filtered query returned no `product-release` override. |
-| Active deployment runtime | **Unverified directly.** Configuration and deployment timestamps support OFF. The running function's effective value was not observed through a deployment-specific runtime check. The authenticated dispatch endpoint was not invoked in this audit. |
+| Check                        | Observed                                                                                                                                                                                                                                              |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Supabase Staging             | Dispatch OFF, Missed Sweep OFF, zero reminder Cron matches by job name or command, zero deliveries and zero webhook receipts.                                                                                                                         |
+| Vercel Preview configuration | The project-wide Preview variable `STUDY_REMINDER_REAL_SEND_ENABLED` returned `false`. Its last update predates the active deployment, and the branch-filtered query returned no `product-release` override.                                          |
+| Active deployment runtime    | **Unverified directly.** Configuration and deployment timestamps support OFF. The running function's effective value was not observed through a deployment-specific runtime check. The authenticated dispatch endpoint was not invoked in this audit. |
 
 Vercel environment edits apply to subsequent deployments. Recheck the effective setting on the selected artifact before re-enabling any worker. [Vercel environment variables](https://vercel.com/docs/environment-variables)
 
@@ -31,13 +31,13 @@ Follow the [kill switch runbook](../operations/rollback-and-kill-switches.md) an
 
 The Staging operational snapshot RPC returned zero pending due jobs, active or expired leases, uncertain attempts, unmatched webhooks, accepted submissions and delivery failures in their respective windows. The internal health route and operator CLI are present. Authenticated Staging monitoring ingress and alert delivery were not exercised.
 
-| Signal | Detection and investigation |
-| --- | --- |
-| Uncertain delivery | `inspect-uncertain` and health alert `uncertain_submissions`. Hold the attempt and correlate the original handoff against a verified receipt or trusted provider outcome. |
-| Failed job and exhausted retries | Snapshot `deliveryFailures24h` for aggregate signal. In a restricted DB read, inspect failed jobs with `attempt_count >= 3` and correlate the last delivery outcome to distinguish exhaustion from a hold or definitive rejection. |
-| Rate-limited | Restricted DB read of delivery `error_code = 'rate_limited'` and the job's `next_attempt_at` and `attempt_count`. The snapshot has no dedicated rate-limit alert. |
-| Bounced or complained | Restricted delivery-status and webhook receipt correlation. Review the resulting suppression through the trusted provider path. |
+| Signal                           | Detection and investigation                                                                                                                                                                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Uncertain delivery               | `inspect-uncertain` and health alert `uncertain_submissions`. Hold the attempt and correlate the original handoff against a verified receipt or trusted provider outcome.                                                                                                      |
+| Failed job and exhausted retries | Snapshot `deliveryFailures24h` for aggregate signal. In a restricted DB read, inspect failed jobs with `attempt_count >= 3` and correlate the last delivery outcome to distinguish exhaustion from a hold or definitive rejection.                                             |
+| Rate-limited                     | Restricted DB read of delivery `error_code = 'rate_limited'` and the job's `next_attempt_at` and `attempt_count`. The snapshot has no dedicated rate-limit alert.                                                                                                              |
+| Bounced or complained            | Restricted delivery-status and webhook receipt correlation. Review the resulting suppression through the trusted provider path.                                                                                                                                                |
 | Signature or persistence failure | Signature verification returns `401 invalid_signature`; check sanitized HTTP status or provider webhook attempt logs. Check handler failures and use `inspect-webhooks` for persisted unmatched receipts. The receipt count alone misses requests rejected before persistence. |
-| Expired jobs and leases | `inspect-queue` and repeated snapshot observations for expired leases. Use a restricted job-status aggregate for terminal `expired` jobs. Hold expired post-handoff attempts for review. |
+| Expired jobs and leases          | `inspect-queue` and repeated snapshot observations for expired leases. Use a restricted job-status aggregate for terminal `expired` jobs. Hold expired post-handoff attempts for review.                                                                                       |
 
 Use counts and sanitized state in the incident record. Keep recipient and capability data in restricted incident access.

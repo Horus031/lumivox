@@ -36,26 +36,22 @@ export async function generateNativeTaskRiskInsightAction(
     if (!apiBaseUrl || !internalKey) {
       return {
         success: false,
-        message:
-          "AI backend environment variables are not configured correctly.",
+        message: "AI backend environment variables are not configured correctly.",
       };
     }
 
-    const response = await fetch(
-      `${apiBaseUrl}/api/v1/ai/native-task-risk-insight/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-lumivox-internal-key": internalKey,
-        },
-        body: JSON.stringify({
-          assessment_id: assessmentId,
-          persist_insight: true,
-        }),
-        cache: "no-store",
+    const response = await fetch(`${apiBaseUrl}/api/v1/ai/native-task-risk-insight/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-lumivox-internal-key": internalKey,
       },
-    );
+      body: JSON.stringify({
+        assessment_id: assessmentId,
+        persist_insight: true,
+      }),
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -67,7 +63,6 @@ export async function generateNativeTaskRiskInsightAction(
     }
 
     const data = (await response.json()) as NativeTaskRiskInsightApiResponse;
-
 
     return {
       success: true,

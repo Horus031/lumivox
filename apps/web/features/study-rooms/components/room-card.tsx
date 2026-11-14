@@ -50,9 +50,7 @@ export function RoomCard({ room, mode }: RoomCardProps) {
       <div className="flex h-full flex-col justify-between gap-card">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">
-              {t(`visibility.${room.visibility}`)}
-            </Badge>
+            <Badge variant="secondary">{t(`visibility.${room.visibility}`)}</Badge>
 
             <span className="inline-flex items-center gap-1 text-caption text-muted-foreground">
               <Users className="size-icon-sm" aria-hidden="true" />
@@ -63,7 +61,10 @@ export function RoomCard({ room, mode }: RoomCardProps) {
           <h3 className="text-section font-semibold [overflow-wrap:anywhere]">{room.title}</h3>
 
           {room.description ? (
-            <p className="mt-1 line-clamp-3 text-body text-secondary-text [overflow-wrap:anywhere]" title={room.description}>
+            <p
+              className="mt-1 line-clamp-3 text-body text-secondary-text [overflow-wrap:anywhere]"
+              title={room.description}
+            >
               {room.description}
             </p>
           ) : null}
@@ -78,15 +79,13 @@ export function RoomCard({ room, mode }: RoomCardProps) {
         <div className="flex shrink-0 flex-wrap gap-2">
           {mode === "joined" ? (
             <Button asChild variant="outline" size="sm">
-              <Link href={`/rooms/${room.id}`}><ArrowRight aria-hidden="true" />{t("enter")}</Link>
+              <Link href={`/rooms/${room.id}`}>
+                <ArrowRight aria-hidden="true" />
+                {t("enter")}
+              </Link>
             </Button>
           ) : (
-            <Button
-              onClick={handleJoin}
-              disabled={isPending}
-              size="sm"
-              aria-busy={isPending}
-            >
+            <Button onClick={handleJoin} disabled={isPending} size="sm" aria-busy={isPending}>
               <ArrowRight aria-hidden="true" />
               {isPending ? t("joining") : t("join")}
             </Button>

@@ -8,13 +8,13 @@ Audit date 2026-11-13. Branch `phase11c6/public-unsubscribe-ingress` started at 
 
 Probes used the existing Staging alias, no cookies, Authorization or bypass, and manual redirect handling. The RFC 8058 action was sent in the form body. The invalid token could not be issued by Lumivox. The dispatch probe used dry-run and omitted its secret. [RFC 8058 §3](https://www.rfc-editor.org/rfc/rfc8058.html#section-3)
 
-| Request | Actual result |
-| --- | --- |
-| GET unsubscribe API without a token | `302` to Vercel SSO |
-| POST unsubscribe API with a URL-encoded action and invalid token | `302` to Vercel SSO |
-| POST unsubscribe API with JSON | `401`, Vercel Authentication JSON |
-| POST internal dispatch dry-run without a secret | `401`, Vercel Authentication JSON |
-| GET internal monitoring and GET admin | Both `302` to Vercel SSO |
+| Request                                                          | Actual result                     |
+| ---------------------------------------------------------------- | --------------------------------- |
+| GET unsubscribe API without a token                              | `302` to Vercel SSO               |
+| POST unsubscribe API with a URL-encoded action and invalid token | `302` to Vercel SSO               |
+| POST unsubscribe API with JSON                                   | `401`, Vercel Authentication JSON |
+| POST internal dispatch dry-run without a secret                  | `401`, Vercel Authentication JSON |
+| GET internal monitoring and GET admin                            | Both `302` to Vercel SSO          |
 
 Redirects targeted `https://vercel.com/sso-api`. Edge responses used `Cache-Control: no-store, max-age=0`. Redirect bodies were plain text and the two 401 bodies were JSON. Callback query values and cookies are omitted. These responses establish the Edge boundary. Application-level behavior is verified locally below.
 
@@ -36,13 +36,13 @@ The production Next.js build passed, including TypeScript. The first build caugh
 
 The HTTP harness ran against that stack and the local production build, without cookies or Vercel credentials. It verified:
 
-| Check | Actual response and state |
-| --- | --- |
-| GET with and without a token | `200`, consent ON, 1 pending job, 0 used tokens. The no-token GET returned `Referrer-Policy: no-referrer`. |
-| URL-encoded POST with a definitely invalid token, JSON POST | `400` and `415`, respectively. Fixture state stayed unchanged. |
-| Multipart POST with a valid fixture token | `200` with no redirect or cookie. Consent became OFF, pending jobs went to 0 and used tokens to 1. |
+| Check                                                                   | Actual response and state                                                                                                                                                    |
+| ----------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET with and without a token                                            | `200`, consent ON, 1 pending job, 0 used tokens. The no-token GET returned `Referrer-Policy: no-referrer`.                                                                   |
+| URL-encoded POST with a definitely invalid token, JSON POST             | `400` and `415`, respectively. Fixture state stayed unchanged.                                                                                                               |
+| Multipart POST with a valid fixture token                               | `200` with no redirect or cookie. Consent became OFF, pending jobs went to 0 and used tokens to 1.                                                                           |
 | Re-consent, then replay used token and submit a previously unused token | Re-consent restored consent ON and 1 pending job. Used replay returned `200`; old unused token returned `400`. Consent, counts and preference `updated_at` stayed unchanged. |
-| Internal dispatch | Without its secret, `401`. With the local fixture secret and real-send OFF, `503 real_send_disabled`. Consent state stayed unchanged. |
+| Internal dispatch                                                       | Without its secret, `401`. With the local fixture secret and real-send OFF, `503 real_send_disabled`. Consent state stayed unchanged.                                        |
 
 Run `node --experimental-strip-types scripts/test-learning-schedule-unsubscribe-http.mjs --public-ingress` with `LUMIVOX_RESEND_TEST_WORKDIR` pointing to the disposable `lumivox-11c5d` stack (API 56321, DB 56322) and `SUPABASE_CLI_PATH` pointing to the CLI if needed. Node 22.13 requires the flag for the existing TypeScript import. Cleanup verified zero fixture rows, both gates OFF and zero reminder Cron jobs. Zero Resend requests and zero emails.
 
@@ -60,16 +60,16 @@ The worker reads `STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN` from server configur
 
 ### Local acceptance
 
-| Case | Observed locally |
-| --- | --- |
-| PI-01 · GET | `200` without redirect or DB call. Consent ON, one pending job and zero used tokens. |
-| PI-02 · Invalid POST | `400` for an invalid capability, `415` for JSON. Consent and job state unchanged. |
-| PI-03 · Path isolation | Loopback ingress returned `404` for admin, dispatch, monitor, bridge, root and source-file probes. |
-| PI-04 · Valid capability | Multipart POST passed ingress and bridge, returned `200`, disabled consent, suppressed the pending job and marked one token used. |
-| PI-05 · Replay and re-consent | Re-consent restored one pending job. Used-token replay returned `200`, the old unused token returned `400`, and preference timestamp, consent and counts stayed unchanged. |
-| PI-06 · Rate limit contract | Blocked limiter fixture returned plain-text `429` without redirect or persistence. Unavailable limiter returned `503`. Vercel WAF was simulated at the service boundary. |
-| PI-07 · URL generation | Mock SDK received the public HTTPS API URL with only the capability token in its query. Switching the configured origin held the old snapshot before authorization. |
-| PI-08 · Safety | The bridge rejected the dispatch secret with `401` and a malformed hash with `400`. Dispatch returned `401` without its secret and `503 real_send_disabled` with the local dispatch secret. Both local DB gates stayed OFF. |
+| Case                          | Observed locally                                                                                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PI-01 · GET                   | `200` without redirect or DB call. Consent ON, one pending job and zero used tokens.                                                                                                                                        |
+| PI-02 · Invalid POST          | `400` for an invalid capability, `415` for JSON. Consent and job state unchanged.                                                                                                                                           |
+| PI-03 · Path isolation        | Loopback ingress returned `404` for admin, dispatch, monitor, bridge, root and source-file probes.                                                                                                                          |
+| PI-04 · Valid capability      | Multipart POST passed ingress and bridge, returned `200`, disabled consent, suppressed the pending job and marked one token used.                                                                                           |
+| PI-05 · Replay and re-consent | Re-consent restored one pending job. Used-token replay returned `200`, the old unused token returned `400`, and preference timestamp, consent and counts stayed unchanged.                                                  |
+| PI-06 · Rate limit contract   | Blocked limiter fixture returned plain-text `429` without redirect or persistence. Unavailable limiter returned `503`. Vercel WAF was simulated at the service boundary.                                                    |
+| PI-07 · URL generation        | Mock SDK received the public HTTPS API URL with only the capability token in its query. Switching the configured origin held the old snapshot before authorization.                                                         |
+| PI-08 · Safety                | The bridge rejected the dispatch secret with `401` and a malformed hash with `400`. Dispatch returned `401` without its secret and `503 real_send_disabled` with the local dispatch secret. Both local DB gates stayed OFF. |
 
 The separate ingress tests passed 2 suites of assertions covering HTTP behavior and the server bundle. A strict TypeScript check of the entry point passed. Web Vitest passed 1,093 tests with 26 skipped, and lint and production build passed with the existing React hook warning in lint. The first end-to-end run returned `503` because Next.js exposed an empty POST as a stream. The bridge now validates the hash header independently of the ignored body; the rebuilt loopback-to-Supabase run passed. Run the existing HTTP harness with `--dedicated-ingress` in place of `--public-ingress`, after `npm ci` in the ingress project. Cleanup verified no fixture rows or reminder Cron and zero real sends.
 

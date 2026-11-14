@@ -37,11 +37,7 @@
       "retryVerifiedAt": "2026-11-03T06:14:27.326Z"
     },
     "ATE-05": {
-      "visited": [
-        "reason",
-        "Cancel",
-        "Confirm skip"
-      ],
+      "visited": ["reason", "Cancel", "Confirm skip"],
       "focusRestored": true,
       "focusStayedInDialog": true,
       "escapeClosedWithoutMutation": true,

@@ -252,6 +252,34 @@ def _get_supabase_admin():
     return get_supabase_client()
 
 
+def _get_native_task_risk_input_revision(
+    supabase: Any,
+    user_id: str,
+) -> int:
+    response = (
+        supabase.table("native_task_risk_input_revisions")
+        .select("revision")
+        .eq("user_id", user_id)
+        .maybe_single()
+        .execute()
+    )
+
+    if not response.data:
+        return 0
+
+    return int(response.data["revision"])
+
+
+def _assert_native_task_risk_revision_unchanged(
+    before: int,
+    after: int,
+) -> None:
+    if before != after:
+        raise RuntimeError(
+            "Task risk inputs changed during prediction. "
+            "Retry with a fresh snapshot."
+        )
+
 def _parse_datetime(value: str | None) -> datetime | None:
     if not value:
         return None
@@ -920,6 +948,7 @@ def _persist_prediction(
     *,
     request: NativeTaskRiskPredictRequest,
     task: dict[str, Any],
+    input_revision: int,
     response: NativeTaskRiskPredictResponse,
 ) -> str | None:
     model_version_id = _get_active_model_version_id(
@@ -945,6 +974,9 @@ def _persist_prediction(
                 "feature_payload": response.features,
                 "prediction_metadata": {
                     "prediction_mode": response.prediction_mode,
+                    "input_revision": input_revision,
+                    "feature_schema_version": FEATURE_SCHEMA_VERSION,
+
                     "risk_score": response.risk_score,
                     "risk_band": response.risk_band,
                     "due_at": response.due_at,
@@ -996,6 +1028,12 @@ def predict_native_task_risk(
     request: NativeTaskRiskPredictRequest,
 ) -> NativeTaskRiskPredictResponse:
     supabase = _get_supabase_admin()
+
+    input_revision = _get_native_task_risk_input_revision(
+        supabase,
+        request.user_id,
+    )
+
     now = _now_utc()
 
     user_tasks = _fetch_user_tasks(supabase, request.user_id)
@@ -1096,12 +1134,23 @@ def predict_native_task_risk(
         reasons=reasons,
         prediction_id=None,
     )
+    
+    latest_input_revision = _get_native_task_risk_input_revision(
+        supabase,
+        request.user_id,
+    )
+
+    _assert_native_task_risk_revision_unchanged(
+        input_revision,
+        latest_input_revision,
+    )
 
     if request.persist:
         prediction_id = _persist_prediction(
             supabase,
             request=request,
             task=task,
+            input_revision=input_revision,
             response=response,
         )
 

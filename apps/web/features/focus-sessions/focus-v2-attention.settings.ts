@@ -23,7 +23,9 @@ export function parseFocusV2AttentionSettings(value: unknown): FocusV2AttentionS
     minimumAwaySeconds:
       typeof source.minimumAwaySeconds === "number" &&
       Number.isInteger(source.minimumAwaySeconds) &&
-      source.minimumAwaySeconds >= 15 && source.minimumAwaySeconds <= 600
-        ? source.minimumAwaySeconds : DEFAULT_FOCUS_V2_ATTENTION_SETTINGS.minimumAwaySeconds,
+      source.minimumAwaySeconds >= 15 &&
+      source.minimumAwaySeconds <= 600
+        ? source.minimumAwaySeconds
+        : DEFAULT_FOCUS_V2_ATTENTION_SETTINGS.minimumAwaySeconds,
   };
 }

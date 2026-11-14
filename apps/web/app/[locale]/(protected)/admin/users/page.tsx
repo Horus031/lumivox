@@ -10,9 +10,7 @@ type AdminUsersPageProps = {
   }>;
 };
 
-export default async function AdminUsersPage({
-  searchParams,
-}: AdminUsersPageProps) {
+export default async function AdminUsersPage({ searchParams }: AdminUsersPageProps) {
   const { q } = await searchParams;
   const query = q ?? "";
 

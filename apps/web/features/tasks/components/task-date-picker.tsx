@@ -25,9 +25,7 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
       return;
     }
 
-    const [hours = 0, minutes = 0, seconds = 0] = dueTime
-      .split(":")
-      .map((value) => Number(value));
+    const [hours = 0, minutes = 0, seconds = 0] = dueTime.split(":").map((value) => Number(value));
 
     const nextDate = new Date(date);
     nextDate.setHours(hours, minutes, seconds, 0);
@@ -41,9 +39,7 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
       return;
     }
 
-    const [hours = 0, minutes = 0, seconds = 0] = value
-      .split(":")
-      .map((part) => Number(part));
+    const [hours = 0, minutes = 0, seconds = 0] = value.split(":").map((part) => Number(part));
 
     const nextDate = new Date(dueAt);
     nextDate.setHours(hours, minutes, seconds, 0);
@@ -52,12 +48,25 @@ export function TaskDatePicker(props: TaskDatePickerProps) {
 
   return (
     <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_8rem]">
-      <DatePicker id={`${id}-date`} label={t("fields.dueDate")} value={dueAt} onChange={handleDateSelect} disabled={disabled} placeholder={t("selectDate")} />
+      <DatePicker
+        id={`${id}-date`}
+        label={t("fields.dueDate")}
+        value={dueAt}
+        onChange={handleDateSelect}
+        disabled={disabled}
+        placeholder={t("selectDate")}
+      />
       <div className="min-w-0 space-y-2">
         <Label htmlFor={`${id}-time`}>{t("fields.dueTime")}</Label>
-        <Input type="time" id={`${id}-time`} step={1} value={dueTime} disabled={disabled}
+        <Input
+          type="time"
+          id={`${id}-time`}
+          step={1}
+          value={dueTime}
+          disabled={disabled}
           onChange={(event) => handleTimeChange(event.target.value)}
-          className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden" />
+          className="appearance-none [&::-webkit-calendar-picker-indicator]:hidden"
+        />
       </div>
     </div>
   );

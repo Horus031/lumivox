@@ -75,19 +75,17 @@ const adminTabs = [
 ] as const;
 
 function getActiveTab(pathname: string, locale: string) {
-  const normalizedPathname = pathname === `/${locale}`
-    ? "/"
-    : pathname.startsWith(`/${locale}/`)
-      ? pathname.slice(locale.length + 1)
-      : pathname;
+  const normalizedPathname =
+    pathname === `/${locale}`
+      ? "/"
+      : pathname.startsWith(`/${locale}/`)
+        ? pathname.slice(locale.length + 1)
+        : pathname;
 
   const activeTab = [...adminTabs]
     .sort((firstTab, secondTab) => secondTab.href.length - firstTab.href.length)
     .find((tab) => {
-      return (
-        normalizedPathname === tab.href ||
-        normalizedPathname.startsWith(`${tab.href}/`)
-      );
+      return normalizedPathname === tab.href || normalizedPathname.startsWith(`${tab.href}/`);
     });
 
   return activeTab?.value ?? "overview";
@@ -104,7 +102,8 @@ export function AdminSectionTabs() {
     const navigation = navigationRef.current;
     const active = navigation?.querySelector<HTMLElement>('[aria-current="page"]');
     if (!navigation || !active) return;
-    const relativeLeft = active.getBoundingClientRect().left - navigation.getBoundingClientRect().left;
+    const relativeLeft =
+      active.getBoundingClientRect().left - navigation.getBoundingClientRect().left;
     if (relativeLeft < 0 || relativeLeft + active.offsetWidth > navigation.clientWidth) {
       navigation.scrollLeft += relativeLeft - (navigation.clientWidth - active.offsetWidth) / 2;
     }
@@ -123,7 +122,9 @@ export function AdminSectionTabs() {
               aria-current={activeTab === tab.value ? "page" : undefined}
               className={cn(
                 "inline-flex h-touch shrink-0 items-center justify-center gap-2 rounded-md px-3 text-label font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:h-control",
-                activeTab === tab.value ? "bg-secondary text-secondary-foreground" : "text-secondary-text hover:bg-muted hover:text-foreground",
+                activeTab === tab.value
+                  ? "bg-secondary text-secondary-foreground"
+                  : "text-secondary-text hover:bg-muted hover:text-foreground",
               )}
             >
               <Icon className="size-icon shrink-0" aria-hidden="true" />

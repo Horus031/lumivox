@@ -43,9 +43,7 @@ function statusClass(status: string) {
   return "border-danger/25 bg-danger/10 text-foreground";
 }
 
-export function AdminTranslationsTable({
-  translations,
-}: AdminTranslationsTableProps) {
+export function AdminTranslationsTable({ translations }: AdminTranslationsTableProps) {
   const locale = useLocale();
   const id = useId();
   const t = useTranslations("admin.translations.table");
@@ -54,28 +52,19 @@ export function AdminTranslationsTable({
   return (
     <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div>
-        <p className="text-caption text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+        <p className="text-caption text-muted-foreground">{t("eyebrow")}</p>
 
-        <h2 className="mt-1 text-section font-semibold text-foreground">
-          {t("title")}
-        </h2>
+        <h2 className="mt-1 text-section font-semibold text-foreground">{t("title")}</h2>
       </div>
 
       {translations.length === 0 ? (
         <div className="py-section">
-          <p className="text-body text-secondary-text">
-            {t("empty")}
-          </p>
+          <p className="text-body text-secondary-text">{t("empty")}</p>
         </div>
       ) : (
         <div className="divide-y divide-border">
           {translations.map((translation) => (
-            <article
-              key={translation.translation_id}
-              className="min-w-0 py-card"
-            >
+            <article key={translation.translation_id} className="min-w-0 py-card">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                   <div className="flex flex-wrap items-center gap-2">
@@ -113,17 +102,13 @@ export function AdminTranslationsTable({
 
                   <p className="mt-1 text-caption text-muted-foreground">
                     {t("updated", {
-                      value: new Date(translation.updated_at).toLocaleString(
-                        locale,
-                      ),
+                      value: new Date(translation.updated_at).toLocaleString(locale),
                     })}
                   </p>
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-1">
-                  <AdminTranslationDeleteButton
-                    translationId={translation.translation_id}
-                  />
+                  <AdminTranslationDeleteButton translationId={translation.translation_id} />
 
                   <AdminClearEntityTranslationsButton
                     entityType={translation.entity_type}
@@ -133,11 +118,19 @@ export function AdminTranslationsTable({
               </div>
 
               <details className="mt-3 min-w-0">
-                <summary id={`${id}-${translation.translation_id}`} className="min-h-touch cursor-pointer rounded-sm py-2 text-label font-medium text-secondary-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-control">
+                <summary
+                  id={`${id}-${translation.translation_id}`}
+                  className="min-h-touch cursor-pointer rounded-sm py-2 text-label font-medium text-secondary-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:min-h-control"
+                >
                   {t("viewTranslatedText")}
                 </summary>
 
-                <div role="region" aria-labelledby={`${id}-${translation.translation_id}`} tabIndex={0} className="mt-2 max-h-80 overflow-y-auto rounded-sm border-l-2 border-border pl-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <div
+                  role="region"
+                  aria-labelledby={`${id}-${translation.translation_id}`}
+                  tabIndex={0}
+                  className="mt-2 max-h-80 overflow-y-auto rounded-sm border-l-2 border-border pl-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
                   <p className="whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">
                     {translation.translated_text}
                   </p>

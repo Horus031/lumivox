@@ -5,9 +5,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth/require-user";
 import type { StudyScheduleInput } from "./schedule-engine";
 
-export async function getStudyScheduleEditorAction(
-  rawScheduleId: unknown,
-): Promise<
+export async function getStudyScheduleEditorAction(rawScheduleId: unknown): Promise<
   | {
       success: true;
       revision: number;
@@ -15,14 +13,16 @@ export async function getStudyScheduleEditorAction(
     }
   | {
       success: false;
-      message: string; code?: string;
+      message: string;
+      code?: string;
     }
 > {
   const parsed = z.string().uuid().safeParse(rawScheduleId);
 
   if (!parsed.success) {
     return {
-      success: false, code: "invalidInput" as const,
+      success: false,
+      code: "invalidInput" as const,
       message: "Invalid schedule ID.",
     };
   }
@@ -39,14 +39,16 @@ export async function getStudyScheduleEditorAction(
 
     if (error || !schedule) {
       return {
-        success: false, code: "notFound" as const,
+        success: false,
+        code: "notFound" as const,
         message: "Study schedule not found.",
       };
     }
 
     if (schedule.status !== "active") {
       return {
-        success: false, code: "notEligible" as const,
+        success: false,
+        code: "notEligible" as const,
         message: "This schedule cannot be edited.",
       };
     }
@@ -61,7 +63,8 @@ export async function getStudyScheduleEditorAction(
 
     if (slotsError || !slots?.length) {
       return {
-        success: false, code: "loadFailed" as const,
+        success: false,
+        code: "loadFailed" as const,
         message: "Could not load weekly slots.",
       };
     }
@@ -74,8 +77,17 @@ export async function getStudyScheduleEditorAction(
       .eq("id", schedule.id)
       .eq("user_id", user.id)
       .single();
-    if (currentError || !current || current.revision !== schedule.revision || current.status !== "active") {
-      return { success: false, code: "conflict" as const, message: "Schedule changed while loading. Retry to load the latest version." };
+    if (
+      currentError ||
+      !current ||
+      current.revision !== schedule.revision ||
+      current.status !== "active"
+    ) {
+      return {
+        success: false,
+        code: "conflict" as const,
+        message: "Schedule changed while loading. Retry to load the latest version.",
+      };
     }
 
     return {
@@ -94,7 +106,8 @@ export async function getStudyScheduleEditorAction(
     };
   } catch {
     return {
-      success: false, code: "loadFailed" as const,
+      success: false,
+      code: "loadFailed" as const,
       message: "Unable to load schedule editor.",
     };
   }

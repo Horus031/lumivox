@@ -85,16 +85,19 @@ Voice rooms are handled by LiveKit instead of custom WebRTC implementation. This
 
 Redis is used as a lightweight protection layer for expensive AI operations. Rate limits prevent repeated button clicks or request bursts from overloading the AI backend or increasing LLM cost.
 
-
 ## 4. Data Flow Examples
+
 ### 4.1. Refresh PBI
+
 User clicks Refresh PBI
 → Next.js Server Action
 → Redis rate limit check
 → FastAPI PBI endpoint
 → Supabase inserts PBI snapshot
 → Dashboard revalidates
+
 ### 4.2. Generate AI Insight
+
 User clicks Generate AI Insight
 → Next.js Server Action
 → Redis rate limit check
@@ -102,18 +105,24 @@ User clicks Generate AI Insight
 → Gemini generates structured explanation
 → Supabase stores AI insight card
 → UI refreshes
+
 ### 4.3. Study Room Realtime Chat
+
 User sends chat message
 → Supabase insert into study_room_messages
 → Supabase Realtime broadcasts change
 → Other room members receive message without refresh
+
 ### 4.4. Voice Room
+
 User clicks Join Voice
 → Next.js API route verifies Supabase membership
 → API route creates LiveKit token
 → Browser connects to LiveKit room
 → LiveKit handles audio transport
+
 ### 4.5. Engagement Streak Update
+
 User completes valid task or focus session
 → Server Action updates task/focus session
 → Engagement cache invalidated

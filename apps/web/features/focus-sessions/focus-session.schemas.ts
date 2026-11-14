@@ -14,6 +14,4 @@ export const sessionIdSchema = z.object({
   sessionId: z.string().uuid("Invalid session id."),
 });
 
-export type CreateFocusSessionInput = z.infer<
-  typeof createFocusSessionSchema
->;
+export type CreateFocusSessionInput = z.infer<typeof createFocusSessionSchema>;

@@ -38,11 +38,7 @@ Component này chỉ điều khiển CSS variables theo scroll.
 ```tsx
 "use client";
 
-import {
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-} from "motion/react";
+import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useEffect, useRef } from "react";
 
 export default function HeroMotionController() {
@@ -79,48 +75,23 @@ export default function HeroMotionController() {
 
     const progress = Math.min(Math.max(value, 0), 1);
 
-    root.style.setProperty(
-      "--hero-content-y",
-      `${progress * -44}px`,
-    );
+    root.style.setProperty("--hero-content-y", `${progress * -44}px`);
 
-    root.style.setProperty(
-      "--hero-content-opacity",
-      `${Math.max(0, 1 - progress * 1.35)}`,
-    );
+    root.style.setProperty("--hero-content-opacity", `${Math.max(0, 1 - progress * 1.35)}`);
 
-    root.style.setProperty(
-      "--hero-video-scale",
-      `${1.06 - progress * 0.08}`,
-    );
+    root.style.setProperty("--hero-video-scale", `${1.06 - progress * 0.08}`);
 
-    root.style.setProperty(
-      "--hero-video-y",
-      `${progress * -18}px`,
-    );
+    root.style.setProperty("--hero-video-y", `${progress * -18}px`);
 
-    root.style.setProperty(
-      "--hero-signals-opacity",
-      `${Math.max(0, 1 - progress * 1.7)}`,
-    );
+    root.style.setProperty("--hero-signals-opacity", `${Math.max(0, 1 - progress * 1.7)}`);
 
-    root.style.setProperty(
-      "--hero-signals-y",
-      `${progress * -22}px`,
-    );
+    root.style.setProperty("--hero-signals-y", `${progress * -22}px`);
 
-    root.style.setProperty(
-      "--hero-filament-opacity",
-      `${Math.min(1, progress * 2.2 + 0.2)}`,
-    );
+    root.style.setProperty("--hero-filament-opacity", `${Math.min(1, progress * 2.2 + 0.2)}`);
   });
 
   return (
-    <div
-      ref={targetRef}
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-    />
+    <div ref={targetRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
   );
 }
 ```
@@ -192,9 +163,7 @@ CSS:
 
 ```css
 .landing-hero__video {
-  transform:
-    translate3d(0, var(--hero-video-y), 0)
-    scale(var(--hero-video-scale));
+  transform: translate3d(0, var(--hero-video-y), 0) scale(var(--hero-video-scale));
 
   transform-origin: center center;
 
@@ -235,24 +204,22 @@ CSS:
 
 ```css
 .landing-hero__veil {
-  background:
-    linear-gradient(
-      180deg,
-      rgb(5 12 8 / 0.34) 0%,
-      rgb(5 12 8 / 0.08) 38%,
-      rgb(5 12 8 / 0.28) 70%,
-      var(--background) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    rgb(5 12 8 / 0.34) 0%,
+    rgb(5 12 8 / 0.08) 38%,
+    rgb(5 12 8 / 0.28) 70%,
+    var(--background) 100%
+  );
 }
 
 .landing-hero__halo {
-  background:
-    radial-gradient(
-      ellipse at 50% 43%,
-      transparent 10%,
-      rgb(4 10 7 / 0.05) 42%,
-      rgb(4 10 7 / 0.56) 100%
-    );
+  background: radial-gradient(
+    ellipse at 50% 43%,
+    transparent 10%,
+    rgb(4 10 7 / 0.05) 42%,
+    rgb(4 10 7 / 0.56) 100%
+  );
 }
 
 .landing-hero__grain {
@@ -260,16 +227,8 @@ CSS:
   mix-blend-mode: soft-light;
 
   background-image:
-    radial-gradient(
-      circle at 24% 18%,
-      white 0 0.5px,
-      transparent 0.8px
-    ),
-    radial-gradient(
-      circle at 68% 52%,
-      white 0 0.5px,
-      transparent 0.8px
-    );
+    radial-gradient(circle at 24% 18%, white 0 0.5px, transparent 0.8px),
+    radial-gradient(circle at 68% 52%, white 0 0.5px, transparent 0.8px);
 
   background-size:
     19px 19px,
@@ -277,12 +236,7 @@ CSS:
 }
 
 .landing-hero__edge {
-  background:
-    radial-gradient(
-      ellipse at center,
-      transparent 30%,
-      rgb(3 9 5 / 0.52) 100%
-    );
+  background: radial-gradient(ellipse at center, transparent 30%, rgb(3 9 5 / 0.52) 100%);
 }
 ```
 
@@ -327,12 +281,7 @@ CSS:
 .landing-hero__content {
   opacity: var(--hero-content-opacity);
 
-  transform:
-    translate3d(
-      0,
-      var(--hero-content-y),
-      0
-    );
+  transform: translate3d(0, var(--hero-content-y), 0);
 
   will-change: transform, opacity;
 }
@@ -393,7 +342,6 @@ Không thay H1 SEO.
     "
   >
     {t("title.before")}{" "}
-
     <span
       className="
         bg-gradient-to-r
@@ -406,7 +354,6 @@ Không thay H1 SEO.
     >
       {t("title.accent")}
     </span>
-
     {t("title.after")}
   </h1>
 </StoryReveal>
@@ -540,13 +487,9 @@ Ví dụ reusable markup:
   <span className="hero-signal__line" />
 
   <div className="hero-signal__content">
-    <span className="hero-signal__label">
-      {t("floating.aiSuggested.title")}
-    </span>
+    <span className="hero-signal__label">{t("floating.aiSuggested.title")}</span>
 
-    <span className="hero-signal__meta">
-      {t("floating.aiSuggested.subtitle")}
-    </span>
+    <span className="hero-signal__meta">{t("floating.aiSuggested.subtitle")}</span>
   </div>
 </div>
 ```
@@ -566,15 +509,9 @@ CSS core:
 
   opacity: var(--hero-signals-opacity);
 
-  transform:
-    translate3d(
-      0,
-      var(--hero-signals-y),
-      0
-    );
+  transform: translate3d(0, var(--hero-signals-y), 0);
 
-  transition:
-    opacity 300ms ease;
+  transition: opacity 300ms ease;
 
   will-change: transform, opacity;
 }
@@ -598,12 +535,7 @@ CSS core:
   width: clamp(28px, 4vw, 64px);
   height: 1px;
 
-  background:
-    linear-gradient(
-      90deg,
-      rgb(131 184 149 / 0.62),
-      rgb(255 255 255 / 0.08)
-    );
+  background: linear-gradient(90deg, rgb(131 184 149 / 0.62), rgb(255 255 255 / 0.08));
 }
 
 .hero-signal__content {
@@ -690,9 +622,7 @@ Chỉ animate glow của dot rất nhẹ:
 }
 
 .hero-signal__dot {
-  animation:
-    hero-signal-breathe
-    3.8s ease-in-out infinite;
+  animation: hero-signal-breathe 3.8s ease-in-out infinite;
 }
 ```
 
@@ -707,11 +637,7 @@ Reduced motion phải disable.
 Ở bottom Hero:
 
 ```tsx
-<div
-  aria-hidden="true"
-  data-landing-motion="decorative"
-  className="hero-filament"
->
+<div aria-hidden="true" data-landing-motion="decorative" className="hero-filament">
   <span className="hero-filament__origin" />
   <span className="hero-filament__beam" />
   <span className="hero-filament__spark" />
@@ -741,12 +667,7 @@ CSS:
   position: absolute;
   inset: 0;
 
-  background:
-    linear-gradient(
-      to bottom,
-      transparent,
-      rgb(131 184 149 / 0.58)
-    );
+  background: linear-gradient(to bottom, transparent, rgb(131 184 149 / 0.58));
 }
 
 .hero-filament__origin {
@@ -764,8 +685,7 @@ CSS:
 
   transform: translateX(-50%);
 
-  box-shadow:
-    0 0 22px rgb(131 184 149 / 0.8);
+  box-shadow: 0 0 22px rgb(131 184 149 / 0.8);
 }
 ```
 
@@ -827,26 +747,25 @@ Trong navbar root:
 Nav link:
 
 ```tsx
-data-navbar-link
+data - navbar - link;
 ```
 
 Logo/name wrapper:
 
 ```tsx
-data-navbar-brand
+data - navbar - brand;
 ```
 
 CTA primary:
 
 ```tsx
-data-navbar-primary
+data - navbar - primary;
 ```
 
 Sau đó CSS:
 
 ```css
-body:has([data-landing-story])
-[data-marketing-navbar] {
+body:has([data-landing-story]) [data-marketing-navbar] {
   transition:
     background-color 500ms var(--landing-ease-out),
     border-color 500ms var(--landing-ease-out),
@@ -857,18 +776,10 @@ body:has([data-landing-story])
 Khi Hero đang active:
 
 ```css
-body:has(
-  .story-atmosphere[data-active-scene="hero"]
-)
-[data-marketing-navbar] {
+body:has(.story-atmosphere[data-active-scene="hero"]) [data-marketing-navbar] {
   border-color: transparent;
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgb(5 10 7 / 0.64),
-      transparent
-    );
+  background: linear-gradient(to bottom, rgb(5 10 7 / 0.64), transparent);
 
   backdrop-filter: none;
 }
@@ -877,10 +788,7 @@ body:has(
 Navigation text Hero:
 
 ```css
-body:has(
-  .story-atmosphere[data-active-scene="hero"]
-)
-[data-navbar-link] {
+body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-link] {
   color: rgb(255 255 255 / 0.62);
 }
 ```
@@ -925,10 +833,7 @@ Ngoài ra controller có thể pause video:
 useEffect(() => {
   if (!reduceMotion) return;
 
-  const video =
-    document.querySelector<HTMLVideoElement>(
-      "[data-hero-video]",
-    );
+  const video = document.querySelector<HTMLVideoElement>("[data-hero-video]");
 
   video?.pause();
 }, [reduceMotion]);
@@ -993,17 +898,17 @@ Cần đặc biệt kiểm tra:
 
 ## Phase 2 quality gate
 
-| Gate | Requirement |
-|---|---|
-| H1 | Text không đổi |
-| Copy | Không đổi |
-| Hero | Không còn glass-box headline |
-| Signals | 4 cards → neural annotations |
-| Scroll | Brain recedes, content exits nhẹ |
-| Transition | Central filament xuất hiện |
-| Navbar | Cinematic chỉ trên landing hero |
-| Mobile | Không render floating annotations |
-| A11y | Reduced motion có static experience |
-| Performance | Không canvas/WebGL/new video |
-| Server boundary | `hero.tsx` vẫn Server Component |
-| Build | lint/test/build pass |
+| Gate            | Requirement                         |
+| --------------- | ----------------------------------- |
+| H1              | Text không đổi                      |
+| Copy            | Không đổi                           |
+| Hero            | Không còn glass-box headline        |
+| Signals         | 4 cards → neural annotations        |
+| Scroll          | Brain recedes, content exits nhẹ    |
+| Transition      | Central filament xuất hiện          |
+| Navbar          | Cinematic chỉ trên landing hero     |
+| Mobile          | Không render floating annotations   |
+| A11y            | Reduced motion có static experience |
+| Performance     | Không canvas/WebGL/new video        |
+| Server boundary | `hero.tsx` vẫn Server Component     |
+| Build           | lint/test/build pass                |

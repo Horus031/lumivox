@@ -39,13 +39,17 @@ describe("Focus V2 rollout / drain-mode contract", () => {
   });
 
   it("only exact literal false requests drain mode", () => {
-    expect(getFocusV2ReleaseMode({
-      FOCUS_V2_ENABLED: "true",
-      FOCUS_V2_CREATION_ENABLED: "true",
-    })).toBe("on");
-    expect(getFocusV2ReleaseMode({
-      FOCUS_V2_ENABLED: "true",
-      FOCUS_V2_CREATION_ENABLED: "FALSE",
-    })).toBe("on");
+    expect(
+      getFocusV2ReleaseMode({
+        FOCUS_V2_ENABLED: "true",
+        FOCUS_V2_CREATION_ENABLED: "true",
+      }),
+    ).toBe("on");
+    expect(
+      getFocusV2ReleaseMode({
+        FOCUS_V2_ENABLED: "true",
+        FOCUS_V2_CREATION_ENABLED: "FALSE",
+      }),
+    ).toBe("on");
   });
 });

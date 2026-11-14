@@ -12,53 +12,53 @@ Status: Phase 01 logical design (NOT executable SQL). Existing migrations and ge
 
 ## 1. `task_study_schedules`
 
-| Column | Logical type | Constraint / role |
-|---|---|---|
-| `id` | uuid | PK |
-| `user_id` | uuid | NOT NULL, owner |
-| `task_id` | uuid | NOT NULL FK tasks; only root tasks |
-| `starts_on` | date | inclusive range start |
-| `ends_on` | date | inclusive range end, >= start |
-| `timezone` | text | valid IANA timezone (validate at server and/or trusted DB mechanism) |
-| `status` | text | `active`, `paused`, `closed` |
-| `revision` | int | NOT NULL >= 1; optimistic concurrency token |
-| `created_at`, `updated_at` | timestamptz | audit timestamps |
+| Column                     | Logical type | Constraint / role                                                    |
+| -------------------------- | ------------ | -------------------------------------------------------------------- |
+| `id`                       | uuid         | PK                                                                   |
+| `user_id`                  | uuid         | NOT NULL, owner                                                      |
+| `task_id`                  | uuid         | NOT NULL FK tasks; only root tasks                                   |
+| `starts_on`                | date         | inclusive range start                                                |
+| `ends_on`                  | date         | inclusive range end, >= start                                        |
+| `timezone`                 | text         | valid IANA timezone (validate at server and/or trusted DB mechanism) |
+| `status`                   | text         | `active`, `paused`, `closed`                                         |
+| `revision`                 | int          | NOT NULL >= 1; optimistic concurrency token                          |
+| `created_at`, `updated_at` | timestamptz  | audit timestamps                                                     |
 
 Only one current schedule per root Task in v1: `UNIQUE(task_id)` unless an archived multi-schedule policy is explicitly adopted. Root-only validation must be performed atomically (e.g. trigger/RPC); a normal FK cannot express `parent_task_id IS NULL`.
 
 ## 2. `task_study_schedule_slots`
 
-| Column | Logical type | Constraint / role |
-|---|---|---|
-| `id` | uuid | PK |
-| `user_id` | uuid | owner, matches schedule |
-| `schedule_id` | uuid | parent FK |
-| `weekday` | smallint | CHECK 1..7 |
-| `start_time` | time | local time |
-| `end_time` | time | strictly greater than start, v1 same-day |
-| `created_at` | timestamptz | audit |
+| Column        | Logical type | Constraint / role                        |
+| ------------- | ------------ | ---------------------------------------- |
+| `id`          | uuid         | PK                                       |
+| `user_id`     | uuid         | owner, matches schedule                  |
+| `schedule_id` | uuid         | parent FK                                |
+| `weekday`     | smallint     | CHECK 1..7                               |
+| `start_time`  | time         | local time                               |
+| `end_time`    | time         | strictly greater than start, v1 same-day |
+| `created_at`  | timestamptz  | audit                                    |
 
 Unique `(schedule_id, weekday, start_time, end_time)` and guard against overlapping intervals **within schedule weekday**, including overlapping slots with distinct boundaries. Revision changes should snapshot old slots in schedule revision history or immutable events.
 
 ## 3. `task_study_sessions`
 
-| Column | Logical type | Constraint / role |
-|---|---|---|
-| `id` | uuid | PK |
-| `user_id`, `task_id`, `schedule_id` | uuid | ownership-consistent relations |
-| `schedule_revision` | int | generation revision |
-| `source_slot_id` | uuid nullable | slot identity / historical provenance |
-| `local_date` | date | recurrence local date |
-| `local_start_time`, `local_end_time` | time | original local wall clock |
-| `timezone` | text | immutable timezone used for generation |
-| `scheduled_start_at`, `scheduled_end_at` | timestamptz | absolute UTC-instants |
-| `status` | text | `scheduled`, `in_progress`, `completed`, `missed`, `skipped`, `cancelled` |
-| `completed_at` | timestamptz nullable | actual confirmation timestamp |
-| `actual_study_minutes` | int nullable | measured or self-reported, distinguish evidence source |
-| `cancellation_reason` | text nullable | e.g. `schedule_changed`, `task_closed`, `manual` |
-| `logical_occurrence_key` | text | stable identifier for one planned obligation |
-| `replaces_session_id` | uuid nullable | link replacement after reschedule (if used) |
-| `created_at`, `updated_at` | timestamptz | audit |
+| Column                                   | Logical type         | Constraint / role                                                         |
+| ---------------------------------------- | -------------------- | ------------------------------------------------------------------------- |
+| `id`                                     | uuid                 | PK                                                                        |
+| `user_id`, `task_id`, `schedule_id`      | uuid                 | ownership-consistent relations                                            |
+| `schedule_revision`                      | int                  | generation revision                                                       |
+| `source_slot_id`                         | uuid nullable        | slot identity / historical provenance                                     |
+| `local_date`                             | date                 | recurrence local date                                                     |
+| `local_start_time`, `local_end_time`     | time                 | original local wall clock                                                 |
+| `timezone`                               | text                 | immutable timezone used for generation                                    |
+| `scheduled_start_at`, `scheduled_end_at` | timestamptz          | absolute UTC-instants                                                     |
+| `status`                                 | text                 | `scheduled`, `in_progress`, `completed`, `missed`, `skipped`, `cancelled` |
+| `completed_at`                           | timestamptz nullable | actual confirmation timestamp                                             |
+| `actual_study_minutes`                   | int nullable         | measured or self-reported, distinguish evidence source                    |
+| `cancellation_reason`                    | text nullable        | e.g. `schedule_changed`, `task_closed`, `manual`                          |
+| `logical_occurrence_key`                 | text                 | stable identifier for one planned obligation                              |
+| `replaces_session_id`                    | uuid nullable        | link replacement after reschedule (if used)                               |
+| `created_at`, `updated_at`               | timestamptz          | audit                                                                     |
 
 Constraints: `scheduled_end_at > scheduled_start_at`, `actual_study_minutes >= 0`, status-specific completion consistency and revision positive. Use stable occurrence identity **plus a partial unique index on live obligations** or equivalent, so history records can coexist with a replacement without two concurrently active occurrences for the same slot/date. The Phase 02 migration must specify the unique key exactly; never rely on a name-only suggestion from this document. Index `(user_id, scheduled_start_at)` and `(schedule_id, local_date)`.
 

@@ -42,12 +42,7 @@ type StudyRoomPageProps = {
 async function RoomMemberRosterSection({ roomId }: { roomId: string }) {
   const members = await getStudyRoomMembers(roomId);
 
-  return (
-    <StudyRoomMemberRoster
-      roomId={roomId}
-      initialMembers={members as any}
-    />
-  );
+  return <StudyRoomMemberRoster roomId={roomId} initialMembers={members as any} />;
 }
 
 async function RoomChatSection({
@@ -70,10 +65,7 @@ async function RoomChatSection({
 
 function RoomPanelFallback({ className }: { className: string }) {
   return (
-    <div
-      aria-hidden="true"
-      className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`}
-    />
+    <div aria-hidden="true" className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`} />
   );
 }
 
@@ -113,9 +105,15 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
             <div className="flex min-w-0 flex-wrap items-center gap-2">
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant="outline"><Info aria-hidden="true" />{t("viewDetails")}</Button>
+                  <Button variant="outline">
+                    <Info aria-hidden="true" />
+                    {t("viewDetails")}
+                  </Button>
                 </DialogTrigger>
-                <DialogContent aria-describedby={undefined} className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-2xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
+                <DialogContent
+                  aria-describedby={undefined}
+                  className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-2xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control"
+                >
                   <DialogHeader className="pr-10 text-left">
                     <DialogTitle className="text-section">{t("roomDetails")}</DialogTitle>
                   </DialogHeader>
@@ -146,12 +144,9 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
                         />
                       </div>
 
-                      {room.visibility === "private" &&
-                      membership.role === "owner" ? (
+                      {room.visibility === "private" && membership.role === "owner" ? (
                         <div className="mt-card border-t border-border pt-card">
-                          <p className="text-label font-medium">
-                            {t("privateInviteCode")}
-                          </p>
+                          <p className="text-label font-medium">{t("privateInviteCode")}</p>
                           <p className="mt-1 font-mono text-section font-semibold tracking-normal [overflow-wrap:anywhere]">
                             {room.invite_code}
                           </p>
@@ -188,10 +183,7 @@ export default async function StudyRoomPage({ params }: StudyRoomPageProps) {
           />
 
           <Suspense fallback={<RoomPanelFallback className="h-112" />}>
-            <RoomChatSection
-              roomId={room.id}
-              currentUserId={user.id}
-            />
+            <RoomChatSection roomId={room.id} currentUserId={user.id} />
           </Suspense>
         </div>
 
@@ -209,9 +201,7 @@ type DetailCardProps = {
 function DetailCard({ label, value }: DetailCardProps) {
   return (
     <div className="min-w-0">
-      <p className="text-label font-medium text-muted-foreground">
-        {label}
-      </p>
+      <p className="text-label font-medium text-muted-foreground">{label}</p>
       <p className="mt-1 text-body font-medium [overflow-wrap:anywhere]">{value}</p>
     </div>
   );

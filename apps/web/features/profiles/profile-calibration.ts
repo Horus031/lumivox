@@ -18,7 +18,10 @@ export const DEFAULT_PBI_WEIGHTS = {
   consistencyWeight: 0.1,
 };
 
-export function initialCalibration(profile: Profile, weights: PbiWeightProfile): ProfileCalibrationValues {
+export function initialCalibration(
+  profile: Profile,
+  weights: PbiWeightProfile,
+): ProfileCalibrationValues {
   return {
     fullName: profile.full_name ?? "",
     timezone: profile.timezone || "Asia/Ho_Chi_Minh",
@@ -31,12 +34,17 @@ export function initialCalibration(profile: Profile, weights: PbiWeightProfile):
 }
 
 export function calibrationTotal(values: ProfileCalibrationValues) {
-  return Object.keys(DEFAULT_PBI_WEIGHTS).reduce((sum, key) => sum + values[key as keyof typeof DEFAULT_PBI_WEIGHTS], 0);
+  return Object.keys(DEFAULT_PBI_WEIGHTS).reduce(
+    (sum, key) => sum + values[key as keyof typeof DEFAULT_PBI_WEIGHTS],
+    0,
+  );
 }
 
 export function isCalibrationValid(values: ProfileCalibrationValues) {
-  return Object.keys(DEFAULT_PBI_WEIGHTS).every((key) => {
-    const value = values[key as keyof typeof DEFAULT_PBI_WEIGHTS];
-    return Number.isFinite(value) && value >= 0 && value <= 1;
-  }) && Math.abs(calibrationTotal(values) - 1) <= 0.0001;
+  return (
+    Object.keys(DEFAULT_PBI_WEIGHTS).every((key) => {
+      const value = values[key as keyof typeof DEFAULT_PBI_WEIGHTS];
+      return Number.isFinite(value) && value >= 0 && value <= 1;
+    }) && Math.abs(calibrationTotal(values) - 1) <= 0.0001
+  );
 }

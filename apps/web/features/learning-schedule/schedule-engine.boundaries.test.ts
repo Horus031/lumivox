@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  generateStudyOccurrences,
-  SCHEDULE_LIMITS,
-  type WeeklySlot,
-} from "./schedule-engine";
+import { generateStudyOccurrences, SCHEDULE_LIMITS, type WeeklySlot } from "./schedule-engine";
 
 const baseSlots: WeeklySlot[] = [
   {
@@ -14,9 +10,7 @@ const baseSlots: WeeklySlot[] = [
   },
 ];
 
-function createInput(
-  overrides: Partial<Parameters<typeof generateStudyOccurrences>[0]> = {},
-) {
+function createInput(overrides: Partial<Parameters<typeof generateStudyOccurrences>[0]> = {}) {
   return {
     startsOn: "2026-11-02",
     endsOn: "2026-11-08",
@@ -77,10 +71,7 @@ describe("Learning Schedule boundary cases", () => {
       }),
     );
 
-    expect(sessions.map((s) => s.localDate)).toEqual([
-      "2026-12-28",
-      "2027-01-04",
-    ]);
+    expect(sessions.map((s) => s.localDate)).toEqual(["2026-12-28", "2027-01-04"]);
   });
 
   it("rejects an inverted date range", () => {
@@ -106,24 +97,17 @@ describe("Learning Schedule boundary cases", () => {
   });
 
   it("rejects schedules with zero slots", () => {
-    expect(() => generateStudyOccurrences(createInput({ slots: [] }))).toThrow(
-      /weekly slots/,
-    );
+    expect(() => generateStudyOccurrences(createInput({ slots: [] }))).toThrow(/weekly slots/);
   });
 
   it("rejects more than the maximum weekly slots", () => {
-    const slots = Array.from(
-      { length: SCHEDULE_LIMITS.maxSlots + 1 },
-      (_, index) => ({
-        weekday: (index % 7) + 1,
-        startTime: "08:00",
-        endTime: "09:00",
-      }),
-    );
+    const slots = Array.from({ length: SCHEDULE_LIMITS.maxSlots + 1 }, (_, index) => ({
+      weekday: (index % 7) + 1,
+      startTime: "08:00",
+      endTime: "09:00",
+    }));
 
-    expect(() => generateStudyOccurrences(createInput({ slots }))).toThrow(
-      /weekly slots/,
-    );
+    expect(() => generateStudyOccurrences(createInput({ slots }))).toThrow(/weekly slots/);
   });
 
   it("rejects occurrence counts over the limit", () => {
@@ -145,9 +129,9 @@ describe("Learning Schedule boundary cases", () => {
   });
 
   it("rejects fixed UTC offset as IANA timezone input", () => {
-    expect(() =>
-      generateStudyOccurrences(createInput({ timezone: "+07:00" })),
-    ).toThrow(/Invalid IANA timezone/);
+    expect(() => generateStudyOccurrences(createInput({ timezone: "+07:00" }))).toThrow(
+      /Invalid IANA timezone/,
+    );
   });
 
   it("accepts UTC as a valid named timezone", () => {

@@ -1,8 +1,17 @@
-vi.mock("next-intl", async original => {
- const actual = await original<typeof import("next-intl")>();
- const { learningSchedule } = await import("@/messages/en.json");
- const translate = actual.createTranslator({ locale: "en", messages: { learningSchedule }, namespace: "learningSchedule" });
- return { ...actual, useLocale: () => "en", useTranslations: (namespace: string) => namespace === "learningSchedule" ? translate : (key: string) => key };
+vi.mock("next-intl", async (original) => {
+  const actual = await original<typeof import("next-intl")>();
+  const { learningSchedule } = await import("@/messages/en.json");
+  const translate = actual.createTranslator({
+    locale: "en",
+    messages: { learningSchedule },
+    namespace: "learningSchedule",
+  });
+  return {
+    ...actual,
+    useLocale: () => "en",
+    useTranslations: (namespace: string) =>
+      namespace === "learningSchedule" ? translate : (key: string) => key,
+  };
 });
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
@@ -11,22 +20,47 @@ import { workspaceTask } from "@/features/workspace/workspace.test-fixtures";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-engine";
 
-const mocks = vi.hoisted(() => ({ load: vi.fn(), create: vi.fn(), details: vi.fn(),
-  sessions: vi.fn(), remove: vi.fn(), refresh: vi.fn(), error: vi.fn(), success: vi.fn(), confirm: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  load: vi.fn(),
+  create: vi.fn(),
+  details: vi.fn(),
+  sessions: vi.fn(),
+  remove: vi.fn(),
+  refresh: vi.fn(),
+  error: vi.fn(),
+  success: vi.fn(),
+  confirm: vi.fn(),
+}));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock("../schedule.actions", () => ({ createStudyScheduleAction: mocks.create }));
 vi.mock("../schedule.queries.actions", () => ({ getTaskStudyScheduleAction: mocks.load }));
 vi.mock("../session.queries.actions", () => ({ getStudySessionsAction: mocks.sessions }));
-vi.mock("@/features/tasks/task.actions", () => ({ getTaskDetailsAction: mocks.details, deleteTaskAction: mocks.remove }));
+vi.mock("@/features/tasks/task.actions", () => ({
+  getTaskDetailsAction: mocks.details,
+  deleteTaskAction: mocks.remove,
+}));
 vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => mocks.confirm }));
 vi.mock("@/features/tasks/components/task-modal-shell", () => ({
-  TaskModalShell: ({ children, footer }: { children: ReactNode; footer: ReactNode }) => <div>{children}{footer}</div>,
+  TaskModalShell: ({ children, footer }: { children: ReactNode; footer: ReactNode }) => (
+    <div>
+      {children}
+      {footer}
+    </div>
+  ),
 }));
-vi.mock("@/features/tasks/components/task-edit-form", () => ({ TaskEditForm: () => <div>Task edit form</div> }));
-vi.mock("@/features/tasks/components/task-documents-panel", () => ({ TaskDocumentsPanel: () => null }));
-vi.mock("@/features/tasks/components/task-subtasks-panel", () => ({ TaskSubtasksPanel: () => null }));
-vi.mock("@/features/task-review/components/task-review-panel", () => ({ TaskReviewPanel: () => null }));
+vi.mock("@/features/tasks/components/task-edit-form", () => ({
+  TaskEditForm: () => <div>Task edit form</div>,
+}));
+vi.mock("@/features/tasks/components/task-documents-panel", () => ({
+  TaskDocumentsPanel: () => null,
+}));
+vi.mock("@/features/tasks/components/task-subtasks-panel", () => ({
+  TaskSubtasksPanel: () => null,
+}));
+vi.mock("@/features/task-review/components/task-review-panel", () => ({
+  TaskReviewPanel: () => null,
+}));
 
 import { TaskStudyScheduleSection } from "./task-study-schedule-section";
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
@@ -34,13 +68,26 @@ import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-draw
 
 const a = workspaceTask();
 const b = workspaceTask({ id: "00000000-0000-4000-8000-000000000003", title: "Task B" });
-const draft: StudyScheduleInput = { startsOn: "2030-01-07", endsOn: "2030-01-21", timezone: "UTC",
-  slots: [{ weekday: 1, startTime: "19:00", endTime: "20:30" }] };
-const summary = { id: "schedule-a", task_id: a.id, status: "active", revision: 1,
-  starts_on: "2030-01-07", ends_on: "2030-01-21", timezone: "UTC" };
+const draft: StudyScheduleInput = {
+  startsOn: "2030-01-07",
+  endsOn: "2030-01-21",
+  timezone: "UTC",
+  slots: [{ weekday: 1, startTime: "19:00", endTime: "20:30" }],
+};
+const summary = {
+  id: "schedule-a",
+  task_id: a.id,
+  status: "active",
+  revision: 1,
+  starts_on: "2030-01-07",
+  ends_on: "2030-01-21",
+  timezone: "UTC",
+};
 function deferred<T>() {
   let resolve!: (value: T) => void;
-  const promise = new Promise<T>(done => { resolve = done; });
+  const promise = new Promise<T>((done) => {
+    resolve = done;
+  });
   return { promise, resolve };
 }
 
@@ -50,39 +97,68 @@ describe("Task scheduling UI", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
-    host = document.createElement("div"); document.body.append(host); root = createRoot(host);
+    host = document.createElement("div");
+    document.body.append(host);
+    root = createRoot(host);
     mocks.load.mockResolvedValue({ success: true, schedule: null });
-    mocks.sessions.mockResolvedValue({ success: true, sessions: [], total: 0, page: 0, hasMore: false });
-    mocks.details.mockImplementation(async (id: string) => ({ success: true,
-      data: { task: id === a.id ? a : b, subtasks: [], documents: [] } }));
+    mocks.sessions.mockResolvedValue({
+      success: true,
+      sessions: [],
+      total: 0,
+      page: 0,
+      hasMore: false,
+    });
+    mocks.details.mockImplementation(async (id: string) => ({
+      success: true,
+      data: { task: id === a.id ? a : b, subtasks: [], documents: [] },
+    }));
     mocks.confirm.mockResolvedValue(true);
     mocks.remove.mockResolvedValue({ success: true, message: "Deleted" });
   });
-  afterEach(() => { act(() => root.unmount()); host.remove(); });
-  async function render(node: ReactNode) { await act(async () => { root.render(node); }); }
-  function button(text: string) {
-    const result = [...host.querySelectorAll("button")].find(x => x.textContent?.trim() === text);
-    expect(result, `Missing button ${text}`).toBeDefined(); return result!;
+  afterEach(() => {
+    act(() => root.unmount());
+    host.remove();
+  });
+  async function render(node: ReactNode) {
+    await act(async () => {
+      root.render(node);
+    });
   }
-  async function click(text: string) { await act(async () => { button(text).click(); }); }
+  function button(text: string) {
+    const result = [...host.querySelectorAll("button")].find((x) => x.textContent?.trim() === text);
+    expect(result, `Missing button ${text}`).toBeDefined();
+    return result!;
+  }
+  async function click(text: string) {
+    await act(async () => {
+      button(text).click();
+    });
+  }
   function enter(label: string, value: string, index = 0) {
-    const labels = [...host.querySelectorAll("label")].filter(x => x.querySelector("span")?.textContent === label);
+    const labels = [...host.querySelectorAll("label")].filter(
+      (x) => x.querySelector("span")?.textContent === label,
+    );
     const input = labels[index].querySelector("input")!;
     act(() => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, value);
       input.dispatchEvent(new Event("input", { bubbles: true }));
     });
   }
-  const drawer = (task: TaskWithGoal) => <TaskDetailsDrawer task={task} goals={[]} onClose={() => {}} initialTab="overview" />;
+  const drawer = (task: TaskWithGoal) => (
+    <TaskDetailsDrawer task={task} goals={[]} onClose={() => {}} initialTab="overview" />
+  );
 
   it("4.1 renders engine preview and passes the same valid draft without mutations", async () => {
     const next = vi.fn();
     await render(<ScheduleDraftEditor initialValue={draft} onContinue={next} />);
     const expected = generateStudyOccurrences(draft);
     expect(host.querySelectorAll("li")).toHaveLength(expected.length);
-    for (const x of expected) expect(host.textContent).toContain(`${x.localDate} · ${x.localStartTime}–${x.localEndTime}`);
-    await click("Continue"); expect(next).toHaveBeenCalledWith(draft);
-    expect(mocks.create).not.toHaveBeenCalled(); expect(mocks.load).not.toHaveBeenCalled();
+    for (const x of expected)
+      expect(host.textContent).toContain(`${x.localDate} · ${x.localStartTime}–${x.localEndTime}`);
+    await click("Continue");
+    expect(next).toHaveBeenCalledWith(draft);
+    expect(mocks.create).not.toHaveBeenCalled();
+    expect(mocks.load).not.toHaveBeenCalled();
   });
   it("4.1 adds, edits and removes slots, showing overlap and recovering", async () => {
     await render(<ScheduleDraftEditor initialValue={draft} onContinue={vi.fn()} />);
@@ -90,10 +166,13 @@ describe("Task scheduling UI", () => {
     expect(host.querySelectorAll('button[aria-label^="Remove slot"]')).toHaveLength(2);
     expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/Overlapping/);
     expect(button("Continue").disabled).toBe(true);
-    enter("Start", "21:00", 1); enter("End", "22:00", 1);
+    enter("Start", "21:00", 1);
+    enter("End", "22:00", 1);
     expect(host.querySelector('[role="alert"]')).toBeNull();
     expect(host.querySelectorAll("li")).toHaveLength(6);
-    await act(async () => { host.querySelector<HTMLButtonElement>('[aria-label="Remove slot 2"]')!.click(); });
+    await act(async () => {
+      host.querySelector<HTMLButtonElement>('[aria-label="Remove slot 2"]')!.click();
+    });
     expect(host.querySelectorAll("li")).toHaveLength(3);
   });
   it.each([
@@ -106,57 +185,99 @@ describe("Task scheduling UI", () => {
     expect(button("Continue").disabled).toBe(true);
   });
   it("4.1 rejects a DST gap and disables empty previews or missing callback", async () => {
-    await render(<ScheduleDraftEditor initialValue={{ startsOn: "2030-03-10", endsOn: "2030-03-10",
-      timezone: "America/New_York", slots: [{ weekday: 7, startTime: "02:30", endTime: "04:00" }] }} onContinue={vi.fn()} />);
+    await render(
+      <ScheduleDraftEditor
+        initialValue={{
+          startsOn: "2030-03-10",
+          endsOn: "2030-03-10",
+          timezone: "America/New_York",
+          slots: [{ weekday: 7, startTime: "02:30", endTime: "04:00" }],
+        }}
+        onContinue={vi.fn()}
+      />,
+    );
     expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/does not exist/);
     expect(button("Continue").disabled).toBe(true);
-    await render(<ScheduleDraftEditor key="no-matching-day" initialValue={{ ...draft,
-      startsOn: "2030-01-08", endsOn: "2030-01-08" }} onContinue={vi.fn()} />);
+    await render(
+      <ScheduleDraftEditor
+        key="no-matching-day"
+        initialValue={{ ...draft, startsOn: "2030-01-08", endsOn: "2030-01-08" }}
+        onContinue={vi.fn()}
+      />,
+    );
     expect(host.textContent).toContain("No sessions match this date range.");
     expect(button("Continue").disabled).toBe(true);
-    await render(<ScheduleDraftEditor key="empty" initialValue={{ ...draft, endsOn: "2030-01-07", slots: [] }} onContinue={vi.fn()} />);
+    await render(
+      <ScheduleDraftEditor
+        key="empty"
+        initialValue={{ ...draft, endsOn: "2030-01-07", slots: [] }}
+        onContinue={vi.fn()}
+      />,
+    );
     expect(button("Continue").disabled).toBe(true);
     await render(<ScheduleDraftEditor key="no-callback" initialValue={draft} />);
     expect(button("Continue").disabled).toBe(true);
   });
-  it.each(["todo", "in_progress"] as const)("4.2 root %s exposes creation in overview and hides it while editing", async status => {
-    const task = workspaceTask({ status });
-    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
-    await render(drawer(task));
-    expect(button("Add study schedule")).toBeDefined();
-    await click("edit"); expect(host.textContent).toContain("Task edit form");
-    expect(host.querySelector('[aria-label="Task study schedule"]')).toBeNull();
-    await click("cancel"); expect(button("Add study schedule")).toBeDefined();
-  });
-  it.each(["completed", "cancelled", "in_review"] as const)("4.2 %s cannot create", async status => {
-    const task = workspaceTask({ status });
-    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
-    await render(drawer(task));
-    expect(host.textContent).toContain("Study scheduling is not available");
-    expect(host.textContent).not.toContain("Add study schedule");
-  });
+  it.each(["todo", "in_progress"] as const)(
+    "4.2 root %s exposes creation in overview and hides it while editing",
+    async (status) => {
+      const task = workspaceTask({ status });
+      mocks.details.mockResolvedValue({
+        success: true,
+        data: { task, subtasks: [], documents: [] },
+      });
+      await render(drawer(task));
+      expect(button("Add study schedule")).toBeDefined();
+      await click("edit");
+      expect(host.textContent).toContain("Task edit form");
+      expect(host.querySelector('[aria-label="Task study schedule"]')).toBeNull();
+      await click("cancel");
+      expect(button("Add study schedule")).toBeDefined();
+    },
+  );
+  it.each(["completed", "cancelled", "in_review"] as const)(
+    "4.2 %s cannot create",
+    async (status) => {
+      const task = workspaceTask({ status });
+      mocks.details.mockResolvedValue({
+        success: true,
+        data: { task, subtasks: [], documents: [] },
+      });
+      await render(drawer(task));
+      expect(host.textContent).toContain("Study scheduling is not available");
+      expect(host.textContent).not.toContain("Add study schedule");
+    },
+  );
   it("4.2 subtask cannot create and an existing schedule is summary-only", async () => {
     const task = workspaceTask({ parent_task_id: b.id });
     mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
-    await render(drawer(task)); expect(host.textContent).not.toContain("Add study schedule");
+    await render(drawer(task));
+    expect(host.textContent).not.toContain("Add study schedule");
     mocks.load.mockResolvedValue({ success: true, schedule: summary });
     await render(<TaskStudyScheduleSection key="summary" taskId={a.id} eligible />);
     expect(host.textContent).toContain("Revision: 1");
     expect(host.textContent).not.toContain("Add study schedule");
   });
   it("4.2 RPC rejection retains editor and edited draft, then successful retry loads summary", async () => {
-    mocks.create.mockResolvedValueOnce({ success: false, message: "Rejected by RPC" })
+    mocks.create
+      .mockResolvedValueOnce({ success: false, message: "Rejected by RPC" })
       .mockResolvedValueOnce({ success: true, scheduleId: summary.id, sessionCount: 3 });
     await render(<TaskStudyScheduleSection taskId={a.id} eligible />);
     await click("Add study schedule");
-    enter("Start date", "2030-01-07"); enter("End date", "2030-01-21");
+    enter("Start date", "2030-01-07");
+    enter("End date", "2030-01-21");
     act(() => {
       const weekday = host.querySelector("select")!;
-      weekday.value = "1"; weekday.dispatchEvent(new Event("change", { bubbles: true }));
+      weekday.value = "1";
+      weekday.dispatchEvent(new Event("change", { bubbles: true }));
     });
     await click("Continue");
-    expect(mocks.error).toHaveBeenCalledWith("Could not save study schedule. Check the dates and active sessions.");
-    expect(host.querySelector('[role="alert"]')?.textContent).toBe("Could not save study schedule. Check the dates and active sessions.");
+    expect(mocks.error).toHaveBeenCalledWith(
+      "Could not save study schedule. Check the dates and active sessions.",
+    );
+    expect(host.querySelector('[role="alert"]')?.textContent).toBe(
+      "Could not save study schedule. Check the dates and active sessions.",
+    );
     expect(host.querySelector<HTMLInputElement>('input[type="date"]')!.value).toBe("2030-01-07");
     expect(host.querySelector('[aria-label="Study schedule editor"]')).not.toBeNull();
     mocks.load.mockResolvedValue({ success: true, schedule: summary });
@@ -170,48 +291,133 @@ describe("Task scheduling UI", () => {
     mocks.create.mockReturnValue(pending.promise);
     await render(<TaskStudyScheduleSection taskId={a.id} eligible />);
     await click("Add study schedule");
-    await act(async () => { const next = button("Continue"); next.click(); next.click(); });
+    await act(async () => {
+      const next = button("Continue");
+      next.click();
+      next.click();
+    });
     expect(mocks.create).toHaveBeenCalledOnce();
-    expect(host.querySelector<HTMLFieldSetElement>('fieldset[aria-busy="true"]')!.disabled).toBe(true);
-    await act(async () => { pending.resolve({ success: false, message: "Retry" }); });
+    expect(host.querySelector<HTMLFieldSetElement>('fieldset[aria-busy="true"]')!.disabled).toBe(
+      true,
+    );
+    await act(async () => {
+      pending.resolve({ success: false, message: "Retry" });
+    });
   });
   it("4.2 Task switch remounts schedule state and ignores old Task details arriving late", async () => {
-    const old = deferred<unknown>(); const newer = deferred<unknown>();
-    mocks.details.mockImplementation((id: string) => id === a.id ? old.promise : newer.promise);
-    mocks.load.mockImplementation(async (id: string) => ({ success: true, schedule: id === a.id ? summary : null }));
-    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-A", local_date: "2030-01-09",
-      local_start_time: "19:00:00", local_end_time: "20:30:00", timezone: "UTC", status: "scheduled",
-      cancellation_reason: null }], total: 1, page: 0, hasMore: false });
-    await render(drawer(a)); expect(host.textContent).toContain("Revision: 1");
+    const old = deferred<unknown>();
+    const newer = deferred<unknown>();
+    mocks.details.mockImplementation((id: string) => (id === a.id ? old.promise : newer.promise));
+    mocks.load.mockImplementation(async (id: string) => ({
+      success: true,
+      schedule: id === a.id ? summary : null,
+    }));
+    mocks.sessions.mockResolvedValue({
+      success: true,
+      sessions: [
+        {
+          id: "session-A",
+          local_date: "2030-01-09",
+          local_start_time: "19:00:00",
+          local_end_time: "20:30:00",
+          timezone: "UTC",
+          status: "scheduled",
+          cancellation_reason: null,
+        },
+      ],
+      total: 1,
+      page: 0,
+      hasMore: false,
+    });
+    await render(drawer(a));
+    expect(host.textContent).toContain("Revision: 1");
     expect(host.textContent).toContain("2030-01-09");
     // Check the immediate render too, before effects clear old detail state.
-    act(() => { root.render(drawer(b)); });
+    act(() => {
+      root.render(drawer(b));
+    });
     expect(host.textContent).not.toContain("Revision: 1");
     expect(host.textContent).not.toContain("2030-01-09");
-    await act(async () => { newer.resolve({ success: true, data: { task: b, subtasks: [], documents: [] } }); });
-    await act(async () => { old.resolve({ success: true, data: { task: a, subtasks: [], documents: [] } }); });
+    await act(async () => {
+      newer.resolve({ success: true, data: { task: b, subtasks: [], documents: [] } });
+    });
+    await act(async () => {
+      old.resolve({ success: true, data: { task: a, subtasks: [], documents: [] } });
+    });
     expect(host.textContent).not.toContain("Revision: 1");
     expect(button("Add study schedule")).toBeDefined();
-    await click("deleteTask"); expect(mocks.remove).toHaveBeenCalledWith(b.id);
+    await click("deleteTask");
+    expect(mocks.remove).toHaveBeenCalledWith(b.id);
   });
   it.each([
-    [true, "active", 3], [false, "active", 0], [true, "paused", 0], [true, "closed", 0],
-  ] as const)("Attendance capability: eligible=%s / Schedule=%s", async (eligible, status, count) => {
-    mocks.load.mockResolvedValue({ success: true, schedule: { ...summary, status } });
-    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-gate", status: "scheduled", local_date: "2030-01-07",
-      local_start_time: "19:00:00", local_end_time: "20:00:00", timezone: "UTC", scheduled_start_at: "2030-01-07T19:00:00Z", updated_at: "2026-11-02T00:00:00Z" }], total: 1, page: 0, hasMore: false });
-    await render(<TaskStudyScheduleSection taskId={a.id} eligible={eligible} />);
-    const labels = [...host.querySelectorAll('[aria-label="Study sessions"] li button')].map(x => x.textContent);
-    expect(labels.filter(x => ["Start", "Complete", "Skip", "Recover"].includes(x ?? ""))).toHaveLength(count);
-  });
-  it.each(["completed", "cancelled", "in_review", "subtask"] as const)("hides Attendance in the actual drawer for %s even with an active Schedule", async state => {
-    const task = state === "subtask" ? workspaceTask({ parent_task_id: b.id }) : workspaceTask({ status: state });
-    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
-    mocks.load.mockResolvedValue({ success: true, schedule: summary });
-    mocks.sessions.mockResolvedValue({ success: true, sessions: [{ id: "session-gate", status: "scheduled", local_date: "2030-01-07",
-      local_start_time: "19:00:00", local_end_time: "20:00:00", timezone: "UTC", scheduled_start_at: "2030-01-07T19:00:00Z", updated_at: "2026-11-02T00:00:00Z" }], total: 1, page: 0, hasMore: false });
-    await render(drawer(task));
-    expect(host.querySelector('[aria-label="Study sessions"]')).not.toBeNull();
-    expect(host.querySelectorAll('[aria-label="Study sessions"] li button')).toHaveLength(0);
-  });
+    [true, "active", 3],
+    [false, "active", 0],
+    [true, "paused", 0],
+    [true, "closed", 0],
+  ] as const)(
+    "Attendance capability: eligible=%s / Schedule=%s",
+    async (eligible, status, count) => {
+      mocks.load.mockResolvedValue({ success: true, schedule: { ...summary, status } });
+      mocks.sessions.mockResolvedValue({
+        success: true,
+        sessions: [
+          {
+            id: "session-gate",
+            status: "scheduled",
+            local_date: "2030-01-07",
+            local_start_time: "19:00:00",
+            local_end_time: "20:00:00",
+            timezone: "UTC",
+            scheduled_start_at: "2030-01-07T19:00:00Z",
+            updated_at: "2026-11-02T00:00:00Z",
+          },
+        ],
+        total: 1,
+        page: 0,
+        hasMore: false,
+      });
+      await render(<TaskStudyScheduleSection taskId={a.id} eligible={eligible} />);
+      const labels = [...host.querySelectorAll('[aria-label="Study sessions"] li button')].map(
+        (x) => x.textContent,
+      );
+      expect(
+        labels.filter((x) => ["Start", "Complete", "Skip", "Recover"].includes(x ?? "")),
+      ).toHaveLength(count);
+    },
+  );
+  it.each(["completed", "cancelled", "in_review", "subtask"] as const)(
+    "hides Attendance in the actual drawer for %s even with an active Schedule",
+    async (state) => {
+      const task =
+        state === "subtask"
+          ? workspaceTask({ parent_task_id: b.id })
+          : workspaceTask({ status: state });
+      mocks.details.mockResolvedValue({
+        success: true,
+        data: { task, subtasks: [], documents: [] },
+      });
+      mocks.load.mockResolvedValue({ success: true, schedule: summary });
+      mocks.sessions.mockResolvedValue({
+        success: true,
+        sessions: [
+          {
+            id: "session-gate",
+            status: "scheduled",
+            local_date: "2030-01-07",
+            local_start_time: "19:00:00",
+            local_end_time: "20:00:00",
+            timezone: "UTC",
+            scheduled_start_at: "2030-01-07T19:00:00Z",
+            updated_at: "2026-11-02T00:00:00Z",
+          },
+        ],
+        total: 1,
+        page: 0,
+        hasMore: false,
+      });
+      await render(drawer(task));
+      expect(host.querySelector('[aria-label="Study sessions"]')).not.toBeNull();
+      expect(host.querySelectorAll('[aria-label="Study sessions"] li button')).toHaveLength(0);
+    },
+  );
 });

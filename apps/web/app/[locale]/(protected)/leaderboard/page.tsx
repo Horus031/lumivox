@@ -14,7 +14,11 @@ export default async function LeaderboardPage() {
   if (!globalLeaderboardEnabled) {
     return (
       <div className="min-w-0 space-y-section">
-        <PageHeader eyebrow={t("disabledEyebrow")} title={t("disabledTitle")} description={t("disabledDescription")} />
+        <PageHeader
+          eyebrow={t("disabledEyebrow")}
+          title={t("disabledTitle")}
+          description={t("disabledDescription")}
+        />
       </div>
     );
   }

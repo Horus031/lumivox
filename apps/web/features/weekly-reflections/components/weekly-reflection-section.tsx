@@ -11,22 +11,16 @@ type WeeklyReflectionSectionProps = {
   compact?: boolean;
 };
 
-export function WeeklyReflectionSection({
-  cards,
-}: WeeklyReflectionSectionProps) {
+export function WeeklyReflectionSection({ cards }: WeeklyReflectionSectionProps) {
   const t = useTranslations("reflections.section");
 
   return (
     <section className="min-w-0 space-y-section">
       {cards.length === 0 ? (
         <div className="min-w-0 border-t border-border py-section">
-          <h3 className="text-section font-semibold text-foreground">
-            {t("emptyTitle")}
-          </h3>
+          <h3 className="text-section font-semibold text-foreground">{t("emptyTitle")}</h3>
 
-          <p className="mt-2 text-body text-muted-foreground">
-            {t("emptyDescription")}
-          </p>
+          <p className="mt-2 text-body text-muted-foreground">{t("emptyDescription")}</p>
         </div>
       ) : (
         <div className="min-w-0 space-y-section">

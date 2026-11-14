@@ -28,16 +28,12 @@ type Props = {
 };
 
 type LoadedSchedule = NonNullable<
-  Extract<
-    Awaited<ReturnType<typeof getTaskStudyScheduleAction>>,
-    { success: true }
-  >["schedule"]
+  Extract<Awaited<ReturnType<typeof getTaskStudyScheduleAction>>, { success: true }>["schedule"]
 >;
 
 function defaultDraft(): StudyScheduleInput {
   // Generate a local calendar date, not an ISO UTC date.
-  const timezone =
-    Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || "Asia/Ho_Chi_Minh";
 
   const now = new Date();
   const today = new Intl.DateTimeFormat("en-CA", {
@@ -140,10 +136,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
   }
 
   return (
-    <section
-      aria-label={t("taskSection")}
-      className="space-y-4 border-t border-border pt-4"
-    >
+    <section aria-label={t("taskSection")} className="space-y-4 border-t border-border pt-4">
       <h3 data-study-schedule-heading tabIndex={-1} className="font-medium">
         {t("title")}
       </h3>
@@ -155,11 +148,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
       ) : loadError ? (
         <div role="alert" className="space-y-2">
           <p className="text-sm">{loadError}</p>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => void loadSchedule()}
-          >
+          <Button type="button" variant="outline" onClick={() => void loadSchedule()}>
             {t("retry")}
           </Button>
         </div>
@@ -194,11 +183,7 @@ export function TaskStudyScheduleSection({ taskId, eligible }: Props) {
           ) : (
             <>
               {eligible && schedule.status === "active" && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setRevising(true)}
-                >
+                <Button type="button" variant="outline" onClick={() => setRevising(true)}>
                   {t("edit")}
                 </Button>
               )}

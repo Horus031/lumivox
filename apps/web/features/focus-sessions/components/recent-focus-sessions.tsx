@@ -13,19 +13,19 @@ export function RecentFocusSessions({ sessions, embedded = false }: RecentFocusS
   const t = useTranslations("focus.recent");
 
   return (
-    <section className={embedded ? "min-w-0" : "min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm"}>
+    <section
+      className={
+        embedded ? "min-w-0" : "min-w-0 rounded-2xl border border-border bg-card p-5 shadow-sm"
+      }
+    >
       <div>
-        <h2 className="text-label font-semibold text-foreground">
-          {t("title")}
-        </h2>
+        <h2 className="text-label font-semibold text-foreground">{t("title")}</h2>
       </div>
 
       {sessions.length === 0 ? (
         <div className="pt-4">
           <h3 className="text-label font-medium">{t("emptyTitle")}</h3>
-          <p className="mt-1 text-body text-secondary-text">
-            {t("emptyDescription")}
-          </p>
+          <p className="mt-1 text-body text-secondary-text">{t("emptyDescription")}</p>
         </div>
       ) : (
         <div className="mt-3 max-h-64 divide-y divide-border overflow-y-auto pr-1">

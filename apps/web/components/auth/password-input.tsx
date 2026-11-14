@@ -14,10 +14,18 @@ export function PasswordInput(props: Omit<ComponentProps<typeof Input>, "type">)
   return (
     <div className="relative">
       <Input {...props} type={visible ? "text" : "password"} className="pr-12" />
-      <Button type="button" variant="ghost" size="icon"
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
         className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground"
-        aria-label={label} title={label} aria-pressed={visible} aria-controls={props.id}
-        disabled={props.disabled} onClick={() => setVisible((value) => !value)}>
+        aria-label={label}
+        title={label}
+        aria-pressed={visible}
+        aria-controls={props.id}
+        disabled={props.disabled}
+        onClick={() => setVisible((value) => !value)}
+      >
         <Icon aria-hidden="true" />
       </Button>
     </div>

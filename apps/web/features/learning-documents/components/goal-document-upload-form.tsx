@@ -14,9 +14,7 @@ type GoalDocumentUploadFormProps = {
   goalId: string;
 };
 
-export function GoalDocumentUploadForm({
-  goalId,
-}: GoalDocumentUploadFormProps) {
+export function GoalDocumentUploadForm({ goalId }: GoalDocumentUploadFormProps) {
   const t = useTranslations("goals.documents.upload");
   const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
@@ -41,22 +39,17 @@ export function GoalDocumentUploadForm({
     <form
       ref={formRef}
       action={handleSubmit}
-      aria-busy={isPending} className="min-w-0 border-t border-border pt-card"
+      aria-busy={isPending}
+      className="min-w-0 border-t border-border pt-card"
     >
       <input type="hidden" name="goalId" value={goalId} />
 
       <div>
-        <p className="text-caption font-medium text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+        <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
-        <h3 className="mt-1 text-section font-semibold text-foreground">
-          {t("title")}
-        </h3>
+        <h3 className="mt-1 text-section font-semibold text-foreground">{t("title")}</h3>
 
-        <p className="mt-1 text-body text-muted-foreground">
-          {t("description")}
-        </p>
+        <p className="mt-1 text-body text-muted-foreground">{t("description")}</p>
       </div>
 
       <div className="mt-3">
@@ -71,12 +64,9 @@ export function GoalDocumentUploadForm({
         />
       </div>
 
-      <Button
-        type="submit"
-        disabled={isPending}
-        className="mt-3"
-      >
-        <Upload aria-hidden="true" />{isPending ? t("uploading") : t("button")}
+      <Button type="submit" disabled={isPending} className="mt-3">
+        <Upload aria-hidden="true" />
+        {isPending ? t("uploading") : t("button")}
       </Button>
     </form>
   );

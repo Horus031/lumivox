@@ -12,7 +12,9 @@ describe("legacy active focus session lookup", () => {
     const eq = vi.fn();
     const inStatuses = vi.fn();
     const query = {
-      select: vi.fn(), eq, in: inStatuses,
+      select: vi.fn(),
+      eq,
+      in: inStatuses,
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     };
     query.select.mockReturnValue(query);

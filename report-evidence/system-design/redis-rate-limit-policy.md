@@ -6,13 +6,13 @@ The purpose of the Redis rate limit layer is to protect expensive operations in 
 
 ## Rate-Limited Actions
 
-| Feature | Key Pattern | Limit | Window |
-|---|---|---:|---|
-| PBI refresh | `pbi-refresh:{userId}` | 5 | 10 minutes |
-| Native task risk refresh | `native-task-risk-refresh:{userId}` | 5 | 10 minutes |
-| Native task AI insight | `native-task-ai-insight:{userId}` | 3 | 10 minutes |
-| Weekly reflection | `weekly-reflection:{userId}` | 2 | 1 day |
-| Engagement recalculation | `engagement-recalculate:{userId}` | 10 | 10 minutes |
+| Feature                  | Key Pattern                         | Limit | Window     |
+| ------------------------ | ----------------------------------- | ----: | ---------- |
+| PBI refresh              | `pbi-refresh:{userId}`              |     5 | 10 minutes |
+| Native task risk refresh | `native-task-risk-refresh:{userId}` |     5 | 10 minutes |
+| Native task AI insight   | `native-task-ai-insight:{userId}`   |     3 | 10 minutes |
+| Weekly reflection        | `weekly-reflection:{userId}`        |     2 | 1 day      |
+| Engagement recalculation | `engagement-recalculate:{userId}`   |    10 | 10 minutes |
 
 ## Design Notes
 
@@ -27,3 +27,4 @@ When a user exceeds a limit, the application returns a friendly message such as:
 
 ```txt
 Too many requests. Please try again in 3 minute(s).
+```

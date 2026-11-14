@@ -26,24 +26,12 @@
         "name": "chromium",
         "testDir": "D:/lumivox-proj/apps/web/tests",
         "testIgnore": [],
-        "testMatch": [
-          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
-        ],
+        "testMatch": ["**/*.@(spec|test).?(c|m)[jt]s?(x)"],
         "timeout": 30000
       }
     ],
     "quiet": false,
-    "reporter": [
-      [
-        "list"
-      ],
-      [
-        "html"
-      ],
-      [
-        "json"
-      ]
-    ],
+    "reporter": [["list"], ["html"], ["json"]],
     "reportSlowTests": {
       "max": 5,
       "threshold": 300000

@@ -9,9 +9,11 @@ import { StudyNotificationSettings } from "@/features/learning-schedule/componen
 async function ReminderSection() {
   const result = await getStudyNotificationPreferencesAction();
   const allowOptIn = process.env.STUDY_REMINDER_SETTINGS_ENABLED === "true";
-  return result.success
-    ? <StudyNotificationSettings initialPreferences={result.preferences} allowOptIn={allowOptIn} />
-    : <StudyNotificationSettings initialError={result.code} allowOptIn={allowOptIn} />;
+  return result.success ? (
+    <StudyNotificationSettings initialPreferences={result.preferences} allowOptIn={allowOptIn} />
+  ) : (
+    <StudyNotificationSettings initialError={result.code} allowOptIn={allowOptIn} />
+  );
 }
 
 export default async function SettingsPage() {
@@ -24,14 +26,12 @@ export default async function SettingsPage() {
   return (
     <section>
       <div className="min-w-0 max-w-4xl space-y-section">
-        <PageHeader
-          eyebrow={t("eyebrow")}
-          title={t("title")}
-          description={t("description")}
-        />
+        <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
         <SettingsForm profile={profile} weights={weights} />
-        <Suspense fallback={<p role="status">{reminders("loading")}</p>}><ReminderSection /></Suspense>
+        <Suspense fallback={<p role="status">{reminders("loading")}</p>}>
+          <ReminderSection />
+        </Suspense>
       </div>
     </section>
   );

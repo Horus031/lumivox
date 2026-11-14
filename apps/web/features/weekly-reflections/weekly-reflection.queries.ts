@@ -1,9 +1,7 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
 import { translateWeeklyReflectionCards } from "@/features/weekly-reflections/weekly-reflection-translations.server";
-import type {
-  WeeklyReflectionCardView,
-} from "@/features/weekly-reflections/weekly-reflection.types";
+import type { WeeklyReflectionCardView } from "@/features/weekly-reflections/weekly-reflection.types";
 
 export async function getLatestWeeklyReflectionCards(
   limit = 3,
@@ -29,15 +27,13 @@ export async function getLatestWeeklyReflectionCards(
         current_window_end,
         current_metrics
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
-    throw new Error(
-      `Failed to fetch weekly reflection cards: ${error.message}`
-    );
+    throw new Error(`Failed to fetch weekly reflection cards: ${error.message}`);
   }
 
   const cards = (data ?? []) as WeeklyReflectionCardView[];

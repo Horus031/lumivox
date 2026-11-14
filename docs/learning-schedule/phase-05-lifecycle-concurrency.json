@@ -6,18 +6,14 @@
     {
       "name": "LC-01-start-first-task-close/iteration-1",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "start",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -66,18 +62,14 @@
     {
       "name": "LC-02-recovery-first-task-close/iteration-1",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "recover",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -131,9 +123,7 @@
     {
       "name": "LC-03-task-close-first-recovery/iteration-1",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "recover",
       "secondSqlstate": "22023",
@@ -172,18 +162,14 @@
     {
       "name": "LC-04-skip-first-task-close/iteration-1",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "skip",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -233,18 +219,14 @@
     {
       "name": "LC-05-task-close-first-future-skip/iteration-1",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "skip",
       "secondSqlstate": "22023",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "cancelled",
-      "eventTypes": [
-        "cancelled"
-      ],
+      "eventTypes": ["cancelled"],
       "exactReplay": null,
       "final": {
         "events": [
@@ -296,18 +278,14 @@
     {
       "name": "LC-01-start-first-task-close/iteration-2",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "start",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -356,18 +334,14 @@
     {
       "name": "LC-02-recovery-first-task-close/iteration-2",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "recover",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -421,9 +395,7 @@
     {
       "name": "LC-03-task-close-first-recovery/iteration-2",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "recover",
       "secondSqlstate": "22023",
@@ -462,18 +434,14 @@
     {
       "name": "LC-04-skip-first-task-close/iteration-2",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "skip",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -523,18 +491,14 @@
     {
       "name": "LC-05-task-close-first-future-skip/iteration-2",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "skip",
       "secondSqlstate": "22023",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "cancelled",
-      "eventTypes": [
-        "cancelled"
-      ],
+      "eventTypes": ["cancelled"],
       "exactReplay": null,
       "final": {
         "events": [
@@ -586,18 +550,14 @@
     {
       "name": "LC-01-start-first-task-close/iteration-3",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "start",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -646,18 +606,14 @@
     {
       "name": "LC-02-recovery-first-task-close/iteration-3",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "recover",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -711,9 +667,7 @@
     {
       "name": "LC-03-task-close-first-recovery/iteration-3",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "recover",
       "secondSqlstate": "22023",
@@ -752,18 +706,14 @@
     {
       "name": "LC-04-skip-first-task-close/iteration-3",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "skip",
       "second": "close",
       "secondSqlstate": "00000",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "exactReplay": "PASS",
       "final": {
         "events": [
@@ -813,18 +763,14 @@
     {
       "name": "LC-05-task-close-first-future-skip/iteration-3",
       "status": "PASS",
-      "blockers": [
-        843
-      ],
+      "blockers": [843],
       "first": "close",
       "second": "skip",
       "secondSqlstate": "22023",
       "taskStatus": "completed",
       "scheduleStatus": "closed",
       "sessionStatus": "cancelled",
-      "eventTypes": [
-        "cancelled"
-      ],
+      "eventTypes": ["cancelled"],
       "exactReplay": null,
       "final": {
         "events": [

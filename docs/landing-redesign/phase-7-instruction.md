@@ -67,21 +67,13 @@ Trong `research-evidence.tsx`, thay phần metric từ:
 thành:
 
 ```tsx
-<div
-  key={item.key}
-  data-evidence-position={index}
-  className="evidence-metric"
->
+<div key={item.key} data-evidence-position={index} className="evidence-metric">
   <dt>{t(`metrics.${item.key}.label`)}</dt>
 
   <dd>
-    <span className="evidence-metric__value">
-      {item.value}
-    </span>
+    <span className="evidence-metric__value">{item.value}</span>
 
-    <span className="evidence-metric__description">
-      {t(`metrics.${item.key}.description`)}
-    </span>
+    <span className="evidence-metric__description">{t(`metrics.${item.key}.description`)}</span>
   </dd>
 </div>
 ```
@@ -211,8 +203,7 @@ Một layout hơi editorial sẽ nối tốt hơn với Trust.
 
 ```css
 .quiet-resolution {
-  padding-block:
-    clamp(7rem, 12vw, 11rem);
+  padding-block: clamp(7rem, 12vw, 11rem);
 }
 
 .quiet-resolution__inner {
@@ -222,8 +213,7 @@ Một layout hơi editorial sẽ nối tốt hơn với Trust.
     minmax(15rem, 0.6fr)
     minmax(0, 1.4fr);
 
-  gap:
-    clamp(4rem, 10vw, 10rem);
+  gap: clamp(4rem, 10vw, 10rem);
 }
 
 .quiet-resolution__heading {
@@ -249,8 +239,7 @@ Một layout hơi editorial sẽ nối tốt hơn với Trust.
 
   margin-top: 0.9rem;
 
-  font-size:
-    clamp(2.25rem, 4.5vw, 4.25rem);
+  font-size: clamp(2.25rem, 4.5vw, 4.25rem);
 
   font-weight: 600;
 
@@ -270,26 +259,15 @@ Giữ native `<details>`.
 Đây là lựa chọn tốt hơn client accordion về accessibility, SSR và JS cost.
 
 ```tsx
-<details
-  key={f.key}
-  className="resolution-item"
->
+<details key={f.key} className="resolution-item">
   <summary className="resolution-item__summary">
-    <span
-      aria-hidden="true"
-      className="resolution-item__index"
-    >
+    <span aria-hidden="true" className="resolution-item__index">
       {String(index + 1).padStart(2, "0")}
     </span>
 
-    <h3>
-      {t(`items.${f.key}.question`)}
-    </h3>
+    <h3>{t(`items.${f.key}.question`)}</h3>
 
-    <span
-      aria-hidden="true"
-      className="resolution-item__toggle"
-    >
+    <span aria-hidden="true" className="resolution-item__toggle">
       <i />
       <i />
     </span>
@@ -311,30 +289,17 @@ Dùng hai hairline để tạo plus icon.
 
 ```css
 .quiet-resolution__questions {
-  border-top:
-    1px solid
-    color-mix(
-      in oklab,
-      var(--foreground) 10%,
-      transparent
-    );
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 .resolution-item {
-  border-bottom:
-    1px solid
-    color-mix(
-      in oklab,
-      var(--foreground) 10%,
-      transparent
-    );
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
 }
 
 .resolution-item__summary {
   display: grid;
 
-  grid-template-columns:
-    2.5rem 1fr 2rem;
+  grid-template-columns: 2.5rem 1fr 2rem;
 
   align-items: center;
 
@@ -368,8 +333,7 @@ Question:
 
 ```css
 .resolution-item h3 {
-  font-size:
-    clamp(1.05rem, 1.7vw, 1.35rem);
+  font-size: clamp(1.05rem, 1.7vw, 1.35rem);
 
   font-weight: 500;
 
@@ -404,25 +368,17 @@ Question:
 
   background: currentColor;
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 
-  transition:
-    transform 350ms
-    var(--landing-ease-out);
+  transition: transform 350ms var(--landing-ease-out);
 }
 
 .resolution-item__toggle i:last-child {
-  transform:
-    translate(-50%, -50%)
-    rotate(90deg);
+  transform: translate(-50%, -50%) rotate(90deg);
 }
 
-.resolution-item[open]
-.resolution-item__toggle i:last-child {
-  transform:
-    translate(-50%, -50%)
-    rotate(0deg);
+.resolution-item[open] .resolution-item__toggle i:last-child {
+  transform: translate(-50%, -50%) rotate(0deg);
 }
 ```
 
@@ -438,8 +394,7 @@ Không button-like affordance.
 .resolution-item__answer {
   display: grid;
 
-  grid-template-columns:
-    2.5rem 1fr 2rem;
+  grid-template-columns: 2.5rem 1fr 2rem;
 
   gap: 1rem;
 
@@ -471,9 +426,7 @@ Ta đã có khá nhiều motion phía trên; cuối trang nên bớt chuyển đ
 
 ```css
 .resolution-item__summary {
-  transition:
-    color 300ms
-    var(--landing-ease-out);
+  transition: color 300ms var(--landing-ease-out);
 }
 
 .resolution-item__summary:hover {
@@ -481,13 +434,7 @@ Ta đã có khá nhiều motion phía trên; cuối trang nên bớt chuyển đ
 }
 
 .resolution-item__summary:focus-visible {
-  outline:
-    2px solid
-    color-mix(
-      in oklab,
-      var(--landing-emerald) 45%,
-      transparent
-    );
+  outline: 2px solid color-mix(in oklab, var(--landing-emerald) 45%, transparent);
 
   outline-offset: 6px;
 }
@@ -518,15 +465,13 @@ Heading không sticky:
   }
 
   .resolution-item__summary {
-    grid-template-columns:
-      2rem 1fr 1.5rem;
+    grid-template-columns: 2rem 1fr 1.5rem;
 
     min-height: 5.5rem;
   }
 
   .resolution-item__answer {
-    grid-template-columns:
-      2rem 1fr 1.5rem;
+    grid-template-columns: 2rem 1fr 1.5rem;
   }
 }
 ```
@@ -611,11 +556,7 @@ Server Component, không JS.
 ```tsx
 export default function ConvergenceVisual() {
   return (
-    <div
-      aria-hidden="true"
-      data-landing-motion="decorative"
-      className="convergence-visual"
-    >
+    <div aria-hidden="true" data-landing-motion="decorative" className="convergence-visual">
       <div className="convergence-visual__halo" />
 
       <div className="convergence-visual__ring convergence-visual__ring--outer" />
@@ -647,24 +588,16 @@ Không particles loop.
 
 ```css
 .final-convergence {
-  min-height:
-    min(58rem, 92svh);
+  min-height: min(58rem, 92svh);
 
   display: grid;
   place-items: center;
 
-  padding-block:
-    clamp(8rem, 14vw, 13rem);
+  padding-block: clamp(8rem, 14vw, 13rem);
 
   color: var(--landing-pearl);
 
-  background:
-    radial-gradient(
-      ellipse at 50% 52%,
-      #0e2517 0%,
-      #08140d 40%,
-      var(--landing-void) 74%
-    );
+  background: radial-gradient(ellipse at 50% 52%, #0e2517 0%, #08140d 40%, var(--landing-void) 74%);
 }
 ```
 
@@ -688,8 +621,7 @@ Section itself là environment.
 .convergence-visual {
   position: relative;
 
-  width:
-    min(46rem, 76vw);
+  width: min(46rem, 76vw);
 
   aspect-ratio: 1;
 
@@ -707,12 +639,7 @@ Halo:
 
   border-radius: 50%;
 
-  background:
-    radial-gradient(
-      circle,
-      rgb(51 125 77 / 0.22),
-      transparent 68%
-    );
+  background: radial-gradient(circle, rgb(51 125 77 / 0.22), transparent 68%);
 
   filter: blur(36px);
 }
@@ -727,14 +654,11 @@ Rings:
   left: 50%;
   top: 50%;
 
-  border:
-    1px solid
-    rgb(131 184 149 / 0.1);
+  border: 1px solid rgb(131 184 149 / 0.1);
 
   border-radius: 50%;
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 
 .convergence-visual__ring--outer {
@@ -764,8 +688,7 @@ Core:
 
   background: var(--landing-mint);
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 
   box-shadow:
     0 0 0 9px rgb(131 184 149 / 0.05),
@@ -786,13 +709,7 @@ Base:
   left: 50%;
   top: 50%;
 
-  background:
-    linear-gradient(
-      to right,
-      transparent,
-      rgb(131 184 149 / 0.25),
-      transparent
-    );
+  background: linear-gradient(to right, transparent, rgb(131 184 149 / 0.25), transparent);
 
   transform-origin: center;
 }
@@ -837,12 +754,9 @@ Bạn có thể positioning cụ thể bằng translate.
 
   border-radius: 50%;
 
-  background:
-    rgb(214 193 161 / 0.7);
+  background: rgb(214 193 161 / 0.7);
 
-  box-shadow:
-    0 0 12px
-    rgb(214 193 161 / 0.35);
+  box-shadow: 0 0 12px rgb(214 193 161 / 0.35);
 }
 ```
 
@@ -858,16 +772,9 @@ Không starfield dày.
 <div className="final-convergence__content mx-auto max-w-310 px-6">
   <StoryReveal distance={18}>
     <div className="final-convergence__copy">
-      <p className="final-convergence__eyebrow">
-        LUMIVOX
-      </p>
-
+      <p className="final-convergence__eyebrow">LUMIVOX</p>
       <h2>{t("title")}</h2>
-
-      <p className="final-convergence__subtitle">
-        {t("subtitle")}
-      </p>
-
+      <p className="final-convergence__subtitle">{t("subtitle")}</p>
       ...
     </div>
   </StoryReveal>
@@ -899,8 +806,7 @@ Hoặc bỏ hoàn toàn eyebrow.
 }
 
 .final-convergence h2 {
-  font-size:
-    clamp(3rem, 7vw, 6.5rem);
+  font-size: clamp(3rem, 7vw, 6.5rem);
 
   font-weight: 600;
 
@@ -914,13 +820,11 @@ Hoặc bỏ hoàn toàn eyebrow.
 
   margin: 1.75rem auto 0;
 
-  font-size:
-    clamp(14.5px, 1.5vw, 17px);
+  font-size: clamp(14.5px, 1.5vw, 17px);
 
   line-height: 1.75;
 
-  color:
-    rgb(236 240 237 / 0.62);
+  color: rgb(236 240 237 / 0.62);
 }
 ```
 
@@ -948,10 +852,7 @@ Primary:
 Secondary:
 
 ```tsx
-<Link
-  href="/features"
-  className="final-convergence__secondary"
->
+<Link href="/features" className="final-convergence__secondary">
   {t("secondaryCta")}
 </Link>
 ```
@@ -1004,15 +905,11 @@ Secondary:
 
 ```css
 .final-convergence__secondary {
-  border:
-    1px solid
-    rgb(236 240 237 / 0.15);
+  border: 1px solid rgb(236 240 237 / 0.15);
 
-  color:
-    rgb(236 240 237 / 0.72);
+  color: rgb(236 240 237 / 0.72);
 
-  background:
-    rgb(255 255 255 / 0.025);
+  background: rgb(255 255 255 / 0.025);
 }
 ```
 
@@ -1044,15 +941,13 @@ Nhưng visual:
 
   justify-content: center;
 
-  gap:
-    0.75rem 1.5rem;
+  gap: 0.75rem 1.5rem;
 
   margin-top: 2rem;
 
   font-size: 11px;
 
-  color:
-    rgb(236 240 237 / 0.4);
+  color: rgb(236 240 237 / 0.4);
 }
 
 .final-convergence__proof span {
@@ -1091,12 +986,7 @@ FAQ có thể bắt đầu bằng:
   width: 1px;
   height: 5rem;
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgb(51 125 77 / 0.12),
-      transparent
-    );
+  background: linear-gradient(to bottom, rgb(51 125 77 / 0.12), transparent);
 }
 ```
 
@@ -1114,12 +1004,7 @@ FAQ → CTA:
   width: 1px;
   height: 6rem;
 
-  background:
-    linear-gradient(
-      to bottom,
-      transparent,
-      rgb(131 184 149 / 0.16)
-    );
+  background: linear-gradient(to bottom, transparent, rgb(131 184 149 / 0.16));
 }
 ```
 
@@ -1179,8 +1064,7 @@ Nếu có transition:
   .final-convergence {
     min-height: auto;
 
-    padding-block:
-      8rem;
+    padding-block: 8rem;
   }
 
   .convergence-visual {
@@ -1190,8 +1074,7 @@ Nếu có transition:
   }
 
   .final-convergence h2 {
-    font-size:
-      clamp(2.7rem, 12vw, 4.5rem);
+    font-size: clamp(2.7rem, 12vw, 4.5rem);
   }
 
   .final-convergence__actions {
@@ -1225,20 +1108,20 @@ Không horizontal overflow:
 
 ## Phase 7 acceptance gate
 
-| Gate | Requirement |
-|---|---|
-| FAQ | Không còn generic accordion styling |
-| Semantics | Vẫn native `<details>/<summary>` |
-| FAQ copy | Không thay đổi |
-| FAQ desktop | Editorial split layout |
-| FAQ mobile | Heading không sticky |
-| CTA | Không còn rounded green container |
-| CTA environment | Full-width convergence scene |
-| CTA copy | Không đổi title/subtitle/proof |
-| Links | `/auth/sign-up` và `/features` giữ nguyên |
-| Convergence visual | CSS/SVG/server-only, không canvas |
-| JS | Không client controller mới |
-| Motion | Không infinite animation |
-| Evidence cleanup | `dt → dd` semantics đúng |
-| SEO | Metadata/H1/JSON-LD không đổi |
-| Build | lint/test/build pass |
+| Gate               | Requirement                               |
+| ------------------ | ----------------------------------------- |
+| FAQ                | Không còn generic accordion styling       |
+| Semantics          | Vẫn native `<details>/<summary>`          |
+| FAQ copy           | Không thay đổi                            |
+| FAQ desktop        | Editorial split layout                    |
+| FAQ mobile         | Heading không sticky                      |
+| CTA                | Không còn rounded green container         |
+| CTA environment    | Full-width convergence scene              |
+| CTA copy           | Không đổi title/subtitle/proof            |
+| Links              | `/auth/sign-up` và `/features` giữ nguyên |
+| Convergence visual | CSS/SVG/server-only, không canvas         |
+| JS                 | Không client controller mới               |
+| Motion             | Không infinite animation                  |
+| Evidence cleanup   | `dt → dd` semantics đúng                  |
+| SEO                | Metadata/H1/JSON-LD không đổi             |
+| Build              | lint/test/build pass                      |

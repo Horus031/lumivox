@@ -2,27 +2,17 @@
 
 import { useEffect, useState } from "react";
 
-import {
-  initialLandingScene,
-  landingSceneIds,
-  type LandingSceneId,
-} from "./story-scenes";
+import { initialLandingScene, landingSceneIds, type LandingSceneId } from "./story-scenes";
 
 function isLandingScene(value: string | undefined): value is LandingSceneId {
-  return (
-    typeof value === "string" &&
-    landingSceneIds.includes(value as LandingSceneId)
-  );
+  return typeof value === "string" && landingSceneIds.includes(value as LandingSceneId);
 }
 
 export default function StoryAtmosphere() {
-  const [activeScene, setActiveScene] =
-    useState<LandingSceneId>(initialLandingScene);
+  const [activeScene, setActiveScene] = useState<LandingSceneId>(initialLandingScene);
 
   useEffect(() => {
-    const sections = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-landing-scene]"),
-    );
+    const sections = Array.from(document.querySelectorAll<HTMLElement>("[data-landing-scene]"));
 
     if (!sections.length) return;
 
@@ -41,8 +31,7 @@ export default function StoryAtmosphere() {
         const active = [...visible.entries()].sort(
           (a, b) =>
             b[1] - a[1] ||
-            sections.indexOf(a[0] as HTMLElement) -
-              sections.indexOf(b[0] as HTMLElement),
+            sections.indexOf(a[0] as HTMLElement) - sections.indexOf(b[0] as HTMLElement),
         )[0]?.[0] as HTMLElement | undefined;
 
         const scene = active?.dataset.landingScene;
@@ -91,10 +80,7 @@ export default function StoryAtmosphere() {
         className="story-atmosphere__orb story-atmosphere__orb--secondary"
       />
 
-      <div
-        data-landing-motion="decorative"
-        className="story-atmosphere__constellation"
-      />
+      <div data-landing-motion="decorative" className="story-atmosphere__constellation" />
 
       <div className="story-atmosphere__grid" />
 

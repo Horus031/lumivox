@@ -44,7 +44,6 @@ export async function refreshNativeTaskRiskPredictionsAction(): Promise<
       },
     });
 
-
     return {
       success: true,
       message: `Updated ${response.predictions.length} task risk prediction(s).`,
@@ -64,14 +63,13 @@ export async function refreshNativeTaskRiskPredictionsAction(): Promise<
   }
 }
 
-
 const rescheduleTaskSchema = z.object({
   taskId: z.string().uuid(),
   daysToAdd: z.coerce.number().int().min(1).max(14),
 });
 
 export async function rescheduleTaskFromRiskAlertAction(
-  input: z.infer<typeof rescheduleTaskSchema>
+  input: z.infer<typeof rescheduleTaskSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase, user } = await requireUser();
@@ -147,7 +145,6 @@ export async function rescheduleTaskFromRiskAlertAction(
       };
     }
 
-
     return {
       success: true,
       message: `Task deadline moved ${parsed.data.daysToAdd} day(s) later. Refresh risk to recalculate.`,
@@ -156,10 +153,7 @@ export async function rescheduleTaskFromRiskAlertAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while rescheduling task.",
+      message: error instanceof Error ? error.message : "Unexpected error while rescheduling task.",
     };
   }
 }

@@ -1,13 +1,4 @@
-import {
-  BarChart3,
-  Brain,
-  CheckSquare,
-  Coins,
-  Sparkles,
-  Target,
-  Timer,
-  Users,
-} from "lucide-react";
+import { BarChart3, Brain, CheckSquare, Coins, Sparkles, Target, Timer, Users } from "lucide-react";
 
 export const features = [
   {

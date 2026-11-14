@@ -21,20 +21,17 @@ export async function generateCurrentPbiSnapshotAction(): Promise<ActionResult> 
       };
     }
 
-    const response = await fetch(
-      `${process.env.AI_API_BASE_URL}/api/v1/pbi/generate-snapshot`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-lumivox-internal-key": process.env.AI_INTERNAL_API_KEY ?? "",
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-        }),
-        cache: "no-store",
+    const response = await fetch(`${process.env.AI_API_BASE_URL}/api/v1/pbi/generate-snapshot`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-lumivox-internal-key": process.env.AI_INTERNAL_API_KEY ?? "",
       },
-    );
+      body: JSON.stringify({
+        user_id: user.id,
+      }),
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -47,7 +44,6 @@ export async function generateCurrentPbiSnapshotAction(): Promise<ActionResult> 
 
     const data = await response.json();
 
-
     return {
       success: true,
       message: "PBI snapshot refreshed successfully.",
@@ -57,9 +53,7 @@ export async function generateCurrentPbiSnapshotAction(): Promise<ActionResult> 
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while generating PBI snapshot.",
+        error instanceof Error ? error.message : "Unexpected error while generating PBI snapshot.",
     };
   }
 }

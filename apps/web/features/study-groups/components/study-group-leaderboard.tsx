@@ -24,11 +24,7 @@ function getRankLabel(rank: number) {
   return `#${rank}`;
 }
 
-export function StudyGroupLeaderboard({
-  weekStart,
-  weekEnd,
-  rows,
-}: StudyGroupLeaderboardProps) {
+export function StudyGroupLeaderboard({ weekStart, weekEnd, rows }: StudyGroupLeaderboardProps) {
   const locale = useLocale();
   const t = useTranslations("groups.leaderboardPanel");
   const dateFormatter = new Intl.DateTimeFormat(locale, {
@@ -40,30 +36,21 @@ export function StudyGroupLeaderboard({
     <section className="min-w-0 border-t border-border pt-card">
       <div className="flex flex-col justify-between gap-3 md:flex-row md:items-start">
         <div>
-          <p className="text-caption font-medium text-muted-foreground">
-            {t("eyebrow")}
-          </p>
+          <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
-          <h2 className="mt-2 text-section font-semibold text-foreground">
-            {t("title")}
-          </h2>
+          <h2 className="mt-2 text-section font-semibold text-foreground">{t("title")}</h2>
 
           <p className="mt-2 text-body text-secondary-text">
-            {dateFormatter.format(new Date(weekStart))} -{" "}
-            {dateFormatter.format(new Date(weekEnd))}
+            {dateFormatter.format(new Date(weekStart))} - {dateFormatter.format(new Date(weekEnd))}
           </p>
         </div>
 
-        <p className="text-caption text-muted-foreground">
-          {t("scoreFormula")}
-        </p>
+        <p className="text-caption text-muted-foreground">{t("scoreFormula")}</p>
       </div>
 
       {rows.length === 0 ? (
         <div className="mt-5 border-t border-border py-card text-center">
-          <p className="text-body text-secondary-text">
-            {t("empty")}
-          </p>
+          <p className="text-body text-secondary-text">{t("empty")}</p>
         </div>
       ) : (
         <div className="mt-card min-w-0 overflow-x-auto" tabIndex={0} aria-label={t("title")}>
@@ -99,22 +86,16 @@ export function StudyGroupLeaderboard({
                     <p className="max-w-48 font-medium text-foreground [overflow-wrap:anywhere]">
                       {displayUser(row)}
                     </p>
-                    <p className="text-caption text-muted-foreground">
-                      {t(`roles.${row.role}`)}
-                    </p>
+                    <p className="text-caption text-muted-foreground">{t(`roles.${row.role}`)}</p>
                   </td>
 
                   <td className="px-3 py-3 text-secondary-text">
                     {t("minutes", { count: row.focus_minutes })}
                   </td>
 
-                  <td className="px-3 py-3 text-secondary-text">
-                    {row.completed_tasks}
-                  </td>
+                  <td className="px-3 py-3 text-secondary-text">{row.completed_tasks}</td>
 
-                  <td className="px-3 py-3 font-semibold text-foreground">
-                    {row.score}
-                  </td>
+                  <td className="px-3 py-3 font-semibold text-foreground">{row.score}</td>
                 </tr>
               ))}
             </tbody>

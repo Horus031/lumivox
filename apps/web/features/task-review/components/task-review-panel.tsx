@@ -16,10 +16,7 @@ import { Button } from "@/components/ui/button";
 
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 
-import {
-  getLatestTaskReviewAction,
-  requestTaskReviewAction,
-} from "../task-review.actions";
+import { getLatestTaskReviewAction, requestTaskReviewAction } from "../task-review.actions";
 
 import type { TaskReviewAttempt } from "../task-review.types";
 
@@ -37,11 +34,7 @@ type TaskReviewPanelProps = {
   onTaskChanged: () => void;
 };
 
-export function TaskReviewPanel({
-  task,
-  subtasks,
-  onTaskChanged,
-}: TaskReviewPanelProps) {
+export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPanelProps) {
   const t = useTranslations("taskReview");
 
   const locale = useLocale();
@@ -60,8 +53,7 @@ export function TaskReviewPanel({
     locale === "vi" ? "vi" : locale === "en" ? "en" : "auto";
 
   const blockingSubtasks = subtasks.filter(
-    (subtask) =>
-      subtask.status !== "completed" && subtask.status !== "cancelled",
+    (subtask) => subtask.status !== "completed" && subtask.status !== "cancelled",
   );
 
   const taskCanGenerate =
@@ -178,21 +170,13 @@ export function TaskReviewPanel({
       <div className="border-y border-border py-card">
         <Sparkles className="h-5 w-5 text-primary" />
 
-        <h3 className="mt-3 text-section font-semibold text-foreground">
-          {t("generatingTitle")}
-        </h3>
+        <h3 className="mt-3 text-section font-semibold text-foreground">{t("generatingTitle")}</h3>
 
-        <p className="mt-2 text-body text-secondary-text">
-          {t("generatingDescription")}
-        </p>
+        <p className="mt-2 text-body text-secondary-text">{t("generatingDescription")}</p>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-4"
-          onClick={() => void loadLatest()}
-        >
-          <RefreshCw aria-hidden="true" />{t("refresh")}
+        <Button type="button" variant="outline" className="mt-4" onClick={() => void loadLatest()}>
+          <RefreshCw aria-hidden="true" />
+          {t("refresh")}
         </Button>
       </div>
     );
@@ -220,13 +204,9 @@ export function TaskReviewPanel({
             {attempt.assessment.title}
           </h3>
 
-          <p className="mt-2 text-body text-secondary-text">
-            {attempt.assessment.summary}
-          </p>
+          <p className="mt-2 text-body text-secondary-text">{attempt.assessment.summary}</p>
 
-          <p className="mt-3 text-caption text-muted-foreground">
-            {sourceLabel(attempt)}
-          </p>
+          <p className="mt-3 text-caption text-muted-foreground">{sourceLabel(attempt)}</p>
         </div>
 
         <TaskReviewFlashcards flashcards={attempt.assessment.flashcards} />
@@ -239,9 +219,7 @@ export function TaskReviewPanel({
   if (attempt?.status === "passed" || attempt?.status === "failed") {
     return (
       <div className="min-w-0 space-y-section">
-        <p className="text-caption text-muted-foreground">
-          {sourceLabel(attempt)}
-        </p>
+        <p className="text-caption text-muted-foreground">{sourceLabel(attempt)}</p>
 
         {attempt.assessment ? (
           <TaskReviewFlashcards flashcards={attempt.assessment.flashcards} />
@@ -253,16 +231,9 @@ export function TaskReviewPanel({
           <div className="border-t border-border pt-card">
             <h3 className="text-section font-semibold text-foreground">{t("retryTitle")}</h3>
 
-            <p className="mt-2 text-body text-secondary-text">
-              {t("retryDescription")}
-            </p>
+            <p className="mt-2 text-body text-secondary-text">{t("retryDescription")}</p>
 
-            <Button
-              type="button"
-              className="mt-4"
-              disabled={isGenerating}
-              onClick={handleGenerate}
-            >
+            <Button type="button" className="mt-4" disabled={isGenerating} onClick={handleGenerate}>
               <Sparkles aria-hidden="true" />
 
               {isGenerating ? t("generating") : t("generateAgain")}
@@ -273,27 +244,17 @@ export function TaskReviewPanel({
     );
   }
 
-  if (
-    attempt?.status === "generation_failed" ||
-    attempt?.status === "cancelled"
-  ) {
+  if (attempt?.status === "generation_failed" || attempt?.status === "cancelled") {
     return (
       <div className="border-y border-border py-card">
-        <h3 className="text-section font-semibold text-foreground">
-          {t("generationFailedTitle")}
-        </h3>
+        <h3 className="text-section font-semibold text-foreground">{t("generationFailedTitle")}</h3>
 
         <p className="mt-2 text-body text-secondary-text">
           {attempt.generation_error || t("generationFailedDescription")}
         </p>
 
         {taskCanGenerate ? (
-          <Button
-            type="button"
-            className="mt-4"
-            disabled={isGenerating}
-            onClick={handleGenerate}
-          >
+          <Button type="button" className="mt-4" disabled={isGenerating} onClick={handleGenerate}>
             <Sparkles />
 
             {isGenerating ? t("generating") : t("retryGeneration")}
@@ -338,12 +299,7 @@ export function TaskReviewPanel({
       <div className="border-y border-border py-card">
         <p className="text-body text-muted-foreground">{t("missingAttempt")}</p>
 
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-4"
-          onClick={() => void loadLatest()}
-        >
+        <Button type="button" variant="outline" className="mt-4" onClick={() => void loadLatest()}>
           {t("refresh")}
         </Button>
       </div>
@@ -363,16 +319,10 @@ export function TaskReviewPanel({
       <div>
         <h3 className="text-section font-semibold text-foreground">{t("generateTitle")}</h3>
 
-        <p className="mt-2 text-body text-secondary-text">
-          {t("generateDescription")}
-        </p>
+        <p className="mt-2 text-body text-secondary-text">{t("generateDescription")}</p>
       </div>
 
-      <Button
-        type="button"
-        disabled={!taskCanGenerate || isGenerating}
-        onClick={handleGenerate}
-      >
+      <Button type="button" disabled={!taskCanGenerate || isGenerating} onClick={handleGenerate}>
         <Sparkles />
 
         {isGenerating ? t("generating") : t("generate")}

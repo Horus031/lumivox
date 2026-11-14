@@ -196,7 +196,6 @@ changes in the same release that removes application compatibility.
 
 Prefer expand -> deploy -> contract migrations for production database changes.
 
-
 ## Python development environment
 
 The AI API runtime is pinned in `.python-version`. Use that same Python minor

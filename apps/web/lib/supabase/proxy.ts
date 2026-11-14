@@ -28,17 +28,14 @@ function isProtectedPath(pathname: string) {
   const pathWithoutLocale = removeLocalePrefix(pathname);
 
   return PROTECTED_PATH_PREFIXES.some(
-    (path) =>
-      pathWithoutLocale === path || pathWithoutLocale.startsWith(`${path}/`),
+    (path) => pathWithoutLocale === path || pathWithoutLocale.startsWith(`${path}/`),
   );
 }
 
 function getLocaleFromPathname(pathname: string) {
   const [, maybeLocale] = pathname.split("/");
 
-  return hasLocale(routing.locales, maybeLocale)
-    ? maybeLocale
-    : routing.defaultLocale;
+  return hasLocale(routing.locales, maybeLocale) ? maybeLocale : routing.defaultLocale;
 }
 
 function removeLocalePrefix(pathname: string) {
@@ -74,9 +71,7 @@ export async function updateSession(
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options),
           );

@@ -10,9 +10,8 @@ export function AuthWatercolor() {
     if (!canvas) return;
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobile = window.matchMedia("(max-width: 767px)");
-    const connection = (
-      navigator as Navigator & { connection?: { saveData?: boolean } }
-    ).connection;
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } })
+      .connection;
     let stopped = false;
     let frame = 0;
     let timer = 0;
@@ -30,11 +29,7 @@ export function AuthWatercolor() {
       last = now;
       try {
         if (
-          !engine.paintWatercolor(
-            canvas,
-            time,
-            document.documentElement.classList.contains("dark"),
-          )
+          !engine.paintWatercolor(canvas, time, document.documentElement.classList.contains("dark"))
         )
           return;
       } catch {
@@ -86,8 +81,7 @@ export function AuthWatercolor() {
         });
     };
     const loadTimer = window.setTimeout(() => {
-      if (window.requestIdleCallback)
-        idle = window.requestIdleCallback(load, { timeout: 1500 });
+      if (window.requestIdleCallback) idle = window.requestIdleCallback(load, { timeout: 1500 });
       else load();
     }, 600);
     return () => {
@@ -103,7 +97,5 @@ export function AuthWatercolor() {
     };
   }, []);
 
-  return (
-    <canvas ref={canvasRef} className="auth-watercolor" aria-hidden="true" />
-  );
+  return <canvas ref={canvasRef} className="auth-watercolor" aria-hidden="true" />;
 }

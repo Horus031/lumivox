@@ -58,15 +58,19 @@ export function AdminNativeTaskRiskMetricsOverview({ metrics }: Props) {
       <AdminMetricCard
         label={t("highElevated.label")}
         value={`${value(metrics?.high_risk_predictions)} / ${value(
-          metrics?.elevated_risk_predictions
+          metrics?.elevated_risk_predictions,
         )}`}
         description={t("highElevated.description")}
       />
 
       <article className="min-w-0 rounded-lg border border-border bg-card p-card [overflow-wrap:anywhere]">
         <p className="text-label font-medium text-secondary-text">{t("activeModel.label")}</p>
-        <p className="mt-2 text-section font-semibold text-foreground">{metrics?.active_algorithm ?? t("notAvailable")}</p>
-        <p className="mt-1 text-caption text-muted-foreground">{metrics?.active_model_version ?? t("activeModel.empty")}</p>
+        <p className="mt-2 text-section font-semibold text-foreground">
+          {metrics?.active_algorithm ?? t("notAvailable")}
+        </p>
+        <p className="mt-1 text-caption text-muted-foreground">
+          {metrics?.active_model_version ?? t("activeModel.empty")}
+        </p>
       </article>
     </section>
   );

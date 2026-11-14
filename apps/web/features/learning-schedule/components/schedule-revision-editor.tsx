@@ -8,7 +8,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useScheduleDialogFocus } from "../use-schedule-dialog-focus";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { reviseStudyScheduleAction } from "../schedule-revision.actions";
 import { getStudyScheduleEditorAction } from "../schedule-editor.queries.actions";
 import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-engine";
@@ -37,7 +43,9 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
 
   useEffect(() => {
     mounted.current = true;
-    return () => { mounted.current = false; };
+    return () => {
+      mounted.current = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -48,7 +56,10 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       try {
         const result = await getStudyScheduleEditorAction(scheduleId);
         if (cancelled) return;
-        if (!result.success) { setError(t(`errors.${result.code ?? "loadFailed"}`)); return; }
+        if (!result.success) {
+          setError(t(`errors.${result.code ?? "loadFailed"}`));
+          return;
+        }
         setLoaded({ revision: result.revision, draft: result.draft });
         setConflict(false);
       } catch {
@@ -58,7 +69,9 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       }
     }
     void load();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [scheduleId, reload, t]);
 
   function review(draft: StudyScheduleInput) {
@@ -68,8 +81,10 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       const now = Temporal.Now.instant();
       const today = now.toZonedDateTimeISO(draft.timezone).toPlainDate();
       const occurrences = generateStudyOccurrences(draft);
-      if (Temporal.PlainDate.compare(draft.startsOn, today) < 0 ||
-        occurrences.some(x => Temporal.Instant.compare(x.scheduledStartAt, now) <= 0)) {
+      if (
+        Temporal.PlainDate.compare(draft.startsOn, today) < 0 ||
+        occurrences.some((x) => Temporal.Instant.compare(x.scheduledStartAt, now) <= 0)
+      ) {
         setError(t("errors.futureDates"));
         return;
       }
@@ -87,7 +102,11 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
     setError(null);
     startSaving(async () => {
       try {
-        const result = await reviseStudyScheduleAction({ scheduleId, expectedRevision: loaded.revision, ...draft });
+        const result = await reviseStudyScheduleAction({
+          scheduleId,
+          expectedRevision: loaded.revision,
+          ...draft,
+        });
         if (!mounted.current) return;
         setPending(null);
         if (!result.success) {
@@ -99,7 +118,10 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
         onSaved();
         router.refresh();
       } catch {
-        if (mounted.current) { setPending(null); setError(t("errors.saveFailed")); }
+        if (mounted.current) {
+          setPending(null);
+          setError(t("errors.saveFailed"));
+        }
       } finally {
         inFlight.current = false;
       }
@@ -107,37 +129,96 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
   }
 
   if (loading) return <p role="status">{t("loadingEditor")}</p>;
-  if (!loaded) return <div role="alert" className="space-y-2">
-    <p>{error ?? t("errors.loadFailed")}</p>
-    <Button type="button" onClick={() => setReload(x => x + 1)}>{t("retry")}</Button>
-    <Button type="button" variant="outline" onClick={onCancel}>{t("close")}</Button>
-  </div>;
+  if (!loaded)
+    return (
+      <div role="alert" className="space-y-2">
+        <p>{error ?? t("errors.loadFailed")}</p>
+        <Button type="button" onClick={() => setReload((x) => x + 1)}>
+          {t("retry")}
+        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>
+          {t("close")}
+        </Button>
+      </div>
+    );
 
-  return <section aria-label={t("revisionEditor")} className="min-w-0 space-y-4 [overflow-wrap:anywhere]">
-    <h4 className="font-medium">{t("revisionTitle")}</h4>
-    <p>{t("versions", { current: loaded.revision, next: loaded.revision + 1 })}</p>
-    <p className="text-sm text-muted-foreground">{t("revisionImpact")}</p>
-    {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-    {conflict && <div className="space-y-2">
-      <p>{t("conflictDraft")}</p>
-      <Button type="button" onClick={() => { setLoaded(null); setReload(x => x + 1); }}>{t("discardReload")}</Button>
-    </div>}
-    <fieldset disabled={saving || conflict || pending !== null} aria-busy={saving} className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
-      <ScheduleDraftEditor key={`${scheduleId}-${loaded.revision}`} initialValue={loaded.draft} onContinue={review} />
-    </fieldset>
-    <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>{t("cancel")}</Button>
-    <Dialog open={pending !== null} onOpenChange={open => { if (!open && !inFlight.current) setPending(null); }}>
-      <DialogContent {...dialogFocus.dialogProps} className="max-h-[calc(100dvh-2rem)] overflow-y-auto [overflow-wrap:anywhere]" showCloseButton={false} onEscapeKeyDown={event => { if (inFlight.current) event.preventDefault(); }}
-        onInteractOutside={event => { if (inFlight.current) event.preventDefault(); }}>
-        <DialogTitle>{t("confirmRevisionTitle")}</DialogTitle>
-        <DialogDescription>
-          {t("confirmRevisionImpact", { revision: loaded.revision + 1 })}
-        </DialogDescription>
-        <DialogFooter>
-          <Button type="button" variant="outline" disabled={saving} onClick={() => setPending(null)}>{t("backToDraft")}</Button>
-          <Button type="button" disabled={saving} onClick={save}>{t("confirmRevision")}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </section>;
+  return (
+    <section
+      aria-label={t("revisionEditor")}
+      className="min-w-0 space-y-4 [overflow-wrap:anywhere]"
+    >
+      <h4 className="font-medium">{t("revisionTitle")}</h4>
+      <p>{t("versions", { current: loaded.revision, next: loaded.revision + 1 })}</p>
+      <p className="text-sm text-muted-foreground">{t("revisionImpact")}</p>
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
+      {conflict && (
+        <div className="space-y-2">
+          <p>{t("conflictDraft")}</p>
+          <Button
+            type="button"
+            onClick={() => {
+              setLoaded(null);
+              setReload((x) => x + 1);
+            }}
+          >
+            {t("discardReload")}
+          </Button>
+        </div>
+      )}
+      <fieldset
+        disabled={saving || conflict || pending !== null}
+        aria-busy={saving}
+        className="min-w-0 space-y-3 [overflow-wrap:anywhere]"
+      >
+        <ScheduleDraftEditor
+          key={`${scheduleId}-${loaded.revision}`}
+          initialValue={loaded.draft}
+          onContinue={review}
+        />
+      </fieldset>
+      <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>
+        {t("cancel")}
+      </Button>
+      <Dialog
+        open={pending !== null}
+        onOpenChange={(open) => {
+          if (!open && !inFlight.current) setPending(null);
+        }}
+      >
+        <DialogContent
+          {...dialogFocus.dialogProps}
+          className="max-h-[calc(100dvh-2rem)] overflow-y-auto [overflow-wrap:anywhere]"
+          showCloseButton={false}
+          onEscapeKeyDown={(event) => {
+            if (inFlight.current) event.preventDefault();
+          }}
+          onInteractOutside={(event) => {
+            if (inFlight.current) event.preventDefault();
+          }}
+        >
+          <DialogTitle>{t("confirmRevisionTitle")}</DialogTitle>
+          <DialogDescription>
+            {t("confirmRevisionImpact", { revision: loaded.revision + 1 })}
+          </DialogDescription>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={saving}
+              onClick={() => setPending(null)}
+            >
+              {t("backToDraft")}
+            </Button>
+            <Button type="button" disabled={saving} onClick={save}>
+              {t("confirmRevision")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
 }

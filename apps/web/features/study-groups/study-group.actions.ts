@@ -60,21 +60,15 @@ export async function createStudyGroupAction(
       };
     }
 
-    const { error: memberError } = await supabase
-      .from("study_room_members")
-      .insert({
-        room_id: group.id,
-        user_id: user.id,
-        role: "owner",
-        membership_status: "active",
-      });
+    const { error: memberError } = await supabase.from("study_room_members").insert({
+      room_id: group.id,
+      user_id: user.id,
+      role: "owner",
+      membership_status: "active",
+    });
 
     if (memberError) {
-      await supabase
-        .from("study_rooms")
-        .delete()
-        .eq("id", group.id)
-        .eq("owner_id", user.id);
+      await supabase.from("study_rooms").delete().eq("id", group.id).eq("owner_id", user.id);
 
       return {
         success: false,
@@ -95,9 +89,7 @@ export async function createStudyGroupAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while creating study group.",
+        error instanceof Error ? error.message : "Unexpected error while creating study group.",
     };
   }
 }
@@ -163,24 +155,21 @@ export async function inviteStudyGroupMemberAction(
     if (!targetUserId) {
       return {
         success: false,
-        message:
-          "No Lumivox account was found with this email. Ask them to sign up first.",
+        message: "No Lumivox account was found with this email. Ask them to sign up first.",
       };
     }
 
-    const { error: insertError } = await supabase
-      .from("study_room_members")
-      .upsert(
-        {
-          room_id: groupId,
-          user_id: targetUserId,
-          role: "member",
-          membership_status: "active",
-        },
-        {
-          onConflict: "room_id,user_id",
-        },
-      );
+    const { error: insertError } = await supabase.from("study_room_members").upsert(
+      {
+        room_id: groupId,
+        user_id: targetUserId,
+        role: "member",
+        membership_status: "active",
+      },
+      {
+        onConflict: "room_id,user_id",
+      },
+    );
 
     if (insertError) {
       return {
@@ -200,10 +189,7 @@ export async function inviteStudyGroupMemberAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while inviting member.",
+      message: error instanceof Error ? error.message : "Unexpected error while inviting member.",
     };
   }
 }
@@ -292,10 +278,7 @@ export async function sendStudyGroupMessageAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while sending message.",
+      message: error instanceof Error ? error.message : "Unexpected error while sending message.",
     };
   }
 }
@@ -315,8 +298,7 @@ export async function upsertStudyGroupWeeklyChallengeAction(
       };
     }
 
-    const { groupId, title, targetFocusMinutes, targetCompletedTasks } =
-      parsed.data;
+    const { groupId, title, targetFocusMinutes, targetCompletedTasks } = parsed.data;
 
     const { data: membership, error: membershipError } = await supabase
       .from("study_room_members")
@@ -345,22 +327,20 @@ export async function upsertStudyGroupWeeklyChallengeAction(
 
     const { weekStart, weekEnd } = getCurrentWeekRange();
 
-    const { error } = await supabase
-      .from("study_group_weekly_challenges")
-      .upsert(
-        {
-          group_id: groupId,
-          created_by: user.id,
-          week_start: weekStart,
-          week_end: weekEnd,
-          title,
-          target_focus_minutes: targetFocusMinutes,
-          target_completed_tasks: targetCompletedTasks,
-        },
-        {
-          onConflict: "group_id,week_start",
-        },
-      );
+    const { error } = await supabase.from("study_group_weekly_challenges").upsert(
+      {
+        group_id: groupId,
+        created_by: user.id,
+        week_start: weekStart,
+        week_end: weekEnd,
+        title,
+        target_focus_minutes: targetFocusMinutes,
+        target_completed_tasks: targetCompletedTasks,
+      },
+      {
+        onConflict: "group_id,week_start",
+      },
+    );
 
     if (error) {
       return {
@@ -380,9 +360,7 @@ export async function upsertStudyGroupWeeklyChallengeAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while saving weekly challenge.",
+        error instanceof Error ? error.message : "Unexpected error while saving weekly challenge.",
     };
   }
 }

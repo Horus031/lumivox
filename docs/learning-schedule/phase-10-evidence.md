@@ -10,17 +10,17 @@
 
 ### Metric definitions
 
-| Signal | Definition |
-| --- | --- |
-| `dispatch.pendingDue` | Pending jobs whose due and retry timestamps are both at or before the snapshot. Age is measured from the oldest qualifying `due_at`. It is null when the set is empty. |
-| `dispatch.activeLeases`, `dispatch.expiredLeases` | Leased jobs split at `lease_until`, with equality in the expired set. |
-| `dispatch.uncertainAttempts` | Current uncertain delivery attempt rows across both existing providers. |
-| `dispatch.unmatchedWebhooks` | Unmatched receipts. Age uses receipt ingestion time, independent of provider timestamps. |
-| `dispatch.acceptedSubmissions24h` | Resend attempts with provider acceptance in the last 24 hours. An accepted attempt can later bounce. |
-| `dispatch.deliveryFailures24h` | Resend attempts currently failed, bounced or complained and updated in the last 24 hours. This is a status-based diagnostic gauge. |
-| `missedSweep.eligibleBacklog` | Scheduled occurrences past the inclusive 60-minute grace boundary, on active schedules for eligible root Tasks. Locks and gates are evaluated separately from this read. |
-| `focus.activeSessions` | Ongoing and paused Focus sessions. |
-| Focus launch conflicts | Countable FastAPI `study_focus_launch_conflict` events with allowlisted outcomes for HTTP 409, 423 and 429. Counts come from the log collector. The snapshot contains the active Focus gauge. |
+| Signal                                            | Definition                                                                                                                                                                                    |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dispatch.pendingDue`                             | Pending jobs whose due and retry timestamps are both at or before the snapshot. Age is measured from the oldest qualifying `due_at`. It is null when the set is empty.                        |
+| `dispatch.activeLeases`, `dispatch.expiredLeases` | Leased jobs split at `lease_until`, with equality in the expired set.                                                                                                                         |
+| `dispatch.uncertainAttempts`                      | Current uncertain delivery attempt rows across both existing providers.                                                                                                                       |
+| `dispatch.unmatchedWebhooks`                      | Unmatched receipts. Age uses receipt ingestion time, independent of provider timestamps.                                                                                                      |
+| `dispatch.acceptedSubmissions24h`                 | Resend attempts with provider acceptance in the last 24 hours. An accepted attempt can later bounce.                                                                                          |
+| `dispatch.deliveryFailures24h`                    | Resend attempts currently failed, bounced or complained and updated in the last 24 hours. This is a status-based diagnostic gauge.                                                            |
+| `missedSweep.eligibleBacklog`                     | Scheduled occurrences past the inclusive 60-minute grace boundary, on active schedules for eligible root Tasks. Locks and gates are evaluated separately from this read.                      |
+| `focus.activeSessions`                            | Ongoing and paused Focus sessions.                                                                                                                                                            |
+| Focus launch conflicts                            | Countable FastAPI `study_focus_launch_conflict` events with allowlisted outcomes for HTTP 409, 423 and 429. Counts come from the log collector. The snapshot contains the active Focus gauge. |
 
 ### Health and alert policy
 
@@ -36,31 +36,31 @@
 
 Executed local `EXPLAIN (ANALYZE, BUFFERS)` on scratch distributions of 30,000 rows per queue, receipt and delivery table. The fixture recreated the existing claim index and compared the same queries before and after adding the measured partial indexes.
 
-| Query | Baseline → candidate execution time |
-| --- | --- |
-| Due backlog ordered by due date | 0.670 → 0.327 ms. Ordered index scan removed the sort. |
-| Unmatched receipts ordered by ingestion | 3.124 → 0.329 ms. Removed a full receipt scan. |
-| Uncertain attempts | 3.222 → 0.199 ms. Removed a full delivery scan. |
+| Query                                      | Baseline → candidate execution time                                                                                                                       |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Due backlog ordered by due date            | 0.670 → 0.327 ms. Ordered index scan removed the sort.                                                                                                    |
+| Unmatched receipts ordered by ingestion    | 3.124 → 0.329 ms. Removed a full receipt scan.                                                                                                            |
+| Uncertain attempts                         | 3.222 → 0.199 ms. Removed a full delivery scan.                                                                                                           |
 | Accepted submissions, quiet 24-hour window | 3.482 → 0.027 ms. Removed a full delivery scan for zero results. In the busy capped fixture the candidate cost 0.319 ms versus 0.231 ms for the baseline. |
-| Recent delivery failures | 3.460 → 0.042 ms. Removed a full delivery scan for five matches. |
+| Recent delivery failures                   | 3.460 → 0.042 ms. Removed a full delivery scan for five matches.                                                                                          |
 
 The migration reuses existing lease, scheduled-end and active-Focus indexes. These measurements describe the scratch distribution and are separate from the Phase 10C load and latency work.
 
 ### Executed gates
 
-| Gate | Actual result |
-| --- | --- |
-| Local migration replay / types | **PASS**, 93 migrations and generated local TypeScript types |
-| Full pgTAP | **PASS**, 973 assertions across 35 entries, including 22 new assertions and one existing fixture-only skip |
-| Targeted Vitest | **PASS**, 11 tests in 2 files |
-| Full Vitest | **PASS**, 1,068 passed / 26 skipped, 93 files passed / 5 skipped, 241.18s |
-| FastAPI Focus V2 regression | **PASS**, 9 tests including conflict log redaction |
-| Chromium Phase 09 regression | **PASS**, 5 tests in 1.3 minutes. Live local FastAPI emitted the allowlisted `activeFocusConflict` outcome during the race tests. |
-| ESLint | **PASS**, zero errors and one existing missing-`projection` dependency warning |
-| Standalone TypeScript | **PASS** |
-| Next.js production build | **PASS**, 16.2.6, compiled in 21.5s, 106 pages. The npm prebuild cleanup was skipped. |
-| Local HTTP integration | **PASS** against the Next.js production build and local Supabase. Missing, wrong and dispatcher credentials returned 401. POST returned 405. Idle gates-OFF returned 200/normal and the seeded uncertain attempt returned 200/attention. Pausing local PostgREST returned 503/unknown and unpausing restored 200. |
-| Security advisors | Existing mutable search-path warning for `public.set_updated_at`. No new findings. |
+| Gate                           | Actual result                                                                                                                                                                                                                                                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Local migration replay / types | **PASS**, 93 migrations and generated local TypeScript types                                                                                                                                                                                                                                                      |
+| Full pgTAP                     | **PASS**, 973 assertions across 35 entries, including 22 new assertions and one existing fixture-only skip                                                                                                                                                                                                        |
+| Targeted Vitest                | **PASS**, 11 tests in 2 files                                                                                                                                                                                                                                                                                     |
+| Full Vitest                    | **PASS**, 1,068 passed / 26 skipped, 93 files passed / 5 skipped, 241.18s                                                                                                                                                                                                                                         |
+| FastAPI Focus V2 regression    | **PASS**, 9 tests including conflict log redaction                                                                                                                                                                                                                                                                |
+| Chromium Phase 09 regression   | **PASS**, 5 tests in 1.3 minutes. Live local FastAPI emitted the allowlisted `activeFocusConflict` outcome during the race tests.                                                                                                                                                                                 |
+| ESLint                         | **PASS**, zero errors and one existing missing-`projection` dependency warning                                                                                                                                                                                                                                    |
+| Standalone TypeScript          | **PASS**                                                                                                                                                                                                                                                                                                          |
+| Next.js production build       | **PASS**, 16.2.6, compiled in 21.5s, 106 pages. The npm prebuild cleanup was skipped.                                                                                                                                                                                                                             |
+| Local HTTP integration         | **PASS** against the Next.js production build and local Supabase. Missing, wrong and dispatcher credentials returned 401. POST returned 405. Idle gates-OFF returned 200/normal and the seeded uncertain attempt returned 200/attention. Pausing local PostgREST returned 503/unknown and unpausing restored 200. |
+| Security advisors              | Existing mutable search-path warning for `public.set_updated_at`. No new findings.                                                                                                                                                                                                                                |
 
 ### Acceptance and reproduction
 
@@ -112,46 +112,46 @@ For the Phase 09 browser regression, reuse the loopback FastAPI/proxy and fixtur
 
 ### Notification recovery and observability
 
-| Case | Actual result |
-| --- | --- |
-| FR-01 | Child terminated after claim commit. One expired lease was visible. Restart recovered and sent once to the fake provider, using the existing key. Attempt count advanced from 1 to 2. |
-| FR-02 | Child terminated after payload preparation. Restart used the same persisted envelope and token, with one fake submission and no duplicate token. |
-| FR-03 | Child terminated after durable handoff, before provider invocation. Restart cleared the expired lease and converted the single submitting delivery to uncertain. The failed job stayed held with zero submissions. |
-| FR-04 | The fake provider recorded acceptance and destroyed the socket. The worker persisted uncertain. Restart performed zero further submissions. Trusted correlation using the fake provider's known ID settled the same handoff and cleared the uncertain gauge. |
-| FR-05 | Real PostgreSQL trigger forced the outcome write to roll back with `P0001` after fake acceptance. The committed handoff remained submitting. On lease expiry, restart moved it to uncertain without sending again. Trusted correlation settled that same row. |
-| FR-06–FR-07 | A delivery webhook reached the existing ingestion RPC before outcome persistence. The unmatched gauge moved from 1 to 0 after correlation. Duplicate and older events left the delivery in `delivered`, with two unique receipts and one submission total. |
-| FR-08 | Both commit orders ran. Opt-out before handoff produced zero submissions. Opt-out after handoff preserved the committed attempt and its one accepted outcome. Consent was OFF in both final states. |
-| FR-09 | After a successful fake batch, disabling Dispatch made the next batch inspect zero jobs. Its pending job kept attempt count 0. |
-| FR-10 | After a prepared-payload crash, the wrong key failed closed, retained the one payload/token and made zero provider calls. Restoring the key while one attempt remained reused the same payload and key and submitted once. |
+| Case        | Actual result                                                                                                                                                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-01       | Child terminated after claim commit. One expired lease was visible. Restart recovered and sent once to the fake provider, using the existing key. Attempt count advanced from 1 to 2.                                                                         |
+| FR-02       | Child terminated after payload preparation. Restart used the same persisted envelope and token, with one fake submission and no duplicate token.                                                                                                              |
+| FR-03       | Child terminated after durable handoff, before provider invocation. Restart cleared the expired lease and converted the single submitting delivery to uncertain. The failed job stayed held with zero submissions.                                            |
+| FR-04       | The fake provider recorded acceptance and destroyed the socket. The worker persisted uncertain. Restart performed zero further submissions. Trusted correlation using the fake provider's known ID settled the same handoff and cleared the uncertain gauge.  |
+| FR-05       | Real PostgreSQL trigger forced the outcome write to roll back with `P0001` after fake acceptance. The committed handoff remained submitting. On lease expiry, restart moved it to uncertain without sending again. Trusted correlation settled that same row. |
+| FR-06–FR-07 | A delivery webhook reached the existing ingestion RPC before outcome persistence. The unmatched gauge moved from 1 to 0 after correlation. Duplicate and older events left the delivery in `delivered`, with two unique receipts and one submission total.    |
+| FR-08       | Both commit orders ran. Opt-out before handoff produced zero submissions. Opt-out after handoff preserved the committed attempt and its one accepted outcome. Consent was OFF in both final states.                                                           |
+| FR-09       | After a successful fake batch, disabling Dispatch made the next batch inspect zero jobs. Its pending job kept attempt count 0.                                                                                                                                |
+| FR-10       | After a prepared-payload crash, the wrong key failed closed, retained the one payload/token and made zero provider calls. Restoring the key while one attempt remained reused the same payload and key and submitted once.                                    |
 
 The known-ID correlation in FR-04/05 used fake-provider evidence already available to the harness. This is separate from the automatic restart, which held each unknown outcome. A health snapshot never invokes recovery.
 
 ### Focus and Attendance recovery
 
-| Case | Actual result |
-| --- | --- |
-| FR-11 | The loopback proxy destroyed its downstream socket after the real FastAPI launch returned success. Retry used the identical payload and key and returned the original ID, with one launch record and one attribution. |
-| FR-12 | A separate test withheld the response after upstream success until Next.js timed out. The active Focus gauge stayed at one before and after replay. |
+| Case  | Actual result                                                                                                                                                                                                                                                       |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-11 | The loopback proxy destroyed its downstream socket after the real FastAPI launch returned success. Retry used the identical payload and key and returned the original ID, with one launch record and one attribution.                                               |
+| FR-12 | A separate test withheld the response after upstream success until Next.js timed out. The active Focus gauge stayed at one before and after replay.                                                                                                                 |
 | FR-13 | Two authenticated browser contexts submitted completion of the same segment through Next.js. FastAPI returned 200 and 409. PostgreSQL persisted one completed 1,500-second segment and zero Attendance events. The parent remained active for its remaining rounds. |
-| FR-14 | PostgreSQL reported an Attendance lock wait while the browser completed Focus. After releasing the lock, one manual Attendance event committed. The final snapshot showed zero active Focus sessions. |
-| FR-15 | Launch waited on the Task close transaction and then returned HTTP 410. The snapshot showed zero active Focus sessions and no Focus row was created. |
-| FR-16 | pgTAP injected a real attribution INSERT failure. Focus parent, plan, segments and launch record rolled back. The snapshot agreed with the zero-active state. |
-| FR-17 | The query-action test injected a short page and verified `incompleteData`. The local browser separately verified that a missing persisted segment hid Recorded Focus while Attendance stayed visible. |
-| FR-18 | A fresh browser with no saved launch key opened the existing timer after the uncertain result and retained it on reload. It sent no new launch request. |
+| FR-14 | PostgreSQL reported an Attendance lock wait while the browser completed Focus. After releasing the lock, one manual Attendance event committed. The final snapshot showed zero active Focus sessions.                                                               |
+| FR-15 | Launch waited on the Task close transaction and then returned HTTP 410. The snapshot showed zero active Focus sessions and no Focus row was created.                                                                                                                |
+| FR-16 | pgTAP injected a real attribution INSERT failure. Focus parent, plan, segments and launch record rolled back. The snapshot agreed with the zero-active state.                                                                                                       |
+| FR-17 | The query-action test injected a short page and verified `incompleteData`. The local browser separately verified that a missing persisted segment hid Recorded Focus while Attendance stayed visible.                                                               |
+| FR-18 | A fresh browser with no saved launch key opened the existing timer after the uncertain result and retained it on reload. It sent no new launch request.                                                                                                             |
 
 ### Quality gates
 
-| Gate | Actual result |
-| --- | --- |
-| Full pgTAP | **PASS**, 974 assertions across 35 entries. One new post-rollback snapshot assertion, one existing fixture-only skip. |
-| Recovery harness | **PASS**, 11 notification executions covering FR-01–FR-10, including both opt-out commit orders. Four child processes terminated with SIGTERM. Eight fake submissions total, including the successful batch before gate OFF, and zero real provider requests. |
-| Targeted Vitest | **PASS**, 29 tests in 4 files |
-| Full Vitest | **PASS**, 1,076 passed / 26 skipped, 94 files passed / 5 skipped, 202.81s |
-| FastAPI Focus V2 regression | **PASS**, 9 tests |
-| Chromium Focus and Attendance regression | **PASS**, 7 tests in 1.4 minutes |
-| ESLint | **PASS**, zero errors, one existing missing-`projection` dependency warning |
-| TypeScript | **PASS**, standalone and production build typecheck |
-| Next.js production build | **PASS**, Next.js 16.2.6, compiled in 16.9s. npm prebuild cleanup was skipped. |
+| Gate                                     | Actual result                                                                                                                                                                                                                                                 |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Full pgTAP                               | **PASS**, 974 assertions across 35 entries. One new post-rollback snapshot assertion, one existing fixture-only skip.                                                                                                                                         |
+| Recovery harness                         | **PASS**, 11 notification executions covering FR-01–FR-10, including both opt-out commit orders. Four child processes terminated with SIGTERM. Eight fake submissions total, including the successful batch before gate OFF, and zero real provider requests. |
+| Targeted Vitest                          | **PASS**, 29 tests in 4 files                                                                                                                                                                                                                                 |
+| Full Vitest                              | **PASS**, 1,076 passed / 26 skipped, 94 files passed / 5 skipped, 202.81s                                                                                                                                                                                     |
+| FastAPI Focus V2 regression              | **PASS**, 9 tests                                                                                                                                                                                                                                             |
+| Chromium Focus and Attendance regression | **PASS**, 7 tests in 1.4 minutes                                                                                                                                                                                                                              |
+| ESLint                                   | **PASS**, zero errors, one existing missing-`projection` dependency warning                                                                                                                                                                                   |
+| TypeScript                               | **PASS**, standalone and production build typecheck                                                                                                                                                                                                           |
+| Next.js production build                 | **PASS**, Next.js 16.2.6, compiled in 16.9s. npm prebuild cleanup was skipped.                                                                                                                                                                                |
 
 ### Reproduction
 
@@ -196,12 +196,12 @@ Final database read verified 93 applied migrations, zero fixture users, Tasks, S
 
 ### Study Plan results
 
-| Profile / persona | Samples | p50 / p95 / p99 (ms) | PostgREST calls / rows per request | Mean HTML bytes |
-| --- | ---: | ---: | ---: | ---: |
-| Small, 12 sessions | 15 | 272.01 / 347.62 / 347.62 | 8 / 22 | 179,732 |
-| Small, 20 sessions and 201 links | 15 | 288.75 / 304.65 / 304.65 | 14 / 634 | 179,794 |
-| Medium, 12 sessions | 60 | 877.96 / 916.76 / 925.06 | 8 / 22 | 179,621 |
-| Medium, 1,500 sessions and 201 links | 60 | 3,386.38 / **3,457.98** / 3,487.35 | 54 / 2,554 | 559,372 |
+| Profile / persona                    | Samples |               p50 / p95 / p99 (ms) | PostgREST calls / rows per request | Mean HTML bytes |
+| ------------------------------------ | ------: | ---------------------------------: | ---------------------------------: | --------------: |
+| Small, 12 sessions                   |      15 |           272.01 / 347.62 / 347.62 |                             8 / 22 |         179,732 |
+| Small, 20 sessions and 201 links     |      15 |           288.75 / 304.65 / 304.65 |                           14 / 634 |         179,794 |
+| Medium, 12 sessions                  |      60 |           877.96 / 916.76 / 925.06 |                             8 / 22 |         179,621 |
+| Medium, 1,500 sessions and 201 links |      60 | 3,386.38 / **3,457.98** / 3,487.35 |                         54 / 2,554 |         559,372 |
 
 - Small used **10 owners / 500 Study Sessions / 5 concurrent clients**. Medium used **100 / 10,000 / 20**. The full run reported zero measured Study Plan errors. Both profiles rendered the correct 201-minute effort and showed the incomplete-data state when the proxy shortened a real page while preserving its declared count.
 - The Medium linked owner's peak Next.js working set was **541 MiB**. Across 60 requests, aggregate request time was **197,396 ms**, measured PostgREST round trips were **21,143 ms**, and matching SQL execution time was **2,444 ms**. These are summed measurements from different layers under concurrency.
@@ -209,19 +209,19 @@ Final database read verified 93 applied migrations, zero fixture users, Tasks, S
 
 ### Mutation, Focus and queue results
 
-| Workload | Small | Medium |
-| --- | ---: | ---: |
-| Schedule create p95 | 146.90 ms | 285.43 ms |
-| Schedule revise p95 | 62.53 ms | 197.26 ms |
-| Same-schedule reschedule p95 | 32.33 ms | 27.75 ms |
-| Manual Attendance plus exact replay p95 | 21.61 ms | 130.82 ms |
-| Focus ordinary / attributed create p95 | 35.99 / 24.26 ms | 85.52 / 60.47 ms |
+| Workload                                    |                    Small |                   Medium |
+| ------------------------------------------- | -----------------------: | -----------------------: |
+| Schedule create p95                         |                146.90 ms |                285.43 ms |
+| Schedule revise p95                         |                 62.53 ms |                197.26 ms |
+| Same-schedule reschedule p95                |                 32.33 ms |                 27.75 ms |
+| Manual Attendance plus exact replay p95     |                 21.61 ms |                130.82 ms |
+| Focus ordinary / attributed create p95      |         35.99 / 24.26 ms |         85.52 / 60.47 ms |
 | Focus pause / resume / segment complete p95 | 18.17 / 17.95 / 18.34 ms | 73.87 / 73.27 / 73.44 ms |
-| Focus cancel / active read / replay p95 | 26.24 / 13.64 / 20.67 ms | 60.17 / 22.56 / 58.74 ms |
-| Browser launch via Next.js, one sample | 587.08 ms | 551.84 ms |
-| Queue drain, terminal jobs per second | 13.06 | 15.08 |
-| Queue accepted jobs per second | 12.67 | 14.63 |
-| Queue worker batch p95 | 2,136.87 ms | 1,719.06 ms |
+| Focus cancel / active read / replay p95     | 26.24 / 13.64 / 20.67 ms | 60.17 / 22.56 / 58.74 ms |
+| Browser launch via Next.js, one sample      |                587.08 ms |                551.84 ms |
+| Queue drain, terminal jobs per second       |                    13.06 |                    15.08 |
+| Queue accepted jobs per second              |                    12.67 |                    14.63 |
+| Queue worker batch p95                      |              2,136.87 ms |              1,719.06 ms |
 
 - Real lock waits were observed in both profiles via `pg_blocking_pids()`. Revision versus Attendance finished successfully, with one manual completion event. Task close versus launch returned the expected HTTP 410 with zero attribution. Opt-out versus handoff refused authorization before provider invocation. Per-case statement observations and wall-clock timings are in the JSON.
 - All Focus load samples completed with expected statuses, including HTTP 423 for a new key during active Focus. Exact launch replay returned the original ID with zero extra Focus rows. The transition p95 figures above are below the **500 ms** FastAPI trial target. The one-sample Chromium results represent click-to-timer latency through the full stack.
@@ -255,14 +255,14 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 Build Next.js with `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:8098` and the local publishable key so the benchmark can instrument the Data API. The harness expects `LEARNING_SCHEDULE_TEST_URL=http://127.0.0.1:55321`, local anon/service keys in `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`, and a test-only `AI_INTERNAL_API_KEY`. It starts its own Next.js, FastAPI and loopback proxy processes. Optional positional profile names are `small`, `medium` and `large`.
 
-| Regression gate | Actual result |
-| --- | --- |
-| Full pgTAP | **PASS**, 974 assertions across 35 entries |
-| Full Vitest | **PASS**, 1,076 passed / 26 skipped, 94 files passed / 5 skipped, 194.13s |
-| FastAPI Focus V2 regression | **PASS**, 9 tests |
-| ESLint | **PASS**, zero errors, existing missing-`projection` dependency warning |
-| TypeScript | **PASS**, standalone and Next.js build typecheck |
-| Next.js production build | **PASS**, compiled in 14.2s, 106 pages. npm prebuild cleanup was skipped. |
+| Regression gate             | Actual result                                                             |
+| --------------------------- | ------------------------------------------------------------------------- |
+| Full pgTAP                  | **PASS**, 974 assertions across 35 entries                                |
+| Full Vitest                 | **PASS**, 1,076 passed / 26 skipped, 94 files passed / 5 skipped, 194.13s |
+| FastAPI Focus V2 regression | **PASS**, 9 tests                                                         |
+| ESLint                      | **PASS**, zero errors, existing missing-`projection` dependency warning   |
+| TypeScript                  | **PASS**, standalone and Next.js build typecheck                          |
+| Next.js production build    | **PASS**, compiled in 14.2s, 106 pages. npm prebuild cleanup was skipped. |
 
 The post-benchmark pgTAP rerun also passed all 974 assertions. The final local database had **93 migrations**, zero fixture users, Tasks, Study Sessions, events, Focus sessions, attributions, jobs, deliveries, payloads, tokens and receipts. Dispatch and Missed Sweep were **OFF**, with zero reminder Cron jobs. The harness ports were closed and the provider used only the injected fake SDK port.
 
@@ -284,39 +284,39 @@ The remediation run uses the same Medium fixture generator, machine, loopback pr
 
 ### Measured results
 
-| Medium clients | Samples per persona | Light p50 / p95 / p99 (ms) | Heavy p50 / p95 / p99 (ms) |
-| ---: | ---: | ---: | ---: |
-| 1 | 3 | 85.92 / 123.74 / 123.74 | 237.17 / 250.44 / 250.44 |
-| 5 | 15 | 255.29 / 280.86 / 280.86 | 639.88 / 748.16 / 748.16 |
-| 20 | 60 | 850.79 / 872.06 / 878.72 | 1,979.12 / 2,093.65 / 2,096.17 |
+| Medium clients | Samples per persona | Light p50 / p95 / p99 (ms) |     Heavy p50 / p95 / p99 (ms) |
+| -------------: | ------------------: | -------------------------: | -----------------------------: |
+|              1 |                   3 |    85.92 / 123.74 / 123.74 |       237.17 / 250.44 / 250.44 |
+|              5 |                  15 |   255.29 / 280.86 / 280.86 |       639.88 / 748.16 / 748.16 |
+|             20 |                  60 |   850.79 / 872.06 / 878.72 | 1,979.12 / 2,093.65 / 2,096.17 |
 
 At 20 clients, heavy p95 improved from 3,457.98 ms to **2,093.65 ms**. PostgREST calls fell from 54 to 17 per request, with 2,554 rows per request in the final trial. Mean response size fell from 559,372 to 511,226 bytes. Mean Study Plan, Focus effort and render preparation times were 718.57, 560.86 and 0.07 ms respectively. The process lifetime peak working set was 474,169,344 bytes. Every measured request returned HTTP 200. The short-page probe still rejected incomplete data.
 
 The final timing run isolated Study Plan reads after the pagination change. The earlier complete Medium runs exercised schedule, contention, Focus and the durable retry path. The notification workload ended with 97 sent jobs and three jobs failed for automatic sending, with zero unexpected duplicate submissions. The browser regression also exercises the exact effort total and the preserved Attendance read paths.
 
-| Checkpoint | Result |
-| --- | --- |
-| PE-01 | **PASS**, 60 heavy samples at 20 clients, p95 2,093.65 ms against the unchanged 2,500 ms gate |
-| PE-02 | **PASS**, zero measured errors and short-page rejection at all three concurrency levels |
-| PE-03 | **PASS**, the heavy fixture includes 201 Focus links on one occurrence and checks the complete effort total |
-| PE-04 | **PASS**, existing Attendance formulas retained and covered by the regressions |
-| PE-05 | **PASS**, two confirmed rate limits requeued durably and retried with identical bodies and keys |
-| PE-06 | **PASS**, quota and payload mismatch stayed terminal and pgTAP covered window and claim exhaustion |
-| PE-07 | **PASS**, uncertain timeout stayed on hold for automatic sending |
-| PE-08 | **PASS**, zero unexpected duplicate submissions to the injected provider |
-| PE-09 | **PASS**, full local regression and quality gates below |
-| PE-10 | **PASS**, fixture data removed, harness listeners closed, Dispatch and Missed Sweep OFF |
+| Checkpoint | Result                                                                                                      |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| PE-01      | **PASS**, 60 heavy samples at 20 clients, p95 2,093.65 ms against the unchanged 2,500 ms gate               |
+| PE-02      | **PASS**, zero measured errors and short-page rejection at all three concurrency levels                     |
+| PE-03      | **PASS**, the heavy fixture includes 201 Focus links on one occurrence and checks the complete effort total |
+| PE-04      | **PASS**, existing Attendance formulas retained and covered by the regressions                              |
+| PE-05      | **PASS**, two confirmed rate limits requeued durably and retried with identical bodies and keys             |
+| PE-06      | **PASS**, quota and payload mismatch stayed terminal and pgTAP covered window and claim exhaustion          |
+| PE-07      | **PASS**, uncertain timeout stayed on hold for automatic sending                                            |
+| PE-08      | **PASS**, zero unexpected duplicate submissions to the injected provider                                    |
+| PE-09      | **PASS**, full local regression and quality gates below                                                     |
+| PE-10      | **PASS**, fixture data removed, harness listeners closed, Dispatch and Missed Sweep OFF                     |
 
-| Local gate | Result |
-| --- | --- |
-| Clean migration replay and TypeScript type generation | **PASS**, 94 migrations |
-| pgTAP | **PASS**, 983 assertions across 35 files |
-| Vitest | **PASS**, 1,077 passed and 26 skipped. After the final pagination typecheck fix, all 45 focused Study Plan and Focus effort tests passed again. |
-| FastAPI Focus V2 | **PASS**, 9 tests |
-| Chromium on the final production build | **PASS**, 7 tests in 1.3 minutes |
-| ESLint | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts` |
-| Standalone TypeScript and Next.js production build | **PASS** |
-| Harness syntax and Git diff whitespace | **PASS** |
+| Local gate                                            | Result                                                                                                                                          |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clean migration replay and TypeScript type generation | **PASS**, 94 migrations                                                                                                                         |
+| pgTAP                                                 | **PASS**, 983 assertions across 35 files                                                                                                        |
+| Vitest                                                | **PASS**, 1,077 passed and 26 skipped. After the final pagination typecheck fix, all 45 focused Study Plan and Focus effort tests passed again. |
+| FastAPI Focus V2                                      | **PASS**, 9 tests                                                                                                                               |
+| Chromium on the final production build                | **PASS**, 7 tests in 1.3 minutes                                                                                                                |
+| ESLint                                                | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts`                                                                       |
+| Standalone TypeScript and Next.js production build    | **PASS**                                                                                                                                        |
+| Harness syntax and Git diff whitespace                | **PASS**                                                                                                                                        |
 
 The database after Chromium contained 94 migrations and zero fixture users, Tasks, Study Sessions, session events, Focus sessions, attributions, notification jobs, deliveries, payloads, unsubscribe tokens and webhook receipts. Dispatch and Missed Sweep were both OFF. There were zero reminder Cron jobs and zero listeners on the three harness ports.
 
@@ -355,31 +355,31 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Operational acceptance
 
-| Case | Observed result |
-| --- | --- |
-| OR-01 | **PASS**. The CLI read both persisted gates OFF and zero pending due jobs. The real-send endpoint separately returned HTTP 503 `real_send_disabled`. |
-| OR-02 | **PASS**. Missing, wrong and dispatch credentials returned HTTP 401. CLI denial returned exit 3 with empty stdout. Anonymous and authenticated roles lacked snapshot RPC execution privileges. |
-| OR-03 | **PASS**. The fake provider accepted one submission and dropped the response. The attempt became uncertain, appeared in diagnostics and stayed held after gate re-enable with zero additional submissions. |
-| OR-04 | **PASS**. `pg_blocking_pids()` showed the open claim blocking gate disable. Once disable committed, the next claim returned zero jobs. The bounded RPC released the expired pre-handoff lease to pending with zero deliveries and zero submissions. |
-| OR-05 | **PASS**. Disabling Dispatch while idle consumed zero claims. Disabling before durable handoff produced zero deliveries and zero provider submissions. |
-| OR-06 | **PASS**. Disabling after durable handoff allowed the authorized attempt to finish. One fake submission was recorded and the delivery stayed accepted with the job sent. |
-| OR-07 | **PASS**. The CLI reported one unmatched webhook receipt through the existing aggregate. |
-| OR-08 | **PASS**. Sweep was observed ON then OFF. The gated entrypoint returned zero marked sessions with one eligible session present, and persisted rows were unchanged. |
-| OR-09 | **PASS**. Pausing the local DB caused CLI exit 1 with empty stdout. Diagnostics recovered after DB resume. Stopping the Next.js process also failed closed. |
-| OR-10 | **PASS**. All five CLI commands emitted only approved aggregate fields. Injected private fixture values and credentials were absent, and database contents were unchanged by the reads. |
+| Case  | Observed result                                                                                                                                                                                                                                                                                                                        |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| OR-01 | **PASS**. The CLI read both persisted gates OFF and zero pending due jobs. The real-send endpoint separately returned HTTP 503 `real_send_disabled`.                                                                                                                                                                                   |
+| OR-02 | **PASS**. Missing, wrong and dispatch credentials returned HTTP 401. CLI denial returned exit 3 with empty stdout. Anonymous and authenticated roles lacked snapshot RPC execution privileges.                                                                                                                                         |
+| OR-03 | **PASS**. The fake provider accepted one submission and dropped the response. The attempt became uncertain, appeared in diagnostics and stayed held after gate re-enable with zero additional submissions.                                                                                                                             |
+| OR-04 | **PASS**. `pg_blocking_pids()` showed the open claim blocking gate disable. Once disable committed, the next claim returned zero jobs. The bounded RPC released the expired pre-handoff lease to pending with zero deliveries and zero submissions.                                                                                    |
+| OR-05 | **PASS**. Disabling Dispatch while idle consumed zero claims. Disabling before durable handoff produced zero deliveries and zero provider submissions.                                                                                                                                                                                 |
+| OR-06 | **PASS**. Disabling after durable handoff allowed the authorized attempt to finish. One fake submission was recorded and the delivery stayed accepted with the job sent.                                                                                                                                                               |
+| OR-07 | **PASS**. The CLI reported one unmatched webhook receipt through the existing aggregate.                                                                                                                                                                                                                                               |
+| OR-08 | **PASS**. Sweep was observed ON then OFF. The gated entrypoint returned zero marked sessions with one eligible session present, and persisted rows were unchanged.                                                                                                                                                                     |
+| OR-09 | **PASS**. Pausing the local DB caused CLI exit 1 with empty stdout. Diagnostics recovered after DB resume. Stopping the Next.js process also failed closed.                                                                                                                                                                            |
+| OR-10 | **PASS**. All five CLI commands emitted only approved aggregate fields. Injected private fixture values and credentials were absent, and database contents were unchanged by the reads.                                                                                                                                                |
 | OR-11 | **PASS**. Swapped the current Next.js build for the distinct artifact built from `e333e30a061e36e1e3c3e9309430dbfd395558ed`. Health recovered with both gates OFF, one overdue session and one pending reminder still visible. The Task, Schedule, Session, audit, reminder job and migration-history digest matched before and after. |
-| OR-12 | **PASS**. Cleanup verified 94 migrations, zero fixture rows, both database gates OFF, zero reminder Cron jobs and zero harness listeners. All local regressions below passed. |
+| OR-12 | **PASS**. Cleanup verified 94 migrations, zero fixture rows, both database gates OFF, zero reminder Cron jobs and zero harness listeners. All local regressions below passed.                                                                                                                                                          |
 
 The [operations report](phase-10-operations.json) contains the final drill observations. The notification cases made two total submissions to the fake provider and zero to real Resend. The rollback exercise covered local artifact compatibility and database persistence. Staging, live Resend Tier B and deployment are outside this evidence.
 
-| Local regression | Observed result |
-| --- | --- |
-| Supabase clean replay and pgTAP | **PASS**, 94 migrations, 983 assertions across 35 files |
-| Vitest | **PASS**, 1,077 passed and 26 skipped |
-| FastAPI Focus V2 | **PASS**, 9 tests |
-| Chromium | **PASS**, 7 tests |
-| Next.js production build and TypeScript | **PASS**, 106 generated pages, standalone TypeScript passed |
-| ESLint | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts` |
+| Local regression                        | Observed result                                                           |
+| --------------------------------------- | ------------------------------------------------------------------------- |
+| Supabase clean replay and pgTAP         | **PASS**, 94 migrations, 983 assertions across 35 files                   |
+| Vitest                                  | **PASS**, 1,077 passed and 26 skipped                                     |
+| FastAPI Focus V2                        | **PASS**, 9 tests                                                         |
+| Chromium                                | **PASS**, 7 tests                                                         |
+| Next.js production build and TypeScript | **PASS**, 106 generated pages, standalone TypeScript passed               |
+| ESLint                                  | **PASS**, one existing hook dependency warning in `use-focus-v2-audio.ts` |
 
 ### Reproduction on disposable local Supabase
 

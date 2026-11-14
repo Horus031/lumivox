@@ -1,9 +1,6 @@
 import { z } from "zod";
 
-import {
-  DEFAULT_FOCUS_V2_CONFIG,
-  focusV2ConfigSchema,
-} from "./focus-v2-config.schemas";
+import { DEFAULT_FOCUS_V2_CONFIG, focusV2ConfigSchema } from "./focus-v2-config.schemas";
 
 // A saved preference is reusable across tasks and never stores task identity.
 export const focusV2PreferencesSchema = focusV2ConfigSchema.omit({

@@ -6,9 +6,7 @@ type LandingStoryShellProps = {
   children: ReactNode;
 };
 
-export default function LandingStoryShell({
-  children,
-}: LandingStoryShellProps) {
+export default function LandingStoryShell({ children }: LandingStoryShellProps) {
   return (
     <div className="landing-story relative isolate" data-landing-story>
       <StoryAtmosphere />

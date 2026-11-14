@@ -1,9 +1,5 @@
 import type { Session } from "@supabase/supabase-js";
-import {
-  authResult,
-  type AuthRequest,
-  type AuthResponse,
-} from "./shared/auth-protocol";
+import { authResult, type AuthRequest, type AuthResponse } from "./shared/auth-protocol";
 import { getExtensionAuthClient } from "./auth-client";
 
 declare const __LUMIVOX_API_ORIGIN__: string;
@@ -56,36 +52,20 @@ async function verifyWithWebsite(session: Session): Promise<AuthResponse> {
         );
       }
     } catch {
-      return authResult(
-        "unavailable",
-        undefined,
-        "Chưa thể xóa credential không hợp lệ.",
-      );
+      return authResult("unavailable", undefined, "Chưa thể xóa credential không hợp lệ.");
     }
 
-    return authResult(
-      "signed_out",
-      undefined,
-      "Phiên đăng nhập đã hết hiệu lực.",
-    );
+    return authResult("signed_out", undefined, "Phiên đăng nhập đã hết hiệu lực.");
   }
 
   if (!response.ok) {
-    return authResult(
-      "unavailable",
-      undefined,
-      "Lumivox API tạm thời không khả dụng.",
-    );
+    return authResult("unavailable", undefined, "Lumivox API tạm thời không khả dụng.");
   }
 
   const payload: unknown = await response.json();
 
   if (!isVerifiedUser(payload) || payload.user.id !== session.user.id) {
-    return authResult(
-      "unavailable",
-      undefined,
-      "Không thể xác minh đúng tài khoản.",
-    );
+    return authResult("unavailable", undefined, "Không thể xác minh đúng tài khoản.");
   }
 
   return authResult("signed_in", payload.user);
@@ -97,11 +77,7 @@ async function getAuthStatus(): Promise<AuthResponse> {
   const { data, error } = await client.auth.getSession();
 
   if (error) {
-    return authResult(
-      "unavailable",
-      undefined,
-      "Không thể khôi phục phiên đăng nhập.",
-    );
+    return authResult("unavailable", undefined, "Không thể khôi phục phiên đăng nhập.");
   }
 
   if (!data.session) {
@@ -138,19 +114,13 @@ async function logout(): Promise<AuthResponse> {
   });
 
   if (error) {
-    return authResult(
-      "unavailable",
-      undefined,
-      "Chưa thể đăng xuất an toàn. Hãy thử lại.",
-    );
+    return authResult("unavailable", undefined, "Chưa thể đăng xuất an toàn. Hãy thử lại.");
   }
 
   return authResult("signed_out");
 }
 
-export async function handleAuthRequest(
-  request: AuthRequest,
-): Promise<AuthResponse> {
+export async function handleAuthRequest(request: AuthRequest): Promise<AuthResponse> {
   try {
     switch (request.type) {
       case "AUTH_STATUS":
@@ -163,10 +133,6 @@ export async function handleAuthRequest(
         return await logout();
     }
   } catch {
-    return authResult(
-      "unavailable",
-      undefined,
-      "Không thể kết nối dịch vụ xác thực.",
-    );
+    return authResult("unavailable", undefined, "Không thể kết nối dịch vụ xác thực.");
   }
 }

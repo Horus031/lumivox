@@ -78,9 +78,7 @@ export function WorkspaceLane({
             />
           ))
         ) : (
-          <div className="py-6 text-center text-caption text-muted-foreground">
-            {t("empty")}
-          </div>
+          <div className="py-6 text-center text-caption text-muted-foreground">{t("empty")}</div>
         )}
       </div>
     </section>

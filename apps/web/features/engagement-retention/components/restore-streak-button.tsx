@@ -11,9 +11,7 @@ type RestoreStreakButtonProps = {
   disabled?: boolean;
 };
 
-export function RestoreStreakButton({
-  disabled = false,
-}: RestoreStreakButtonProps) {
+export function RestoreStreakButton({ disabled = false }: RestoreStreakButtonProps) {
   const router = useRouter();
   const t = useTranslations("settings.restoreButton");
   const [isPending, startTransition] = useTransition();

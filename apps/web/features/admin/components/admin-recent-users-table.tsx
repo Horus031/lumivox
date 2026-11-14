@@ -18,11 +18,7 @@ type AdminRecentUsersTableProps = {
 };
 
 function displayName(user: RecentUser) {
-  return (
-    user.display_name ||
-    user.full_name ||
-    `User ${user.user_id.slice(0, 8)}`
-  );
+  return user.display_name || user.full_name || `User ${user.user_id.slice(0, 8)}`;
 }
 
 function formatDate(value: string | null, locale: string, fallback: string) {
@@ -31,9 +27,7 @@ function formatDate(value: string | null, locale: string, fallback: string) {
   return new Date(value).toLocaleString(locale);
 }
 
-export function AdminRecentUsersTable({
-  users,
-}: AdminRecentUsersTableProps) {
+export function AdminRecentUsersTable({ users }: AdminRecentUsersTableProps) {
   const locale = useLocale();
   const t = useTranslations("admin.users.recentTable");
   const commonT = useTranslations("admin.common");
@@ -47,12 +41,15 @@ export function AdminRecentUsersTable({
 
       {users.length === 0 ? (
         <div className="py-section">
-          <p className="text-body text-muted-foreground">
-            {t("empty")}
-          </p>
+          <p className="text-body text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <div
+          role="region"
+          aria-labelledby={titleId}
+          tabIndex={0}
+          className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
           <table className="min-w-190 w-full text-left text-body">
             <caption className="sr-only">{t("title")}</caption>
             <thead className="border-b border-border bg-muted text-label text-secondary-text">
@@ -79,13 +76,14 @@ export function AdminRecentUsersTable({
               {users.map((user) => (
                 <tr key={user.user_id} className="hover:bg-muted/50">
                   <td className="max-w-72 px-3 py-3 align-top [overflow-wrap:anywhere]">
-                    <Link href={`/admin/users/${user.user_id}`} className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                    <Link
+                      href={`/admin/users/${user.user_id}`}
+                      className="rounded-sm font-medium text-foreground underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
                       {displayName(user)}
                     </Link>
 
-                    <p className="mt-1 text-caption text-muted-foreground">
-                      {user.user_id}
-                    </p>
+                    <p className="mt-1 text-caption text-muted-foreground">{user.user_id}</p>
                   </td>
 
                   <td className="px-3 py-3 align-top">

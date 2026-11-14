@@ -3,14 +3,9 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
-import {
-  updateSettingsSchema,
-  type UpdateSettingsInput,
-} from "./settings.schemas";
+import { updateSettingsSchema, type UpdateSettingsInput } from "./settings.schemas";
 
-export async function updateSettingsAction(
-  input: UpdateSettingsInput,
-): Promise<ActionResult> {
+export async function updateSettingsAction(input: UpdateSettingsInput): Promise<ActionResult> {
   const parsed = updateSettingsSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -67,7 +62,6 @@ export async function updateSettingsAction(
       };
     }
 
-
     return {
       success: true,
       message: "Settings updated successfully.",
@@ -76,10 +70,7 @@ export async function updateSettingsAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating settings.",
+      message: error instanceof Error ? error.message : "Unexpected error while updating settings.",
     };
   }
 }

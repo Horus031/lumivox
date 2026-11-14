@@ -1,4 +1,3 @@
-
 # Task Risk Recovery — Phase 1 UI Contract
 
 ## Purpose
@@ -17,6 +16,7 @@ Location:
 apps/web/features/native-task-risk/components/task-risk-indicator.tsx
 
 Responsibility:
+
 - Present a compact task-level risk label.
 - Reuse Lumivox theme tokens.
 - Avoid nested interactive elements.
@@ -24,6 +24,7 @@ Responsibility:
 - Distinguish loading and stale data.
 
 Must not:
+
 - Query Supabase.
 - Trigger predictions.
 - Modify tasks.
@@ -35,6 +36,7 @@ Location:
 apps/web/features/native-task-risk/components/task-risk-summary.tsx
 
 Responsibility:
+
 - Display the model estimate.
 - Display the risk band.
 - Display prediction time.
@@ -43,6 +45,7 @@ Responsibility:
 - Hide outdated prediction values in stale state.
 
 Must not:
+
 - Treat model explanations as proven causation.
 - Reuse stale values as fresh values.
 - Infer prediction freshness without a data contract.
@@ -53,12 +56,14 @@ Location:
 apps/web/features/native-task-risk/components/task-risk-recovery-panel.tsx
 
 Responsibility:
+
 - Display supported recovery action types.
 - Localize labels and descriptions.
 - Disable unavailable or disconnected actions.
 - Emit action-request callbacks.
 
 Must not:
+
 - Write to the database.
 - Create Focus sessions.
 - Modify deadlines.
@@ -69,6 +74,7 @@ Must not:
 ## Presentation State Contract
 
 Supported states:
+
 - loading
 - unavailable
 - ineligible
@@ -78,6 +84,7 @@ Supported states:
 Ready state contains a NativeTaskRiskAlert.
 
 Risk bands:
+
 - high
 - elevated
 - moderate
@@ -91,6 +98,7 @@ unless the Phase 2 adapter has validated freshness.
 ## Localization
 
 Namespaces:
+
 - messages/en.json -> taskRiskRecovery
 - messages/vi.json -> taskRiskRecovery
 
@@ -124,21 +132,25 @@ Its action callbacks must not perform database writes.
 ## Integration Boundaries
 
 Phase 2:
+
 - Map owned task predictions to TaskRiskViewState.
 - Validate eligibility and freshness.
 - Provide batched task-risk data.
 
 Phase 3:
+
 - Integrate TaskRiskIndicator with WorkspaceTaskCard.
 - Preserve drag-and-drop behavior.
 - Connect task selection with Task Details.
 
 Phase 4:
+
 - Integrate TaskRiskSummary and Recovery Panel with
   task-specific explanation data.
 - Normalize and localize model explanation content.
 
 Phases 5–8:
+
 - Implement verified recovery actions and reassessment.
 
 ## Phase 1 Exit Criteria

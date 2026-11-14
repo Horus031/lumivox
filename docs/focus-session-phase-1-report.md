@@ -28,15 +28,15 @@ features were added.
 
 Executed from `apps/web`:
 
-| Check | Result |
-| --- | --- |
-| `npm ci` | PASS after retry outside sandbox for Windows EPERM |
-| `npm run test:unit -- features/focus-sessions` | 60 passed; 1 integration test skipped |
-| `npm run test:unit` | 331 passed; 1 integration test skipped |
-| `tsc --noEmit` | PASS after retry for tsbuildinfo write permission |
-| `npm run lint` | PASS |
-| `npm run build` | PASS after retry for .next cache permission; 96 static pages |
-| `git diff --check` | PASS |
+| Check                                          | Result                                                       |
+| ---------------------------------------------- | ------------------------------------------------------------ |
+| `npm ci`                                       | PASS after retry outside sandbox for Windows EPERM           |
+| `npm run test:unit -- features/focus-sessions` | 60 passed; 1 integration test skipped                        |
+| `npm run test:unit`                            | 331 passed; 1 integration test skipped                       |
+| `tsc --noEmit`                                 | PASS after retry for tsbuildinfo write permission            |
+| `npm run lint`                                 | PASS                                                         |
+| `npm run build`                                | PASS after retry for .next cache permission; 96 static pages |
+| `git diff --check`                             | PASS                                                         |
 
 No credentials or environment files were modified or committed.
 

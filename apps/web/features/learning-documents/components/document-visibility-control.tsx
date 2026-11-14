@@ -23,9 +23,7 @@ type DocumentVisibilityControlProps = {
   document: LearningDocument;
 };
 
-export function DocumentVisibilityControl({
-  document,
-}: DocumentVisibilityControlProps) {
+export function DocumentVisibilityControl({ document }: DocumentVisibilityControlProps) {
   const router = useRouter();
   const t = useTranslations("documentUi");
   const id = useId();
@@ -54,10 +52,20 @@ export function DocumentVisibilityControl({
       <p className="mt-1 max-w-3xl text-body text-secondary-text">{t("visibilityDescription")}</p>
       <div className="mt-3 max-w-xs space-y-2">
         <Label htmlFor={id}>{t("visibilityField")}</Label>
-        <Select disabled={isPending} value={document.visibility} onValueChange={(value) => handleChange(value as LearningDocumentVisibility)}>
-          <SelectTrigger id={id} className="w-full"><SelectValue /></SelectTrigger>
+        <Select
+          disabled={isPending}
+          value={document.visibility}
+          onValueChange={(value) => handleChange(value as LearningDocumentVisibility)}
+        >
+          <SelectTrigger id={id} className="w-full">
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent>
-            {(["private", "shared", "public"] as const).map((visibility) => <SelectItem key={visibility} value={visibility}>{t(`visibility.${visibility}`)}</SelectItem>)}
+            {(["private", "shared", "public"] as const).map((visibility) => (
+              <SelectItem key={visibility} value={visibility}>
+                {t(`visibility.${visibility}`)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>

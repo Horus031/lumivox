@@ -41,10 +41,7 @@ const answerSchema = z.object({
     .array(z.number().int().min(0).max(4))
     .min(1)
     .max(5)
-    .refine(
-      (values) => new Set(values).size === values.length,
-      "Selected options must be unique.",
-    ),
+    .refine((values) => new Set(values).size === values.length, "Selected options must be unique."),
 });
 
 const submitTaskReviewSchema = z.object({
@@ -78,8 +75,7 @@ export async function requestTaskReviewAction(input: {
 
   try {
     const { supabase, user } = await requireUser();
-    const rateLimitMode =
-      process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
+    const rateLimitMode = process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
 
     const rateLimit = await checkRateLimit({
       key: `task-review-generate:${user.id}`,
@@ -181,10 +177,7 @@ export async function requestTaskReviewAction(input: {
     return {
       success: false,
 
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to generate AI Review.",
+      message: error instanceof Error ? error.message : "Failed to generate AI Review.",
     };
   }
 }
@@ -228,8 +221,7 @@ export async function getLatestTaskReviewAction(
     return {
       success: false,
 
-      message:
-        error instanceof Error ? error.message : "Failed to load AI Review.",
+      message: error instanceof Error ? error.message : "Failed to load AI Review.",
     };
   }
 }
@@ -256,8 +248,7 @@ export async function submitTaskReviewAction(input: {
   try {
     const { user } = await requireUser();
 
-    const rateLimitMode =
-      process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
+    const rateLimitMode = process.env.NODE_ENV === "production" ? "fail-closed" : "fail-open";
 
     const rateLimit = await checkRateLimit({
       key: `task-review-submit:${user.id}`,
@@ -318,8 +309,7 @@ export async function submitTaskReviewAction(input: {
     return {
       success: true,
 
-      message:
-        response.status === "passed" ? "Review passed." : "Review completed.",
+      message: response.status === "passed" ? "Review passed." : "Review completed.",
 
       data: response,
     };
@@ -327,8 +317,7 @@ export async function submitTaskReviewAction(input: {
     return {
       success: false,
 
-      message:
-        error instanceof Error ? error.message : "Failed to submit AI Review.",
+      message: error instanceof Error ? error.message : "Failed to submit AI Review.",
     };
   }
 }

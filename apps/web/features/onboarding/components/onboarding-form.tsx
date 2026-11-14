@@ -6,7 +6,11 @@ import { Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { PbiWeightProfile, Profile } from "@/features/profiles/profile.types";
-import { initialCalibration, isCalibrationValid, type ProfileCalibrationValues } from "@/features/profiles/profile-calibration";
+import {
+  initialCalibration,
+  isCalibrationValid,
+  type ProfileCalibrationValues,
+} from "@/features/profiles/profile-calibration";
 import { ProfileCalibrationFields } from "@/features/profiles/components/profile-calibration-fields";
 import { completeOnboardingAction } from "../onboarding.actions";
 
@@ -17,7 +21,9 @@ export function OnboardingForm({ profile, weights }: Props) {
 
   const [values, setValues] = useState(() => initialCalibration(profile, weights));
   const [isPending, startTransition] = useTransition();
-  function change(patch: Partial<ProfileCalibrationValues>) { setValues((current) => ({ ...current, ...patch })); }
+  function change(patch: Partial<ProfileCalibrationValues>) {
+    setValues((current) => ({ ...current, ...patch }));
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +42,8 @@ export function OnboardingForm({ profile, weights }: Props) {
       <ProfileCalibrationFields values={values} onChange={change} disabled={isPending} />
       <div className="flex justify-end border-t border-border pt-card">
         <Button type="submit" disabled={isPending || !isCalibrationValid(values)}>
-          <Check aria-hidden="true" />{isPending ? t("completing") : t("complete")}
+          <Check aria-hidden="true" />
+          {isPending ? t("completing") : t("complete")}
         </Button>
       </div>
     </form>

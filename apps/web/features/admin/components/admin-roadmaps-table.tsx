@@ -61,28 +61,19 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
   return (
     <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div>
-        <p className="text-caption text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+        <p className="text-caption text-muted-foreground">{t("eyebrow")}</p>
 
-        <h2 className="mt-1 text-section font-semibold text-foreground">
-          {t("title")}
-        </h2>
+        <h2 className="mt-1 text-section font-semibold text-foreground">{t("title")}</h2>
       </div>
 
       {roadmaps.length === 0 ? (
         <div className="py-section">
-          <p className="text-body text-secondary-text">
-            {t("empty")}
-          </p>
+          <p className="text-body text-secondary-text">{t("empty")}</p>
         </div>
       ) : (
         <div className="divide-y divide-border">
           {roadmaps.map((roadmap) => (
-            <article
-              key={roadmap.roadmap_id}
-              className="min-w-0 py-card"
-            >
+            <article key={roadmap.roadmap_id} className="min-w-0 py-card">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                   <div className="flex flex-wrap items-center gap-2">
@@ -103,15 +94,13 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
                     {roadmap.title}
                   </h3>
 
-                  <p className="mt-1 text-body text-secondary-text">
-                    {roadmap.topic}
-                  </p>
+                  <p className="mt-1 text-body text-secondary-text">{roadmap.topic}</p>
 
                   <p className="mt-3 text-caption text-muted-foreground">
                     {t("owner", {
                       name: roadmap.owner_name ?? commonT("unknownOwner"),
-                    })} ·{" "}
-                    {roadmap.owner_email ?? roadmap.user_id}
+                    })}{" "}
+                    · {roadmap.owner_email ?? roadmap.user_id}
                   </p>
 
                   <p className="mt-1 text-caption text-muted-foreground">
@@ -142,10 +131,7 @@ export function AdminRoadmapsTable({ roadmaps }: AdminRoadmapsTableProps) {
                   </p>
                 </div>
 
-                <AdminRoadmapArchiveButton
-                  roadmapId={roadmap.roadmap_id}
-                  status={roadmap.status}
-                />
+                <AdminRoadmapArchiveButton roadmapId={roadmap.roadmap_id} status={roadmap.status} />
               </div>
             </article>
           ))}

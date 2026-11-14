@@ -9,9 +9,7 @@ type NewRoadmapPageProps = {
   }>;
 };
 
-export default async function NewRoadmapPage({
-  params,
-}: NewRoadmapPageProps) {
+export default async function NewRoadmapPage({ params }: NewRoadmapPageProps) {
   const { locale } = await params;
   const t = await getTranslations("roadmaps");
 

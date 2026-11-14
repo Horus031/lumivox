@@ -163,17 +163,17 @@ export function TaskSubtasksPanel({
   return (
     <div className="min-w-0 space-y-card">
       <div>
-        <h3 className="text-base text-section font-semibold text-foreground">
-          {t("title")}
-        </h3>
+        <h3 className="text-base text-section font-semibold text-foreground">{t("title")}</h3>
 
-        <p className="mt-1 text-body text-secondary-text">
-          {t("description")}
-        </p>
+        <p className="mt-1 text-body text-secondary-text">{t("description")}</p>
       </div>
 
       {canCreate ? (
-        <form onSubmit={handleCreate} aria-busy={isPending} className="flex min-w-0 flex-col gap-2 sm:flex-row">
+        <form
+          onSubmit={handleCreate}
+          aria-busy={isPending}
+          className="flex min-w-0 flex-col gap-2 sm:flex-row"
+        >
           <Input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
@@ -184,7 +184,8 @@ export function TaskSubtasksPanel({
           />
 
           <Button type="submit" disabled={isPending || !title.trim()}>
-            <Plus aria-hidden="true" />{isPending ? t("adding") : t("add")}
+            <Plus aria-hidden="true" />
+            {isPending ? t("adding") : t("add")}
           </Button>
         </form>
       ) : (
@@ -219,8 +220,7 @@ export function TaskSubtasksPanel({
               actions.push({
                 target: "todo",
 
-                label:
-                  boardStatus === "cancelled" ? t("restore") : t("moveToTodo"),
+                label: boardStatus === "cancelled" ? t("restore") : t("moveToTodo"),
               });
             }
 
@@ -241,10 +241,7 @@ export function TaskSubtasksPanel({
             }
 
             return (
-              <article
-                key={subtask.id}
-                className="min-w-0 border-t border-border py-card"
-              >
+              <article key={subtask.id} className="min-w-0 border-t border-border py-card">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
@@ -252,17 +249,11 @@ export function TaskSubtasksPanel({
                     </p>
 
                     <div className="mt-2 flex flex-wrap gap-2">
-                      <Badge
-                        variant="secondary"
-                        className={getPriorityTone(subtask.priority)}
-                      >
+                      <Badge variant="secondary" className={getPriorityTone(subtask.priority)}>
                         {formT(`priorities.${subtask.priority}`)}
                       </Badge>
 
-                      <Badge
-                        variant="outline"
-                        className={getStatusTone(boardStatus)}
-                      >
+                      <Badge variant="outline" className={getStatusTone(boardStatus)}>
                         {formT(`statuses.${boardStatus}`)}
                       </Badge>
                     </div>
@@ -272,7 +263,8 @@ export function TaskSubtasksPanel({
                     type="button"
                     size="icon"
                     variant="ghost"
-                    aria-label={t("delete")} title={t("delete")}
+                    aria-label={t("delete")}
+                    title={t("delete")}
                     disabled={isPending}
                     onClick={() => handleDelete(subtask)}
                   >
@@ -286,13 +278,20 @@ export function TaskSubtasksPanel({
                       key={action.target}
                       type="button"
                       size="sm"
-                      variant={
-                        action.target === "completed" ? "default" : "outline"
-                      }
+                      variant={action.target === "completed" ? "default" : "outline"}
                       disabled={isPending}
                       onClick={() => transitionSubtask(subtask, action.target)}
                     >
-                      {action.target === "completed" ? <Check aria-hidden="true" /> : action.target === "in_progress" ? <Play aria-hidden="true" /> : action.target === "cancelled" ? <X aria-hidden="true" /> : <RotateCcw aria-hidden="true" />}{action.label}
+                      {action.target === "completed" ? (
+                        <Check aria-hidden="true" />
+                      ) : action.target === "in_progress" ? (
+                        <Play aria-hidden="true" />
+                      ) : action.target === "cancelled" ? (
+                        <X aria-hidden="true" />
+                      ) : (
+                        <RotateCcw aria-hidden="true" />
+                      )}
+                      {action.label}
                     </Button>
                   ))}
 
@@ -302,12 +301,11 @@ export function TaskSubtasksPanel({
                     variant="ghost"
                     disabled={isPending}
                     onClick={() =>
-                      setEditingSubtaskId((current) =>
-                        current === subtask.id ? null : subtask.id,
-                      )
+                      setEditingSubtaskId((current) => (current === subtask.id ? null : subtask.id))
                     }
                   >
-                    <Pencil aria-hidden="true" />{commonT("edit")}
+                    <Pencil aria-hidden="true" />
+                    {commonT("edit")}
                   </Button>
                 </div>
 
