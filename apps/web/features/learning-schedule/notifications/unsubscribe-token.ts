@@ -1,13 +1,7 @@
-import { randomBytes, createHash } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { renderReminderEmail, type TrustedReminderTemplateContext } from "./reminder-email-template";
-
-export function hashUnsubscribeToken(token: unknown): string | null {
-  // 32 random bytes, canonical base64url without padding: 256 bits.
-  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
-  const bytes = Buffer.from(token, "base64url");
-  if (bytes.length !== 32 || bytes.toString("base64url") !== token) return null;
-  return createHash("sha256").update(token, "utf8").digest("hex");
-}
+import { hashUnsubscribeToken } from "./unsubscribe-capability";
+export { hashUnsubscribeToken } from "./unsubscribe-capability";
 export function generateUnsubscribeToken() {
   const token = randomBytes(32).toString("base64url");
   return { token, hash: hashUnsubscribeToken(token)! };

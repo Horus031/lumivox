@@ -110,6 +110,12 @@ export async function handleResendDispatch(
       origin.hash
     )
       throw new Error();
+    const publicOrigin = env.STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN
+      ? new URL(env.STUDY_REMINDER_PUBLIC_UNSUBSCRIBE_ORIGIN) : undefined;
+    if (publicOrigin && (
+      publicOrigin.protocol !== "https:" || publicOrigin.username || publicOrigin.password ||
+      publicOrigin.pathname !== "/" || publicOrigin.search || publicOrigin.hash
+    )) throw new Error();
     config = {
       enabled: env.STUDY_REMINDER_REAL_SEND_ENABLED === "true",
       allowlist: configuredReminderRecipients(
@@ -121,6 +127,7 @@ export async function handleResendDispatch(
       ),
       from: env.STUDY_REMINDER_FROM,
       trustedOrigin: origin.origin,
+      publicUnsubscribeOrigin: publicOrigin?.origin,
     };
     if (
       !input.dryRun &&

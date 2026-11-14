@@ -1,4 +1,4 @@
-import { hashUnsubscribeToken } from "./unsubscribe-token";
+import { hashUnsubscribeToken } from "./unsubscribe-capability";
 
 const headers = { "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "X-Robots-Tag": "noindex, nofollow" };
 export function unsubscribeGet() {

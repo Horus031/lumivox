@@ -13,7 +13,7 @@ export interface ResendDispatchStore {
   record(claim:ReminderClaim,deliveryId:string,fingerprint:string,result:SubmissionResult):Promise<void>;
   reconcile():Promise<void>;
 }
-export type ResendDispatchConfig={enabled:boolean;allowlist:ReadonlySet<string>;identityKey:string;encryptionKey:Buffer;from:string;trustedOrigin:string};
+export type ResendDispatchConfig={enabled:boolean;allowlist:ReadonlySet<string>;identityKey:string;encryptionKey:Buffer;from:string;trustedOrigin:string;publicUnsubscribeOrigin?:string};
 export async function dispatchResendReminders(store:ResendDispatchStore,transport:EmailTransport,config:ResendDispatchConfig,options:{dryRun?:boolean;batchSize?:number}={}) {
   const size=options.batchSize??5;
   if (!Number.isInteger(size)||size<1||size>5) throw new Error("Invalid batch size");
@@ -40,7 +40,7 @@ export async function dispatchResendReminders(store:ResendDispatchStore,transpor
         const origin=new URL(config.trustedOrigin);
         if(origin.protocol!=="https:"||origin.username||origin.password||origin.pathname!=="/"||origin.search||origin.hash) throw new Error("Invalid origin");
         const confirmation=new URL(`/${c.locale}/study-reminders/unsubscribe`,origin);confirmation.searchParams.set("token",token);
-        const oneClick=new URL("/api/study-reminders/unsubscribe",origin);oneClick.searchParams.set("token",token);
+        const oneClick=new URL("/api/study-reminders/unsubscribe",config.publicUnsubscribeOrigin ?? origin.origin);oneClick.searchParams.set("token",token);
         const content=renderReminderEmail({taskId:c.taskId,taskTitle:c.taskTitle,locale:c.locale,scheduledStartAt:c.scheduledStartAt,scheduledEndAt:c.scheduledEndAt,timezone:c.timezone,leadMinutes:c.leadMinutes},{trustedOrigin:origin.origin,unsubscribeUrl:confirmation.href});
         const encrypted=encryptReminderPayload({...content,recipient:c.recipient,from:config.from,idempotencyKey:c.idempotencyKey,unsubscribeUrl:oneClick.href},config.encryptionKey,claim.jobId);
         snapshot=await store.prepare(claim,c,{...encrypted,tokenHash:hash});
@@ -48,7 +48,7 @@ export async function dispatchResendReminders(store:ResendDispatchStore,transpor
       const email=decryptReminderPayload(snapshot,config.encryptionKey);
       if(snapshot.context_hash!==c.contextHash || snapshot.recipient_fingerprint!==c.recipientFingerprint || snapshot.locale!==c.locale ||
         email.recipient!==c.recipient || email.idempotencyKey!==c.idempotencyKey || email.from!==config.from || !email.unsubscribeUrl ||
-        new URL(email.unsubscribeUrl).origin!==new URL(config.trustedOrigin).origin) throw new Error("Stale payload");
+        new URL(email.unsubscribeUrl).origin!==new URL(config.publicUnsubscribeOrigin ?? config.trustedOrigin).origin) throw new Error("Stale payload");
       // Leave room for authorize (4s), transport (10s), persistence (4s).
       if(deadline-Date.now()<19000){counts.held++;continue;}
       const authorization=await store.authorize(claim,c); // durable commit before send

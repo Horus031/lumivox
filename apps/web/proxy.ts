@@ -18,6 +18,7 @@ export default async function proxy(request: NextRequest) {
   // Capability endpoints authorize in their handlers without a session refresh.
   if (request.nextUrl.pathname === "/api/webhooks/resend/study-reminders" ||
     request.nextUrl.pathname === "/api/study-reminders/unsubscribe" ||
+    request.nextUrl.pathname === "/api/internal/study-reminders/unsubscribe" ||
     request.nextUrl.pathname === "/api/internal/study-reminders/dispatch" ||
     request.nextUrl.pathname === "/api/internal/learning-schedule/health") {
     return NextResponse.next();

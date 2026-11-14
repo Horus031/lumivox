@@ -150,3 +150,7 @@ Read-only Supabase checks found both Staging gates OFF, zero reminder Cron jobs,
 **Local protocol PASS. Public Staging ingress BLOCKED. Production email activation NO-GO.** At baseline `f98b45f146bd2500c4107b85e08b1d93d56c14f4`, unauthenticated GET and a correctly formed invalid-token POST returned Vercel SSO redirects. The local application accepted both RFC 8058 form encodings, preserved re-consent after replay, and enforced internal dispatch authorization and real-send OFF. A dedicated, path-scoped public ingress is the selected design. Hosting and verification on a public endpoint remain pending.
 
 Read-only Staging checks verified both database gates OFF, zero reminder Cron jobs, deliveries and receipts, and Preview real-send configuration `false`. [Public ingress evidence and next validation steps](release/phase-11c6-public-ingress.md)
+
+### Step 11C.6A.2 — Dedicated Public Ingress
+
+**Local PASS. Hosted ingress pending review and provisioning. Production email activation NO-GO.** At baseline `bbf10160cc28065726a35bf67226d57242f73319`, the independent ingress, scoped internal bridge and worker URL generation passed local PI-01–PI-08 checks. Local tests used a simulated Vercel OIDC token and limiter decisions. Vercel and Render Staging metadata matched PR #132's merge SHA. Read-only Staging checks confirmed both database gates OFF, no reminder Cron or provider activity rows, and Preview configuration real-send OFF. [Implementation and validation evidence](release/phase-11c6-public-ingress.md#step-11c6a2--dedicated-ingress)

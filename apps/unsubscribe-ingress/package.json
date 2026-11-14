@@ -1,0 +1,12 @@
+{
+  "name": "lumivox-unsubscribe-ingress",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "22.x" },
+  "scripts": { "test": "node --test test/ingress.test.mjs" },
+  "dependencies": {
+    "@vercel/firewall": "1.2.6",
+    "@vercel/oidc": "3.7.0"
+  },
+  "devDependencies": { "esbuild": "0.28.1" }
+}
