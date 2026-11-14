@@ -13,9 +13,15 @@ import { Button } from "@/components/ui/button";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { deleteTaskAction, getTaskDetailsAction } from "@/features/tasks/task.actions";
+import {
+  deleteTaskAction,
+  getTaskDetailsAction,
+} from "@/features/tasks/task.actions";
 
-import type { TaskDetailsData, TaskWithGoal } from "@/features/tasks/task.types";
+import type {
+  TaskDetailsData,
+  TaskWithGoal,
+} from "@/features/tasks/task.types";
 
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
@@ -32,7 +38,20 @@ import { Pencil, Trash2, X } from "lucide-react";
 
 import { TaskStudyScheduleSection } from "@/features/learning-schedule/components/task-study-schedule-section";
 
-export type TaskDrawerTab = "overview" | "subtasks" | "documents" | "review";
+import { TaskRiskSummary } from "@/features/native-task-risk/components/task-risk-summary";
+
+import { TaskRiskSuggestions } from "@/features/native-task-risk/components/task-risk-suggestions";
+
+import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+
+import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
+
+export type TaskDrawerTab =
+  | "overview"
+  | "risk"
+  | "subtasks"
+  | "documents"
+  | "review";
 
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
@@ -44,6 +63,10 @@ type TaskDetailsDrawerProps = {
   initialTab?: TaskDrawerTab;
 
   initialEditMode?: boolean;
+
+  riskState?: TaskRiskViewState;
+  riskNow?: Date;
+  onTaskDataChanged?: () => void;
 };
 
 export function TaskDetailsDrawer({
@@ -52,6 +75,9 @@ export function TaskDetailsDrawer({
   onClose,
   initialTab,
   initialEditMode,
+  riskState,
+  riskNow,
+  onTaskDataChanged,
 }: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
   const confirm = useConfirmDialog();
@@ -65,7 +91,9 @@ export function TaskDetailsDrawer({
 
   const [details, setDetails] = useState<TaskDetailsData | null>(null);
 
-  const [activeTab, setActiveTab] = useState<TaskDrawerTab>(initialTab ?? "overview");
+  const [activeTab, setActiveTab] = useState<TaskDrawerTab>(
+    initialTab ?? "overview",
+  );
 
   const [isEditing, setIsEditing] = useState(initialEditMode ?? false);
 
@@ -107,7 +135,9 @@ export function TaskDetailsDrawer({
 
     setDetails(null);
 
-    setActiveTab(initialTab ?? (task?.status === "in_review" ? "review" : "overview"));
+    setActiveTab(
+      initialTab ?? (task?.status === "in_review" ? "review" : "overview"),
+    );
 
     setIsEditing(initialEditMode ?? false);
 
@@ -115,7 +145,14 @@ export function TaskDetailsDrawer({
     return () => {
       detailsRequest.current += 1;
     };
-  }, [taskId, taskUpdatedAt, task?.status, initialTab, initialEditMode, refreshDetails]);
+  }, [
+    taskId,
+    taskUpdatedAt,
+    task?.status,
+    initialTab,
+    initialEditMode,
+    refreshDetails,
+  ]);
 
   if (!task) {
     return null;
@@ -123,6 +160,10 @@ export function TaskDetailsDrawer({
 
   const currentDetails = details?.task.id === task.id ? details : null;
   const currentTask = currentDetails?.task ?? task;
+
+  const currentRiskState: TaskRiskViewState = riskNow
+    ? getTaskRiskDisplayState(currentTask, riskState, riskNow)
+    : (riskState ?? { status: "unavailable" });
 
   const subtasks = currentDetails?.subtasks ?? [];
 
@@ -187,6 +228,7 @@ export function TaskDetailsDrawer({
 
       toast.success(result.message);
 
+      onTaskDataChanged?.();
       onClose();
 
       router.refresh();
@@ -206,7 +248,12 @@ export function TaskDetailsDrawer({
             {t("close")}
           </Button>
 
-          <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
             <Trash2 aria-hidden="true" />
             {isDeleting ? t("deleting") : t("deleteTask")}
           </Button>
@@ -215,11 +262,17 @@ export function TaskDetailsDrawer({
     >
       <div className="min-w-0 space-y-card">
         <div className="flex flex-wrap gap-2">
-          <Badge variant="secondary" className={`${getPriorityTone(currentTask.priority)}`}>
+          <Badge
+            variant="secondary"
+            className={`${getPriorityTone(currentTask.priority)}`}
+          >
             {formT(`priorities.${currentTask.priority}`)}
           </Badge>
 
-          <Badge variant="outline" className={`${getStatusTone(currentTask.status)}`}>
+          <Badge
+            variant="outline"
+            className={`${getStatusTone(currentTask.status)}`}
+          >
             {formT(`statuses.${currentTask.status}`)}
           </Badge>
         </div>
@@ -236,8 +289,13 @@ export function TaskDetailsDrawer({
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
-            <TabsList variant="line" className="min-w-max border-b border-border">
+            <TabsList
+              variant="line"
+              className="min-w-max border-b border-border"
+            >
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
+
+              <TabsTrigger value="risk">{t("tabs.risk")}</TabsTrigger>
 
               <TabsTrigger value="subtasks">
                 {t("tabs.subtasks", {
@@ -263,7 +321,11 @@ export function TaskDetailsDrawer({
                 size="sm"
                 onClick={() => setIsEditing((current) => !current)}
               >
-                {isEditing ? <X aria-hidden="true" /> : <Pencil aria-hidden="true" />}
+                {isEditing ? (
+                  <X aria-hidden="true" />
+                ) : (
+                  <Pencil aria-hidden="true" />
+                )}
                 {isEditing ? commonT("cancel") : commonT("edit")}
               </Button>
             </div>
@@ -277,7 +339,7 @@ export function TaskDetailsDrawer({
                   onCancel={() => setIsEditing(false)}
                   onSaved={() => {
                     setIsEditing(false);
-
+                    onTaskDataChanged?.();
                     refreshDetails();
                   }}
                 />
@@ -289,7 +351,9 @@ export function TaskDetailsDrawer({
                 <dl className="grid gap-card sm:grid-cols-2">
                   {summaryRows.map((row) => (
                     <div key={row.label} className="min-w-0">
-                      <dt className="text-label font-medium text-muted-foreground">{row.label}</dt>
+                      <dt className="text-label font-medium text-muted-foreground">
+                        {row.label}
+                      </dt>
 
                       <dd className="mt-1 text-body font-medium text-foreground wrap-anywhere">
                         {row.value}
@@ -299,10 +363,14 @@ export function TaskDetailsDrawer({
                 </dl>
 
                 <div className="border-t border-border pt-card">
-                  <h3 className="text-label font-medium text-muted-foreground">{t("notes")}</h3>
+                  <h3 className="text-label font-medium text-muted-foreground">
+                    {t("notes")}
+                  </h3>
 
                   <p className="mt-1 whitespace-pre-wrap text-body text-foreground wrap-anywhere">
-                    {currentTask.description?.trim() ? currentTask.description : t("noDescription")}
+                    {currentTask.description?.trim()
+                      ? currentTask.description
+                      : t("noDescription")}
                   </p>
                 </div>
 
@@ -344,12 +412,21 @@ export function TaskDetailsDrawer({
             )}
           </TabsContent>
 
+          <TabsContent value="risk" className="min-w-0 space-y-card">
+            <TaskRiskSummary state={currentRiskState} />
+
+            <TaskRiskSuggestions state={currentRiskState} />
+          </TabsContent>
+
           <TabsContent value="subtasks">
             <TaskSubtasksPanel
               parentTask={currentTask}
               subtasks={subtasks}
               goals={goals}
-              onChanged={refreshDetails}
+              onChanged={() => {
+                onTaskDataChanged?.();
+                refreshDetails();
+              }}
             />
           </TabsContent>
 
@@ -365,7 +442,10 @@ export function TaskDetailsDrawer({
             <TaskReviewPanel
               task={currentTask}
               subtasks={subtasks}
-              onTaskChanged={refreshDetails}
+              onTaskChanged={() => {
+                onTaskDataChanged?.();
+                refreshDetails();
+              }}
             />
           </TabsContent>
         </Tabs>

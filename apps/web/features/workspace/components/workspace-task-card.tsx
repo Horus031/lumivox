@@ -8,11 +8,15 @@ import { Badge } from "@/components/ui/badge";
 import { formatDisplayDate } from "@/lib/utils/date";
 import { cn } from "@/lib/utils";
 import type { WorkspaceTask } from "../workspace.types";
+import { TaskRiskIndicator } from "@/features/native-task-risk/components/task-risk-indicator";
+
+import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
 
 type WorkspaceTaskCardProps = {
   task: WorkspaceTask;
   onOpen: (task: WorkspaceTask) => void;
   disabled?: boolean;
+  riskState: TaskRiskViewState;
 };
 
 const PRIORITY_TONES = {
@@ -22,7 +26,12 @@ const PRIORITY_TONES = {
   low: "border-border bg-muted text-secondary-text",
 };
 
-export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceTaskCardProps) {
+export function WorkspaceTaskCard({
+  task,
+  onOpen,
+  disabled = false,
+  riskState,
+}: WorkspaceTaskCardProps) {
   const t = useTranslations("workspace.board");
   const taskT = useTranslations("tasks.form");
   const draggable = useDraggable({
@@ -36,6 +45,11 @@ export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceT
     (subtask) => subtask.status === "completed",
   ).length;
 
+  const showRiskIndicator =
+    riskState.status === "stale" ||
+    riskState.status === "loading" ||
+    (riskState.status === "ready" && riskState.alert.risk_band !== "low");
+
   return (
     <article
       ref={draggable.ref}
@@ -44,6 +58,11 @@ export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceT
         draggable.isDragging && "opacity-60",
       )}
     >
+      {showRiskIndicator ? (
+        <div className="mt-2 flex min-w-0">
+          <TaskRiskIndicator state={riskState} />
+        </div>
+      ) : null}
       <button
         type="button"
         onClick={() => onOpen(task)}
@@ -57,7 +76,10 @@ export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceT
         </h3>
 
         <div className="mt-2 flex min-w-0 items-center gap-2">
-          <Badge variant="secondary" className={cn("shrink-0", PRIORITY_TONES[task.priority])}>
+          <Badge
+            variant="secondary"
+            className={cn("shrink-0", PRIORITY_TONES[task.priority])}
+          >
             {taskT(`priorities.${task.priority}`)}
           </Badge>
           {task.goals ? (
@@ -74,7 +96,10 @@ export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceT
           <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
             {task.due_at ? (
               <span className="flex items-center gap-1">
-                <CalendarClock aria-hidden="true" className="size-icon-sm shrink-0" />
+                <CalendarClock
+                  aria-hidden="true"
+                  className="size-icon-sm shrink-0"
+                />
 
                 {formatDisplayDate(task.due_at)}
               </span>
@@ -82,7 +107,10 @@ export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceT
 
             {task.subtasks.length > 0 ? (
               <span className="flex items-center gap-1">
-                <CheckSquare2 aria-hidden="true" className="size-icon-sm shrink-0" />
+                <CheckSquare2
+                  aria-hidden="true"
+                  className="size-icon-sm shrink-0"
+                />
 
                 {t("subtaskProgress", {
                   completed: completedSubtasks,

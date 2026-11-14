@@ -3,9 +3,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DragEndEvent } from "@dnd-kit/react";
 import { workspaceTask } from "../workspace.test-fixtures";
+import { TASK_RISK_UI_FIXTURES } from "@/features/native-task-risk/task-risk-ui.fixtures";
 
 const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
-vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({
+  useConfirmDialog: () => confirmation,
+}));
 
 const mocks = vi.hoisted(() => ({
   transition: vi.fn(),
@@ -56,7 +59,11 @@ vi.mock("@/features/tasks/components/task-details-drawer", () => ({
     initialEditMode?: boolean;
   }) =>
     task ? (
-      <div data-drawer data-tab={initialTab} data-edit={String(Boolean(initialEditMode))}>
+      <div
+        data-drawer
+        data-tab={initialTab}
+        data-edit={String(Boolean(initialEditMode))}
+      >
         {task.title}
       </div>
     ) : null,
@@ -72,6 +79,7 @@ describe("workspace optimistic controller", () => {
     tasks: [task],
     scope: { type: "all" as const },
     referenceNow: "2026-10-04T12:00:00Z",
+    riskStates: {},
   };
   beforeEach(() => {
     vi.clearAllMocks();
@@ -163,7 +171,9 @@ describe("workspace optimistic controller", () => {
     const article = container.querySelector("article")!;
     expect(article.querySelector("button button")).toBeNull();
     act(() => (article.querySelector("button") as HTMLButtonElement).click());
-    expect(container.querySelector("[data-drawer]")?.textContent).toBe(task.title);
+    expect(container.querySelector("[data-drawer]")?.textContent).toBe(
+      task.title,
+    );
     expect(mocks.transition).not.toHaveBeenCalled();
   });
 
@@ -171,46 +181,136 @@ describe("workspace optimistic controller", () => {
     { scope: { type: "all" as const }, goalId: "" },
     { scope: { type: "unassigned" as const }, goalId: "" },
     { scope: { type: "goal" as const, goalId: task.id }, goalId: task.id },
-  ])("quick create uses the correct goal for $scope.type", async ({ scope, goalId }) => {
-    mocks.create.mockResolvedValue({
-      success: true,
-      message: "created",
-      data: null,
+  ])(
+    "quick create uses the correct goal for $scope.type",
+    async ({ scope, goalId }) => {
+      mocks.create.mockResolvedValue({
+        success: true,
+        message: "created",
+        data: null,
+      });
+      act(() =>
+        root.render(
+          <WorkspaceBoard
+            goals={[]}
+            initialTaskId={null}
+            initialTaskTab={"overview"}
+            initialEditMode={false}
+            {...props}
+            scope={scope}
+          />,
+        ),
+      );
+      act(() =>
+        (lane("todo").querySelector("button") as HTMLButtonElement).click(),
+      );
+      const input = lane("todo").querySelector("input")!;
+      act(() => {
+        Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value",
+        )!.set!.call(input, "Quick task");
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      });
+      await act(async () => {
+        lane("todo")
+          .querySelector("form")!
+          .dispatchEvent(
+            new Event("submit", { bubbles: true, cancelable: true }),
+          );
+      });
+      expect(mocks.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: "Quick task",
+          goalId,
+          priority: "medium",
+          dueAt: "",
+        }),
+      );
+      expect(mocks.refresh).toHaveBeenCalledOnce();
+    },
+  );
+
+  it("invalidates visible risk during optimistic task transition", async () => {
+    const high = TASK_RISK_UI_FIXTURES.find(
+      (fixture) => fixture.id === "high",
+    )?.state;
+
+    if (!high || high.status !== "ready") {
+      throw new Error("High-risk fixture is missing");
+    }
+
+    const riskTask = workspaceTask({
+      due_at: "2026-10-05T12:00:00.000Z",
+      updated_at: "2026-10-04T10:00:00.000Z",
     });
-    act(() =>
+
+    const readyState = {
+      status: "ready" as const,
+      alert: {
+        ...high.alert,
+        task_id: riskTask.id,
+        predicted_at: "2026-10-04T11:00:00.000Z",
+        due_at: riskTask.due_at,
+      },
+    };
+
+    act(() => {
       root.render(
         <WorkspaceBoard
           goals={[]}
           initialTaskId={null}
-          initialTaskTab={"overview"}
+          initialTaskTab="overview"
           initialEditMode={false}
           {...props}
-          scope={scope}
+          tasks={[riskTask]}
+          riskStates={{
+            [riskTask.id]: readyState,
+          }}
         />,
-      ),
-    );
-    act(() => (lane("todo").querySelector("button") as HTMLButtonElement).click());
-    const input = lane("todo").querySelector("input")!;
-    act(() => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
-        input,
-        "Quick task",
       );
-      input.dispatchEvent(new Event("input", { bubbles: true }));
     });
-    await act(async () => {
-      lane("todo")
-        .querySelector("form")!
-        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
-    });
-    expect(mocks.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Quick task",
-        goalId,
-        priority: "medium",
-        dueAt: "",
+
+    expect(
+      container.querySelector('[data-task-risk-indicator="high"]'),
+    ).not.toBeNull();
+
+    let resolveTransition!: (result: {
+      success: false;
+      message: string;
+    }) => void;
+
+    mocks.transition.mockReturnValue(
+      new Promise((resolve) => {
+        resolveTransition = resolve;
       }),
     );
-    expect(mocks.refresh).toHaveBeenCalledOnce();
+
+    act(() => {
+      mocks.dragEnd?.({
+        canceled: false,
+        operation: {
+          source: { id: `task:${riskTask.id}` },
+          target: { id: "lane:in_progress" },
+        },
+      } as DragEndEvent);
+    });
+
+    expect(
+      container.querySelector('[data-task-risk-indicator="high"]'),
+    ).toBeNull();
+
+    expect(
+      container.querySelector('[data-task-risk-indicator="stale"]'),
+    ).not.toBeNull();
+
+    await act(async () => {
+      resolveTransition({
+        success: false,
+        message: "staleTask",
+      });
+    });
+
+    expect(mocks.refresh).toHaveBeenCalled();
   });
 });

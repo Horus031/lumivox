@@ -10,6 +10,7 @@ import type { TaskStatus } from "@/features/tasks/task-status";
 import type { WorkspaceTask } from "../workspace.types";
 import { WorkspaceTaskCard } from "./workspace-task-card";
 import { WorkspaceQuickCreateTask } from "./workspace-quick-create-task";
+import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
 
 type WorkspaceLaneProps = {
   status: TaskStatus;
@@ -18,6 +19,7 @@ type WorkspaceLaneProps = {
   onOpenTask: (task: WorkspaceTask) => void;
   disabled: boolean;
   quickCreateGoalId: string | null;
+  riskStateForTask: (task: WorkspaceTask) => TaskRiskViewState;
 };
 
 export function WorkspaceLane({
@@ -27,6 +29,7 @@ export function WorkspaceLane({
   onOpenTask,
   disabled,
   quickCreateGoalId,
+  riskStateForTask,
 }: WorkspaceLaneProps) {
   const t = useTranslations("workspace.board");
   const droppable = useDroppable({
@@ -47,7 +50,9 @@ export function WorkspaceLane({
       )}
     >
       <header className="mb-3 flex min-h-control items-center justify-between gap-3 border-b border-border pb-2">
-        <h2 className="min-w-0 text-label font-semibold text-foreground">{label}</h2>
+        <h2 className="min-w-0 text-label font-semibold text-foreground">
+          {label}
+        </h2>
 
         <span className="shrink-0 text-caption font-medium text-muted-foreground tabular-nums">
           {tasks.length}
@@ -56,7 +61,10 @@ export function WorkspaceLane({
 
       {(status === "in_review" || status === "overdue") && (
         <p className="mb-3 flex items-start gap-1.5 text-caption text-muted-foreground">
-          <LockKeyhole aria-hidden="true" className="mt-0.5 size-icon-sm shrink-0" />
+          <LockKeyhole
+            aria-hidden="true"
+            className="mt-0.5 size-icon-sm shrink-0"
+          />
           {t(status === "in_review" ? "reviewManaged" : "overdueManaged")}
         </p>
       )}
@@ -75,10 +83,13 @@ export function WorkspaceLane({
               task={task}
               onOpen={onOpenTask}
               disabled={disabled || status === "in_review"}
+              riskState={riskStateForTask(task)}
             />
           ))
         ) : (
-          <div className="py-6 text-center text-caption text-muted-foreground">{t("empty")}</div>
+          <div className="py-6 text-center text-caption text-muted-foreground">
+            {t("empty")}
+          </div>
         )}
       </div>
     </section>

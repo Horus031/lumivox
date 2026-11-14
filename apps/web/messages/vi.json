@@ -744,6 +744,7 @@
       "deleteConfirm": "Xóa nhiệm vụ này? Các nhiệm vụ con và tài liệu học tập gắn với nhiệm vụ cũng sẽ bị xóa. Hành động này không thể hoàn tác.",
       "tabs": {
         "overview": "Tổng quan",
+        "risk": "Nguy cơ trễ hạn",
         "subtasks": "Nhiệm vụ con ({count})",
         "documents": "Tài liệu ({count})",
         "review": "AI Review"
@@ -2711,6 +2712,7 @@
       "subtitle": "Hãy xem xét từng gợi ý trước khi thay đổi Task hoặc lịch học.",
       "empty": "Hiện chưa có hành động khắc phục phù hợp cho Task này.",
       "choose": "Xem hành động",
+      "readOnlyNotice": "Đây là các gợi ý từ mô hình để bạn tham khảo. Hành động khắc phục sẽ được kích hoạt sau khi các luồng xử lý được tích hợp.",
       "label": {
         "start_focus": "Bắt đầu Focus",
         "split_task": "Chia nhỏ thành Subtask",
