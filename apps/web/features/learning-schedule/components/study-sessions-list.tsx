@@ -11,10 +11,7 @@ import { SessionAttendanceDialog } from "./session-attendance-dialog";
 
 import type { AttendanceCommand } from "../session-attendance.actions";
 
-type SuccessResult = Extract<
-  Awaited<ReturnType<typeof getStudySessionsAction>>,
-  { success: true }
->;
+type SuccessResult = Extract<Awaited<ReturnType<typeof getStudySessionsAction>>, { success: true }>;
 type Session = SuccessResult["sessions"][number];
 type Props = {
   scheduleId: string;
@@ -22,11 +19,7 @@ type Props = {
   canAttend?: boolean;
 };
 
-export function StudySessionsList({
-  scheduleId,
-  canReschedule = false,
-  canAttend = false,
-}: Props) {
+export function StudySessionsList({ scheduleId, canReschedule = false, canAttend = false }: Props) {
   const [refreshKey, setRefreshKey] = useState(0);
 
   return (
@@ -54,8 +47,7 @@ function SessionRows({
     kind: AttendanceCommand["command"];
   };
 
-  const [selectedAttendance, setSelectedAttendance] =
-    useState<SelectedAttendance | null>(null);
+  const [selectedAttendance, setSelectedAttendance] = useState<SelectedAttendance | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [page, setPage] = useState(0);
   const [total, setTotal] = useState(0);
@@ -68,10 +60,7 @@ function SessionRows({
   // State alone cannot serialize two clicks before the next React render.
   const dialogOpen = useRef(false);
 
-  function openAttendance(
-    session: Session,
-    kind: AttendanceCommand["command"],
-  ) {
+  function openAttendance(session: Session, kind: AttendanceCommand["command"]) {
     if (!canAttend || loading || inFlight.current || dialogOpen.current) {
       return;
     }
@@ -107,8 +96,7 @@ function SessionRows({
         setSessions((current) => {
           const rows = requestedPage === 0 ? [] : current;
           const byId = new Map(rows.map((item) => [item.id, item]));
-          for (const item of result.sessions)
-            if (!byId.has(item.id)) byId.set(item.id, item);
+          for (const item of result.sessions) if (!byId.has(item.id)) byId.set(item.id, item);
           return [...byId.values()];
         });
         setPage(result.page);
@@ -174,12 +162,10 @@ function SessionRows({
           <li key={session.id} className="rounded-md border border-border p-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-medium">
-                  {formatStudyDate(session.local_date, locale)}
-                </p>
+                <p className="text-sm font-medium">{formatStudyDate(session.local_date, locale)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {session.local_start_time.slice(0, 5)} –{" "}
-                  {session.local_end_time.slice(0, 5)} · {session.timezone}
+                  {session.local_start_time.slice(0, 5)} – {session.local_end_time.slice(0, 5)} ·{" "}
+                  {session.timezone}
                 </p>
               </div>
               <span className="rounded-md border px-2 py-1 text-xs">
@@ -211,7 +197,9 @@ function SessionRows({
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={loading || selectedSession !== null || selectedAttendance !== null}
+                        disabled={
+                          loading || selectedSession !== null || selectedAttendance !== null
+                        }
                         onClick={() => openAttendance(session, "start")}
                       >
                         {t("attendance.action.start")}
@@ -220,7 +208,9 @@ function SessionRows({
                       <Button
                         type="button"
                         size="sm"
-                        disabled={loading || selectedSession !== null || selectedAttendance !== null}
+                        disabled={
+                          loading || selectedSession !== null || selectedAttendance !== null
+                        }
                         onClick={() => openAttendance(session, "complete")}
                       >
                         {t("attendance.action.complete")}
@@ -230,7 +220,9 @@ function SessionRows({
                         type="button"
                         size="sm"
                         variant="outline"
-                        disabled={loading || selectedSession !== null || selectedAttendance !== null}
+                        disabled={
+                          loading || selectedSession !== null || selectedAttendance !== null
+                        }
                         onClick={() => openAttendance(session, "skip")}
                       >
                         {t("attendance.action.skip")}
@@ -255,7 +247,9 @@ function SessionRows({
                         type="button"
                         size="sm"
                         onClick={() => openAttendance(session, "recover")}
-                        disabled={loading || selectedSession !== null || selectedAttendance !== null}
+                        disabled={
+                          loading || selectedSession !== null || selectedAttendance !== null
+                        }
                       >
                         {t("attendance.action.recover")}
                       </Button>
@@ -265,7 +259,9 @@ function SessionRows({
                         size="sm"
                         variant="outline"
                         onClick={() => openAttendance(session, "skip")}
-                        disabled={loading || selectedSession !== null || selectedAttendance !== null}
+                        disabled={
+                          loading || selectedSession !== null || selectedAttendance !== null
+                        }
                       >
                         {t("attendance.action.skip")}
                       </Button>
@@ -334,9 +330,7 @@ function SessionRows({
         <Button
           type="button"
           variant="outline"
-          disabled={
-            loading || selectedSession !== null || selectedAttendance !== null
-          }
+          disabled={loading || selectedSession !== null || selectedAttendance !== null}
           onClick={() => void loadPage(page + 1)}
         >
           {t("loadMore")}

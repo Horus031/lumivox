@@ -15,7 +15,7 @@ const setRoadmapArchivedSchema = z.object({
 });
 
 export async function adminSetLearningRoadmapArchivedAction(
-  input: z.infer<typeof setRoadmapArchivedSchema>
+  input: z.infer<typeof setRoadmapArchivedSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -29,13 +29,10 @@ export async function adminSetLearningRoadmapArchivedAction(
       };
     }
 
-    const { error } = await supabase.rpc(
-      "admin_set_learning_roadmap_archived",
-      {
-        p_roadmap_id: parsed.data.roadmapId,
-        p_archived: parsed.data.archived,
-      }
-    );
+    const { error } = await supabase.rpc("admin_set_learning_roadmap_archived", {
+      p_roadmap_id: parsed.data.roadmapId,
+      p_archived: parsed.data.archived,
+    });
 
     if (error) {
       return {
@@ -49,9 +46,7 @@ export async function adminSetLearningRoadmapArchivedAction(
 
     return {
       success: true,
-      message: parsed.data.archived
-        ? "Roadmap archived."
-        : "Roadmap restored to draft.",
+      message: parsed.data.archived ? "Roadmap archived." : "Roadmap restored to draft.",
       data: null,
     };
   } catch (error) {

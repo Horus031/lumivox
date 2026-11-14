@@ -14,10 +14,7 @@ import { WorkspaceGoalRail } from "@/features/workspace/components/workspace-goa
 
 import { getWorkspaceTasks } from "@/features/workspace/workspace.queries";
 
-import {
-  getWorkspaceScopeKey,
-  resolveWorkspaceScope,
-} from "@/features/workspace/workspace.utils";
+import { getWorkspaceScopeKey, resolveWorkspaceScope } from "@/features/workspace/workspace.utils";
 
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
@@ -34,21 +31,14 @@ type WorkspacePageProps = {
 };
 
 function resolveTaskTab(value: string | undefined): TaskDrawerTab {
-  if (
-    value === "overview" ||
-    value === "subtasks" ||
-    value === "documents" ||
-    value === "review"
-  ) {
+  if (value === "overview" || value === "subtasks" || value === "documents" || value === "review") {
     return value;
   }
 
   return "overview";
 }
 
-export default async function WorkspacePage({
-  searchParams,
-}: WorkspacePageProps) {
+export default async function WorkspacePage({ searchParams }: WorkspacePageProps) {
   const [t, params, goals] = await Promise.all([
     getTranslations("workspace.page"),
 
@@ -70,9 +60,7 @@ export default async function WorkspacePage({
   const defaultGoalId = scope.type === "goal" ? scope.goalId : undefined;
 
   const initialTaskId =
-    params.task && tasks.some((task) => task.id === params.task)
-      ? params.task
-      : null;
+    params.task && tasks.some((task) => task.id === params.task) ? params.task : null;
 
   const initialTaskTab = resolveTaskTab(params.tab);
 

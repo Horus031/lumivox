@@ -2,10 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { routing } from "@/i18n/routing";
 import { blogPosts } from "@/lib/blog/posts";
-import {
-  isSearchIndexingEnabled,
-  siteConfig,
-} from "@/lib/seo/site-config";
+import { isSearchIndexingEnabled, siteConfig } from "@/lib/seo/site-config";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   if (!isSearchIndexingEnabled) {

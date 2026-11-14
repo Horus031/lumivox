@@ -1,7 +1,4 @@
-import type {
-  FocusWireSegment,
-  FocusWireSnapshot,
-} from "./shared/focus-protocol";
+import type { FocusWireSegment, FocusWireSnapshot } from "./shared/focus-protocol";
 
 export type FocusProjection = {
   phase: "running" | "paused" | "awaiting_next" | "invalid";
@@ -17,17 +14,10 @@ function milliseconds(value: string | null): number | null {
   return Number.isFinite(time) ? time : null;
 }
 
-export function projectFocus(
-  snapshot: FocusWireSnapshot,
-  nowMs: number,
-): FocusProjection {
-  const segments = [...snapshot.segments].sort(
-    (a, b) => a.position - b.position,
-  );
+export function projectFocus(snapshot: FocusWireSnapshot, nowMs: number): FocusProjection {
+  const segments = [...snapshot.segments].sort((a, b) => a.position - b.position);
 
-  const live = segments.filter(
-    (s) => s.status === "running" || s.status === "paused",
-  );
+  const live = segments.filter((s) => s.status === "running" || s.status === "paused");
 
   const current = live.length === 1 ? live[0] : null;
   const next = segments.find((s) => s.status === "pending") ?? null;
@@ -65,8 +55,7 @@ export function projectFocus(
     };
   }
 
-  const end =
-    current.status === "paused" ? milliseconds(current.paused_at) : nowMs;
+  const end = current.status === "paused" ? milliseconds(current.paused_at) : nowMs;
 
   if (end === null) {
     return {
@@ -80,10 +69,7 @@ export function projectFocus(
 
   const elapsed = Math.min(
     current.planned_seconds,
-    Math.max(
-      0,
-      Math.floor((end - start) / 1000) - current.total_paused_seconds,
-    ),
+    Math.max(0, Math.floor((end - start) / 1000) - current.total_paused_seconds),
   );
 
   const remainingSeconds = Math.max(0, current.planned_seconds - elapsed);
@@ -107,6 +93,5 @@ export function formatClock(seconds: number): string {
     ? `${String(hours).padStart(2, "0")}:` +
         `${String(minutes).padStart(2, "0")}:` +
         `${String(remainder).padStart(2, "0")}`
-    : `${String(minutes).padStart(2, "0")}:` +
-        `${String(remainder).padStart(2, "0")}`;
+    : `${String(minutes).padStart(2, "0")}:` + `${String(remainder).padStart(2, "0")}`;
 }

@@ -8,7 +8,6 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { processLearningDocumentAction } from "../learning-document-processing.action";
 
-
 type ProcessLearningDocumentButtonProps = {
   documentId: string;
   status: string | null;
@@ -41,17 +40,16 @@ export function ProcessLearningDocumentButton({
   }
 
   return (
-    <Button variant="outline" size="sm"
+    <Button
+      variant="outline"
+      size="sm"
       type="button"
       onClick={handleProcess}
       disabled={isProcessing}
       aria-busy={isProcessing}
     >
-      <RefreshCw aria-hidden="true" />{isProcessing
-        ? t("processing")
-        : isCompleted
-          ? t("reprocess")
-          : t("process")}
+      <RefreshCw aria-hidden="true" />
+      {isProcessing ? t("processing") : isCompleted ? t("reprocess") : t("process")}
     </Button>
   );
 }

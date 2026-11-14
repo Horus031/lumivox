@@ -10,21 +10,21 @@
 
 ## Step 6A — Analytics Core Edge Cases
 
-| Check | Execution / result |
-| --- | --- |
-| UT-027 zero due denominator | Unit test: null Attendance/On-time, future Planned Coverage remains 0 |
-| UT-028 8/12 due, 5 on-time | Unit test: correct rates and counts |
-| UT-029 late completion | Unit test: counts completion, excludes on-time credit |
-| UT-030 future obligation | Unit test: included in planned, excluded from due |
-| UT-031 proactive cancellation | Unit test: excluded using authoritative cancellation audit time |
-| Grace equality | Unit test: end + 60 elapsed minutes equals asOf is due |
-| Completion after asOf | Unit test: no due or planned completion credit |
-| Cancellation after start | Unit test: remains eligible |
-| Missing cancellation audit | Unit test: throws; no guessed updated_at timestamp |
-| Ambiguous logical identity | Unit test: rejects two eligible candidates |
-| Proactive replacement identity | Unit test: excludes proactive historical candidate before coalescing |
-| Persisted Scheduled past grace | Unit test: counts due without rewriting/inventing persisted Missed status |
-| UT-032 local-day grouping | **NOT EXECUTED / deferred to Calendar projection**; summary does not group by day |
+| Check                          | Execution / result                                                                |
+| ------------------------------ | --------------------------------------------------------------------------------- |
+| UT-027 zero due denominator    | Unit test: null Attendance/On-time, future Planned Coverage remains 0             |
+| UT-028 8/12 due, 5 on-time     | Unit test: correct rates and counts                                               |
+| UT-029 late completion         | Unit test: counts completion, excludes on-time credit                             |
+| UT-030 future obligation       | Unit test: included in planned, excluded from due                                 |
+| UT-031 proactive cancellation  | Unit test: excluded using authoritative cancellation audit time                   |
+| Grace equality                 | Unit test: end + 60 elapsed minutes equals asOf is due                            |
+| Completion after asOf          | Unit test: no due or planned completion credit                                    |
+| Cancellation after start       | Unit test: remains eligible                                                       |
+| Missing cancellation audit     | Unit test: throws; no guessed updated_at timestamp                                |
+| Ambiguous logical identity     | Unit test: rejects two eligible candidates                                        |
+| Proactive replacement identity | Unit test: excludes proactive historical candidate before coalescing              |
+| Persisted Scheduled past grace | Unit test: counts due without rewriting/inventing persisted Missed status         |
+| UT-032 local-day grouping      | **NOT EXECUTED / deferred to Calendar projection**; summary does not group by day |
 
 Core implementation behavior was retained. Its documentation now correctly calls asOf a caller-supplied instant: this adapter uses application-server time, not a database timestamp.
 
@@ -79,16 +79,16 @@ supabase test db --local
 
 For the targeted integration run, `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY`, and `LEARNING_SCHEDULE_TEST_SERVICE_KEY` are injected from CLI local status. The normal full Vitest run omits this opt-in environment; separate targeted execution is the evidence for the two new local integration tests.
 
-| Gate | Actual result |
-| --- | --- |
-| Targeted analytics core + action + local integration | **PASS**, exit 0; **3 files / 44 tests / 0 skipped**: core 12, action 30, real local integration 2; **5.56s**, started **22:20:47 UTC+07:00** |
-| ESLint | **PASS**, exit 0; 0 errors / 1 existing `projection` hook-dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104` |
-| Full Vitest | **PASS**, exit 0; **73 files passed / 3 skipped**, **714 tests passed / 22 skipped**, **193.73s**, started **22:16:29 UTC+07:00**. Includes two intentionally opt-in new integration tests skipped here and executed separately above; 20 pre-existing skips remain |
-| Standalone TypeScript | **PASS**, exit 0 |
-| Next.js production build | **PASS**, exit 0; Next **16.2.6**, compile **20.4s**, TypeScript **33.2s**, **98/98** pages in **1646ms** |
-| Database regression | **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, 2 wall-clock seconds; persistent concurrency setup intentionally skipped |
-| Migration inventory | **84 SQL files**; no migration added, clean migration replay **NOT EXECUTED** in this read-adapter checkpoint |
-| Whitespace / final scope review | **PASS**: `git diff --check`, explicit trailing-whitespace checks for new untracked files, and final six-file scope review; no migration/RPC/config/lockfile diff |
+| Gate                                                 | Actual result                                                                                                                                                                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Targeted analytics core + action + local integration | **PASS**, exit 0; **3 files / 44 tests / 0 skipped**: core 12, action 30, real local integration 2; **5.56s**, started **22:20:47 UTC+07:00**                                                                                                                       |
+| ESLint                                               | **PASS**, exit 0; 0 errors / 1 existing `projection` hook-dependency warning at `features/focus-sessions/use-focus-v2-audio.ts:104`                                                                                                                                 |
+| Full Vitest                                          | **PASS**, exit 0; **73 files passed / 3 skipped**, **714 tests passed / 22 skipped**, **193.73s**, started **22:16:29 UTC+07:00**. Includes two intentionally opt-in new integration tests skipped here and executed separately above; 20 pre-existing skips remain |
+| Standalone TypeScript                                | **PASS**, exit 0                                                                                                                                                                                                                                                    |
+| Next.js production build                             | **PASS**, exit 0; Next **16.2.6**, compile **20.4s**, TypeScript **33.2s**, **98/98** pages in **1646ms**                                                                                                                                                           |
+| Database regression                                  | **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, 2 wall-clock seconds; persistent concurrency setup intentionally skipped                                                                                                                              |
+| Migration inventory                                  | **84 SQL files**; no migration added, clean migration replay **NOT EXECUTED** in this read-adapter checkpoint                                                                                                                                                       |
+| Whitespace / final scope review                      | **PASS**: `git diff --check`, explicit trailing-whitespace checks for new untracked files, and final six-file scope review; no migration/RPC/config/lockfile diff                                                                                                   |
 
 Build uses process-only Supabase local URL/keys; `.env.local` is unchanged. `--ignore-scripts` skips the project's destructive prebuild deletion of `.next/dev`, while still executing the actual Next production build. Existing development cache is retained. The build and full Vitest runners overlapped; durations are not performance benchmarks.
 
@@ -119,18 +119,18 @@ Build uses process-only Supabase local URL/keys; `.env.local` is unchanged. `--i
 
 ### Execution evidence
 
-| Layer / case | Actual evidence |
-| --- | --- |
-| Pure projection | **15 tests**: UT-032 with coherent Tokyo/New York UTC fixtures, cancelled history, all status handling, invalid/empty months, year rollover, DST spring/fall, actual-instant ordering, cross-Task ID ties and non-mutating input |
-| Mocked read action | **28 tests**: strict/auth input, 501-row pagination and owner predicates across tables, count/truncation/query failures, Task-title isolation, audit integrity, cross-timezone Today independent of month, weighted aggregate KPI, row/output caps and malformed/ambiguous data |
-| EN/VI components | **6 tests**: matching catalogs, N/A/empty states, dates/times/zones, six textual statuses, Task links, table headers and accessible December–January links. Weekdays are asserted against catalog labels |
-| Navigation regression | **3 tests**: nine desktop destinations, Study Planner accessible in mobile More, original four primary destinations retained, active/nested routes and sidebar behavior |
-| Targeted combined | **52/52 PASS**, 4 files, **8.82s** before the final weekday hydration fix; final full-suite execution below includes the updated catalog-label assertion |
-| Real browser + database | `tests/study-plan.spec.ts`, Chromium, one worker, Europe/London browser timezone; **3/3 PASS / 0 skipped** on the final production build, **13.5s**, zero Planner console/page errors |
-| SP-01 | Owner A's two Tasks have actual persisted Completed/Skipped Sessions in **Pacific/Kiritimati** and **Etc/GMT+12**. These zones differ by 26 hours, so Today has two different local dates at the same instant. Authenticated server reads show both, with correct status/time/zone; Task link opens matching drawer |
-| SP-02 | Authenticated `ls_create_schedule` and `ls_revise_schedule` produce revision 2, **4 historical Sessions / 2 cancellation audits** across December 2030 and January 2031. Calendar shows Cancelled and Scheduled for the correct persisted days. Keyboard Enter on Next and Previous navigation cross the year boundary |
-| SP-03 | EN/VI mobile **390×844**, no horizontal document overflow, real screenshots, empty month, localized invalid-input alert and anonymous redirect to login |
-| Owner isolation / cleanup | Separate owner B has its own Task/Schedule/Session. It is absent from A's Today and Calendar. Both fixture users are deleted; teardown asserts 0 owner Tasks, Schedules, Sessions and events. Sweep processing gate checked **OFF** before and after |
+| Layer / case              | Actual evidence                                                                                                                                                                                                                                                                                                        |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pure projection           | **15 tests**: UT-032 with coherent Tokyo/New York UTC fixtures, cancelled history, all status handling, invalid/empty months, year rollover, DST spring/fall, actual-instant ordering, cross-Task ID ties and non-mutating input                                                                                       |
+| Mocked read action        | **28 tests**: strict/auth input, 501-row pagination and owner predicates across tables, count/truncation/query failures, Task-title isolation, audit integrity, cross-timezone Today independent of month, weighted aggregate KPI, row/output caps and malformed/ambiguous data                                        |
+| EN/VI components          | **6 tests**: matching catalogs, N/A/empty states, dates/times/zones, six textual statuses, Task links, table headers and accessible December–January links. Weekdays are asserted against catalog labels                                                                                                               |
+| Navigation regression     | **3 tests**: nine desktop destinations, Study Planner accessible in mobile More, original four primary destinations retained, active/nested routes and sidebar behavior                                                                                                                                                |
+| Targeted combined         | **52/52 PASS**, 4 files, **8.82s** before the final weekday hydration fix; final full-suite execution below includes the updated catalog-label assertion                                                                                                                                                               |
+| Real browser + database   | `tests/study-plan.spec.ts`, Chromium, one worker, Europe/London browser timezone; **3/3 PASS / 0 skipped** on the final production build, **13.5s**, zero Planner console/page errors                                                                                                                                  |
+| SP-01                     | Owner A's two Tasks have actual persisted Completed/Skipped Sessions in **Pacific/Kiritimati** and **Etc/GMT+12**. These zones differ by 26 hours, so Today has two different local dates at the same instant. Authenticated server reads show both, with correct status/time/zone; Task link opens matching drawer    |
+| SP-02                     | Authenticated `ls_create_schedule` and `ls_revise_schedule` produce revision 2, **4 historical Sessions / 2 cancellation audits** across December 2030 and January 2031. Calendar shows Cancelled and Scheduled for the correct persisted days. Keyboard Enter on Next and Previous navigation cross the year boundary |
+| SP-03                     | EN/VI mobile **390×844**, no horizontal document overflow, real screenshots, empty month, localized invalid-input alert and anonymous redirect to login                                                                                                                                                                |
+| Owner isolation / cleanup | Separate owner B has its own Task/Schedule/Session. It is absent from A's Today and Calendar. Both fixture users are deleted; teardown asserts 0 owner Tasks, Schedules, Sessions and events. Sweep processing gate checked **OFF** before and after                                                                   |
 
 The Completed/Skipped states are isolated fixture inserts by the local-only test administrator, not new browser attendance-transition coverage. Generation/revision and cancellation audits are real authenticated RPC/trigger executions. No Auth/DB/action responses are mocked in Playwright. Pure/mock tests cover row limits; no 20,000-row live fixture or load benchmark was run.
 
@@ -151,15 +151,15 @@ node node_modules/@playwright/test/cli.js test tests/study-plan.spec.ts --projec
 supabase test db --local
 ```
 
-| Gate | Actual result |
-| --- | --- |
-| ESLint | **PASS**, exit 0; 0 errors / 1 existing Focus `projection` hook-dependency warning |
-| Standalone TypeScript | **PASS**, exit 0 |
-| Full Vitest (final) | **PASS**, exit 0; **763 passed / 22 skipped**, **76 files passed / 3 skipped**, **179.00s**, started **12:21:13 UTC+07:00**, after the weekday hydration fix. Opt-in integration skips remain explicit |
-| Next production build (final) | **PASS**, exit 0; Next **16.2.6**, compile **15.2s**, TypeScript **33.7s**, **100/100** pages in **1212ms**; `/[locale]/study-plan` is dynamic |
-| Playwright production build (final) | **PASS**, exit 0; **3/3**, **13.5s** against `next start` on port 3100; report interval **2026-11-03T05:23:36.465Z–05:23:48.225Z** |
-| pgTAP local regression | **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, 6 wall-clock seconds. Persistent concurrency fixture setup intentionally skipped |
-| Migration replay | **NOT EXECUTED**; no new SQL/migration or schema changes in 6C |
+| Gate                                | Actual result                                                                                                                                                                                          |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ESLint                              | **PASS**, exit 0; 0 errors / 1 existing Focus `projection` hook-dependency warning                                                                                                                     |
+| Standalone TypeScript               | **PASS**, exit 0                                                                                                                                                                                       |
+| Full Vitest (final)                 | **PASS**, exit 0; **763 passed / 22 skipped**, **76 files passed / 3 skipped**, **179.00s**, started **12:21:13 UTC+07:00**, after the weekday hydration fix. Opt-in integration skips remain explicit |
+| Next production build (final)       | **PASS**, exit 0; Next **16.2.6**, compile **15.2s**, TypeScript **33.7s**, **100/100** pages in **1212ms**; `/[locale]/study-plan` is dynamic                                                         |
+| Playwright production build (final) | **PASS**, exit 0; **3/3**, **13.5s** against `next start` on port 3100; report interval **2026-11-03T05:23:36.465Z–05:23:48.225Z**                                                                     |
+| pgTAP local regression              | **PASS**, exit 0; **26 files / 516 assertions / 0 failures**, 6 wall-clock seconds. Persistent concurrency fixture setup intentionally skipped                                                         |
+| Migration replay                    | **NOT EXECUTED**; no new SQL/migration or schema changes in 6C                                                                                                                                         |
 
 Local test credentials are injected from CLI status into process environment only; `.env.local` is unchanged. Browser testing uses isolated port 3100. The temporary dev cache/helper was removed and tsconfig restored. Build skips only prebuild to retain `.next/dev`; actual `next build` runs. Some test/build runners overlapped, so elapsed times are not performance measurements.
 
@@ -181,16 +181,16 @@ Local test credentials are injected from CLI status into process environment onl
 
 **Baseline:** `1deebfd84f1afc2b165ee0e0ee864fcab20cb20e`, clean `feature/learning-schedule-foundation` before this run; **2026-11-03**, Asia/Bangkok. Results cover the baseline plus uncommitted 6D changes. No new migration or data-layer rewrite. Added the EN/VI reload explanation; extracted the existing server content renderer into `study-plan-content.tsx` to test its real failure UI with a mocked action boundary.
 
-| Acceptance case | Actual execution / outcome |
-| --- | --- |
-| SP-04 Recovery → analytics | **Real browser PASS**: one two-local-days-old Missed obligation; Attendance **0/1 → 1/1**, On-time **0/1 → 0/1**, Coverage **0/1 → 1/1**. Real Recover UI and confirmation, then real navigation back to Planner. Database: Completed, non-null completed_at, exactly **1 recovered event**, parent Task **todo**, actual_study_minutes **null**; Calendar shows Completed on the original date |
-| SP-05 Skip | **Real browser PASS**: Scheduled → Skipped through UI, exactly **1 skipped event**, no completion/time credit. This fixture is before end + 60m, so due counts remain **0/0 (N/A)** and planned coverage remains **0/1**. Calendar and Today show Skipped |
-| SP-06 Task closure | **Real browser + authenticated Task update PASS**: before planned **0/2**, after **0/0 (N/A)**; **2 future Sessions cancelled + 2 cancellation audits**, retained on Calendar, removed from Today. No completion event or actual study minutes. Owner client closes the Task through the existing transactional trigger; no service-role Session update after the command |
-| SP-07 Query failure | **2 component tests PASS (EN/VI)**, mocked action `loadFailed`, real content renderer displays localized error/retry and no KPI/Calendar. Existing action tests separately exercise underlying read-query errors |
-| SP-08 Incomplete data | **2 component tests PASS (EN/VI)**, mocked action `incompleteData`, no partial views. Existing action tests exercise missing/duplicate cancellation audit and page truncation |
-| SP-09 Interleaved read | **Real local integration PASS**: authenticated RPC creates **730 Sessions**. Fetch wrapper waits for page 1's real HTTP response (**500 Scheduled rows**), commits a real authenticated Task-close, then releases that response and reads page 2 (**230 Cancelled rows**). All **730 cancellation audits** exist; mixed status/audit projection returns exactly **incompleteData**, without partial results. Fresh read succeeds with planned denominator **0** and **62** retained January history rows. Only request-cookie binding is mocked; HTTP/RLS/data/mutation are real |
-| SP-10 Owner isolation | **Real browser PASS**: simultaneous A/B Auth contexts open Planner; each sees only its own Task/Session, reciprocal titles absent across Today/Calendar and planned denominator **1** per owner |
-| SP-11 No schedules | **Real browser + component PASS**: owner A's isolated fixtures cleaned to zero Schedules; three N/A KPIs, both empty states, valid month links, no error |
+| Acceptance case            | Actual execution / outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SP-04 Recovery → analytics | **Real browser PASS**: one two-local-days-old Missed obligation; Attendance **0/1 → 1/1**, On-time **0/1 → 0/1**, Coverage **0/1 → 1/1**. Real Recover UI and confirmation, then real navigation back to Planner. Database: Completed, non-null completed_at, exactly **1 recovered event**, parent Task **todo**, actual_study_minutes **null**; Calendar shows Completed on the original date                                                                                                                                                                                  |
+| SP-05 Skip                 | **Real browser PASS**: Scheduled → Skipped through UI, exactly **1 skipped event**, no completion/time credit. This fixture is before end + 60m, so due counts remain **0/0 (N/A)** and planned coverage remains **0/1**. Calendar and Today show Skipped                                                                                                                                                                                                                                                                                                                        |
+| SP-06 Task closure         | **Real browser + authenticated Task update PASS**: before planned **0/2**, after **0/0 (N/A)**; **2 future Sessions cancelled + 2 cancellation audits**, retained on Calendar, removed from Today. No completion event or actual study minutes. Owner client closes the Task through the existing transactional trigger; no service-role Session update after the command                                                                                                                                                                                                        |
+| SP-07 Query failure        | **2 component tests PASS (EN/VI)**, mocked action `loadFailed`, real content renderer displays localized error/retry and no KPI/Calendar. Existing action tests separately exercise underlying read-query errors                                                                                                                                                                                                                                                                                                                                                                 |
+| SP-08 Incomplete data      | **2 component tests PASS (EN/VI)**, mocked action `incompleteData`, no partial views. Existing action tests exercise missing/duplicate cancellation audit and page truncation                                                                                                                                                                                                                                                                                                                                                                                                    |
+| SP-09 Interleaved read     | **Real local integration PASS**: authenticated RPC creates **730 Sessions**. Fetch wrapper waits for page 1's real HTTP response (**500 Scheduled rows**), commits a real authenticated Task-close, then releases that response and reads page 2 (**230 Cancelled rows**). All **730 cancellation audits** exist; mixed status/audit projection returns exactly **incompleteData**, without partial results. Fresh read succeeds with planned denominator **0** and **62** retained January history rows. Only request-cookie binding is mocked; HTTP/RLS/data/mutation are real |
+| SP-10 Owner isolation      | **Real browser PASS**: simultaneous A/B Auth contexts open Planner; each sees only its own Task/Session, reciprocal titles absent across Today/Calendar and planned denominator **1** per owner                                                                                                                                                                                                                                                                                                                                                                                  |
+| SP-11 No schedules         | **Real browser + component PASS**: owner A's isolated fixtures cleaned to zero Schedules; three N/A KPIs, both empty states, valid month links, no error                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 **Browser artifacts:** [Phase 06 report](./phase-06-study-plan-browser.json) now has **8 passed / 0 skipped** browser cases (SP-01–06, SP-10–11), **51.6s**, report interval **2026-11-03T06:12:28Z–06:13:18Z**, with actual KPI strings/persisted mutation outcomes and successful cleanup. SP-07/08/09 are deliberately documented at their component/integration layers, not counted as browser cases. [Attendance regression report](./phase-05-attendance-browser.json) was refreshed at the same HEAD with **7 passed**, including exact retry, stale update, keyboard/focus, mobile and cross-owner HTTP denial. The separate Schedule suite adds **10 passed**; combined regression command **17/17**, **1.2m**. Study Planner EN/VI mobile screenshots were refreshed for the reload explanation.
 

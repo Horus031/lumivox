@@ -13,15 +13,9 @@ import { Button } from "@/components/ui/button";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import {
-  deleteTaskAction,
-  getTaskDetailsAction,
-} from "@/features/tasks/task.actions";
+import { deleteTaskAction, getTaskDetailsAction } from "@/features/tasks/task.actions";
 
-import type {
-  TaskDetailsData,
-  TaskWithGoal,
-} from "@/features/tasks/task.types";
+import type { TaskDetailsData, TaskWithGoal } from "@/features/tasks/task.types";
 
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
@@ -71,9 +65,7 @@ export function TaskDetailsDrawer({
 
   const [details, setDetails] = useState<TaskDetailsData | null>(null);
 
-  const [activeTab, setActiveTab] = useState<TaskDrawerTab>(
-    initialTab ?? "overview",
-  );
+  const [activeTab, setActiveTab] = useState<TaskDrawerTab>(initialTab ?? "overview");
 
   const [isEditing, setIsEditing] = useState(initialEditMode ?? false);
 
@@ -115,22 +107,15 @@ export function TaskDetailsDrawer({
 
     setDetails(null);
 
-    setActiveTab(
-      initialTab ?? (task?.status === "in_review" ? "review" : "overview"),
-    );
+    setActiveTab(initialTab ?? (task?.status === "in_review" ? "review" : "overview"));
 
     setIsEditing(initialEditMode ?? false);
 
     refreshDetails();
-    return () => { detailsRequest.current += 1; };
-  }, [
-    taskId,
-    taskUpdatedAt,
-    task?.status,
-    initialTab,
-    initialEditMode,
-    refreshDetails,
-  ]);
+    return () => {
+      detailsRequest.current += 1;
+    };
+  }, [taskId, taskUpdatedAt, task?.status, initialTab, initialEditMode, refreshDetails]);
 
   if (!task) {
     return null;
@@ -221,12 +206,7 @@ export function TaskDetailsDrawer({
             {t("close")}
           </Button>
 
-          <Button
-            type="button"
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting}
-          >
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>
             <Trash2 aria-hidden="true" />
             {isDeleting ? t("deleting") : t("deleteTask")}
           </Button>
@@ -235,17 +215,11 @@ export function TaskDetailsDrawer({
     >
       <div className="min-w-0 space-y-card">
         <div className="flex flex-wrap gap-2">
-          <Badge
-            variant="secondary"
-            className={`${getPriorityTone(currentTask.priority)}`}
-          >
+          <Badge variant="secondary" className={`${getPriorityTone(currentTask.priority)}`}>
             {formT(`priorities.${currentTask.priority}`)}
           </Badge>
 
-          <Badge
-            variant="outline"
-            className={`${getStatusTone(currentTask.status)}`}
-          >
+          <Badge variant="outline" className={`${getStatusTone(currentTask.status)}`}>
             {formT(`statuses.${currentTask.status}`)}
           </Badge>
         </div>
@@ -262,10 +236,7 @@ export function TaskDetailsDrawer({
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
-            <TabsList
-              variant="line"
-              className="min-w-max border-b border-border"
-            >
+            <TabsList variant="line" className="min-w-max border-b border-border">
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
 
               <TabsTrigger value="subtasks">
@@ -292,11 +263,7 @@ export function TaskDetailsDrawer({
                 size="sm"
                 onClick={() => setIsEditing((current) => !current)}
               >
-                {isEditing ? (
-                  <X aria-hidden="true" />
-                ) : (
-                  <Pencil aria-hidden="true" />
-                )}
+                {isEditing ? <X aria-hidden="true" /> : <Pencil aria-hidden="true" />}
                 {isEditing ? commonT("cancel") : commonT("edit")}
               </Button>
             </div>
@@ -322,9 +289,7 @@ export function TaskDetailsDrawer({
                 <dl className="grid gap-card sm:grid-cols-2">
                   {summaryRows.map((row) => (
                     <div key={row.label} className="min-w-0">
-                      <dt className="text-label font-medium text-muted-foreground">
-                        {row.label}
-                      </dt>
+                      <dt className="text-label font-medium text-muted-foreground">{row.label}</dt>
 
                       <dd className="mt-1 text-body font-medium text-foreground wrap-anywhere">
                         {row.value}
@@ -334,14 +299,10 @@ export function TaskDetailsDrawer({
                 </dl>
 
                 <div className="border-t border-border pt-card">
-                  <h3 className="text-label font-medium text-muted-foreground">
-                    {t("notes")}
-                  </h3>
+                  <h3 className="text-label font-medium text-muted-foreground">{t("notes")}</h3>
 
                   <p className="mt-1 whitespace-pre-wrap text-body text-foreground wrap-anywhere">
-                    {currentTask.description?.trim()
-                      ? currentTask.description
-                      : t("noDescription")}
+                    {currentTask.description?.trim() ? currentTask.description : t("noDescription")}
                   </p>
                 </div>
 

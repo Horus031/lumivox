@@ -47,11 +47,7 @@ function formatFileSize(bytes: number) {
   return `${(kb / 1024).toFixed(1)} MB`;
 }
 
-export function TaskDocumentsPanel({
-  taskId,
-  documents,
-  onChanged,
-}: TaskDocumentsPanelProps) {
+export function TaskDocumentsPanel({ taskId, documents, onChanged }: TaskDocumentsPanelProps) {
   const t = useTranslations("tasks.details.documents");
   const confirm = useConfirmDialog();
 
@@ -61,9 +57,7 @@ export function TaskDocumentsPanel({
 
   const formRef = useRef<HTMLFormElement>(null);
 
-  const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(
-    null,
-  );
+  const [pendingDocumentId, setPendingDocumentId] = useState<string | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -143,19 +137,16 @@ export function TaskDocumentsPanel({
   return (
     <div className="min-w-0 space-y-card">
       <div>
-        <h3 className="text-base font-semibold text-foreground">
-          {t("title")}
-        </h3>
+        <h3 className="text-base font-semibold text-foreground">{t("title")}</h3>
 
-        <p className="mt-1 text-body text-secondary-text">
-          {t("description")}
-        </p>
+        <p className="mt-1 text-body text-secondary-text">{t("description")}</p>
       </div>
 
       <form
         ref={formRef}
         action={handleUpload}
-        aria-busy={isPending} className="min-w-0 border-y border-border py-card"
+        aria-busy={isPending}
+        className="min-w-0 border-y border-border py-card"
       >
         <input type="hidden" name="taskId" value={taskId} />
 
@@ -170,7 +161,8 @@ export function TaskDocumentsPanel({
         />
 
         <Button type="submit" className="mt-3" disabled={isPending}>
-          <Upload aria-hidden="true" />{isPending ? t("uploading") : t("upload")}
+          <Upload aria-hidden="true" />
+          {isPending ? t("uploading") : t("upload")}
         </Button>
       </form>
 
@@ -182,14 +174,10 @@ export function TaskDocumentsPanel({
         <div className="divide-y divide-border">
           {documents.map((document) => {
             const processing =
-              pendingDocumentId === document.id ||
-              document.extracted_text_status === "processing";
+              pendingDocumentId === document.id || document.extracted_text_status === "processing";
 
             return (
-              <article
-                key={document.id}
-                className="min-w-0 py-card"
-              >
+              <article key={document.id} className="min-w-0 py-card">
                 <div>
                   <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
                     {document.file_name}
@@ -203,13 +191,9 @@ export function TaskDocumentsPanel({
 
                   <p className="mt-1 text-caption text-muted-foreground">
                     {documentT("metadata", {
-                      visibility: documentT(
-                        `visibility.${document.visibility}`,
-                      ),
+                      visibility: documentT(`visibility.${document.visibility}`),
 
-                      status: documentT(
-                        `aiStatus.${document.extracted_text_status ?? "pending"}`,
-                      ),
+                      status: documentT(`aiStatus.${document.extracted_text_status ?? "pending"}`),
                     })}
                   </p>
                 </div>
@@ -222,7 +206,8 @@ export function TaskDocumentsPanel({
                     disabled={processing || isPending}
                     onClick={() => handleProcess(document.id)}
                   >
-                    <Sparkles aria-hidden="true" />{processing
+                    <Sparkles aria-hidden="true" />
+                    {processing
                       ? t("processing")
                       : document.extracted_text_status === "completed"
                         ? t("reprocess")
@@ -233,7 +218,8 @@ export function TaskDocumentsPanel({
 
                   <Button asChild type="button" size="sm" variant="outline">
                     <Link href={`/documents/${document.id}/share`}>
-                      <Share2 aria-hidden="true" />{t("share")}
+                      <Share2 aria-hidden="true" />
+                      {t("share")}
                     </Link>
                   </Button>
 
@@ -244,7 +230,8 @@ export function TaskDocumentsPanel({
                     disabled={isPending}
                     onClick={() => handleDelete(document.id)}
                   >
-                    <Trash2 aria-hidden="true" />{t("delete")}
+                    <Trash2 aria-hidden="true" />
+                    {t("delete")}
                   </Button>
                 </div>
               </article>

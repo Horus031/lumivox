@@ -18,9 +18,13 @@ export interface ReminderProvider {
 
 /** Local deterministic fake. No address/content storage, network or email SDK. */
 export class FakeReminderProvider implements ReminderProvider {
-  private readonly simulate: (request: FakeReminderRequest) => FakeProviderOutcome | Promise<FakeProviderOutcome>;
+  private readonly simulate: (
+    request: FakeReminderRequest,
+  ) => FakeProviderOutcome | Promise<FakeProviderOutcome>;
 
-  constructor(simulate: (request: FakeReminderRequest) => FakeProviderOutcome | Promise<FakeProviderOutcome>) {
+  constructor(
+    simulate: (request: FakeReminderRequest) => FakeProviderOutcome | Promise<FakeProviderOutcome>,
+  ) {
     this.simulate = simulate;
   }
 

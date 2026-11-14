@@ -5,8 +5,10 @@ import { FocusV2AudioEngine } from "./focus-v2-audio.engine";
 import { getFocusV2TransitionCue, toFocusV2AudioPhase } from "./focus-v2-audio.cues";
 import type { FocusV2Cue } from "./focus-v2-audio.cues";
 import {
-  DEFAULT_FOCUS_V2_AUDIO_SETTINGS, FOCUS_V2_AUDIO_STORAGE_KEY,
-  parseFocusV2AudioSettings, shouldPlayFocusV2Ambient,
+  DEFAULT_FOCUS_V2_AUDIO_SETTINGS,
+  FOCUS_V2_AUDIO_STORAGE_KEY,
+  parseFocusV2AudioSettings,
+  shouldPlayFocusV2Ambient,
 } from "./focus-v2-audio.settings";
 import type { FocusV2AudioSettings } from "./focus-v2-audio.settings";
 import type { FocusV2Projection } from "./focus-v2.types";
@@ -32,7 +34,9 @@ export function useFocusV2Audio(sessionId: string, projection: FocusV2Projection
     try {
       const saved = window.localStorage.getItem(FOCUS_V2_AUDIO_STORAGE_KEY);
       if (saved) setSettings(parseFocusV2AudioSettings(JSON.parse(saved) as unknown));
-    } catch { /* Private browsing or invalid saved content: defaults remain. */ }
+    } catch {
+      /* Private browsing or invalid saved content: defaults remain. */
+    }
     setHydrated(true);
     return () => {
       mountedRef.current = false;
@@ -44,8 +48,11 @@ export function useFocusV2Audio(sessionId: string, projection: FocusV2Projection
 
   useEffect(() => {
     if (!hydrated) return;
-    try { window.localStorage.setItem(FOCUS_V2_AUDIO_STORAGE_KEY, JSON.stringify(settings)); }
-    catch { /* Storage is optional: audio still works for the active page. */ }
+    try {
+      window.localStorage.setItem(FOCUS_V2_AUDIO_STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      /* Storage is optional: audio still works for the active page. */
+    }
   }, [settings, hydrated]);
 
   useEffect(() => {
@@ -58,7 +65,10 @@ export function useFocusV2Audio(sessionId: string, projection: FocusV2Projection
       setEnabled(false);
       setError(null);
     };
-    return () => { channelRef.current = null; channel.close(); };
+    return () => {
+      channelRef.current = null;
+      channel.close();
+    };
   }, [sessionId]);
 
   const updateSettings = useCallback((patch: Partial<FocusV2AudioSettings>) => {
@@ -97,7 +107,10 @@ export function useFocusV2Audio(sessionId: string, projection: FocusV2Projection
     engine.setAmbientVolume(settings.volume, settings.muted);
     engine.setCueVolume(settings.cueVolume, settings.cuesEnabled);
     const shouldPlay = shouldPlayFocusV2Ambient(
-      enabled, projection.phase, projection.current?.segment_kind ?? null, settings,
+      enabled,
+      projection.phase,
+      projection.current?.segment_kind ?? null,
+      settings,
     );
     if (shouldPlay) engine.playAmbient(settings.sound);
     else engine.stopAmbient();

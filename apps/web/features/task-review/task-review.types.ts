@@ -1,7 +1,4 @@
-export type TaskReviewQuestionKind =
-  | "single_choice"
-  | "multiple_select"
-  | "true_false";
+export type TaskReviewQuestionKind = "single_choice" | "multiple_select" | "true_false";
 
 export type TaskReviewAttemptStatus =
   | "generating"
@@ -11,9 +8,7 @@ export type TaskReviewAttemptStatus =
   | "generation_failed"
   | "cancelled";
 
-export type TaskReviewSourceMode =
-  | "document_grounded"
-  | "topic_inferred";
+export type TaskReviewSourceMode = "document_grounded" | "topic_inferred";
 
 export type TaskReviewFlashcard = {
   id: string;
@@ -24,8 +19,7 @@ export type TaskReviewFlashcard = {
 export type TaskReviewQuestion = {
   id: string;
 
-  kind:
-    TaskReviewQuestionKind;
+  kind: TaskReviewQuestionKind;
 
   prompt: string;
 
@@ -36,21 +30,17 @@ export type TaskReviewAssessment = {
   title: string;
   summary: string;
 
-  flashcards:
-    TaskReviewFlashcard[];
+  flashcards: TaskReviewFlashcard[];
 
-  questions:
-    TaskReviewQuestion[];
+  questions: TaskReviewQuestion[];
 };
 
 export type TaskReviewSourceSummary = {
-  mode:
-    TaskReviewSourceMode;
+  mode: TaskReviewSourceMode;
 
   document_count: number;
 
-  retrieved_chunk_count:
-    number;
+  retrieved_chunk_count: number;
 };
 
 export type TaskReviewQuestionFeedback = {
@@ -58,17 +48,13 @@ export type TaskReviewQuestionFeedback = {
 
   correct: boolean;
 
-  selected_option_indices:
-    number[];
+  selected_option_indices: number[];
 
-  correct_option_indices:
-    number[];
+  correct_option_indices: number[];
 
   explanation: string;
 
-  weak_area:
-    | string
-    | null;
+  weak_area: string | null;
 };
 
 export type TaskReviewFeedback = {
@@ -80,8 +66,7 @@ export type TaskReviewFeedback = {
 
   passed: boolean;
 
-  questions:
-    TaskReviewQuestionFeedback[];
+  questions: TaskReviewQuestionFeedback[];
 };
 
 export type TaskReviewAttempt = {
@@ -91,66 +76,45 @@ export type TaskReviewAttempt = {
 
   attempt_number: number;
 
-  status:
-    TaskReviewAttemptStatus;
+  status: TaskReviewAttemptStatus;
 
   pass_threshold: number;
 
   score: number | null;
 
-  assessment:
-    | TaskReviewAssessment
-    | null;
+  assessment: TaskReviewAssessment | null;
 
-  feedback:
-    | TaskReviewFeedback
-    | null;
+  feedback: TaskReviewFeedback | null;
 
   weak_areas: string[];
 
-  source:
-    TaskReviewSourceSummary;
+  source: TaskReviewSourceSummary;
 
   provider: string | null;
 
   model: string | null;
 
-  prompt_version:
-    | string
-    | null;
+  prompt_version: string | null;
 
-  latency_ms:
-    | number
-    | null;
+  latency_ms: number | null;
 
-  generation_error:
-    | string
-    | null;
+  generation_error: string | null;
 
   created_at: string;
 
-  ready_at:
-    | string
-    | null;
+  ready_at: string | null;
 
-  submitted_at:
-    | string
-    | null;
+  submitted_at: string | null;
 
-  completed_at:
-    | string
-    | null;
+  completed_at: string | null;
 };
 
 export type TaskReviewAnswerSubmission = {
   questionId: string;
 
-  selectedOptionIndices:
-    number[];
+  selectedOptionIndices: number[];
 };
 
 export type LatestTaskReviewResponse = {
-  attempt:
-    | TaskReviewAttempt
-    | null;
+  attempt: TaskReviewAttempt | null;
 };

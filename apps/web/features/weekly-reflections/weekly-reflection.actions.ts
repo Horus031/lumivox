@@ -38,27 +38,23 @@ export async function generateWeeklyReflectionAction(): Promise<
     if (!apiBaseUrl || !internalKey) {
       return {
         success: false,
-        message:
-          "AI backend environment variables are not configured correctly.",
+        message: "AI backend environment variables are not configured correctly.",
       };
     }
 
-    const response = await fetch(
-      `${apiBaseUrl}/api/v1/reflections/weekly/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-lumivox-internal-key": internalKey,
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          persist_reflection: true,
-          generate_ai_card: true,
-        }),
-        cache: "no-store",
+    const response = await fetch(`${apiBaseUrl}/api/v1/reflections/weekly/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-lumivox-internal-key": internalKey,
       },
-    );
+      body: JSON.stringify({
+        user_id: user.id,
+        persist_reflection: true,
+        generate_ai_card: true,
+      }),
+      cache: "no-store",
+    });
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -70,7 +66,6 @@ export async function generateWeeklyReflectionAction(): Promise<
     }
 
     const data = (await response.json()) as GenerateWeeklyReflectionApiResponse;
-
 
     return {
       success: true,

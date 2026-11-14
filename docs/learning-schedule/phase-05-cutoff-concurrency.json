@@ -7,15 +7,11 @@
       "name": "TIME-start-1",
       "status": "PASS",
       "command": "start",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:28.657483+00:00",
         "observedAt": "2026-11-01T13:39:23.710859+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:28.914474+00:00",
@@ -54,15 +50,11 @@
       "name": "TIME-complete-1",
       "status": "PASS",
       "command": "complete",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:33.948757+00:00",
         "observedAt": "2026-11-01T13:39:29.008064+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:34.202609+00:00",
@@ -101,15 +93,11 @@
       "name": "TIME-start-2",
       "status": "PASS",
       "command": "start",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:39.256849+00:00",
         "observedAt": "2026-11-01T13:39:34.317635+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:39.511382+00:00",
@@ -148,15 +136,11 @@
       "name": "TIME-complete-2",
       "status": "PASS",
       "command": "complete",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:44.551959+00:00",
         "observedAt": "2026-11-01T13:39:39.620679+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:44.805331+00:00",
@@ -195,15 +179,11 @@
       "name": "TIME-start-3",
       "status": "PASS",
       "command": "start",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:49.833739+00:00",
         "observedAt": "2026-11-01T13:39:44.887906+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:50.087044+00:00",
@@ -242,15 +222,11 @@
       "name": "TIME-complete-3",
       "status": "PASS",
       "command": "complete",
-      "blockers": [
-        1768
-      ],
+      "blockers": [1768],
       "observed": {
         "deadline": "2026-11-01T13:39:55.118767+00:00",
         "observedAt": "2026-11-01T13:39:50.168959+00:00",
-        "blockingPids": [
-          1768
-        ]
+        "blockingPids": [1768]
       },
       "afterDeadline": {
         "after": "2026-11-01T13:39:55.37185+00:00",

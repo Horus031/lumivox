@@ -60,16 +60,16 @@ No email is sent synchronously inside Task save/update. All sensitive mutations 
 
 ## 5. Key architectural decisions
 
-| ID | Decision | Rationale |
-|---|---|---|
-| ADR-LS-01 | Study schedule is optional and attached to root Task only | Backward compatibility and avoids nested scheduling ambiguity |
-| ADR-LS-02 | Weekly slots become explicit dated occurrences | Auditable attendance, accurate previews and reminder targeting |
-| ADR-LS-03 | Store local date/time plus IANA zone for recurrence, UTC instants for occurrences | DST correctness and display consistency |
-| ADR-LS-04 | Version every schedule change; preserve started/closed/past occurrences | No silent history rewriting |
-| ADR-LS-05 | Explicit completion, Focus is evidence but not automatic completion | Prevents misleading attendance |
-| ADR-LS-06 | Transactional outbox and protected scheduled dispatch | Durable reminders and retry observability |
-| ADR-LS-07 | Analytics derived from occurrences; separated from Task/Focus completion | Prevents double-counted PBI/streak |
-| ADR-LS-08 | Expand/deploy/contract migrations and feature flags | Safe staging-to-production rollout |
+| ID        | Decision                                                                          | Rationale                                                      |
+| --------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| ADR-LS-01 | Study schedule is optional and attached to root Task only                         | Backward compatibility and avoids nested scheduling ambiguity  |
+| ADR-LS-02 | Weekly slots become explicit dated occurrences                                    | Auditable attendance, accurate previews and reminder targeting |
+| ADR-LS-03 | Store local date/time plus IANA zone for recurrence, UTC instants for occurrences | DST correctness and display consistency                        |
+| ADR-LS-04 | Version every schedule change; preserve started/closed/past occurrences           | No silent history rewriting                                    |
+| ADR-LS-05 | Explicit completion, Focus is evidence but not automatic completion               | Prevents misleading attendance                                 |
+| ADR-LS-06 | Transactional outbox and protected scheduled dispatch                             | Durable reminders and retry observability                      |
+| ADR-LS-07 | Analytics derived from occurrences; separated from Task/Focus completion          | Prevents double-counted PBI/streak                             |
+| ADR-LS-08 | Expand/deploy/contract migrations and feature flags                               | Safe staging-to-production rollout                             |
 
 ## 6. Compatibility and change management
 

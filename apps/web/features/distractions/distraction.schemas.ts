@@ -3,13 +3,7 @@ import { z } from "zod";
 export const logDistractionSchema = z.object({
   sessionId: z.string().uuid("Invalid session id."),
 
-  distractionType: z.enum([
-    "social_media",
-    "messaging",
-    "external_interrupt",
-    "fatigue",
-    "other",
-  ]),
+  distractionType: z.enum(["social_media", "messaging", "external_interrupt", "fatigue", "other"]),
 
   durationSeconds: z.coerce
     .number()
@@ -25,6 +19,4 @@ export const logDistractionSchema = z.object({
     .or(z.literal("")),
 });
 
-export type LogDistractionInput = z.infer<
-  typeof logDistractionSchema
->;
+export type LogDistractionInput = z.infer<typeof logDistractionSchema>;

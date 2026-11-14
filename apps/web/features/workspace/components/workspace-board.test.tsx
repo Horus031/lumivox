@@ -56,11 +56,7 @@ vi.mock("@/features/tasks/components/task-details-drawer", () => ({
     initialEditMode?: boolean;
   }) =>
     task ? (
-      <div
-        data-drawer
-        data-tab={initialTab}
-        data-edit={String(Boolean(initialEditMode))}
-      >
+      <div data-drawer data-tab={initialTab} data-edit={String(Boolean(initialEditMode))}>
         {task.title}
       </div>
     ) : null,
@@ -78,12 +74,23 @@ describe("workspace optimistic controller", () => {
     referenceNow: "2026-10-04T12:00:00Z",
   };
   beforeEach(() => {
-    vi.clearAllMocks(); confirmation.mockResolvedValue(true);
+    vi.clearAllMocks();
+    confirmation.mockResolvedValue(true);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} />));
+    act(() =>
+      root.render(
+        <WorkspaceBoard
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab={"overview"}
+          initialEditMode={false}
+          {...props}
+        />,
+      ),
+    );
   });
   afterEach(() => {
     act(() => root.unmount());
@@ -141,8 +148,13 @@ describe("workspace optimistic controller", () => {
     act(() =>
       root.render(
         <WorkspaceBoard
-        goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props}
-        tasks={[{ ...task, status: "completed" }]}        />,
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab={"overview"}
+          initialEditMode={false}
+          {...props}
+          tasks={[{ ...task, status: "completed" }]}
+        />,
       ),
     );
     expect(lane("completed").querySelector("article")).not.toBeNull();
@@ -151,9 +163,7 @@ describe("workspace optimistic controller", () => {
     const article = container.querySelector("article")!;
     expect(article.querySelector("button button")).toBeNull();
     act(() => (article.querySelector("button") as HTMLButtonElement).click());
-    expect(container.querySelector("[data-drawer]")?.textContent).toBe(
-      task.title,
-    );
+    expect(container.querySelector("[data-drawer]")?.textContent).toBe(task.title);
     expect(mocks.transition).not.toHaveBeenCalled();
   });
 
@@ -161,42 +171,46 @@ describe("workspace optimistic controller", () => {
     { scope: { type: "all" as const }, goalId: "" },
     { scope: { type: "unassigned" as const }, goalId: "" },
     { scope: { type: "goal" as const, goalId: task.id }, goalId: task.id },
-  ])(
-    "quick create uses the correct goal for $scope.type",
-    async ({ scope, goalId }) => {
-      mocks.create.mockResolvedValue({
-        success: true,
-        message: "created",
-        data: null,
-      });
-      act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} scope={scope} />));
-      act(() =>
-        (lane("todo").querySelector("button") as HTMLButtonElement).click(),
+  ])("quick create uses the correct goal for $scope.type", async ({ scope, goalId }) => {
+    mocks.create.mockResolvedValue({
+      success: true,
+      message: "created",
+      data: null,
+    });
+    act(() =>
+      root.render(
+        <WorkspaceBoard
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab={"overview"}
+          initialEditMode={false}
+          {...props}
+          scope={scope}
+        />,
+      ),
+    );
+    act(() => (lane("todo").querySelector("button") as HTMLButtonElement).click());
+    const input = lane("todo").querySelector("input")!;
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(
+        input,
+        "Quick task",
       );
-      const input = lane("todo").querySelector("input")!;
-      act(() => {
-        Object.getOwnPropertyDescriptor(
-          HTMLInputElement.prototype,
-          "value",
-        )!.set!.call(input, "Quick task");
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-      await act(async () => {
-        lane("todo")
-          .querySelector("form")!
-          .dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true }),
-          );
-      });
-      expect(mocks.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Quick task",
-          goalId,
-          priority: "medium",
-          dueAt: "",
-        }),
-      );
-      expect(mocks.refresh).toHaveBeenCalledOnce();
-    },
-  );
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      lane("todo")
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    expect(mocks.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Quick task",
+        goalId,
+        priority: "medium",
+        dueAt: "",
+      }),
+    );
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+  });
 });

@@ -57,18 +57,23 @@ export function AdminGroupArchiveButton({
 
   const label = isPending ? t("updating") : archived ? t("restore") : t("archive");
   return (
-    <div aria-busy={isPending} className={compact ? "flex min-w-0 items-center gap-2" : "flex min-w-0 flex-col gap-2"}>
+    <div
+      aria-busy={isPending}
+      className={compact ? "flex min-w-0 items-center gap-2" : "flex min-w-0 flex-col gap-2"}
+    >
       {!archived ? (
         <div className="grid min-w-0 flex-1 gap-2">
-        <Label htmlFor={id} className={compact ? "sr-only" : undefined}>{detailT("adminNote")}</Label>
-        <Input
-          id={id}
-          maxLength={500}
-          disabled={isPending}
-          value={note}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder={t("adminNotePlaceholder")}
-        />
+          <Label htmlFor={id} className={compact ? "sr-only" : undefined}>
+            {detailT("adminNote")}
+          </Label>
+          <Input
+            id={id}
+            maxLength={500}
+            disabled={isPending}
+            value={note}
+            onChange={(event) => setNote(event.target.value)}
+            placeholder={t("adminNotePlaceholder")}
+          />
         </div>
       ) : null}
 
@@ -81,7 +86,13 @@ export function AdminGroupArchiveButton({
         aria-label={compact ? label : undefined}
         title={compact ? label : undefined}
       >
-        {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+        {isPending ? (
+          <Loader2 className="animate-spin" aria-hidden="true" />
+        ) : archived ? (
+          <ArchiveRestore aria-hidden="true" />
+        ) : (
+          <Archive aria-hidden="true" />
+        )}
         {!compact && label}
       </Button>
     </div>

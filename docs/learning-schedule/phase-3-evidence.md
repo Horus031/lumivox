@@ -333,12 +333,14 @@ Status: LOCAL CONCURRENCY ACCEPTANCE PASS for the scenarios and limits above. Ph
 ## Step 3.6 — Phase 03 Final Acceptance
 
 ### Baseline
+
 - Branch: feature/learning-schedule-foundation
 - HEAD SHA: `d7173707b976b86566046b6795b1138bca273566`. Verified on 2026-10-27, approximately 18:38–18:42 (Asia/Bangkok).
 - Working tree: at verification start, `docs/learning-schedule/concurrency-results.json` and this evidence file already had uncommitted changes; no runtime/migration/test source changes. Both existing edits were preserved. This run fills Step 3.6 and adds a separate final-concurrency report; results therefore describe this HEAD plus documentation/report changes, not a clean committed evidence snapshot.
 - Compared with product-release: local `product-release` is `fb2d8fe5e84fcc19033eba463976550129a8d99a`; `git rev-list --left-right --count product-release...HEAD` returns `0 16` (HEAD ahead by 16, behind by 0). `git diff --stat product-release...HEAD`: 37 files, 9,033 insertions, 1 deletion. Comparison uses local refs only; no fetch or remote synchronization claim.
 
 ### Database
+
 - Clean migration replay: PASS — `supabase db reset --local`, exit 0; replay completed on the foundation branch. Only local Supabase was reset. Non-fatal messages: deprecated `[inbucket]` configuration and missing `supabase/seed.sql`.
 - Total migrations: 79 SQL migrations replayed, ending at `20261027104448_learning_schedule_task_close.sql`; live local `supabase_migrations.schema_migrations` confirms latest version `20261027104448`.
 - pgTAP: PASS — after concurrency cleanup, `supabase test db --local`, exit 0; `Files=17, Tests=322. Result: PASS`. All 322 assertions passed; the persistent concurrency setup helper alone emits TAP SKIP to prevent accidental fixture COMMIT during discovery.
@@ -347,6 +349,7 @@ Status: LOCAL CONCURRENCY ACCEPTANCE PASS for the scenarios and limits above. Ph
 - Audit and rollback: PASS — create/revise/reschedule/Task-close regression tests passed, including 22 revision and 31 Task lifecycle assertions. Real-connection failure injection also passed for reschedule, revision and Task-close, with committed snapshots restored after rollback. Cancellation events, reschedule fingerprint binding, historical identity and Task reopen behavior remain covered within the stated fixture scope.
 
 ### Concurrency
+
 - Harness command: `node scripts/test-learning-schedule-concurrency.mjs --iterations 3 --output docs/learning-schedule/phase-03-final-concurrency-results.json`, exit 0, after the clean replay and before pgTAP. Separate output preserves the pre-existing modified `concurrency-results.json`.
 - Scenarios/iterations: PASS — 12 scenarios x 3 iterations = 36/36; backend PIDs A=426, B=425, observer=424. Final report records baseline SHA, SQLSTATE/messages, committed fixture snapshots and all run results. Started `2026-10-27T11:40:48.822Z`, finished `2026-10-27T11:40:53.548Z`.
 - Blocking observed: PASS — 24/24 controlled races explicitly observed A in `pg_blocking_pids(B)` before release. Both create/close orders and both revise/reschedule orders passed, along with duplicate create, revise stale version, reschedule conflict and concurrent exact retry. No deadlock or timeout occurred with lock=5s, statement=10s and client=15s deadlines.
@@ -355,17 +358,20 @@ Status: LOCAL CONCURRENCY ACCEPTANCE PASS for the scenarios and limits above. Ph
 - Fixture cleanup: PASS — Task, owner and related fixture rows removed; zero open worker transactions, zero worker locks; all clients closed. Final pgTAP run then passed independently.
 
 ### Web Gates
+
 - Lint: PASS — from `apps/web`, `node node_modules/eslint/bin/eslint.js .` (equivalent to `npm run lint`), exit 0; 0 errors, 1 warning.
 - Unit tests: PASS — `node node_modules/vitest/vitest.mjs run` (equivalent to `npm run test:unit`), exit 0; 60 files passed, 1 skipped; 524 tests passed, 1 skipped; duration 46.08 seconds.
 - Build: PASS — `node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" run build` (including prebuild), exit 0; Next.js 16.2.6 compiled in 16.0 seconds, completed TypeScript in 18.2 seconds and generated 98/98 static pages. Used existing `.env.local`; no secrets recorded.
 - Known warnings/skips: existing missing `projection` effect dependency at `features/focus-sessions/use-focus-v2-audio.ts:104:6`; existing Vite ESM/native-config warning. Focus PostgREST integration test skipped because required `FOCUS_TEST_SUPABASE_*` variables are absent. These are recorded limitations; the skipped test is not counted as passed. Supabase CLI used the installed npm-cache executable with Docker access outside the sandbox; build also ran outside the sandbox. Direct Node commands bypass the broken npm/npx shell shims.
 
 ### Outstanding
+
 - Out-of-scope work deferred to Phase 04–11: schedule UI/API wiring (04), remaining attendance/recovery flows (05), calendar/progress/Today's Plan (06), notification preferences/outbox/cron (07), email delivery/templates/webhooks (08), Focus/Engagement integration (09), staging E2E/load/security evidence (10), feature-flagged rollout/monitoring (11), per `architecture.md`. Existing backend rescheduling implemented here does not imply those later user flows are complete.
 - Residual risks: no browser invocation of the new Server Actions, one skipped PostgREST integration test, limited revision/event RLS fixtures, selected DST dates/timezones only, and controlled single-owner concurrency rather than broad randomized or multi-tenant stress. Evidence/report changes remain uncommitted; review/preservation of this final verification snapshot is still required.
 - Release blockers: none observed for the local Phase 03 gates listed here. Production release remains blocked pending UI/notification integration, staging E2E/security/load checks, environment-specific migration review and rollout approval in later phases. Historical earlier-fold/fingerprint/Task-close blockers above have local tests now; that does not authorize deployment.
 
 ### Final Decision
+
 - Phase 03: PASS — local final-acceptance gates above passed with explicitly documented warnings, skip and coverage limits. No unexpected reset, SQL test, concurrency, lint, unit-test or build failure occurred in this run.
 - Ready for Phase 04: YES — proceed with local UI/API integration while retaining the residual risks and later release gates above. This is not a claim that Phase 04–11 is complete.
 - Production deployment authorized: NO

@@ -15,10 +15,7 @@ import { handleAuthRequest } from "./auth-service";
 import { isFocusRequest, focusResult } from "./shared/focus-protocol";
 import { handleFocusRequest } from "./focus-service";
 
-import {
-  attentionResult,
-  isAttentionRequest,
-} from "./shared/attention-protocol";
+import { attentionResult, isAttentionRequest } from "./shared/attention-protocol";
 
 import {
   handleAttentionRequest,
@@ -30,10 +27,7 @@ registerAttentionListeners();
 
 declare const __LUMIVOX_ALLOWED_ORIGINS__: readonly string[];
 
-function siteResult(
-  state: SiteConnectionState,
-  origin?: string,
-): CheckSiteResponse {
+function siteResult(state: SiteConnectionState, origin?: string): CheckSiteResponse {
   return {
     channel: PROTOCOL_CHANNEL,
     version: PROTOCOL_VERSION,
@@ -55,9 +49,7 @@ async function checkActiveWebsite(): Promise<CheckSiteResponse> {
     return siteResult("no_active_tab");
   }
 
-  const origin = tab.url
-    ? getApprovedSiteOrigin(tab.url, __LUMIVOX_ALLOWED_ORIGINS__)
-    : null;
+  const origin = tab.url ? getApprovedSiteOrigin(tab.url, __LUMIVOX_ALLOWED_ORIGINS__) : null;
 
   if (!origin) {
     return siteResult("not_lumivox");
@@ -82,87 +74,71 @@ async function checkActiveWebsite(): Promise<CheckSiteResponse> {
   }
 }
 
-chrome.runtime.onMessage.addListener(
-  (message: unknown, sender, sendResponse) => {
-    const isPopup =
-      sender.id === chrome.runtime.id &&
-      sender.url === chrome.runtime.getURL("popup.html");
+chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
+  const isPopup =
+    sender.id === chrome.runtime.id && sender.url === chrome.runtime.getURL("popup.html");
 
-    if (!isPopup) {
-      return false;
-    }
-
-    if (isCheckSiteRequest(message)) {
-      void checkActiveWebsite()
-        .then(sendResponse)
-        .catch(() => {
-          sendResponse(siteResult("unavailable"));
-        });
-
-      return true;
-    }
-
-    if (isAuthRequest(message)) {
-      void handleAuthRequest(message)
-        .then(async (response) => {
-          const identityChanged =
-            (message.type === "AUTH_LOGIN" && response.state === "signed_in") ||
-            (message.type === "AUTH_LOGOUT" && response.state === "signed_out");
-
-          if (identityChanged) {
-            try {
-              await disableAttention();
-              await chrome.permissions.remove({
-                permissions: ["tabs"],
-              });
-            } catch {
-              // The feature is disabled locally even if
-              // Chrome cannot revoke the optional permission.
-            }
-          }
-
-          sendResponse(response);
-        })
-        .catch(() => {
-          sendResponse(authResult("unavailable", undefined, "Lỗi xác thực."));
-        });
-
-      return true;
-    }
-
-    if (isFocusRequest(message)) {
-      void handleFocusRequest(message)
-        .then(sendResponse)
-        .catch(() => {
-          sendResponse(
-            focusResult(
-              "unavailable",
-              undefined,
-              "Không thể kết nối Focus Service.",
-            ),
-          );
-        });
-
-      return true;
-    }
-
-    if (isAttentionRequest(message)) {
-      void handleAttentionRequest(message)
-        .then(sendResponse)
-        .catch(() => {
-          sendResponse(
-            attentionResult(
-              false,
-              false,
-              null,
-              "Không thể truy cập Attention Service.",
-            ),
-          );
-        });
-
-      return true;
-    }
-
+  if (!isPopup) {
     return false;
-  },
-);
+  }
+
+  if (isCheckSiteRequest(message)) {
+    void checkActiveWebsite()
+      .then(sendResponse)
+      .catch(() => {
+        sendResponse(siteResult("unavailable"));
+      });
+
+    return true;
+  }
+
+  if (isAuthRequest(message)) {
+    void handleAuthRequest(message)
+      .then(async (response) => {
+        const identityChanged =
+          (message.type === "AUTH_LOGIN" && response.state === "signed_in") ||
+          (message.type === "AUTH_LOGOUT" && response.state === "signed_out");
+
+        if (identityChanged) {
+          try {
+            await disableAttention();
+            await chrome.permissions.remove({
+              permissions: ["tabs"],
+            });
+          } catch {
+            // The feature is disabled locally even if
+            // Chrome cannot revoke the optional permission.
+          }
+        }
+
+        sendResponse(response);
+      })
+      .catch(() => {
+        sendResponse(authResult("unavailable", undefined, "Lỗi xác thực."));
+      });
+
+    return true;
+  }
+
+  if (isFocusRequest(message)) {
+    void handleFocusRequest(message)
+      .then(sendResponse)
+      .catch(() => {
+        sendResponse(focusResult("unavailable", undefined, "Không thể kết nối Focus Service."));
+      });
+
+    return true;
+  }
+
+  if (isAttentionRequest(message)) {
+    void handleAttentionRequest(message)
+      .then(sendResponse)
+      .catch(() => {
+        sendResponse(attentionResult(false, false, null, "Không thể truy cập Attention Service."));
+      });
+
+    return true;
+  }
+
+  return false;
+});

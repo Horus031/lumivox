@@ -22,19 +22,21 @@ describe("Focus V2 presets and reusable preferences", () => {
   });
 
   it("rejects unexpected task identity in saved preferences", () => {
-    expect(focusV2PreferencesSchema.safeParse({
-      ...DEFAULT_FOCUS_V2_PREFERENCES,
-      taskId: "11111111-1111-4111-8111-111111111111",
-    }).success).toBe(false);
+    expect(
+      focusV2PreferencesSchema.safeParse({
+        ...DEFAULT_FOCUS_V2_PREFERENCES,
+        taskId: "11111111-1111-4111-8111-111111111111",
+      }).success,
+    ).toBe(false);
   });
 
   it("detects matching and modified configurations", () => {
-    expect(isMatchingFocusV2Preferences(
-      DEFAULT_FOCUS_V2_PREFERENCES, FOCUS_V2_PRESETS.classic,
-    )).toBe(true);
-    expect(isMatchingFocusV2Preferences(
-      DEFAULT_FOCUS_V2_PREFERENCES, FOCUS_V2_PRESETS.deepWork,
-    )).toBe(false);
+    expect(
+      isMatchingFocusV2Preferences(DEFAULT_FOCUS_V2_PREFERENCES, FOCUS_V2_PRESETS.classic),
+    ).toBe(true);
+    expect(
+      isMatchingFocusV2Preferences(DEFAULT_FOCUS_V2_PREFERENCES, FOCUS_V2_PRESETS.deepWork),
+    ).toBe(false);
   });
 
   it("creates the correct deep work schedule", () => {

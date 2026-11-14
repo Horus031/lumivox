@@ -16,46 +16,26 @@ export default function NavBar() {
       <div className="max-w-310 mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
         <Link href="/" className="flex shrink-0 items-center gap-2 rounded-md">
           <div className="size-8 rounded-lg flex items-center justify-center">
-            <Image
-              src={"/logo.png"}
-              alt="lumivox-logo"
-              width={48}
-              height={48}
-            />
+            <Image src={"/logo.png"} alt="lumivox-logo" width={48} height={48} />
           </div>
           <span className="font-semibold text-foreground tracking-tight text-[15px]">
             {common("appName")}
           </span>
         </Link>
         <nav className="hidden lg:flex items-center gap-7 text-[13.5px]">
-          <Link
-            href="/features"
-            className="marketing-navbar__link rounded-sm transition-colors"
-          >
+          <Link href="/features" className="marketing-navbar__link rounded-sm transition-colors">
             {t("features")}
           </Link>
-          <Link
-            href="/#how"
-            className="marketing-navbar__link rounded-sm transition-colors"
-          >
+          <Link href="/#how" className="marketing-navbar__link rounded-sm transition-colors">
             {t("howItWorks")}
           </Link>
-          <Link
-            href="/research"
-            className="marketing-navbar__link rounded-sm transition-colors"
-          >
+          <Link href="/research" className="marketing-navbar__link rounded-sm transition-colors">
             {t("research")}
           </Link>
-          <Link
-            href="/blog"
-            className="marketing-navbar__link rounded-sm transition-colors"
-          >
+          <Link href="/blog" className="marketing-navbar__link rounded-sm transition-colors">
             {t("blog")}
           </Link>
-          <Link
-            href="/about"
-            className="marketing-navbar__link rounded-sm transition-colors"
-          >
+          <Link href="/about" className="marketing-navbar__link rounded-sm transition-colors">
             {t("about")}
           </Link>
         </nav>

@@ -16,10 +16,7 @@ type RoadmapApplyButtonProps = {
   disabled?: boolean;
 };
 
-export function RoadmapApplyButton({
-  roadmapId,
-  disabled = false,
-}: RoadmapApplyButtonProps) {
+export function RoadmapApplyButton({ roadmapId, disabled = false }: RoadmapApplyButtonProps) {
   const router = useRouter();
   const t = useTranslations("roadmaps");
   const confirm = useConfirmDialog();
@@ -41,7 +38,11 @@ export function RoadmapApplyButton({
       }
 
       toast.success(
-        t("applied", { goals: result.data.created_goals, tasks: result.data.created_tasks, subtasks: result.data.created_subtasks })
+        t("applied", {
+          goals: result.data.created_goals,
+          tasks: result.data.created_tasks,
+          subtasks: result.data.created_subtasks,
+        }),
       );
 
       router.refresh();

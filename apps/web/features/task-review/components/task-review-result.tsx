@@ -25,9 +25,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
 
   const passed = attempt.status === "passed";
 
-  const questionById = new Map(
-    assessment.questions.map((question) => [question.id, question]),
-  );
+  const questionById = new Map(assessment.questions.map((question) => [question.id, question]));
 
   function optionLabels(questionId: string, indices: number[]) {
     const question = questionById.get(questionId);
@@ -95,9 +93,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
               ))}
             </div>
           ) : (
-            <p className="mt-2 text-body text-muted-foreground">
-              {t("noWeakAreas")}
-            </p>
+            <p className="mt-2 text-body text-muted-foreground">{t("noWeakAreas")}</p>
           )}
         </div>
       ) : null}
@@ -111,10 +107,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
           }
 
           return (
-            <article
-              key={item.question_id}
-              className="border-t border-border pt-card"
-            >
+            <article key={item.question_id} className="border-t border-border pt-card">
               <div className="flex items-start gap-3">
                 {item.correct ? (
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
@@ -137,35 +130,23 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
 
               <div className="mt-4 space-y-3 text-sm">
                 <div>
-                  <p className="font-medium text-muted-foreground">
-                    {t("yourAnswer")}
-                  </p>
+                  <p className="font-medium text-muted-foreground">{t("yourAnswer")}</p>
 
                   <p className="mt-1 text-foreground [overflow-wrap:anywhere]">
-                    {optionLabels(
-                      item.question_id,
-                      item.selected_option_indices,
-                    )}
+                    {optionLabels(item.question_id, item.selected_option_indices)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-medium text-muted-foreground">
-                    {t("correctAnswer")}
-                  </p>
+                  <p className="font-medium text-muted-foreground">{t("correctAnswer")}</p>
 
                   <p className="mt-1 text-foreground">
-                    {optionLabels(
-                      item.question_id,
-                      item.correct_option_indices,
-                    )}
+                    {optionLabels(item.question_id, item.correct_option_indices)}
                   </p>
                 </div>
 
                 <div>
-                  <p className="font-medium text-muted-foreground">
-                    {t("explanation")}
-                  </p>
+                  <p className="font-medium text-muted-foreground">{t("explanation")}</p>
 
                   <p className="mt-1 text-body text-foreground [overflow-wrap:anywhere]">
                     {item.explanation}
@@ -174,9 +155,7 @@ export function TaskReviewResult({ attempt }: TaskReviewResultProps) {
 
                 {item.weak_area ? (
                   <div>
-                    <p className="font-medium text-muted-foreground">
-                      {t("reviewArea")}
-                    </p>
+                    <p className="font-medium text-muted-foreground">{t("reviewArea")}</p>
 
                     <p className="mt-1 text-foreground">{item.weak_area}</p>
                   </div>

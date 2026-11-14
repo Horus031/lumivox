@@ -7,9 +7,7 @@ export function createArticleStructuredData(post: BlogPost) {
   const blogUrl = `${siteConfig.url}/${post.locale}/blog`;
   const homeUrl = `${siteConfig.url}/${post.locale}`;
   const labels =
-    post.locale === "en"
-      ? { home: "Home", blog: "Blog" }
-      : { home: "Trang chủ", blog: "Blog" };
+    post.locale === "en" ? { home: "Home", blog: "Blog" } : { home: "Trang chủ", blog: "Blog" };
 
   return {
     "@context": "https://schema.org",

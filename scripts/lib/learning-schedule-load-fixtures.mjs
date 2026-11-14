@@ -3,10 +3,29 @@ import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { pool } from "./learning-schedule-load-metrics.mjs";
 
-export const q = value => `'${String(value).replaceAll("'", "''")}'`;
-export const psql = ["exec", "-i", "supabase_db_lumivox-proj", "psql", "-X", "-qAt", "-v", "ON_ERROR_STOP=1", "-U", "postgres", "-d", "postgres"];
-export const sql = query => execFileSync("docker", psql, { input: query, encoding: "utf8", windowsHide: true, maxBuffer: 16 * 1024 * 1024 }).trim();
-export const json = query => JSON.parse(sql(query));
+export const q = (value) => `'${String(value).replaceAll("'", "''")}'`;
+export const psql = [
+  "exec",
+  "-i",
+  "supabase_db_lumivox-proj",
+  "psql",
+  "-X",
+  "-qAt",
+  "-v",
+  "ON_ERROR_STOP=1",
+  "-U",
+  "postgres",
+  "-d",
+  "postgres",
+];
+export const sql = (query) =>
+  execFileSync("docker", psql, {
+    input: query,
+    encoding: "utf8",
+    windowsHide: true,
+    maxBuffer: 16 * 1024 * 1024,
+  }).trim();
+export const json = (query) => JSON.parse(sql(query));
 
 export function verifyEmpty() {
   const state = sql(`SELECT (SELECT count(*) FROM auth.users),(SELECT count(*) FROM public.tasks),
@@ -20,16 +39,25 @@ export function verifyEmpty() {
 
 export async function seedProfile(admin, profile, users) {
   const password = randomUUID();
-  await pool(Array.from({ length: profile.users }, (_, i) => i), 10, async index => {
-    const email = `load-${randomUUID()}@example.invalid`;
-    const result = await admin.auth.admin.createUser({ email, password, email_confirm: true });
-    assert.ifError(result.error);
-    users[index] = { id: result.data.user.id, email, password };
-  });
+  await pool(
+    Array.from({ length: profile.users }, (_, i) => i),
+    10,
+    async (index) => {
+      const email = `load-${randomUUID()}@example.invalid`;
+      const result = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+      assert.ifError(result.error);
+      users[index] = { id: result.data.user.id, email, password };
+    },
+  );
   const other = Math.floor((profile.sessions - profile.history - 12) / (users.length - 2));
   const remainder = profile.sessions - profile.history - 12 - other * (users.length - 2);
-  const lengths = users.map((_, i) => i === 0 ? profile.history : i === 1 ? 12 : other + (i === 2 ? remainder : 0));
-  assert.equal(lengths.reduce((a, b) => a + b, 0), profile.sessions);
+  const lengths = users.map((_, i) =>
+    i === 0 ? profile.history : i === 1 ? 12 : other + (i === 2 ? remainder : 0),
+  );
+  assert.equal(
+    lengths.reduce((a, b) => a + b, 0),
+    profile.sessions,
+  );
   sql(`BEGIN;
     CREATE TEMP TABLE owners (uid uuid, n int, persona int);
     INSERT INTO owners VALUES ${users.map((u, i) => `(${q(u.id)},${lengths[i]},${i})`).join(",")};
@@ -79,16 +107,22 @@ export async function seedProfile(admin, profile, users) {
 
 /** A single valid Study occurrence with a server-clock-relative UTC instant. */
 export function timedFixture(uid, offset = -5, reuse) {
-  const task = reuse?.task ?? randomUUID(), schedule = reuse?.schedule ?? randomUUID(), study = randomUUID();
+  const task = reuse?.task ?? randomUUID(),
+    schedule = reuse?.schedule ?? randomUUID(),
+    study = randomUUID();
   return json(`DO $fixture$ DECLARE
     st timestamptz:=date_trunc('minute',clock_timestamp())+make_interval(mins=>${offset});
     z text; d date;
   BEGIN
     z:=CASE WHEN extract(hour FROM st AT TIME ZONE 'UTC') BETWEEN 2 AND 20 THEN 'UTC' ELSE 'Etc/GMT+12' END;
     d:=(st AT TIME ZONE z)::date;
-    ${reuse ? "" : `INSERT INTO public.tasks(id,user_id,title,status) VALUES(${q(task)},${q(uid)},'Load workload task','todo');
+    ${
+      reuse
+        ? ""
+        : `INSERT INTO public.tasks(id,user_id,title,status) VALUES(${q(task)},${q(uid)},'Load workload task','todo');
     INSERT INTO public.task_study_schedules(id,user_id,task_id,starts_on,ends_on,timezone)
-      VALUES(${q(schedule)},${q(uid)},${q(task)},d,d,z);`}
+      VALUES(${q(schedule)},${q(uid)},${q(task)},d,d,z);`
+    }
     INSERT INTO public.task_study_sessions(id,user_id,task_id,schedule_id,schedule_revision,logical_occurrence_key,
       local_date,local_start_time,local_end_time,timezone,scheduled_start_at,scheduled_end_at)
     VALUES(${q(study)},${q(uid)},${q(task)},${q(schedule)},1,${q(study)},d,(st AT TIME ZONE z)::time,
@@ -99,12 +133,16 @@ export function timedFixture(uid, offset = -5, reuse) {
 
 export function seedQueue(users) {
   const fixtures = Array.from({ length: 100 }, (_, i) => ({
-    owner: users[i % 10].id, task: randomUUID(), schedule: randomUUID(), study: randomUUID(), job: randomUUID(),
+    owner: users[i % 10].id,
+    task: randomUUID(),
+    schedule: randomUUID(),
+    study: randomUUID(),
+    job: randomUUID(),
   }));
   sql(`BEGIN;
     CREATE TEMP TABLE jobs(uid uuid,task uuid,schedule uuid,study uuid,job uuid,st timestamptz,zone text,day date);
     INSERT INTO jobs(uid,task,schedule,study,job,st) VALUES
-      ${fixtures.map(f => `(${[f.owner,f.task,f.schedule,f.study,f.job].map(q).join(",")},date_trunc('minute',now())+interval '5 minutes')`).join(",")};
+      ${fixtures.map((f) => `(${[f.owner, f.task, f.schedule, f.study, f.job].map(q).join(",")},date_trunc('minute',now())+interval '5 minutes')`).join(",")};
     UPDATE jobs SET zone=CASE WHEN extract(hour FROM st AT TIME ZONE 'UTC') BETWEEN 2 AND 20 THEN 'UTC' ELSE 'Etc/GMT+12' END;
     UPDATE jobs SET day=(st AT TIME ZONE zone)::date;
     INSERT INTO public.study_notification_preferences(user_id,study_email_enabled,consented_at,reminder_locale,locale_confirmed_at)

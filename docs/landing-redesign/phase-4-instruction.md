@@ -97,11 +97,7 @@ apps/web/components/landing/story/learning-journey-controller.tsx
 ```tsx
 "use client";
 
-import {
-  useMotionValueEvent,
-  useReducedMotion,
-  useScroll,
-} from "motion/react";
+import { useMotionValueEvent, useReducedMotion, useScroll } from "motion/react";
 import { useEffect, useRef } from "react";
 
 export default function LearningJourneyController() {
@@ -114,18 +110,11 @@ export default function LearningJourneyController() {
   });
 
   useEffect(() => {
-    const root =
-      trackRef.current?.closest<HTMLElement>(
-        "[data-learning-journey]",
-      );
+    const root = trackRef.current?.closest<HTMLElement>("[data-learning-journey]");
 
     if (!root) return;
 
-    const chapters = Array.from(
-      root.querySelectorAll<HTMLElement>(
-        "[data-journey-step]",
-      ),
-    );
+    const chapters = Array.from(root.querySelectorAll<HTMLElement>("[data-journey-step]"));
 
     const visible = new Map<Element, number>();
 
@@ -135,10 +124,7 @@ export default function LearningJourneyController() {
       root.dataset.activeStep = step;
 
       chapters.forEach((chapter) => {
-        chapter.toggleAttribute(
-          "data-active",
-          chapter.dataset.journeyStep === step,
-        );
+        chapter.toggleAttribute("data-active", chapter.dataset.journeyStep === step);
       });
 
       window.dispatchEvent(
@@ -162,8 +148,7 @@ export default function LearningJourneyController() {
           }
         });
 
-        const active = [...visible.entries()]
-          .sort((a, b) => b[1] - a[1])[0]?.[0] as
+        const active = [...visible.entries()].sort((a, b) => b[1] - a[1])[0]?.[0] as
           | HTMLElement
           | undefined;
 
@@ -185,25 +170,15 @@ export default function LearningJourneyController() {
   useMotionValueEvent(scrollYProgress, "change", (value) => {
     if (reduceMotion) return;
 
-    const root =
-      trackRef.current?.closest<HTMLElement>(
-        "[data-learning-journey]",
-      );
+    const root = trackRef.current?.closest<HTMLElement>("[data-learning-journey]");
 
     if (!root) return;
 
-    root.style.setProperty(
-      "--journey-progress",
-      String(Math.min(Math.max(value, 0), 1)),
-    );
+    root.style.setProperty("--journey-progress", String(Math.min(Math.max(value, 0), 1)));
   });
 
   return (
-    <span
-      ref={trackRef}
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-    />
+    <span ref={trackRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
   );
 }
 ```
@@ -253,13 +228,9 @@ Structure chính:
 ```tsx
 <div className="mx-auto max-w-310 px-6">
   <header className="learning-journey__heading">
-    <p className="...">
-      {t("eyebrow")}
-    </p>
+    <p className="...">{t("eyebrow")}</p>
 
-    <h2 className="...">
-      {t("title")}
-    </h2>
+    <h2 className="...">{t("title")}</h2>
   </header>
 
   <div className="learning-journey__layout">
@@ -268,27 +239,16 @@ Structure chính:
         const Icon = step.icon;
 
         return (
-          <article
-            key={step.key}
-            data-journey-step={step.key}
-            className="journey-chapter"
-          >
+          <article key={step.key} data-journey-step={step.key} className="journey-chapter">
             <div className="journey-chapter__meta">
               <span>{step.n}</span>
               <span className="journey-chapter__rule" />
-              <Icon
-                aria-hidden="true"
-                className="size-4"
-              />
+              <Icon aria-hidden="true" className="size-4" />
             </div>
 
-            <h3>
-              {t(`steps.${step.key}.title`)}
-            </h3>
+            <h3>{t(`steps.${step.key}.title`)}</h3>
 
-            <p>
-              {t(`steps.${step.key}.desc`)}
-            </p>
+            <p>{t(`steps.${step.key}.desc`)}</p>
           </article>
         );
       })}
@@ -324,27 +284,18 @@ Ví dụ:
 ```tsx
 export default function JourneyVisualStage() {
   return (
-    <div
-      aria-hidden="true"
-      className="journey-stage"
-    >
+    <div aria-hidden="true" className="journey-stage">
       <div className="journey-stage__field" />
 
       <div className="journey-stage__progress">
         <span />
       </div>
 
-      <div className="journey-scene journey-scene--capture">
-        {/* task / goal visual */}
-      </div>
+      <div className="journey-scene journey-scene--capture">{/* task / goal visual */}</div>
 
-      <div className="journey-scene journey-scene--focus">
-        {/* timer visual */}
-      </div>
+      <div className="journey-scene journey-scene--focus">{/* timer visual */}</div>
 
-      <div className="journey-scene journey-scene--patterns">
-        {/* analytics visual */}
-      </div>
+      <div className="journey-scene journey-scene--patterns">{/* analytics visual */}</div>
     </div>
   );
 }
@@ -399,13 +350,9 @@ Center visual:
 ```tsx
 <div className="journey-focus__ring">
   <div className="journey-focus__inner">
-    <span className="journey-focus__time">
-      25:00
-    </span>
+    <span className="journey-focus__time">25:00</span>
 
-    <span className="journey-focus__label">
-      FOCUS
-    </span>
+    <span className="journey-focus__label">FOCUS</span>
   </div>
 </div>
 ```
@@ -418,13 +365,12 @@ Ring dùng CSS conic gradient:
   aspect-ratio: 1;
   border-radius: 50%;
 
-  background:
-    conic-gradient(
-      from -90deg,
-      var(--landing-emerald) 0deg,
-      var(--landing-mint) 270deg,
-      rgb(25 65 38 / 0.08) 270deg
-    );
+  background: conic-gradient(
+    from -90deg,
+    var(--landing-emerald) 0deg,
+    var(--landing-mint) 270deg,
+    rgb(25 65 38 / 0.08) 270deg
+  );
 
   padding: 1px;
 }
@@ -520,8 +466,7 @@ Base:
 Capture:
 
 ```css
-[data-learning-journey][data-active-step="capture"]
-.journey-scene--capture {
+[data-learning-journey][data-active-step="capture"] .journey-scene--capture {
   opacity: 1;
   transform: scale(1);
 }
@@ -530,8 +475,7 @@ Capture:
 Focus:
 
 ```css
-[data-learning-journey][data-active-step="focus"]
-.journey-scene--focus {
+[data-learning-journey][data-active-step="focus"] .journey-scene--focus {
   opacity: 1;
   transform: scale(1);
 }
@@ -551,16 +495,9 @@ Crossfade + subtle scale là đủ.
 .learning-journey {
   --journey-progress: 0;
 
-  padding-block:
-    var(--landing-scene-space);
+  padding-block: var(--landing-scene-space);
 
-  background:
-    linear-gradient(
-      180deg,
-      transparent,
-      rgb(25 65 38 / 0.025) 30%,
-      transparent 100%
-    );
+  background: linear-gradient(180deg, transparent, rgb(25 65 38 / 0.025) 30%, transparent 100%);
 }
 
 .learning-journey__heading {
@@ -636,12 +573,7 @@ Stage field:
 
   border-radius: 50%;
 
-  background:
-    radial-gradient(
-      circle,
-      rgb(51 125 77 / 0.08),
-      transparent 68%
-    );
+  background: radial-gradient(circle, rgb(51 125 77 / 0.08), transparent 68%);
 
   filter: blur(4px);
 }
@@ -674,8 +606,7 @@ CSS:
   width: 1px;
   height: 68%;
 
-  background:
-    rgb(25 65 38 / 0.08);
+  background: rgb(25 65 38 / 0.08);
 }
 
 .journey-stage__progress span {
@@ -684,17 +615,11 @@ CSS:
   width: 100%;
   height: 100%;
 
-  transform:
-    scaleY(var(--journey-progress));
+  transform: scaleY(var(--journey-progress));
 
   transform-origin: top;
 
-  background:
-    linear-gradient(
-      to bottom,
-      var(--landing-mint),
-      var(--landing-champagne)
-    );
+  background: linear-gradient(to bottom, var(--landing-mint), var(--landing-champagne));
 }
 ```
 
@@ -731,12 +656,7 @@ Rule:
   width: 34px;
   height: 1px;
 
-  background:
-    color-mix(
-      in oklab,
-      var(--landing-emerald) 35%,
-      transparent
-    );
+  background: color-mix(in oklab, var(--landing-emerald) 35%, transparent);
 }
 ```
 
@@ -746,8 +666,7 @@ Title:
 .journey-chapter h3 {
   max-width: 30rem;
 
-  font-size:
-    clamp(2rem, 3.7vw, 3.4rem);
+  font-size: clamp(2rem, 3.7vw, 3.4rem);
 
   font-weight: 600;
 
@@ -824,10 +743,7 @@ Mình khuyến nghị desktop stage chỉ hiện ở desktop:
 Và mỗi chapter có một mini visual:
 
 ```tsx
-<div
-  aria-hidden="true"
-  className={`journey-mobile-visual journey-mobile-visual--${step.key}`}
-/>
+<div aria-hidden="true" className={`journey-mobile-visual journey-mobile-visual--${step.key}`} />
 ```
 
 Nếu bạn muốn giữ implementation Phase 4 gọn hơn, có thể chưa tạo mini illustration riêng mà dùng icon/orb abstraction.
@@ -854,12 +770,7 @@ Có thể thêm bottom filament:
   width: 1px;
   height: 7rem;
 
-  background:
-    linear-gradient(
-      to bottom,
-      rgb(51 125 77 / 0.18),
-      transparent
-    );
+  background: linear-gradient(to bottom, rgb(51 125 77 / 0.18), transparent);
 }
 ```
 
@@ -883,8 +794,7 @@ Và Journey có upper signal origin:
 
   transform: translate(-50%, -50%);
 
-  box-shadow:
-    0 0 22px rgb(51 125 77 / 0.3);
+  box-shadow: 0 0 22px rgb(51 125 77 / 0.3);
 }
 ```
 
@@ -897,9 +807,7 @@ Nhờ vậy sections không bị cảm giác “cắt trang”.
 Trong `IntelligenceController`, có thể thay callback:
 
 ```tsx
-const active = entries.find(
-  (entry) => entry.isIntersecting,
-);
+const active = entries.find((entry) => entry.isIntersecting);
 ```
 
 bằng deterministic state map giống Journey controller.
@@ -926,10 +834,7 @@ Không bắt buộc, nhưng mình khuyến nghị xử lý luôn.
 Trong controller nếu reduce motion:
 
 ```tsx
-root.style.setProperty(
-  "--journey-progress",
-  "1",
-);
+root.style.setProperty("--journey-progress", "1");
 ```
 
 Hoặc để progress static.
@@ -960,17 +865,17 @@ Không đổi translation.
 
 ## Phase 4 acceptance gate
 
-| Gate | Requirement |
-|---|---|
-| HowItWorks | Không còn 3 cards |
-| Story | Capture → Focus → Patterns rõ ràng |
-| Desktop | Text scroll + visual stage sticky |
-| Stage | Visual crossfade/morph nhẹ theo active step |
-| Progress | Chỉ một progress line scrub theo scroll |
-| Mobile | Không sticky dài |
-| SSR | 3 title/description vẫn server-rendered |
-| Controller | Client island riêng |
-| Performance | Không RAF/custom scroll handler |
-| Reduced motion | Không scrubbed transform |
-| SEO | Copy/metadata/H1 không đổi |
-| Build | lint/test/build pass |
+| Gate           | Requirement                                 |
+| -------------- | ------------------------------------------- |
+| HowItWorks     | Không còn 3 cards                           |
+| Story          | Capture → Focus → Patterns rõ ràng          |
+| Desktop        | Text scroll + visual stage sticky           |
+| Stage          | Visual crossfade/morph nhẹ theo active step |
+| Progress       | Chỉ một progress line scrub theo scroll     |
+| Mobile         | Không sticky dài                            |
+| SSR            | 3 title/description vẫn server-rendered     |
+| Controller     | Client island riêng                         |
+| Performance    | Không RAF/custom scroll handler             |
+| Reduced motion | Không scrubbed transform                    |
+| SEO            | Copy/metadata/H1 không đổi                  |
+| Build          | lint/test/build pass                        |

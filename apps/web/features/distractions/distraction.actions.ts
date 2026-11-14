@@ -5,14 +5,9 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
-import {
-  logDistractionSchema,
-  type LogDistractionInput,
-} from "./distraction.schemas";
+import { logDistractionSchema, type LogDistractionInput } from "./distraction.schemas";
 
-export async function logDistractionAction(
-  input: LogDistractionInput
-): Promise<ActionResult> {
+export async function logDistractionAction(input: LogDistractionInput): Promise<ActionResult> {
   const parsed = logDistractionSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -26,22 +21,15 @@ export async function logDistractionAction(
   try {
     const { supabase, user } = await requireUser();
 
-    const {
-      sessionId,
-      distractionType,
-      durationSeconds,
-      note,
-    } = parsed.data;
+    const { sessionId, distractionType, durationSeconds, note } = parsed.data;
 
-    const { error } = await supabase
-      .from("distraction_events")
-      .insert({
-        user_id: user.id,
-        session_id: sessionId,
-        distraction_type: distractionType,
-        duration_seconds: durationSeconds,
-        note: note || null,
-      });
+    const { error } = await supabase.from("distraction_events").insert({
+      user_id: user.id,
+      session_id: sessionId,
+      distraction_type: distractionType,
+      duration_seconds: durationSeconds,
+      note: note || null,
+    });
 
     if (error) {
       return {
@@ -61,9 +49,7 @@ export async function logDistractionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while logging distraction.",
+        error instanceof Error ? error.message : "Unexpected error while logging distraction.",
     };
   }
 }

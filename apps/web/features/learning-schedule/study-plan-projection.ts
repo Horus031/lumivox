@@ -3,9 +3,16 @@ import type { AnalyticsObligation } from "./attendance-analytics";
 import type { StudyFocusEffort } from "./study-focus-effort";
 
 export type StudyPlanSession = {
-  id: string; taskId: string; taskTitle: string; scheduleId: string;
-  localDate: string; localStartTime: string; localEndTime: string;
-  timezone: string; scheduledStartAt: string; status: AnalyticsObligation["status"];
+  id: string;
+  taskId: string;
+  taskTitle: string;
+  scheduleId: string;
+  localDate: string;
+  localStartTime: string;
+  localEndTime: string;
+  timezone: string;
+  scheduledStartAt: string;
+  status: AnalyticsObligation["status"];
   canLaunchFocus?: boolean;
   plannedMinutes?: number;
 };
@@ -25,33 +32,47 @@ export function calendarMonth(month: string) {
   return parsed;
 }
 function ordered(sessions: readonly StudyPlanSession[]): StudyPlanSession[] {
-  return sessions.map(row => ({ row, instant: Temporal.Instant.from(row.scheduledStartAt).epochNanoseconds }))
-    .sort((a, b) => a.instant < b.instant ? -1 : a.instant > b.instant ? 1 : a.row.id.localeCompare(b.row.id))
-    .map(entry => entry.row);
+  return sessions
+    .map((row) => ({ row, instant: Temporal.Instant.from(row.scheduledStartAt).epochNanoseconds }))
+    .sort((a, b) =>
+      a.instant < b.instant ? -1 : a.instant > b.instant ? 1 : a.row.id.localeCompare(b.row.id),
+    )
+    .map((entry) => entry.row);
 }
 /** Today is evaluated in EACH persisted Session timezone, never the device zone. */
-export function getTodaysStudySessions(sessions: readonly StudyPlanSession[], asOf: string): StudyPlanSession[] {
+export function getTodaysStudySessions(
+  sessions: readonly StudyPlanSession[],
+  asOf: string,
+): StudyPlanSession[] {
   const dates = new Map<string, string>();
-  return ordered(sessions.filter(row => {
-    if (row.status === "cancelled") return false;
-    let today = dates.get(row.timezone);
-    if (today === undefined) {
-      today = todayInTimezone(asOf, row.timezone);
-      dates.set(row.timezone, today);
-    }
-    return row.localDate === today;
-  }));
+  return ordered(
+    sessions.filter((row) => {
+      if (row.status === "cancelled") return false;
+      let today = dates.get(row.timezone);
+      if (today === undefined) {
+        today = todayInTimezone(asOf, row.timezone);
+        dates.set(row.timezone, today);
+      }
+      return row.localDate === today;
+    }),
+  );
 }
 /** Calendar retains cancellation history, grouped by persisted local dates. */
-export function groupStudyCalendar(sessions: readonly StudyPlanSession[], month: string): CalendarDay[] {
+export function groupStudyCalendar(
+  sessions: readonly StudyPlanSession[],
+  month: string,
+): CalendarDay[] {
   calendarMonth(month);
   const days = new Map<string, StudyPlanSession[]>();
   for (const row of sessions) {
     if (row.localDate.slice(0, 7) !== month) continue;
     const group = days.get(row.localDate) ?? [];
-    if (!group.length && Temporal.PlainDate.from(row.localDate).toString() !== row.localDate) throw new Error("Invalid local date");
-    group.push(row); days.set(row.localDate, group);
+    if (!group.length && Temporal.PlainDate.from(row.localDate).toString() !== row.localDate)
+      throw new Error("Invalid local date");
+    group.push(row);
+    days.set(row.localDate, group);
   }
-  return [...days.entries()].sort(([a], [b]) => a.localeCompare(b))
+  return [...days.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
     .map(([localDate, rows]) => ({ localDate, sessions: ordered(rows) }));
 }

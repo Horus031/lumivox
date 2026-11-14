@@ -10,16 +10,13 @@ import type { Database } from "@/types/database.types";
 import { removeLearningDocumentPermissionAction } from "@/features/learning-documents/learning-document-sharing.actions";
 import { Button } from "@/components/ui/button";
 
-type Permission =
-  Database["public"]["Tables"]["learning_document_permissions"]["Row"];
+type Permission = Database["public"]["Tables"]["learning_document_permissions"]["Row"];
 
 type DocumentPermissionListProps = {
   permissions: Permission[];
 };
 
-export function DocumentPermissionList({
-  permissions,
-}: DocumentPermissionListProps) {
+export function DocumentPermissionList({ permissions }: DocumentPermissionListProps) {
   const t = useTranslations("documentUi");
   if (permissions.length === 0) {
     return (
@@ -28,18 +25,14 @@ export function DocumentPermissionList({
           {t("permissionsTitle")}
         </h2>
 
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("permissionsEmpty")}
-        </p>
+        <p className="mt-2 text-sm text-muted-foreground">{t("permissionsEmpty")}</p>
       </section>
     );
   }
 
   return (
     <section className="min-w-0 border-t border-border pt-card">
-      <h2 className="text-section font-semibold text-foreground">
-        {t("permissionsTitle")}
-      </h2>
+      <h2 className="text-section font-semibold text-foreground">{t("permissionsTitle")}</h2>
 
       <div className="mt-2 divide-y divide-border">
         {permissions.map((permission) => (
@@ -57,9 +50,7 @@ function PermissionRow({ permission }: { permission: Permission }) {
 
   function handleRemove() {
     startTransition(async () => {
-      const result = await removeLearningDocumentPermissionAction(
-        permission.id,
-      );
+      const result = await removeLearningDocumentPermissionAction(permission.id);
 
       if (!result.success) {
         toast.error(result.message);
@@ -78,9 +69,7 @@ function PermissionRow({ permission }: { permission: Permission }) {
           {permission.user_email}
         </p>
 
-        <p className="mt-1 text-caption text-muted-foreground">
-          {t(`roles.${permission.role}`)}
-        </p>
+        <p className="mt-1 text-caption text-muted-foreground">{t(`roles.${permission.role}`)}</p>
       </div>
 
       <Button

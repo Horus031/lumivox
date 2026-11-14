@@ -26,7 +26,10 @@ export function WorkspaceGoalSelector({
   return (
     <div className="min-w-0 lg:hidden">
       <div className="flex min-w-0 items-center gap-2">
-        <Select value={selectedKey} onValueChange={(key) => router.push(`/workspace?goal=${encodeURIComponent(key)}`)}>
+        <Select
+          value={selectedKey}
+          onValueChange={(key) => router.push(`/workspace?goal=${encodeURIComponent(key)}`)}
+        >
           <SelectTrigger aria-label={t("title")} className="w-full min-w-0 sm:h-touch">
             <SelectValue />
           </SelectTrigger>
@@ -44,7 +47,10 @@ export function WorkspaceGoalSelector({
       </div>
       {selectedGoal ? (
         <p className="mt-2 text-caption text-muted-foreground">
-          {t("taskProgress", { completed: selectedGoal.completed_tasks, total: selectedGoal.total_tasks })}
+          {t("taskProgress", {
+            completed: selectedGoal.completed_tasks,
+            total: selectedGoal.total_tasks,
+          })}
         </p>
       ) : null}
     </div>

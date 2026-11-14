@@ -34,12 +34,7 @@ export default function ProductShowcaseImage({
 
   return (
     <picture className="product-showcase-picture">
-      <source
-        data-showcase-theme-source
-        media="not all"
-        srcSet={darkProps.srcSet}
-        sizes={sizes}
-      />
+      <source data-showcase-theme-source media="not all" srcSet={darkProps.srcSet} sizes={sizes} />
       <Image
         src={images.light}
         alt={alt}

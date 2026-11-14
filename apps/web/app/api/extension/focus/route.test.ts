@@ -24,12 +24,9 @@ vi.mock("@/lib/ai-api/fetch-ai-api", () => ({
   },
 }));
 
-vi.mock(
-  "@/features/engagement-retention/engagement-retention.background",
-  () => ({
-    scheduleEngagementRecalculation: mocks.schedule,
-  }),
-);
+vi.mock("@/features/engagement-retention/engagement-retention.background", () => ({
+  scheduleEngagementRecalculation: mocks.schedule,
+}));
 
 import { GET, POST } from "./route";
 
@@ -78,13 +75,7 @@ function createDatabase(parentExists = true) {
         }),
       };
 
-      if (
-        ![
-          "focus_sessions",
-          "focus_session_plans",
-          "focus_session_segments",
-        ].includes(table)
-      ) {
+      if (!["focus_sessions", "focus_session_plans", "focus_session_segments"].includes(table)) {
         throw new Error("Unexpected table");
       }
 
@@ -122,18 +113,14 @@ describe("Extension Focus API", () => {
   it("rejects unauthenticated reads", async () => {
     mocks.authenticate.mockResolvedValue(null);
 
-    const response = await GET(
-      new Request("https://lumivox.test/api/extension/focus"),
-    );
+    const response = await GET(new Request("https://lumivox.test/api/extension/focus"));
 
     expect(response.status).toBe(401);
     expect(mocks.fetchAiApi).not.toHaveBeenCalled();
   });
 
   it("reads an active session without service-role writes", async () => {
-    const response = await GET(
-      new Request("https://lumivox.test/api/extension/focus"),
-    );
+    const response = await GET(new Request("https://lumivox.test/api/extension/focus"));
 
     expect(response.status).toBe(200);
     const payload = await response.json();
@@ -147,9 +134,7 @@ describe("Extension Focus API", () => {
       supabase: createDatabase(false),
     });
 
-    const response = await GET(
-      new Request("https://lumivox.test/api/extension/focus"),
-    );
+    const response = await GET(new Request("https://lumivox.test/api/extension/focus"));
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({

@@ -22,11 +22,7 @@ const PRIORITY_TONES = {
   low: "border-border bg-muted text-secondary-text",
 };
 
-export function WorkspaceTaskCard({
-  task,
-  onOpen,
-  disabled = false,
-}: WorkspaceTaskCardProps) {
+export function WorkspaceTaskCard({ task, onOpen, disabled = false }: WorkspaceTaskCardProps) {
   const t = useTranslations("workspace.board");
   const taskT = useTranslations("tasks.form");
   const draggable = useDraggable({
@@ -53,7 +49,10 @@ export function WorkspaceTaskCard({
         onClick={() => onOpen(task)}
         className="block min-h-touch w-full rounded-lg p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
-        <h3 title={task.title} className="min-h-touch pr-10 text-body font-medium text-foreground line-clamp-2 [overflow-wrap:anywhere] lg:min-h-control-sm">
+        <h3
+          title={task.title}
+          className="min-h-touch pr-10 text-body font-medium text-foreground line-clamp-2 [overflow-wrap:anywhere] lg:min-h-control-sm"
+        >
           {task.title}
         </h3>
 
@@ -62,32 +61,37 @@ export function WorkspaceTaskCard({
             {taskT(`priorities.${task.priority}`)}
           </Badge>
           {task.goals ? (
-            <p title={task.goals.title} className="min-w-0 truncate text-caption text-muted-foreground">
+            <p
+              title={task.goals.title}
+              className="min-w-0 truncate text-caption text-muted-foreground"
+            >
               {task.goals.title}
             </p>
           ) : null}
         </div>
 
-        {(task.due_at || task.subtasks.length > 0) ? <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
-          {task.due_at ? (
-            <span className="flex items-center gap-1">
-              <CalendarClock aria-hidden="true" className="size-icon-sm shrink-0" />
+        {task.due_at || task.subtasks.length > 0 ? (
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
+            {task.due_at ? (
+              <span className="flex items-center gap-1">
+                <CalendarClock aria-hidden="true" className="size-icon-sm shrink-0" />
 
-              {formatDisplayDate(task.due_at)}
-            </span>
-          ) : null}
+                {formatDisplayDate(task.due_at)}
+              </span>
+            ) : null}
 
-          {task.subtasks.length > 0 ? (
-            <span className="flex items-center gap-1">
-              <CheckSquare2 aria-hidden="true" className="size-icon-sm shrink-0" />
+            {task.subtasks.length > 0 ? (
+              <span className="flex items-center gap-1">
+                <CheckSquare2 aria-hidden="true" className="size-icon-sm shrink-0" />
 
-              {t("subtaskProgress", {
-                completed: completedSubtasks,
-                total: task.subtasks.length,
-              })}
-            </span>
-          ) : null}
-        </div> : null}
+                {t("subtaskProgress", {
+                  completed: completedSubtasks,
+                  total: task.subtasks.length,
+                })}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
       </button>
       <button
         ref={draggable.handleRef}

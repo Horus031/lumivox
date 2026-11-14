@@ -7,12 +7,7 @@ type PublicPageHeaderProps = {
   children?: ReactNode;
 };
 
-export function PublicPageHeader({
-  eyebrow,
-  title,
-  description,
-  children,
-}: PublicPageHeaderProps) {
+export function PublicPageHeader({ eyebrow, title, description, children }: PublicPageHeaderProps) {
   return (
     <header className="border-b border-border bg-surface pt-32 pb-16">
       <div className="mx-auto max-w-250 px-6">
@@ -22,9 +17,7 @@ export function PublicPageHeader({
         <h1 className="mt-4 max-w-4xl text-[42px] font-semibold leading-[1.08] tracking-tight md:text-[58px]">
           {title}
         </h1>
-        <p className="mt-6 max-w-3xl text-[17px] leading-relaxed text-secondary">
-          {description}
-        </p>
+        <p className="mt-6 max-w-3xl text-[17px] leading-relaxed text-secondary">{description}</p>
         {children}
       </div>
     </header>
@@ -41,18 +34,10 @@ export function ContentSection({ number, title, children }: ContentSectionProps)
   return (
     <section className="grid gap-4 border-b border-border py-10 md:grid-cols-[11rem_1fr] md:gap-10">
       <div>
-        {number && (
-          <span className="font-mono text-[12px] text-muted-foreground">
-            {number}
-          </span>
-        )}
-        <h2 className="mt-2 text-[23px] font-semibold tracking-tight">
-          {title}
-        </h2>
+        {number && <span className="font-mono text-[12px] text-muted-foreground">{number}</span>}
+        <h2 className="mt-2 text-[23px] font-semibold tracking-tight">{title}</h2>
       </div>
-      <div className="max-w-3xl space-y-4 text-[15px] leading-7 text-secondary">
-        {children}
-      </div>
+      <div className="max-w-3xl space-y-4 text-[15px] leading-7 text-secondary">{children}</div>
     </section>
   );
 }

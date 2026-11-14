@@ -20,11 +20,7 @@ type GlobalLeaderboardTableProps = {
   rows: GlobalLeaderboardRow[];
 };
 
-export function GlobalLeaderboardTable({
-  weekStart,
-  weekEnd,
-  rows,
-}: GlobalLeaderboardTableProps) {
+export function GlobalLeaderboardTable({ weekStart, weekEnd, rows }: GlobalLeaderboardTableProps) {
   const locale = useLocale();
   const titleId = useId();
   const t = useTranslations("leaderboard.table");
@@ -37,17 +33,14 @@ export function GlobalLeaderboardTable({
     <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="text-caption text-muted-foreground">
-            {t("eyebrow")}
-          </p>
+          <p className="text-caption text-muted-foreground">{t("eyebrow")}</p>
 
           <h2 id={titleId} className="mt-1 text-section font-semibold text-foreground">
             {t("title")}
           </h2>
 
           <p className="mt-1 text-caption text-muted-foreground">
-            {dateFormatter.format(new Date(weekStart))} -{" "}
-            {dateFormatter.format(new Date(weekEnd))}
+            {dateFormatter.format(new Date(weekStart))} - {dateFormatter.format(new Date(weekEnd))}
           </p>
         </div>
 
@@ -61,8 +54,14 @@ export function GlobalLeaderboardTable({
           <p className="text-sm text-muted-foreground">{t("empty")}</p>
         </div>
       ) : (
-        <div role="region" aria-labelledby={titleId} tabIndex={0} className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-          <table className="min-w-180 w-full text-left text-body"><caption className="sr-only">{t("title")}</caption>
+        <div
+          role="region"
+          aria-labelledby={titleId}
+          tabIndex={0}
+          className="max-w-full overflow-x-auto rounded-lg border border-border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <table className="min-w-180 w-full text-left text-body">
+            <caption className="sr-only">{t("title")}</caption>
             <thead className="border-b border-border bg-muted text-label text-secondary-text">
               <tr>
                 <th scope="col" className="px-3 py-2 font-medium">

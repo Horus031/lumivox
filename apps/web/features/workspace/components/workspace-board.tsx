@@ -51,9 +51,7 @@ export function WorkspaceBoard({
   const taskT = useTranslations("tasks.form");
   const t = useTranslations("workspace.board");
   const router = useRouter();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
-    initialTaskId,
-  );
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(initialTaskId);
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
   const [isPending, startTransition] = useTransition();
@@ -66,8 +64,7 @@ export function WorkspaceBoard({
     setServerTasks(tasks);
     setBoardTasks(tasks);
   }
-  const selectedTask =
-    boardTasks.find((task) => task.id === selectedTaskId) ?? null;
+  const selectedTask = boardTasks.find((task) => task.id === selectedTaskId) ?? null;
 
   const groupedTasks = useMemo(
     () => groupWorkspaceTasksByStatus(boardTasks, boardNow),
@@ -146,7 +143,12 @@ export function WorkspaceBoard({
     <>
       <DragDropProvider onDragEnd={handleDragEnd}>
         <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
-          <div role="region" aria-label={t("title")} tabIndex={0} className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring">
+          <div
+            role="region"
+            aria-label={t("title")}
+            tabIndex={0}
+            className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+          >
             {TASK_BOARD_LANES.map((status) => (
               <WorkspaceLane
                 key={status}

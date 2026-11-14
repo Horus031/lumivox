@@ -5,15 +5,35 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/vi.json";
 
-const mocks = vi.hoisted(() => ({ create: vi.fn(), push: vi.fn(), refresh: vi.fn(), error: vi.fn() }));
-vi.mock("@/i18n/navigation", () => ({ Link: (props: React.ComponentProps<"a">) => <a {...props} />, useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }) }));
-vi.mock("@/features/study-groups/study-group.actions", () => ({ createStudyGroupAction: mocks.create }));
-vi.mock("@/features/study-rooms/study-room.actions", () => ({ joinPublicStudyRoomAction: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  create: vi.fn(),
+  push: vi.fn(),
+  refresh: vi.fn(),
+  error: vi.fn(),
+}));
+vi.mock("@/i18n/navigation", () => ({
+  Link: (props: React.ComponentProps<"a">) => <a {...props} />,
+  useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }),
+}));
+vi.mock("@/features/study-groups/study-group.actions", () => ({
+  createStudyGroupAction: mocks.create,
+}));
+vi.mock("@/features/study-rooms/study-room.actions", () => ({
+  joinPublicStudyRoomAction: vi.fn(),
+}));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: vi.fn() } }));
 vi.mock("@/components/ui/dialog", () => {
   const Wrapper = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;
-  return { Dialog: Wrapper, DialogContent: Wrapper, DialogHeader: Wrapper, DialogFooter: Wrapper,
-    DialogTrigger: Wrapper, DialogClose: Wrapper, DialogTitle: Wrapper, DialogDescription: Wrapper };
+  return {
+    Dialog: Wrapper,
+    DialogContent: Wrapper,
+    DialogHeader: Wrapper,
+    DialogFooter: Wrapper,
+    DialogTrigger: Wrapper,
+    DialogClose: Wrapper,
+    DialogTitle: Wrapper,
+    DialogDescription: Wrapper,
+  };
 });
 
 import { CreateStudyGroupForm } from "./create-study-group-form";
@@ -23,7 +43,11 @@ import { StudyGroupMemberList } from "./study-group-member-list";
 import { MyRoomList } from "@/features/study-rooms/components/my-room-list";
 
 function localized(children: React.ReactNode) {
-  return <NextIntlClientProvider locale="vi" messages={messages} timeZone="UTC">{children}</NextIntlClientProvider>;
+  return (
+    <NextIntlClientProvider locale="vi" messages={messages} timeZone="UTC">
+      {children}
+    </NextIntlClientProvider>
+  );
 }
 function markup(children: React.ReactNode) {
   const container = document.createElement("div");
@@ -33,7 +57,14 @@ function markup(children: React.ReactNode) {
 
 describe("social study presentation", () => {
   it("deduplicates joined rooms and keeps enter navigation", () => {
-    const room = { id: "room", title: "Algebra", description: null, visibility: "private" as const, max_participants: 20, profiles: null };
+    const room = {
+      id: "room",
+      title: "Algebra",
+      description: null,
+      visibility: "private" as const,
+      max_participants: 20,
+      profiles: null,
+    };
     const joined = { room_id: "room", study_rooms: room };
     const view = markup(<MyRoomList rooms={[joined, joined]} />);
     expect(view.querySelectorAll("article")).toHaveLength(1);
@@ -43,16 +74,50 @@ describe("social study presentation", () => {
   });
 
   it("exposes named, bounded challenge meters and an empty state", () => {
-    const view = markup(<StudyGroupWeeklyChallenge progress={{ group_id: "g", week_start: "2026-10-12", week_end: "2026-10-18", target_focus_minutes: 300, target_completed_tasks: 10, actual_focus_minutes: 450, actual_completed_tasks: 0, focus_progress_percent: 150, task_progress_percent: -5 }} />);
+    const view = markup(
+      <StudyGroupWeeklyChallenge
+        progress={{
+          group_id: "g",
+          week_start: "2026-10-12",
+          week_end: "2026-10-18",
+          target_focus_minutes: 300,
+          target_completed_tasks: 10,
+          actual_focus_minutes: 450,
+          actual_completed_tasks: 0,
+          focus_progress_percent: 150,
+          task_progress_percent: -5,
+        }}
+      />,
+    );
     const meters = view.querySelectorAll('[role="progressbar"]');
-    expect(meters[0].getAttribute("aria-label")).toBe(messages.groups.weeklyChallengePanel.focusMinutes);
+    expect(meters[0].getAttribute("aria-label")).toBe(
+      messages.groups.weeklyChallengePanel.focusMinutes,
+    );
     expect(meters[0].getAttribute("aria-valuenow")).toBe("100");
     expect(meters[1].getAttribute("aria-valuenow")).toBe("0");
-    expect(markup(<StudyGroupWeeklyChallenge progress={null} />).textContent).toContain(messages.groups.weeklyChallengePanel.empty);
+    expect(markup(<StudyGroupWeeklyChallenge progress={null} />).textContent).toContain(
+      messages.groups.weeklyChallengePanel.empty,
+    );
   });
 
   it("keeps leaderboard metadata within a focusable scroll region", () => {
-    const view = markup(<StudyGroupLeaderboard weekStart="2026-10-12" weekEnd="2026-10-18" rows={[{ user_id: "u", email: "learner@example.com", role: "member", focus_minutes: 20, completed_tasks: 2, score: 40, rank_position: 1 }]} />);
+    const view = markup(
+      <StudyGroupLeaderboard
+        weekStart="2026-10-12"
+        weekEnd="2026-10-18"
+        rows={[
+          {
+            user_id: "u",
+            email: "learner@example.com",
+            role: "member",
+            focus_minutes: 20,
+            completed_tasks: 2,
+            score: 40,
+            rank_position: 1,
+          },
+        ]}
+      />,
+    );
     expect(view.querySelector('div[tabindex="0"] table')).not.toBeNull();
     expect(view.querySelectorAll("tbody tr")).toHaveLength(1);
     expect(view.textContent).toContain("#1");
@@ -61,7 +126,21 @@ describe("social study presentation", () => {
   });
 
   it("renders member identity, role and invitation status as flat rows", () => {
-    const view = markup(<StudyGroupMemberList members={[{ member_id: "m", room_id: "r", user_id: "u", email: "learner@example.com", role: "member", membership_status: "invited", joined_at: null }]} />);
+    const view = markup(
+      <StudyGroupMemberList
+        members={[
+          {
+            member_id: "m",
+            room_id: "r",
+            user_id: "u",
+            email: "learner@example.com",
+            role: "member",
+            membership_status: "invited",
+            joined_at: null,
+          },
+        ]}
+      />,
+    );
     expect(view.textContent).toContain(messages.groups.members.status.invited);
     expect(view.querySelector("article article")).toBeNull();
   });
@@ -78,10 +157,14 @@ describe("group creation regression", () => {
     root = createRoot(container);
     act(() => root.render(localized(<CreateStudyGroupForm />)));
   });
-  afterEach(() => { act(() => root.unmount()); container.remove(); });
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+  });
 
   function enter(element: HTMLInputElement | HTMLTextAreaElement, value: string) {
-    const prototype = element.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    const prototype =
+      element.tagName === "TEXTAREA" ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
     act(() => {
       Object.getOwnPropertyDescriptor(prototype, "value")!.set!.call(element, value);
       element.dispatchEvent(new Event("input", { bubbles: true }));
@@ -98,8 +181,15 @@ describe("group creation regression", () => {
     enter(name, "Study group");
     enter(description, "Separate description");
     expect(name.value).toBe("Study group");
-    await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
-    expect(mocks.create).toHaveBeenCalledWith({ title: "Study group", description: "Separate description" });
+    await act(async () =>
+      container
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    );
+    expect(mocks.create).toHaveBeenCalledWith({
+      title: "Study group",
+      description: "Separate description",
+    });
     expect(mocks.push).toHaveBeenCalledWith("/groups/g");
   });
 
@@ -107,7 +197,11 @@ describe("group creation regression", () => {
     mocks.create.mockResolvedValue({ success: false, message: "Rejected" });
     enter(container.querySelector("input")!, "Study group");
     enter(container.querySelector("textarea")!, "Description");
-    await act(async () => container.querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })));
+    await act(async () =>
+      container
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    );
     expect(container.querySelector("input")!.value).toBe("Study group");
     expect(container.querySelector("fieldset")!.disabled).toBe(false);
     expect(mocks.error).toHaveBeenCalledWith("Rejected");

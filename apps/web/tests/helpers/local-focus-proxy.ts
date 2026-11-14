@@ -1,20 +1,35 @@
 import { createServer } from "node:http";
 
-type LaunchObserver = (request: Record<string, unknown>, response: Record<string, unknown>) => boolean | "disconnect";
+type LaunchObserver = (
+  request: Record<string, unknown>,
+  response: Record<string, unknown>,
+) => boolean | "disconnect";
 
-export async function startLocalFocusProxy(backend: string, port: string, withholdLaunch?: LaunchObserver,
-  observeTransition?: (status: number) => void) {
+export async function startLocalFocusProxy(
+  backend: string,
+  port: string,
+  withholdLaunch?: LaunchObserver,
+  observeTransition?: (status: number) => void,
+) {
   const origin = new URL(backend);
-  if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1") throw new Error("Focus proxy requires a loopback FastAPI");
+  if (origin.protocol !== "http:" || origin.hostname !== "127.0.0.1")
+    throw new Error("Focus proxy requires a loopback FastAPI");
   const proxy = createServer(async (request, response) => {
     try {
-      if (!request.url?.startsWith("/api/v1/focus-v2/")) { response.writeHead(404).end(); return; }
+      if (!request.url?.startsWith("/api/v1/focus-v2/")) {
+        response.writeHead(404).end();
+        return;
+      }
       const chunks = [];
       for await (const chunk of request) chunks.push(chunk);
       const body = Buffer.concat(chunks).toString("utf8");
       const upstream = await fetch(new URL(request.url, origin), {
-        method: "POST", body, headers: { "content-type": "application/json",
-          "x-lumivox-internal-key": String(request.headers["x-lumivox-internal-key"] ?? "") },
+        method: "POST",
+        body,
+        headers: {
+          "content-type": "application/json",
+          "x-lumivox-internal-key": String(request.headers["x-lumivox-internal-key"] ?? ""),
+        },
       });
       const payload = await upstream.text();
       // Observe an upstream commit before optionally withholding the response.
@@ -32,8 +47,9 @@ export async function startLocalFocusProxy(backend: string, port: string, withho
   await new Promise<void>((resolve, reject) => {
     proxy.once("error", reject).listen(Number(port), "127.0.0.1", resolve);
   });
-  return () => new Promise<void>((resolve, reject) => {
-    proxy.close(error => error ? reject(error) : resolve());
-    proxy.closeAllConnections();
-  });
+  return () =>
+    new Promise<void>((resolve, reject) => {
+      proxy.close((error) => (error ? reject(error) : resolve()));
+      proxy.closeAllConnections();
+    });
 }

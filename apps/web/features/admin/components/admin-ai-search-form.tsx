@@ -54,9 +54,7 @@ export function AdminAiSearchForm({
     <form onSubmit={handleSubmit} className="min-w-0">
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
         <div className="col-span-2 grid min-w-0 gap-2 md:col-span-1">
-          <Label htmlFor={`${id}-query`}>
-            {t("label")}
-          </Label>
+          <Label htmlFor={`${id}-query`}>{t("label")}</Label>
 
           <Input
             id={`${id}-query`}
@@ -68,14 +66,9 @@ export function AdminAiSearchForm({
         </div>
 
         <div className="grid min-w-0 gap-2">
-          <Label htmlFor={`${id}-mode`}>
-            {t("contextMode")}
-          </Label>
+          <Label htmlFor={`${id}-mode`}>{t("contextMode")}</Label>
 
-          <Select
-            value={contextMode}
-            onValueChange={(value) => setContextMode(value)}
-          >
+          <Select value={contextMode} onValueChange={(value) => setContextMode(value)}>
             <SelectTrigger id={`${id}-mode`} className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -83,23 +76,14 @@ export function AdminAiSearchForm({
               <SelectGroup>
                 <SelectLabel>{t("contextMode")}</SelectLabel>
                 <SelectItem value="all">{commonT("all")}</SelectItem>
-                <SelectItem value="general">
-                  {commonT("contextModes.general")}
-                </SelectItem>
-                <SelectItem value="document_rag">
-                  {commonT("contextModes.document_rag")}
-                </SelectItem>
+                <SelectItem value="general">{commonT("contextModes.general")}</SelectItem>
+                <SelectItem value="document_rag">{commonT("contextModes.document_rag")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
         </div>
 
-        <Button
-          type="submit"
-          size="icon"
-          aria-label={commonT("search")}
-          title={commonT("search")}
-        >
+        <Button type="submit" size="icon" aria-label={commonT("search")} title={commonT("search")}>
           <Search aria-hidden="true" />
         </Button>
       </div>

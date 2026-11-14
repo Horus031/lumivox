@@ -24,9 +24,7 @@ function json(body: unknown, status = 200) {
   return NextResponse.json(body, { status, headers });
 }
 
-type ExtensionIdentity = NonNullable<
-  Awaited<ReturnType<typeof authenticateExtension>>
->;
+type ExtensionIdentity = NonNullable<Awaited<ReturnType<typeof authenticateExtension>>>;
 
 async function getSnapshot(identity: ExtensionIdentity) {
   const { supabase, userId } = identity;
@@ -43,11 +41,7 @@ async function getSnapshot(identity: ExtensionIdentity) {
   if (!parent) return null;
 
   const [planResult, segmentsResult] = await Promise.all([
-    supabase
-      .from("focus_session_plans")
-      .select("round_count")
-      .eq("session_id", parent.id)
-      .single(),
+    supabase.from("focus_session_plans").select("round_count").eq("session_id", parent.id).single(),
     supabase
       .from("focus_session_segments")
       .select(
@@ -151,10 +145,7 @@ export async function POST(request: Request) {
       retries: 0,
     });
 
-    if (
-      typeof result.parentCompleted !== "boolean" ||
-      typeof result.parentStatus !== "string"
-    ) {
+    if (typeof result.parentCompleted !== "boolean" || typeof result.parentStatus !== "string") {
       return json({ error: "Invalid backend response" }, 502);
     }
 
@@ -176,10 +167,7 @@ export async function POST(request: Request) {
     if (error instanceof AiApiError) {
       return json(
         {
-          error:
-            error.status === 409
-              ? "Session changed; refresh required"
-              : "Transition rejected",
+          error: error.status === 409 ? "Session changed; refresh required" : "Transition rejected",
         },
         error.status === 409 ? 409 : 400,
       );

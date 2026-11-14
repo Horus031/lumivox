@@ -16,10 +16,7 @@ export default function TrustSection() {
   const t = useTranslations("landing.trust");
 
   return (
-    <section
-      data-landing-scene="trust"
-      className="transparent-core relative isolate"
-    >
+    <section data-landing-scene="trust" className="transparent-core relative isolate">
       <div className="transparent-core__inner mx-auto max-w-310 px-6">
         <StoryReveal>
           <header className="transparent-core__heading">
@@ -27,9 +24,7 @@ export default function TrustSection() {
               {t("eyebrow")}
             </p>
             <h2>{t("title")}</h2>
-            <p className="mt-4 text-[15px] leading-relaxed text-secondary">
-              {t("description")}
-            </p>
+            <p className="mt-4 text-[15px] leading-relaxed text-secondary">{t("description")}</p>
           </header>
         </StoryReveal>
 

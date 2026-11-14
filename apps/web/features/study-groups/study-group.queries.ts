@@ -78,12 +78,9 @@ export async function getStudyGroupById(groupId: string) {
 export async function getStudyGroupMembers(groupId: string) {
   const { supabase } = await requireUser();
 
-  const { data, error } = await supabase.rpc(
-    "get_study_group_members_with_email",
-    {
-      p_group_id: groupId,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_study_group_members_with_email", {
+    p_group_id: groupId,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch study group members: ${error.message}`);
@@ -95,13 +92,10 @@ export async function getStudyGroupMembers(groupId: string) {
 export async function getStudyGroupMessages(groupId: string) {
   const { supabase } = await requireUser();
 
-  const { data, error } = await supabase.rpc(
-    "get_study_group_messages_with_email",
-    {
-      p_group_id: groupId,
-      p_limit: 100,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_study_group_messages_with_email", {
+    p_group_id: groupId,
+    p_limit: 100,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch group messages: ${error.message}`);
@@ -114,14 +108,11 @@ export async function getStudyGroupWeeklyLeaderboard(groupId: string) {
   const { supabase } = await requireUser();
   const { weekStart, weekEnd } = getCurrentWeekRange();
 
-  const { data, error } = await supabase.rpc(
-    "get_study_group_weekly_leaderboard",
-    {
-      p_group_id: groupId,
-      p_week_start: weekStart,
-      p_week_end: weekEnd,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_study_group_weekly_leaderboard", {
+    p_group_id: groupId,
+    p_week_start: weekStart,
+    p_week_end: weekEnd,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch group leaderboard: ${error.message}`);
@@ -138,14 +129,11 @@ export async function getStudyGroupWeeklyChallengeProgress(groupId: string) {
   const { supabase } = await requireUser();
   const { weekStart, weekEnd } = getCurrentWeekRange();
 
-  const { data, error } = await supabase.rpc(
-    "get_study_group_weekly_challenge_progress",
-    {
-      p_group_id: groupId,
-      p_week_start: weekStart,
-      p_week_end: weekEnd,
-    },
-  );
+  const { data, error } = await supabase.rpc("get_study_group_weekly_challenge_progress", {
+    p_group_id: groupId,
+    p_week_start: weekStart,
+    p_week_end: weekEnd,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch challenge progress: ${error.message}`);

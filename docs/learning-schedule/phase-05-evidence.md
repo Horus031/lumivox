@@ -25,32 +25,32 @@
 
 ### SQLSTATE / HTTP Contract
 
-| Condition | SQLSTATE | Verified HTTP response |
-| --- | --- | --- |
-| Missing authentication / non-owner / inaccessible session | 42501 | Cross-owner authenticated request: 403 |
-| Invalid key/version input, invalid state/window, changed payload under an existing key | 22023 | Changed same-key payload: 400 |
-| Stale expected version on an otherwise eligible scheduled session | PT409 | 409, observed in 26 ms |
-| Valid Start / identical replay | Success, same UUID | 200 |
-| Injected audit failure in test only | P0001 | SQL-only rollback test; not an HTTP acceptance case |
+| Condition                                                                              | SQLSTATE           | Verified HTTP response                              |
+| -------------------------------------------------------------------------------------- | ------------------ | --------------------------------------------------- |
+| Missing authentication / non-owner / inaccessible session                              | 42501              | Cross-owner authenticated request: 403              |
+| Invalid key/version input, invalid state/window, changed payload under an existing key | 22023              | Changed same-key payload: 400                       |
+| Stale expected version on an otherwise eligible scheduled session                      | PT409              | 409, observed in 26 ms                              |
+| Valid Start / identical replay                                                         | Success, same UUID | 200                                                 |
+| Injected audit failure in test only                                                    | P0001              | SQL-only rollback test; not an HTTP acceptance case |
 
 - Business stale errors deliberately use PT409 rather than 40001. This follows [PostgREST custom HTTP error codes](https://docs.postgrest.org/en/v14/references/errors.html) and [Supabase guidance on custom serialization errors/retry loops](https://supabase.com/kb/troubleshooting/high-cpu-and-infinite-transaction-retries-when-using-custom-error-codes-in-rpc-functions). The HTTP mapping and absence of the previous multi-second stale response were actually probed locally; it is not a source-review-only claim.
 - Existing Phase 03 reschedule/revise RPC SQLSTATE contracts were not changed by this migration.
 
 ### Acceptance Matrix — Executed
 
-| ID | Actual test / result | Status |
-| --- | --- | --- |
-| START-01 | Owner starts eligible session; same UUID, status in_progress, original logical identity retained, completed_at/actual_study_minutes remain null and parent Task stays todo. | PASS |
-| START-02 | Exactly one started event with scheduled -> in_progress, owning actor and nonnull fingerprint. Real Auth/PostgREST probe also verifies one event. | PASS |
-| START-03 | Original expected version/key replay succeeds after status/version change without another event. Independent-transaction durable replay also passes in the concurrency harness. | PASS |
-| START-04 | Same session/key with a different expected version fails 22023 / Event key reused with different request. Real HTTP probe returns 400; event count stays one. | PASS |
-| START-05 | Future session (one hour ahead) rejected as outside the start window. | PASS |
-| START-06 | Session more than 60 minutes after scheduled end rejected; a separate fixture after end but still inside grace starts successfully. | PASS |
-| START-07 | Completed, cancelled, missed, skipped and already-in-progress fixtures rejected. | PASS |
-| START-08 | Completed/cancelled Task and paused Schedule rejected. Existing Task-close integration/guards remain intact. | PASS |
-| START-09 | User B denied with 42501 and cannot read A's row through RLS. Real locally signed-in B receives HTTP 403. Missing auth identity is rejected, anon cannot execute, authenticated has execution permission. | PASS |
-| START-10 | Stale version does not overwrite scheduled status or timestamp; SQLSTATE PT409. Real authenticated PostgREST stale request returns 409 in 26 ms without changing the row. | PASS |
-| START-11 | Temporary BEFORE INSERT audit trigger throws after attempted status update; complete session/event snapshots match the prior snapshot, including updated_at. Trigger/helper/fixture changes roll back. | PASS |
+| ID       | Actual test / result                                                                                                                                                                                                                                                 | Status                  |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| START-01 | Owner starts eligible session; same UUID, status in_progress, original logical identity retained, completed_at/actual_study_minutes remain null and parent Task stays todo.                                                                                          | PASS                    |
+| START-02 | Exactly one started event with scheduled -> in_progress, owning actor and nonnull fingerprint. Real Auth/PostgREST probe also verifies one event.                                                                                                                    | PASS                    |
+| START-03 | Original expected version/key replay succeeds after status/version change without another event. Independent-transaction durable replay also passes in the concurrency harness.                                                                                      | PASS                    |
+| START-04 | Same session/key with a different expected version fails 22023 / Event key reused with different request. Real HTTP probe returns 400; event count stays one.                                                                                                        | PASS                    |
+| START-05 | Future session (one hour ahead) rejected as outside the start window.                                                                                                                                                                                                | PASS                    |
+| START-06 | Session more than 60 minutes after scheduled end rejected; a separate fixture after end but still inside grace starts successfully.                                                                                                                                  | PASS                    |
+| START-07 | Completed, cancelled, missed, skipped and already-in-progress fixtures rejected.                                                                                                                                                                                     | PASS                    |
+| START-08 | Completed/cancelled Task and paused Schedule rejected. Existing Task-close integration/guards remain intact.                                                                                                                                                         | PASS                    |
+| START-09 | User B denied with 42501 and cannot read A's row through RLS. Real locally signed-in B receives HTTP 403. Missing auth identity is rejected, anon cannot execute, authenticated has execution permission.                                                            | PASS                    |
+| START-10 | Stale version does not overwrite scheduled status or timestamp; SQLSTATE PT409. Real authenticated PostgREST stale request returns 409 in 26 ms without changing the row.                                                                                            | PASS                    |
+| START-11 | Temporary BEFORE INSERT audit trigger throws after attempted status update; complete session/event snapshots match the prior snapshot, including updated_at. Trigger/helper/fixture changes roll back.                                                               | PASS                    |
 | START-12 | Separate A/B/observer PostgreSQL connections: distinct-key double Start has one transition and one 22023 loser; exact-key double Start returns the same ID to both with only one event. Both scenarios repeated three times and observed blocked by A before commit. | PASS — real concurrency |
 
 ### Database Replay / pgTAP — Actual Commands and Results
@@ -120,22 +120,22 @@
 
 ### Complete Acceptance — Executed Results
 
-| Area / test | Actual coverage | Result |
-| --- | --- | --- |
-| COMPLETE-01: scheduled -> completed | Original Session UUID returned; completed status and nonnull completed_at persisted; actual_study_minutes stays null. | PASS — pgTAP and HTTP |
-| COMPLETE-02: in_progress -> completed | Original UUID returned; HTTP probe additionally verifies completed state/time and audit from_status=in_progress. | PASS |
-| COMPLETE-03: within grace | Fixture ended 10 minutes ago; completion accepted with wasLate=true. Other HTTP fixtures complete before end with wasLate=false. | PASS |
-| COMPLETE-04: authoritative audit | Exactly one completed event with correct from/to, owning actor and fingerprint. HTTP verifies 64-hex fingerprint and equality of audit completedAt and persisted completed_at as instants. | PASS |
-| COMPLETE-05: exact replay | Original expected version/key succeeds after completion; one event only. HTTP compares full session snapshots before/after replay, preserving completed_at/updated_at and UUID. | PASS |
-| COMPLETE-06: key fingerprint | Changing expected version under a used key rejects with 22023 / Event key reused with different request before completed-state/stale handling. Event count and full HTTP row snapshot remain unchanged. | PASS |
-| COMPLETE-07: timing rejection | Future fixture and expired grace-window fixture reject 22023 / Session is outside the completion window. | PASS — pgTAP |
-| COMPLETE-08: disallowed states | Already completed, cancelled, missed and skipped fixtures reject 22023. Late recovery is not silently treated as ordinary Complete. | PASS — pgTAP |
-| COMPLETE-09: parent eligibility | Completed Task and paused Schedule fixtures reject 22023. Other parent eligibility branches were source-reviewed, not individually exercised in this new suite. | PASS for executed cases |
-| COMPLETE-10: stale PT409 | Otherwise eligible stale scheduled row remains scheduled with null completion and original timestamp. HTTP 409/PT409 observed in 13 ms; independent full-row before/after comparison is equal. | PASS |
-| COMPLETE-11: user isolation | User B cannot complete A's session: SQLSTATE 42501; real authenticated HTTP response is 403. No owner-row change follows denial. | PASS |
-| COMPLETE-12: Task/Focus separation | Task stays todo, minutes stay null; no Focus-start or Task-completion call exists in this function. Focus table snapshots were not independently compared in this step. | PASS within stated boundary |
-| COMPLETE-13: audit rollback | Temporary BEFORE INSERT completed-event trigger raises P0001 after attempted completion. Complete session/event snapshots equal the pre-command snapshot, including timestamps; the error aborts both writes. | PASS — pgTAP |
-| Execution privileges | anon cannot execute; authenticated can execute the reviewed RPC. Security-definer owner checks precede replay/mutation and empty search_path is retained. | PASS — pgTAP plus source review |
+| Area / test                           | Actual coverage                                                                                                                                                                                               | Result                          |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| COMPLETE-01: scheduled -> completed   | Original Session UUID returned; completed status and nonnull completed_at persisted; actual_study_minutes stays null.                                                                                         | PASS — pgTAP and HTTP           |
+| COMPLETE-02: in_progress -> completed | Original UUID returned; HTTP probe additionally verifies completed state/time and audit from_status=in_progress.                                                                                              | PASS                            |
+| COMPLETE-03: within grace             | Fixture ended 10 minutes ago; completion accepted with wasLate=true. Other HTTP fixtures complete before end with wasLate=false.                                                                              | PASS                            |
+| COMPLETE-04: authoritative audit      | Exactly one completed event with correct from/to, owning actor and fingerprint. HTTP verifies 64-hex fingerprint and equality of audit completedAt and persisted completed_at as instants.                    | PASS                            |
+| COMPLETE-05: exact replay             | Original expected version/key succeeds after completion; one event only. HTTP compares full session snapshots before/after replay, preserving completed_at/updated_at and UUID.                               | PASS                            |
+| COMPLETE-06: key fingerprint          | Changing expected version under a used key rejects with 22023 / Event key reused with different request before completed-state/stale handling. Event count and full HTTP row snapshot remain unchanged.       | PASS                            |
+| COMPLETE-07: timing rejection         | Future fixture and expired grace-window fixture reject 22023 / Session is outside the completion window.                                                                                                      | PASS — pgTAP                    |
+| COMPLETE-08: disallowed states        | Already completed, cancelled, missed and skipped fixtures reject 22023. Late recovery is not silently treated as ordinary Complete.                                                                           | PASS — pgTAP                    |
+| COMPLETE-09: parent eligibility       | Completed Task and paused Schedule fixtures reject 22023. Other parent eligibility branches were source-reviewed, not individually exercised in this new suite.                                               | PASS for executed cases         |
+| COMPLETE-10: stale PT409              | Otherwise eligible stale scheduled row remains scheduled with null completion and original timestamp. HTTP 409/PT409 observed in 13 ms; independent full-row before/after comparison is equal.                | PASS                            |
+| COMPLETE-11: user isolation           | User B cannot complete A's session: SQLSTATE 42501; real authenticated HTTP response is 403. No owner-row change follows denial.                                                                              | PASS                            |
+| COMPLETE-12: Task/Focus separation    | Task stays todo, minutes stay null; no Focus-start or Task-completion call exists in this function. Focus table snapshots were not independently compared in this step.                                       | PASS within stated boundary     |
+| COMPLETE-13: audit rollback           | Temporary BEFORE INSERT completed-event trigger raises P0001 after attempted completion. Complete session/event snapshots equal the pre-command snapshot, including timestamps; the error aborts both writes. | PASS — pgTAP                    |
+| Execution privileges                  | anon cannot execute; authenticated can execute the reviewed RPC. Security-definer owner checks precede replay/mutation and empty search_path is retained.                                                     | PASS — pgTAP plus source review |
 
 ### HTTP Contract — Supabase Local
 
@@ -143,15 +143,15 @@
 - Created two disposable users, signed in with real Auth/JWT clients, and used actual PostgREST RPC requests against scheduled, in_progress and post-end/in-grace fixtures. No requireUser injection or fake RPC response was used; no Next.js attendance Server Action or browser UI exists in this verification.
 - 14/14 checks PASS. [Raw report: phase-05-complete-http.json](./phase-05-complete-http.json).
 
-| Request | HTTP / SQLSTATE | Actual result |
-| --- | --- | --- |
-| Stale expected version on eligible session | 409 / PT409 | Rejected in 13 ms; row unchanged; 5-second request bound not reached. |
-| Another authenticated owner | 403 / 42501 | Denied; row unchanged. |
-| Complete from scheduled | 200 | Same UUID; completed timestamp and one event. |
-| Complete from in_progress | 200 | Same UUID; correct audit source state. |
-| Complete after end, inside grace | 200 | wasLate=true; completion time persisted. |
-| Exact replay of each successful command | 200 | Same UUID and entire completed row; no extra event. |
-| Changed version under each used key | 400 / 22023 | Rejected; row and one-event count unchanged. |
+| Request                                    | HTTP / SQLSTATE | Actual result                                                         |
+| ------------------------------------------ | --------------- | --------------------------------------------------------------------- |
+| Stale expected version on eligible session | 409 / PT409     | Rejected in 13 ms; row unchanged; 5-second request bound not reached. |
+| Another authenticated owner                | 403 / 42501     | Denied; row unchanged.                                                |
+| Complete from scheduled                    | 200             | Same UUID; completed timestamp and one event.                         |
+| Complete from in_progress                  | 200             | Same UUID; correct audit source state.                                |
+| Complete after end, inside grace           | 200             | wasLate=true; completion time persisted.                              |
+| Exact replay of each successful command    | 200             | Same UUID and entire completed row; no extra event.                   |
+| Changed version under each used key        | 400 / 22023     | Rejected; row and one-event count unchanged.                          |
 
 - Both probe users signed out and were deleted; remaining per-user Task counts were zero. Final independent query confirmed 0 completion fixture users and 0 complete_test_audit_failure triggers. pgTAP fixtures/helpers/injected trigger rolled back.
 
@@ -232,7 +232,6 @@
 - Step 5.3: **PASS (LOCAL)** for the executed sequential RPC, HTTP, rollback, ownership and regression scope above; pending boundary/concurrency work remains explicitly open.
 - Ready for Step 5.4: **YES**, with the Step 5.6/5.7 limits retained.
 - Production authorized: **NO**.
-
 
 ## Step 5.4 — Automatic Missed Sweep
 
@@ -323,22 +322,22 @@
 
 ### Functional Acceptance — Executed
 
-| Coverage | Actual result | Status |
-| --- | --- | --- |
-| REC-01 missed -> completed | Returns original session UUID, persists completed_at, retains logical occurrence identity and null actual_study_minutes. | PASS — pgTAP + HTTP |
-| REC-02 skipped -> completed | Returns original UUID and completed state; source status retained in audit. | PASS — pgTAP + HTTP |
-| REC-03 authoritative audit | One recovered event with owning actor, correct source/target state, wasLate=true and fingerprint. HTTP also checks 64-hex fingerprint, sourceStatus, original local date/timezone, computed cutoff and equality of recoveredAt/completed_at as instants. | PASS — pgTAP + HTTP |
-| REC-04 exact replay | Original key/version returns same UUID after completion; no additional event. HTTP compares the entire completed row and event array before/after retry, preserving timestamps. | PASS — pgTAP + HTTP |
-| REC-05 fingerprint mismatch | Changed expected version under a used key rejects 22023 / Event key reused with different request; HTTP confirms unchanged row/events. | PASS — pgTAP + HTTP |
-| REC-06 expired window | 10-day-old missed/skipped reject 22023. HTTP additionally checks both states on local day 8; both reject without mutation. | PASS for executed away-from-cutoff fixtures |
-| REC-07 disallowed states | scheduled, in_progress, completed and cancelled reject 22023; HTTP confirms unchanged rows and zero events. | PASS — pgTAP + HTTP |
-| REC-08 future obligation | Future missed rejects Session has not started; HTTP additionally checks future skipped with the same rejection and no mutation. | PASS — pgTAP + HTTP |
-| REC-09 parent eligibility | Completed Task and paused Schedule reject Session is not eligible for recovery. Other Task status/subtask branches were source-reviewed only. | PASS for executed pgTAP cases |
-| REC-10 stale version | Otherwise eligible stale request returns PT409; row remains missed with original updated_at and null completion. HTTP returns 409/PT409 and compares full row/events. | PASS — pgTAP + HTTP |
-| REC-11 owner isolation | B cannot recover A's session: 42501. Real HTTP is 403/42501; B's user-scoped SELECT returns zero rows, and A's row is unchanged. | PASS — pgTAP + HTTP |
-| REC-12 parent Task separation | Task stays todo; minutes remain null. HTTP confirms Task status and original session identity/time/revision/source slot. No independent Focus table snapshot was taken. | PASS within executed scope |
-| REC-13 audit rollback | BEFORE INSERT recovered-event trigger raises P0001 / Injected recovery audit failure. Full fixture session/event snapshots match their originals after failure, including timestamps. | PASS — pgTAP |
-| REC-14 execution privileges | anon cannot execute, authenticated can execute the reviewed RPC. Empty search_path and owner authorization before replay/mutation were also source-reviewed. | PASS — pgTAP plus stated source review |
+| Coverage                      | Actual result                                                                                                                                                                                                                                            | Status                                      |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| REC-01 missed -> completed    | Returns original session UUID, persists completed_at, retains logical occurrence identity and null actual_study_minutes.                                                                                                                                 | PASS — pgTAP + HTTP                         |
+| REC-02 skipped -> completed   | Returns original UUID and completed state; source status retained in audit.                                                                                                                                                                              | PASS — pgTAP + HTTP                         |
+| REC-03 authoritative audit    | One recovered event with owning actor, correct source/target state, wasLate=true and fingerprint. HTTP also checks 64-hex fingerprint, sourceStatus, original local date/timezone, computed cutoff and equality of recoveredAt/completed_at as instants. | PASS — pgTAP + HTTP                         |
+| REC-04 exact replay           | Original key/version returns same UUID after completion; no additional event. HTTP compares the entire completed row and event array before/after retry, preserving timestamps.                                                                          | PASS — pgTAP + HTTP                         |
+| REC-05 fingerprint mismatch   | Changed expected version under a used key rejects 22023 / Event key reused with different request; HTTP confirms unchanged row/events.                                                                                                                   | PASS — pgTAP + HTTP                         |
+| REC-06 expired window         | 10-day-old missed/skipped reject 22023. HTTP additionally checks both states on local day 8; both reject without mutation.                                                                                                                               | PASS for executed away-from-cutoff fixtures |
+| REC-07 disallowed states      | scheduled, in_progress, completed and cancelled reject 22023; HTTP confirms unchanged rows and zero events.                                                                                                                                              | PASS — pgTAP + HTTP                         |
+| REC-08 future obligation      | Future missed rejects Session has not started; HTTP additionally checks future skipped with the same rejection and no mutation.                                                                                                                          | PASS — pgTAP + HTTP                         |
+| REC-09 parent eligibility     | Completed Task and paused Schedule reject Session is not eligible for recovery. Other Task status/subtask branches were source-reviewed only.                                                                                                            | PASS for executed pgTAP cases               |
+| REC-10 stale version          | Otherwise eligible stale request returns PT409; row remains missed with original updated_at and null completion. HTTP returns 409/PT409 and compares full row/events.                                                                                    | PASS — pgTAP + HTTP                         |
+| REC-11 owner isolation        | B cannot recover A's session: 42501. Real HTTP is 403/42501; B's user-scoped SELECT returns zero rows, and A's row is unchanged.                                                                                                                         | PASS — pgTAP + HTTP                         |
+| REC-12 parent Task separation | Task stays todo; minutes remain null. HTTP confirms Task status and original session identity/time/revision/source slot. No independent Focus table snapshot was taken.                                                                                  | PASS within executed scope                  |
+| REC-13 audit rollback         | BEFORE INSERT recovered-event trigger raises P0001 / Injected recovery audit failure. Full fixture session/event snapshots match their originals after failure, including timestamps.                                                                    | PASS — pgTAP                                |
+| REC-14 execution privileges   | anon cannot execute, authenticated can execute the reviewed RPC. Empty search_path and owner authorization before replay/mutation were also source-reviewed.                                                                                             | PASS — pgTAP plus stated source review      |
 
 ### HTTP Contract — Supabase Local
 
@@ -356,14 +355,14 @@
 - **Executed:** pgTAP accepts 2-day-old sessions and rejects 10-day-old sessions. Real HTTP additionally accepts both missed/skipped on local day 7 and rejects both on day 8; audit recoveryCutoff is compared with an independently calculated Temporal midnight. Executed HTTP timezone was **UTC**. These fixtures were hours away from midnight and establish calendar-day samples only.
 - A separate REC-B case matrix/numbered definitions was not present in the checked repository files. No missing REC-B identifier is assigned a PASS or inferred mapping from ordinary REC-01–REC-14 assertions. The unexecuted boundary scenarios below remain explicit acceptance gaps.
 
-| Boundary scenario | Execution status |
-| --- | --- |
-| Exact cutoff instant, just-before and just-after controlled boundary pair | **NOT EXECUTED** |
+| Boundary scenario                                                                                         | Execution status |
+| --------------------------------------------------------------------------------------------------------- | ---------------- |
+| Exact cutoff instant, just-before and just-after controlled boundary pair                                 | **NOT EXECUTED** |
 | DST spring-forward or fall-back recovery window; prove calendar-day semantics versus 7 x 24 elapsed hours | **NOT EXECUTED** |
-| Different historical session timezone versus subsequently changed schedule/device timezone | **NOT EXECUTED** |
-| Multiple non-UTC timezones or unusual midnight timezone transition | **NOT EXECUTED** |
-| Lock wait crosses recovery cutoff; true clock rechecked after waiting | **NOT EXECUTED** |
-| Exact replay after cutoff or later Task/Schedule eligibility changes | **NOT EXECUTED** |
+| Different historical session timezone versus subsequently changed schedule/device timezone                | **NOT EXECUTED** |
+| Multiple non-UTC timezones or unusual midnight timezone transition                                        | **NOT EXECUTED** |
+| Lock wait crosses recovery cutoff; true clock rechecked after waiting                                     | **NOT EXECUTED** |
+| Exact replay after cutoff or later Task/Schedule eligibility changes                                      | **NOT EXECUTED** |
 
 - The cutoff expression, earlier replay check and post-lock clock placement are **SOURCE REVIEW ONLY** for those scenarios. They do not change any NOT EXECUTED result to PASS. Broader REC-B acceptance remains open for Step 5.6/additional dedicated tests.
 
@@ -383,7 +382,6 @@
 - Step 5.5 executed core sequential RPC/HTTP, audit rollback, owner isolation and web gates: **LOCAL PASS within the stated executed scope**.
 - **Full Step 5.5 boundary/REC-B acceptance: PENDING — NOT EXECUTED cases above remain open.** Do not treat this evidence as an unconditional final acceptance of those cases. Phase 05 remains **IN PROGRESS**.
 - Production authorized: **NO**. No commit or push was performed.
-
 
 ## Step 5.6A — Cross-Command Concurrency Foundation
 
@@ -463,18 +461,18 @@
 
 ### SQLSTATE / Final State / Audit Results
 
-| Scenario | Runs | Actual B result | Final Session / Task / Schedule | Events per fixture |
-| --- | --- | --- | --- | --- |
-| Sweep first vs Complete | 3/3 PASS | 22023 | missed / todo / active | 1 marked_missed |
-| Sweep first vs Start | 3/3 PASS | 22023 | missed / todo / active | 1 marked_missed |
-| Sweep first vs Skip | 3/3 PASS | PT409 | missed / todo / active | 1 marked_missed |
-| Sweep first vs Recovery | 3/3 PASS | PT409 | missed / todo / active | 1 marked_missed |
-| Task Close first vs Start | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
-| Task Close first vs Complete | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
-| Task Close first vs Skip | 3/3 PASS | 22023 | scheduled / completed / closed | 0 |
-| Complete first then Task Close | 3/3 PASS | 00000 | completed / completed / closed | 1 completed |
-| Skip first then Task Close | 3/3 PASS | 00000 | skipped / completed / closed | 1 skipped |
-| Locked Task -> Sweep skip -> retry | 3/3 PASS | Successful batch calls; marked 0 then 1 | missed / todo / active | 0 while locked, 1 marked_missed after retry |
+| Scenario                           | Runs     | Actual B result                         | Final Session / Task / Schedule | Events per fixture                          |
+| ---------------------------------- | -------- | --------------------------------------- | ------------------------------- | ------------------------------------------- |
+| Sweep first vs Complete            | 3/3 PASS | 22023                                   | missed / todo / active          | 1 marked_missed                             |
+| Sweep first vs Start               | 3/3 PASS | 22023                                   | missed / todo / active          | 1 marked_missed                             |
+| Sweep first vs Skip                | 3/3 PASS | PT409                                   | missed / todo / active          | 1 marked_missed                             |
+| Sweep first vs Recovery            | 3/3 PASS | PT409                                   | missed / todo / active          | 1 marked_missed                             |
+| Task Close first vs Start          | 3/3 PASS | 22023                                   | scheduled / completed / closed  | 0                                           |
+| Task Close first vs Complete       | 3/3 PASS | 22023                                   | scheduled / completed / closed  | 0                                           |
+| Task Close first vs Skip           | 3/3 PASS | 22023                                   | scheduled / completed / closed  | 0                                           |
+| Complete first then Task Close     | 3/3 PASS | 00000                                   | completed / completed / closed  | 1 completed                                 |
+| Skip first then Task Close         | 3/3 PASS | 00000                                   | skipped / completed / closed    | 1 skipped                                   |
+| Locked Task -> Sweep skip -> retry | 3/3 PASS | Successful batch calls; marked 0 then 1 | missed / todo / active          | 0 while locked, 1 marked_missed after retry |
 
 - Task-close-first fixtures have already started, so they stay scheduled rather than being cancelled as future unstarted occurrences. Their Schedule closes and all competing attendance commands reject; no completion/audit is invented.
 - PT409 after Sweep means the source state missed remains eligible for Skip/Recovery, but Sweep changed updated_at. No new event is written by the stale second command. Start/Complete are ineligible from missed and return 22023 instead.
@@ -517,8 +515,6 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - Step 5.6B-2: **PENDING**; remaining gaps above are not marked PASS.
 - Phase 05 completed: **NO**.
 - Production authorized: **NO**.
-
-
 
 ## Step 5.6B-2A — Atomic Batch / Security / Historical Timezone
 
@@ -608,14 +604,14 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 - **18/18 observed blockers:** observer confirms A=446 in `pg_blocking_pids(447)` while A's completed RPC transaction remains uncommitted. A commits only after the observed blocker; B's resulting SQLSTATE is then asserted and its transaction committed or rolled back. All six scenarios use real waiting, with no SKIP LOCKED case in this harness.
 - This tests the listed deterministic first/second transaction orderings, not simultaneous random load or every status/ordering. Timeouts: 5-second lock, 10-second statement, 15-second command; none reached.
 
-| Scenario | Executions | Actual B SQLSTATE | Schedule revision / original Session / audit | Sessions retained |
-| --- | --- | --- | --- | --- |
-| REV-01 Revision first vs future Skip | 3/3 PASS | **22023** | revision 2 / cancelled, reason schedule_changed / 1 cancelled event | Old revision-1 row retained; one new revision-2 scheduled row, distinct ID |
-| REV-02 Future Skip first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / skipped / 1 skipped event | Old skipped revision-1 row retained; one new revision-2 scheduled row |
-| REV-03 Start first vs Revision | 3/3 PASS | **22023** | revision 1 / in_progress / 1 started event | Only the original row; failed Revision creates no new occurrence |
-| REV-04 Revision first vs Recovery | 3/3 PASS | **00000**; Recovery returns original UUID | revision 2 / historical missed row becomes completed / 1 recovered event | Historical revision-1 row retained; one new revision-2 scheduled row |
-| REV-05 Recovery first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / completed / 1 recovered event | Completed revision-1 history retained; one new revision-2 scheduled row |
-| REV-06 Complete first vs Revision | 3/3 PASS | **00000**; Revision returns 2 | revision 2 / completed / 1 completed event | Completed revision-1 history retained; one new revision-2 scheduled row |
+| Scenario                             | Executions | Actual B SQLSTATE                         | Schedule revision / original Session / audit                             | Sessions retained                                                          |
+| ------------------------------------ | ---------- | ----------------------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| REV-01 Revision first vs future Skip | 3/3 PASS   | **22023**                                 | revision 2 / cancelled, reason schedule_changed / 1 cancelled event      | Old revision-1 row retained; one new revision-2 scheduled row, distinct ID |
+| REV-02 Future Skip first vs Revision | 3/3 PASS   | **00000**; Revision returns 2             | revision 2 / skipped / 1 skipped event                                   | Old skipped revision-1 row retained; one new revision-2 scheduled row      |
+| REV-03 Start first vs Revision       | 3/3 PASS   | **22023**                                 | revision 1 / in_progress / 1 started event                               | Only the original row; failed Revision creates no new occurrence           |
+| REV-04 Revision first vs Recovery    | 3/3 PASS   | **00000**; Recovery returns original UUID | revision 2 / historical missed row becomes completed / 1 recovered event | Historical revision-1 row retained; one new revision-2 scheduled row       |
+| REV-05 Recovery first vs Revision    | 3/3 PASS   | **00000**; Revision returns 2             | revision 2 / completed / 1 recovered event                               | Completed revision-1 history retained; one new revision-2 scheduled row    |
+| REV-06 Complete first vs Revision    | 3/3 PASS   | **00000**; Revision returns 2             | revision 2 / completed / 1 completed event                               | Completed revision-1 history retained; one new revision-2 scheduled row    |
 
 - SQLSTATE totals for B: **6 x 22023**, **12 x 00000**; **no PT409 observed** in these six scenarios. Do not substitute an expected stale conflict for the actual state/revision outcomes above.
 
@@ -746,14 +742,14 @@ All items below remain **NOT EXECUTED / PENDING** unless an earlier section expl
 
 All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-bearing timestamps are in JSON.
 
-| Run | B observed blocked at | Grace deadline | Observer clock before A COMMIT | Actual SQLSTATE |
-| --- | --- | --- | --- | --- |
-| TIME-start-1 | 20:39:23.710859 | 20:39:28.657483 | 20:39:28.914474 | 22023 |
-| TIME-complete-1 | 20:39:29.008064 | 20:39:33.948757 | 20:39:34.202609 | 22023 |
-| TIME-start-2 | 20:39:34.317635 | 20:39:39.256849 | 20:39:39.511382 | 22023 |
-| TIME-complete-2 | 20:39:39.620679 | 20:39:44.551959 | 20:39:44.805331 | 22023 |
-| TIME-start-3 | 20:39:44.887906 | 20:39:49.833739 | 20:39:50.087044 | 22023 |
-| TIME-complete-3 | 20:39:50.168959 | 20:39:55.118767 | 20:39:55.371850 | 22023 |
+| Run             | B observed blocked at | Grace deadline  | Observer clock before A COMMIT | Actual SQLSTATE |
+| --------------- | --------------------- | --------------- | ------------------------------ | --------------- |
+| TIME-start-1    | 20:39:23.710859       | 20:39:28.657483 | 20:39:28.914474                | 22023           |
+| TIME-complete-1 | 20:39:29.008064       | 20:39:33.948757 | 20:39:34.202609                | 22023           |
+| TIME-start-2    | 20:39:34.317635       | 20:39:39.256849 | 20:39:39.511382                | 22023           |
+| TIME-complete-2 | 20:39:39.620679       | 20:39:44.551959 | 20:39:44.805331                | 22023           |
+| TIME-start-3    | 20:39:44.887906       | 20:39:49.833739 | 20:39:50.087044                | 22023           |
+| TIME-complete-3 | 20:39:50.168959       | 20:39:55.118767 | 20:39:55.371850                | 22023           |
 
 - Every observedAt is strictly before deadline, and every afterDeadline.after is >= deadline. Thus these runs genuinely span a deadline while waiting on the Task lock. Timestamp assertions use millisecond Date.parse in the harness; observed margins are seconds/~250 ms, so no exact-microsecond classification is inferred from them.
 - Start rejection message, **3/3**: **Session is outside the start window**, SQLSTATE **22023**. Complete rejection message, **3/3**: **Session is outside the completion window**, SQLSTATE **22023**. Rejections are the expected timing result, not PT409, ineligible-state error or lock/statement timeout.
@@ -822,20 +818,20 @@ All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-b
 - [Fresh secret-free report](./phase-05-http-security.json), **2026-11-01 14:19:03.101–14:19:06.235 UTC** (21:19:03–21:19:06 Asia/Bangkok).
 - Anonymous requests use the local anon credential without a signed-in user. Authenticated requests use an actual access token returned by local Auth password sign-in, not simulated database claims or a fake RPC response. Service credential stays in the Node process and is used only for fixture administration and the disabled wrapper request.
 
-| Check | HTTP | Actual SQLSTATE / result | Outcome |
-| --- | --- | --- | --- |
-| SEC-anon-batch | **401** | **42501** | Anonymous POST ls_mark_missed_batch denied |
-| SEC-anon-cron-wrapper | **401** | **42501** | Anonymous POST ls_run_missed_sweep_if_enabled denied |
-| SEC-anon-control-read | **401** | **42501** | Anonymous GET ls_missed_sweep_control denied |
-| SEC-auth-batch | **403** | **42501** | Signed-in ordinary user cannot execute trusted batch |
-| SEC-auth-cron-wrapper | **403** | **42501** | Signed-in ordinary user cannot execute wrapper |
-| SEC-auth-control-read | **403** | **42501** | Signed-in ordinary user cannot read activation control |
-| SEC-auth-ownership-start | **403** | **42501** | Start with nonexistent Session UUID denied |
-| SEC-auth-ownership-complete | **403** | **42501** | Complete with nonexistent Session UUID denied |
-| SEC-auth-ownership-skip | **403** | **42501** | Skip with nonexistent Session UUID denied |
-| SEC-auth-ownership-recover | **403** | **42501** | Recovery with nonexistent Session UUID denied |
-| SEC-auth-invalid-event-key | **400** | **22023** | Whitespace-only Start event key rejected before ownership lookup |
-| SEC-service-disabled-wrapper | **200** | Scalar **0**, no error SQLSTATE | Trusted wrapper succeeds without processing while gate OFF |
+| Check                        | HTTP    | Actual SQLSTATE / result        | Outcome                                                          |
+| ---------------------------- | ------- | ------------------------------- | ---------------------------------------------------------------- |
+| SEC-anon-batch               | **401** | **42501**                       | Anonymous POST ls_mark_missed_batch denied                       |
+| SEC-anon-cron-wrapper        | **401** | **42501**                       | Anonymous POST ls_run_missed_sweep_if_enabled denied             |
+| SEC-anon-control-read        | **401** | **42501**                       | Anonymous GET ls_missed_sweep_control denied                     |
+| SEC-auth-batch               | **403** | **42501**                       | Signed-in ordinary user cannot execute trusted batch             |
+| SEC-auth-cron-wrapper        | **403** | **42501**                       | Signed-in ordinary user cannot execute wrapper                   |
+| SEC-auth-control-read        | **403** | **42501**                       | Signed-in ordinary user cannot read activation control           |
+| SEC-auth-ownership-start     | **403** | **42501**                       | Start with nonexistent Session UUID denied                       |
+| SEC-auth-ownership-complete  | **403** | **42501**                       | Complete with nonexistent Session UUID denied                    |
+| SEC-auth-ownership-skip      | **403** | **42501**                       | Skip with nonexistent Session UUID denied                        |
+| SEC-auth-ownership-recover   | **403** | **42501**                       | Recovery with nonexistent Session UUID denied                    |
+| SEC-auth-invalid-event-key   | **400** | **22023**                       | Whitespace-only Start event key rejected before ownership lookup |
+| SEC-service-disabled-wrapper | **200** | Scalar **0**, no error SQLSTATE | Trusted wrapper succeeds without processing while gate OFF       |
 
 - All denials match explicit 401/403 plus 42501 assertions. No HTTP 404/PGRST202 or other schema-cache failure was accepted as a permission PASS.
 - Counts: **3 anonymous denials + 3 authenticated operational denials + 4 nonexistent-session ownership denials + 1 input rejection + 1 trusted disabled-wrapper success = 12 HTTP acceptance checks**. Report checks array additionally contains SEC-00/SEC-99 gate entries; Auth setup/sign-out/deletion requests are fixture operations and not inflated into the 12.
@@ -894,17 +890,17 @@ All timestamps below are **2026-11-01, UTC+07:00 (Asia/Bangkok)**; full offset-b
 
 All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report retains original PostgreSQL offsets; values here are normalized to the same timezone.
 
-| Run | Attendance finished | Grace deadline | Observer after deadline, before first Sweep | First Sweep elapsed ms |
-| --- | --- | --- | --- | --- |
-| SWR-start-1 | 21:27:13.814844 | 21:27:19.790441 | 21:27:20.048069 | 4.5064 |
-| SWR-complete-1 | 21:27:20.110210 | 21:27:26.097367 | 21:27:26.352701 | 2.5481 |
-| SWR-skip-1 | 21:27:26.415166 | 21:27:32.401411 | 21:27:32.657387 | 1.8046 |
-| SWR-start-2 | 21:27:32.714741 | 21:27:38.701036 | 21:27:38.957270 | 2.4660 |
-| SWR-complete-2 | 21:27:39.017543 | 21:27:45.003762 | 21:27:45.256377 | 1.8033 |
-| SWR-skip-2 | 21:27:45.313161 | 21:27:51.299597 | 21:27:51.554570 | 2.6979 |
-| SWR-start-3 | 21:27:51.612207 | 21:27:57.598581 | 21:27:57.854137 | 1.7016 |
-| SWR-complete-3 | 21:27:57.908956 | 21:28:03.895186 | 21:28:04.151168 | 2.0293 |
-| SWR-skip-3 | 21:28:04.210842 | 21:28:10.195827 | 21:28:10.449998 | 1.5869 |
+| Run            | Attendance finished | Grace deadline  | Observer after deadline, before first Sweep | First Sweep elapsed ms |
+| -------------- | ------------------- | --------------- | ------------------------------------------- | ---------------------- |
+| SWR-start-1    | 21:27:13.814844     | 21:27:19.790441 | 21:27:20.048069                             | 4.5064                 |
+| SWR-complete-1 | 21:27:20.110210     | 21:27:26.097367 | 21:27:26.352701                             | 2.5481                 |
+| SWR-skip-1     | 21:27:26.415166     | 21:27:32.401411 | 21:27:32.657387                             | 1.8046                 |
+| SWR-start-2    | 21:27:32.714741     | 21:27:38.701036 | 21:27:38.957270                             | 2.4660                 |
+| SWR-complete-2 | 21:27:39.017543     | 21:27:45.003762 | 21:27:45.256377                             | 1.8033                 |
+| SWR-skip-2     | 21:27:45.313161     | 21:27:51.299597 | 21:27:51.554570                             | 2.6979                 |
+| SWR-start-3    | 21:27:51.612207     | 21:27:57.598581 | 21:27:57.854137                             | 1.7016                 |
+| SWR-complete-3 | 21:27:57.908956     | 21:28:03.895186 | 21:28:04.151168                             | 2.0293                 |
+| SWR-skip-3     | 21:28:04.210842     | 21:28:10.195827 | 21:28:10.449998                             | 1.5869                 |
 
 - **9/9** Attendance commands finished before cutoff; **9/9** first Sweep calls were issued only after observer confirmed cutoff passed. All these timing conditions were independently rechecked from the fresh JSON report, not inferred from total PASS output.
 
@@ -961,19 +957,19 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 
 ### Actual ZONE Results
 
-| Group | Executed assertions | Actual result | Status |
-| --- | --- | --- | --- |
-| ZONE-01 | 1 | Historical Session timezone remains America/New_York | PASS |
-| ZONE-02 | 1 | Current Schedule timezone changed to Asia/Tokyo independently | PASS |
-| ZONE-03 | 3 | Real Recovery succeeds for NY missed, Tokyo skipped and HCM missed; each returns original Session UUID | PASS |
-| ZONE-04 | 3 | Each Session completed with non-null completed_at and null actual_study_minutes; recovered audit has correct source/target/owner and historical-zone cutoff | PASS |
-| ZONE-05 | 3 | Same key and original expected version replay successfully after completion in all three timezones; original UUID returned | PASS |
-| ZONE-06 | 1 | Each recovered Session has exactly one audit event after retries | PASS |
-| ZONE-07 | 1 | 10-local-day-old NY missed Recovery rejects 22023 / Session is outside the recovery window | PASS |
-| ZONE-08 | 1 | 10-local-day-old Tokyo missed Skip rejects 22023 / Session is outside the recovery window | PASS |
-| ZONE-09 | 1 | Both rejected expired Sessions retain their initial status and null completed_at | PASS |
-| ZONE-10 | 1 | Both expired requests append zero audit events | PASS |
-| **Total** | **16** | Sequential real database RPC/pgTAP checks | **PASS** |
+| Group     | Executed assertions | Actual result                                                                                                                                               | Status   |
+| --------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| ZONE-01   | 1                   | Historical Session timezone remains America/New_York                                                                                                        | PASS     |
+| ZONE-02   | 1                   | Current Schedule timezone changed to Asia/Tokyo independently                                                                                               | PASS     |
+| ZONE-03   | 3                   | Real Recovery succeeds for NY missed, Tokyo skipped and HCM missed; each returns original Session UUID                                                      | PASS     |
+| ZONE-04   | 3                   | Each Session completed with non-null completed_at and null actual_study_minutes; recovered audit has correct source/target/owner and historical-zone cutoff | PASS     |
+| ZONE-05   | 3                   | Same key and original expected version replay successfully after completion in all three timezones; original UUID returned                                  | PASS     |
+| ZONE-06   | 1                   | Each recovered Session has exactly one audit event after retries                                                                                            | PASS     |
+| ZONE-07   | 1                   | 10-local-day-old NY missed Recovery rejects 22023 / Session is outside the recovery window                                                                  | PASS     |
+| ZONE-08   | 1                   | 10-local-day-old Tokyo missed Skip rejects 22023 / Session is outside the recovery window                                                                   | PASS     |
+| ZONE-09   | 1                   | Both rejected expired Sessions retain their initial status and null completed_at                                                                            | PASS     |
+| ZONE-10   | 1                   | Both expired requests append zero audit events                                                                                                              | PASS     |
+| **Total** | **16**              | Sequential real database RPC/pgTAP checks                                                                                                                   | **PASS** |
 
 - Execution uses SET LOCAL ROLE authenticated and the fixture owner's actual JWT claims in PostgreSQL. It invokes production functions with their authorization/lock/time/audit logic intact; no fake result or test clock parameter. This is database RPC execution, not a fresh HTTP or browser test.
 - Valid fixtures are two local dates old; expired fixtures are ten local dates old. Each has its own root todo Task, active Schedule and Session. These samples are away from midnight cutoff and do not claim exact-boundary execution.
@@ -1046,19 +1042,19 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 
 - Targeted command from apps/web: `node node_modules/vitest/vitest.mjs run features/learning-schedule/session-attendance.actions.test.ts`, **exit 0; 1 file / 24 tests PASS**, **3.76 seconds**.
 
-| Group | Tests | Actual result |
-| --- | --- | --- |
-| Start/Complete/Recovery dispatch | 3 | Correct RPC name and exact p_session_id/p_expected_updated_at/p_event_key; abort signal attached; same UUID success |
-| Non-empty Skip normalization | 1 | Trimmed reason passed to ls_skip_study_session |
-| Optional/blank Skip normalization | 4 | undefined/null/empty/ordinary spaces normalize to null |
-| Invalid/extra input fields | 7 | Bad command/UUID/date, overlong reason, forged userId/now reject before requireUser and RPC |
-| Safe database error mapping | 4 | PT409/42501/22023/XX000 map to safe codes without exposing supplied sensitive DB message |
-| Network uncertainty | 1 | Empty error code -> uncertain; one RPC call only |
-| Thrown post-dispatch failure | 1 | uncertain; no automatic retry |
-| Unexpected RPC result | 1 | Different returned ID -> uncertain, not success |
-| Authentication failure | 1 | notAuthorized; no RPC dispatch |
-| Exact command identity | 1 | Two explicit calls pass identical version/key/Session args and return identical success |
-| **Total** | **24** | **PASS** |
+| Group                             | Tests  | Actual result                                                                                                       |
+| --------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------- |
+| Start/Complete/Recovery dispatch  | 3      | Correct RPC name and exact p_session_id/p_expected_updated_at/p_event_key; abort signal attached; same UUID success |
+| Non-empty Skip normalization      | 1      | Trimmed reason passed to ls_skip_study_session                                                                      |
+| Optional/blank Skip normalization | 4      | undefined/null/empty/ordinary spaces normalize to null                                                              |
+| Invalid/extra input fields        | 7      | Bad command/UUID/date, overlong reason, forged userId/now reject before requireUser and RPC                         |
+| Safe database error mapping       | 4      | PT409/42501/22023/XX000 map to safe codes without exposing supplied sensitive DB message                            |
+| Network uncertainty               | 1      | Empty error code -> uncertain; one RPC call only                                                                    |
+| Thrown post-dispatch failure      | 1      | uncertain; no automatic retry                                                                                       |
+| Unexpected RPC result             | 1      | Different returned ID -> uncertain, not success                                                                     |
+| Authentication failure            | 1      | notAuthorized; no RPC dispatch                                                                                      |
+| Exact command identity            | 1      | Two explicit calls pass identical version/key/Session args and return identical success                             |
+| **Total**                         | **24** | **PASS**                                                                                                            |
 
 - Unit mocks intentionally isolate the Next.js adapter. They do not establish a fresh Server Action -> real Auth/PostgREST -> database completion path, DB audit idempotency or transaction rollback by themselves; earlier integration evidence remains separate.
 
@@ -1112,23 +1108,23 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - Expanded targeted run: `node node_modules/vitest/vitest.mjs run features/learning-schedule/components/session-attendance-dialog.test.tsx features/learning-schedule/components/study-sessions-list.test.tsx features/learning-schedule/components/task-scheduling-ui.test.tsx`, **61/61 PASS** across three files. Final rerun after callback typing correction: **exit 0, 8.10 seconds**.
 - Final file coverage: **12 dialog tests, 27 list tests, 22 Task scheduling UI tests**. Relative to committed baseline these add **36 tests**: 12 new dialog cases, 16 additional list cases and 8 Task capability/Drawer cases.
 
-| Acceptance | Actual executed evidence | Result |
-| --- | --- | --- |
-| Default capability | Default canAttend=false leaves the existing six-state list without Attendance buttons | PASS |
-| Status mapping | scheduled -> Start/Complete/Skip; in_progress -> Complete; missed -> Recover/Skip; skipped -> Recover; completed/cancelled -> no mutation buttons | PASS, six explicit list cases |
-| Task/Schedule gating | Active eligible parent exposes controls; ineligible parent, paused/closed Schedule hide them; actual Drawer completed/cancelled/in_review/subtask hides controls even with an active Schedule | PASS |
-| Confirmation context | Dialog title/description linked by aria attributes; actual local date, start/end and timezone rendered | PASS, component DOM assertions |
-| Four commands | Actual list/dialog clicks call the mocked Server Action with the right command, Session and saved version; existing Server Action tests reran in full suite | PASS at mocked component/adapter boundaries |
-| Pending double-click | Two immediate confirm clicks dispatch once; Cancel disabled and Escape cannot close pending dialog; no onSaved before result | PASS |
-| Exact uncertain replay | Frozen object retained; original UUID/version/key and normalized Skip reason reused, including object identity on retry | PASS |
-| Locked reason | Textarea disabled after uncertainty; attempted input change cannot change the submitted exact retry reason | PASS |
-| Conflict | Confirm disabled; Check latest closes/reloads without another mutation | PASS |
-| notEligible / thrown request | No automatic retry; localized alert and Check latest/uncertain retry behavior; no optimistic completed status | PASS |
-| Page-one success | Real list discards old pages, reloads page zero, then sends the newly queried updated_at on the next action | PASS |
-| Modal exclusivity | Attendance-first and Reschedule-first opener clicks in the same React act each leave exactly one dialog; Load more/conflicting opener disabled | PASS, both orderings |
-| Schedule/permission change | Old rows/dialog removed; late old mutation result ignored; capability revocation removes controls/dialog | PASS |
-| Unmounted dialog | Late success produces no callback or toast on the new context | PASS |
-| Localization | Guide EN/VI JSON parity checked; Vietnamese dialog/reason/error/retry labels exercised with real messages | PASS |
+| Acceptance                   | Actual executed evidence                                                                                                                                                                      | Result                                      |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Default capability           | Default canAttend=false leaves the existing six-state list without Attendance buttons                                                                                                         | PASS                                        |
+| Status mapping               | scheduled -> Start/Complete/Skip; in_progress -> Complete; missed -> Recover/Skip; skipped -> Recover; completed/cancelled -> no mutation buttons                                             | PASS, six explicit list cases               |
+| Task/Schedule gating         | Active eligible parent exposes controls; ineligible parent, paused/closed Schedule hide them; actual Drawer completed/cancelled/in_review/subtask hides controls even with an active Schedule | PASS                                        |
+| Confirmation context         | Dialog title/description linked by aria attributes; actual local date, start/end and timezone rendered                                                                                        | PASS, component DOM assertions              |
+| Four commands                | Actual list/dialog clicks call the mocked Server Action with the right command, Session and saved version; existing Server Action tests reran in full suite                                   | PASS at mocked component/adapter boundaries |
+| Pending double-click         | Two immediate confirm clicks dispatch once; Cancel disabled and Escape cannot close pending dialog; no onSaved before result                                                                  | PASS                                        |
+| Exact uncertain replay       | Frozen object retained; original UUID/version/key and normalized Skip reason reused, including object identity on retry                                                                       | PASS                                        |
+| Locked reason                | Textarea disabled after uncertainty; attempted input change cannot change the submitted exact retry reason                                                                                    | PASS                                        |
+| Conflict                     | Confirm disabled; Check latest closes/reloads without another mutation                                                                                                                        | PASS                                        |
+| notEligible / thrown request | No automatic retry; localized alert and Check latest/uncertain retry behavior; no optimistic completed status                                                                                 | PASS                                        |
+| Page-one success             | Real list discards old pages, reloads page zero, then sends the newly queried updated_at on the next action                                                                                   | PASS                                        |
+| Modal exclusivity            | Attendance-first and Reschedule-first opener clicks in the same React act each leave exactly one dialog; Load more/conflicting opener disabled                                                | PASS, both orderings                        |
+| Schedule/permission change   | Old rows/dialog removed; late old mutation result ignored; capability revocation removes controls/dialog                                                                                      | PASS                                        |
+| Unmounted dialog             | Late success produces no callback or toast on the new context                                                                                                                                 | PASS                                        |
+| Localization                 | Guide EN/VI JSON parity checked; Vietnamese dialog/reason/error/retry labels exercised with real messages                                                                                     | PASS                                        |
 
 - The tests mock query/action boundaries while rendering actual components, including the real Task Drawer in gating cases. They do **not** establish browser -> Next Server Action -> Auth/PostgREST -> persisted Session/audit acceptance.
 - Native pointer/outside interaction, full focus restoration/tab order, screen-reader output and mobile visual behavior are not newly proven by jsdom title/alert/Escape assertions. Those remain for browser/a11y Step 5.7C.
@@ -1271,10 +1267,10 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 
 - **PASS** in both locales at viewport **390 x 844**. Each localized Skip dialog opens, its Reason textarea is visible, and Cancel closes without changing the Session; final state **scheduled**, **0 events**.
 
-| Locale | Content / client width | Rendered dialog width | Viewport / document width | Actual interaction |
-| --- | --- | --- | --- | --- |
-| EN | 356 / 356 px | 358 px | 390 / 390 px | Skip -> Reason visible -> Cancel |
-| VI | 356 / 356 px | 358 px | 390 / 390 px | Bỏ qua -> Lý do visible -> Hủy |
+| Locale | Content / client width | Rendered dialog width | Viewport / document width | Actual interaction               |
+| ------ | ---------------------- | --------------------- | ------------------------- | -------------------------------- |
+| EN     | 356 / 356 px           | 358 px                | 390 / 390 px              | Skip -> Reason visible -> Cancel |
+| VI     | 356 / 356 px           | 358 px                | 390 / 390 px              | Bỏ qua -> Lý do visible -> Hủy   |
 
 - Both screenshots were opened and visually inspected: localized title/description, Session context, textarea and confirmation/cancel controls fit without horizontal clipping. This is Chromium viewport coverage, not a physical-phone/browser/virtual-keyboard test or mobile mutation acceptance.
 - Local artifacts, relative to `apps/web`: `test-results/learning-schedule-attendan-220da-tendance-works-in-EN-and-VI-chromium/attendance-en-mobile.png` and `attendance-vi-mobile.png` in the same directory. They remain ignored Playwright outputs and are **not added to Git**. The old browser suite used a separate output subdirectory so these images remain available locally.
@@ -1285,11 +1281,11 @@ All timestamps below are **2026-11-01 UTC+07:00 (Asia/Bangkok)**. Raw report ret
 - User B's separate API client uses the **local anon key + its real password-authenticated JWT**, never a service-role Attendance command or a fabricated user ID. RLS Session SELECT returns **HTTP success with zero rows**.
 
 | User B RPC against User A's Session | Actual SQLSTATE | Actual HTTP status | Returned data |
-| --- | --- | --- | --- |
-| `ls_start_study_session` | `42501` | 403 | null |
-| `ls_complete_study_session` | `42501` | 403 | null |
-| `ls_skip_study_session` | `42501` | 403 | null |
-| `ls_recover_study_session` | `42501` | 403 | null |
+| ----------------------------------- | --------------- | ------------------ | ------------- |
+| `ls_start_study_session`            | `42501`         | 403                | null          |
+| `ls_complete_study_session`         | `42501`         | 403                | null          |
+| `ls_skip_study_session`             | `42501`         | 403                | null          |
+| `ls_recover_study_session`          | `42501`         | 403                | null          |
 
 - Owner's selected Session fields are unchanged after all four denials; **0 audit events**. User B's API session and cookie-authenticated browser session are signed out before context closure/Auth-user deletion; cleanup reports PASS.
 - Scope is browser visibility plus authenticated user-scoped HTTP/RPC authorization. **Forged Next Server Action payloads and anonymous browser restrictions were NOT EXECUTED** and are not inferred from this case.

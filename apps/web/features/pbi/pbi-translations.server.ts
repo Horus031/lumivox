@@ -27,10 +27,8 @@ export async function translatePbiExplanationPayload(
     key: `lumivox:translation:pbi:${snapshotId}:${targetLocale}:${sourceHash}`,
     ttlSeconds: 60 * 60 * 24,
     fetcher: async () => {
-      const componentExplanations =
-        explanation.component_explanations as PbiComponentExplanation[];
-      const actionableInsights =
-        explanation.actionable_insights as PbiActionableInsight[];
+      const componentExplanations = explanation.component_explanations as PbiComponentExplanation[];
+      const actionableInsights = explanation.actionable_insights as PbiActionableInsight[];
 
       const translations = await translateAiContentBatch([
         {
@@ -93,34 +91,21 @@ export async function translatePbiExplanationPayload(
 
       return {
         ...explanation,
-        pbi_band:
-          translatedTextByField.get("pbi_band") ?? explanation.pbi_band,
+        pbi_band: translatedTextByField.get("pbi_band") ?? explanation.pbi_band,
         overall_summary:
-          translatedTextByField.get("overall_summary") ??
-          explanation.overall_summary,
-        component_explanations: componentExplanations.map(
-          (component, index) => ({
-            ...component,
-            title:
-              translatedTextByField.get(
-                `component_explanations.${index}.title`,
-              ) ?? component.title,
-            message:
-              translatedTextByField.get(
-                `component_explanations.${index}.message`,
-              ) ?? component.message,
-          }),
-        ),
+          translatedTextByField.get("overall_summary") ?? explanation.overall_summary,
+        component_explanations: componentExplanations.map((component, index) => ({
+          ...component,
+          title:
+            translatedTextByField.get(`component_explanations.${index}.title`) ?? component.title,
+          message:
+            translatedTextByField.get(`component_explanations.${index}.message`) ??
+            component.message,
+        })),
         actionable_insights: actionableInsights.map((insight, index) => ({
           ...insight,
-          title:
-            translatedTextByField.get(
-              `actionable_insights.${index}.title`,
-            ) ?? insight.title,
-          body:
-            translatedTextByField.get(
-              `actionable_insights.${index}.body`,
-            ) ?? insight.body,
+          title: translatedTextByField.get(`actionable_insights.${index}.title`) ?? insight.title,
+          body: translatedTextByField.get(`actionable_insights.${index}.body`) ?? insight.body,
         })),
       };
     },

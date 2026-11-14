@@ -6,11 +6,7 @@ import { Button } from "@/components/ui/button";
 import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
 
 // Radix's asChild trigger must be created inside the client boundary.
-export function WorkspaceCreateGoalButton({
-  iconOnly = false,
-}: {
-  iconOnly?: boolean;
-}) {
+export function WorkspaceCreateGoalButton({ iconOnly = false }: { iconOnly?: boolean }) {
   const t = useTranslations("workspace");
   return (
     <CreateGoalForm

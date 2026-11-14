@@ -14,9 +14,7 @@ type InviteStudyGroupMemberFormProps = {
   groupId: string;
 };
 
-export function InviteStudyGroupMemberForm({
-  groupId,
-}: InviteStudyGroupMemberFormProps) {
+export function InviteStudyGroupMemberForm({ groupId }: InviteStudyGroupMemberFormProps) {
   const router = useRouter();
   const t = useTranslations("groups.inviteForm");
   const [email, setEmail] = useState("");
@@ -48,13 +46,9 @@ export function InviteStudyGroupMemberForm({
       aria-busy={isPending}
       className="min-w-0 border-t border-border pt-card"
     >
-      <h2 className="text-section font-semibold text-foreground">
-        {t("title")}
-      </h2>
+      <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
 
-      <p className="mt-1 text-body text-secondary-text">
-        {t("description")}
-      </p>
+      <p className="mt-1 text-body text-secondary-text">{t("description")}</p>
 
       <div className="mt-3 flex max-w-xl flex-col gap-3 sm:flex-row">
         <Input
@@ -67,10 +61,7 @@ export function InviteStudyGroupMemberForm({
           placeholder={t("placeholder")}
         />
 
-        <Button
-          type="submit"
-          disabled={isPending}
-        >
+        <Button type="submit" disabled={isPending}>
           <UserPlus aria-hidden="true" />
           {isPending ? t("inviting") : t("invite")}
         </Button>

@@ -58,9 +58,7 @@ export async function getMyRoadmapDetail(roadmapId: string) {
   ]);
 
   if (roadmapResult.error) {
-    throw new Error(
-      `Failed to load roadmap: ${roadmapResult.error.message}`,
-    );
+    throw new Error(`Failed to load roadmap: ${roadmapResult.error.message}`);
   }
 
   if (!roadmapResult.data) {
@@ -68,9 +66,7 @@ export async function getMyRoadmapDetail(roadmapId: string) {
   }
 
   if (nodesResult.error) {
-    throw new Error(
-      `Failed to load roadmap nodes: ${nodesResult.error.message}`,
-    );
+    throw new Error(`Failed to load roadmap nodes: ${nodesResult.error.message}`);
   }
 
   const roadmap = roadmapResult.data;

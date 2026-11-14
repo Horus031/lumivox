@@ -56,7 +56,11 @@ export function AdminDocumentDeleteButton({
       variant={"destructive"}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Trash2 aria-hidden="true" />
+      )}
       {isPending ? t("deleting") : t("deleteDocument")}
     </Button>
   );

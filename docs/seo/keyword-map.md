@@ -13,15 +13,15 @@ This document is the on-page SEO source of truth for the 14 public English and V
 
 ## Intent ownership
 
-| Page | English ownership | Vietnamese ownership | Intent |
-| --- | --- | --- | --- |
-| Home | AI study planner | ứng dụng học tập AI | Product discovery |
-| Features | study planner app for students | ứng dụng lập kế hoạch học tập | Feature evaluation |
-| Research | task delay prediction | phân tích hành vi học tập | Research / informational |
-| About | Lumivox / AI study platform | Lumivox / nền tảng học tập AI | Brand / entity |
-| Privacy | Lumivox privacy | quyền riêng tư Lumivox | Trust / navigational |
-| Terms | Lumivox terms | điều khoản Lumivox | Navigational |
-| Contact | Lumivox contact | liên hệ Lumivox | Navigational |
+| Page     | English ownership              | Vietnamese ownership          | Intent                   |
+| -------- | ------------------------------ | ----------------------------- | ------------------------ |
+| Home     | AI study planner               | ứng dụng học tập AI           | Product discovery        |
+| Features | study planner app for students | ứng dụng lập kế hoạch học tập | Feature evaluation       |
+| Research | task delay prediction          | phân tích hành vi học tập     | Research / informational |
+| About    | Lumivox / AI study platform    | Lumivox / nền tảng học tập AI | Brand / entity           |
+| Privacy  | Lumivox privacy                | quyền riêng tư Lumivox        | Trust / navigational     |
+| Terms    | Lumivox terms                  | điều khoản Lumivox            | Navigational             |
+| Contact  | Lumivox contact                | liên hệ Lumivox               | Navigational             |
 
 ## Home
 

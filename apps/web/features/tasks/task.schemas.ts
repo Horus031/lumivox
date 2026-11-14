@@ -16,23 +16,16 @@ const taskDescriptionSchema = z
   .optional()
   .or(z.literal(""));
 
-const taskPrioritySchema = z.enum(
-  ["low", "medium", "high", "critical"],
-  {
-    message: "Invalid task priority.",
-  },
-);
+const taskPrioritySchema = z.enum(["low", "medium", "high", "critical"], {
+  message: "Invalid task priority.",
+});
 
 export const createTaskSchema = z.object({
   title: taskTitleSchema,
 
   description: taskDescriptionSchema,
 
-  goalId: z
-    .string()
-    .uuid("Invalid goal id.")
-    .optional()
-    .or(z.literal("")),
+  goalId: z.string().uuid("Invalid goal id.").optional().or(z.literal("")),
 
   priority: taskPrioritySchema,
 
@@ -76,14 +69,10 @@ export const transitionTaskStatusSchema = z.object({
   expectedUpdatedAt: z.string().min(1),
 });
 
-export type CreateTaskInput =
-  z.infer<typeof createTaskSchema>;
+export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 
-export type CreateSubtaskInput =
-  z.infer<typeof createSubtaskSchema>;
+export type CreateSubtaskInput = z.infer<typeof createSubtaskSchema>;
 
-export type UpdateTaskInput =
-  z.infer<typeof updateTaskSchema>;
+export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 
-export type TransitionTaskStatusInput =
-  z.infer<typeof transitionTaskStatusSchema>;
+export type TransitionTaskStatusInput = z.infer<typeof transitionTaskStatusSchema>;

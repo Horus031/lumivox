@@ -1,4 +1,3 @@
-
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
@@ -8,10 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-const reportPath = resolve(
-  root,
-  "docs/learning-schedule/phase-05-http-security.json",
-);
+const reportPath = resolve(root, "docs/learning-schedule/phase-05-http-security.json");
 
 const dbContainer = "supabase_db_lumivox-proj";
 const apiTimeoutMs = 10000;
@@ -19,11 +15,7 @@ const apiTimeoutMs = 10000;
 const report = {
   scope: "local-attendance-http-security",
   startedAt: new Date().toISOString(),
-  baseline: execFileSync(
-    "git",
-    ["rev-parse", "HEAD"],
-    { cwd: root, encoding: "utf8" },
-  ).trim(),
+  baseline: execFileSync("git", ["rev-parse", "HEAD"], { cwd: root, encoding: "utf8" }).trim(),
   checks: [],
 };
 
@@ -120,13 +112,7 @@ function assertSweepGateOff(label) {
   });
 }
 
-async function httpRequest(
-  method,
-  path,
-  apiKey,
-  bearer,
-  payload,
-) {
+async function httpRequest(method, path, apiKey, bearer, payload) {
   const response = await fetch(new URL(path, api.origin), {
     method,
     signal: AbortSignal.timeout(apiTimeoutMs),
@@ -135,9 +121,7 @@ async function httpRequest(
       Authorization: `Bearer ${bearer}`,
       "Content-Type": "application/json",
     },
-    ...(payload === undefined
-      ? {}
-      : { body: JSON.stringify(payload) }),
+    ...(payload === undefined ? {} : { body: JSON.stringify(payload) }),
   });
 
   const text = await response.text();
@@ -161,10 +145,8 @@ function record(name, response) {
     status: "PASS",
     httpStatus: response.status,
     sqlstate:
-      response.data &&
-      typeof response.data === "object" &&
-      !Array.isArray(response.data)
-        ? response.data.code ?? null
+      response.data && typeof response.data === "object" && !Array.isArray(response.data)
+        ? (response.data.code ?? null)
         : null,
   });
 
@@ -177,41 +159,22 @@ function assertDenied(name, response) {
     `${name}: expected HTTP 401/403, received ${response.status}`,
   );
 
-  assert.equal(
-    response.data?.code,
-    "42501",
-    `${name}: expected PostgreSQL permission denial`,
-  );
+  assert.equal(response.data?.code, "42501", `${name}: expected PostgreSQL permission denial`);
 
   record(name, response);
 }
 
-async function checkDenied(
-  name,
-  method,
-  path,
-  apiKey,
-  bearer,
-  body,
-) {
-  const response = await httpRequest(
-    method,
-    path,
-    apiKey,
-    bearer,
-    body,
-  );
+async function checkDenied(name, method, path, apiKey, bearer, body) {
+  const response = await httpRequest(method, path, apiKey, bearer, body);
 
   assertDenied(name, response);
 }
 
 const fixtureKey = randomUUID();
 
-const email =
-  `ls-security-${fixtureKey}@example.invalid`;
+const email = `ls-security-${fixtureKey}@example.invalid`;
 
-const password =
-  `LS-${randomBytes(24).toString("hex")}!`;
+const password = `LS-${randomBytes(24).toString("hex")}!`;
 
 let createdUserId = null;
 let failure = null;
@@ -342,18 +305,12 @@ try {
   ];
 
   for (const operation of userCommands) {
-    const response = await httpRequest(
-      "POST",
-      operation.path,
-      local.ANON_KEY,
-      token,
-      {
-        p_session_id: nonexistentSession,
-        p_expected_updated_at: version,
-        p_event_key: randomUUID(),
-        ...operation.extra,
-      },
-    );
+    const response = await httpRequest("POST", operation.path, local.ANON_KEY, token, {
+      p_session_id: nonexistentSession,
+      p_expected_updated_at: version,
+      p_event_key: randomUUID(),
+      ...operation.extra,
+    });
 
     assertDenied(`SEC-auth-ownership-${operation.name}`, response);
   }
@@ -475,22 +432,13 @@ try {
   report.finishedAt = new Date().toISOString();
 
   await mkdir(dirname(reportPath), { recursive: true });
-  await writeFile(
-    reportPath,
-    JSON.stringify(report, null, 2) + "\n",
-    "utf8",
-  );
+  await writeFile(reportPath, JSON.stringify(report, null, 2) + "\n", "utf8");
 }
 
 if (failure) {
-  process.stderr.write(
-    `FAIL: ${failure.message ?? String(failure)}\n`,
-  );
+  process.stderr.write(`FAIL: ${failure.message ?? String(failure)}\n`);
 
   process.exitCode = 1;
 } else {
-  process.stdout.write(
-    "PASS: local Attendance HTTP authorization checks\n",
-  );
+  process.stdout.write("PASS: local Attendance HTTP authorization checks\n");
 }
-

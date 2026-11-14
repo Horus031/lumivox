@@ -33,24 +33,24 @@
 
 ### Tier A acceptance — executed
 
-| Case | Actual result |
-| --- | --- |
-| RI-01 | **PASS**, flag OFF produces no claim/preparation/submission; actual authenticated HTTP real request returns **503**. |
-| RI-02 | **PASS**, DB gate OFF yields zero submissions/claims. Authenticated read-only dry-run remains available. |
-| RI-03 | **PASS**, exact-address allowlist rejects unrelated/case-different local parts and wildcard/domain config; no handoff. |
-| RI-04 | **PASS**, real Auth fixture with verification removed is refused before preparation/provider. |
-| RI-05 | **PASS**, active recipient suppression stops the worker; final authorization remains the independent fence. |
-| RI-06 | **PASS**, no implicit locale; actual EN/VI browser Settings actions persist confirmation, and respective deliveries snapshot locale. New unconfirmed user is dry-run ineligible. |
-| RI-07 | **PASS**, actual SDK adapter forwards exactly two fixed headers. Worker-issued capability is GET without mutation, then POSTed through the actual local unsubscribe endpoint. |
+| Case  | Actual result                                                                                                                                                                                                              |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RI-01 | **PASS**, flag OFF produces no claim/preparation/submission; actual authenticated HTTP real request returns **503**.                                                                                                       |
+| RI-02 | **PASS**, DB gate OFF yields zero submissions/claims. Authenticated read-only dry-run remains available.                                                                                                                   |
+| RI-03 | **PASS**, exact-address allowlist rejects unrelated/case-different local parts and wildcard/domain config; no handoff.                                                                                                     |
+| RI-04 | **PASS**, real Auth fixture with verification removed is refused before preparation/provider.                                                                                                                              |
+| RI-05 | **PASS**, active recipient suppression stops the worker; final authorization remains the independent fence.                                                                                                                |
+| RI-06 | **PASS**, no implicit locale; actual EN/VI browser Settings actions persist confirmation, and respective deliveries snapshot locale. New unconfirmed user is dry-run ineligible.                                           |
+| RI-07 | **PASS**, actual SDK adapter forwards exactly two fixed headers. Worker-issued capability is GET without mutation, then POSTed through the actual local unsubscribe endpoint.                                              |
 | RI-08 | **PASS**, three two-connection preparation races with different candidates and connection timezones preserve one ciphertext/capability/fingerprint and one token. Final actual worker submits that original snapshot once. |
-| RI-09 | **PASS, MOCK ACCEPTANCE**, injected SDK returns ID; actual outcome RPC persists it. The local signed callback correlates that same ID and projects delivered. This is not live Resend acceptance/delivery. |
-| RI-10 | **PASS**, injected SDK timeout persists uncertain, Job failed/held, no automatic claim/resend. Persistence failure never triggers another provider request. |
-| RI-11 | **PASS**, SDK 409 remains on the persisted key, uncertain for concurrent-key response; no key rotation or blind retry. Existing mismatch-409 adapter coverage retained. |
-| RI-12 | **PASS**, unsubscribe transaction A holds owner coordinator while actual worker B authorizes; after commit B gets no capability/submission. |
+| RI-09 | **PASS, MOCK ACCEPTANCE**, injected SDK returns ID; actual outcome RPC persists it. The local signed callback correlates that same ID and projects delivered. This is not live Resend acceptance/delivery.                 |
+| RI-10 | **PASS**, injected SDK timeout persists uncertain, Job failed/held, no automatic claim/resend. Persistence failure never triggers another provider request.                                                                |
+| RI-11 | **PASS**, SDK 409 remains on the persisted key, uncertain for concurrent-key response; no key rotation or blind retry. Existing mismatch-409 adapter coverage retained.                                                    |
+| RI-12 | **PASS**, unsubscribe transaction A holds owner coordinator while actual worker B authorizes; after commit B gets no capability/submission.                                                                                |
 | RI-13 | **PASS**, opt-out after committed handoff preserves cancellation fence and actual mock accepted outcome. HTTP pipeline also consumes the real capability during injected SDK handoff, before accepted outcome persistence. |
-| RI-14 | **PASS**, two actual workers compete at PostgreSQL claim: busy-owner worker promptly skips, first worker commits and alone submits. No blocker is expected for SKIP behavior. |
-| RI-15 | **PASS**, actual HTTP missing/wrong Bearer **401**, GET **405**, caller-selected recipient **400** before DB/SDK activity. |
-| RI-16 | **PASS**, final fixtures zero, dispatch/Sweep OFF, reminder Cron zero, real provider requests zero. |
+| RI-14 | **PASS**, two actual workers compete at PostgreSQL claim: busy-owner worker promptly skips, first worker commits and alone submits. No blocker is expected for SKIP behavior.                                              |
+| RI-15 | **PASS**, actual HTTP missing/wrong Bearer **401**, GET **405**, caller-selected recipient **400** before DB/SDK activity.                                                                                                 |
+| RI-16 | **PASS**, final fixtures zero, dispatch/Sweep OFF, reminder Cron zero, real provider requests zero.                                                                                                                        |
 
 - [`phase-08-resend-worker.json`](./phase-08-resend-worker.json): **23 case executions** using the actual repository worker/store/SDK adapter with only `emails.send` injected. Includes **12 repeated concurrency cases** (RI-08/12/13/14 ×3), **9 observed `pg_blocking_pids()` blockers**, three prompt SKIP cases, payload/source fingerprints, final states and cleanup. Standalone harness transpiles actual TS modules to ignored `.next/step-8d-runtime`; it does not implement a substitute worker. Full TypeScript checking is a separate gate.
 - [`phase-08-resend-worker-http.json`](./phase-08-resend-worker-http.json): **10 HTTP/Chromium checks PASS** on owned `127.0.0.1:3110`, including locale Settings Server Actions, OFF/auth/body gates, read-only dry-run, full mock worker → real unsubscribe HTTP → accepted persistence → signed callback. Dry-run creates **zero** tokens/snapshots/attempts. One SDK mock submission in the full pipeline; **zero real provider requests**. Two Analytics requests from ordinary Settings pages were intercepted/blocked, not sent externally. Safe batch log fields checked. EN/VI **390×844** screenshots under `evidence/step-8d/` visually inspected; no horizontal overflow.
@@ -79,17 +79,17 @@ node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
 node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
 ```
 
-| Gate | Actual final result |
-| --- | --- |
-| Clean replay | **90 migrations PASS** |
-| pgTAP | **881 PASS / 32 files** reported, one existing fixture-only SQL entry intentionally skipped; new worker suite **30 assertions**, baseline 851 retained |
-| Notifications Vitest | **199 PASS / 9 files / 7.90s** |
-| Notifications + Actions/Settings | **253 PASS / 11 files / 12.09s** |
-| Full Vitest | **1021 PASS / 26 skipped**, **88 files passed / 5 skipped (93)**, **241.66s**, start **15:31:56 UTC+7** |
-| ESLint | **PASS**, zero errors, one existing `use-focus-v2-audio.ts:104` missing-`projection` warning |
-| TypeScript | **PASS**, standalone `--noEmit --incremental false --pretty false` |
-| Production build | **PASS**, Next **16.2.6**, compile **20.7s**, TypeScript **42s**, **105 pages / 1227ms** |
-| Security advisors | One pre-existing `public.set_updated_at` mutable-search-path WARN, no new notification findings |
+| Gate                             | Actual final result                                                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clean replay                     | **90 migrations PASS**                                                                                                                                 |
+| pgTAP                            | **881 PASS / 32 files** reported, one existing fixture-only SQL entry intentionally skipped; new worker suite **30 assertions**, baseline 851 retained |
+| Notifications Vitest             | **199 PASS / 9 files / 7.90s**                                                                                                                         |
+| Notifications + Actions/Settings | **253 PASS / 11 files / 12.09s**                                                                                                                       |
+| Full Vitest                      | **1021 PASS / 26 skipped**, **88 files passed / 5 skipped (93)**, **241.66s**, start **15:31:56 UTC+7**                                                |
+| ESLint                           | **PASS**, zero errors, one existing `use-focus-v2-audio.ts:104` missing-`projection` warning                                                           |
+| TypeScript                       | **PASS**, standalone `--noEmit --incremental false --pretty false`                                                                                     |
+| Production build                 | **PASS**, Next **16.2.6**, compile **20.7s**, TypeScript **42s**, **105 pages / 1227ms**                                                               |
+| Security advisors                | One pre-existing `public.set_updated_at` mutable-search-path WARN, no new notification findings                                                        |
 
 - Build uses local Supabase process env and inert `G-TESTPRIVACY`; `.env.local` unchanged and `.next/dev` preserved. `--ignore-scripts` skips only prebuild cleanup; actual `next build` ran. No dependency changes.
 - Initial checks caught the expanded missing-row locale contract in an old assertion, a noncanonical base64url envelope edge, PostgREST abort-signal ordering and an overly specific environment test type. Corrected with retained/expanded assertions and final regression above; no test was disabled to obtain PASS.
@@ -124,22 +124,22 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Executed acceptance
 
-| Case | Actual result |
-| --- | --- |
-| US-01 | **PASS**, API GET and EN/VI browser GET leave consent ON, one pending Job, token unused. No login/redirect. |
-| US-02 | **PASS**, actual keyboard confirmation POST → Next route → local Supabase atomically changes consent OFF, pending count 1→0, used token count 0→1; DB tests verify leased cancellation marker too. |
-| US-03 | **PASS**, HTTP and DB replay no-op, same generic success, never opts in. |
-| US-04 | **PASS**, expired, explicit-revoked and forged token all return the same **400** body. Replacement revokes older tokens; issuer rejects stale/unverified Auth identity (**PT409**). |
-| US-05/06 | **PASS**, fresh browser/no session and cookie-free one-click POST succeed; responses omit token, user/email and account data, no Location/Set-Cookie. |
-| US-07 | **PASS**, actual Svix-signed Permanent bounce through Next HTTP creates one hard-bounce fact for the exact correlated identity; duplicate remains one. Pending/leased fences verified in pgTAP. |
-| US-08 | **PASS**, complaint plus bounce retained independently; late delivered event cannot clear suppression. Real HTTP late-delivery regression included. |
-| US-09 | **PASS**, delayed event adds no suppression; Transient/missing proof never classified hard bounce. |
-| US-10/11 | **PASS**, unknown/mismatched event creates no guessed suppression; later trusted Email ID correlates and suppresses the correct identity atomically. |
-| US-12 | **PASS**, Settings OFF→ON does not revoke suppression; a new leased Job is denied at real-provider final handoff. |
-| US-13 | **PASS**, fixture changes to a new verified Auth email do not enable global consent; old destination suppression does not automatically attach to the new fingerprint after explicit opt-in. This simulates verified identity, not a live Auth re-verification email flow. |
-| US-14 | **PASS**, **24 real PostgreSQL executions**, eight orders × three repetitions, all **00000**; **21 observed `pg_blocking_pids()` blockers**. The remaining three unsubscribe-first/claim cases correctly skip busy owner and return promptly, without expecting a blocker. |
-| US-15 | **PASS**, Owner B/anon denied private records; browser denied token consumption and real handoff RPCs; direct service-role token mutation denied (**42501**); all three tables have RLS. |
-| US-16 | **PASS**, final dispatch/Sweep OFF, zero reminder Cron, provider requests zero; local fixtures and owned servers cleaned. |
+| Case     | Actual result                                                                                                                                                                                                                                                              |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US-01    | **PASS**, API GET and EN/VI browser GET leave consent ON, one pending Job, token unused. No login/redirect.                                                                                                                                                                |
+| US-02    | **PASS**, actual keyboard confirmation POST → Next route → local Supabase atomically changes consent OFF, pending count 1→0, used token count 0→1; DB tests verify leased cancellation marker too.                                                                         |
+| US-03    | **PASS**, HTTP and DB replay no-op, same generic success, never opts in.                                                                                                                                                                                                   |
+| US-04    | **PASS**, expired, explicit-revoked and forged token all return the same **400** body. Replacement revokes older tokens; issuer rejects stale/unverified Auth identity (**PT409**).                                                                                        |
+| US-05/06 | **PASS**, fresh browser/no session and cookie-free one-click POST succeed; responses omit token, user/email and account data, no Location/Set-Cookie.                                                                                                                      |
+| US-07    | **PASS**, actual Svix-signed Permanent bounce through Next HTTP creates one hard-bounce fact for the exact correlated identity; duplicate remains one. Pending/leased fences verified in pgTAP.                                                                            |
+| US-08    | **PASS**, complaint plus bounce retained independently; late delivered event cannot clear suppression. Real HTTP late-delivery regression included.                                                                                                                        |
+| US-09    | **PASS**, delayed event adds no suppression; Transient/missing proof never classified hard bounce.                                                                                                                                                                         |
+| US-10/11 | **PASS**, unknown/mismatched event creates no guessed suppression; later trusted Email ID correlates and suppresses the correct identity atomically.                                                                                                                       |
+| US-12    | **PASS**, Settings OFF→ON does not revoke suppression; a new leased Job is denied at real-provider final handoff.                                                                                                                                                          |
+| US-13    | **PASS**, fixture changes to a new verified Auth email do not enable global consent; old destination suppression does not automatically attach to the new fingerprint after explicit opt-in. This simulates verified identity, not a live Auth re-verification email flow. |
+| US-14    | **PASS**, **24 real PostgreSQL executions**, eight orders × three repetitions, all **00000**; **21 observed `pg_blocking_pids()` blockers**. The remaining three unsubscribe-first/claim cases correctly skip busy owner and return promptly, without expecting a blocker. |
+| US-15    | **PASS**, Owner B/anon denied private records; browser denied token consumption and real handoff RPCs; direct service-role token mutation denied (**42501**); all three tables have RLS.                                                                                   |
+| US-16    | **PASS**, final dispatch/Sweep OFF, zero reminder Cron, provider requests zero; local fixtures and owned servers cleaned.                                                                                                                                                  |
 
 - Additional atomicity checks **PASS**: injected suppression insertion fault rolls back receipt and delivery projection; injected token-mark fault rolls back both consent and pending invalidation (**P0001**). A hash-only replay regression covers receipt schema evolution without conflicting typed metadata.
 - Concurrency orders: unsubscribe/claim, claim/unsubscribe, unsubscribe/handoff, handoff/unsubscribe, Settings/unsubscribe, unsubscribe/Settings, suppression/handoff, handoff/suppression. Handoff-first cases retain one durable submitting attempt plus cancellation fence; no send is performed and no recall guarantee is inferred. Report: [`phase-08-unsubscribe-concurrency.json`](./phase-08-unsubscribe-concurrency.json).
@@ -168,17 +168,17 @@ node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
 node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
 ```
 
-| Gate | Actual result |
-| --- | --- |
-| Final clean replay | **89 migrations PASS** |
-| Full pgTAP | **851 assertions PASS**, **31 files** reported; one existing fixture-only entry intentionally skipped. New suite **48 assertions**, baseline 803 retained. |
-| Notification Vitest | **164 PASS / 8 files / 8.53s** |
-| Full Vitest | **980 PASS / 26 skipped**, **87 files passed / 5 skipped (92)**, **228.72s**, start **14:32:15 UTC+7** |
-| Lint | **PASS**, zero errors, one existing Focus `use-focus-v2-audio.ts:104` dependency warning |
-| TypeScript | **PASS**, standalone `--noEmit --incremental false --pretty false` |
-| Production build | **PASS**, Next **16.2.6**, compile **17.4s**, TypeScript **38.1s**, **104 pages / 1901ms** |
-| Types | **PASS**, local-generated `public` + `graphql_public`; contents/exit checked before replacing output |
-| Security advisors | One existing `public.set_updated_at` mutable-search-path WARN; no new notification findings |
+| Gate                | Actual result                                                                                                                                              |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Final clean replay  | **89 migrations PASS**                                                                                                                                     |
+| Full pgTAP          | **851 assertions PASS**, **31 files** reported; one existing fixture-only entry intentionally skipped. New suite **48 assertions**, baseline 803 retained. |
+| Notification Vitest | **164 PASS / 8 files / 8.53s**                                                                                                                             |
+| Full Vitest         | **980 PASS / 26 skipped**, **87 files passed / 5 skipped (92)**, **228.72s**, start **14:32:15 UTC+7**                                                     |
+| Lint                | **PASS**, zero errors, one existing Focus `use-focus-v2-audio.ts:104` dependency warning                                                                   |
+| TypeScript          | **PASS**, standalone `--noEmit --incremental false --pretty false`                                                                                         |
+| Production build    | **PASS**, Next **16.2.6**, compile **17.4s**, TypeScript **38.1s**, **104 pages / 1901ms**                                                                 |
+| Types               | **PASS**, local-generated `public` + `graphql_public`; contents/exit checked before replacing output                                                       |
+| Security advisors   | One existing `public.set_updated_at` mutable-search-path WARN; no new notification findings                                                                |
 
 - Build used local Supabase process env and inert **`G-TESTPRIVACY`** process-only measurement fixture. `.env.local` unchanged; no new dependencies. `--ignore-scripts` skips prebuild cleanup only; actual Next build ran and `.next/dev` was preserved. Unit secrets/token material existed in test memory/process env only; screenshots/reports contain no raw tokens or keys.
 - Final state: **89 applied migrations**, **0 users / Tasks / jobs / deliveries / receipts / tokens / suppressions / identity bindings**, dispatch **OFF**, Sweep **OFF**, **0 reminder Cron**. Test ports **3108/3109** stopped. Concurrency temporarily enabled the DB gate only for fixture claim/handoff tests and restored it in `finally`; no worker/provider was invoked.
@@ -211,21 +211,21 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Executed acceptance
 
-| Case | Actual result / evidence |
-| --- | --- |
-| RW-01 | **PASS**, real HMAC/Svix verifier rejects forged, expired, future, tampered raw body and malformed headers before DB client/write. Actual Next production route returned **401**, receipt count stayed zero. |
-| RW-02 | **PASS**, seven supported event types parsed after verification. Actual Next POST → local PostgREST → PostgreSQL committed receipt, returned **200**. |
-| RW-03 | **PASS**, exact duplicate returns **200**, one receipt; pgTAP compares entire delivery row including timestamps to prove no-op. |
-| RW-04 | **PASS**, duplicate event ID with changed payload raises **22023**; original fact unchanged. Handler/route contract maps conflict to **409**, with sanitized diagnostic. |
-| RW-05/06 | **PASS**, early receipt remains unmatched then trusted acceptance/ID reconciles to delivered, Job sent. Both real-connection commit orders exercised. |
-| RW-07 | **PASS**, delivered followed by sent remains delivered. |
-| RW-08 | **PASS**, bounce then late delivery retains bounce; complaint retained too; both receipt facts remain. Actual suppression enforcement is 8C, not claimed here. |
-| RW-09 | **PASS**, unknown Email ID stays unmatched; recipient mismatch never changes another delivery. |
-| RW-10 | **PASS**, Owner B and anon denied receipt access; authenticated browser cannot invoke ingestion or read private delivery fingerprints (**42501**). |
-| RW-11 | **PASS**, duplicate real-provider Email ID rejected (**23505**) and assignment rolled back; fake outcome cannot write a Resend attempt (**PT409**). |
-| RW-12 | **PASS**, injected delivery projection failure rolls back inserted receipt; injected Job update failure rolls back provider ID/outcome. Original state remains intact (**P0001** fault injection). |
-| RW-13 | **PASS**, persistence failure returns **503**, no success before commit barrier releases. Faulted persistence port/route mock used; no real DB outage was induced. |
-| RW-14 | **PASS**, SDK verification tests assert zero global fetch/provider requests; actual route only performs local Supabase persistence. No sends, retrieval, key rotation or webhook registration. |
+| Case     | Actual result / evidence                                                                                                                                                                                     |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RW-01    | **PASS**, real HMAC/Svix verifier rejects forged, expired, future, tampered raw body and malformed headers before DB client/write. Actual Next production route returned **401**, receipt count stayed zero. |
+| RW-02    | **PASS**, seven supported event types parsed after verification. Actual Next POST → local PostgREST → PostgreSQL committed receipt, returned **200**.                                                        |
+| RW-03    | **PASS**, exact duplicate returns **200**, one receipt; pgTAP compares entire delivery row including timestamps to prove no-op.                                                                              |
+| RW-04    | **PASS**, duplicate event ID with changed payload raises **22023**; original fact unchanged. Handler/route contract maps conflict to **409**, with sanitized diagnostic.                                     |
+| RW-05/06 | **PASS**, early receipt remains unmatched then trusted acceptance/ID reconciles to delivered, Job sent. Both real-connection commit orders exercised.                                                        |
+| RW-07    | **PASS**, delivered followed by sent remains delivered.                                                                                                                                                      |
+| RW-08    | **PASS**, bounce then late delivery retains bounce; complaint retained too; both receipt facts remain. Actual suppression enforcement is 8C, not claimed here.                                               |
+| RW-09    | **PASS**, unknown Email ID stays unmatched; recipient mismatch never changes another delivery.                                                                                                               |
+| RW-10    | **PASS**, Owner B and anon denied receipt access; authenticated browser cannot invoke ingestion or read private delivery fingerprints (**42501**).                                                           |
+| RW-11    | **PASS**, duplicate real-provider Email ID rejected (**23505**) and assignment rolled back; fake outcome cannot write a Resend attempt (**PT409**).                                                          |
+| RW-12    | **PASS**, injected delivery projection failure rolls back inserted receipt; injected Job update failure rolls back provider ID/outcome. Original state remains intact (**P0001** fault injection).           |
+| RW-13    | **PASS**, persistence failure returns **503**, no success before commit barrier releases. Faulted persistence port/route mock used; no real DB outage was induced.                                           |
+| RW-14    | **PASS**, SDK verification tests assert zero global fetch/provider requests; actual route only performs local Supabase persistence. No sends, retrieval, key rotation or webhook registration.               |
 
 - **pgTAP: 803 PASS**, **30 files** reported (one existing concurrency-fixture SQL entry skipped deliberately); new webhook suite **42 assertions**, baseline **761** retained. Existing NP-10 expectation updated from the Phase 07 fake-only CHECK error to **22023 immutable fake identity** under the expanded 8B provider contract; its coverage was retained, not removed.
 - **Targeted notifications: 121 PASS / 5 files / 4.65s**: 89 existing + **28 signed-boundary/parser tests + 4 actual route-module tests**. Real SDK verification uses locally generated test signatures; no mocked cryptography in signature acceptance.
@@ -282,15 +282,15 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### Executed acceptance
 
-| Case | Actual result |
-| --- | --- |
-| RE-01/02 | **PASS**, English/Vietnamese subject + HTML + text, localized dates, 19:00–20:00 Session time, locale Task/Settings links |
-| RE-03/04 | **PASS**, escaped HTML injection, unsafe scheme/origin/credentials/path config, spoofed Host/Task link rejected |
-| RE-05 | **PASS for adapter contract**, same persisted logical key forwarded on explicit retry; one call per invocation, no generated key/automatic retry. Real provider deduplication NOT EXECUTED |
-| RE-06/07 | **PASS**, accepted ID normalization; 400/422 validation and 401/403/404/405 configuration errors never auto-retry |
-| RE-08/09 | **PASS**, thrown timeout, controlled abort, SDK null status and 5xx uncertain; 409 mismatch distinguished from concurrent in-flight request |
-| RE-10 | **PASS**, strict minimum template/request fields, no document/notes/prompt/attachments/CC/BCC/header payload, normalized errors omit recipient/raw diagnostics |
-| RE-11/12 | **PASS**, global fetch stubbed/zero calls; mock client only; module import/constructor remain inert with API-key/UI-flag fixture env set; browser construction refused |
+| Case     | Actual result                                                                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| RE-01/02 | **PASS**, English/Vietnamese subject + HTML + text, localized dates, 19:00–20:00 Session time, locale Task/Settings links                                                                  |
+| RE-03/04 | **PASS**, escaped HTML injection, unsafe scheme/origin/credentials/path config, spoofed Host/Task link rejected                                                                            |
+| RE-05    | **PASS for adapter contract**, same persisted logical key forwarded on explicit retry; one call per invocation, no generated key/automatic retry. Real provider deduplication NOT EXECUTED |
+| RE-06/07 | **PASS**, accepted ID normalization; 400/422 validation and 401/403/404/405 configuration errors never auto-retry                                                                          |
+| RE-08/09 | **PASS**, thrown timeout, controlled abort, SDK null status and 5xx uncertain; 409 mismatch distinguished from concurrent in-flight request                                                |
+| RE-10    | **PASS**, strict minimum template/request fields, no document/notes/prompt/attachments/CC/BCC/header payload, normalized errors omit recipient/raw diagnostics                             |
+| RE-11/12 | **PASS**, global fetch stubbed/zero calls; mock client only; module import/constructor remain inert with API-key/UI-flag fixture env set; browser construction refused                     |
 
 - Final targeted notifications Vitest **PASS**, **3 files / 89 tests**, **4.86s**: **28 template + 44 adapter + 17 existing fake-provider/worker tests**. Includes malformed provider responses, max key length, sender mismatch, quotas, bounded abort signal, DST folds/gap, date rollover, accessible HTML and deterministic rendering.
 - Offline preview script **PASS**, `node --experimental-strip-types scripts/preview-learning-schedule-reminder-email.mjs`: EN/VI HTML + plain text, Chromium **640px and 390px**, no horizontal overflow and **zero HTTP(S) requests**. Four screenshots visually inspected at representative desktop/mobile sizes; artifacts under `evidence/step-8a/` use fixture titles, `.test` origin and `preview-only` unsubscribe token. This is Chromium HTML QA, not Gmail/Outlook/inbox/client-delivery acceptance.

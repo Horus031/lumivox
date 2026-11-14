@@ -4,9 +4,7 @@ import type { FocusWireSnapshot } from "./shared/focus-protocol";
 
 const start = Date.parse("2026-10-20T10:00:00Z");
 
-function snapshot(
-  status: "running" | "paused" | "completed" = "running",
-): FocusWireSnapshot {
+function snapshot(status: "running" | "paused" | "completed" = "running"): FocusWireSnapshot {
   return {
     session: {
       id: "11111111-1111-4111-8111-111111111111",

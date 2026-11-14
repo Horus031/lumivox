@@ -6,13 +6,7 @@ export type AnalyticsObligation = {
   timezone: string;
   scheduledStartAt: string;
   scheduledEndAt: string;
-  status:
-    | "scheduled"
-    | "in_progress"
-    | "completed"
-    | "missed"
-    | "skipped"
-    | "cancelled";
+  status: "scheduled" | "in_progress" | "completed" | "missed" | "skipped" | "cancelled";
   completedAt: string | null;
 
   // Derived by the trusted query layer from a persisted
@@ -122,9 +116,7 @@ export function calculateAttendanceSummary(
     }
 
     const completed =
-      row.status === "completed" &&
-      row.completedAt !== null &&
-      instant(row.completedAt) <= now;
+      row.status === "completed" && row.completedAt !== null && instant(row.completedAt) <= now;
 
     if (completed) {
       completedPlanned += 1;

@@ -83,9 +83,7 @@ export function TaskEditForm({
 
   const [goalId, setGoalId] = useState(task.goal_id ?? "");
 
-  const [priority, setPriority] = useState<
-    "low" | "medium" | "high" | "critical"
-  >(task.priority);
+  const [priority, setPriority] = useState<"low" | "medium" | "high" | "critical">(task.priority);
 
   const [estimatedMinutes, setEstimatedMinutes] = useState(
     task.estimated_minutes?.toString() ?? "",
@@ -112,8 +110,7 @@ export function TaskEditForm({
 
         priority,
 
-        estimatedMinutes:
-          estimatedMinutes.trim() === "" ? undefined : Number(estimatedMinutes),
+        estimatedMinutes: estimatedMinutes.trim() === "" ? undefined : Number(estimatedMinutes),
 
         dueAt: dueAt ? dueAt.toISOString() : "",
 
@@ -146,131 +143,124 @@ export function TaskEditForm({
   return (
     <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
       <fieldset disabled={isPending} className="min-w-0 space-y-card">
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
+        <div className="space-y-2">
+          <Label htmlFor={`${id}-title`}>{t("fields.title")}</Label>
 
-        <Input
-          id={`${id}-title`}
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-          maxLength={160}
-          required
-        />
-      </div>
+          <Input
+            id={`${id}-title`}
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            maxLength={160}
+            required
+          />
+        </div>
 
-      <div className="space-y-2">
-        <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
+        <div className="space-y-2">
+          <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
 
-        <Textarea
-          id={`${id}-description`}
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-          rows={3}
-          maxLength={1200}
-        />
-      </div>
+          <Textarea
+            id={`${id}-description`}
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+            rows={3}
+            maxLength={1200}
+          />
+        </div>
 
-      <div className="grid min-w-0 gap-card sm:grid-cols-2">
-        {allowGoalChange ? (
+        <div className="grid min-w-0 gap-card sm:grid-cols-2">
+          {allowGoalChange ? (
+            <div className="space-y-2">
+              <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
+
+              <Select
+                disabled={isPending}
+                value={goalId || "no-goal"}
+                onValueChange={(value) => setGoalId(value === "no-goal" ? "" : value)}
+              >
+                <SelectTrigger id={`${id}-linkedGoal`} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="no-goal">{t("noGoal")}</SelectItem>
+
+                    {goals.map((goal) => (
+                      <SelectItem key={goal.id} value={goal.id}>
+                        {goal.title}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+          ) : null}
+
           <div className="space-y-2">
-            <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
+            <Label htmlFor={`${id}-priority`}>{t("fields.priority")}</Label>
 
             <Select
-            disabled={isPending}
-              value={goalId || "no-goal"}
+              disabled={isPending}
+              value={priority}
               onValueChange={(value) =>
-                setGoalId(value === "no-goal" ? "" : value)
+                setPriority(value as "low" | "medium" | "high" | "critical")
               }
             >
-              <SelectTrigger id={`${id}-linkedGoal`} className="w-full"><SelectValue />
+              <SelectTrigger id={`${id}-priority`} className="w-full">
+                <SelectValue />
               </SelectTrigger>
 
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="no-goal">{t("noGoal")}</SelectItem>
+                  <SelectLabel>{t("fields.priority")}</SelectLabel>
 
-                  {goals.map((goal) => (
-                    <SelectItem key={goal.id} value={goal.id}>
-                      {goal.title}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="low">{t("priorities.low")}</SelectItem>
+
+                  <SelectItem value="medium">{t("priorities.medium")}</SelectItem>
+
+                  <SelectItem value="high">{t("priorities.high")}</SelectItem>
+
+                  <SelectItem value="critical">{t("priorities.critical")}</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
           </div>
-        ) : null}
-
-        <div className="space-y-2">
-          <Label htmlFor={`${id}-priority`}>{t("fields.priority")}</Label>
-
-          <Select
-            disabled={isPending}
-            value={priority}
-            onValueChange={(value) =>
-              setPriority(value as "low" | "medium" | "high" | "critical")
-            }
-          >
-            <SelectTrigger id={`${id}-priority`} className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>{t("fields.priority")}</SelectLabel>
-
-                <SelectItem value="low">{t("priorities.low")}</SelectItem>
-
-                <SelectItem value="medium">{t("priorities.medium")}</SelectItem>
-
-                <SelectItem value="high">{t("priorities.high")}</SelectItem>
-
-                <SelectItem value="critical">
-                  {t("priorities.critical")}
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
         </div>
-      </div>
 
-      <div className="grid min-w-0 gap-card sm:grid-cols-2">
-        <div className="space-y-2">
-          <Label htmlFor={`${id}-estimatedMinutes`}>{t("fields.estimatedMinutes")}</Label>
+        <div className="grid min-w-0 gap-card sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor={`${id}-estimatedMinutes`}>{t("fields.estimatedMinutes")}</Label>
 
-          <Input
-            id={`${id}-estimatedMinutes`}
-            type="number"
-            min={0}
-            step={1}
-            value={estimatedMinutes}
-            onChange={(event) => setEstimatedMinutes(event.target.value)}
+            <Input
+              id={`${id}-estimatedMinutes`}
+              type="number"
+              min={0}
+              step={1}
+              value={estimatedMinutes}
+              onChange={(event) => setEstimatedMinutes(event.target.value)}
+            />
+          </div>
+
+          <TaskDatePicker
+            disabled={isPending}
+            dueAt={dueAt}
+            setDueAt={setDueAt}
+            dueTime={dueTime}
+            setDueTime={setDueTime}
           />
         </div>
 
-        <TaskDatePicker
-          disabled={isPending}
-          dueAt={dueAt}
-          setDueAt={setDueAt}
-          dueTime={dueTime}
-          setDueTime={setDueTime}
-        />
-      </div>
+        <div className="flex flex-wrap justify-end gap-2">
+          <Button type="button" variant="outline" disabled={isPending} onClick={onCancel}>
+            {commonT("cancel")}
+          </Button>
 
-      <div className="flex flex-wrap justify-end gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isPending}
-          onClick={onCancel}
-        >
-          {commonT("cancel")}
-        </Button>
-
-        <Button type="submit" disabled={isPending}><Save aria-hidden="true" />
-          {isPending ? t("saving") : commonT("save")}
-        </Button>
-      </div>
-    </fieldset>
+          <Button type="submit" disabled={isPending}>
+            <Save aria-hidden="true" />
+            {isPending ? t("saving") : commonT("save")}
+          </Button>
+        </div>
+      </fieldset>
     </form>
   );
 }

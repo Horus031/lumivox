@@ -32,10 +32,11 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
 
   const questions = assessment?.questions ?? [];
 
-  const answeredCount = questions.filter((question) => (answers[question.id]?.length ?? 0) > 0).length;
+  const answeredCount = questions.filter(
+    (question) => (answers[question.id]?.length ?? 0) > 0,
+  ).length;
 
-  const allAnswered =
-    questions.length > 0 && answeredCount === questions.length;
+  const allAnswered = questions.length > 0 && answeredCount === questions.length;
 
   function selectSingle(questionId: string, optionIndex: number) {
     setAnswers((current) => ({
@@ -45,11 +46,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
     }));
   }
 
-  function toggleMultiple(
-    questionId: string,
-    optionIndex: number,
-    checked: boolean,
-  ) {
+  function toggleMultiple(questionId: string, optionIndex: number, checked: boolean) {
     setAnswers((current) => {
       const previous = current[questionId] ?? [];
 
@@ -104,9 +101,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
       <div>
         <h3 className="text-section font-semibold text-foreground">{t("title")}</h3>
 
-        <p className="mt-1 text-body text-muted-foreground">
-          {t("description")}
-        </p>
+        <p className="mt-1 text-body text-muted-foreground">{t("description")}</p>
 
         <p className="mt-2 text-caption font-medium text-muted-foreground">
           {t("progress", {
@@ -124,7 +119,8 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
           const isMultiple = question.kind === "multiple_select";
 
           return (
-            <fieldset disabled={isPending}
+            <fieldset
+              disabled={isPending}
               key={question.id}
               className="min-w-0 border-t border-border pt-card"
             >
@@ -147,12 +143,9 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
 
               <div className="mt-4 space-y-2">
                 {question.options.map((option, optionIndex) => {
-                  const inputId = [
-                    "review",
-                    attempt.attempt_id,
-                    question.id,
-                    optionIndex,
-                  ].join("-");
+                  const inputId = ["review", attempt.attempt_id, question.id, optionIndex].join(
+                    "-",
+                  );
 
                   const checked = selected.includes(optionIndex);
 
@@ -168,11 +161,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
                           checked={checked}
                           disabled={isPending}
                           onCheckedChange={(value) =>
-                            toggleMultiple(
-                              question.id,
-                              optionIndex,
-                              Boolean(value),
-                            )
+                            toggleMultiple(question.id, optionIndex, Boolean(value))
                           }
                           className="mt-0.5"
                         />
@@ -212,9 +201,7 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
         })}
       </div>
 
-      {!allAnswered ? (
-        <p className="text-sm text-muted-foreground">{t("answerAll")}</p>
-      ) : null}
+      {!allAnswered ? <p className="text-sm text-muted-foreground">{t("answerAll")}</p> : null}
 
       <Button
         type="button"
@@ -222,7 +209,8 @@ export function TaskReviewQuiz({ attempt, onSubmitted }: TaskReviewQuizProps) {
         disabled={!allAnswered || isPending}
         onClick={handleSubmit}
       >
-        <Send aria-hidden="true" />{isPending ? t("submitting") : t("submit")}
+        <Send aria-hidden="true" />
+        {isPending ? t("submitting") : t("submit")}
       </Button>
     </section>
   );

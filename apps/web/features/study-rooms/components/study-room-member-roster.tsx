@@ -11,20 +11,14 @@ type StudyRoomMemberRosterProps = {
   initialMembers: StudyRoomMemberWithProfile[];
 };
 
-export function StudyRoomMemberRoster({
-  roomId,
-  initialMembers,
-}: StudyRoomMemberRosterProps) {
+export function StudyRoomMemberRoster({ roomId, initialMembers }: StudyRoomMemberRosterProps) {
   const t = useTranslations("rooms.memberRoster");
   const supabase = useMemo(() => createClient(), []);
   const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const [members, setMembers] =
-    useState<StudyRoomMemberWithProfile[]>(initialMembers);
+  const [members, setMembers] = useState<StudyRoomMemberWithProfile[]>(initialMembers);
 
-  const [liveState, setLiveState] = useState<
-    "connecting" | "connected" | "error"
-  >("connecting");
+  const [liveState, setLiveState] = useState<"connecting" | "connected" | "error">("connecting");
 
   const refreshMembers = useCallback(async () => {
     const { data, error } = await supabase
@@ -126,9 +120,7 @@ export function StudyRoomMemberRoster({
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div>
           <h2 className="text-section font-semibold">{t("title")}</h2>
-          <p className="mt-1 text-body text-secondary-text">
-            {t("description")}
-          </p>
+          <p className="mt-1 text-body text-secondary-text">{t("description")}</p>
         </div>
 
         <span
@@ -147,9 +139,7 @@ export function StudyRoomMemberRoster({
 
       <div className="mt-2 divide-y divide-border">
         {members.length === 0 ? (
-          <div className="py-card text-body text-muted-foreground">
-            {t("empty")}
-          </div>
+          <div className="py-card text-body text-muted-foreground">{t("empty")}</div>
         ) : (
           members.map((member) => (
             <div
@@ -165,9 +155,7 @@ export function StudyRoomMemberRoster({
                 </p>
               </div>
 
-              <span className="text-caption text-muted-foreground">
-                {t("memberBadge")}
-              </span>
+              <span className="text-caption text-muted-foreground">{t("memberBadge")}</span>
             </div>
           ))
         )}

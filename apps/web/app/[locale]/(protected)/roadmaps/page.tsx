@@ -17,7 +17,10 @@ export default async function RoadmapsPage() {
         description={t("description")}
         action={
           <Button asChild>
-            <Link href="/roadmaps/new"><Plus aria-hidden="true" />{t("create")}</Link>
+            <Link href="/roadmaps/new">
+              <Plus aria-hidden="true" />
+              {t("create")}
+            </Link>
           </Button>
         }
       />

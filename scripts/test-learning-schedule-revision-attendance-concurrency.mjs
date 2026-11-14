@@ -30,20 +30,7 @@ class Connection {
 
     this.child = spawn(
       "docker",
-      [
-        "exec",
-        "-i",
-        container,
-        "psql",
-        "-X",
-        "-A",
-        "-t",
-        "-q",
-        "-U",
-        "postgres",
-        "-d",
-        "postgres",
-      ],
+      ["exec", "-i", container, "psql", "-X", "-A", "-t", "-q", "-U", "postgres", "-d", "postgres"],
       {
         cwd: root,
         windowsHide: true,
@@ -68,9 +55,7 @@ class Connection {
       }
     });
 
-    createInterface({ input: this.child.stderr }).on("line", (line) =>
-      this.stderr.push(line),
-    );
+    createInterface({ input: this.child.stderr }).on("line", (line) => this.stderr.push(line));
 
     this.child.on("error", (error) => this.fail(error));
 
@@ -119,9 +104,7 @@ class Connection {
     }).then((result) => {
       const lines = result.text.split("\n");
 
-      const state = lines
-        .findLast((x) => x.startsWith("__LS_SQLSTATE "))
-        ?.split(" ")[1];
+      const state = lines.findLast((x) => x.startsWith("__LS_SQLSTATE "))?.split(" ")[1];
 
       const message = lines
         .findLast((x) => x.startsWith("__LS_LAST_ERROR "))
@@ -131,11 +114,7 @@ class Connection {
         state,
         message: state === "00000" ? null : message,
         text: lines
-          .filter(
-            (x) =>
-              !x.startsWith("__LS_SQLSTATE ") &&
-              !x.startsWith("__LS_LAST_ERROR "),
-          )
+          .filter((x) => !x.startsWith("__LS_SQLSTATE ") && !x.startsWith("__LS_LAST_ERROR "))
           .join("\n")
           .trim(),
         errors: result.errors,
@@ -149,8 +128,7 @@ class Connection {
     assert.equal(
       result.state,
       "00000",
-      `${this.name}: ${result.state}: ` +
-        `${result.message ?? ""}\n${result.errors.join("\n")}`,
+      `${this.name}: ${result.state}: ` + `${result.message ?? ""}\n${result.errors.join("\n")}`,
     );
 
     return result.text;
@@ -174,10 +152,7 @@ class Connection {
   }
 
   async begin(role = "authenticated") {
-    assert(
-      ["authenticated", "service_role"].includes(role),
-      "Unexpected test role",
-    );
+    assert(["authenticated", "service_role"].includes(role), "Unexpected test role");
 
     await this.ok(`
       BEGIN;
@@ -204,10 +179,7 @@ class Connection {
 
     this.child.stdin.end("ROLLBACK;\n\\q\n");
 
-    await Promise.race([
-      new Promise((done) => this.child.once("exit", done)),
-      wait(2000),
-    ]);
+    await Promise.race([new Promise((done) => this.child.once("exit", done)), wait(2000)]);
 
     if (this.child.exitCode === null) {
       this.child.kill();
@@ -215,11 +187,7 @@ class Connection {
   }
 }
 
-const [a, b, observer] = [
-  new Connection("A"),
-  new Connection("B"),
-  new Connection("observer"),
-];
+const [a, b, observer] = [new Connection("A"), new Connection("B"), new Connection("observer")];
 
 const report = {
   baseline: execFileSync("git", ["rev-parse", "HEAD"], {
@@ -327,11 +295,7 @@ async function setup(sourceStatus) {
     FROM public.task_study_schedules s
     CROSS JOIN LATERAL (
       SELECT
-        ${
-          historical
-            ? "now() - interval '2 days'"
-            : "now() - interval '20 minutes'"
-        } AS starts_at,
+        ${historical ? "now() - interval '2 days'" : "now() - interval '20 minutes'"} AS starts_at,
         ${
           historical
             ? "now() - interval '2 days' + interval '30 minutes'"
@@ -568,29 +532,13 @@ async function runRevisionRace(scenario, iteration) {
     WHERE schedule_id = ${q(fixture.scheduleId)};
   `);
 
-  assert.equal(
-    final.taskStatus,
-    "todo",
-    `${name}: parent Task mutated unexpectedly`,
-  );
+  assert.equal(final.taskStatus, "todo", `${name}: parent Task mutated unexpectedly`);
 
-  assert.equal(
-    schedule.status,
-    "active",
-    `${name}: Schedule unexpectedly closed`,
-  );
+  assert.equal(schedule.status, "active", `${name}: Schedule unexpectedly closed`);
 
-  assert.equal(
-    schedule.revision,
-    scenario.expectedRevision,
-    `${name}: wrong revision`,
-  );
+  assert.equal(schedule.revision, scenario.expectedRevision, `${name}: wrong revision`);
 
-  assert.equal(
-    sessions.length,
-    scenario.expectedSessionCount,
-    `${name}: wrong number of sessions`,
-  );
+  assert.equal(sessions.length, scenario.expectedSessionCount, `${name}: wrong number of sessions`);
 
   assert.equal(
     final.session.status,
@@ -610,23 +558,12 @@ async function runRevisionRace(scenario, iteration) {
     `${name}: incorrect audit history`,
   );
 
-  assert.equal(
-    final.session.actual_study_minutes,
-    null,
-    `${name}: fabricated study minutes`,
-  );
+  assert.equal(final.session.actual_study_minutes, null, `${name}: fabricated study minutes`);
 
   if (scenario.expectedOldStatus === "completed") {
-    assert(
-      final.session.completed_at !== null,
-      `${name}: completed_at missing`,
-    );
+    assert(final.session.completed_at !== null, `${name}: completed_at missing`);
   } else {
-    assert.equal(
-      final.session.completed_at,
-      null,
-      `${name}: unexpected completion timestamp`,
-    );
+    assert.equal(final.session.completed_at, null, `${name}: unexpected completion timestamp`);
   }
 
   if (scenario.expectedOldStatus === "cancelled") {
@@ -640,11 +577,7 @@ async function runRevisionRace(scenario, iteration) {
   if (scenario.expectedRevision === 2) {
     const newOccurrences = sessions.filter((x) => x.revision === 2);
 
-    assert.equal(
-      newOccurrences.length,
-      1,
-      `${name}: expected one revised occurrence`,
-    );
+    assert.equal(newOccurrences.length, 1, `${name}: expected one revised occurrence`);
 
     assert.equal(
       newOccurrences[0].status,
@@ -661,11 +594,7 @@ async function runRevisionRace(scenario, iteration) {
 
   const eventKeys = final.events.map((e) => e.event_key);
 
-  assert.equal(
-    new Set(eventKeys).size,
-    eventKeys.length,
-    `${name}: duplicate audit event key`,
-  );
+  assert.equal(new Set(eventKeys).size, eventKeys.length, `${name}: duplicate audit event key`);
 
   report.runs.push({
     name,
@@ -775,11 +704,7 @@ async function runRace({
 
   const firstId = await a.ok(command(first, fixture, keyA));
 
-  assert.equal(
-    firstId,
-    fixture.sessionId,
-    `${name}: first command returned unexpected ID`,
-  );
+  assert.equal(firstId, fixture.sessionId, `${name}: first command returned unexpected ID`);
 
   await b.begin();
 
@@ -801,11 +726,7 @@ async function runRace({
   );
 
   if (secondResult.state === "00000") {
-    assert.equal(
-      secondResult.text,
-      fixture.sessionId,
-      `${name}: retry returned different ID`,
-    );
+    assert.equal(secondResult.text, fixture.sessionId, `${name}: retry returned different ID`);
 
     await b.ok("COMMIT;");
   } else {
@@ -814,29 +735,13 @@ async function runRace({
 
   const final = await snapshot(fixture);
 
-  assert.equal(
-    final.session.status,
-    expectedFinalStatus,
-    `${name}: incorrect final Session state`,
-  );
+  assert.equal(final.session.status, expectedFinalStatus, `${name}: incorrect final Session state`);
 
-  assert.equal(
-    final.events.length,
-    expectedEvents,
-    `${name}: incorrect audit count`,
-  );
+  assert.equal(final.events.length, expectedEvents, `${name}: incorrect audit count`);
 
-  assert.equal(
-    final.taskStatus,
-    "todo",
-    `${name}: Task status unexpectedly changed`,
-  );
+  assert.equal(final.taskStatus, "todo", `${name}: Task status unexpectedly changed`);
 
-  assert.equal(
-    final.session.actual_study_minutes,
-    null,
-    `${name}: fake Focus minutes recorded`,
-  );
+  assert.equal(final.session.actual_study_minutes, null, `${name}: fake Focus minutes recorded`);
 
   const keys = final.events.map((event) => event.event_key);
 
@@ -845,11 +750,7 @@ async function runRace({
   if (expectedFinalStatus === "completed") {
     assert(final.session.completed_at, `${name}: missing completed_at`);
   } else {
-    assert.equal(
-      final.session.completed_at,
-      null,
-      `${name}: unexpected completed_at`,
-    );
+    assert.equal(final.session.completed_at, null, `${name}: unexpected completed_at`);
   }
 
   report.runs.push({
@@ -970,11 +871,7 @@ try {
   WHERE singleton = true;
 `);
 
-  assert.deepEqual(
-    gate,
-    { enabled: false },
-    "Cron processing gate must be OFF",
-  );
+  assert.deepEqual(gate, { enabled: false }, "Cron processing gate must be OFF");
 
   report.backendPids = {
     a: a.pid,
@@ -1051,7 +948,5 @@ if (failure) {
   process.stderr.write(String(failure.stack ?? failure) + "\n");
   process.exitCode = 1;
 } else {
-  process.stdout.write(
-    `PASS: ${report.runs.length} revision-attendance races\n`,
-  );
+  process.stdout.write(`PASS: ${report.runs.length} revision-attendance races\n`);
 }

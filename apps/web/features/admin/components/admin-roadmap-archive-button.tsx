@@ -16,10 +16,7 @@ type AdminRoadmapArchiveButtonProps = {
   status: string;
 };
 
-export function AdminRoadmapArchiveButton({
-  roadmapId,
-  status,
-}: AdminRoadmapArchiveButtonProps) {
+export function AdminRoadmapArchiveButton({ roadmapId, status }: AdminRoadmapArchiveButtonProps) {
   const router = useRouter();
   const t = useTranslations("admin.roadmaps.actions");
   const confirm = useConfirmDialog();
@@ -33,9 +30,7 @@ export function AdminRoadmapArchiveButton({
 
   async function handleClick() {
     if (isPending) return;
-    const confirmed = await confirm(
-      archived ? t("restoreConfirm") : t("archiveConfirm"),
-    );
+    const confirmed = await confirm(archived ? t("restoreConfirm") : t("archiveConfirm"));
 
     if (!confirmed) return;
 
@@ -67,7 +62,13 @@ export function AdminRoadmapArchiveButton({
       title={label}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : archived ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : archived ? (
+        <ArchiveRestore aria-hidden="true" />
+      ) : (
+        <Archive aria-hidden="true" />
+      )}
     </Button>
   );
 }

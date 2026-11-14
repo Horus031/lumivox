@@ -1,6 +1,16 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { AlertDialog } from "radix-ui";
 import { AlertTriangle, Info } from "lucide-react";
 
@@ -24,12 +34,28 @@ type ConfirmationDialogProps = ConfirmationOptions & {
 };
 
 /** Theme-aware, accessible confirmation surface, also usable as a controlled component. */
-export function ConfirmationDialog({ open, onConfirm, onCancel, returnFocus, title, description, confirmLabel, cancelLabel, variant = "default", mode = "confirm" }: ConfirmationDialogProps) {
+export function ConfirmationDialog({
+  open,
+  onConfirm,
+  onCancel,
+  returnFocus,
+  title,
+  description,
+  confirmLabel,
+  cancelLabel,
+  variant = "default",
+  mode = "confirm",
+}: ConfirmationDialogProps) {
   const destructive = variant === "destructive";
   const Icon = destructive ? AlertTriangle : Info;
 
   return (
-    <AlertDialog.Root open={open} onOpenChange={(nextOpen) => { if (!nextOpen) onCancel(); }}>
+    <AlertDialog.Root
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onCancel();
+      }}
+    >
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-reduce:animate-none" />
         <AlertDialog.Content
@@ -41,21 +67,38 @@ export function ConfirmationDialog({ open, onConfirm, onCancel, returnFocus, tit
           }}
           className="fixed left-1/2 top-1/2 z-[60] grid max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-5 overflow-y-auto rounded-2xl border border-border bg-card p-6 text-card-foreground shadow-2xl outline-none data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 motion-reduce:animate-none"
         >
-          <div className={cn("flex size-12 items-center justify-center rounded-xl", destructive ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary")}>
+          <div
+            className={cn(
+              "flex size-12 items-center justify-center rounded-xl",
+              destructive ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary",
+            )}
+          >
             <Icon className="size-6" aria-hidden="true" />
           </div>
           <div className="min-w-0 space-y-2">
-            <AlertDialog.Title className="text-lg font-semibold tracking-tight [overflow-wrap:anywhere]">{title}</AlertDialog.Title>
-            <AlertDialog.Description className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">{description}</AlertDialog.Description>
+            <AlertDialog.Title className="text-lg font-semibold tracking-tight [overflow-wrap:anywhere]">
+              {title}
+            </AlertDialog.Title>
+            <AlertDialog.Description className="whitespace-pre-line text-sm leading-relaxed text-muted-foreground [overflow-wrap:anywhere]">
+              {description}
+            </AlertDialog.Description>
           </div>
           <div className="flex flex-col-reverse gap-2 border-t border-border pt-4 sm:flex-row sm:justify-end">
             {mode === "confirm" ? (
               <AlertDialog.Cancel asChild>
-                <Button type="button" variant="outline" onClick={onCancel}>{cancelLabel}</Button>
+                <Button type="button" variant="outline" onClick={onCancel}>
+                  {cancelLabel}
+                </Button>
               </AlertDialog.Cancel>
             ) : null}
             <AlertDialog.Action asChild>
-              <Button type="button" variant={destructive ? "destructive" : "default"} onClick={onConfirm}>{confirmLabel}</Button>
+              <Button
+                type="button"
+                variant={destructive ? "destructive" : "default"}
+                onClick={onConfirm}
+              >
+                {confirmLabel}
+              </Button>
             </AlertDialog.Action>
           </div>
         </AlertDialog.Content>
@@ -64,7 +107,12 @@ export function ConfirmationDialog({ open, onConfirm, onCancel, returnFocus, tit
   );
 }
 
-type Request = { owner: string; options: ConfirmationOptions; resolve: (confirmed: boolean) => void; returnFocus: HTMLElement | null };
+type Request = {
+  owner: string;
+  options: ConfirmationOptions;
+  resolve: (confirmed: boolean) => void;
+  returnFocus: HTMLElement | null;
+};
 type ConfirmationContextValue = {
   request: (options: ConfirmationOptions, owner: string) => Promise<boolean>;
   cancel: (owner: string) => void;
@@ -89,27 +137,45 @@ export function ConfirmationProvider({ children }: { children: ReactNode }) {
     return new Promise<boolean>((resolve) => {
       const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
       const menuId = active?.closest('[role="menu"]')?.id;
-      const menuTrigger = menuId ? [...document.querySelectorAll<HTMLElement>("[aria-controls]")].find(element => element.getAttribute("aria-controls") === menuId) : null;
+      const menuTrigger = menuId
+        ? [...document.querySelectorAll<HTMLElement>("[aria-controls]")].find(
+            (element) => element.getAttribute("aria-controls") === menuId,
+          )
+        : null;
       const next = { owner, options, resolve, returnFocus: menuTrigger ?? active };
       pending.current = next;
       setDialog(next);
     });
   }, []);
 
-  const cancel = useCallback((owner: string) => {
-    if (pending.current?.owner === owner) settle(false);
-  }, [settle]);
+  const cancel = useCallback(
+    (owner: string) => {
+      if (pending.current?.owner === owner) settle(false);
+    },
+    [settle],
+  );
   const contextValue = useMemo(() => ({ request, cancel }), [request, cancel]);
 
-  useEffect(() => () => {
-    pending.current?.resolve(false);
-    pending.current = null;
-  }, []);
+  useEffect(
+    () => () => {
+      pending.current?.resolve(false);
+      pending.current = null;
+    },
+    [],
+  );
 
   return (
     <ConfirmationContext.Provider value={contextValue}>
       {children}
-      {dialog ? <ConfirmationDialog {...dialog.options} open returnFocus={dialog.returnFocus} onConfirm={() => settle(true)} onCancel={() => settle(false)} /> : null}
+      {dialog ? (
+        <ConfirmationDialog
+          {...dialog.options}
+          open
+          returnFocus={dialog.returnFocus}
+          onConfirm={() => settle(true)}
+          onCancel={() => settle(false)}
+        />
+      ) : null}
     </ConfirmationContext.Provider>
   );
 }

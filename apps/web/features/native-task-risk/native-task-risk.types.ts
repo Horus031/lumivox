@@ -88,12 +88,7 @@ export type NativeTaskRiskRecommendedAction = {
   action_id: string;
   label: string;
   description: string;
-  action_type:
-    | "start_focus"
-    | "reschedule"
-    | "split_task"
-    | "reduce_scope"
-    | "view_task";
+  action_type: "start_focus" | "reschedule" | "split_task" | "reduce_scope" | "view_task";
   priority: number;
   payload: Record<string, unknown>;
 };

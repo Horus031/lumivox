@@ -57,19 +57,17 @@ export async function shareLearningDocumentByEmailAction(
       };
     }
 
-    const { error: permissionError } = await supabase
-      .from("learning_document_permissions")
-      .upsert(
-        {
-          document_id: documentId,
-          user_email: normalizedEmail,
-          role,
-          created_by: user.id,
-        },
-        {
-          onConflict: "document_id,user_email",
-        },
-      );
+    const { error: permissionError } = await supabase.from("learning_document_permissions").upsert(
+      {
+        document_id: documentId,
+        user_email: normalizedEmail,
+        role,
+        created_by: user.id,
+      },
+      {
+        onConflict: "document_id,user_email",
+      },
+    );
 
     if (permissionError) {
       return {
@@ -108,10 +106,7 @@ export async function shareLearningDocumentByEmailAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while sharing document.",
+      message: error instanceof Error ? error.message : "Unexpected error while sharing document.",
     };
   }
 }

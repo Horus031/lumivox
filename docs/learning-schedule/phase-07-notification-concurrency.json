@@ -9,14 +9,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -33,14 +28,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -57,14 +47,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -81,14 +66,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -105,14 +85,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -129,14 +104,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -153,14 +123,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -177,14 +142,9 @@
       "blocker": {
         "waiter": 717,
         "blocker": 716,
-        "observed": [
-          716
-        ]
+        "observed": [716]
       },
-      "states": [
-        "00000",
-        "00000"
-      ],
+      "states": ["00000", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",
@@ -201,23 +161,15 @@
         {
           "waiter": 717,
           "blocker": 718,
-          "observed": [
-            718
-          ]
+          "observed": [718]
         },
         {
           "waiter": 716,
           "blocker": 718,
-          "observed": [
-            718,
-            717
-          ]
+          "observed": [718, 717]
         }
       ],
-      "states": [
-        "55P03",
-        "00000"
-      ],
+      "states": ["55P03", "00000"],
       "final": {
         "enabled": false,
         "sessionStart": "2030-01-08T18:00:00+00:00",

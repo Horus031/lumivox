@@ -96,9 +96,7 @@ export async function getStudyRoomPageData(roomId: string) {
     .maybeSingle();
 
   if (error) {
-    throw new Error(
-      `Failed to load study room membership: ${error.message}`,
-    );
+    throw new Error(`Failed to load study room membership: ${error.message}`);
   }
 
   if (!data?.study_rooms) {

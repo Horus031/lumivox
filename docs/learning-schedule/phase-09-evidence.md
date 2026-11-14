@@ -20,20 +20,20 @@
 
 ### Executed acceptance
 
-| Case | Actual result |
-| --- | --- |
-| FA-01 | **PASS**, matching Task/owner link for Legacy and Focus V2, stable attribution ID. |
-| FA-02 | **PASS**, different Task and null Task rejected (**22023**); composite FK also prevents linked Focus Task reassignment (**23503**). |
-| FA-03 | **PASS**, both cross-owner directions rejected; direct privileged cross-owner insert violates composite FK (**23503**). Actual authenticated local HTTP owner B link denied (**22023**) and read returns zero rows. |
-| FA-04 | **PASS**, anonymous RPC and private table read denied (**42501**); authenticated direct deletion denied too. |
-| FA-05 | **PASS**, exact retry returns same ID and entire persisted row, including timestamps/source, remains identical. Actual local HTTP replay included. |
-| FA-06 | **PASS**, same Focus/other valid Study occurrence conflicts (**23505**), exactly one persisted link. |
-| FA-07 | **PASS**, cancelled and completed Study sessions reject new attribution; terminal Focus cannot receive a new retrospective link. |
-| FA-08 | **PASS**, actual `ls_reschedule_session` preserves Session and attribution ID. |
-| FA-09 | **PASS**, actual `ls_revise_schedule` cancels prior scheduled occurrences but retains all three prior links/Focus records. Exact historical retry still succeeds, including after Task completion. |
+| Case  | Actual result                                                                                                                                                                                                                                                             |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FA-01 | **PASS**, matching Task/owner link for Legacy and Focus V2, stable attribution ID.                                                                                                                                                                                        |
+| FA-02 | **PASS**, different Task and null Task rejected (**22023**); composite FK also prevents linked Focus Task reassignment (**23503**).                                                                                                                                       |
+| FA-03 | **PASS**, both cross-owner directions rejected; direct privileged cross-owner insert violates composite FK (**23503**). Actual authenticated local HTTP owner B link denied (**22023**) and read returns zero rows.                                                       |
+| FA-04 | **PASS**, anonymous RPC and private table read denied (**42501**); authenticated direct deletion denied too.                                                                                                                                                              |
+| FA-05 | **PASS**, exact retry returns same ID and entire persisted row, including timestamps/source, remains identical. Actual local HTTP replay included.                                                                                                                        |
+| FA-06 | **PASS**, same Focus/other valid Study occurrence conflicts (**23505**), exactly one persisted link.                                                                                                                                                                      |
+| FA-07 | **PASS**, cancelled and completed Study sessions reject new attribution; terminal Focus cannot receive a new retrospective link.                                                                                                                                          |
+| FA-08 | **PASS**, actual `ls_reschedule_session` preserves Session and attribution ID.                                                                                                                                                                                            |
+| FA-09 | **PASS**, actual `ls_revise_schedule` cancels prior scheduled occurrences but retains all three prior links/Focus records. Exact historical retry still succeeds, including after Task completion.                                                                        |
 | FA-10 | **PASS**, actual V2 cancel and complete lifecycle RPCs leave Attendance unchanged; cancelled V2 keeps persisted interrupted focus seconds, Legacy cancelled effort is not overwritten to zero. Task completion does not turn the old cancelled occurrence into completed. |
-| FA-11 | **PASS**, real PostgreSQL concurrency and rollback behavior below. |
-| FA-12 | **PASS**, final clean replay of **91 migrations**, then full DB regression. |
+| FA-11 | **PASS**, real PostgreSQL concurrency and rollback behavior below.                                                                                                                                                                                                        |
+| FA-12 | **PASS**, final clean replay of **91 migrations**, then full DB regression.                                                                                                                                                                                               |
 
 - **pgTAP: 38 new assertions PASS** in `supabase/tests/learning_schedule_focus_attribution.sql`. Includes RLS, FK enforcement, idempotency, actual reschedule/revise/V2 lifecycle integration, terminal-state rejection and physical Task delete compatibility. All fixtures rolled back.
 - **Concurrency: 12 case executions**, four orders/scenarios × three repetitions: same-pair replay; conflicting Study IDs; first insert rolled back; Focus row busy then exact retry. **9 blockers observed with `pg_blocking_pids()`** for waiting cases. Busy-Focus cases returned **55P03 in 1–2 ms**, with zero inserted rows, then succeeded after the lock was released; those NOWAIT cases intentionally do not require a wait/blocker.
@@ -67,17 +67,17 @@ node node_modules/typescript/bin/tsc --noEmit --incremental false --pretty false
 node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts run build
 ```
 
-| Gate | Actual result |
-| --- | --- |
-| Final clean replay | **91 migrations PASS** |
-| Full pgTAP | **919 assertions PASS / 33 files** reported; one existing fixture-only concurrency entry intentionally skipped; baseline 881 retained |
-| Attribution Server Actions | **16 PASS / 1 file / 5.66s** |
-| Full Vitest | **1037 PASS / 26 skipped**, **89 files passed / 5 skipped (94)**, **180.69s**, start **02:23:34 UTC+7**, Nov 7 |
-| ESLint | **PASS**, zero errors; one existing `use-focus-v2-audio.ts:104` missing-`projection` dependency warning |
-| TypeScript | **PASS**, standalone `--noEmit --incremental false --pretty false` and actual build typecheck |
-| Production build | **PASS**, Next **16.2.6**, compile **14.7s**, TypeScript **25.9s**, **105 pages / 810ms** |
-| Generated types | **PASS**, final local schema with both `public` and `graphql_public`; contents/exit checked before replacing output |
-| Security advisors | One pre-existing `public.set_updated_at` mutable-search-path WARN; no new attribution findings |
+| Gate                       | Actual result                                                                                                                         |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Final clean replay         | **91 migrations PASS**                                                                                                                |
+| Full pgTAP                 | **919 assertions PASS / 33 files** reported; one existing fixture-only concurrency entry intentionally skipped; baseline 881 retained |
+| Attribution Server Actions | **16 PASS / 1 file / 5.66s**                                                                                                          |
+| Full Vitest                | **1037 PASS / 26 skipped**, **89 files passed / 5 skipped (94)**, **180.69s**, start **02:23:34 UTC+7**, Nov 7                        |
+| ESLint                     | **PASS**, zero errors; one existing `use-focus-v2-audio.ts:104` missing-`projection` dependency warning                               |
+| TypeScript                 | **PASS**, standalone `--noEmit --incremental false --pretty false` and actual build typecheck                                         |
+| Production build           | **PASS**, Next **16.2.6**, compile **14.7s**, TypeScript **25.9s**, **105 pages / 810ms**                                             |
+| Generated types            | **PASS**, final local schema with both `public` and `graphql_public`; contents/exit checked before replacing output                   |
+| Security advisors          | One pre-existing `public.set_updated_at` mutable-search-path WARN; no new attribution findings                                        |
 
 - Build used local Supabase process env and reminder flags OFF. `.env.local`, timer/Render code and dependencies unchanged; `.next/dev` retained. `--ignore-scripts` skipped prebuild cleanup only; actual `next build` ran.
 - **Corrected failure:** initial composite FK implementation obstructed physical Task deletion because existing Focus rows use `SET NULL`. Added narrowly scoped BEFORE-DELETE cleanup in the new migration and an indexed Task lookup, then clean-replayed and reran full pgTAP plus concurrency. Both hard-delete regression assertions now pass; logical cancellation/revision history remains preserved.
@@ -100,14 +100,14 @@ node "C:\Program Files\nodejs\node_modules\npm\bin\npm-cli.js" --ignore-scripts 
 
 ### PostgreSQL and FastAPI execution
 
-| Case | Actual result |
-| --- | --- |
+| Case                       | Actual result                                                                                                                                                                                                                                                                                                                    |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | FL-01, FL-02, FL-03, FL-04 | **PASS**. Launch uses the owning Study Session's Task and returns the attributed Focus ID. Cross-owner returns SQLSTATE `PT403` and HTTP 403. FastAPI rejects a supplied `task_id` with 422. A completed Study Session, a launch too early and a launch after scheduled end return `PT422`. An invalid internal key returns 401. |
-| FL-05 | **PASS**. A separate PostgreSQL transaction held the Task close uncommitted. The launch waited, with a blocker observed via `pg_blocking_pids()`. Once Task close committed, the launch returned HTTP 410 and zero Focus rows persisted. |
-| FL-06, FL-07, FL-08 | **PASS**. Exact retry returns the same ID. Changed Study ID or Pomodoro settings with the same key returns `PT409`. Three overlapping HTTP requests produced 200/200/423, one original launch, one replay and one persisted launch record. A Task lock wait was observed. |
-| FL-09 | **PASS**. Injected attribution INSERT failure `P0001` left zero Focus, plan, segment and launch rows. Removing the fault let the same key create Focus successfully. |
-| FL-11, FL-12 | **PASS**. A new key with active Focus returns `PT423`. In a separate ordinary-create race, the Study launch waited on a Task lock while ordinary Focus created successfully with HTTP 200. The Study request then returned 423 and the ordinary Focus had no attribution. |
-| FL-13, FL-16 | **PASS**. An attributed Focus completed through the existing V2 transition RPC and left the Study Session scheduled with zero Attendance events. The FastAPI suite also exercised cancel for both attributed and ordinary Focus. |
+| FL-05                      | **PASS**. A separate PostgreSQL transaction held the Task close uncommitted. The launch waited, with a blocker observed via `pg_blocking_pids()`. Once Task close committed, the launch returned HTTP 410 and zero Focus rows persisted.                                                                                         |
+| FL-06, FL-07, FL-08        | **PASS**. Exact retry returns the same ID. Changed Study ID or Pomodoro settings with the same key returns `PT409`. Three overlapping HTTP requests produced 200/200/423, one original launch, one replay and one persisted launch record. A Task lock wait was observed.                                                        |
+| FL-09                      | **PASS**. Injected attribution INSERT failure `P0001` left zero Focus, plan, segment and launch rows. Removing the fault let the same key create Focus successfully.                                                                                                                                                             |
+| FL-11, FL-12               | **PASS**. A new key with active Focus returns `PT423`. In a separate ordinary-create race, the Study launch waited on a Task lock while ordinary Focus created successfully with HTTP 200. The Study request then returned 423 and the ordinary Focus had no attribution.                                                        |
+| FL-13, FL-16               | **PASS**. An attributed Focus completed through the existing V2 transition RPC and left the Study Session scheduled with zero Attendance events. The FastAPI suite also exercised cancel for both attributed and ordinary Focus.                                                                                                 |
 
 ### Browser E2E
 
@@ -140,16 +140,16 @@ node node_modules/@playwright/test/cli.js test tests/study-focus-launch.spec.ts 
 
 For Playwright, use `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119`, `STUDY_FOCUS_TEST_BACKEND=http://127.0.0.1:8096`, `STUDY_FOCUS_TEST_PROXY_PORT=8097`, the local `LEARNING_SCHEDULE_TEST_URL` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`, and the same test-only `AI_INTERNAL_API_KEY` as both servers. Configure Next.js with `AI_API_BASE_URL=http://127.0.0.1:8097` for the response-loss fixture. Build skipped the npm prebuild cleanup and ran the actual Next.js build.
 
-| Gate | Actual result |
-| --- | --- |
-| Clean migration replay / types | **PASS**, 92 applied migrations and regenerated local TypeScript types |
-| Full pgTAP | **PASS**, 948 assertions across 34 entries, including 29 new Step 9B assertions. Existing fixture-only concurrency entry intentionally skipped. |
-| FastAPI Focus V2 regression | **PASS**, 8 tests |
-| Full Vitest | **PASS**, 1038 passed / 26 skipped, 89 files passed / 5 skipped, 201.37s |
-| Lint | **PASS**, zero errors and one existing missing-`projection` dependency warning in `use-focus-v2-audio.ts` |
-| TypeScript | **PASS**, standalone typecheck and Next.js build typecheck |
-| Production build | **PASS**, Next.js 16.2.6, compiled in 14.1s, generated 105 pages |
-| Security advisors | Existing `public.set_updated_at` mutable search-path warning. No new findings. [Supabase Data API access controls](https://supabase.com/docs/guides/api/securing-your-api) |
+| Gate                           | Actual result                                                                                                                                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Clean migration replay / types | **PASS**, 92 applied migrations and regenerated local TypeScript types                                                                                                     |
+| Full pgTAP                     | **PASS**, 948 assertions across 34 entries, including 29 new Step 9B assertions. Existing fixture-only concurrency entry intentionally skipped.                            |
+| FastAPI Focus V2 regression    | **PASS**, 8 tests                                                                                                                                                          |
+| Full Vitest                    | **PASS**, 1038 passed / 26 skipped, 89 files passed / 5 skipped, 201.37s                                                                                                   |
+| Lint                           | **PASS**, zero errors and one existing missing-`projection` dependency warning in `use-focus-v2-audio.ts`                                                                  |
+| TypeScript                     | **PASS**, standalone typecheck and Next.js build typecheck                                                                                                                 |
+| Production build               | **PASS**, Next.js 16.2.6, compiled in 14.1s, generated 105 pages                                                                                                           |
+| Security advisors              | Existing `public.set_updated_at` mutable search-path warning. No new findings. [Supabase Data API access controls](https://supabase.com/docs/guides/api/securing-your-api) |
 
 The initial standalone typecheck found an untyped Playwright Supabase client. Typing it with the generated `Database` fixed the fixture inserts. Standalone TypeScript and the production build typecheck passed afterward.
 
@@ -172,16 +172,16 @@ Final database read showed **92 applied migrations** and **zero** Auth users, Ta
 
 ### Acceptance matrix
 
-| Case | Executed coverage |
-| --- | --- |
-| FE-01–FE-02 | Unit and local browser verify complete zero without attribution and seven persisted Legacy minutes. |
-| FE-03–FE-07 | Unit and real `focus_v2_create_session` / `focus_v2_transition` RPCs cover completed Focus rounds, a completed break, interrupted Focus, a pending round and aggregation across multiple attributed Focus sessions. |
-| FE-08–FE-09 | Pure model rejects duplicate Focus IDs within one Study or across two Studies. |
-| FE-10 | Local authenticated PostgREST queries from another owner return no Study, attribution or Focus parent/child records. |
-| FE-11–FE-13 | Unit tests cover missing parent/segment, owner/Task mismatch, changing links, a short page and the cap. The browser suite also reads 201 links from local PostgREST and injects one missing segment to verify the unavailable state while Attendance remains visible. |
+| Case        | Executed coverage                                                                                                                                                                                                                                                            |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FE-01–FE-02 | Unit and local browser verify complete zero without attribution and seven persisted Legacy minutes.                                                                                                                                                                          |
+| FE-03–FE-07 | Unit and real `focus_v2_create_session` / `focus_v2_transition` RPCs cover completed Focus rounds, a completed break, interrupted Focus, a pending round and aggregation across multiple attributed Focus sessions.                                                          |
+| FE-08–FE-09 | Pure model rejects duplicate Focus IDs within one Study or across two Studies.                                                                                                                                                                                               |
+| FE-10       | Local authenticated PostgREST queries from another owner return no Study, attribution or Focus parent/child records.                                                                                                                                                         |
+| FE-11–FE-13 | Unit tests cover missing parent/segment, owner/Task mismatch, changing links, a short page and the cap. The browser suite also reads 201 links from local PostgREST and injects one missing segment to verify the unavailable state while Attendance remains visible.        |
 | FE-14–FE-16 | Real reschedule keeps the original Study ID and effort. Real revision preserves effort on the cancelled occurrence and leaves the replacement at zero before adding its own fixtures. Focus complete/cancel leaves the original Study scheduled with zero Attendance events. |
-| FE-17 | Chromium uses EN/VI at 390 px and keyboard expansion of the planned duration. |
-| FE-18 | Full pgTAP and Vitest plus FastAPI Focus V2 regression and the local Chromium integration run. |
+| FE-17       | Chromium uses EN/VI at 390 px and keyboard expansion of the planned duration.                                                                                                                                                                                                |
+| FE-18       | Full pgTAP and Vitest plus FastAPI Focus V2 regression and the local Chromium integration run.                                                                                                                                                                               |
 
 ### Commands and results
 
@@ -204,16 +204,16 @@ node node_modules/@playwright/test/cli.js test tests/study-focus-effort.spec.ts 
 
 For Playwright, set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119` and provide the verified loopback `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`. The harness requires an empty disposable local database and checks both operational gates before inserting fixtures.
 
-| Gate | Actual result |
-| --- | --- |
-| Targeted Vitest | **PASS**, 24 tests in 3 files |
-| Full Vitest | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 216.85s |
-| Full pgTAP | **PASS**, 948 assertions across 34 entries, including one existing fixture-only skip |
-| FastAPI Focus V2 regression | **PASS**, 8 tests |
-| Playwright Chromium | **PASS**, 1 end-to-end scenario, 8.3s total. Recorded Focus displayed 18 minutes from 1,111 persisted seconds (420 Legacy + 600 completed Pomodoro + 91 interrupted). The 60-second completed break was excluded. |
-| ESLint | **PASS**, zero errors and one existing missing-`projection` dependency warning |
-| TypeScript | **PASS**, standalone typecheck and Next.js build typecheck |
-| Production build | **PASS**, Next.js 16.2.6, 105 pages. Actual `next build` ran with npm prebuild cleanup skipped. |
+| Gate                        | Actual result                                                                                                                                                                                                     |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Targeted Vitest             | **PASS**, 24 tests in 3 files                                                                                                                                                                                     |
+| Full Vitest                 | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 216.85s                                                                                                                                         |
+| Full pgTAP                  | **PASS**, 948 assertions across 34 entries, including one existing fixture-only skip                                                                                                                              |
+| FastAPI Focus V2 regression | **PASS**, 8 tests                                                                                                                                                                                                 |
+| Playwright Chromium         | **PASS**, 1 end-to-end scenario, 8.3s total. Recorded Focus displayed 18 minutes from 1,111 persisted seconds (420 Legacy + 600 completed Pomodoro + 91 interrupted). The 60-second completed break was excluded. |
+| ESLint                      | **PASS**, zero errors and one existing missing-`projection` dependency warning                                                                                                                                    |
+| TypeScript                  | **PASS**, standalone typecheck and Next.js build typecheck                                                                                                                                                        |
+| Production build            | **PASS**, Next.js 16.2.6, 105 pages. Actual `next build` ran with npm prebuild cleanup skipped.                                                                                                                   |
 
 The first Chromium run reached the missing-segment UI, then failed because the test looked for “Attendance Rate” while the page renders “Attendance”. The locator was corrected to match the existing label.
 
@@ -233,17 +233,17 @@ Final database read showed **92 applied migrations**, zero fixture users, Tasks,
 
 ### Acceptance matrix
 
-| Cases | Actual result |
-| --- | --- |
-| E2E-01–E2E-02 | **PASS**. Browser created a Task and Schedule, opened Pomodoro setup from Today, and launched through the real Next.js → FastAPI → Supabase path. Database assertions verified Task/Study IDs, launch record, plan and segments. After the first Focus completed, Study remained `scheduled` with zero Attendance events. |
-| E2E-03–E2E-06 | **PASS**. Browser completed a two-round Focus with a break, cancelled a second Focus during a round, and completed a third. The persisted sum was **991 Focus seconds**, including **91 interrupted seconds**, plus **60 excluded break seconds**. Study Plan showed **16 minutes** after manual completion, with three attributed Focus IDs and one Attendance event. |
-| E2E-07–E2E-08 | **PASS**. Real reschedule preserved the Study ID and effort. Real revision kept 18 recorded minutes on the cancelled historical occurrence and initially displayed zero on the replacement. |
-| E2E-09 | **PASS**. Task completion while Focus was active closed the schedule. Focus remained `ongoing` and linked to the still-`scheduled` Study occurrence whose scheduled start had passed. That occurrence had no Attendance events. The future occurrence became `cancelled` with reason `task_closed` and one cancellation audit. |
-| E2E-10–E2E-11 | **PASS**. Cross-owner launch returned HTTP 403. The other owner could not read Study, attribution or Focus records through PostgREST. Ordinary Legacy creation through the authenticated Focus insert boundary and ordinary V2 creation produced no attribution. |
-| E2E-12, E2E-17 | **PASS**. The proxy withheld the response after FastAPI returned HTTP 200. Next.js timed out and the browser showed uncertainty. A new browser context with no saved request key reached the existing active timer without issuing a launch. Retry in the original tab sent the identical payload and got the original Focus ID with `replay: true`. |
-| E2E-13–E2E-15 | **PASS**. Exact opening created Focus. One millisecond early and exact scheduled end both returned SQLSTATE `PT422`. The same key succeeded at opening after both denied attempts. |
-| E2E-16 | **PASS**. Two independently authenticated Chromium contexts submitted Start from setup. One opened the timer and the other received the active Focus conflict. Database verified one active Focus, one launch record and one attribution for the winner. |
-| E2E-18 | **PASS**. A separate database connection held the Study row. The browser submitted manual Attendance, and `pg_blocking_pids()` confirmed it waited on that connection. Focus completed through its existing browser timer while Study remained scheduled and event count stayed zero. After release, Study became completed with one manual `completed` event. |
+| Cases          | Actual result                                                                                                                                                                                                                                                                                                                                                          |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E2E-01–E2E-02  | **PASS**. Browser created a Task and Schedule, opened Pomodoro setup from Today, and launched through the real Next.js → FastAPI → Supabase path. Database assertions verified Task/Study IDs, launch record, plan and segments. After the first Focus completed, Study remained `scheduled` with zero Attendance events.                                              |
+| E2E-03–E2E-06  | **PASS**. Browser completed a two-round Focus with a break, cancelled a second Focus during a round, and completed a third. The persisted sum was **991 Focus seconds**, including **91 interrupted seconds**, plus **60 excluded break seconds**. Study Plan showed **16 minutes** after manual completion, with three attributed Focus IDs and one Attendance event. |
+| E2E-07–E2E-08  | **PASS**. Real reschedule preserved the Study ID and effort. Real revision kept 18 recorded minutes on the cancelled historical occurrence and initially displayed zero on the replacement.                                                                                                                                                                            |
+| E2E-09         | **PASS**. Task completion while Focus was active closed the schedule. Focus remained `ongoing` and linked to the still-`scheduled` Study occurrence whose scheduled start had passed. That occurrence had no Attendance events. The future occurrence became `cancelled` with reason `task_closed` and one cancellation audit.                                         |
+| E2E-10–E2E-11  | **PASS**. Cross-owner launch returned HTTP 403. The other owner could not read Study, attribution or Focus records through PostgREST. Ordinary Legacy creation through the authenticated Focus insert boundary and ordinary V2 creation produced no attribution.                                                                                                       |
+| E2E-12, E2E-17 | **PASS**. The proxy withheld the response after FastAPI returned HTTP 200. Next.js timed out and the browser showed uncertainty. A new browser context with no saved request key reached the existing active timer without issuing a launch. Retry in the original tab sent the identical payload and got the original Focus ID with `replay: true`.                   |
+| E2E-13–E2E-15  | **PASS**. Exact opening created Focus. One millisecond early and exact scheduled end both returned SQLSTATE `PT422`. The same key succeeded at opening after both denied attempts.                                                                                                                                                                                     |
+| E2E-16         | **PASS**. Two independently authenticated Chromium contexts submitted Start from setup. One opened the timer and the other received the active Focus conflict. Database verified one active Focus, one launch record and one attribution for the winner.                                                                                                               |
+| E2E-18         | **PASS**. A separate database connection held the Study row. The browser submitted manual Attendance, and `pg_blocking_pids()` confirmed it waited on that connection. Focus completed through its existing browser timer while Study remained scheduled and event count stayed zero. After release, Study became completed with one manual `completed` event.         |
 
 The combined run exercised four lock-wait scenarios with a blocker observed in each. The Task-close launch race returned HTTP 410. The concurrent launch/replay group returned 200/200/423. The ordinary-versus-attributed creation race returned 200/423. The Attendance-versus-Focus case verified both commits from persisted state. Browser actions report HTTP/UI outcomes and do not expose raw SQLSTATEs.
 
@@ -271,16 +271,16 @@ node node_modules/@playwright/test/cli.js test tests/study-focus-launch.spec.ts 
 
 The Playwright suites use the local `LEARNING_SCHEDULE_TEST_URL`, `LEARNING_SCHEDULE_TEST_ANON_KEY` and `LEARNING_SCHEDULE_TEST_SERVICE_KEY`. Set `PLAYWRIGHT_BASE_URL=http://127.0.0.1:3119`, `STUDY_FOCUS_TEST_BACKEND=http://127.0.0.1:8096`, `STUDY_FOCUS_TEST_PROXY_PORT=8097` and the same test-only `AI_INTERNAL_API_KEY` as both servers. Next.js uses `AI_API_BASE_URL=http://127.0.0.1:8097`.
 
-| Gate | Actual result |
-| --- | --- |
-| Schema | 92 migrations. No migration or generated types change for 9D. |
-| Full pgTAP | **PASS**, 951 assertions across 34 entries, including three new exact-window assertions. Existing fixture-only entry skipped. |
-| Full Vitest | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 195.63s |
-| FastAPI Focus V2 regression | **PASS**, 8 tests |
-| ESLint | **PASS**, zero errors, existing missing-`projection` dependency warning |
-| TypeScript | **PASS**, standalone and build typecheck |
-| Next.js production build | **PASS**, 16.2.6, compiled in 17.5s. The npm prebuild cleanup was skipped. |
-| Combined Playwright Chromium | **PASS**, 5 tests, 1.2 minutes |
+| Gate                         | Actual result                                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Schema                       | 92 migrations. No migration or generated types change for 9D.                                                                 |
+| Full pgTAP                   | **PASS**, 951 assertions across 34 entries, including three new exact-window assertions. Existing fixture-only entry skipped. |
+| Full Vitest                  | **PASS**, 1,057 passed / 26 skipped, 91 files passed / 5 skipped, 195.63s                                                     |
+| FastAPI Focus V2 regression  | **PASS**, 8 tests                                                                                                             |
+| ESLint                       | **PASS**, zero errors, existing missing-`projection` dependency warning                                                       |
+| TypeScript                   | **PASS**, standalone and build typecheck                                                                                      |
+| Next.js production build     | **PASS**, 16.2.6, compiled in 17.5s. The npm prebuild cleanup was skipped.                                                    |
+| Combined Playwright Chromium | **PASS**, 5 tests, 1.2 minutes                                                                                                |
 
 The initial browser attempts timed out while locating the new Task in a goal-filtered board and while looking for a standard dialog for the destructive Focus confirmation. The harness now verifies the Task insert and reopens the all-Tasks board, and locates the confirmation by its actual `alertdialog` role. The full combined suite passed afterward.
 

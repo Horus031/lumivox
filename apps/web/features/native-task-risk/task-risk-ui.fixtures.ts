@@ -1,13 +1,6 @@
+import type { NativeTaskRiskAlert, NativeTaskRiskBand } from "./native-task-risk.types";
 
-import type {
-  NativeTaskRiskAlert,
-  NativeTaskRiskBand,
-} from "./native-task-risk.types";
-
-import type {
-  TaskRiskRecoveryUiAction,
-  TaskRiskViewState,
-} from "./task-risk-presentation.types";
+import type { TaskRiskRecoveryUiAction, TaskRiskViewState } from "./task-risk-presentation.types";
 
 const BASE_ALERT: NativeTaskRiskAlert = {
   prediction_id: "00000000-0000-4000-8000-000000000101",
@@ -25,14 +18,12 @@ const BASE_ALERT: NativeTaskRiskAlert = {
   reason_summaries: [
     {
       title: "Deadline is approaching",
-      description:
-        "The current deadline leaves limited time for the estimated workload.",
+      description: "The current deadline leaves limited time for the estimated workload.",
       severity: "warning",
     },
     {
       title: "Recent focus activity is limited",
-      description:
-        "Recent study activity may not be sufficient for the remaining work.",
+      description: "Recent study activity may not be sufficient for the remaining work.",
       severity: "warning",
     },
   ],
@@ -50,10 +41,7 @@ const BASE_ALERT: NativeTaskRiskAlert = {
   top_attributions: [],
 };
 
-function readyState(
-  band: NativeTaskRiskBand,
-  probability: number,
-): TaskRiskViewState {
+function readyState(band: NativeTaskRiskBand, probability: number): TaskRiskViewState {
   return {
     status: "ready",
     alert: {
@@ -61,8 +49,7 @@ function readyState(
       risk_band: band,
       risk_probability: probability,
       risk_score: Math.round(probability * 100),
-      predicted_label:
-        probability >= BASE_ALERT.decision_threshold,
+      predicted_label: probability >= BASE_ALERT.decision_threshold,
     },
   };
 }

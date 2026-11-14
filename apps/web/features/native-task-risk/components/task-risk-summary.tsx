@@ -27,9 +27,7 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
         aria-label={t("summary.title")}
         className="min-w-0 rounded-lg border border-border bg-card p-card"
       >
-        <h3 className="text-section font-semibold text-foreground">
-          {t("summary.title")}
-        </h3>
+        <h3 className="text-section font-semibold text-foreground">{t("summary.title")}</h3>
 
         <p role="status" className="mt-2 text-body text-secondary-text">
           {message}
@@ -45,9 +43,7 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
     alert.risk_probability >= 0 &&
     alert.risk_probability <= 1;
 
-  const probability = probabilityIsValid
-    ? Math.round(alert.risk_probability * 100)
-    : null;
+  const probability = probabilityIsValid ? Math.round(alert.risk_probability * 100) : null;
 
   const predictionDate = new Date(alert.predicted_at);
 
@@ -69,13 +65,9 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-section font-semibold text-foreground">
-            {t("summary.title")}
-          </h3>
+          <h3 className="text-section font-semibold text-foreground">{t("summary.title")}</h3>
 
-          <p className="mt-1 text-caption text-muted-foreground">
-            {t("summary.subtitle")}
-          </p>
+          <p className="mt-1 text-caption text-muted-foreground">{t("summary.subtitle")}</p>
         </div>
 
         {alert.risk_band === "low" ? (
@@ -89,23 +81,17 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
 
       {probability !== null ? (
         <div className="mt-4">
-          <p className="text-caption text-muted-foreground">
-            {t("summary.estimateLabel")}
-          </p>
+          <p className="text-caption text-muted-foreground">{t("summary.estimateLabel")}</p>
 
           <p className="mt-1 text-metric font-semibold tabular-nums text-foreground">
             {probability}%
           </p>
         </div>
       ) : (
-        <p className="mt-4 text-body text-secondary-text">
-          {t("summary.invalidEstimate")}
-        </p>
+        <p className="mt-4 text-body text-secondary-text">{t("summary.invalidEstimate")}</p>
       )}
 
-      <p className="mt-2 text-body text-secondary-text">
-        {t("summary.disclaimer")}
-      </p>
+      <p className="mt-2 text-body text-secondary-text">{t("summary.disclaimer")}</p>
 
       <div className="mt-3 flex flex-wrap gap-3 text-caption text-muted-foreground">
         {alert.days_until_due !== null && alert.days_until_due >= 0 ? (
@@ -126,14 +112,10 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
       </div>
 
       <div className="mt-4 border-t border-border pt-4">
-        <h4 className="text-label font-semibold text-foreground">
-          {t("summary.reasonsTitle")}
-        </h4>
+        <h4 className="text-label font-semibold text-foreground">{t("summary.reasonsTitle")}</h4>
 
         {reasons.length === 0 ? (
-          <p className="mt-2 text-body text-muted-foreground">
-            {t("summary.noReasons")}
-          </p>
+          <p className="mt-2 text-body text-muted-foreground">{t("summary.noReasons")}</p>
         ) : (
           <div className="mt-3 space-y-3">
             {reasons.map((reason, index) => (
@@ -141,13 +123,9 @@ export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
                 key={`${index}-${reason.title}`}
                 className="rounded-lg border border-border bg-muted/40 p-3"
               >
-                <p className="text-body font-medium text-foreground">
-                  {reason.title}
-                </p>
+                <p className="text-body font-medium text-foreground">{reason.title}</p>
 
-                <p className="mt-1 text-body text-secondary-text">
-                  {reason.description}
-                </p>
+                <p className="mt-1 text-body text-secondary-text">{reason.description}</p>
               </div>
             ))}
           </div>

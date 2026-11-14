@@ -218,9 +218,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "immutablePayload": true,
       "mockSubmissions": 1,
@@ -238,9 +236,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 0,
       "final": {
@@ -257,9 +253,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 1,
       "final": {
@@ -289,9 +283,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "immutablePayload": true,
       "mockSubmissions": 1,
@@ -309,9 +301,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 0,
       "final": {
@@ -328,9 +318,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 1,
       "final": {
@@ -360,9 +348,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "immutablePayload": true,
       "mockSubmissions": 1,
@@ -380,9 +366,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 0,
       "final": {
@@ -399,9 +383,7 @@
       "blocker": {
         "waiter": 1387,
         "blocker": 1388,
-        "observed": [
-          1388
-        ]
+        "observed": [1388]
       },
       "mockSubmissions": 1,
       "final": {

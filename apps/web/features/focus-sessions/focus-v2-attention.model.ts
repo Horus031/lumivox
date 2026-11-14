@@ -7,8 +7,11 @@ export type FocusV2ObservedPhase = {
 };
 
 export type FocusV2NotificationKind =
-  | "focusStarted" | "breakStarted" | "focusFinished"
-  | "breakFinished" | "sessionCompleted";
+  | "focusStarted"
+  | "breakStarted"
+  | "focusFinished"
+  | "breakFinished"
+  | "sessionCompleted";
 
 export function observeFocusV2Phase(projection: FocusV2Projection): FocusV2ObservedPhase {
   return {

@@ -14,9 +14,7 @@ type TaskReviewFlashcardsProps = {
   flashcards: TaskReviewFlashcard[];
 };
 
-export function TaskReviewFlashcards({
-  flashcards,
-}: TaskReviewFlashcardsProps) {
+export function TaskReviewFlashcards({ flashcards }: TaskReviewFlashcardsProps) {
   const t = useTranslations("taskReview.flashcards");
 
   const [index, setIndex] = useState(0);
@@ -72,10 +70,10 @@ export function TaskReviewFlashcards({
           size="icon"
           variant="ghost"
           onClick={() => setFlipped(false)}
-          aria-label={t("reset")} title={t("reset")}
+          aria-label={t("reset")}
+          title={t("reset")}
         >
           <RotateCcw />
-
         </Button>
       </div>
 
@@ -94,17 +92,28 @@ export function TaskReviewFlashcards({
         <span className="mt-3 min-h-0 overflow-y-auto text-section font-medium text-foreground [overflow-wrap:anywhere]">
           {flipped ? card.back : card.front}
         </span>
-
       </button>
 
       <div className="flex items-center justify-between gap-3">
-        <Button type="button" size="icon" variant="outline" onClick={() => move(-1)} aria-label={t("previous")} title={t("previous")}>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={() => move(-1)}
+          aria-label={t("previous")}
+          title={t("previous")}
+        >
           <ChevronLeft />
-
         </Button>
 
-        <Button type="button" size="icon" variant="outline" onClick={() => move(1)} aria-label={t("next")} title={t("next")}>
-
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={() => move(1)}
+          aria-label={t("next")}
+          title={t("next")}
+        >
           <ChevronRight />
         </Button>
       </div>

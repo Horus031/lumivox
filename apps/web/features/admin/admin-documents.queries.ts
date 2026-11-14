@@ -9,15 +9,12 @@ export async function searchAdminLearningDocuments({
 }) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_search_learning_documents",
-    {
-      p_query: query,
-      p_status: status,
-      p_limit: 50,
-      p_offset: 0,
-    }
-  );
+  const { data, error } = await supabase.rpc("admin_search_learning_documents", {
+    p_query: query,
+    p_status: status,
+    p_limit: 50,
+    p_offset: 0,
+  });
 
   if (error) {
     throw new Error(`Failed to search learning documents: ${error.message}`);
@@ -29,12 +26,9 @@ export async function searchAdminLearningDocuments({
 export async function getAdminLearningDocumentDetail(documentId: string) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_get_learning_document_detail",
-    {
-      p_document_id: documentId,
-    }
-  );
+  const { data, error } = await supabase.rpc("admin_get_learning_document_detail", {
+    p_document_id: documentId,
+  });
 
   if (error) {
     throw new Error(`Failed to fetch document detail: ${error.message}`);

@@ -8,9 +8,7 @@ type RoadmapEditPageProps = {
   }>;
 };
 
-export default async function RoadmapEditPage({
-  params,
-}: RoadmapEditPageProps) {
+export default async function RoadmapEditPage({ params }: RoadmapEditPageProps) {
   const { roadmapId } = await params;
 
   const { roadmap, nodes } = await getMyRoadmapDetail(roadmapId);

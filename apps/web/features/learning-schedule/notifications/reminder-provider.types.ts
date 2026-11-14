@@ -15,8 +15,27 @@ export type ReminderEmail = Readonly<{
 export type ReminderEmailContent = Pick<ReminderEmail, "subject" | "html" | "text">;
 export type SubmissionResult =
   | { kind: "accepted"; providerMessageId: string }
-  | { kind: "rejected"; code: "invalid_request" | "sender_not_approved" | "validation_rejected" | "configuration_rejected" | "rate_limited" | "quota_exceeded" | "idempotency_payload_mismatch"; retryable: boolean }
-  | { kind: "uncertain"; code: "transport_error" | "provider_unavailable" | "idempotency_in_flight" | "invalid_provider_response" | "provider_outcome_unknown" };
+  | {
+      kind: "rejected";
+      code:
+        | "invalid_request"
+        | "sender_not_approved"
+        | "validation_rejected"
+        | "configuration_rejected"
+        | "rate_limited"
+        | "quota_exceeded"
+        | "idempotency_payload_mismatch";
+      retryable: boolean;
+    }
+  | {
+      kind: "uncertain";
+      code:
+        | "transport_error"
+        | "provider_unavailable"
+        | "idempotency_in_flight"
+        | "invalid_provider_response"
+        | "provider_outcome_unknown";
+    };
 
 export interface EmailTransport {
   send(email: ReminderEmail): Promise<SubmissionResult>;

@@ -5,14 +5,9 @@ import { redirect, unstable_rethrow } from "next/navigation";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 
-import {
-  onboardingSchema,
-  type OnboardingInput,
-} from "./onboarding.schemas";
+import { onboardingSchema, type OnboardingInput } from "./onboarding.schemas";
 
-export async function completeOnboardingAction(
-  input: OnboardingInput
-): Promise<ActionResult> {
+export async function completeOnboardingAction(input: OnboardingInput): Promise<ActionResult> {
   const parsed = onboardingSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -70,7 +65,6 @@ export async function completeOnboardingAction(
       };
     }
 
-
     redirect("/dashboard");
   } catch (error) {
     unstable_rethrow(error);
@@ -78,9 +72,7 @@ export async function completeOnboardingAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while completing onboarding.",
+        error instanceof Error ? error.message : "Unexpected error while completing onboarding.",
     };
   }
 }

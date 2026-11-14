@@ -12,10 +12,7 @@ type NativeTaskRiskActionButtonsProps = {
   actions: NativeTaskRiskRecommendedAction[];
 };
 
-export function NativeTaskRiskActionButtons({
-  taskId,
-  actions,
-}: NativeTaskRiskActionButtonsProps) {
+export function NativeTaskRiskActionButtons({ taskId, actions }: NativeTaskRiskActionButtonsProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -53,9 +50,7 @@ export function NativeTaskRiskActionButtons({
 
         if (action.action_type === "reschedule") {
           const daysToAdd =
-            typeof action.payload.days_to_add === "number"
-              ? action.payload.days_to_add
-              : 1;
+            typeof action.payload.days_to_add === "number" ? action.payload.days_to_add : 1;
 
           return (
             <button

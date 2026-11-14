@@ -21,9 +21,11 @@ const bundled = await build({
   write: false,
 });
 const source = bundled.outputFiles[0].text;
-const { handleIngress, consumeThroughBridge } = await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
+const { handleIngress, consumeThroughBridge } = await import(
+  `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`
+);
 
-test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async t => {
+test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async (t) => {
   const requests = [];
   let limit = "allow";
   let upstream = 204;
@@ -32,17 +34,24 @@ test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async 
       if (limit === "unavailable") throw Error(canary);
       return limit === "block";
     },
-    consume: hash => consumeThroughBridge(hash, {
-      UNSUBSCRIBE_BRIDGE_ORIGIN: "https://protected.example.invalid",
-      UNSUBSCRIBE_BRIDGE_SECRET: canary,
-    }, async () => oidcCanary, async (url, init) => {
-      requests.push({ url, init });
-      return new Response(null, { status: upstream });
-    }),
+    consume: (hash) =>
+      consumeThroughBridge(
+        hash,
+        {
+          UNSUBSCRIBE_BRIDGE_ORIGIN: "https://protected.example.invalid",
+          UNSUBSCRIBE_BRIDGE_SECRET: canary,
+        },
+        async () => oidcCanary,
+        async (url, init) => {
+          requests.push({ url, init });
+          return new Response(null, { status: upstream });
+        },
+      ),
   };
   const server = createServer(async (req, res) => {
     const request = new Request(`http://127.0.0.1${req.url}`, {
-      method: req.method, headers: req.headers,
+      method: req.method,
+      headers: req.headers,
       ...(req.method === "POST" ? { body: req, duplex: "half" } : {}),
     });
     const response = await handleIngress(request, ports);
@@ -53,14 +62,25 @@ test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async 
   await once(server, "listening");
   t.after(() => server.close());
   const origin = `http://127.0.0.1:${server.address().port}`;
-  const get = path => fetch(origin + path, { redirect: "manual" });
-  const post = (capability = token) => fetch(`${origin}${path}?token=${capability}`, {
-    method: "POST", body: new URLSearchParams({ "List-Unsubscribe": "One-Click" }), redirect: "manual",
-  });
+  const get = (path) => fetch(origin + path, { redirect: "manual" });
+  const post = (capability = token) =>
+    fetch(`${origin}${path}?token=${capability}`, {
+      method: "POST",
+      body: new URLSearchParams({ "List-Unsubscribe": "One-Click" }),
+      redirect: "manual",
+    });
   assert.equal((await get(path)).status, 200);
   assert.equal((await post("invalid")).status, 400);
-  for (const route of ["/", "/en/admin", "/api/internal/study-reminders/dispatch", "/api/internal/learning-schedule/health",
-    "/api/internal/study-reminders/unsubscribe", "/handler.ts", "/package.json", path + "/"]) {
+  for (const route of [
+    "/",
+    "/en/admin",
+    "/api/internal/study-reminders/dispatch",
+    "/api/internal/learning-schedule/health",
+    "/api/internal/study-reminders/unsubscribe",
+    "/handler.ts",
+    "/package.json",
+    path + "/",
+  ]) {
     assert.equal((await get(route)).status, 404);
   }
   limit = "block";
@@ -79,7 +99,10 @@ test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async 
   assert(!result.includes(canary) && !result.includes(token) && !result.includes(oidcCanary));
   assert.equal(requests.length, 1);
   const [{ url, init }] = requests;
-  assert.equal(url.href, "https://protected.example.invalid/api/internal/study-reminders/unsubscribe");
+  assert.equal(
+    url.href,
+    "https://protected.example.invalid/api/internal/study-reminders/unsubscribe",
+  );
   assert.equal(init.redirect, "error");
   assert.equal(init.headers.Authorization, `Bearer ${canary}`);
   assert.equal(init.headers["x-vercel-trusted-oidc-idp-token"], oidcCanary);
@@ -91,10 +114,20 @@ test("isolated HTTP ingress, rate-limit decisions and secret boundaries", async 
 
 test("the Vercel entry bundles with no frontend or Supabase credential", async () => {
   const result = await build({
-    entryPoints: [fileURLToPath(new URL("unsubscribe-ingress/api/study-reminders/unsubscribe.ts", apps))],
-    platform: "node", format: "esm", bundle: true, write: false, metafile: true,
+    entryPoints: [
+      fileURLToPath(new URL("unsubscribe-ingress/api/study-reminders/unsubscribe.ts", apps)),
+    ],
+    platform: "node",
+    format: "esm",
+    bundle: true,
+    write: false,
+    metafile: true,
   });
   const output = result.outputFiles[0].text;
   assert(!output.includes(canary) && !output.includes("SUPABASE_SERVICE_ROLE_KEY"));
-  assert(!Object.keys(result.metafile.inputs).some(file => /resend-reminder-dispatcher|unsubscribe-persistence|app\/.*\/page\./.test(file)));
+  assert(
+    !Object.keys(result.metafile.inputs).some((file) =>
+      /resend-reminder-dispatcher|unsubscribe-persistence|app\/.*\/page\./.test(file),
+    ),
+  );
 });

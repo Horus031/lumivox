@@ -13,10 +13,7 @@ type WorkspaceGoalRailProps = {
   selectedKey: string;
 };
 
-export async function WorkspaceGoalRail({
-  goals,
-  selectedKey,
-}: WorkspaceGoalRailProps) {
+export async function WorkspaceGoalRail({ goals, selectedKey }: WorkspaceGoalRailProps) {
   const t = await getTranslations("workspace.rail");
   const linkClassName =
     "block min-h-touch shrink-0 rounded-md px-2 py-2 text-label font-medium text-secondary-text transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:min-h-control";
@@ -27,9 +24,7 @@ export async function WorkspaceGoalRail({
         <div className="mb-3 flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-            <p className="mt-1 text-caption text-muted-foreground">
-              {t("description")}
-            </p>
+            <p className="mt-1 text-caption text-muted-foreground">{t("description")}</p>
           </div>
           <WorkspaceCreateGoalButton iconOnly />
         </div>
@@ -38,10 +33,7 @@ export async function WorkspaceGoalRail({
           <Link
             href="/workspace?goal=all"
             aria-current={selectedKey === "all" ? "page" : undefined}
-            className={cn(
-              linkClassName,
-              selectedKey === "all" && "bg-muted text-foreground",
-            )}
+            className={cn(linkClassName, selectedKey === "all" && "bg-muted text-foreground")}
           >
             {t("allTasks")}
           </Link>
@@ -89,7 +81,14 @@ export async function WorkspaceGoalRail({
                       </span>
                     </div>
 
-                    <div role="meter" aria-label={goal.title} aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
+                    <div
+                      role="meter"
+                      aria-label={goal.title}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progress}
+                      className="mt-1.5 h-1 overflow-hidden rounded-full bg-border"
+                    >
                       <div
                         className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none dark:bg-success"
                         style={{

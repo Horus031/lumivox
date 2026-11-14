@@ -12,10 +12,7 @@ const owner = randomUUID();
 const email = `attendance-cc-${owner}@example.invalid`;
 const title = "Attendance concurrency verification fixture";
 
-const reportPath = resolve(
-  root,
-  "docs/learning-schedule/phase-05-attendance-cross-boundary.json",
-);
+const reportPath = resolve(root, "docs/learning-schedule/phase-05-attendance-cross-boundary.json");
 
 const q = (value) => `'${String(value).replaceAll("'", "''")}'`;
 
@@ -30,20 +27,7 @@ class Connection {
 
     this.child = spawn(
       "docker",
-      [
-        "exec",
-        "-i",
-        container,
-        "psql",
-        "-X",
-        "-A",
-        "-t",
-        "-q",
-        "-U",
-        "postgres",
-        "-d",
-        "postgres",
-      ],
+      ["exec", "-i", container, "psql", "-X", "-A", "-t", "-q", "-U", "postgres", "-d", "postgres"],
       {
         cwd: root,
         windowsHide: true,
@@ -68,9 +52,7 @@ class Connection {
       }
     });
 
-    createInterface({ input: this.child.stderr }).on("line", (line) =>
-      this.stderr.push(line),
-    );
+    createInterface({ input: this.child.stderr }).on("line", (line) => this.stderr.push(line));
 
     this.child.on("error", (error) => this.fail(error));
 
@@ -119,9 +101,7 @@ class Connection {
     }).then((result) => {
       const lines = result.text.split("\n");
 
-      const state = lines
-        .findLast((x) => x.startsWith("__LS_SQLSTATE "))
-        ?.split(" ")[1];
+      const state = lines.findLast((x) => x.startsWith("__LS_SQLSTATE "))?.split(" ")[1];
 
       const message = lines
         .findLast((x) => x.startsWith("__LS_LAST_ERROR "))
@@ -131,11 +111,7 @@ class Connection {
         state,
         message: state === "00000" ? null : message,
         text: lines
-          .filter(
-            (x) =>
-              !x.startsWith("__LS_SQLSTATE ") &&
-              !x.startsWith("__LS_LAST_ERROR "),
-          )
+          .filter((x) => !x.startsWith("__LS_SQLSTATE ") && !x.startsWith("__LS_LAST_ERROR "))
           .join("\n")
           .trim(),
         errors: result.errors,
@@ -149,8 +125,7 @@ class Connection {
     assert.equal(
       result.state,
       "00000",
-      `${this.name}: ${result.state}: ` +
-        `${result.message ?? ""}\n${result.errors.join("\n")}`,
+      `${this.name}: ${result.state}: ` + `${result.message ?? ""}\n${result.errors.join("\n")}`,
     );
 
     return result.text;
@@ -174,10 +149,7 @@ class Connection {
   }
 
   async begin(role = "authenticated") {
-    assert(
-      ["authenticated", "service_role"].includes(role),
-      "Unexpected test role",
-    );
+    assert(["authenticated", "service_role"].includes(role), "Unexpected test role");
 
     await this.ok(`
       BEGIN;
@@ -204,10 +176,7 @@ class Connection {
 
     this.child.stdin.end("ROLLBACK;\n\\q\n");
 
-    await Promise.race([
-      new Promise((done) => this.child.once("exit", done)),
-      wait(2000),
-    ]);
+    await Promise.race([new Promise((done) => this.child.once("exit", done)), wait(2000)]);
 
     if (this.child.exitCode === null) {
       this.child.kill();
@@ -215,11 +184,7 @@ class Connection {
   }
 }
 
-const [a, b, observer] = [
-  new Connection("A"),
-  new Connection("B"),
-  new Connection("observer"),
-];
+const [a, b, observer] = [new Connection("A"), new Connection("B"), new Connection("observer")];
 
 const report = {
   baseline: execFileSync("git", ["rev-parse", "HEAD"], {
@@ -327,11 +292,7 @@ async function setup(sourceStatus) {
     FROM public.task_study_schedules s
     CROSS JOIN LATERAL (
       SELECT
-        ${
-          historical
-            ? "now() - interval '2 days'"
-            : "now() - interval '20 minutes'"
-        } AS starts_at,
+        ${historical ? "now() - interval '2 days'" : "now() - interval '20 minutes'"} AS starts_at,
         ${
           historical
             ? "now() - interval '2 days' + interval '30 minutes'"
@@ -460,17 +421,9 @@ async function prepareOverdue(fixture) {
 function assertSessionAudit(final, status, eventType) {
   assert(final.session, "Missing final session");
 
-  assert.equal(
-    final.session.status,
-    status,
-    `Unexpected final status: ${status}`,
-  );
+  assert.equal(final.session.status, status, `Unexpected final status: ${status}`);
 
-  assert.equal(
-    final.events.length,
-    1,
-    "Expected exactly one authoritative event",
-  );
+  assert.equal(final.events.length, 1, "Expected exactly one authoritative event");
 
   assert.equal(final.events[0].event_type, eventType, "Wrong audit event type");
 
@@ -564,11 +517,7 @@ async function runTaskCloseFirst(secondCommand) {
 
   const second = await pending;
 
-  assert.equal(
-    second.state,
-    "22023",
-    `Task close race: unexpected ${JSON.stringify(second)}`,
-  );
+  assert.equal(second.state, "22023", `Task close race: unexpected ${JSON.stringify(second)}`);
 
   await b.ok("ROLLBACK;");
 
@@ -608,9 +557,7 @@ async function runAttendanceThenClose(attendanceCommand, finalStatus) {
 
   await a.begin("authenticated");
 
-  const returnedId = await a.ok(
-    command(attendanceCommand, fixture, randomUUID()),
-  );
+  const returnedId = await a.ok(command(attendanceCommand, fixture, randomUUID()));
 
   assert.equal(returnedId, fixture.sessionId);
 
@@ -631,11 +578,7 @@ async function runAttendanceThenClose(attendanceCommand, finalStatus) {
 
   const second = await pending;
 
-  assert.equal(
-    second.state,
-    "00000",
-    `Task Close failed: ${JSON.stringify(second)}`,
-  );
+  assert.equal(second.state, "00000", `Task Close failed: ${JSON.stringify(second)}`);
 
   await b.ok("COMMIT;");
 
@@ -772,11 +715,7 @@ async function runRace({
 
   const firstId = await a.ok(command(first, fixture, keyA));
 
-  assert.equal(
-    firstId,
-    fixture.sessionId,
-    `${name}: first command returned unexpected ID`,
-  );
+  assert.equal(firstId, fixture.sessionId, `${name}: first command returned unexpected ID`);
 
   await b.begin();
 
@@ -798,11 +737,7 @@ async function runRace({
   );
 
   if (secondResult.state === "00000") {
-    assert.equal(
-      secondResult.text,
-      fixture.sessionId,
-      `${name}: retry returned different ID`,
-    );
+    assert.equal(secondResult.text, fixture.sessionId, `${name}: retry returned different ID`);
 
     await b.ok("COMMIT;");
   } else {
@@ -811,29 +746,13 @@ async function runRace({
 
   const final = await snapshot(fixture);
 
-  assert.equal(
-    final.session.status,
-    expectedFinalStatus,
-    `${name}: incorrect final Session state`,
-  );
+  assert.equal(final.session.status, expectedFinalStatus, `${name}: incorrect final Session state`);
 
-  assert.equal(
-    final.events.length,
-    expectedEvents,
-    `${name}: incorrect audit count`,
-  );
+  assert.equal(final.events.length, expectedEvents, `${name}: incorrect audit count`);
 
-  assert.equal(
-    final.taskStatus,
-    "todo",
-    `${name}: Task status unexpectedly changed`,
-  );
+  assert.equal(final.taskStatus, "todo", `${name}: Task status unexpectedly changed`);
 
-  assert.equal(
-    final.session.actual_study_minutes,
-    null,
-    `${name}: fake Focus minutes recorded`,
-  );
+  assert.equal(final.session.actual_study_minutes, null, `${name}: fake Focus minutes recorded`);
 
   const keys = final.events.map((event) => event.event_key);
 
@@ -842,11 +761,7 @@ async function runRace({
   if (expectedFinalStatus === "completed") {
     assert(final.session.completed_at, `${name}: missing completed_at`);
   } else {
-    assert.equal(
-      final.session.completed_at,
-      null,
-      `${name}: unexpected completed_at`,
-    );
+    assert.equal(final.session.completed_at, null, `${name}: unexpected completed_at`);
   }
 
   report.runs.push({
@@ -894,11 +809,7 @@ try {
   WHERE singleton = true;
 `);
 
-  assert.deepEqual(
-    sweepGate,
-    { enabled: false },
-    "Missed Sweep Cron gate must remain disabled",
-  );
+  assert.deepEqual(sweepGate, { enabled: false }, "Missed Sweep Cron gate must remain disabled");
   report.sweepGateBefore = sweepGate.enabled;
 
   const job = await observer.json(`

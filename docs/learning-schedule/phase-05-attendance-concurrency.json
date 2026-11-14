@@ -6,16 +6,12 @@
     {
       "name": "CC-01 complete-vs-complete-distinct/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -64,16 +60,12 @@
     {
       "name": "CC-02 complete-vs-complete-exact/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -122,16 +114,12 @@
     {
       "name": "CC-03 start-vs-complete-stale/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "start",
       "second": "complete",
       "secondSqlstate": "PT409",
       "finalStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "final": {
         "events": [
           {
@@ -179,16 +167,12 @@
     {
       "name": "CC-04 complete-vs-skip/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -237,16 +221,12 @@
     {
       "name": "CC-05 recover-vs-recover-distinct/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -299,16 +279,12 @@
     {
       "name": "CC-05b recover-vs-recover-exact/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -361,16 +337,12 @@
     {
       "name": "CC-06 recover-vs-skip/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -423,16 +395,12 @@
     {
       "name": "CC-07 skip-vs-recover-stale/iteration-1",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "skip",
       "second": "recover",
       "secondSqlstate": "PT409",
       "finalStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "final": {
         "events": [
           {
@@ -481,16 +449,12 @@
     {
       "name": "CC-01 complete-vs-complete-distinct/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -539,16 +503,12 @@
     {
       "name": "CC-02 complete-vs-complete-exact/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -597,16 +557,12 @@
     {
       "name": "CC-03 start-vs-complete-stale/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "start",
       "second": "complete",
       "secondSqlstate": "PT409",
       "finalStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "final": {
         "events": [
           {
@@ -654,16 +610,12 @@
     {
       "name": "CC-04 complete-vs-skip/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -712,16 +664,12 @@
     {
       "name": "CC-05 recover-vs-recover-distinct/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -774,16 +722,12 @@
     {
       "name": "CC-05b recover-vs-recover-exact/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -836,16 +780,12 @@
     {
       "name": "CC-06 recover-vs-skip/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -898,16 +838,12 @@
     {
       "name": "CC-07 skip-vs-recover-stale/iteration-2",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "skip",
       "second": "recover",
       "secondSqlstate": "PT409",
       "finalStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "final": {
         "events": [
           {
@@ -956,16 +892,12 @@
     {
       "name": "CC-01 complete-vs-complete-distinct/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -1014,16 +946,12 @@
     {
       "name": "CC-02 complete-vs-complete-exact/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "complete",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -1072,16 +1000,12 @@
     {
       "name": "CC-03 start-vs-complete-stale/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "start",
       "second": "complete",
       "secondSqlstate": "PT409",
       "finalStatus": "in_progress",
-      "eventTypes": [
-        "started"
-      ],
+      "eventTypes": ["started"],
       "final": {
         "events": [
           {
@@ -1129,16 +1053,12 @@
     {
       "name": "CC-04 complete-vs-skip/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "complete",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "completed"
-      ],
+      "eventTypes": ["completed"],
       "final": {
         "events": [
           {
@@ -1187,16 +1107,12 @@
     {
       "name": "CC-05 recover-vs-recover-distinct/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -1249,16 +1165,12 @@
     {
       "name": "CC-05b recover-vs-recover-exact/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "recover",
       "secondSqlstate": "00000",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -1311,16 +1223,12 @@
     {
       "name": "CC-06 recover-vs-skip/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "recover",
       "second": "skip",
       "secondSqlstate": "22023",
       "finalStatus": "completed",
-      "eventTypes": [
-        "recovered"
-      ],
+      "eventTypes": ["recovered"],
       "final": {
         "events": [
           {
@@ -1373,16 +1281,12 @@
     {
       "name": "CC-07 skip-vs-recover-stale/iteration-3",
       "status": "PASS",
-      "blockedBy": [
-        1605
-      ],
+      "blockedBy": [1605],
       "first": "skip",
       "second": "recover",
       "secondSqlstate": "PT409",
       "finalStatus": "skipped",
-      "eventTypes": [
-        "skipped"
-      ],
+      "eventTypes": ["skipped"],
       "final": {
         "events": [
           {

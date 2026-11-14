@@ -13,6 +13,6 @@ export default function unsubscribe(request: Request) {
       if (result.error) throw new Error("Rate limit unavailable");
       return result.rateLimited;
     },
-    consume: hash => consumeThroughBridge(hash, process.env, getVercelOidcToken),
+    consume: (hash) => consumeThroughBridge(hash, process.env, getVercelOidcToken),
   });
 }

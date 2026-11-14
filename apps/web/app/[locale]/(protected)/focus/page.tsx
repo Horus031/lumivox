@@ -19,7 +19,13 @@ import { requireUser } from "@/lib/auth/require-user";
 import { Link } from "@/i18n/navigation";
 import { z } from "zod";
 
-async function FocusRagSection({ focusSessionId, fillHeight = false }: { focusSessionId: string; fillHeight?: boolean }) {
+async function FocusRagSection({
+  focusSessionId,
+  fillHeight = false,
+}: {
+  focusSessionId: string;
+  fillHeight?: boolean;
+}) {
   const [documents, ragDefaults] = await Promise.all([
     getAccessibleProcessedLearningDocuments(),
     getRagDefaultSettings(),
@@ -40,35 +46,49 @@ async function FocusRagSection({ focusSessionId, fillHeight = false }: { focusSe
 
 function RagLoadingFallback() {
   return (
-    <div aria-hidden="true" className="h-full min-h-64 animate-pulse rounded-lg border border-border bg-muted" />
+    <div
+      aria-hidden="true"
+      className="h-full min-h-64 animate-pulse rounded-lg border border-border bg-muted"
+    />
   );
 }
 
-export default async function FocusPage({ searchParams }: {
+export default async function FocusPage({
+  searchParams,
+}: {
   searchParams: Promise<{ studySession?: string | string[] }>;
 }) {
   const { studySession } = await searchParams;
-  const activeV2 = process.env.FOCUS_V2_ENABLED === "true"
-    ? await getActiveFocusV2Snapshot()
-    : null;
+  const activeV2 =
+    process.env.FOCUS_V2_ENABLED === "true" ? await getActiveFocusV2Snapshot() : null;
   const [tasks, activeSession, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
     getTranslations("focus.page"),
   ]);
-  const initialPreferences = isFocusV2CreationEnabled() && !activeSession && !activeV2
-    ? await getFocusV2Preferences()
-    : null;
-  const launchText = studySession === undefined ? null : await getTranslations("studyPlan.focusLaunch");
+  const initialPreferences =
+    isFocusV2CreationEnabled() && !activeSession && !activeV2
+      ? await getFocusV2Preferences()
+      : null;
+  const launchText =
+    studySession === undefined ? null : await getTranslations("studyPlan.focusLaunch");
   const sessionId = z.uuid().safeParse(studySession);
   let studyLaunch;
   if (initialPreferences && sessionId.success) {
     const { supabase, user } = await requireUser();
-    const { data } = await supabase.from("task_study_sessions").select("id,task_id")
-      .eq("id", sessionId.data).eq("user_id", user.id).maybeSingle();
+    const { data } = await supabase
+      .from("task_study_sessions")
+      .select("id,task_id")
+      .eq("id", sessionId.data)
+      .eq("user_id", user.id)
+      .maybeSingle();
     if (data) {
-      const { data: task } = await supabase.from("tasks").select("id,title")
-        .eq("id", data.task_id).eq("user_id", user.id).maybeSingle();
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("id,title")
+        .eq("id", data.task_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
       if (task) studyLaunch = { studySessionId: data.id, task, userId: user.id };
     }
   }
@@ -76,22 +96,24 @@ export default async function FocusPage({ searchParams }: {
   return (
     <section>
       <div className="mx-auto min-w-0 space-y-5">
-        {!activeV2 && <PageHeader
-          eyebrow={t("eyebrow")}
-          title={t("title")}
-          description={t("description")}
-        />}
+        {!activeV2 && (
+          <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
+        )}
 
         <div className="min-w-0">
           {launchText && (activeV2 || activeSession) && (
-            <p role="status" className="mb-4 text-sm">{launchText("activeFocusConflict")}</p>
+            <p role="status" className="mb-4 text-sm">
+              {launchText("activeFocusConflict")}
+            </p>
           )}
           <div className="min-w-0 space-y-card">
             {activeV2 ? (
               <>
                 <FocusV2LifecycleView
                   initialSnapshot={activeV2}
-                  taskTitle={tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null}
+                  taskTitle={
+                    tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null
+                  }
                 >
                   <Suspense fallback={<RagLoadingFallback />}>
                     <FocusRagSection focusSessionId={activeV2.session.id} fillHeight />
@@ -105,16 +127,22 @@ export default async function FocusPage({ searchParams }: {
                   <FocusRagSection focusSessionId={activeSession.id} />
                 </Suspense>
               </>
+            ) : launchText && !studyLaunch ? (
+              <div role="alert">
+                <p>{launchText("ineligibleSession")}</p>
+                <Link className="underline" href="/study-plan">
+                  {launchText("back")}
+                </Link>
+              </div>
+            ) : initialPreferences ? (
+              <FocusV2SessionBuilder
+                key={studyLaunch?.studySessionId}
+                tasks={tasks}
+                initialPreferences={initialPreferences}
+                studyLaunch={studyLaunch}
+              />
             ) : (
-              launchText && !studyLaunch ? (
-                <div role="alert">
-                  <p>{launchText("ineligibleSession")}</p>
-                  <Link className="underline" href="/study-plan">{launchText("back")}</Link>
-                </div>
-              ) : initialPreferences ? (
-                <FocusV2SessionBuilder key={studyLaunch?.studySessionId} tasks={tasks}
-                  initialPreferences={initialPreferences} studyLaunch={studyLaunch} />
-              ) : <StartFocusSessionForm tasks={tasks} />
+              <StartFocusSessionForm tasks={tasks} />
             )}
           </div>
         </div>

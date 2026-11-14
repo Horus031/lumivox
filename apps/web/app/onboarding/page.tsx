@@ -31,7 +31,9 @@ async function OnboardingPageContent() {
   const savedLocale = (await cookies()).get("NEXT_LOCALE")?.value;
   const locale = hasLocale(routing.locales, savedLocale) ? savedLocale : routing.defaultLocale;
   const [{ profile, weights }, messages, t] = await Promise.all([
-    getCurrentProfileWithWeights(), getMessages({ locale }), getTranslations({ locale, namespace: "onboarding" }),
+    getCurrentProfileWithWeights(),
+    getMessages({ locale }),
+    getTranslations({ locale, namespace: "onboarding" }),
   ]);
 
   return (

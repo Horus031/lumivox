@@ -43,9 +43,7 @@ export function isAttentionRequest(input: unknown): input is AttentionRequest {
   );
 }
 
-export function isAttentionResponse(
-  input: unknown,
-): input is AttentionResponse {
+export function isAttentionResponse(input: unknown): input is AttentionResponse {
   if (
     !isRecord(input) ||
     input.channel !== PROTOCOL_CHANNEL ||
@@ -57,8 +55,7 @@ export function isAttentionResponse(
     return false;
   }
 
-  if (input.error !== undefined && typeof input.error !== "string")
-    return false;
+  if (input.error !== undefined && typeof input.error !== "string") return false;
 
   if (input.saved !== undefined && typeof input.saved !== "boolean") {
     return false;

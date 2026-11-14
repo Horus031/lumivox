@@ -44,9 +44,10 @@ export async function createFocusSessionAction(
     if (error) {
       return {
         success: false,
-        message: error.code === "23505"
-          ? "You already have an active focus session."
-          : `Failed to start focus session: ${error.message}`,
+        message:
+          error.code === "23505"
+            ? "You already have an active focus session."
+            : `Failed to start focus session: ${error.message}`,
       };
     }
 
@@ -59,16 +60,12 @@ export async function createFocusSessionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while starting focus session.",
+        error instanceof Error ? error.message : "Unexpected error while starting focus session.",
     };
   }
 }
 
-export async function pauseFocusSessionAction(
-  sessionId: string,
-): Promise<ActionResult> {
+export async function pauseFocusSessionAction(sessionId: string): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
@@ -108,16 +105,12 @@ export async function pauseFocusSessionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while pausing focus session.",
+        error instanceof Error ? error.message : "Unexpected error while pausing focus session.",
     };
   }
 }
 
-export async function resumeFocusSessionAction(
-  sessionId: string,
-): Promise<ActionResult> {
+export async function resumeFocusSessionAction(sessionId: string): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
@@ -149,18 +142,14 @@ export async function resumeFocusSessionAction(
     }
 
     const pausedAtMs = new Date(session.paused_at).getTime();
-    const newlyPausedSeconds = Math.max(
-      0,
-      Math.floor((Date.now() - pausedAtMs) / 1000),
-    );
+    const newlyPausedSeconds = Math.max(0, Math.floor((Date.now() - pausedAtMs) / 1000));
 
     let updateQuery = supabase
       .from("focus_sessions")
       .update({
         status: "ongoing",
         paused_at: null,
-        total_paused_seconds:
-          session.total_paused_seconds + newlyPausedSeconds,
+        total_paused_seconds: session.total_paused_seconds + newlyPausedSeconds,
       })
       .eq("id", parsed.data.sessionId)
       .eq("user_id", user.id)
@@ -171,9 +160,7 @@ export async function resumeFocusSessionAction(
       session.paused_at === null
         ? updateQuery.is("paused_at", null)
         : updateQuery.eq("paused_at", session.paused_at);
-    const { data: updated, error: updateError } = await updateQuery
-      .select("id")
-      .maybeSingle();
+    const { data: updated, error: updateError } = await updateQuery.select("id").maybeSingle();
 
     if (updateError) {
       return {
@@ -193,16 +180,12 @@ export async function resumeFocusSessionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while resuming focus session.",
+        error instanceof Error ? error.message : "Unexpected error while resuming focus session.",
     };
   }
 }
 
-export async function completeFocusSessionAction(
-  sessionId: string,
-): Promise<ActionResult> {
+export async function completeFocusSessionAction(sessionId: string): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
@@ -214,9 +197,7 @@ export async function completeFocusSessionAction(
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select(
-        "id, started_at, planned_minutes, paused_at, total_paused_seconds, status",
-      )
+      .select("id, started_at, planned_minutes, paused_at, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
       .eq("user_id", user.id)
       .single();
@@ -254,9 +235,7 @@ export async function completeFocusSessionAction(
       session.paused_at === null
         ? updateQuery.is("paused_at", null)
         : updateQuery.eq("paused_at", session.paused_at);
-    const { data: updated, error: updateError } = await updateQuery
-      .select("id")
-      .maybeSingle();
+    const { data: updated, error: updateError } = await updateQuery.select("id").maybeSingle();
 
     if (updateError) {
       return {
@@ -285,16 +264,12 @@ export async function completeFocusSessionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while completing focus session.",
+        error instanceof Error ? error.message : "Unexpected error while completing focus session.",
     };
   }
 }
 
-export async function cancelFocusSessionAction(
-  sessionId: string,
-): Promise<ActionResult> {
+export async function cancelFocusSessionAction(sessionId: string): Promise<ActionResult> {
   const parsed = sessionIdSchema.safeParse({ sessionId });
 
   if (!parsed.success) {
@@ -306,9 +281,7 @@ export async function cancelFocusSessionAction(
 
     const { data: session, error: fetchError } = await supabase
       .from("focus_sessions")
-      .select(
-        "id, started_at, planned_minutes, paused_at, total_paused_seconds, status",
-      )
+      .select("id, started_at, planned_minutes, paused_at, total_paused_seconds, status")
       .eq("id", parsed.data.sessionId)
       .eq("user_id", user.id)
       .single();
@@ -340,9 +313,7 @@ export async function cancelFocusSessionAction(
           (session.status === "paused" && session.paused_at
             ? Math.max(
                 0,
-                Math.floor(
-                  (endedAt.getTime() - new Date(session.paused_at).getTime()) / 1000,
-                ),
+                Math.floor((endedAt.getTime() - new Date(session.paused_at).getTime()) / 1000),
               )
             : 0),
         ended_at: endedAt.toISOString(),
@@ -357,9 +328,7 @@ export async function cancelFocusSessionAction(
       session.paused_at === null
         ? updateQuery.is("paused_at", null)
         : updateQuery.eq("paused_at", session.paused_at);
-    const { data: updated, error: updateError } = await updateQuery
-      .select("id")
-      .maybeSingle();
+    const { data: updated, error: updateError } = await updateQuery.select("id").maybeSingle();
 
     if (updateError) {
       return {
@@ -379,9 +348,7 @@ export async function cancelFocusSessionAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while cancelling focus session.",
+        error instanceof Error ? error.message : "Unexpected error while cancelling focus session.",
     };
   }
 }

@@ -6,9 +6,7 @@
     {
       "name": "sweep-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -64,9 +62,7 @@
     {
       "name": "sweep-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -122,9 +118,7 @@
     {
       "name": "sweep-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -180,9 +174,7 @@
     {
       "name": "sweep-first-vs-recover",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -238,9 +230,7 @@
     {
       "name": "task-close-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -273,9 +263,7 @@
     {
       "name": "task-close-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -308,9 +296,7 @@
     {
       "name": "task-close-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -343,9 +329,7 @@
     {
       "name": "complete-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [
@@ -396,9 +380,7 @@
     {
       "name": "skip-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [
@@ -509,9 +491,7 @@
     {
       "name": "sweep-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -567,9 +547,7 @@
     {
       "name": "sweep-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -625,9 +603,7 @@
     {
       "name": "sweep-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -683,9 +659,7 @@
     {
       "name": "sweep-first-vs-recover",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -741,9 +715,7 @@
     {
       "name": "task-close-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -776,9 +748,7 @@
     {
       "name": "task-close-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -811,9 +781,7 @@
     {
       "name": "task-close-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -846,9 +814,7 @@
     {
       "name": "complete-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [
@@ -899,9 +865,7 @@
     {
       "name": "skip-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [
@@ -1012,9 +976,7 @@
     {
       "name": "sweep-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -1070,9 +1032,7 @@
     {
       "name": "sweep-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -1128,9 +1088,7 @@
     {
       "name": "sweep-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -1186,9 +1144,7 @@
     {
       "name": "sweep-first-vs-recover",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "sweep": {
         "marked": 1,
         "examined": 1
@@ -1244,9 +1200,7 @@
     {
       "name": "task-close-first-vs-start",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -1279,9 +1233,7 @@
     {
       "name": "task-close-first-vs-complete",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -1314,9 +1266,7 @@
     {
       "name": "task-close-first-vs-skip",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "22023",
       "final": {
         "events": [],
@@ -1349,9 +1299,7 @@
     {
       "name": "complete-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [
@@ -1402,9 +1350,7 @@
     {
       "name": "skip-first-then-task-close",
       "status": "PASS",
-      "blockers": [
-        2718
-      ],
+      "blockers": [2718],
       "secondSqlstate": "00000",
       "final": {
         "events": [

@@ -13,9 +13,7 @@ function required<T extends HTMLElement>(id: string): T {
   return node as T;
 }
 
-async function sendFocus(
-  request: Record<string, unknown>,
-): Promise<FocusResponse> {
+async function sendFocus(request: Record<string, unknown>): Promise<FocusResponse> {
   const response: unknown = await chrome.runtime.sendMessage({
     channel: PROTOCOL_CHANNEL,
     version: PROTOCOL_VERSION,
@@ -75,9 +73,7 @@ export function initializeFocusPopup(): void {
         ? formatClock(current.planned_seconds)
         : formatClock(projection.remainingSeconds);
 
-    round.textContent = current
-      ? `Vòng ${current.round_number}/${snapshot.plan.roundCount}`
-      : "";
+    round.textContent = current ? `Vòng ${current.round_number}/${snapshot.plan.roundCount}` : "";
 
     const visible = new Set<FocusAction>();
 
@@ -195,8 +191,7 @@ export function initializeFocusPopup(): void {
 
     const projection = projectFocus(snapshot, Date.now() + serverOffsetMs);
 
-    const selected =
-      action === "start_next" ? projection.next : projection.current;
+    const selected = action === "start_next" ? projection.next : projection.current;
 
     if (!selected) return;
 

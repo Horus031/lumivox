@@ -5,10 +5,7 @@ Mình đã verify commit `5e440299dd285040e633b037cd0bf02d64d5a1c0` trên `redes
 Có 2 cleanup nhỏ nên làm ở đầu Phase 3:
 
 ```css
-body:has(
-  .story-atmosphere[data-active-scene="hero"]
-)
-[data-navbar-brand] {
+body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   color: white;
 }
 ```
@@ -82,7 +79,6 @@ Root đổi thành:
   className="principle-constellation relative isolate overflow-hidden"
 >
   <StoryLine />
-
   ...
 </section>
 ```
@@ -95,13 +91,7 @@ CSS:
 
   color: var(--landing-pearl);
 
-  background:
-    linear-gradient(
-      180deg,
-      var(--landing-void) 0%,
-      #09150e 68%,
-      var(--background) 100%
-    );
+  background: linear-gradient(180deg, var(--landing-void) 0%, #09150e 68%, var(--background) 100%);
 }
 ```
 
@@ -134,16 +124,9 @@ Markup nên thành:
 
 ```tsx
 <div className="principle-constellation__field mx-auto max-w-310 px-6">
-  <div
-    aria-hidden="true"
-    className="principle-constellation__core"
-  />
+  <div aria-hidden="true" className="principle-constellation__core" />
 
-  <svg
-    aria-hidden="true"
-    viewBox="0 0 1000 420"
-    className="principle-constellation__connections"
-  >
+  <svg aria-hidden="true" viewBox="0 0 1000 420" className="principle-constellation__connections">
     <path d="M500 210 L230 110" />
     <path d="M500 210 L770 110" />
     <path d="M500 210 L250 320" />
@@ -152,22 +135,12 @@ Markup nên thành:
 
   <ul className="principle-constellation__nodes">
     {items.map(({ key, icon: Icon }, index) => (
-      <li
-        key={key}
-        data-principle-node
-        data-node-position={index}
-        className="principle-node"
-      >
-        <span
-          aria-hidden="true"
-          className="principle-node__signal"
-        >
+      <li key={key} data-principle-node data-node-position={index} className="principle-node">
+        <span aria-hidden="true" className="principle-node__signal">
           <Icon className="size-4" />
         </span>
 
-        <span className="principle-node__text">
-          {t(`items.${key}`)}
-        </span>
+        <span className="principle-node__text">{t(`items.${key}`)}</span>
       </li>
     ))}
   </ul>
@@ -260,8 +233,7 @@ Nodes:
 
   color: var(--landing-mint);
 
-  box-shadow:
-    inset 0 0 18px rgb(131 184 149 / 0.05);
+  box-shadow: inset 0 0 18px rgb(131 184 149 / 0.05);
 }
 
 .principle-node__text {
@@ -338,8 +310,7 @@ Không absolute positioning trên mobile.
     flex-direction: column;
     gap: 2rem;
 
-    border-left:
-      1px solid rgb(131 184 149 / 0.18);
+    border-left: 1px solid rgb(131 184 149 / 0.18);
 
     margin-left: 17px;
   }
@@ -411,40 +382,23 @@ export default function IntelligenceController() {
   const anchorRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const root =
-      anchorRef.current?.closest<HTMLElement>(
-        "[data-intelligence-system]",
-      );
+    const root = anchorRef.current?.closest<HTMLElement>("[data-intelligence-system]");
 
     if (!root) return;
 
-    const chapters = Array.from(
-      root.querySelectorAll<HTMLElement>(
-        "[data-intelligence-feature]",
-      ),
-    );
+    const chapters = Array.from(root.querySelectorAll<HTMLElement>("[data-intelligence-feature]"));
 
-    const nodes = Array.from(
-      root.querySelectorAll<HTMLElement>(
-        "[data-intelligence-node]",
-      ),
-    );
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>("[data-intelligence-node]"));
 
     function activate(feature: string) {
       root.dataset.activeFeature = feature;
 
       chapters.forEach((chapter) => {
-        chapter.toggleAttribute(
-          "data-active",
-          chapter.dataset.intelligenceFeature === feature,
-        );
+        chapter.toggleAttribute("data-active", chapter.dataset.intelligenceFeature === feature);
       });
 
       nodes.forEach((node) => {
-        node.toggleAttribute(
-          "data-active",
-          node.dataset.intelligenceNode === feature,
-        );
+        node.toggleAttribute("data-active", node.dataset.intelligenceNode === feature);
       });
 
       window.dispatchEvent(
@@ -460,15 +414,11 @@ export default function IntelligenceController() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const active = entries.find(
-          (entry) => entry.isIntersecting,
-        );
+        const active = entries.find((entry) => entry.isIntersecting);
 
         if (!active) return;
 
-        const feature = (
-          active.target as HTMLElement
-        ).dataset.intelligenceFeature;
+        const feature = (active.target as HTMLElement).dataset.intelligenceFeature;
 
         if (feature) activate(feature);
       },
@@ -478,9 +428,7 @@ export default function IntelligenceController() {
       },
     );
 
-    chapters.forEach((chapter) =>
-      observer.observe(chapter),
-    );
+    chapters.forEach((chapter) => observer.observe(chapter));
 
     return () => observer.disconnect();
   }, []);
@@ -520,26 +468,15 @@ Giữ heading hiện tại.
 Sau heading:
 
 ```tsx
-<div
-  data-intelligence-system
-  className="intelligence-system"
->
+<div data-intelligence-system className="intelligence-system">
   <IntelligenceController />
 
   <div className="intelligence-system__stage">
-    <div
-      aria-hidden="true"
-      className="intelligence-core"
-    >
+    <div aria-hidden="true" className="intelligence-core">
       <div className="intelligence-core__halo" />
 
       <div className="intelligence-core__center">
-        <Image
-          src="/logo.png"
-          alt=""
-          width={52}
-          height={52}
-        />
+        <Image src="/logo.png" alt="" width={52} height={52} />
       </div>
 
       {features.map((feature, index) => {
@@ -566,20 +503,13 @@ Sau heading:
         data-intelligence-feature={feature.key}
         className="intelligence-chapter"
       >
-        <span
-          aria-hidden="true"
-          className="intelligence-chapter__index"
-        >
+        <span aria-hidden="true" className="intelligence-chapter__index">
           {String(index + 1).padStart(2, "0")}
         </span>
 
-        <h3>
-          {t(`items.${feature.key}.title`)}
-        </h3>
+        <h3>{t(`items.${feature.key}.title`)}</h3>
 
-        <p>
-          {t(`items.${feature.key}.desc`)}
-        </p>
+        <p>{t(`items.${feature.key}.desc`)}</p>
       </article>
     ))}
   </div>
@@ -654,12 +584,7 @@ Stage:
 
   border-radius: inherit;
 
-  background:
-    radial-gradient(
-      circle,
-      rgb(51 125 77 / 0.16),
-      transparent 68%
-    );
+  background: radial-gradient(circle, rgb(51 125 77 / 0.16), transparent 68%);
 
   filter: blur(22px);
 }
@@ -670,8 +595,7 @@ Stage:
 
   position: absolute;
 
-  border:
-    1px solid rgb(25 65 38 / 0.11);
+  border: 1px solid rgb(25 65 38 / 0.11);
 
   border-radius: inherit;
 }
@@ -697,17 +621,11 @@ Stage:
   align-items: center;
   justify-content: center;
 
-  border:
-    1px solid rgb(51 125 77 / 0.18);
+  border: 1px solid rgb(51 125 77 / 0.18);
 
   border-radius: 9999px;
 
-  background:
-    color-mix(
-      in oklab,
-      var(--surface) 82%,
-      transparent
-    );
+  background: color-mix(in oklab, var(--surface) 82%, transparent);
 
   box-shadow:
     0 20px 70px rgb(25 65 38 / 0.14),
@@ -739,8 +657,7 @@ Base:
   align-items: center;
   justify-content: center;
 
-  border:
-    1px solid rgb(25 65 38 / 0.12);
+  border: 1px solid rgb(25 65 38 / 0.12);
 
   border-radius: 9999px;
 
@@ -766,9 +683,7 @@ Active:
 
   opacity: 1;
 
-  transform:
-    translate(var(--node-x), var(--node-y))
-    scale(1.12);
+  transform: translate(var(--node-x), var(--node-y)) scale(1.12);
 
   box-shadow:
     0 0 0 7px rgb(51 125 77 / 0.05),
@@ -833,8 +748,7 @@ Luxury UI thường nhìn đắt hơn khi motion có mục đích.
 .intelligence-chapter h3 {
   max-width: 26rem;
 
-  font-size:
-    clamp(1.6rem, 2.5vw, 2.35rem);
+  font-size: clamp(1.6rem, 2.5vw, 2.35rem);
 
   font-weight: 600;
 
@@ -905,10 +819,7 @@ Không bắt mobile scroll qua 6 × 52vh.
 Fix brand:
 
 ```css
-body:has(
-  .story-atmosphere[data-active-scene="hero"]
-)
-[data-navbar-brand] {
+body:has(.story-atmosphere[data-active-scene="hero"]) [data-navbar-brand] {
   color: white;
 }
 ```
@@ -956,17 +867,17 @@ Observer vẫn được phép đổi active state; chỉ motion bị tắt.
 
 ## Phase 3 quality gate
 
-| Gate | Requirement |
-|---|---|
-| EvidenceStrip | Không còn 4-column bordered grid |
-| Principles | 4 signals tạo constellation |
-| Hero transition | Filament nối tự nhiên vào constellation |
-| Features | Không còn six-card grid |
-| Intelligence | Có central Lumivox core |
-| Scroll | Chapter active → node active |
-| Content | Cả 6 title + description vẫn SSR |
-| Mobile | Không sticky dài, không absolute constellation |
-| Motion | Không infinite orbit / scroll listener |
-| A11y | Decorative visuals `aria-hidden` |
-| SEO | Copy, H1, metadata, JSON-LD không đổi |
-| Build | lint/test/build pass |
+| Gate            | Requirement                                    |
+| --------------- | ---------------------------------------------- |
+| EvidenceStrip   | Không còn 4-column bordered grid               |
+| Principles      | 4 signals tạo constellation                    |
+| Hero transition | Filament nối tự nhiên vào constellation        |
+| Features        | Không còn six-card grid                        |
+| Intelligence    | Có central Lumivox core                        |
+| Scroll          | Chapter active → node active                   |
+| Content         | Cả 6 title + description vẫn SSR               |
+| Mobile          | Không sticky dài, không absolute constellation |
+| Motion          | Không infinite orbit / scroll listener         |
+| A11y            | Decorative visuals `aria-hidden`               |
+| SEO             | Copy, H1, metadata, JSON-LD không đổi          |
+| Build           | lint/test/build pass                           |

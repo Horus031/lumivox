@@ -1,9 +1,4 @@
-import {
-  ArrowRight,
-  BrainCircuit,
-  CircleDollarSign,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowRight, BrainCircuit, CircleDollarSign, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -28,10 +23,7 @@ export default function CTA() {
             <h2>{t("title")}</h2>
             <p className="final-convergence__subtitle">{t("subtitle")}</p>
             <div className="final-convergence__actions">
-              <Link
-                href="/auth/sign-up"
-                className="final-convergence__primary group"
-              >
+              <Link href="/auth/sign-up" className="final-convergence__primary group">
                 {t("primaryCta")}
                 <ArrowRight className="size-4" aria-hidden="true" />
               </Link>

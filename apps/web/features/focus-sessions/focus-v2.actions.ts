@@ -10,11 +10,13 @@ import { isFocusV2CreationEnabled } from "./focus-v2-release";
 import { getFocusV2Snapshot } from "./focus-v2.queries";
 import type { FocusV2Action, FocusV2Snapshot, FocusV2TransitionResult } from "./focus-v2.types";
 
-const transitionInputSchema = z.object({
-  sessionId: z.uuid(),
-  action: z.enum(["pause", "resume", "complete", "skip_break", "start_next", "cancel"]),
-  expectedSegmentId: z.uuid().nullable(),
-}).strict();
+const transitionInputSchema = z
+  .object({
+    sessionId: z.uuid(),
+    action: z.enum(["pause", "resume", "complete", "skip_break", "start_next", "cancel"]),
+    expectedSegmentId: z.uuid().nullable(),
+  })
+  .strict();
 const snapshotIdSchema = z.uuid();
 
 type CreateResponse = { session_id: string };
@@ -34,10 +36,15 @@ function errorMessage(error: unknown): string {
 export async function createFocusV2SessionAction(
   input: FocusV2Config,
 ): Promise<ActionResult<{ sessionId: string }>> {
-  if (!isFocusV2CreationEnabled()) return { success: false, message: "Focus V2 is not accepting new sessions." };
+  if (!isFocusV2CreationEnabled())
+    return { success: false, message: "Focus V2 is not accepting new sessions." };
   const parsed = focusV2ConfigSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: "Invalid Focus V2 configuration.", fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      success: false,
+      message: "Invalid Focus V2 configuration.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const { user } = await requireUser();
@@ -57,8 +64,13 @@ export async function createFocusV2SessionAction(
       },
       retries: 0,
     });
-    if (!z.uuid().safeParse(response.session_id).success) throw new Error("Invalid create response.");
-    return { success: true, message: "Focus V2 session created.", data: { sessionId: response.session_id } };
+    if (!z.uuid().safeParse(response.session_id).success)
+      throw new Error("Invalid create response.");
+    return {
+      success: true,
+      message: "Focus V2 session created.",
+      data: { sessionId: response.session_id },
+    };
   } catch (error) {
     return { success: false, message: errorMessage(error) };
   }
@@ -68,7 +80,8 @@ export async function loadFocusV2SnapshotAction(
   sessionId: string,
 ): Promise<ActionResult<FocusV2Snapshot>> {
   if (!isEnabled()) return { success: false, message: "Focus V2 is not enabled." };
-  if (!snapshotIdSchema.safeParse(sessionId).success) return { success: false, message: "Invalid session ID." };
+  if (!snapshotIdSchema.safeParse(sessionId).success)
+    return { success: false, message: "Invalid session ID." };
   try {
     const snapshot = await getFocusV2Snapshot(sessionId);
     if (!snapshot) return { success: false, message: "Focus V2 session not found." };
@@ -78,9 +91,11 @@ export async function loadFocusV2SnapshotAction(
   }
 }
 
-export async function transitionFocusV2Action(
-  input: { sessionId: string; action: FocusV2Action; expectedSegmentId: string | null },
-): Promise<ActionResult<FocusV2TransitionResult>> {
+export async function transitionFocusV2Action(input: {
+  sessionId: string;
+  action: FocusV2Action;
+  expectedSegmentId: string | null;
+}): Promise<ActionResult<FocusV2TransitionResult>> {
   if (!isEnabled()) return { success: false, message: "Focus V2 is not enabled." };
   const parsed = transitionInputSchema.safeParse(input);
   if (!parsed.success) return { success: false, message: "Invalid Focus V2 transition." };

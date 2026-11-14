@@ -1,30 +1,18 @@
-
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
-import {
-  createClient,
-  type SupabaseClient,
-} from "@supabase/supabase-js";
-import {
-  expect,
-  test,
-  type Page,
-} from "@playwright/test";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { expect, test, type Page } from "@playwright/test";
 
 import { submitLoginForm } from "./helpers/auth";
 
 const localUrl = process.env.LEARNING_SCHEDULE_TEST_URL;
-const serviceKey =
-  process.env.LEARNING_SCHEDULE_TEST_SERVICE_KEY;
+const serviceKey = process.env.LEARNING_SCHEDULE_TEST_SERVICE_KEY;
 const anonKey = process.env.LEARNING_SCHEDULE_TEST_ANON_KEY;
 
 // Reuse the repository's existing local-only E2E gates.
-test.skip(
-  !localUrl || !serviceKey,
-  "Opt-in: requires local Supabase E2E credentials",
-);
+test.skip(!localUrl || !serviceKey, "Opt-in: requires local Supabase E2E credentials");
 
 test.describe.configure({
   mode: "serial",
@@ -43,8 +31,7 @@ const options = {
   },
 };
 
-const email =
-  `attendance-browser-${randomUUID()}@example.invalid`;
+const email = `attendance-browser-${randomUUID()}@example.invalid`;
 const password = randomUUID();
 
 let admin: SupabaseClient;
@@ -63,7 +50,23 @@ const browserReport = {
 };
 
 function localDatabase(sql: string) {
-  return execFileSync("docker", ["exec", "supabase_db_lumivox-proj", "psql", "-X", "-At", "-U", "postgres", "-d", "postgres", "-c", sql], { encoding: "utf8", windowsHide: true }).trim();
+  return execFileSync(
+    "docker",
+    [
+      "exec",
+      "supabase_db_lumivox-proj",
+      "psql",
+      "-X",
+      "-At",
+      "-U",
+      "postgres",
+      "-d",
+      "postgres",
+      "-c",
+      sql,
+    ],
+    { encoding: "utf8", windowsHide: true },
+  ).trim();
 }
 
 type Status = "scheduled" | "missed" | "skipped";
@@ -80,10 +83,7 @@ function localClock(date: Date, zone: string) {
   // Both zones below have an exact, known offset.
   // Choose the -12 zone around UTC midnight so the
   // current attendance window never crosses local midnight.
-  const shifted =
-    zone === "Etc/GMT+12"
-      ? new Date(date.getTime() - 12 * 3_600_000)
-      : date;
+  const shifted = zone === "Etc/GMT+12" ? new Date(date.getTime() - 12 * 3_600_000) : date;
 
   const iso = shifted.toISOString();
 
@@ -97,20 +97,13 @@ function dateShift(date: Date, days: number) {
   return new Date(date.getTime() + days * 86_400_000);
 }
 
-async function createFixture(
-  status: Status,
-): Promise<Fixture> {
+async function createFixture(status: Status): Promise<Fixture> {
   const now = new Date();
-  const zone =
-    now.getUTCHours() >= 2 && now.getUTCHours() <= 21
-      ? "UTC"
-      : "Etc/GMT+12";
+  const zone = now.getUTCHours() >= 2 && now.getUTCHours() <= 21 ? "UTC" : "Etc/GMT+12";
 
   const historical = status !== "scheduled";
 
-  const beginsAt = historical
-    ? dateShift(now, -2)
-    : new Date(now.getTime() - 10 * 60_000);
+  const beginsAt = historical ? dateShift(now, -2) : new Date(now.getTime() - 10 * 60_000);
 
   const endsAt = historical
     ? new Date(beginsAt.getTime() + 30 * 60_000)
@@ -169,8 +162,7 @@ async function createFixture(
       scheduled_start_at: beginsAt.toISOString(),
       scheduled_end_at: endsAt.toISOString(),
       status,
-      updated_at:
-        new Date(now.getTime() - 10 * 60_000).toISOString(),
+      updated_at: new Date(now.getTime() - 10 * 60_000).toISOString(),
     })
     .select("id")
     .single();
@@ -191,9 +183,7 @@ async function createFixture(
 async function readSession(fixture: Fixture) {
   const result = await admin
     .from("task_study_sessions")
-    .select(
-      "id,status,completed_at,actual_study_minutes,updated_at",
-    )
+    .select("id,status,completed_at,actual_study_minutes,updated_at")
     .eq("id", fixture.sessionId)
     .single();
 
@@ -204,9 +194,7 @@ async function readSession(fixture: Fixture) {
 async function readEvents(fixture: Fixture) {
   const result = await admin
     .from("task_study_session_events")
-    .select(
-      "id,event_type,event_key,from_status,to_status,actor_id",
-    )
+    .select("id,event_type,event_key,from_status,to_status,actor_id")
     .eq("session_id", fixture.sessionId)
     .order("created_at");
 
@@ -217,16 +205,12 @@ async function readEvents(fixture: Fixture) {
 async function openFixture(page: Page, fixture: Fixture) {
   await page.goto(`/en/workspace?goal=${goalId}`);
 
-  const card = page
-    .locator("article")
-    .filter({ hasText: fixture.title });
+  const card = page.locator("article").filter({ hasText: fixture.title });
 
   await expect(card).toBeVisible();
   await card.getByRole("button").first().click();
 
-  await page
-    .getByRole("tab", { name: "Overview", exact: true })
-    .click();
+  await page.getByRole("tab", { name: "Overview", exact: true }).click();
 
   const section = page.getByRole("region", {
     name: "Task study schedule",
@@ -239,10 +223,7 @@ async function openFixture(page: Page, fixture: Fixture) {
   return section;
 }
 
-async function confirmAttendance(
-  page: Page,
-  action: "start" | "complete" | "skip" | "recover",
-) {
+async function confirmAttendance(page: Page, action: "start" | "complete" | "skip" | "recover") {
   const ui = {
     start: {
       button: "Start",
@@ -309,7 +290,9 @@ test.beforeAll(async ({ baseURL }) => {
   expect(web.hostname).toMatch(/^(127\.0\.0\.1|localhost)$/);
   browserReport.baseURL = web.origin;
   browserReport.apiOrigin = local.origin;
-  expect(localDatabase("SELECT enabled FROM public.ls_missed_sweep_control WHERE singleton=true;")).toBe("f");
+  expect(
+    localDatabase("SELECT enabled FROM public.ls_missed_sweep_control WHERE singleton=true;"),
+  ).toBe("f");
 
   admin = createClient(localUrl!, serviceKey!, options);
 
@@ -356,22 +339,41 @@ test.afterAll(async () => {
 
   expect(sessions.error).toBeNull();
   expect(sessions.count).toBe(0);
-  expect(localDatabase("SELECT enabled FROM public.ls_missed_sweep_control WHERE singleton=true;")).toBe("f");
-  const tasks = await admin.from("tasks").select("id", { count: "exact", head: true }).eq("user_id", userId);
+  expect(
+    localDatabase("SELECT enabled FROM public.ls_missed_sweep_control WHERE singleton=true;"),
+  ).toBe("f");
+  const tasks = await admin
+    .from("tasks")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
   expect(tasks.error).toBeNull();
   expect(tasks.count).toBe(0);
-  writeFileSync(resolve(process.cwd(), "../../docs/learning-schedule/phase-05-attendance-browser.json"), JSON.stringify({
-    ...browserReport, sweepGateAfter: false, userCleanup: "PASS", remainingSessions: sessions.count, remainingTasks: tasks.count,
-    finishedAt: new Date().toISOString(),
-  }, null, 2) + "\n");
+  writeFileSync(
+    resolve(process.cwd(), "../../docs/learning-schedule/phase-05-attendance-browser.json"),
+    JSON.stringify(
+      {
+        ...browserReport,
+        sweepGateAfter: false,
+        userCleanup: "PASS",
+        remainingSessions: sessions.count,
+        remainingTasks: tasks.count,
+        finishedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    ) + "\n",
+  );
 });
 
 test.beforeEach(async ({ page, context }) => {
   pageErrors = [];
   currentFixtures = [];
-  const observe = (observedPage: Page) => observedPage.on("pageerror", error => {
-    pageErrors.push(error.message.replaceAll(password, "[redacted]").replaceAll(serviceKey!, "[redacted]"));
-  });
+  const observe = (observedPage: Page) =>
+    observedPage.on("pageerror", (error) => {
+      pageErrors.push(
+        error.message.replaceAll(password, "[redacted]").replaceAll(serviceKey!, "[redacted]"),
+      );
+    });
   observe(page);
   context.on("page", observe);
   await page.goto("/en/auth/login");
@@ -385,9 +387,21 @@ test.afterEach(async ({ page }, info) => {
   const snapshots = [];
   for (const fixture of currentFixtures) {
     const task = await admin.from("tasks").select("status").eq("id", fixture.taskId).single();
-    snapshots.push({ taskId: fixture.taskId, scheduleId: fixture.scheduleId, sessionId: fixture.sessionId, session: await readSession(fixture), events: await readEvents(fixture), taskStatus: task.data?.status });
+    snapshots.push({
+      taskId: fixture.taskId,
+      scheduleId: fixture.scheduleId,
+      sessionId: fixture.sessionId,
+      session: await readSession(fixture),
+      events: await readEvents(fixture),
+      taskStatus: task.data?.status,
+    });
   }
-  browserReport.runs.push({ name: info.title, status: info.status ?? "unknown", pageErrors: [...pageErrors], snapshots });
+  browserReport.runs.push({
+    name: info.title,
+    status: info.status ?? "unknown",
+    pageErrors: [...pageErrors],
+    snapshots,
+  });
   // Use the app's real cookie-authenticated sign-out route before deleting Auth fixtures.
   const signedOut = await page.request.post("/auth/signout", { maxRedirects: 0 });
   expect(signedOut.status()).toBe(303);
@@ -398,17 +412,13 @@ test.afterEach(async ({ page }, info) => {
 // ATE-01: Start -> Complete
 // ---------------------------------------------------------
 
-test("ATE-01 browser starts then completes one session", async ({
-  page,
-}) => {
+test("ATE-01 browser starts then completes one session", async ({ page }) => {
   const fixture = await createFixture("scheduled");
   const section = await openFixture(page, fixture);
 
   await confirmAttendance(page, "start");
 
-  await expect(
-    section.getByText("In progress", { exact: true }),
-  ).toBeVisible();
+  await expect(section.getByText("In progress", { exact: true })).toBeVisible();
 
   let saved = await readSession(fixture);
   expect(saved.status).toBe("in_progress");
@@ -416,9 +426,7 @@ test("ATE-01 browser starts then completes one session", async ({
 
   await confirmAttendance(page, "complete");
 
-  await expect(
-    section.getByText("Completed", { exact: true }),
-  ).toBeVisible();
+  await expect(section.getByText("Completed", { exact: true })).toBeVisible();
 
   saved = await readSession(fixture);
   expect(saved.status).toBe("completed");
@@ -427,8 +435,7 @@ test("ATE-01 browser starts then completes one session", async ({
 
   const events = await readEvents(fixture);
 
-  expect(events.map(event => event.event_type))
-    .toEqual(["started", "completed"]);
+  expect(events.map((event) => event.event_type)).toEqual(["started", "completed"]);
 
   expect(events[0].from_status).toBe("scheduled");
   expect(events[0].to_status).toBe("in_progress");
@@ -436,17 +443,11 @@ test("ATE-01 browser starts then completes one session", async ({
   expect(events[1].from_status).toBe("in_progress");
   expect(events[1].to_status).toBe("completed");
 
-  expect(events.every(event => event.actor_id === userId))
-    .toBe(true);
+  expect(events.every((event) => event.actor_id === userId)).toBe(true);
 
-  expect(new Set(events.map(event => event.event_key)).size)
-    .toBe(2);
+  expect(new Set(events.map((event) => event.event_key)).size).toBe(2);
 
-  const task = await admin
-    .from("tasks")
-    .select("status")
-    .eq("id", fixture.taskId)
-    .single();
+  const task = await admin.from("tasks").select("status").eq("id", fixture.taskId).single();
 
   expect(task.data?.status).toBe("todo");
 });
@@ -455,17 +456,13 @@ test("ATE-01 browser starts then completes one session", async ({
 // ATE-02: Skip -> Recover
 // ---------------------------------------------------------
 
-test("ATE-02 browser recovers a skipped session", async ({
-  page,
-}) => {
+test("ATE-02 browser recovers a skipped session", async ({ page }) => {
   const fixture = await createFixture("scheduled");
   const section = await openFixture(page, fixture);
 
   await confirmAttendance(page, "skip");
 
-  await expect(
-    section.getByText("Skipped", { exact: true }),
-  ).toBeVisible();
+  await expect(section.getByText("Skipped", { exact: true })).toBeVisible();
 
   let saved = await readSession(fixture);
   expect(saved.status).toBe("skipped");
@@ -473,9 +470,7 @@ test("ATE-02 browser recovers a skipped session", async ({
 
   await confirmAttendance(page, "recover");
 
-  await expect(
-    section.getByText("Completed", { exact: true }),
-  ).toBeVisible();
+  await expect(section.getByText("Completed", { exact: true })).toBeVisible();
 
   saved = await readSession(fixture);
   expect(saved.status).toBe("completed");
@@ -484,8 +479,7 @@ test("ATE-02 browser recovers a skipped session", async ({
 
   const events = await readEvents(fixture);
 
-  expect(events.map(event => event.event_type))
-    .toEqual(["skipped", "recovered"]);
+  expect(events.map((event) => event.event_type)).toEqual(["skipped", "recovered"]);
 
   expect(events[1].from_status).toBe("skipped");
   expect(events[1].to_status).toBe("completed");
@@ -495,10 +489,7 @@ test("ATE-02 browser recovers a skipped session", async ({
 // ATE-03: Two tabs / stale optimistic version
 // ---------------------------------------------------------
 
-test("ATE-03 two tabs reject a stale command", async ({
-  page,
-  context,
-}) => {
+test("ATE-03 two tabs reject a stale command", async ({ page, context }) => {
   const fixture = await createFixture("scheduled");
 
   const first = await openFixture(page, fixture);
@@ -508,19 +499,13 @@ test("ATE-03 two tabs reject a stale command", async ({
     const second = await openFixture(secondTab, fixture);
 
     // Both tabs have loaded the original scheduled row.
-    await expect(
-      first.getByText("Scheduled", { exact: true }),
-    ).toBeVisible();
+    await expect(first.getByText("Scheduled", { exact: true })).toBeVisible();
 
-    await expect(
-      second.getByText("Scheduled", { exact: true }),
-    ).toBeVisible();
+    await expect(second.getByText("Scheduled", { exact: true })).toBeVisible();
 
     await confirmAttendance(page, "start");
 
-    await expect(
-      first.getByText("In progress", { exact: true }),
-    ).toBeVisible();
+    await expect(first.getByText("In progress", { exact: true })).toBeVisible();
 
     // The second tab still has the old updated_at.
     // Complete remains a legal transition from in_progress,
@@ -543,8 +528,7 @@ test("ATE-03 two tabs reject a stale command", async ({
       })
       .click();
 
-    await expect(dialog.getByRole("alert"))
-      .toContainText("changed");
+    await expect(dialog.getByRole("alert")).toContainText("changed");
 
     await dialog
       .getByRole("button", {
@@ -552,27 +536,20 @@ test("ATE-03 two tabs reject a stale command", async ({
       })
       .click();
 
-    await expect(
-      second.getByText("In progress", { exact: true }),
-    ).toBeVisible();
+    await expect(second.getByText("In progress", { exact: true })).toBeVisible();
 
     const saved = await readSession(fixture);
     expect(saved.status).toBe("in_progress");
 
     const events = await readEvents(fixture);
 
-    expect(events.map(event => event.event_type))
-      .toEqual(["started"]);
+    expect(events.map((event) => event.event_type)).toEqual(["started"]);
   } finally {
     await secondTab.close();
   }
 });
 
-
-
-test("ATE-04 lost response preserves exact completion", async ({
-  page,
-}) => {
+test("ATE-04 lost response preserves exact completion", async ({ page }) => {
   const fixture = await createFixture("scheduled");
   const section = await openFixture(page, fixture);
 
@@ -581,13 +558,10 @@ test("ATE-04 lost response preserves exact completion", async ({
   let intercepted = 0;
   const sentBodies: string[] = [];
 
-  await page.route(actionUrl, async route => {
+  await page.route(actionUrl, async (route) => {
     const request = route.request();
 
-    if (
-      request.method() !== "POST" ||
-      !request.headers()["next-action"]
-    ) {
+    if (request.method() !== "POST" || !request.headers()["next-action"]) {
       await route.continue();
       return;
     }
@@ -602,9 +576,14 @@ test("ATE-04 lost response preserves exact completion", async ({
       await route.continue();
       return;
     }
-    if (!command || typeof command !== "object" ||
-      !("command" in command) || command.command !== "complete" ||
-      !("sessionId" in command) || command.sessionId !== fixture.sessionId) {
+    if (
+      !command ||
+      typeof command !== "object" ||
+      !("command" in command) ||
+      command.command !== "complete" ||
+      !("sessionId" in command) ||
+      command.sessionId !== fixture.sessionId
+    ) {
       await route.continue();
       return;
     }
@@ -624,7 +603,7 @@ test("ATE-04 lost response preserves exact completion", async ({
       const committed = await readSession(fixture);
       const committedEvents = await readEvents(fixture);
       expect(committed.status).toBe("completed");
-      expect(committedEvents.map(event => event.event_type)).toEqual(["completed"]);
+      expect(committedEvents.map((event) => event.event_type)).toEqual(["completed"]);
       browserReport.caseDetails["ATE-04"] = {
         upstreamHttpStatus: upstream.status(),
         committedObservedAt: new Date().toISOString(),
@@ -643,53 +622,55 @@ test("ATE-04 lost response preserves exact completion", async ({
   });
 
   try {
-    await section.getByRole("button", {
-      name: "Complete",
-      exact: true,
-    }).click();
+    await section
+      .getByRole("button", {
+        name: "Complete",
+        exact: true,
+      })
+      .click();
 
     const dialog = page.getByRole("dialog", {
       name: "Complete study session",
       exact: true,
     });
 
-    await dialog.getByRole("button", {
-      name: "Confirm completion",
-      exact: true,
-    }).click();
+    await dialog
+      .getByRole("button", {
+        name: "Confirm completion",
+        exact: true,
+      })
+      .click();
 
     // Backend completion must already be persisted,
     // regardless of the browser receiving an error.
-    await expect.poll(async () =>
-      (await readSession(fixture)).status,
-    ).toBe("completed");
+    await expect.poll(async () => (await readSession(fixture)).status).toBe("completed");
 
     const beforeRetry = await readSession(fixture);
     const eventsBefore = await readEvents(fixture);
 
-    expect(eventsBefore.map(event => event.event_type))
-      .toEqual(["completed"]);
+    expect(eventsBefore.map((event) => event.event_type)).toEqual(["completed"]);
 
     // An interrupted transport must not be interpreted
     // as a verified failure of the database transaction.
-    await expect(dialog.getByRole("alert"))
-      .toBeVisible();
+    await expect(dialog.getByRole("alert")).toBeVisible();
 
-    await expect(dialog.getByRole("button", {
-      name: "Retry exact command",
-      exact: true,
-    })).toBeVisible();
+    await expect(
+      dialog.getByRole("button", {
+        name: "Retry exact command",
+        exact: true,
+      }),
+    ).toBeVisible();
 
-    await dialog.getByRole("button", {
-      name: "Retry exact command",
-      exact: true,
-    }).click();
+    await dialog
+      .getByRole("button", {
+        name: "Retry exact command",
+        exact: true,
+      })
+      .click();
 
     await expect(dialog).not.toBeVisible();
 
-    await expect(
-      section.getByText("Completed", { exact: true }),
-    ).toBeVisible();
+    await expect(section.getByText("Completed", { exact: true })).toBeVisible();
 
     const afterRetry = await readSession(fixture);
     const eventsAfter = await readEvents(fixture);
@@ -738,11 +719,7 @@ test("ATE-04 lost response preserves exact completion", async ({
   }
 });
 
-
-
-test("ATE-05 Attendance dialog supports keyboard and restores focus", async ({
-  page,
-}) => {
+test("ATE-05 Attendance dialog supports keyboard and restores focus", async ({ page }) => {
   const fixture = await createFixture("scheduled");
   const section = await openFixture(page, fixture);
 
@@ -765,15 +742,9 @@ test("ATE-05 Attendance dialog supports keyboard and restores focus", async ({
 
   await expect(dialog).toBeVisible();
 
-  await expect(dialog).toHaveAttribute(
-    "aria-labelledby",
-    /.+/,
-  );
+  await expect(dialog).toHaveAttribute("aria-labelledby", /.+/);
 
-  await expect(dialog).toHaveAttribute(
-    "aria-describedby",
-    /.+/,
-  );
+  await expect(dialog).toHaveAttribute("aria-describedby", /.+/);
 
   const input = dialog.getByRole("textbox", {
     name: /Reason/,
@@ -798,7 +769,7 @@ test("ATE-05 Attendance dialog supports keyboard and restores focus", async ({
   const visited = new Set<string>();
 
   for (let step = 0; step < 15; step++) {
-    expect(await dialog.evaluate(element => element.contains(document.activeElement))).toBe(true);
+    expect(await dialog.evaluate((element) => element.contains(document.activeElement))).toBe(true);
     const current = await page.evaluate(() => {
       const element = document.activeElement;
 
@@ -834,16 +805,15 @@ test("ATE-05 Attendance dialog supports keyboard and restores focus", async ({
 
   expect(await readEvents(fixture)).toHaveLength(0);
   browserReport.caseDetails["ATE-05"] = {
-    visited: [...visited], focusRestored: true, focusStayedInDialog: true,
-    escapeClosedWithoutMutation: true, eventCount: 0,
+    visited: [...visited],
+    focusRestored: true,
+    focusStayedInDialog: true,
+    escapeClosedWithoutMutation: true,
+    eventCount: 0,
   };
 });
 
-
-
-test("ATE-06 mobile Attendance works in EN and VI", async ({
-  page,
-}, testInfo) => {
+test("ATE-06 mobile Attendance works in EN and VI", async ({ page }, testInfo) => {
   const fixture = await createFixture("scheduled");
   const mobileResults: unknown[] = [];
 
@@ -872,22 +842,20 @@ test("ATE-06 mobile Attendance works in EN and VI", async ({
   ] as const;
 
   for (const item of cases) {
-    await page.goto(
-      `/${item.locale}/workspace?goal=${goalId}`,
-    );
+    await page.goto(`/${item.locale}/workspace?goal=${goalId}`);
 
-    const card = page
-      .locator("article")
-      .filter({ hasText: fixture.title });
+    const card = page.locator("article").filter({ hasText: fixture.title });
 
     await expect(card).toBeVisible();
 
     await card.getByRole("button").first().click();
 
-    await page.getByRole("tab", {
-      name: item.locale === "en" ? "Overview" : "Tổng quan",
-      exact: true,
-    }).click();
+    await page
+      .getByRole("tab", {
+        name: item.locale === "en" ? "Overview" : "Tổng quan",
+        exact: true,
+      })
+      .click();
 
     const section = page.getByRole("region", {
       name: item.sectionName,
@@ -896,10 +864,12 @@ test("ATE-06 mobile Attendance works in EN and VI", async ({
 
     await expect(section).toBeVisible();
 
-    await section.getByRole("button", {
-      name: item.action,
-      exact: true,
-    }).click();
+    await section
+      .getByRole("button", {
+        name: item.action,
+        exact: true,
+      })
+      .click();
 
     const dialog = page.getByRole("dialog", {
       name: item.dialogName,
@@ -914,24 +884,19 @@ test("ATE-06 mobile Attendance works in EN and VI", async ({
       }),
     ).toBeVisible();
 
-    const dimensions = await dialog.evaluate(element => ({
+    const dimensions = await dialog.evaluate((element) => ({
       contentWidth: element.scrollWidth,
       clientWidth: element.clientWidth,
-      renderedWidth:
-        element.getBoundingClientRect().width,
+      renderedWidth: element.getBoundingClientRect().width,
       viewportWidth: window.innerWidth,
-      documentWidth:
-        document.documentElement.scrollWidth,
+      documentWidth: document.documentElement.scrollWidth,
     }));
 
-    expect(dimensions.contentWidth)
-      .toBeLessThanOrEqual(dimensions.clientWidth);
+    expect(dimensions.contentWidth).toBeLessThanOrEqual(dimensions.clientWidth);
 
-    expect(dimensions.renderedWidth)
-      .toBeLessThanOrEqual(dimensions.viewportWidth);
+    expect(dimensions.renderedWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
 
-    expect(dimensions.documentWidth)
-      .toBeLessThanOrEqual(dimensions.viewportWidth);
+    expect(dimensions.documentWidth).toBeLessThanOrEqual(dimensions.viewportWidth);
 
     const screenshotPath = testInfo.outputPath(`attendance-${item.locale}-mobile.png`);
     await page.screenshot({
@@ -939,14 +904,21 @@ test("ATE-06 mobile Attendance works in EN and VI", async ({
       fullPage: true,
     });
 
-    await dialog.getByRole("button", {
-      name: item.cancel,
-      exact: true,
-    }).click();
+    await dialog
+      .getByRole("button", {
+        name: item.cancel,
+        exact: true,
+      })
+      .click();
 
     await expect(dialog).not.toBeVisible();
-    mobileResults.push({ locale: item.locale, viewport: { width: 390, height: 844 }, ...dimensions,
-      screenshot: relative(process.cwd(), screenshotPath).replaceAll("\\", "/"), cancelled: true });
+    mobileResults.push({
+      locale: item.locale,
+      viewport: { width: 390, height: 844 },
+      ...dimensions,
+      screenshot: relative(process.cwd(), screenshotPath).replaceAll("\\", "/"),
+      cancelled: true,
+    });
   }
 
   // Merely opening/cancelling dialogs must not mutate.
@@ -954,26 +926,20 @@ test("ATE-06 mobile Attendance works in EN and VI", async ({
   expect(saved.status).toBe("scheduled");
 
   expect(await readEvents(fixture)).toHaveLength(0);
-  browserReport.caseDetails["ATE-06"] = { locales: mobileResults, eventCount: 0, sessionUnchanged: true };
+  browserReport.caseDetails["ATE-06"] = {
+    locales: mobileResults,
+    eventCount: 0,
+    sessionUnchanged: true,
+  };
 });
 
-
-
-test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
-  page,
-  browser,
-  baseURL,
-}) => {
-  test.skip(
-    !anonKey,
-    "Requires the local anon key for real user-scoped RPC checks",
-  );
+test("ATE-07 cross-owner cannot read or mutate Attendance", async ({ page, browser, baseURL }) => {
+  test.skip(!anonKey, "Requires the local anon key for real user-scoped RPC checks");
 
   const fixture = await createFixture("scheduled");
   await openFixture(page, fixture);
 
-  const otherEmail =
-    `attendance-other-${randomUUID()}@example.invalid`;
+  const otherEmail = `attendance-other-${randomUUID()}@example.invalid`;
   const otherPassword = randomUUID();
 
   let otherUserId: string | null = null;
@@ -1000,17 +966,15 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
     expect(profile.error).toBeNull();
 
     otherPage = await otherContext.newPage();
-    otherPage.on("pageerror", error => pageErrors.push(
-      error.message.replaceAll(otherPassword, "[redacted]").replaceAll(serviceKey!, "[redacted]"),
-    ));
+    otherPage.on("pageerror", (error) =>
+      pageErrors.push(
+        error.message.replaceAll(otherPassword, "[redacted]").replaceAll(serviceKey!, "[redacted]"),
+      ),
+    );
 
     await otherPage.goto("/en/auth/login");
 
-    await submitLoginForm(
-      otherPage,
-      otherEmail,
-      otherPassword,
-    );
+    await submitLoginForm(otherPage, otherEmail, otherPassword);
 
     await otherPage.waitForURL("**/en/dashboard");
 
@@ -1025,11 +989,7 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
 
     // Create an authenticated API client for User B,
     // explicitly using the ANON key, never service_role.
-    otherClient = createClient(
-      localUrl!,
-      anonKey!,
-      options,
-    );
+    otherClient = createClient(localUrl!, anonKey!, options);
 
     const login = await otherClient.auth.signInWithPassword({
       email: otherEmail,
@@ -1062,14 +1022,9 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
         p_event_key: randomUUID(),
       };
 
-      const payload = rpcName === "ls_skip_study_session"
-        ? { ...args, p_reason: null }
-        : args;
+      const payload = rpcName === "ls_skip_study_session" ? { ...args, p_reason: null } : args;
 
-      const result = await otherClient.rpc(
-        rpcName,
-        payload,
-      );
+      const result = await otherClient.rpc(rpcName, payload);
 
       expect(result.error?.code).toBe("42501");
       expect(result.data).toBeNull();
@@ -1081,8 +1036,12 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
     expect(await readEvents(fixture)).toEqual([]);
 
     browserReport.caseDetails["ATE-07"] = {
-      otherUserId, browserTaskVisible: false, rlsRowsReturned: read.data?.length,
-      denials, sessionUnchanged: true, eventCount: 0,
+      otherUserId,
+      browserTaskVisible: false,
+      rlsRowsReturned: read.data?.length,
+      denials,
+      sessionUnchanged: true,
+      eventCount: 0,
     };
   } finally {
     if (otherClient) {
@@ -1096,16 +1055,14 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({
     await otherContext.close();
 
     if (otherUserId) {
-      const deleted = await admin.auth.admin.deleteUser(
-        otherUserId,
-      );
+      const deleted = await admin.auth.admin.deleteUser(otherUserId);
 
       expect(deleted.error).toBeNull();
       browserReport.caseDetails["ATE-07"] = {
         ...(browserReport.caseDetails["ATE-07"] as Record<string, unknown> | undefined),
-        otherUserId, otherUserCleanup: "PASS",
+        otherUserId,
+        otherUserCleanup: "PASS",
       };
     }
   }
 });
-

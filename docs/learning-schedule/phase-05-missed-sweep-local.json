@@ -13,12 +13,7 @@
     {
       "name": "ineligible-full-row-preservation",
       "status": "PASS",
-      "states": [
-        "in_progress",
-        "completed",
-        "skipped",
-        "cancelled"
-      ]
+      "states": ["in_progress", "completed", "skipped", "cancelled"]
     },
     {
       "name": "double-sweep-uncommitted-first-transition",
@@ -105,11 +100,7 @@
       }
     }
   ],
-  "backendPids": [
-    536,
-    537,
-    538
-  ],
+  "backendPids": [536, 537, 538],
   "environment": {
     "cron": "1.6.4",
     "postgres": "PostgreSQL 17.6 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 15.2.0, 64-bit",

@@ -34,8 +34,7 @@ export const blogPosts: readonly BlogPost[] = [
     publishedAt: "2026-09-28T08:00:00+07:00",
     modifiedAt: "2026-09-28T08:00:00+07:00",
     image: "/blog/adaptive-study-plan.jpg",
-    imageAlt:
-      "A flexible weekly study plan arranged around tasks, deadlines, and open buffer time",
+    imageAlt: "A flexible weekly study plan arranged around tasks, deadlines, and open buffer time",
     load: () => import("@/content/blog/adaptive-study-plan/en.mdx"),
   },
   {
@@ -110,8 +109,7 @@ export const blogPosts: readonly BlogPost[] = [
     id: "study-analytics",
     locale: "vi",
     slug: blogSlugs["study-analytics"].vi,
-    title:
-      "Phân tích thói quen học tập: cách đọc mô thức học của chính bạn",
+    title: "Phân tích thói quen học tập: cách đọc mô thức học của chính bạn",
     description:
       "Hiểu dữ liệu học tập hữu ích, phân biệt hành vi với kết quả và biến mô thức quan sát được thành thử nghiệm nhỏ cho tuần tiếp theo.",
     excerpt:
@@ -131,9 +129,7 @@ export function getBlogPosts(locale: BlogLocale) {
 }
 
 export function getBlogPost(locale: BlogLocale, slug: string) {
-  return blogPosts.find(
-    (post) => post.locale === locale && post.slug === slug,
-  );
+  return blogPosts.find((post) => post.locale === locale && post.slug === slug);
 }
 
 export function getBlogPostBySlug(slug: string) {
@@ -141,9 +137,7 @@ export function getBlogPostBySlug(slug: string) {
 }
 
 export function getBlogTranslation(post: BlogPost, locale: BlogLocale) {
-  return blogPosts.find(
-    (candidate) => candidate.id === post.id && candidate.locale === locale,
-  );
+  return blogPosts.find((candidate) => candidate.id === post.id && candidate.locale === locale);
 }
 
 export function getBlogLanguagePaths(post: BlogPost) {

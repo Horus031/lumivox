@@ -99,40 +99,46 @@ function resolveLocal(
     zoned.hour !== time.hour ||
     zoned.minute !== time.minute
   ) {
-    throw new ScheduleValidationError("dstGap", `Nonexistent local time ${date.toString()} ${time.toString().slice(0, 5)} in ${timezone}`);
+    throw new ScheduleValidationError(
+      "dstGap",
+      `Nonexistent local time ${date.toString()} ${time.toString().slice(0, 5)} in ${timezone}`,
+    );
   }
   return zoned;
 }
 
 /** Pure calculation: does not access Supabase, user state or system timezone. */
-export function generateStudyOccurrences(
-  input: StudyScheduleInput,
-): GeneratedStudySession[] {
+export function generateStudyOccurrences(input: StudyScheduleInput): GeneratedStudySession[] {
   const start = parseDate(input.startsOn);
   const end = parseDate(input.endsOn);
   const days = start.until(end, { largestUnit: "days" }).days + 1;
   if (days <= 0 || days > SCHEDULE_LIMITS.maxDays) {
-    throw new ScheduleValidationError("dateRange", `Schedule must cover between 1 and ${SCHEDULE_LIMITS.maxDays} days`);
+    throw new ScheduleValidationError(
+      "dateRange",
+      `Schedule must cover between 1 and ${SCHEDULE_LIMITS.maxDays} days`,
+    );
   }
   if (!input.slots.length || input.slots.length > SCHEDULE_LIMITS.maxSlots) {
-    throw new ScheduleValidationError("slotCount", `Schedule requires 1–${SCHEDULE_LIMITS.maxSlots} weekly slots`);
+    throw new ScheduleValidationError(
+      "slotCount",
+      `Schedule requires 1–${SCHEDULE_LIMITS.maxSlots} weekly slots`,
+    );
   }
   // Reject malformed timezone identifiers before recurrence generation.
   // UTC and valid IANA identifiers such as Asia/Ho_Chi_Minh are supported.
   validateIanaTimezone(input.timezone);
 
   const normalized = input.slots.map((slot, index) => {
-    if (
-      !Number.isInteger(slot.weekday) ||
-      slot.weekday < 1 ||
-      slot.weekday > 7
-    ) {
+    if (!Number.isInteger(slot.weekday) || slot.weekday < 1 || slot.weekday > 7) {
       throw new ScheduleValidationError("invalidWeekday", `Invalid ISO weekday at slot ${index}`);
     }
     const from = asMinutes(parseTime(slot.startTime));
     const to = asMinutes(parseTime(slot.endTime));
     if (from >= to)
-      throw new ScheduleValidationError("invalidTime", `Slot ${index} must end on the same day after it starts`);
+      throw new ScheduleValidationError(
+        "invalidTime",
+        `Slot ${index} must end on the same day after it starts`,
+      );
     return { ...slot, index, from, to };
   });
   for (let i = 0; i < normalized.length; i++) {
@@ -146,11 +152,7 @@ export function generateStudyOccurrences(
   }
 
   const result: GeneratedStudySession[] = [];
-  for (
-    let date = start;
-    Temporal.PlainDate.compare(date, end) <= 0;
-    date = date.add({ days: 1 })
-  ) {
+  for (let date = start; Temporal.PlainDate.compare(date, end) <= 0; date = date.add({ days: 1 })) {
     const todaySlots = normalized
       .filter((slot) => slot.weekday === date.dayOfWeek)
       .sort((a, b) => a.from - b.from);
@@ -162,7 +164,10 @@ export function generateStudyOccurrences(
       const from = resolveLocal(date, startTime, input.timezone);
       const to = resolveLocal(date, endTime, input.timezone);
       if (Temporal.Instant.compare(from.toInstant(), to.toInstant()) >= 0) {
-        throw new ScheduleValidationError("invalidTime", `Nonpositive duration at ${date.toString()} in ${input.timezone}`);
+        throw new ScheduleValidationError(
+          "invalidTime",
+          `Nonpositive duration at ${date.toString()} in ${input.timezone}`,
+        );
       }
       result.push({
         localDate: date.toString(),

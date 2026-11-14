@@ -1,9 +1,4 @@
-
-import {
-  AlertTriangle,
-  Clock3,
-  LoaderCircle,
-} from "lucide-react";
+import { AlertTriangle, Clock3, LoaderCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
@@ -26,16 +21,10 @@ const BASE_CLASS =
   "inline-flex max-w-full items-center gap-1.5 rounded-md " +
   "border px-2 py-1 text-caption font-semibold";
 
-export function TaskRiskIndicator({
-  state,
-  className,
-}: TaskRiskIndicatorProps) {
+export function TaskRiskIndicator({ state, className }: TaskRiskIndicatorProps) {
   const t = useTranslations("taskRiskRecovery");
 
-  if (
-    state.status === "ineligible" ||
-    state.status === "unavailable"
-  ) {
+  if (state.status === "ineligible" || state.status === "unavailable") {
     return null;
   }
 
@@ -43,16 +32,9 @@ export function TaskRiskIndicator({
     return (
       <span
         data-task-risk-indicator="loading"
-        className={cn(
-          BASE_CLASS,
-          "border-border bg-muted text-muted-foreground",
-          className,
-        )}
+        className={cn(BASE_CLASS, "border-border bg-muted text-muted-foreground", className)}
       >
-        <LoaderCircle
-          aria-hidden="true"
-          className="size-icon-sm animate-spin"
-        />
+        <LoaderCircle aria-hidden="true" className="size-icon-sm animate-spin" />
         {t("status.loading")}
       </span>
     );
@@ -62,11 +44,7 @@ export function TaskRiskIndicator({
     return (
       <span
         data-task-risk-indicator="stale"
-        className={cn(
-          BASE_CLASS,
-          "border-border bg-muted text-secondary-text",
-          className,
-        )}
+        className={cn(BASE_CLASS, "border-border bg-muted text-secondary-text", className)}
       >
         <Clock3 aria-hidden="true" className="size-icon-sm" />
         {t("status.stale")}
@@ -81,18 +59,8 @@ export function TaskRiskIndicator({
   }
 
   return (
-    <span
-      data-task-risk-indicator={band}
-      className={cn(
-        BASE_CLASS,
-        BAND_CLASSES[band],
-        className,
-      )}
-    >
-      <AlertTriangle
-        aria-hidden="true"
-        className="size-icon-sm shrink-0"
-      />
+    <span data-task-risk-indicator={band} className={cn(BASE_CLASS, BAND_CLASSES[band], className)}>
+      <AlertTriangle aria-hidden="true" className="size-icon-sm shrink-0" />
       {t(`status.${band}`)}
     </span>
   );

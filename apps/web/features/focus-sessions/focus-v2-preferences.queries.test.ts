@@ -33,10 +33,13 @@ describe("getFocusV2Preferences", () => {
         long_break_every: 4,
         auto_start_breaks: true,
         auto_start_focus: false,
-      }, error: null,
+      },
+      error: null,
     });
     expect(await getFocusV2Preferences()).toMatchObject({
-      focusMinutes: 50, shortBreakMinutes: 10, autoStartBreaks: true,
+      focusMinutes: 50,
+      shortBreakMinutes: 10,
+      autoStartBreaks: true,
     });
   });
 

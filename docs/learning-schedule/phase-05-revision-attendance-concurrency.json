@@ -8,9 +8,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "skip",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "23e2b59d-8697-466b-a97e-425818692e34",
       "final": {
@@ -85,9 +83,7 @@
       "status": "PASS",
       "first": "skip",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "5485609d-86c8-478a-8abe-dc02f42ea168",
       "final": {
@@ -161,9 +157,7 @@
       "status": "PASS",
       "first": "start",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "66e89bf1-e053-45c0-8114-cdd48b2850b9",
       "final": {
@@ -229,9 +223,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "recover",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "a052d338-dfaf-4b65-abba-7a1a6dd59c76",
       "final": {
@@ -309,9 +301,7 @@
       "status": "PASS",
       "first": "recover",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "f86bfca2-2102-4062-86a1-237cf2589896",
       "final": {
@@ -389,9 +379,7 @@
       "status": "PASS",
       "first": "complete",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "b28740a6-ce71-4eab-8293-2b847014cb6b",
       "final": {
@@ -465,9 +453,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "skip",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "894e1519-a6dc-4877-b29c-e76157c1a7fc",
       "final": {
@@ -542,9 +528,7 @@
       "status": "PASS",
       "first": "skip",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "495349ba-7a06-4b67-aff2-f2e374d1d9ec",
       "final": {
@@ -618,9 +602,7 @@
       "status": "PASS",
       "first": "start",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "366a9456-4c65-4a21-afa0-b61801f2b748",
       "final": {
@@ -686,9 +668,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "recover",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "1162d880-92f4-4f91-8af6-251af4e04053",
       "final": {
@@ -766,9 +746,7 @@
       "status": "PASS",
       "first": "recover",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "3873c1ae-5d1a-4169-b770-3be5b7c537f4",
       "final": {
@@ -846,9 +824,7 @@
       "status": "PASS",
       "first": "complete",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "48cb858e-9135-4988-856d-2c2497edf2db",
       "final": {
@@ -922,9 +898,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "skip",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "6fa20bce-5393-4d72-94b9-34f82bb036d2",
       "final": {
@@ -999,9 +973,7 @@
       "status": "PASS",
       "first": "skip",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "f78b4bda-5a5a-4ff9-bcf4-1350f35aec04",
       "final": {
@@ -1075,9 +1047,7 @@
       "status": "PASS",
       "first": "start",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "22023",
       "originalSessionId": "f7e1cacb-f1a5-4912-aa54-3712697a6980",
       "final": {
@@ -1143,9 +1113,7 @@
       "status": "PASS",
       "first": "revise",
       "second": "recover",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "552c82d9-dac8-4af2-bafb-2e5054e8af1e",
       "final": {
@@ -1223,9 +1191,7 @@
       "status": "PASS",
       "first": "recover",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "3fc3cb69-1b6f-4061-9cc8-24e0cc17227f",
       "final": {
@@ -1303,9 +1269,7 @@
       "status": "PASS",
       "first": "complete",
       "second": "revise",
-      "blockers": [
-        446
-      ],
+      "blockers": [446],
       "secondSqlstate": "00000",
       "originalSessionId": "ebc4a199-f685-473d-a02e-cedcdb6a74bd",
       "final": {

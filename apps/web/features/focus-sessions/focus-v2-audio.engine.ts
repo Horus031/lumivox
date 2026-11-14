@@ -15,7 +15,8 @@ export class FocusV2AudioEngine {
 
   async unlock(): Promise<void> {
     if (this.destroyed) throw new Error("Audio engine was closed.");
-    if (typeof AudioContext === "undefined") throw new Error("Web Audio is not supported in this browser.");
+    if (typeof AudioContext === "undefined")
+      throw new Error("Web Audio is not supported in this browser.");
     if (!this.context) {
       const context = new AudioContext();
       this.context = context;
@@ -27,7 +28,8 @@ export class FocusV2AudioEngine {
       this.cueOutput.connect(context.destination);
     }
     if (this.context.state !== "running") await this.context.resume();
-    if (this.context.state !== "running") throw new Error("Audio playback is blocked by your browser.");
+    if (this.context.state !== "running")
+      throw new Error("Audio playback is blocked by your browser.");
   }
 
   isUnlocked(): boolean {
@@ -36,14 +38,17 @@ export class FocusV2AudioEngine {
 
   setAmbientVolume(volume: number, muted: boolean): void {
     if (!this.context || !this.ambientOutput) return;
-    const gain = muted ? 0 : clampAudioPercent(volume) / 100 * 0.48;
+    const gain = muted ? 0 : (clampAudioPercent(volume) / 100) * 0.48;
     this.ambientOutput.gain.setTargetAtTime(gain, this.context.currentTime, 0.035);
   }
 
   setCueVolume(volume: number, enabled: boolean): void {
     if (!this.context || !this.cueOutput) return;
-    this.cueOutput.gain.setTargetAtTime(enabled ? clampAudioPercent(volume) / 100 * 0.24 : 0,
-      this.context.currentTime, 0.02);
+    this.cueOutput.gain.setTargetAtTime(
+      enabled ? (clampAudioPercent(volume) / 100) * 0.24 : 0,
+      this.context.currentTime,
+      0.02,
+    );
   }
 
   playAmbient(sound: FocusV2AudioSound): void {
@@ -70,7 +75,10 @@ export class FocusV2AudioEngine {
       return;
     }
 
-    const buffer = this.createNoiseBuffer(context, sound === "pink" ? "pink" : sound === "brown" || sound === "ocean" ? "brown" : "white");
+    const buffer = this.createNoiseBuffer(
+      context,
+      sound === "pink" ? "pink" : sound === "brown" || sound === "ocean" ? "brown" : "white",
+    );
     const source = context.createBufferSource();
     source.buffer = buffer;
     source.loop = true;
@@ -119,7 +127,11 @@ export class FocusV2AudioEngine {
 
   stopAmbient(): void {
     for (const source of this.playingSources) {
-      try { source.stop(); } catch { /* Already stopped. */ }
+      try {
+        source.stop();
+      } catch {
+        /* Already stopped. */
+      }
       source.disconnect();
     }
     for (const node of this.playingNodes) node.disconnect();
@@ -150,7 +162,10 @@ export class FocusV2AudioEngine {
       envelope.gain.exponentialRampToValueAtTime(0.001, start + 0.23);
       oscillator.connect(envelope);
       envelope.connect(this.cueOutput!);
-      oscillator.onended = () => { oscillator.disconnect(); envelope.disconnect(); };
+      oscillator.onended = () => {
+        oscillator.disconnect();
+        envelope.disconnect();
+      };
       oscillator.start(start);
       oscillator.stop(start + 0.25);
     });
@@ -175,7 +190,10 @@ export class FocusV2AudioEngine {
     const pink = new Float32Array(7);
     for (let index = 0; index < frameCount; index++) {
       const white = Math.random() * 2 - 1;
-      if (kind === "white") { channel[index] = white * 0.19; continue; }
+      if (kind === "white") {
+        channel[index] = white * 0.19;
+        continue;
+      }
       if (kind === "brown") {
         brown = (brown + 0.02 * white) / 1.02;
         channel[index] = brown * 1.9;
@@ -187,7 +205,9 @@ export class FocusV2AudioEngine {
       pink[3] = 0.8665 * pink[3] + white * 0.3104856;
       pink[4] = 0.55 * pink[4] + white * 0.5329522;
       pink[5] = -0.7616 * pink[5] - white * 0.016898;
-      channel[index] = (pink[0] + pink[1] + pink[2] + pink[3] + pink[4] + pink[5] + pink[6] + white * 0.5362) * 0.055;
+      channel[index] =
+        (pink[0] + pink[1] + pink[2] + pink[3] + pink[4] + pink[5] + pink[6] + white * 0.5362) *
+        0.055;
       pink[6] = white * 0.115926;
     }
     return buffer;

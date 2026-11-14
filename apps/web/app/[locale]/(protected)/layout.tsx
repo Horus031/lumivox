@@ -18,9 +18,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ProtectedLayout({
-  children,
-}: ProtectedLayoutProps) {
+export default async function ProtectedLayout({ children }: ProtectedLayoutProps) {
   return (
     <Suspense fallback={<ProtectedLayoutFallback />}>
       <ProtectedLayoutContent>{children}</ProtectedLayoutContent>
@@ -39,7 +37,11 @@ function ProtectedLayoutFallback() {
   return (
     <div className="min-h-svh bg-background text-foreground">
       <div aria-hidden="true" className="h-topbar border-b border-border" />
-      <div className="lg:pl-sidebar"><div className="min-w-0 px-card py-page md:px-page"><PageLoading label={t("loading")} /></div></div>
+      <div className="lg:pl-sidebar">
+        <div className="min-w-0 px-card py-page md:px-page">
+          <PageLoading label={t("loading")} />
+        </div>
+      </div>
     </div>
   );
 }
