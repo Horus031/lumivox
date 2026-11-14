@@ -271,9 +271,26 @@ describe("workspace optimistic controller", () => {
       );
     });
 
-    expect(
-      container.querySelector('[data-task-risk-indicator="high"]'),
-    ).not.toBeNull();
+    const indicator = container.querySelector<HTMLElement>(
+      '[data-task-risk-indicator="high"]',
+    );
+    expect(indicator).not.toBeNull();
+
+    // Risk indicator must belong to the Task open button.
+    const openButton = indicator!.closest("button");
+    expect(openButton).not.toBeNull();
+
+    act(() => {
+      indicator!.click();
+    });
+
+    // Clicking the risk indicator opens the Task Drawer.
+    expect(container.querySelector("[data-drawer]")?.textContent).toBe(
+      riskTask.title,
+    );
+
+    // Opening a Task must trigger zero status transitions.
+    expect(mocks.transition).not.toHaveBeenCalled();
 
     let resolveTransition!: (result: {
       success: false;

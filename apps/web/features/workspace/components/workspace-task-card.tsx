@@ -58,11 +58,6 @@ export function WorkspaceTaskCard({
         draggable.isDragging && "opacity-60",
       )}
     >
-      {showRiskIndicator ? (
-        <div className="mt-2 flex min-w-0">
-          <TaskRiskIndicator state={riskState} />
-        </div>
-      ) : null}
       <button
         type="button"
         onClick={() => onOpen(task)}
@@ -120,7 +115,14 @@ export function WorkspaceTaskCard({
             ) : null}
           </div>
         ) : null}
+
+        {showRiskIndicator ? (
+          <div className="mt-2 flex min-w-0">
+            <TaskRiskIndicator state={riskState} />
+          </div>
+        ) : null}
       </button>
+
       <button
         ref={draggable.handleRef}
         type="button"
