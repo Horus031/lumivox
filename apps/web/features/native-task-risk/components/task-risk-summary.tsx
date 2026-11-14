@@ -1,4 +1,3 @@
-
 import { useLocale, useTranslations } from "next-intl";
 
 import { TaskRiskIndicator } from "./task-risk-indicator";
@@ -8,9 +7,7 @@ type TaskRiskSummaryProps = {
   state: TaskRiskViewState;
 };
 
-export function TaskRiskSummary({
-  state,
-}: TaskRiskSummaryProps) {
+export function TaskRiskSummary({ state }: TaskRiskSummaryProps) {
   const t = useTranslations("taskRiskRecovery");
   const locale = useLocale();
 
@@ -34,10 +31,7 @@ export function TaskRiskSummary({
           {t("summary.title")}
         </h3>
 
-        <p
-          role="status"
-          className="mt-2 text-body text-secondary-text"
-        >
+        <p role="status" className="mt-2 text-body text-secondary-text">
           {message}
         </p>
       </section>
@@ -57,13 +51,13 @@ export function TaskRiskSummary({
 
   const predictionDate = new Date(alert.predicted_at);
 
-  const predictionDateLabel =
-    Number.isNaN(predictionDate.getTime())
-      ? null
-      : new Intl.DateTimeFormat(locale, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(predictionDate);
+  const predictionDateLabel = Number.isNaN(predictionDate.getTime())
+    ? null
+    : `${new Intl.DateTimeFormat(locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
+        timeZone: "UTC",
+      }).format(predictionDate)} UTC`;
 
   const reasons = alert.reason_summaries.slice(0, 3);
 
@@ -114,8 +108,7 @@ export function TaskRiskSummary({
       </p>
 
       <div className="mt-3 flex flex-wrap gap-3 text-caption text-muted-foreground">
-        {alert.days_until_due !== null &&
-        alert.days_until_due >= 0 ? (
+        {alert.days_until_due !== null && alert.days_until_due >= 0 ? (
           <span>
             {t("summary.daysRemaining", {
               days: alert.days_until_due,

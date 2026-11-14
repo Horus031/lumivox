@@ -1,15 +1,7 @@
-
 import { act, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { NextIntlClientProvider } from "next-intl";
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import en from "@/messages/en.json";
 import viMessages from "@/messages/vi.json";
@@ -24,9 +16,7 @@ import { TaskRiskRecoveryPanel } from "./task-risk-recovery-panel";
 import { TaskRiskSummary } from "./task-risk-summary";
 
 function fixture(id: string) {
-  const result = TASK_RISK_UI_FIXTURES.find(
-    (item) => item.id === id,
-  );
+  const result = TASK_RISK_UI_FIXTURES.find((item) => item.id === id);
 
   if (!result) {
     throw new Error(`Unknown fixture: ${id}`);
@@ -54,10 +44,7 @@ describe("Task Risk UI Foundation", () => {
     container.remove();
   });
 
-  function render(
-    content: ReactNode,
-    locale: "en" | "vi" = "en",
-  ) {
+  function render(content: ReactNode, locale: "en" | "vi" = "en") {
     act(() => {
       root.render(
         <NextIntlClientProvider
@@ -74,89 +61,56 @@ describe("Task Risk UI Foundation", () => {
   it.each(["en", "vi"] as const)(
     "renders localized high-risk labels in %s",
     (locale) => {
-      render(
-        <TaskRiskIndicator state={fixture("high")} />,
-        locale,
-      );
+      render(<TaskRiskIndicator state={fixture("high")} />, locale);
 
       const messages =
-        locale === "en"
-          ? en.taskRiskRecovery
-          : viMessages.taskRiskRecovery;
+        locale === "en" ? en.taskRiskRecovery : viMessages.taskRiskRecovery;
 
-      expect(container.textContent).toContain(
-        messages.status.high,
-      );
+      expect(container.textContent).toContain(messages.status.high);
     },
   );
 
   it("does not show warnings for low-risk or ineligible tasks", () => {
-    render(
-      <TaskRiskIndicator state={fixture("low")} />,
-    );
+    render(<TaskRiskIndicator state={fixture("low")} />);
 
-    expect(
-      container.querySelector("[data-task-risk-indicator]"),
-    ).toBeNull();
+    expect(container.querySelector("[data-task-risk-indicator]")).toBeNull();
 
-    render(
-      <TaskRiskIndicator state={fixture("ineligible")} />,
-    );
+    render(<TaskRiskIndicator state={fixture("ineligible")} />);
 
-    expect(
-      container.querySelector("[data-task-risk-indicator]"),
-    ).toBeNull();
+    expect(container.querySelector("[data-task-risk-indicator]")).toBeNull();
   });
 
   it("distinguishes loading and stale states", () => {
-    render(
-      <TaskRiskIndicator state={fixture("loading")} />,
-    );
+    render(<TaskRiskIndicator state={fixture("loading")} />);
 
     expect(
-      container.querySelector(
-        '[data-task-risk-indicator="loading"]',
-      ),
+      container.querySelector('[data-task-risk-indicator="loading"]'),
     ).not.toBeNull();
 
-    render(
-      <TaskRiskIndicator state={fixture("stale")} />,
-    );
+    render(<TaskRiskIndicator state={fixture("stale")} />);
 
     expect(
-      container.querySelector(
-        '[data-task-risk-indicator="stale"]',
-      ),
+      container.querySelector('[data-task-risk-indicator="stale"]'),
     ).not.toBeNull();
   });
 
   it("hides the previous probability when a snapshot is stale", () => {
-    render(
-      <TaskRiskSummary state={fixture("high")} />,
-    );
+    render(<TaskRiskSummary state={fixture("high")} />);
 
     expect(container.textContent).toContain("76%");
 
-    render(
-      <TaskRiskSummary state={fixture("stale")} />,
-    );
+    render(<TaskRiskSummary state={fixture("stale")} />);
 
     expect(
-      container.querySelector(
-        '[data-risk-view-state="stale"]',
-      ),
+      container.querySelector('[data-risk-view-state="stale"]'),
     ).not.toBeNull();
 
     expect(container.textContent).not.toContain("76%");
-    expect(container.textContent).not.toContain(
-      "Deadline is approaching",
-    );
+    expect(container.textContent).not.toContain("Deadline is approaching");
   });
 
   it("shows a moderate band without claiming certain lateness", () => {
-    render(
-      <TaskRiskSummary state={fixture("moderate")} />,
-    );
+    render(<TaskRiskSummary state={fixture("moderate")} />);
 
     expect(container.textContent).toContain(
       en.taskRiskRecovery.status.moderate,
@@ -177,13 +131,9 @@ describe("Task Risk UI Foundation", () => {
     );
 
     const buttons =
-      container.querySelectorAll<HTMLButtonElement>(
-        "[data-risk-action]",
-      );
+      container.querySelectorAll<HTMLButtonElement>("[data-risk-action]");
 
-    expect(buttons.length).toBe(
-      TASK_RISK_UI_ACTIONS.length,
-    );
+    expect(buttons.length).toBe(TASK_RISK_UI_ACTIONS.length);
 
     for (const button of buttons) {
       expect(button.disabled).toBe(true);
@@ -201,15 +151,13 @@ describe("Task Risk UI Foundation", () => {
       />,
     );
 
-    const focusButton =
-      container.querySelector<HTMLButtonElement>(
-        '[data-risk-action="start_focus"]',
-      );
+    const focusButton = container.querySelector<HTMLButtonElement>(
+      '[data-risk-action="start_focus"]',
+    );
 
-    const scheduleButton =
-      container.querySelector<HTMLButtonElement>(
-        '[data-risk-action="increase_study_frequency"]',
-      );
+    const scheduleButton = container.querySelector<HTMLButtonElement>(
+      '[data-risk-action="increase_study_frequency"]',
+    );
 
     expect(focusButton).not.toBeNull();
     expect(scheduleButton).not.toBeNull();
@@ -219,9 +167,7 @@ describe("Task Risk UI Foundation", () => {
     act(() => focusButton!.click());
 
     expect(onActionRequested).toHaveBeenCalledOnce();
-    expect(onActionRequested).toHaveBeenCalledWith(
-      TASK_RISK_UI_ACTIONS[0],
-    );
+    expect(onActionRequested).toHaveBeenCalledWith(TASK_RISK_UI_ACTIONS[0]);
 
     act(() => scheduleButton!.click());
 
@@ -237,9 +183,7 @@ describe("Task Risk UI Foundation", () => {
       />,
     );
 
-    expect(
-      container.querySelector("[data-risk-action]"),
-    ).toBeNull();
+    expect(container.querySelector("[data-risk-action]")).toBeNull();
 
     render(
       <TaskRiskRecoveryPanel
@@ -249,8 +193,13 @@ describe("Task Risk UI Foundation", () => {
       />,
     );
 
-    expect(
-      container.querySelector("[data-risk-action]"),
-    ).toBeNull();
+    expect(container.querySelector("[data-risk-action]")).toBeNull();
+  });
+
+  it("renders prediction time in an explicit, stable timezone", () => {
+    render(<TaskRiskSummary state={fixture("high")} />, "en");
+
+    expect(container.textContent).toContain("9:00");
+    expect(container.textContent).toContain("UTC");
   });
 });
