@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
 
-select plan(12);
+select plan(14);
 
 -- Two isolated test users.
 insert into auth.users (id, email)
@@ -254,6 +254,21 @@ select is(
   'Creating a Focus session increments the input revision'
 );
 
+update public.focus_sessions
+set planned_minutes = 30
+where id = '00000000-0000-4000-8000-000000000814';
+
+select is(
+  (
+    select revision
+    from public.native_task_risk_input_revisions
+    where user_id =
+      '00000000-0000-4000-8000-000000000801'
+  ),
+  4::bigint,
+  'Updating Focus also invalidates risk snapshots'
+);
+
 delete from public.focus_sessions
 where id =
   '00000000-0000-4000-8000-000000000814';
@@ -265,8 +280,22 @@ select is(
     where user_id =
       '00000000-0000-4000-8000-000000000801'
   ),
-  4::bigint,
+  5::bigint,
   'Deleting a Focus session also invalidates predictions'
+);
+
+delete from public.tasks
+where id = '00000000-0000-4000-8000-000000000811';
+
+select is(
+  (
+    select revision
+    from public.native_task_risk_input_revisions
+    where user_id =
+      '00000000-0000-4000-8000-000000000801'
+  ),
+  6::bigint,
+  'Deleting a Task also invalidates risk snapshots'
 );
 
 select * from finish();
