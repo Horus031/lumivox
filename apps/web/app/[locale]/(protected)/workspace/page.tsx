@@ -14,9 +14,19 @@ import { WorkspaceGoalRail } from "@/features/workspace/components/workspace-goa
 
 import { getWorkspaceTasks } from "@/features/workspace/workspace.queries";
 
-import { getWorkspaceScopeKey, resolveWorkspaceScope } from "@/features/workspace/workspace.utils";
+import {
+  getWorkspaceScopeKey,
+  resolveWorkspaceScope,
+} from "@/features/workspace/workspace.utils";
 
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
+
+import {
+  getWorkspaceTaskRiskStates,
+  type WorkspaceTaskRiskMap,
+} from "@/features/native-task-risk/task-risk-workspace.queries";
+
+import { resolveTaskRiskSnapshot } from "@/features/native-task-risk/task-risk-snapshot.adapter";
 
 type WorkspacePageProps = {
   searchParams: Promise<{
@@ -31,14 +41,22 @@ type WorkspacePageProps = {
 };
 
 function resolveTaskTab(value: string | undefined): TaskDrawerTab {
-  if (value === "overview" || value === "subtasks" || value === "documents" || value === "review") {
+  if (
+    value === "overview" ||
+    value === "risk" ||
+    value === "subtasks" ||
+    value === "documents" ||
+    value === "review"
+  ) {
     return value;
   }
 
   return "overview";
 }
 
-export default async function WorkspacePage({ searchParams }: WorkspacePageProps) {
+export default async function WorkspacePage({
+  searchParams,
+}: WorkspacePageProps) {
   const [t, params, goals] = await Promise.all([
     getTranslations("workspace.page"),
 
@@ -55,18 +73,38 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
 
   const tasks = await getWorkspaceTasks(scope);
 
+  const referenceNow = new Date().toISOString();
+  const riskNow = new Date(referenceNow);
+
+  let riskStates: WorkspaceTaskRiskMap;
+
+  try {
+    riskStates = await getWorkspaceTaskRiskStates(tasks, {
+      now: riskNow,
+    });
+  } catch {
+    // Risk is an enhancement, not a prerequisite for Workspace.
+    // Never interpret a failed risk query as low risk.
+    riskStates = Object.fromEntries(
+      tasks.map((task) => [
+        task.id,
+        resolveTaskRiskSnapshot(task, undefined, riskNow),
+      ]),
+    ) as WorkspaceTaskRiskMap;
+  }
+
   const selectedKey = getWorkspaceScopeKey(scope);
 
   const defaultGoalId = scope.type === "goal" ? scope.goalId : undefined;
 
   const initialTaskId =
-    params.task && tasks.some((task) => task.id === params.task) ? params.task : null;
+    params.task && tasks.some((task) => task.id === params.task)
+      ? params.task
+      : null;
 
   const initialTaskTab = resolveTaskTab(params.tab);
 
   const initialEditMode = params.edit === "1";
-
-  const referenceNow = new Date().toISOString();
 
   return (
     <section className="min-w-0 space-y-section">
@@ -99,6 +137,7 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           initialTaskId={initialTaskId}
           initialTaskTab={initialTaskTab}
           initialEditMode={initialEditMode}
+          riskStates={riskStates}
         />
       </div>
     </section>

@@ -749,6 +749,7 @@
       "deleteConfirm": "Delete this task? Its subtasks and task learning documents will also be deleted. This action cannot be undone.",
       "tabs": {
         "overview": "Overview",
+        "risk": "Risk",
         "subtasks": "Subtasks ({count})",
         "documents": "Documents ({count})",
         "review": "AI Review"
@@ -2717,6 +2718,7 @@
       "subtitle": "Review each suggestion before changing your tasks or study schedule.",
       "empty": "No recovery actions are available for this task.",
       "choose": "Review action",
+      "readOnlyNotice": "These are model-generated suggestions for review. Actions will become available after the recovery workflows are connected.",
       "label": {
         "start_focus": "Start Focus",
         "split_task": "Break into subtasks",

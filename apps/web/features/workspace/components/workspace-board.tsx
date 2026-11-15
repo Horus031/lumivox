@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition, useEffect } from "react";
 import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -23,6 +23,10 @@ import type { GoalOption } from "@/features/goals/goal.types";
 
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
+import type { WorkspaceTaskRiskMap } from "@/features/native-task-risk/task-risk-workspace.queries";
+
+import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+
 type WorkspaceBoardProps = {
   tasks: WorkspaceTask[];
 
@@ -37,6 +41,8 @@ type WorkspaceBoardProps = {
   initialTaskTab: TaskDrawerTab;
 
   initialEditMode: boolean;
+
+  riskStates: WorkspaceTaskRiskMap;
 };
 
 export function WorkspaceBoard({
@@ -47,29 +53,67 @@ export function WorkspaceBoard({
   initialTaskId,
   initialTaskTab,
   initialEditMode,
+  riskStates,
 }: WorkspaceBoardProps) {
   const taskT = useTranslations("tasks.form");
   const t = useTranslations("workspace.board");
   const router = useRouter();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(initialTaskId);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
+    initialTaskId,
+  );
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
+  const [serverRiskStates, setServerRiskStates] = useState(riskStates);
+
+  const [riskInvalidated, setRiskInvalidated] = useState(false);
+
+  const [riskClockMs, setRiskClockMs] = useState(() =>
+    Date.parse(referenceNow),
+  );
   const [isPending, startTransition] = useTransition();
   const requestInFlight = useRef(false);
   const boardNow = useMemo(() => new Date(referenceNow), [referenceNow]);
+
+  const riskNow = useMemo(
+    () => new Date(Math.max(riskClockMs, boardNow.getTime())),
+    [riskClockMs, boardNow],
+  );
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setRiskClockMs(Date.now());
+    }, 60_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
   const quickCreateGoalId = scope.type === "goal" ? scope.goalId : null;
 
   // Reset the local snapshot when refreshed server props arrive, before paint.
-  if (serverTasks !== tasks) {
+  if (serverTasks !== tasks || serverRiskStates !== riskStates) {
     setServerTasks(tasks);
     setBoardTasks(tasks);
+
+    setServerRiskStates(riskStates);
+    setRiskInvalidated(false);
   }
-  const selectedTask = boardTasks.find((task) => task.id === selectedTaskId) ?? null;
+  const selectedTask =
+    boardTasks.find((task) => task.id === selectedTaskId) ?? null;
 
   const groupedTasks = useMemo(
     () => groupWorkspaceTasksByStatus(boardTasks, boardNow),
     [boardTasks, boardNow],
   );
+
+  function riskForTask(task: WorkspaceTask) {
+    return getTaskRiskDisplayState(
+      task,
+      riskStates[task.id],
+      riskNow,
+      riskInvalidated,
+    );
+  }
 
   function handleDragEnd(event: DragEndEvent) {
     if (event.canceled || requestInFlight.current || isPending) return;
@@ -93,6 +137,7 @@ export function WorkspaceBoard({
 
     const previousTasks = boardTasks;
     requestInFlight.current = true;
+    setRiskInvalidated(true);
     setBoardTasks((current) =>
       current.map((item) =>
         item.id === taskId
@@ -158,6 +203,7 @@ export function WorkspaceBoard({
                 onOpenTask={(task) => setSelectedTaskId(task.id)}
                 disabled={isPending}
                 quickCreateGoalId={quickCreateGoalId}
+                riskStateForTask={riskForTask}
               />
             ))}
           </div>
@@ -170,6 +216,11 @@ export function WorkspaceBoard({
         initialTab={initialTaskTab}
         initialEditMode={initialEditMode}
         onClose={() => setSelectedTaskId(null)}
+        riskState={selectedTask ? riskForTask(selectedTask) : undefined}
+        riskNow={riskNow}
+        onTaskDataChanged={() => {
+          setRiskInvalidated(true);
+        }}
       />
     </>
   );

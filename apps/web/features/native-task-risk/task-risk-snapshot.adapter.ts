@@ -101,7 +101,10 @@ export function getEffectiveTaskDueAtMs(
   return null;
 }
 
-function taskIsEligible(task: WorkspaceTask, nowMs: number): boolean {
+function taskIsEligible(
+  task: Pick<WorkspaceTask, "status" | "completed_at" | "due_at" | "due_date">,
+  nowMs: number,
+): boolean {
   if (
     task.status === "completed" ||
     task.status === "cancelled" ||
@@ -121,7 +124,10 @@ function taskIsEligible(task: WorkspaceTask, nowMs: number): boolean {
   return remaining >= 0 && remaining <= HORIZON_MS;
 }
 
-export function isTaskRiskEligible(task: WorkspaceTask, now: Date): boolean {
+export function isTaskRiskEligible(
+  task: Pick<WorkspaceTask, "status" | "completed_at" | "due_at" | "due_date">,
+  now: Date,
+): boolean {
   return taskIsEligible(task, now.getTime());
 }
 
