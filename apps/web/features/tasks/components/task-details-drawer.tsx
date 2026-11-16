@@ -40,6 +40,8 @@ import { TaskStudyScheduleSection } from "@/features/learning-schedule/component
 
 import { TaskRiskSummary } from "@/features/native-task-risk/components/task-risk-summary";
 
+import { startTaskRiskRecoveryAction } from "@/features/native-task-risk/task-risk-recovery.actions";
+import { TaskRiskRecoveryHistory } from "@/features/native-task-risk/components/task-risk-recovery-history";
 import { TaskRiskSuggestions } from "@/features/native-task-risk/components/task-risk-suggestions";
 
 import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
@@ -105,6 +107,9 @@ export function TaskDetailsDrawer({
 
   const [isDeleting, startDeleteTransition] = useTransition();
 
+  const [recovery, setRecovery] = useState<{ taskId: string; id: string; action: string } | null>(null);
+  const recoveryKeys = useRef(new Map<string, string>());
+  const recoveryRequest = useRef(0);
   const taskId = task?.id ?? null;
 
   const taskUpdatedAt = task?.updated_at ?? null;
@@ -148,6 +153,7 @@ export function TaskDetailsDrawer({
     refreshDetails();
     return () => {
       detailsRequest.current += 1;
+      recoveryRequest.current += 1;
     };
   }, [
     taskId,
@@ -169,17 +175,35 @@ export function TaskDetailsDrawer({
     ? getTaskRiskDisplayState(currentTask, riskState, riskNow)
     : (riskState ?? { status: "unavailable" });
 
-  function handleRecoveryAction(
+  async function handleRecoveryAction(
     type: NativeTaskRiskRecommendedAction["action_type"],
   ) {
     if (currentRiskState.status !== "ready") {
       return;
     }
 
+    if (type === "view_task") {
+      setActiveTab("overview");
+      return;
+    }
+    const request = ++recoveryRequest.current;
+    const predictionId = currentRiskState.alert.prediction_id;
+    const key = `${currentTask.id}:${predictionId}:${type}`;
+    const idempotencyKey = recoveryKeys.current.get(key) ?? crypto.randomUUID();
+    recoveryKeys.current.set(key, idempotencyKey);
+    let attemptId: string | null = null;
+    try {
+      attemptId = await startTaskRiskRecoveryAction({ taskId: currentTask.id, predictionId, actionType: type, idempotencyKey });
+    } catch {
+      // The original recovery workflow is still available during a tracking outage.
+    }
+    if (request !== recoveryRequest.current) return;
+    setRecovery(attemptId ? { taskId: currentTask.id, id: attemptId, action: type } : null);
+
     switch (type) {
       case "start_focus":
         localizedRouter.push(
-          `/focus?taskId=${encodeURIComponent(currentTask.id)}`,
+          `/focus?taskId=${encodeURIComponent(currentTask.id)}${attemptId ? `&recoveryAttemptId=${encodeURIComponent(attemptId)}` : ""}`,
         );
         return;
 
@@ -194,9 +218,6 @@ export function TaskDetailsDrawer({
         setIsEditing(true);
         return;
 
-      case "view_task":
-        setActiveTab("overview");
-        return;
     }
   }
 
@@ -371,8 +392,10 @@ export function TaskDetailsDrawer({
                   key={currentTask.updated_at}
                   task={currentTask}
                   goals={goals}
-                  onCancel={() => setIsEditing(false)}
+                  recoveryAttemptId={recovery?.taskId === currentTask.id && ["reschedule", "reduce_scope"].includes(recovery.action) ? recovery.id : undefined}
+                  onCancel={() => { setRecovery(null); setIsEditing(false); }}
                   onSaved={() => {
+                    setRecovery(null);
                     setIsEditing(false);
                     onTaskDataChanged?.();
                     refreshDetails();
@@ -454,14 +477,17 @@ export function TaskDetailsDrawer({
               state={currentRiskState}
               onActionRequested={handleRecoveryAction}
             />
+            <TaskRiskRecoveryHistory key={currentTask.id} taskId={currentTask.id} revision={currentTask.updated_at} />
           </TabsContent>
 
           <TabsContent value="subtasks">
             <TaskSubtasksPanel
               parentTask={currentTask}
+              recoveryAttemptId={recovery?.taskId === currentTask.id && recovery.action === "split_task" ? recovery.id : undefined}
               subtasks={subtasks}
               goals={goals}
               onChanged={() => {
+                setRecovery(null);
                 onTaskDataChanged?.();
                 refreshDetails();
               }}

@@ -1043,6 +1043,78 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_risk_recovery_attempts": {
+                  Row: {
+                    id: string
+                    user_id: string
+                    task_id: string
+                    source_prediction_id: string
+                    action_type: string
+                    status: string
+                    idempotency_key: string
+                    initiated_at: string
+                    original_due_at: string
+                    applied_at: string | null
+                    applied_entity_id: string | null
+                    reassessment_prediction_id: string | null
+                    evaluated_at: string | null
+                    reassessment_requested_at: string | null
+                  }
+                  Insert: {
+                    id?: string
+                    user_id: string
+                    task_id: string
+                    source_prediction_id: string
+                    action_type: string
+                    status?: string
+                    idempotency_key: string
+                    initiated_at?: string
+                    original_due_at: string
+                    applied_at?: string | null
+                    applied_entity_id?: string | null
+                    reassessment_prediction_id?: string | null
+                    evaluated_at?: string | null
+                    reassessment_requested_at?: string | null
+                  }
+                  Update: {
+                    id?: string
+                    user_id?: string
+                    task_id?: string
+                    source_prediction_id?: string
+                    action_type?: string
+                    status?: string
+                    idempotency_key?: string
+                    initiated_at?: string
+                    original_due_at?: string
+                    applied_at?: string | null
+                    applied_entity_id?: string | null
+                    reassessment_prediction_id?: string | null
+                    evaluated_at?: string | null
+                    reassessment_requested_at?: string | null
+                  }
+                  Relationships: [
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_task_id_fkey"
+                      columns: ["task_id"]
+                      isOneToOne: false
+                      referencedRelation: "tasks"
+                      referencedColumns: ["id"]
+                    },
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_source_prediction_id_fkey"
+                      columns: ["source_prediction_id"]
+                      isOneToOne: false
+                      referencedRelation: "deadline_risk_predictions"
+                      referencedColumns: ["id"]
+                    },
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_reassessment_prediction_id_fkey"
+                      columns: ["reassessment_prediction_id"]
+                      isOneToOne: false
+                      referencedRelation: "deadline_risk_predictions"
+                      referencedColumns: ["id"]
+                    },
+                  ]
                 },"task_study_focus_attributions": {
                   Row: {
                     "attribution_source": string,"created_at": string,"focus_session_id": string,"id": string,"study_session_id": string,"task_id": string,"updated_at": string,"user_id": string
@@ -1605,6 +1677,12 @@ isOneToOne: false
 { Args: { "p_limit"?: number }; Returns: {
               "algorithm": string,"days_until_due": number,"decision_threshold": number,"due_at": string,"goal_id": string,"goal_title": string,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"reason_summaries": Json,"recommended_actions": Json,"risk_band": string,"risk_probability": number,"risk_score": number,"task_id": string,"task_title": string,"top_attributions": Json
             }[]
+                           },
+"complete_verified_task_risk_recovery":
+{ Args: { p_action_type: string, p_attempt_id: string, p_entity_id?: string, p_previous_due_at?: string, p_previous_minutes?: number, p_task_id: string, p_task_updated_at?: string, p_user_id: string }; Returns: boolean
+                           },
+"start_verified_task_risk_recovery":
+{ Args: { p_action_type: string, p_key: string, p_prediction_id: string, p_task_id: string, p_user_id: string }; Returns: string
                            },
 "get_my_native_task_risk_candidate_tasks":
 { Args: { "p_horizon_days"?: number,"p_limit"?: number }; Returns: {

@@ -59,9 +59,10 @@ export default async function FocusPage({
   searchParams: Promise<{
     studySession?: string | string[];
     taskId?: string | string[];
+    recoveryAttemptId?: string | string[];
   }>;
 }) {
-  const { studySession, taskId: requestedTaskId } = await searchParams;
+  const { studySession, taskId: requestedTaskId, recoveryAttemptId } = await searchParams;
   const activeV2 =
     process.env.FOCUS_V2_ENABLED === "true"
       ? await getActiveFocusV2Snapshot()
@@ -129,6 +130,9 @@ export default async function FocusPage({
     }
   }
 
+  const recoveryId = initialTaskId && typeof recoveryAttemptId === "string" && z.uuid().safeParse(recoveryAttemptId).success
+    ? recoveryAttemptId : undefined;
+
   return (
     <section>
       <div className="mx-auto min-w-0 space-y-5">
@@ -183,6 +187,7 @@ export default async function FocusPage({
                 key={studyLaunch ? `study:${studyLaunch.studySessionId}` : initialTaskId}
                 tasks={taskOptions}
                 initialTaskId={initialTaskId}
+                recoveryAttemptId={recoveryId}
                 initialPreferences={initialPreferences}
                 studyLaunch={studyLaunch}
               />
@@ -191,6 +196,7 @@ export default async function FocusPage({
                 key={initialTaskId}
                 tasks={taskOptions}
                 initialTaskId={initialTaskId}
+                recoveryAttemptId={recoveryId}
               />
             )}
           </div>

@@ -2690,6 +2690,24 @@
     "attendanceActionsLabel": "Attendance actions"
   },
   "taskRiskRecovery": {
+    "history": {
+      "title": "Recovery history",
+      "loading": "Loading recovery history…",
+      "empty": "No recovery actions yet.",
+      "unavailable": "A comparable estimate is unavailable.",
+      "retry": "Reassessment is unavailable. Try again in a few minutes.",
+      "start_focus": "Start Focus",
+      "split_task": "Split task",
+      "reschedule": "Reschedule",
+      "reduce_scope": "Reduce estimated work",
+      "initiated": "Action selected",
+      "applied": "Action applied",
+      "abandoned": "Action abandoned",
+      "awaiting": "Awaiting reassessment",
+      "reassess": "Reassess risk",
+      "originalDue": "Original deadline: {date, date, medium}",
+      "comparison": "Risk reassessed: {before, number, percent} → {after, number, percent} ({delta, number} percentage points). These are model estimates."
+    },
     "status": {
       "high": "High risk",
       "elevated": "Needs attention",

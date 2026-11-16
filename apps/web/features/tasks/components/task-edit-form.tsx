@@ -36,6 +36,7 @@ import { updateTaskAction } from "@/features/tasks/task.actions";
 import { TaskDatePicker } from "./task-date-picker";
 
 type TaskEditFormProps = {
+  recoveryAttemptId?: string;
   task: TaskWithGoal;
 
   goals: GoalOption[];
@@ -62,6 +63,7 @@ function initialDueTime(dueAt: string | null) {
 }
 
 export function TaskEditForm({
+  recoveryAttemptId,
   task,
   goals,
   onSaved,
@@ -100,6 +102,7 @@ export function TaskEditForm({
 
     startTransition(async () => {
       const result = await updateTaskAction({
+        ...(recoveryAttemptId ? { recoveryAttemptId } : {}),
         taskId: task.id,
 
         title,

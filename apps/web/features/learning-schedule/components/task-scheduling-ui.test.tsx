@@ -43,6 +43,11 @@ vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success }
 vi.mock("../schedule.actions", () => ({ createStudyScheduleAction: mocks.create }));
 vi.mock("../schedule.queries.actions", () => ({ getTaskStudyScheduleAction: mocks.load }));
 vi.mock("../session.queries.actions", () => ({ getStudySessionsAction: mocks.sessions }));
+vi.mock("@/features/native-task-risk/task-risk-recovery.actions", () => ({
+  startTaskRiskRecoveryAction: async () => "813faa4e-3d01-4d62-8099-e53d79c33331",
+  loadTaskRiskRecoveryHistoryAction: async () => [],
+  reassessTaskRiskAfterRecoveryAction: async () => false,
+}));
 vi.mock("@/features/tasks/task.actions", () => ({
   getTaskDetailsAction: mocks.details,
   deleteTaskAction: mocks.remove,
@@ -197,7 +202,7 @@ describe("Task scheduling UI", () => {
     expect(mocks.details).toHaveBeenCalledOnce();
   });
 
-  it("only navigates to Focus when Start Focus is clicked twice", async () => {
+  it("navigates once to Focus with a tracked attempt on repeated Review clicks", async () => {
     await render(recoveryDrawer("start_focus"));
     await act(async () => {
       const choose = button("actions.choose");
@@ -205,8 +210,7 @@ describe("Task scheduling UI", () => {
       choose.click();
     });
     expect(mocks.push.mock.calls).toEqual([
-      [`/focus?taskId=${a.id}`],
-      [`/focus?taskId=${a.id}`],
+      [`/focus?taskId=${a.id}&recoveryAttemptId=813faa4e-3d01-4d62-8099-e53d79c33331`],
     ]);
     expect(mocks.details).toHaveBeenCalledOnce();
   });

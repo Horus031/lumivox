@@ -39,11 +39,13 @@ export const createTaskSchema = z.object({
 });
 
 export const createSubtaskSchema = z.object({
+  recoveryAttemptId: z.uuid().optional(),
   parentTaskId: z.string().uuid("Invalid parent task id."),
   title: taskTitleSchema,
 });
 
 export const updateTaskSchema = createTaskSchema.extend({
+  recoveryAttemptId: z.uuid().optional(),
   taskId: z.string().uuid("Invalid task id."),
 
   status: z.enum(TASK_STATUS_VALUES, {

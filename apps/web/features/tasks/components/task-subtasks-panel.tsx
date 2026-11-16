@@ -34,6 +34,7 @@ import type { GoalOption } from "@/features/goals/goal.types";
 import { TaskEditForm } from "./task-edit-form";
 
 type TaskSubtasksPanelProps = {
+  recoveryAttemptId?: string;
   parentTask: TaskWithGoal;
 
   subtasks: TaskWithGoal[];
@@ -44,6 +45,7 @@ type TaskSubtasksPanelProps = {
 };
 
 export function TaskSubtasksPanel({
+  recoveryAttemptId,
   parentTask,
   subtasks,
   goals,
@@ -81,6 +83,7 @@ export function TaskSubtasksPanel({
 
     startTransition(async () => {
       const result = await createSubtaskAction({
+        ...(recoveryAttemptId ? { recoveryAttemptId } : {}),
         parentTaskId: parentTask.id,
 
         title: normalizedTitle,
