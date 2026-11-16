@@ -292,3 +292,56 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
     "true",
   );
 });
+
+test("recovery destinations require Save or Start before writing", async ({ page }) => {
+  test.skip(process.env.FOCUS_V2_ENABLED === "true", "This case submits the legacy Focus form");
+  test.setTimeout(120_000);
+  const title = "Phase 4 recovery task";
+  const dueAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+  dueAt.setUTCMinutes(0, 0, 0);
+  const { data: task, error } = await client
+    .from("tasks")
+    .insert({ user_id: userId, goal_id: goalId, title, due_at: dueAt.toISOString() })
+    .select("id, due_at, updated_at")
+    .single();
+  if (error) throw error;
+  const taskId = task.id;
+
+  async function readTask() {
+    const { data, error } = await client
+      .from("tasks")
+      .select("id, due_at, updated_at")
+      .eq("id", taskId)
+      .single();
+    if (error) throw error;
+    return data;
+  }
+
+  async function activeSessions() {
+    const { data, error } = await client
+      .from("focus_sessions")
+      .select("task_id")
+      .eq("user_id", userId)
+      .eq("status", "ongoing");
+    if (error) throw error;
+    return data;
+  }
+
+  await login(page);
+  await page.goto(`/en/workspace?task=${taskId}&tab=overview&edit=1`);
+  const drawer = page.getByRole("dialog");
+  const dueTime = drawer.locator('input[type="time"]');
+  await expect(dueTime).toBeVisible();
+  expect(await readTask()).toEqual(task);
+  const changedTime = (await dueTime.inputValue()) === "16:30" ? "17:30" : "16:30";
+  await dueTime.fill(changedTime);
+  expect(await readTask()).toEqual(task);
+  await drawer.getByRole("button", { name: "Save", exact: true }).click();
+  await expect.poll(async () => (await readTask()).due_at).not.toBe(task.due_at);
+
+  await page.goto(`/en/focus?taskId=${taskId}`);
+  await expect(page.getByRole("combobox", { name: "Linked task" })).toHaveText(title);
+  expect(await activeSessions()).toEqual([]);
+  await page.getByRole("button", { name: "Start focus session", exact: true }).click();
+  await expect.poll(activeSessions).toEqual([{ task_id: taskId }]);
+});

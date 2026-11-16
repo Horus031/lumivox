@@ -2712,7 +2712,8 @@
       "subtitle": "Hãy xem xét từng gợi ý trước khi thay đổi Task hoặc lịch học.",
       "empty": "Hiện chưa có hành động khắc phục phù hợp cho Task này.",
       "choose": "Xem hành động",
-      "readOnlyNotice": "Đây là các gợi ý từ mô hình để bạn tham khảo. Hành động khắc phục sẽ được kích hoạt sau khi các luồng xử lý được tích hợp.",
+      "readOnlyNotice": "Đây là các gợi ý từ mô hình để bạn tham khảo.",
+      "reviewNotice": "Chọn một hành động để xem và xác nhận trước khi thực hiện.",
       "label": {
         "start_focus": "Bắt đầu Focus",
         "split_task": "Chia nhỏ thành Subtask",

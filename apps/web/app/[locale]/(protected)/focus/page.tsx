@@ -56,22 +56,57 @@ function RagLoadingFallback() {
 export default async function FocusPage({
   searchParams,
 }: {
-  searchParams: Promise<{ studySession?: string | string[] }>;
+  searchParams: Promise<{
+    studySession?: string | string[];
+    taskId?: string | string[];
+  }>;
 }) {
-  const { studySession } = await searchParams;
+  const { studySession, taskId: requestedTaskId } = await searchParams;
   const activeV2 =
-    process.env.FOCUS_V2_ENABLED === "true" ? await getActiveFocusV2Snapshot() : null;
+    process.env.FOCUS_V2_ENABLED === "true"
+      ? await getActiveFocusV2Snapshot()
+      : null;
   const [tasks, activeSession, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
     getTranslations("focus.page"),
   ]);
+
+  const focusTaskId =
+    typeof requestedTaskId === "string" &&
+    z.uuid().safeParse(requestedTaskId).success
+      ? requestedTaskId.toLowerCase()
+      : null;
+  let taskOptions = tasks;
+  let initialTaskId: string | undefined;
+  if (focusTaskId && !activeV2 && !activeSession && studySession === undefined) {
+    if (tasks.some((task) => task.id === focusTaskId)) {
+      initialTaskId = focusTaskId;
+    } else {
+      const { supabase, user } = await requireUser();
+      const { data: linkedTask, error } = await supabase
+        .from("tasks")
+        .select("id, title")
+        .eq("id", focusTaskId)
+        .eq("user_id", user.id)
+        .in("status", ["todo", "in_progress", "overdue"])
+        .maybeSingle();
+
+      if (error === null && linkedTask) {
+        initialTaskId = linkedTask.id;
+        taskOptions = [...tasks, linkedTask];
+      }
+    }
+  }
+
   const initialPreferences =
     isFocusV2CreationEnabled() && !activeSession && !activeV2
       ? await getFocusV2Preferences()
       : null;
   const launchText =
-    studySession === undefined ? null : await getTranslations("studyPlan.focusLaunch");
+    studySession === undefined
+      ? null
+      : await getTranslations("studyPlan.focusLaunch");
   const sessionId = z.uuid().safeParse(studySession);
   let studyLaunch;
   if (initialPreferences && sessionId.success) {
@@ -89,7 +124,8 @@ export default async function FocusPage({
         .eq("id", data.task_id)
         .eq("user_id", user.id)
         .maybeSingle();
-      if (task) studyLaunch = { studySessionId: data.id, task, userId: user.id };
+      if (task)
+        studyLaunch = { studySessionId: data.id, task, userId: user.id };
     }
   }
 
@@ -97,7 +133,11 @@ export default async function FocusPage({
     <section>
       <div className="mx-auto min-w-0 space-y-5">
         {!activeV2 && (
-          <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("description")}
+          />
         )}
 
         <div className="min-w-0">
@@ -112,11 +152,15 @@ export default async function FocusPage({
                 <FocusV2LifecycleView
                   initialSnapshot={activeV2}
                   taskTitle={
-                    tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null
+                    tasks.find((task) => task.id === activeV2.session.task_id)
+                      ?.title ?? null
                   }
                 >
                   <Suspense fallback={<RagLoadingFallback />}>
-                    <FocusRagSection focusSessionId={activeV2.session.id} fillHeight />
+                    <FocusRagSection
+                      focusSessionId={activeV2.session.id}
+                      fillHeight
+                    />
                   </Suspense>
                 </FocusV2LifecycleView>
               </>
@@ -136,13 +180,18 @@ export default async function FocusPage({
               </div>
             ) : initialPreferences ? (
               <FocusV2SessionBuilder
-                key={studyLaunch?.studySessionId}
-                tasks={tasks}
+                key={studyLaunch ? `study:${studyLaunch.studySessionId}` : initialTaskId}
+                tasks={taskOptions}
+                initialTaskId={initialTaskId}
                 initialPreferences={initialPreferences}
                 studyLaunch={studyLaunch}
               />
             ) : (
-              <StartFocusSessionForm tasks={tasks} />
+              <StartFocusSessionForm
+                key={initialTaskId}
+                tasks={taskOptions}
+                initialTaskId={initialTaskId}
+              />
             )}
           </div>
         </div>

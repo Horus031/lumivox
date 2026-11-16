@@ -196,4 +196,18 @@ describe("focus session UI", () => {
     expect(mocks.create).toHaveBeenCalledWith({ taskId: "", plannedMinutes: 45 });
     expect(mocks.refresh).toHaveBeenCalledOnce();
   });
+
+  it("starts Focus with the preselected task", async () => {
+    const task = { id: "9b400000-0000-4000-8000-000000000002", title: "Study Task" };
+    mocks.create.mockResolvedValue({ success: true, message: "Created" });
+    act(() => root.render(<StartFocusSessionForm tasks={[task]} initialTaskId={task.id} />));
+
+    await act(async () =>
+      container
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    );
+
+    expect(mocks.create).toHaveBeenCalledWith({ taskId: task.id, plannedMinutes: 25 });
+  });
 });

@@ -2718,7 +2718,8 @@
       "subtitle": "Review each suggestion before changing your tasks or study schedule.",
       "empty": "No recovery actions are available for this task.",
       "choose": "Review action",
-      "readOnlyNotice": "These are model-generated suggestions for review. Actions will become available after the recovery workflows are connected.",
+      "readOnlyNotice": "These model-generated suggestions are for reference.",
+      "reviewNotice": "Choose an action to review and confirm before making changes.",
       "label": {
         "start_focus": "Start Focus",
         "split_task": "Break into subtasks",

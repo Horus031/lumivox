@@ -46,6 +46,9 @@ import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-d
 
 import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
 
+import { useRouter as useLocalizedRouter } from "@/i18n/navigation";
+import type { NativeTaskRiskRecommendedAction } from "@/features/native-task-risk/native-task-risk.types";
+
 export type TaskDrawerTab =
   | "overview"
   | "risk"
@@ -82,6 +85,7 @@ export function TaskDetailsDrawer({
   const t = useTranslations("tasks.details");
   const confirm = useConfirmDialog();
   const locale = useLocale();
+  const localizedRouter = useLocalizedRouter();
 
   const formT = useTranslations("tasks.form");
 
@@ -164,6 +168,37 @@ export function TaskDetailsDrawer({
   const currentRiskState: TaskRiskViewState = riskNow
     ? getTaskRiskDisplayState(currentTask, riskState, riskNow)
     : (riskState ?? { status: "unavailable" });
+
+  function handleRecoveryAction(
+    type: NativeTaskRiskRecommendedAction["action_type"],
+  ) {
+    if (currentRiskState.status !== "ready") {
+      return;
+    }
+
+    switch (type) {
+      case "start_focus":
+        localizedRouter.push(
+          `/focus?taskId=${encodeURIComponent(currentTask.id)}`,
+        );
+        return;
+
+      case "split_task":
+        setIsEditing(false);
+        setActiveTab("subtasks");
+        return;
+
+      case "reschedule":
+      case "reduce_scope":
+        setActiveTab("overview");
+        setIsEditing(true);
+        return;
+
+      case "view_task":
+        setActiveTab("overview");
+        return;
+    }
+  }
 
   const subtasks = currentDetails?.subtasks ?? [];
 
@@ -415,7 +450,10 @@ export function TaskDetailsDrawer({
           <TabsContent value="risk" className="min-w-0 space-y-card">
             <TaskRiskSummary state={currentRiskState} />
 
-            <TaskRiskSuggestions state={currentRiskState} />
+            <TaskRiskSuggestions
+              state={currentRiskState}
+              onActionRequested={handleRecoveryAction}
+            />
           </TabsContent>
 
           <TabsContent value="subtasks">

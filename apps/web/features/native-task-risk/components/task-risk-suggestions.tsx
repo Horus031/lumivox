@@ -2,11 +2,27 @@ import { useTranslations } from "next-intl";
 
 import type { TaskRiskViewState } from "../task-risk-presentation.types";
 
+import type { NativeTaskRiskRecommendedAction } from "../native-task-risk.types";
+import { Button } from "@/components/ui/button";
+
+type RecoveryActionType = NativeTaskRiskRecommendedAction["action_type"];
+
 type TaskRiskSuggestionsProps = {
   state: TaskRiskViewState;
+  onActionRequested?: (type: RecoveryActionType) => void;
 };
 
-export function TaskRiskSuggestions({ state }: TaskRiskSuggestionsProps) {
+const ACTIONABLE_TYPES = new Set<RecoveryActionType>([
+  "start_focus",
+  "split_task",
+  "reschedule",
+  "reduce_scope",
+]);
+
+export function TaskRiskSuggestions({
+  state,
+  onActionRequested,
+}: TaskRiskSuggestionsProps) {
   const t = useTranslations("taskRiskRecovery");
 
   if (state.status !== "ready" || state.alert.risk_band === "low") {
@@ -35,7 +51,7 @@ export function TaskRiskSuggestions({ state }: TaskRiskSuggestionsProps) {
       </h3>
 
       <p className="mt-2 text-body text-secondary-text">
-        {t("actions.readOnlyNotice")}
+        {t(onActionRequested ? "actions.reviewNotice" : "actions.readOnlyNotice")}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -51,6 +67,18 @@ export function TaskRiskSuggestions({ state }: TaskRiskSuggestionsProps) {
             <p className="mt-1 text-body text-secondary-text">
               {t(`actions.description.${type}`)}
             </p>
+
+            {onActionRequested && ACTIONABLE_TYPES.has(type) ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => onActionRequested(type)}
+              >
+                {t("actions.choose")}
+              </Button>
+            ) : null}
           </article>
         ))}
       </div>

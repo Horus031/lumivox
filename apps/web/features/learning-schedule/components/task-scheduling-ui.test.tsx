@@ -18,6 +18,8 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { workspaceTask } from "@/features/workspace/workspace.test-fixtures";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
+import type { NativeTaskRiskRecommendedAction } from "@/features/native-task-risk/native-task-risk.types";
+import { TASK_RISK_UI_FIXTURES } from "@/features/native-task-risk/task-risk-ui.fixtures";
 import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-engine";
 
 const mocks = vi.hoisted(() => ({
@@ -27,11 +29,16 @@ const mocks = vi.hoisted(() => ({
   sessions: vi.fn(),
   remove: vi.fn(),
   refresh: vi.fn(),
+  push: vi.fn(),
   error: vi.fn(),
   success: vi.fn(),
   confirm: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
+vi.mock("@/i18n/navigation", () => ({
+  useRouter: () => ({ push: mocks.push }),
+  Link: "a",
+}));
 vi.mock("sonner", () => ({ toast: { error: mocks.error, success: mocks.success } }));
 vi.mock("../schedule.actions", () => ({ createStudyScheduleAction: mocks.create }));
 vi.mock("../schedule.queries.actions", () => ({ getTaskStudyScheduleAction: mocks.load }));
@@ -56,7 +63,7 @@ vi.mock("@/features/tasks/components/task-documents-panel", () => ({
   TaskDocumentsPanel: () => null,
 }));
 vi.mock("@/features/tasks/components/task-subtasks-panel", () => ({
-  TaskSubtasksPanel: () => null,
+  TaskSubtasksPanel: () => <div>Subtask form</div>,
 }));
 vi.mock("@/features/task-review/components/task-review-panel", () => ({
   TaskReviewPanel: () => null,
@@ -147,6 +154,62 @@ describe("Task scheduling UI", () => {
   const drawer = (task: TaskWithGoal) => (
     <TaskDetailsDrawer task={task} goals={[]} onClose={() => {}} initialTab="overview" />
   );
+
+  function recoveryDrawer(actionType: NativeTaskRiskRecommendedAction["action_type"]) {
+    const high = TASK_RISK_UI_FIXTURES.find(({ id }) => id === "high")?.state;
+    if (high?.status !== "ready") throw new Error("Expected ready fixture");
+
+    return (
+      <TaskDetailsDrawer
+        task={a}
+        goals={[]}
+        onClose={() => {}}
+        initialTab="risk"
+        riskState={{
+          ...high,
+          alert: {
+            ...high.alert,
+            task_id: a.id,
+            recommended_actions: [{
+              action_id: actionType,
+              action_type: actionType,
+              label: actionType,
+              description: "Review recovery action",
+              priority: 1,
+              payload: { days_to_add: 7 },
+            }],
+          },
+        }}
+      />
+    );
+  }
+
+  it.each([
+    { actionType: "split_task", content: "Subtask form" },
+    { actionType: "reschedule", content: "Task edit form" },
+    { actionType: "reduce_scope", content: "Task edit form" },
+  ] as const)("opens the existing form for $actionType", async ({ actionType, content }) => {
+    await render(recoveryDrawer(actionType));
+    expect(host.textContent).not.toContain(content);
+    await click("actions.choose");
+    expect(host.textContent).toContain(content);
+    expect(mocks.push).not.toHaveBeenCalled();
+    expect(mocks.details).toHaveBeenCalledOnce();
+  });
+
+  it("only navigates to Focus when Start Focus is clicked twice", async () => {
+    await render(recoveryDrawer("start_focus"));
+    await act(async () => {
+      const choose = button("actions.choose");
+      choose.click();
+      choose.click();
+    });
+    expect(mocks.push.mock.calls).toEqual([
+      [`/focus?taskId=${a.id}`],
+      [`/focus?taskId=${a.id}`],
+    ]);
+    expect(mocks.details).toHaveBeenCalledOnce();
+  });
 
   it("4.1 renders engine preview and passes the same valid draft without mutations", async () => {
     const next = vi.fn();
