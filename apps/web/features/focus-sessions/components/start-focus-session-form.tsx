@@ -19,13 +19,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 type FocusTaskOption = { id: string; title: string };
-type StartFocusSessionFormProps = { tasks: FocusTaskOption[] };
+type StartFocusSessionFormProps = {
+  tasks: FocusTaskOption[];
+  initialTaskId?: string | null;
+};
 
-export function StartFocusSessionForm({ tasks }: StartFocusSessionFormProps) {
+export function StartFocusSessionForm({
+  tasks,
+  initialTaskId,
+}: StartFocusSessionFormProps) {
   const router = useRouter();
   const t = useTranslations("focus.startForm");
   const [isPending, startTransition] = useTransition();
-  const [taskId, setTaskId] = useState("");
+  const [taskId, setTaskId] = useState(initialTaskId ?? "");
   const [plannedMinutes, setPlannedMinutes] = useState("25");
   const id = useId();
 

@@ -92,6 +92,29 @@ describe("Focus V2 Session Builder UI", () => {
     expect(mocks.create).not.toHaveBeenCalled();
     expect(mocks.replace).toHaveBeenCalledWith("/focus");
   });
+
+  it("starts Focus V2 with the preselected task", async () => {
+    const task = { id: "9b400000-0000-4000-8000-000000000002", title: "Study Task" };
+    mocks.create.mockResolvedValue({ success: true });
+    act(() =>
+      root.render(
+        <FocusV2SessionBuilder
+          tasks={[task]}
+          initialTaskId={task.id}
+          initialPreferences={DEFAULT_FOCUS_V2_PREFERENCES}
+        />,
+      ),
+    );
+
+    await act(async () =>
+      container
+        .querySelector("form")!
+        .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true })),
+    );
+
+    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({ taskId: task.id }));
+    expect(mocks.launch).not.toHaveBeenCalled();
+  });
   function byText(text: string) {
     const button = [...container.querySelectorAll("button")].find((node) =>
       node.textContent?.trim().includes(text),

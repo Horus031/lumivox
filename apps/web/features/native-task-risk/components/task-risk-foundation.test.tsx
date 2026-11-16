@@ -16,6 +16,18 @@ import { TaskRiskRecoveryPanel } from "./task-risk-recovery-panel";
 import { TaskRiskSummary } from "./task-risk-summary";
 
 import { TaskRiskSuggestions } from "./task-risk-suggestions";
+import { NativeTaskRiskActionButtons } from "./native-task-risk-action-buttons";
+
+vi.mock("@/i18n/navigation", () => ({ Link: "a" }));
+
+const reschedule = {
+  action_id: "reschedule",
+  action_type: "reschedule",
+  label: "Move deadline",
+  description: "Review the deadline",
+  priority: 5,
+  payload: { days_to_add: 7 },
+} as const;
 
 function fixture(id: string) {
   const result = TASK_RISK_UI_FIXTURES.find((item) => item.id === id);
@@ -244,4 +256,57 @@ describe("Task Risk UI Foundation", () => {
 
     expect(container.querySelector("button")).toBeNull();
   });
+
+  it.each(["en", "vi"] as const)(
+    "localizes recovery review and dispatches only the action type in %s",
+    (locale) => {
+      const high = fixture("high");
+      if (high.status !== "ready") throw new Error("Expected ready fixture");
+      const onActionRequested = vi.fn();
+      const messages = (locale === "en" ? en : viMessages).taskRiskRecovery.actions;
+
+      render(
+        <TaskRiskSuggestions
+          state={{
+            ...high,
+            alert: { ...high.alert, recommended_actions: [reschedule] },
+          }}
+          onActionRequested={onActionRequested}
+        />,
+        locale,
+      );
+
+      expect(container.textContent).toContain(messages.reviewNotice);
+      const button = container.querySelector("button")!;
+      expect(button.textContent).toBe(messages.choose);
+      expect(onActionRequested).not.toHaveBeenCalled();
+      act(() => button.click());
+      expect(onActionRequested).toHaveBeenCalledExactlyOnceWith("reschedule");
+    },
+  );
+
+  it.each(["stale", "unavailable", "low", "high"])(
+    "hides recovery buttons for %s without an actionable suggestion",
+    (id) => {
+      const state = fixture(id);
+      const riskState = id === "low" && state.status === "ready"
+        ? { ...state, alert: { ...state.alert, recommended_actions: [reschedule] } }
+        : state;
+      render(<TaskRiskSuggestions state={riskState} onActionRequested={vi.fn()} />);
+      expect(container.querySelector("button")).toBeNull();
+    },
+  );
+
+  it.each(["en", "vi"] as const)(
+    "links Dashboard reschedule to the localized review flow in %s",
+    (locale) => {
+      render(<NativeTaskRiskActionButtons taskId="task-id" actions={[reschedule]} />, locale);
+
+      const link = container.querySelector("a");
+      const messages = (locale === "en" ? en : viMessages).taskRiskRecovery.actions;
+      expect(link?.textContent).toBe(messages.label.reschedule);
+      expect(link?.getAttribute("href")).toBe("/workspace?task=task-id&tab=overview&edit=1");
+      expect(container.querySelector("button")).toBeNull();
+    },
+  );
 });

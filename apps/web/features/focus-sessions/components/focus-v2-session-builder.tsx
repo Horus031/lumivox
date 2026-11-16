@@ -48,6 +48,7 @@ type BooleanField = "autoStartBreaks" | "autoStartFocus";
 
 type Props = {
   tasks: TaskOption[];
+  initialTaskId?: string | null;
   initialPreferences: FocusV2Preferences;
   studyLaunch?: { studySessionId: string; task: TaskOption; userId: string };
 };
@@ -88,14 +89,19 @@ const numericSettings: Array<{
   { key: "longBreakEvery", min: 2, max: 8 },
 ];
 
-export function FocusV2SessionBuilder({ tasks, initialPreferences, studyLaunch }: Props) {
+export function FocusV2SessionBuilder({
+  tasks,
+  initialTaskId,
+  initialPreferences,
+  studyLaunch,
+}: Props) {
   const t = useTranslations("focus.builder");
   const launchText = useTranslations("studyPlan.focusLaunch");
   const router = useRouter();
   const localizedRouter = useLocalizedRouter();
   const uniqueId = useId();
   const [preferences, setPreferences] = useState<FocusV2Preferences>(initialPreferences);
-  const [taskId, setTaskId] = useState(studyLaunch?.task.id ?? "");
+  const [taskId, setTaskId] = useState(studyLaunch?.task.id ?? initialTaskId ?? "");
   const [forceCustom, setForceCustom] = useState(false);
   const [saving, setSaving] = useState(false);
   const [starting, setStarting] = useState(false);
