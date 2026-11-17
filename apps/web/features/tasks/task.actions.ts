@@ -1,7 +1,5 @@
 "use server";
 
-import { completeTaskRiskRecovery, getInitiatedRecovery } from "@/features/native-task-risk/task-risk-recovery.server";
-
 import { getTranslations } from "next-intl/server";
 import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 import { requireUser } from "@/lib/auth/require-user";
@@ -161,7 +159,6 @@ export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
     const { supabase, user } = await requireUser();
 
     const { parentTaskId, title, recoveryAttemptId } = parsed.data;
-    const recovery = await getInitiatedRecovery(supabase, recoveryAttemptId, parentTaskId, ["split_task"]);
 
     const { data: parentTask, error: parentError } = await supabase
       .from("tasks")
@@ -218,6 +215,7 @@ export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
         user_id: user.id,
 
         parent_task_id: parentTask.id,
+        ...(recoveryAttemptId ? { recovery_attempt_id: recoveryAttemptId } : {}),
 
         goal_id: parentTask.goal_id,
 
@@ -238,10 +236,6 @@ export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
         message: t("createFailed"),
       };
     }
-
-    if (recovery) await completeTaskRiskRecovery(user.id, parentTaskId, recovery.id, {
-      action: "split_task", entityId: createdTask.id,
-    });
 
     return {
       success: true,
@@ -429,7 +423,7 @@ export async function updateTaskAction(input: UpdateTaskInput): Promise<ActionRe
       return { success: false, message: t("invalidTransition") };
     }
     const completedAtValue = getTaskCompletedAt(existingTask, status, now);
-    const recovery = await getInitiatedRecovery(supabase, parsed.data.recoveryAttemptId, taskId, ["reschedule", "reduce_scope"]);
+    const { recoveryAttemptId } = parsed.data;
 
     const { data: updatedTask, error } = await supabase
       .from("tasks")
@@ -442,6 +436,7 @@ export async function updateTaskAction(input: UpdateTaskInput): Promise<ActionRe
         due_at: dueAt || null,
         status,
         completed_at: completedAtValue,
+        ...(recoveryAttemptId ? { recovery_attempt_id: recoveryAttemptId } : {}),
       })
       .eq("id", taskId)
       .eq("user_id", user.id)
@@ -459,15 +454,6 @@ export async function updateTaskAction(input: UpdateTaskInput): Promise<ActionRe
 
     if (!updatedTask) {
       return { success: false, message: t("staleTask") };
-    }
-
-    if (recovery?.action === "reschedule" || recovery?.action === "reduce_scope") {
-      const previousDueAt = existingTask.due_at ?? (existingTask.due_date
-        ? new Date(Date.parse(existingTask.due_date) + 86_400_000).toISOString() : null);
-      await completeTaskRiskRecovery(user.id, taskId, recovery.id, {
-        action: recovery.action, updatedAt: updatedTask.updated_at,
-        previousDueAt, previousMinutes: existingTask.estimated_minutes,
-      });
     }
 
     if (status === "completed" && existingTask.status !== "completed") {

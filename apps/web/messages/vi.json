@@ -2698,9 +2698,15 @@
       "applied": "Đã thực hiện hành động",
       "abandoned": "Đã bỏ hành động",
       "awaiting": "Đang chờ đánh giá lại",
+      "awaitingAction": "Đang chờ bạn thực hiện hành động.",
+      "trackingPending": "Đã lưu thay đổi. Đang chờ xác nhận ứng phó.",
+      "unverified": "Chưa có bằng chứng xác minh hành động này.",
+      "cancel": "Hủy hành động ứng phó",
+      "cancelFailed": "Không thể hủy. Hãy kiểm tra trạng thái mới nhất.",
+      "reload": "Kiểm tra trạng thái",
       "reassess": "Đánh giá lại nguy cơ",
       "originalDue": "Hạn ban đầu: {date, date, medium}",
-      "comparison": "Dự báo mới: {before, number, percent} → {after, number, percent} ({delta, number} điểm phần trăm). Đây là ước tính của mô hình."
+      "comparison": "Kết quả đánh giá tại thời điểm thực hiện: {before, number, percent} → {after, number, percent} ({delta, number} điểm phần trăm). Đây là ước tính của mô hình."
     },
     "status": {
       "high": "Nguy cơ cao",

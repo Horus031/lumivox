@@ -18,7 +18,7 @@ def _rpc(name: str, arguments: dict):
         return response.data
     except APIError as exc:
         code = str(exc.code or "")
-        if code in ("23505", "P0001"):
+        if code in ("23505", "P0001", "PT409"):
             raise FocusV2Conflict("Focus session state changed or an active session exists.") from exc
         if code in ("22023", "23514"):
             raise FocusV2BadRequest("Invalid Focus V2 request.") from exc
@@ -26,7 +26,7 @@ def _rpc(name: str, arguments: dict):
 
 
 def create_focus_v2(payload: CreateFocusV2Request) -> dict:
-    data = _rpc("focus_v2_create_session", {
+    arguments = {
         "p_user_id": str(payload.user_id),
         "p_task_id": str(payload.task_id) if payload.task_id else None,
         "p_focus_minutes": payload.focus_minutes,
@@ -36,7 +36,14 @@ def create_focus_v2(payload: CreateFocusV2Request) -> dict:
         "p_long_break_every": payload.long_break_every,
         "p_auto_start_breaks": payload.auto_start_breaks,
         "p_auto_start_focus": payload.auto_start_focus,
-    })
+    }
+    name = "focus_v2_create_session"
+    if payload.recovery_attempt_id:
+        if not payload.task_id:
+            raise FocusV2BadRequest("Recovery requires a task.")
+        name = "create_recovery_focus_v2"
+        arguments["p_attempt_id"] = str(payload.recovery_attempt_id)
+    data = _rpc(name, arguments)
     return {"session_id": data}
 
 
