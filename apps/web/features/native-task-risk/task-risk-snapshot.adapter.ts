@@ -132,7 +132,7 @@ export function isTaskRiskEligible(
 }
 
 export function resolveTaskRiskSnapshot(
-  task: WorkspaceTask,
+  task: Pick<WorkspaceTask, "id" | "status" | "completed_at" | "due_at" | "due_date">,
   row: TaskRiskSnapshotRow | undefined,
   now: Date,
 ): TaskRiskViewState {

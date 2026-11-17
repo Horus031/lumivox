@@ -2684,6 +2684,24 @@
     "attendanceActionsLabel": "Các thao tác điểm danh"
   },
   "taskRiskRecovery": {
+    "history": {
+      "title": "Lịch sử ứng phó",
+      "loading": "Đang tải lịch sử ứng phó…",
+      "empty": "Chưa có hành động ứng phó.",
+      "unavailable": "Chưa có ước tính có thể so sánh.",
+      "retry": "Chưa thể đánh giá lại. Hãy thử lại sau vài phút.",
+      "start_focus": "Bắt đầu Focus",
+      "split_task": "Chia nhỏ công việc",
+      "reschedule": "Đổi hạn",
+      "reduce_scope": "Giảm thời lượng ước tính",
+      "initiated": "Đã chọn hành động",
+      "applied": "Đã thực hiện hành động",
+      "abandoned": "Đã bỏ hành động",
+      "awaiting": "Đang chờ đánh giá lại",
+      "reassess": "Đánh giá lại nguy cơ",
+      "originalDue": "Hạn ban đầu: {date, date, medium}",
+      "comparison": "Dự báo mới: {before, number, percent} → {after, number, percent} ({delta, number} điểm phần trăm). Đây là ước tính của mô hình."
+    },
     "status": {
       "high": "Nguy cơ cao",
       "elevated": "Cần chú ý",

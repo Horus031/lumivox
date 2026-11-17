@@ -1,5 +1,7 @@
 "use server";
 
+import { completeTaskRiskRecovery, getInitiatedRecovery } from "@/features/native-task-risk/task-risk-recovery.server";
+
 import { z } from "zod";
 import { AiApiError, fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
@@ -35,6 +37,7 @@ function errorMessage(error: unknown): string {
 
 export async function createFocusV2SessionAction(
   input: FocusV2Config,
+  recoveryAttemptId?: string,
 ): Promise<ActionResult<{ sessionId: string }>> {
   if (!isFocusV2CreationEnabled())
     return { success: false, message: "Focus V2 is not accepting new sessions." };
@@ -47,8 +50,9 @@ export async function createFocusV2SessionAction(
     };
   }
   try {
-    const { user } = await requireUser();
+    const { user, supabase } = await requireUser();
     const config = parsed.data;
+    const recovery = await getInitiatedRecovery(supabase, recoveryAttemptId, config.taskId || null, ["start_focus"]);
     const response = await fetchAiApi<CreateResponse>({
       path: "/api/v1/focus-v2/create",
       body: {
@@ -66,6 +70,9 @@ export async function createFocusV2SessionAction(
     });
     if (!z.uuid().safeParse(response.session_id).success)
       throw new Error("Invalid create response.");
+    if (recovery && config.taskId) await completeTaskRiskRecovery(user.id, config.taskId, recovery.id, {
+      action: "start_focus", entityId: response.session_id,
+    });
     return {
       success: true,
       message: "Focus V2 session created.",

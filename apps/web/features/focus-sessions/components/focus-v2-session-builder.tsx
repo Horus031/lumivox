@@ -49,6 +49,7 @@ type BooleanField = "autoStartBreaks" | "autoStartFocus";
 type Props = {
   tasks: TaskOption[];
   initialTaskId?: string | null;
+  recoveryAttemptId?: string;
   initialPreferences: FocusV2Preferences;
   studyLaunch?: { studySessionId: string; task: TaskOption; userId: string };
 };
@@ -92,6 +93,7 @@ const numericSettings: Array<{
 export function FocusV2SessionBuilder({
   tasks,
   initialTaskId,
+  recoveryAttemptId,
   initialPreferences,
   studyLaunch,
 }: Props) {
@@ -218,7 +220,7 @@ export function FocusV2SessionBuilder({
         localizedRouter.replace("/focus");
         return;
       }
-      const result = await createFocusV2SessionAction(parsedConfig.data);
+      const result = await createFocusV2SessionAction(parsedConfig.data, ...(recoveryAttemptId ? [recoveryAttemptId] : []));
       if (!result.success) {
         toast.error(result.message);
         return;

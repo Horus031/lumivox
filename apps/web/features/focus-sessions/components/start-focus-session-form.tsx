@@ -22,11 +22,13 @@ type FocusTaskOption = { id: string; title: string };
 type StartFocusSessionFormProps = {
   tasks: FocusTaskOption[];
   initialTaskId?: string | null;
+  recoveryAttemptId?: string;
 };
 
 export function StartFocusSessionForm({
   tasks,
   initialTaskId,
+  recoveryAttemptId,
 }: StartFocusSessionFormProps) {
   const router = useRouter();
   const t = useTranslations("focus.startForm");
@@ -42,7 +44,7 @@ export function StartFocusSessionForm({
         const result = await createFocusSessionAction({
           taskId,
           plannedMinutes: Number(plannedMinutes),
-        });
+        }, ...(recoveryAttemptId ? [recoveryAttemptId] : []));
         if (!result.success) {
           toast.error(result.message);
           return;

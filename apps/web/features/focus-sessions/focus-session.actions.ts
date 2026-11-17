@@ -1,5 +1,8 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+import { completeTaskRiskRecovery, getInitiatedRecovery } from "@/features/native-task-risk/task-risk-recovery.server";
+
 import { scheduleEngagementRecalculation } from "@/features/engagement-retention/engagement-retention.background";
 
 import { requireUser } from "@/lib/auth/require-user";
@@ -17,6 +20,7 @@ const staleSessionMessage = "Session state changed. Please refresh.";
 
 export async function createFocusSessionAction(
   input: CreateFocusSessionInput,
+  recoveryAttemptId?: string,
 ): Promise<ActionResult> {
   const parsed = createFocusSessionSchema.safeParse(input);
 
@@ -31,8 +35,11 @@ export async function createFocusSessionAction(
   try {
     const { supabase, user } = await requireUser();
     const { taskId, plannedMinutes } = parsed.data;
+    const recovery = await getInitiatedRecovery(supabase, recoveryAttemptId, taskId || null, ["start_focus"]);
+    const sessionId = recovery ? randomUUID() : undefined;
 
     const { error } = await supabase.from("focus_sessions").insert({
+      ...(sessionId ? { id: sessionId } : {}),
       user_id: user.id,
       task_id: taskId || null,
       planned_minutes: plannedMinutes,
@@ -51,6 +58,9 @@ export async function createFocusSessionAction(
       };
     }
 
+    if (recovery && taskId && sessionId) await completeTaskRiskRecovery(user.id, taskId, recovery.id, {
+      action: "start_focus", entityId: sessionId,
+    });
     return {
       success: true,
       message: "Focus session started.",
