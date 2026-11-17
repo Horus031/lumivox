@@ -55,6 +55,9 @@ begin
       and t.status not in ('completed','cancelled') and t.completed_at is null
       and p.id = p_prediction_id and p.input_mode = 'lumivox_native_features'
       and p.prediction_metadata->>'prediction_mode' = 'native_ml'
+      and p.prediction_metadata->>'risk_band' in ('moderate','elevated','high')
+      and coalesce(p.prediction_metadata->'recommended_actions', '[]'::jsonb)
+        @> jsonb_build_array(jsonb_build_object('action_type', p_action_type))
       and p.prediction_metadata->>'feature_schema_version' = 'native-task-risk-v2'
       and p.prediction_metadata->'input_revision' = to_jsonb(coalesce(r.revision,0))
       and p.prediction_metadata->>'due_at' is not null

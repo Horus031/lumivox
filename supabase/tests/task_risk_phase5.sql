@@ -1,7 +1,7 @@
 begin;
 create extension if not exists pgtap with schema extensions;
 set local search_path = public, extensions;
-select plan(23);
+select plan(26);
 
 insert into auth.users(id,email) values
  ('50000000-0000-4000-8000-000000000001','risk5-a@example.test'),
@@ -21,7 +21,10 @@ values ('50000000-0000-4000-8000-000000000021','native_task_delay_risk_classifie
 insert into public.deadline_risk_predictions(id,user_id,task_id,model_version_id,input_mode,risk_probability,predicted_label,feature_payload,prediction_metadata)
 select '50000000-0000-4000-8000-000000000031',t.user_id,t.id,'50000000-0000-4000-8000-000000000021',
  'lumivox_native_features',0.76,true,'{}',jsonb_build_object(
-  'prediction_mode','native_ml','feature_schema_version','native-task-risk-v2','input_revision',r.revision,'due_at',t.due_at)
+  'prediction_mode','native_ml','feature_schema_version','native-task-risk-v2',
+  'input_revision',r.revision,'due_at',t.due_at,'risk_band','high',
+  'recommended_actions','[{"action_type":"split_task","priority":1},{"action_type":"start_focus"},{"action_type":"reschedule"}]'::jsonb
+ )
 from public.tasks t join public.native_task_risk_input_revisions r on r.user_id=t.user_id
 where t.id='50000000-0000-4000-8000-000000000011';
 
@@ -32,7 +35,22 @@ returns uuid language sql as $$
 $$;
 select throws_ok($$select pg_temp.begin_recovery('split_task',41,'50000000-0000-4000-8000-000000000002')$$,
  '22023','Prediction unavailable or stale','actor cannot use another owner prediction');
-select pg_temp.begin_recovery('split_task',41);
+select throws_ok($$select pg_temp.begin_recovery('reduce_scope',48)$$,
+ '22023','Prediction unavailable or stale','valid recovery action absent from recommendations is rejected');
+
+update public.deadline_risk_predictions
+set prediction_metadata = jsonb_set(prediction_metadata, '{risk_band}', '"low"')
+where id = '50000000-0000-4000-8000-000000000031';
+select throws_ok($$select pg_temp.begin_recovery('split_task',49)$$,
+ '22023','Prediction unavailable or stale','low risk rejects an otherwise recommended action');
+
+update public.deadline_risk_predictions
+set prediction_metadata = jsonb_set(prediction_metadata, '{risk_band}', '"high"')
+  || jsonb_build_object('recommended_actions', prediction_metadata->'recommended_actions'
+    || '[{"action_type":"reduce_scope"}]'::jsonb)
+where id = '50000000-0000-4000-8000-000000000031';
+select ok(pg_temp.begin_recovery('split_task',41) is not null,
+ 'recommended action with an eligible risk band creates an attempt');
 select pg_temp.begin_recovery('start_focus',42);
 select pg_temp.begin_recovery('start_focus',43);
 select pg_temp.begin_recovery('reschedule',44);
