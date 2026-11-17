@@ -255,13 +255,16 @@ isOneToOne: false
                   ]
                 },"focus_sessions": {
                   Row: {
+                    recovery_attempt_id: string | null
                     "actual_focus_minutes": number,"created_at": string,"ended_at": string | null,"id": string,"notes": string | null,"paused_at": string | null,"planned_minutes": number,"self_focus_rating": number | null,"session_mode": string,"started_at": string,"status": Database["public"]['Enums']["focus_session_status"],"task_id": string | null,"total_paused_seconds": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
+                    recovery_attempt_id?: string | null
                     "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes": number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
+                    recovery_attempt_id?: string | null
                     "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes"?: number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
@@ -1057,6 +1060,8 @@ isOneToOne: false
                     applied_at: string | null
                     applied_entity_id: string | null
                     reassessment_prediction_id: string | null
+                    receipt_required: boolean
+                    receipt_recorded_at: string | null
                     evaluated_at: string | null
                     reassessment_requested_at: string | null
                   }
@@ -1073,6 +1078,8 @@ isOneToOne: false
                     applied_at?: string | null
                     applied_entity_id?: string | null
                     reassessment_prediction_id?: string | null
+                    receipt_required?: boolean
+                    receipt_recorded_at?: string | null
                     evaluated_at?: string | null
                     reassessment_requested_at?: string | null
                   }
@@ -1089,6 +1096,8 @@ isOneToOne: false
                     applied_at?: string | null
                     applied_entity_id?: string | null
                     reassessment_prediction_id?: string | null
+                    receipt_required?: boolean
+                    receipt_recorded_at?: string | null
                     evaluated_at?: string | null
                     reassessment_requested_at?: string | null
                   }
@@ -1299,13 +1308,16 @@ isOneToOne: false
                   ]
                 },"tasks": {
                   Row: {
+                    recovery_attempt_id: string | null
                     "completed_at": string | null,"created_at": string,"description": string | null,"due_at": string | null,"due_date": string | null,"estimated_minutes": number | null,"goal_id": string | null,"id": string,"parent_task_id": string | null,"priority": Database["public"]['Enums']["task_priority"],"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"status": Database["public"]['Enums']["task_status"],"title": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
+                    recovery_attempt_id?: string | null
                     "completed_at"?: string | null,"created_at"?: string,"description"?: string | null,"due_at"?: string | null,"due_date"?: string | null,"estimated_minutes"?: number | null,"goal_id"?: string | null,"id"?: string,"parent_task_id"?: string | null,"priority"?: Database["public"]['Enums']["task_priority"],"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"status"?: Database["public"]['Enums']["task_status"],"title": string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
+                    recovery_attempt_id?: string | null
                     "completed_at"?: string | null,"created_at"?: string,"description"?: string | null,"due_at"?: string | null,"due_date"?: string | null,"estimated_minutes"?: number | null,"goal_id"?: string | null,"id"?: string,"parent_task_id"?: string | null,"priority"?: Database["public"]['Enums']["task_priority"],"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"status"?: Database["public"]['Enums']["task_status"],"title"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
@@ -1677,6 +1689,30 @@ isOneToOne: false
 { Args: { "p_limit"?: number }; Returns: {
               "algorithm": string,"days_until_due": number,"decision_threshold": number,"due_at": string,"goal_id": string,"goal_title": string,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"reason_summaries": Json,"recommended_actions": Json,"risk_band": string,"risk_probability": number,"risk_score": number,"task_id": string,"task_title": string,"top_attributions": Json
             }[]
+                           },
+"abandon_task_risk_recovery":
+{ Args: { p_attempt_id: string }; Returns: boolean
+                           },
+"reserve_task_risk_reassessment":
+{ Args: { p_user_id: string, p_attempt_id: string, p_allow_dispatch?: boolean }; Returns: Json
+                           },
+"pair_task_risk_reassessment":
+{ Args: { p_user_id: string, p_attempt_id: string, p_request_id: string }; Returns: boolean
+                           },
+"claim_task_risk_reassessment":
+{ Args: { p_user_id: string, p_task_id: string, p_request_id: string }; Returns: boolean
+                           },
+"finish_task_risk_reassessment":
+{ Args: { p_user_id: string, p_task_id: string, p_request_id: string }; Returns: undefined
+                           },
+"reconcile_task_risk_recovery":
+{ Args: { p_limit?: number }; Returns: number
+                           },
+"create_recovery_focus_v2":
+{ Args: { p_user_id: string, p_task_id: string, p_attempt_id: string, p_focus_minutes: number, p_short_break_minutes: number, p_long_break_minutes: number, p_round_count: number, p_long_break_every: number, p_auto_start_breaks: boolean, p_auto_start_focus: boolean }; Returns: string
+                           },
+"start_receipted_task_risk_recovery":
+{ Args: { p_user_id: string, p_task_id: string, p_prediction_id: string, p_action_type: string, p_key: string }; Returns: string
                            },
 "complete_verified_task_risk_recovery":
 { Args: { p_action_type: string, p_attempt_id: string, p_entity_id?: string, p_previous_due_at?: string, p_previous_minutes?: number, p_task_id: string, p_task_updated_at?: string, p_user_id: string }; Returns: boolean

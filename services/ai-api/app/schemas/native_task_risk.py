@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -54,6 +55,7 @@ class NativeTaskRiskBatchPredictRequest(BaseModel):
     user_id: str
     task_ids: list[str] = Field(min_length=1, max_length=20)
     persist: bool = True
+    recovery_request_id: UUID | None = None
 
 
 class NativeTaskRiskBatchError(BaseModel):

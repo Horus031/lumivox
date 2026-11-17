@@ -17,6 +17,7 @@ class FocusV2Configuration(BaseModel):
 
 class CreateFocusV2Request(FocusV2Configuration):
     task_id: UUID | None = None
+    recovery_attempt_id: UUID | None = None
 
 
 class CreateStudyFocusRequest(FocusV2Configuration):

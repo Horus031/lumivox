@@ -950,6 +950,7 @@ def _persist_prediction(
     task: dict[str, Any],
     input_revision: int,
     response: NativeTaskRiskPredictResponse,
+    recovery_request_id: str | None = None,
 ) -> str | None:
     model_version_id = _get_active_model_version_id(
         supabase,
@@ -964,6 +965,7 @@ def _persist_prediction(
         supabase.table("deadline_risk_predictions")
         .insert(
             {
+                **({"id": recovery_request_id} if recovery_request_id else {}),
                 "user_id": request.user_id,
                 "task_id": request.task_id,
                 "model_version_id": model_version_id,
@@ -1026,6 +1028,8 @@ def _persist_prediction(
 
 def predict_native_task_risk(
     request: NativeTaskRiskPredictRequest,
+    *,
+    recovery_request_id: str | None = None,
 ) -> NativeTaskRiskPredictResponse:
     supabase = _get_supabase_admin()
 
@@ -1152,6 +1156,7 @@ def predict_native_task_risk(
             task=task,
             input_revision=input_revision,
             response=response,
+            **({"recovery_request_id": recovery_request_id} if recovery_request_id else {}),
         )
 
         response.prediction_id = prediction_id
@@ -1165,15 +1170,26 @@ def predict_native_task_risk_batch(
     errors: list[NativeTaskRiskBatchError] = []
 
     unique_task_ids = list(dict.fromkeys(request.task_ids))
+    recovery_id = str(request.recovery_request_id) if request.recovery_request_id else None
 
     for task_id in unique_task_ids:
+        claimed = False
         try:
+            if recovery_id:
+                if len(unique_task_ids) != 1 or not request.persist:
+                    raise ValueError("Recovery reassessment requires one persisted Task.")
+                supabase = _get_supabase_admin()
+                recovery_args = {"p_user_id": request.user_id, "p_task_id": task_id, "p_request_id": recovery_id}
+                claimed = supabase.rpc("claim_task_risk_reassessment", recovery_args).execute().data is True
+                if not claimed:
+                    raise ValueError("Recovery reassessment was already claimed or expired.")
             prediction = predict_native_task_risk(
                 NativeTaskRiskPredictRequest(
                     user_id=request.user_id,
                     task_id=task_id,
                     persist=request.persist,
-                )
+                ),
+                **({"recovery_request_id": recovery_id} if recovery_id else {}),
             )
             predictions.append(prediction)
         except Exception as error:
@@ -1183,6 +1199,13 @@ def predict_native_task_risk_batch(
                     error=str(error),
                 )
             )
+        finally:
+            if claimed:
+                try:
+                    supabase.rpc("finish_task_risk_reassessment", recovery_args).execute()
+                except Exception:
+                    # The reservation expires if the database cannot record worker exit.
+                    pass
 
     return NativeTaskRiskBatchPredictResponse(
         predictions=predictions,

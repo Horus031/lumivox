@@ -2704,9 +2704,15 @@
       "applied": "Action applied",
       "abandoned": "Action abandoned",
       "awaiting": "Awaiting reassessment",
+      "awaitingAction": "Waiting for you to apply the action.",
+      "trackingPending": "The change was saved. Recovery tracking is pending.",
+      "unverified": "This action has no verified mutation receipt.",
+      "cancel": "Cancel recovery",
+      "cancelFailed": "Recovery could not be canceled. Check its updated status.",
+      "reload": "Check status",
       "reassess": "Reassess risk",
       "originalDue": "Original deadline: {date, date, medium}",
-      "comparison": "Risk reassessed: {before, number, percent} → {after, number, percent} ({delta, number} percentage points). These are model estimates."
+      "comparison": "Historical reassessment: {before, number, percent} → {after, number, percent} ({delta, number} percentage points). These are model estimates."
     },
     "status": {
       "high": "High risk",
