@@ -46,6 +46,39 @@ describe("recovery reassessment", () => {
     expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
+  it("reports a pre-persistence timeout and leaves a concurrent retry fenced", async () => {
+    mocks.rate.mockResolvedValue({ success: true });
+    mocks.rpc
+      .mockResolvedValueOnce({ data: { kind: "dispatch", id: request } })
+      .mockResolvedValueOnce({ data: false })
+      .mockResolvedValueOnce({ data: null });
+    mocks.fetch.mockRejectedValue(new Error("timeout before persistence"));
+
+    await expect(reassessTaskRiskAfterRecoveryAction(attempt)).resolves.toBe(false);
+    await expect(reassessTaskRiskAfterRecoveryAction(attempt)).resolves.toBe(false);
+    expect(mocks.fetch).toHaveBeenCalledOnce();
+    expect(mocks.rpc.mock.calls.map(([rpc]) => rpc)).toEqual([
+      "reserve_task_risk_reassessment", "pair_task_risk_reassessment", "reserve_task_risk_reassessment",
+    ]);
+  });
+
+  it("pairs a delayed persisted result on retry without dispatching again", async () => {
+    mocks.rate.mockResolvedValue({ success: true });
+    mocks.rpc
+      .mockResolvedValueOnce({ data: { kind: "dispatch", id: request } })
+      .mockResolvedValueOnce({ data: false })
+      .mockResolvedValueOnce({ data: { kind: "persisted", id: request } })
+      .mockResolvedValueOnce({ data: true });
+    mocks.fetch.mockRejectedValue(new Error("timeout before the response arrived"));
+
+    await expect(reassessTaskRiskAfterRecoveryAction(attempt)).resolves.toBe(false);
+    await expect(reassessTaskRiskAfterRecoveryAction(attempt)).resolves.toBe(true);
+    expect(mocks.fetch).toHaveBeenCalledOnce();
+    expect(mocks.rpc).toHaveBeenLastCalledWith("pair_task_risk_reassessment", {
+      p_user_id: "owner", p_attempt_id: attempt, p_request_id: request,
+    });
+  });
+
   it("pairs a committed result after the AI HTTP response times out", async () => {
     mocks.rate.mockResolvedValue({ success: true });
     mocks.rpc.mockResolvedValueOnce({ data: { kind: "dispatch", id: request } }).mockResolvedValueOnce({ data: true });
