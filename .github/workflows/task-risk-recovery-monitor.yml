@@ -4,73 +4,72 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      test_alert:
+        description: "Fail a synthetic job to verify GitHub Actions notification receipt (no database access)"
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
-concurrency:
-  group: task-risk-recovery-monitor-staging
-  cancel-in-progress: false
-
 jobs:
+  notification-test:
+    name: Synthetic notification test · no database access
+    if: github.event_name == 'workflow_dispatch' && inputs.test_alert
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - name: Emit controlled failure
+        run: |
+          echo "Synthetic Task Risk alert: no database query or deployment performed." >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Synthetic 9C notification test. Confirm receipt on the initiating GitHub account."
+          exit 1
+
   monitor:
-    name: Staging · Task Risk Recovery health
-    if: vars.TASK_RISK_MONITOR_ENABLED == 'true' && github.ref_name == github.event.repository.default_branch
+    name: ${{ matrix.target }} · Task Risk Recovery health
+    if: >-
+      !inputs.test_alert &&
+      github.ref_name == github.event.repository.default_branch &&
+      (vars.TASK_RISK_MONITOR_ENABLED == 'true' || vars.TASK_RISK_PRODUCTION_MONITOR_ENABLED == 'true')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: staging
+            environment: staging
+            enabled_variable: TASK_RISK_MONITOR_ENABLED
+          - target: production
+            environment: production-monitor
+            enabled_variable: TASK_RISK_PRODUCTION_MONITOR_ENABLED
     runs-on: ubuntu-24.04
     timeout-minutes: 5
+    concurrency:
+      group: task-risk-recovery-monitor-${{ matrix.target }}
+      cancel-in-progress: false
     environment:
-      name: staging
+      name: ${{ matrix.environment }}
     steps:
+      - name: Record disabled target
+        if: vars[matrix.enabled_variable] != 'true'
+        run: echo "Monitor disabled for this environment; no health check executed." >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/checkout@v4
+        if: vars[matrix.enabled_variable] == 'true'
       - uses: actions/setup-node@v4
+        if: vars[matrix.enabled_variable] == 'true'
         with:
           node-version: "22"
-      - name: Check Staging recovery health
+      - name: Check recovery health
+        if: vars[matrix.enabled_variable] == 'true'
         env:
           PGHOST: ${{ vars.TASK_RISK_MONITOR_PGHOST }}
           PGPORT: ${{ vars.TASK_RISK_MONITOR_PGPORT || '5432' }}
-          PGDATABASE: postgres
           PGUSER: ${{ secrets.TASK_RISK_MONITOR_PGUSER }}
           PGPASSWORD: ${{ secrets.TASK_RISK_MONITOR_PGPASSWORD }}
           TASK_RISK_MONITOR_CA_PEM: ${{ secrets.TASK_RISK_MONITOR_CA_PEM }}
-          PGSSLMODE: verify-full
         run: |
-          if [[ "$PGHOST" != db.atbdbbamqjmfkvahqidj.supabase.co ]]; then
-            if [[ "$PGHOST" != *.pooler.supabase.com || "$PGUSER" != *.atbdbbamqjmfkvahqidj ]]; then
-              echo "::error::The monitor must target the verified Supabase Staging project."
-              exit 2
-            fi
-          fi
-          if [[ -z "$PGUSER" || -z "$PGPASSWORD" || -z "$TASK_RISK_MONITOR_CA_PEM" ]]; then
-            echo "::error::Configure the Staging read-only monitor credentials and TLS CA."
-            exit 2
-          fi
           if ! command -v psql >/dev/null; then
             sudo apt-get update
             sudo apt-get install -y postgresql-client
           fi
-          umask 077
-          PGSSLROOTCERT="$(mktemp)"
-          export PGSSLROOTCERT
-          trap 'rm -f -- "$PGSSLROOTCERT"' EXIT
-          printf '%s\n' "$TASK_RISK_MONITOR_CA_PEM" > "$PGSSLROOTCERT"
-          set +e
-          node scripts/check-task-risk-recovery-health.mjs > "$RUNNER_TEMP/task-risk-health.json"
-          status=$?
-          set -e
-          {
-            echo "## Task Risk Recovery health · Staging"
-            if [[ -s "$RUNNER_TEMP/task-risk-health.json" ]]; then
-              echo '```json'
-              cat "$RUNNER_TEMP/task-risk-health.json"
-              echo '```'
-            else
-              echo "Health probe did not return a snapshot."
-            fi
-          } >> "$GITHUB_STEP_SUMMARY"
-          if [[ "$status" == 1 ]]; then
-            echo "::error::Task Risk Recovery raised an operational alert. See the job summary."
-          elif [[ "$status" != 0 ]]; then
-            echo "::error::Task Risk Recovery health probe is unavailable."
-          fi
-          exit "$status"
+          bash scripts/ci/task-risk-monitor.sh "${{ matrix.target }}"

@@ -21,9 +21,10 @@ jobs:
       vars.PRODUCTION_CD_ENABLED == 'true' &&
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.event == 'push'
-    runs-on: ubuntu-latest
-    timeout-minutes: 35
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
     environment:
       name: production
       url: ${{ vars.WEB_URL }}
@@ -35,12 +36,39 @@ jobs:
       WEB_URL: ${{ vars.WEB_URL }}
       AI_API_URL: ${{ vars.AI_API_URL }}
       EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
 
     steps:
       - name: Checkout tested commit
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Validate release bindings before database changes
+        run: |
+          test "$SUPABASE_PROJECT_ID" = lslybjylsxtnznghrtyj
+          case "${WEB_URL%/}" in
+            https://www.lumivox.it.com|https://lumivox.it.com) ;;
+            *) echo "::error::Unexpected Production Web URL."; exit 1 ;;
+          esac
+          test "${AI_API_URL%/}" = https://lumivox-ai-api.onrender.com
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          test -n "$SUPABASE_DB_PASSWORD"
+          if [[ "$RENDER_DEPLOY_HOOK" != https://api.render.com/deploy/srv-d87k12rtqb8s73c0ih10?key=* ]]; then
+            echo "::error::Render hook must target the approved Production service."
+            exit 1
+          fi
+          current_main="$(git ls-remote origin refs/heads/main | cut -f1)"
+          if [[ "$current_main" != "$EXPECTED_SHA" ]]; then
+            echo "::error::CI result is no longer the current main commit. Refusing a stale release."
+            exit 1
+          fi
+          node scripts/ci/production-vercel-release.mjs preflight
 
       - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
@@ -57,18 +85,9 @@ jobs:
         run: supabase db push --linked
 
       - name: Trigger Render production deployment
-        env:
-          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          delimiter='?'
-          if [[ "$DEPLOY_HOOK" == *"?"* ]]; then delimiter='&'; fi
-          curl --fail --silent --show-error --request POST             "${DEPLOY_HOOK}${delimiter}ref=${EXPECTED_SHA}"
-
-      - name: Trigger Vercel production deployment
-        env:
-          DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK_URL }}
-        run: |
-          curl --fail --silent --show-error --request POST "$DEPLOY_HOOK"
+          curl --fail --silent --output /dev/null --max-time 60 --request POST \
+            "${RENDER_DEPLOY_HOOK}&ref=${EXPECTED_SHA}"
 
       - name: Wait for AI API production revision and model
         run: |
@@ -78,6 +97,9 @@ jobs:
             "$EXPECTED_SHA" \
             900 \
             "$expected_model_version"
+
+      - name: Deploy Vercel at the tested SHA after AI readiness
+        run: node scripts/ci/production-vercel-release.mjs deploy
 
       - name: Wait for web production revision
         run: |
