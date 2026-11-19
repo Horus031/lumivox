@@ -2722,6 +2722,14 @@
       "stale": "Refresh needed",
       "loading": "Checking risk"
     },
+    "prediction": {
+      "create": "Assess risk",
+      "refresh": "Refresh risk",
+      "pending": "Assessing risk…",
+      "unavailable": "A reliable prediction could not be loaded. Please try again.",
+      "ineligible": "Choose an unfinished task with a deadline within the next 14 days.",
+      "limited": "Risk assessment is temporarily unavailable or the request limit was reached. Please try again later."
+    },
     "summary": {
       "title": "Task delay risk",
       "subtitle": "Prediction based on your learning activity",
