@@ -32,14 +32,10 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
           {t("eyebrow")}
         </p>
 
-        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-          {goal.title}
-        </h1>
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-foreground">{goal.title}</h1>
 
         {goal.description ? (
-          <p className="mt-3 max-w-3xl text-muted-foreground">
-            {goal.description}
-          </p>
+          <p className="mt-3 max-w-3xl text-muted-foreground">{goal.description}</p>
         ) : null}
       </section>
 

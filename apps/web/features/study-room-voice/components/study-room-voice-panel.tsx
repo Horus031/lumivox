@@ -22,8 +22,7 @@ type StudyRoomVoicePanelProps = {
 export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
   const t = useTranslations("rooms.voice");
   const [isJoining, setIsJoining] = useState(false);
-  const [credentials, setCredentials] =
-    useState<StudyRoomVoiceTokenResponse | null>(null);
+  const [credentials, setCredentials] = useState<StudyRoomVoiceTokenResponse | null>(null);
 
   async function handleJoinVoice() {
     try {
@@ -49,11 +48,7 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
       setCredentials(data as StudyRoomVoiceTokenResponse);
       toast.success(t("toasts.joined"));
     } catch (error) {
-      toast.error(
-        error instanceof Error
-          ? error.message
-          : t("errors.unexpected"),
-      );
+      toast.error(error instanceof Error ? error.message : t("errors.unexpected"));
     } finally {
       setIsJoining(false);
     }
@@ -68,25 +63,15 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
     <section className="min-w-0 border-t border-border pt-card">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
-          <p className="text-caption font-medium text-muted-foreground">
-            {t("eyebrow")}
-          </p>
+          <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
-          <h2 className="mt-2 text-section font-semibold text-foreground">
-            {t("title")}
-          </h2>
+          <h2 className="mt-2 text-section font-semibold text-foreground">{t("title")}</h2>
 
-          <p className="mt-1 max-w-2xl text-body text-secondary-text">
-            {t("description")}
-          </p>
+          <p className="mt-1 max-w-2xl text-body text-secondary-text">{t("description")}</p>
         </div>
 
         {!credentials ? (
-          <Button
-            onClick={handleJoinVoice}
-            disabled={isJoining}
-            aria-busy={isJoining}
-          >
+          <Button onClick={handleJoinVoice} disabled={isJoining} aria-busy={isJoining}>
             <Headphones aria-hidden="true" />
             {isJoining ? t("joining") : t("join")}
           </Button>
@@ -96,16 +81,15 @@ export function StudyRoomVoicePanel({ roomId }: StudyRoomVoicePanelProps) {
             onClick={handleLeaveVoice}
             className="text-danger hover:bg-danger/10 hover:text-danger"
           >
-            <LogOut aria-hidden="true" />{t("leave")}
+            <LogOut aria-hidden="true" />
+            {t("leave")}
           </Button>
         )}
       </div>
 
       {!credentials ? (
         <div className="mt-6 border-t border-border py-card">
-          <p className="text-body text-secondary-text">
-            {t("inactive")}
-          </p>
+          <p className="text-body text-secondary-text">{t("inactive")}</p>
         </div>
       ) : (
         <div className="mt-card border-t border-border pt-card">
@@ -146,12 +130,15 @@ function VoiceRoomContent() {
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-card">
         <div>
           <p className="text-label font-medium">{t("microphoneTitle")}</p>
-          <p className="mt-1 text-body text-secondary-text">
-            {t("microphoneDescription")}
-          </p>
+          <p className="mt-1 text-body text-secondary-text">{t("microphoneDescription")}</p>
         </div>
 
-        <TrackToggle source={Track.Source.Microphone} aria-label={t("microphoneTitle")} title={t("microphoneTitle")} className="min-h-touch rounded-md border border-border px-3 text-body sm:min-h-control" />
+        <TrackToggle
+          source={Track.Source.Microphone}
+          aria-label={t("microphoneTitle")}
+          title={t("microphoneTitle")}
+          className="min-h-touch rounded-md border border-border px-3 text-body sm:min-h-control"
+        />
       </div>
 
       <div>
@@ -164,16 +151,11 @@ function VoiceRoomContent() {
         </div>
 
         {participants.length === 0 ? (
-          <div className="py-card text-body text-muted-foreground">
-            {t("empty")}
-          </div>
+          <div className="py-card text-body text-muted-foreground">{t("empty")}</div>
         ) : (
           <div className="grid gap-x-card divide-y divide-border md:grid-cols-2">
             {participants.map((participant) => (
-              <article
-                key={participant.identity}
-                className="min-w-0 py-3"
-              >
+              <article key={participant.identity} className="min-w-0 py-3">
                 <p className="text-body font-medium [overflow-wrap:anywhere]">
                   {participant.name ?? participant.identity}
                 </p>

@@ -43,19 +43,16 @@ async function GroupLeaderboardArea({
         <h2 className="text-section font-semibold text-foreground">
           {t("leaderboardDisabledTitle")}
         </h2>
-        <p className="mt-1 text-body text-secondary-text">
-          {t("leaderboardDisabledDescription")}
-        </p>
+        <p className="mt-1 text-body text-secondary-text">{t("leaderboardDisabledDescription")}</p>
       </section>
     );
   }
 
-  const [leaderboard, challengeProgress, weeklyChallengeDefaults] =
-    await Promise.all([
-      getStudyGroupWeeklyLeaderboard(groupId),
-      getStudyGroupWeeklyChallengeProgress(groupId),
-      getWeeklyChallengeDefaultSettings(),
-    ]);
+  const [leaderboard, challengeProgress, weeklyChallengeDefaults] = await Promise.all([
+    getStudyGroupWeeklyLeaderboard(groupId),
+    getStudyGroupWeeklyChallengeProgress(groupId),
+    getWeeklyChallengeDefaultSettings(),
+  ]);
 
   return (
     <>
@@ -108,16 +105,11 @@ async function GroupChatSection({
 
 function GroupPanelFallback({ className }: { className: string }) {
   return (
-    <div
-      aria-hidden="true"
-      className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`}
-    />
+    <div aria-hidden="true" className={`${className} min-w-0 animate-pulse rounded-lg bg-muted`} />
   );
 }
 
-export default async function GroupDetailPage({
-  params,
-}: GroupDetailPageProps) {
+export default async function GroupDetailPage({ params }: GroupDetailPageProps) {
   const { groupId } = await params;
 
   const [{ user }, t, membership] = await Promise.all([
@@ -132,12 +124,15 @@ export default async function GroupDetailPage({
 
   const group = membership.study_rooms;
   const canInvite =
-    membership.membership_status === "active" &&
-    ["owner", "admin"].includes(membership.role);
+    membership.membership_status === "active" && ["owner", "admin"].includes(membership.role);
 
   return (
     <section className="min-w-0 space-y-section">
-      <PageHeader eyebrow={t("eyebrow")} title={group.title} description={group.description ?? undefined} />
+      <PageHeader
+        eyebrow={t("eyebrow")}
+        title={group.title}
+        description={group.description ?? undefined}
+      />
 
       <Suspense fallback={<GroupPanelFallback className="h-72" />}>
         <GroupLeaderboardArea groupId={groupId} canManage={canInvite} />

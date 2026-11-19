@@ -3,9 +3,12 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DragEndEvent } from "@dnd-kit/react";
 import { workspaceTask } from "../workspace.test-fixtures";
+import { TASK_RISK_UI_FIXTURES } from "@/features/native-task-risk/task-risk-ui.fixtures";
 
 const confirmation = vi.hoisted(() => vi.fn().mockResolvedValue(true));
-vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => confirmation }));
+vi.mock("@/components/ui/use-confirm-dialog", () => ({
+  useConfirmDialog: () => confirmation,
+}));
 
 const mocks = vi.hoisted(() => ({
   transition: vi.fn(),
@@ -76,14 +79,26 @@ describe("workspace optimistic controller", () => {
     tasks: [task],
     scope: { type: "all" as const },
     referenceNow: "2026-10-04T12:00:00Z",
+    riskStates: {},
   };
   beforeEach(() => {
-    vi.clearAllMocks(); confirmation.mockResolvedValue(true);
+    vi.clearAllMocks();
+    confirmation.mockResolvedValue(true);
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
     container = document.createElement("div");
     document.body.append(container);
     root = createRoot(container);
-    act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} />));
+    act(() =>
+      root.render(
+        <WorkspaceBoard
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab={"overview"}
+          initialEditMode={false}
+          {...props}
+        />,
+      ),
+    );
   });
   afterEach(() => {
     act(() => root.unmount());
@@ -141,8 +156,13 @@ describe("workspace optimistic controller", () => {
     act(() =>
       root.render(
         <WorkspaceBoard
-        goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props}
-        tasks={[{ ...task, status: "completed" }]}        />,
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab={"overview"}
+          initialEditMode={false}
+          {...props}
+          tasks={[{ ...task, status: "completed" }]}
+        />,
       ),
     );
     expect(lane("completed").querySelector("article")).not.toBeNull();
@@ -169,7 +189,18 @@ describe("workspace optimistic controller", () => {
         message: "created",
         data: null,
       });
-      act(() => root.render(<WorkspaceBoard goals={[]} initialTaskId={null} initialTaskTab={"overview"} initialEditMode={false} {...props} scope={scope} />));
+      act(() =>
+        root.render(
+          <WorkspaceBoard
+            goals={[]}
+            initialTaskId={null}
+            initialTaskTab={"overview"}
+            initialEditMode={false}
+            {...props}
+            scope={scope}
+          />,
+        ),
+      );
       act(() =>
         (lane("todo").querySelector("button") as HTMLButtonElement).click(),
       );
@@ -199,4 +230,104 @@ describe("workspace optimistic controller", () => {
       expect(mocks.refresh).toHaveBeenCalledOnce();
     },
   );
+
+  it("invalidates visible risk during optimistic task transition", async () => {
+    const high = TASK_RISK_UI_FIXTURES.find(
+      (fixture) => fixture.id === "high",
+    )?.state;
+
+    if (!high || high.status !== "ready") {
+      throw new Error("High-risk fixture is missing");
+    }
+
+    const riskTask = workspaceTask({
+      due_at: "2026-10-05T12:00:00.000Z",
+      updated_at: "2026-10-04T10:00:00.000Z",
+    });
+
+    const readyState = {
+      status: "ready" as const,
+      alert: {
+        ...high.alert,
+        task_id: riskTask.id,
+        predicted_at: "2026-10-04T11:00:00.000Z",
+        due_at: riskTask.due_at,
+      },
+    };
+
+    act(() => {
+      root.render(
+        <WorkspaceBoard
+          goals={[]}
+          initialTaskId={null}
+          initialTaskTab="overview"
+          initialEditMode={false}
+          {...props}
+          tasks={[riskTask]}
+          riskStates={{
+            [riskTask.id]: readyState,
+          }}
+        />,
+      );
+    });
+
+    const indicator = container.querySelector<HTMLElement>(
+      '[data-task-risk-indicator="high"]',
+    );
+    expect(indicator).not.toBeNull();
+
+    // Risk indicator must belong to the Task open button.
+    const openButton = indicator!.closest("button");
+    expect(openButton).not.toBeNull();
+
+    act(() => {
+      indicator!.click();
+    });
+
+    // Clicking the risk indicator opens the Task Drawer.
+    expect(container.querySelector("[data-drawer]")?.textContent).toBe(
+      riskTask.title,
+    );
+
+    // Opening a Task must trigger zero status transitions.
+    expect(mocks.transition).not.toHaveBeenCalled();
+
+    let resolveTransition!: (result: {
+      success: false;
+      message: string;
+    }) => void;
+
+    mocks.transition.mockReturnValue(
+      new Promise((resolve) => {
+        resolveTransition = resolve;
+      }),
+    );
+
+    act(() => {
+      mocks.dragEnd?.({
+        canceled: false,
+        operation: {
+          source: { id: `task:${riskTask.id}` },
+          target: { id: "lane:in_progress" },
+        },
+      } as DragEndEvent);
+    });
+
+    expect(
+      container.querySelector('[data-task-risk-indicator="high"]'),
+    ).toBeNull();
+
+    expect(
+      container.querySelector('[data-task-risk-indicator="stale"]'),
+    ).not.toBeNull();
+
+    await act(async () => {
+      resolveTransition({
+        success: false,
+        message: "staleTask",
+      });
+    });
+
+    expect(mocks.refresh).toHaveBeenCalled();
+  });
 });

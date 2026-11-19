@@ -87,10 +87,7 @@ export async function POST(request: Request) {
   }
 
   if (process.env.EXTENSION_DISTRACTION_WRITE_ENABLED !== "true") {
-    return json(
-      { error: "Extension distraction logging temporarily disabled" },
-      503,
-    );
+    return json({ error: "Extension distraction logging temporarily disabled" }, 503);
   }
 
   let identity;
@@ -122,16 +119,13 @@ export async function POST(request: Request) {
   const input = parsed.data;
 
   try {
-    const { data, error } = await identity.supabase.rpc(
-      "extension_confirm_distraction",
-      {
-        p_event_id: input.eventId,
-        p_session_id: input.sessionId,
-        p_segment_id: input.segmentId,
-        p_category: input.distractionType,
-        p_duration_seconds: input.durationSeconds,
-      },
-    );
+    const { data, error } = await identity.supabase.rpc("extension_confirm_distraction", {
+      p_event_id: input.eventId,
+      p_session_id: input.sessionId,
+      p_segment_id: input.segmentId,
+      p_category: input.distractionType,
+      p_duration_seconds: input.durationSeconds,
+    });
 
     if (error) {
       if (error.code === "P0001") {

@@ -79,6 +79,11 @@ Secrets:
 - `E2E_TEST_EMAIL`
 - `E2E_TEST_PASSWORD`
 
+Use a dedicated, email-confirmed account in the Supabase project used by
+`WEB_URL`. Complete onboarding once before running the staging E2E suite.
+If Playwright reports `invalid_credentials`, verify the account in that
+project and update both GitHub Environment `staging` secrets to match it.
+
 Variables:
 
 - `WEB_URL`
@@ -190,7 +195,6 @@ Database migrations should use forward-fix migrations. Avoid destructive schema
 changes in the same release that removes application compatibility.
 
 Prefer expand -> deploy -> contract migrations for production database changes.
-
 
 ## Python development environment
 

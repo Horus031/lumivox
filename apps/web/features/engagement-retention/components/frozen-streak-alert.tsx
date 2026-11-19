@@ -24,8 +24,7 @@ export async function FrozenStreakAlert({ stats }: FrozenStreakAlertProps) {
     return null;
   }
 
-  const deadline =
-    formatDeadline(stats.streak_restore_deadline_at, locale) ?? t("soon");
+  const deadline = formatDeadline(stats.streak_restore_deadline_at, locale) ?? t("soon");
 
   return (
     <section className="rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
@@ -35,15 +34,11 @@ export async function FrozenStreakAlert({ stats }: FrozenStreakAlertProps) {
             {t("eyebrow")}
           </p>
 
-          <h2 className="mt-1 text-xl font-bold text-amber-950">
-            {t("title")}
-          </h2>
+          <h2 className="mt-1 text-xl font-bold text-amber-950">{t("title")}</h2>
 
           <p className="mt-2 max-w-3xl text-sm leading-6 text-amber-900">
             {t.rich("description", {
-              deadline: () => (
-                <span className="font-semibold">{deadline}</span>
-              ),
+              deadline: () => <span className="font-semibold">{deadline}</span>,
             })}
           </p>
         </div>

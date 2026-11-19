@@ -44,7 +44,10 @@ export function AdminUserLeaderboardToggle({
   }
 
   return (
-    <Label htmlFor={id} className="flex min-h-touch cursor-pointer items-center gap-2 text-label text-foreground sm:min-h-control">
+    <Label
+      htmlFor={id}
+      className="flex min-h-touch cursor-pointer items-center gap-2 text-label text-foreground sm:min-h-control"
+    >
       <Checkbox
         id={id}
         aria-label={`${commonT("leaderboardVisibility")}: ${userId}`}

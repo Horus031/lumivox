@@ -3,10 +3,7 @@ export type GoalProgressInput = {
   completedTasks: number;
 };
 
-export function calculateGoalProgress({
-  totalTasks,
-  completedTasks,
-}: GoalProgressInput) {
+export function calculateGoalProgress({ totalTasks, completedTasks }: GoalProgressInput) {
   if (totalTasks <= 0) {
     return 0;
   }
@@ -16,10 +13,7 @@ export function calculateGoalProgress({
   return Math.min(100, Math.max(0, Math.round(rawProgress)));
 }
 
-export function formatGoalProgressLabel({
-  totalTasks,
-  completedTasks,
-}: GoalProgressInput) {
+export function formatGoalProgressLabel({ totalTasks, completedTasks }: GoalProgressInput) {
   if (totalTasks <= 0) {
     return "No tasks yet";
   }

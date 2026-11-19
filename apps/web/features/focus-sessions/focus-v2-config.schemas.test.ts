@@ -14,7 +14,9 @@ describe("Focus V2 configuration and immutable schedule", () => {
     expect(schedule.segments).toHaveLength(7);
     expect(schedule.segments.map((segment) => segment.position)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect(schedule.segments[6]).toMatchObject({
-      segmentKind: "focus", roundNumber: 4, plannedSeconds: 1500,
+      segmentKind: "focus",
+      roundNumber: 4,
+      plannedSeconds: 1500,
     });
   });
 
@@ -25,7 +27,10 @@ describe("Focus V2 configuration and immutable schedule", () => {
       longBreakEvery: 4,
     });
     expect(schedule.segments[7]).toMatchObject({
-      position: 8, segmentKind: "long_break", roundNumber: 4, plannedSeconds: 900,
+      position: 8,
+      segmentKind: "long_break",
+      roundNumber: 4,
+      plannedSeconds: 900,
     });
     expect(schedule.plannedBreakMinutes).toBe(35);
     expect(schedule.segments.at(-1)?.segmentKind).toBe("focus");
@@ -46,11 +51,17 @@ describe("Focus V2 configuration and immutable schedule", () => {
     { longBreakEvery: 1 },
     { focusMinutes: 25.5 },
   ])("rejects invalid configuration %j", (patch) => {
-    expect(focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, ...patch }).success).toBe(false);
+    expect(focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, ...patch }).success).toBe(
+      false,
+    );
   });
 
   it("rejects unexpected inputs and invalid linked task IDs", () => {
-    expect(focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, unknown: "x" }).success).toBe(false);
-    expect(focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, taskId: "not-a-uuid" }).success).toBe(false);
+    expect(
+      focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, unknown: "x" }).success,
+    ).toBe(false);
+    expect(
+      focusV2ConfigSchema.safeParse({ ...DEFAULT_FOCUS_V2_CONFIG, taskId: "not-a-uuid" }).success,
+    ).toBe(false);
   });
 });

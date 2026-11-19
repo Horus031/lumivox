@@ -13,10 +13,7 @@ export function JourneyIllustration({ step }: { step: string }) {
   if (step === "patterns") {
     return (
       <svg viewBox="0 0 560 320" className="journey-patterns__graph">
-        <path
-          className="journey-patterns__gridline"
-          d="M40 80 H520 M40 160 H520 M40 240 H520"
-        />
+        <path className="journey-patterns__gridline" d="M40 80 H520 M40 160 H520 M40 240 H520" />
         <path
           className="journey-patterns__signal"
           d="M40 245 C80 245 100 240 130 215 S180 215 220 180 S275 180 310 140 S375 150 410 105 S475 110 520 65"
@@ -45,10 +42,7 @@ export function JourneyIllustration({ step }: { step: string }) {
 
 export default function JourneyVisualStage() {
   return (
-    <div
-      aria-hidden="true"
-      className="journey-stage learning-journey__stage-desktop"
-    >
+    <div aria-hidden="true" className="journey-stage learning-journey__stage-desktop">
       <div className="journey-stage__field" />
 
       <div className="journey-stage__progress">

@@ -45,7 +45,11 @@ export function AdminDocumentReprocessButton({
     });
   }
 
-  const label = isPending ? t("processing") : status === "completed" ? t("reprocess") : t("process");
+  const label = isPending
+    ? t("processing")
+    : status === "completed"
+      ? t("reprocess")
+      : t("process");
 
   return (
     <Button
@@ -58,7 +62,11 @@ export function AdminDocumentReprocessButton({
       title={compact ? label : undefined}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <RefreshCw aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <RefreshCw aria-hidden="true" />
+      )}
       {!compact && label}
     </Button>
   );

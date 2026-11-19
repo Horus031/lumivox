@@ -32,13 +32,33 @@ class FakeAudioContext {
   destination = new FakeAudioNode();
   sources: FakeAudioNode[] = [];
   gains: FakeAudioNode[] = [];
-  resume = vi.fn(async () => { this.state = "running"; });
-  close = vi.fn(async () => { this.state = "closed"; });
-  constructor() { created.contexts.push(this); }
-  createGain() { const node = new FakeAudioNode(); this.gains.push(node); return node; }
-  createOscillator() { const node = new FakeAudioNode(); this.sources.push(node); return node; }
-  createBiquadFilter() { return new FakeAudioNode(); }
-  createBufferSource() { const node = new FakeAudioNode(); this.sources.push(node); return node; }
+  resume = vi.fn(async () => {
+    this.state = "running";
+  });
+  close = vi.fn(async () => {
+    this.state = "closed";
+  });
+  constructor() {
+    created.contexts.push(this);
+  }
+  createGain() {
+    const node = new FakeAudioNode();
+    this.gains.push(node);
+    return node;
+  }
+  createOscillator() {
+    const node = new FakeAudioNode();
+    this.sources.push(node);
+    return node;
+  }
+  createBiquadFilter() {
+    return new FakeAudioNode();
+  }
+  createBufferSource() {
+    const node = new FakeAudioNode();
+    this.sources.push(node);
+    return node;
+  }
   createBuffer(_channels: number, length: number) {
     const samples = new Float32Array(length);
     return { getChannelData: () => samples };
@@ -72,7 +92,9 @@ describe("Focus V2 browser audio engine", () => {
     const context = created.contexts[0];
     expect(context.sources.length).toBeGreaterThan(6);
     engine.stopAmbient();
-    expect(context.sources.filter((source) => source.stop.mock.calls.length > 0).length).toBe(context.sources.length);
+    expect(context.sources.filter((source) => source.stop.mock.calls.length > 0).length).toBe(
+      context.sources.length,
+    );
     await engine.close();
   });
 

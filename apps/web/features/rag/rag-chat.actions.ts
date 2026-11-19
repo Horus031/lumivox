@@ -88,7 +88,6 @@ export async function askRagQuestionAction(
       },
     });
 
-
     return {
       success: true,
       message: "Answer generated.",

@@ -14,10 +14,9 @@ export const blogSlugs = {
 } as const;
 
 export function getLocalizedBlogPath(pathname: string, locale: "en" | "vi") {
-  const pair = Object.values(blogSlugs).find(({ en, vi }) =>
-    pathname === `/blog/${en}` || pathname === `/blog/${vi}`,
+  const pair = Object.values(blogSlugs).find(
+    ({ en, vi }) => pathname === `/blog/${en}` || pathname === `/blog/${vi}`,
   );
 
   return pair ? `/blog/${pair[locale]}` : undefined;
 }
-

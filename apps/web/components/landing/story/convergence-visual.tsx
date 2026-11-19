@@ -1,10 +1,6 @@
 export default function ConvergenceVisual() {
   return (
-    <div
-      aria-hidden="true"
-      data-landing-motion="decorative"
-      className="convergence-visual"
-    >
+    <div aria-hidden="true" data-landing-motion="decorative" className="convergence-visual">
       <div className="convergence-visual__halo" />
       <div className="convergence-visual__ring convergence-visual__ring--outer" />
       <div className="convergence-visual__ring convergence-visual__ring--inner" />

@@ -22,7 +22,7 @@ export async function getLatestAiInsightCards(
         input_mode,
         created_at
       )
-    `
+    `,
     )
     .order("created_at", { ascending: false })
     .limit(limit);

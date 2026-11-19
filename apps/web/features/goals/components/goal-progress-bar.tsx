@@ -6,10 +6,7 @@ type GoalProgressBarProps = {
   completedTasks: number;
 };
 
-export function GoalProgressBar({
-  totalTasks,
-  completedTasks,
-}: GoalProgressBarProps) {
+export function GoalProgressBar({ totalTasks, completedTasks }: GoalProgressBarProps) {
   const t = useTranslations("goals.progress");
   const progress = calculateGoalProgress({
     totalTasks,
@@ -24,13 +21,9 @@ export function GoalProgressBar({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between gap-3 text-sm">
-        <span className="font-medium text-neutral-700 dark:text-neutral-300">
-          {t("label")}
-        </span>
+        <span className="font-medium text-neutral-700 dark:text-neutral-300">{t("label")}</span>
 
-        <span className="text-neutral-500 dark:text-neutral-400">
-          {progress}%
-        </span>
+        <span className="text-neutral-500 dark:text-neutral-400">{progress}%</span>
       </div>
 
       <div className="h-2.5 overflow-hidden rounded-full bg-muted-foreground ">

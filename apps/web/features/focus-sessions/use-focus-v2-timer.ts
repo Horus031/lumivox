@@ -40,35 +40,35 @@ export function useFocusV2Timer(initialSnapshot: FocusV2Snapshot) {
     }
   }, [sessionId]);
 
-  const apply = useCallback(async (
-    action: FocusV2Action,
-    expectedSegmentId: string | null,
-  ): Promise<boolean> => {
-    if (busyRef.current) return false;
-    busyRef.current = true;
-    setIsPending(true);
-    try {
-      const result = await transitionFocusV2Action({ sessionId, action, expectedSegmentId });
-      if (!result.success) {
-        setError(result.message);
+  const apply = useCallback(
+    async (action: FocusV2Action, expectedSegmentId: string | null): Promise<boolean> => {
+      if (busyRef.current) return false;
+      busyRef.current = true;
+      setIsPending(true);
+      try {
+        const result = await transitionFocusV2Action({ sessionId, action, expectedSegmentId });
+        if (!result.success) {
+          setError(result.message);
+          return false;
+        }
+        setError(null);
+        return true;
+      } catch {
+        setError("Unable to change Focus V2 session.");
         return false;
+      } finally {
+        busyRef.current = false;
+        setIsPending(false);
+        await refresh();
+        if (typeof BroadcastChannel !== "undefined") {
+          const channel = new BroadcastChannel(`lumivox-focus-v2-${sessionId}`);
+          channel.postMessage({ type: "refresh" });
+          channel.close();
+        }
       }
-      setError(null);
-      return true;
-    } catch {
-      setError("Unable to change Focus V2 session.");
-      return false;
-    } finally {
-      busyRef.current = false;
-      setIsPending(false);
-      await refresh();
-      if (typeof BroadcastChannel !== "undefined") {
-        const channel = new BroadcastChannel(`lumivox-focus-v2-${sessionId}`);
-        channel.postMessage({ type: "refresh" });
-        channel.close();
-      }
-    }
-  }, [refresh, sessionId]);
+    },
+    [refresh, sessionId],
+  );
 
   useEffect(() => {
     if (!visible) return;
@@ -82,14 +82,23 @@ export function useFocusV2Timer(initialSnapshot: FocusV2Snapshot) {
       setOnline(navigator.onLine);
       if (!document.hidden && navigator.onLine) void refresh();
     }
-    const onOnline = () => { setOnline(true); void refresh(); };
+    const onOnline = () => {
+      setOnline(true);
+      void refresh();
+    };
     const onOffline = () => setOnline(false);
     document.addEventListener("visibilitychange", synchronize);
     window.addEventListener("focus", synchronize);
     window.addEventListener("online", onOnline);
     window.addEventListener("offline", onOffline);
-    const channel = typeof BroadcastChannel !== "undefined" ? new BroadcastChannel(`lumivox-focus-v2-${sessionId}`) : null;
-    if (channel) channel.onmessage = () => { if (!document.hidden) void refresh(); };
+    const channel =
+      typeof BroadcastChannel !== "undefined"
+        ? new BroadcastChannel(`lumivox-focus-v2-${sessionId}`)
+        : null;
+    if (channel)
+      channel.onmessage = () => {
+        if (!document.hidden) void refresh();
+      };
     synchronize();
     return () => {
       document.removeEventListener("visibilitychange", synchronize);
@@ -103,7 +112,9 @@ export function useFocusV2Timer(initialSnapshot: FocusV2Snapshot) {
   // Reconcile missed tab broadcasts without making per-second database requests.
   useEffect(() => {
     if (!visible || !online || ["completed", "cancelled"].includes(snapshot.session.status)) return;
-    const interval = window.setInterval(() => { void refresh(); }, 60_000);
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 60_000);
     return () => window.clearInterval(interval);
   }, [visible, online, snapshot.session.status, refresh]);
 
@@ -126,7 +137,12 @@ export function useFocusV2Timer(initialSnapshot: FocusV2Snapshot) {
   }, [projection, visible, online, apply]);
 
   return {
-    snapshot, projection, error, isPending, online, visible,
+    snapshot,
+    projection,
+    error,
+    isPending,
+    online,
+    visible,
     refresh,
     transition: (action: FocusV2Action, expectedSegmentId: string | null) =>
       apply(action, expectedSegmentId),

@@ -25,7 +25,7 @@ type ProcessLearningDocumentApiResponse = {
 };
 
 export async function adminReprocessLearningDocumentAction(
-  input: z.infer<typeof reprocessDocumentSchema>
+  input: z.infer<typeof reprocessDocumentSchema>,
 ): Promise<ActionResult<ProcessLearningDocumentApiResponse>> {
   try {
     await requireAdmin();
@@ -59,15 +59,13 @@ export async function adminReprocessLearningDocumentAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while re-processing document.",
+        error instanceof Error ? error.message : "Unexpected error while re-processing document.",
     };
   }
 }
 
 export async function adminDeleteLearningDocumentAction(
-  input: z.infer<typeof deleteDocumentSchema>
+  input: z.infer<typeof deleteDocumentSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -94,12 +92,9 @@ export async function adminDeleteLearningDocumentAction(
       };
     }
 
-    const { error: deleteError } = await supabase.rpc(
-      "admin_delete_learning_document",
-      {
-        p_document_id: documentId,
-      }
-    );
+    const { error: deleteError } = await supabase.rpc("admin_delete_learning_document", {
+      p_document_id: documentId,
+    });
 
     if (deleteError) {
       return {
@@ -118,10 +113,7 @@ export async function adminDeleteLearningDocumentAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while deleting document.",
+      message: error instanceof Error ? error.message : "Unexpected error while deleting document.",
     };
   }
 }

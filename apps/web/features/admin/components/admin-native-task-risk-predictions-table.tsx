@@ -69,37 +69,26 @@ function percent(value: number) {
   return `${Math.round(Number(value) * 100)}%`;
 }
 
-export function AdminNativeTaskRiskPredictionsTable({
-  predictions,
-}: Props) {
+export function AdminNativeTaskRiskPredictionsTable({ predictions }: Props) {
   const t = useTranslations("admin.nativeTaskRisk.predictions");
   const locale = useLocale();
 
   return (
     <section className="min-w-0 space-y-3 border-t border-border pt-card">
       <div>
-        <p className="text-caption text-muted-foreground">
-          {t("eyebrow")}
-        </p>
+        <p className="text-caption text-muted-foreground">{t("eyebrow")}</p>
 
-        <h2 className="mt-1 text-section font-semibold text-foreground">
-          {t("title")}
-        </h2>
+        <h2 className="mt-1 text-section font-semibold text-foreground">{t("title")}</h2>
       </div>
 
       {predictions.length === 0 ? (
         <div className="py-section">
-          <p className="text-body text-secondary-text">
-            {t("empty")}
-          </p>
+          <p className="text-body text-secondary-text">{t("empty")}</p>
         </div>
       ) : (
         <div className="divide-y divide-border">
           {predictions.map((prediction) => (
-            <article
-              key={prediction.prediction_id}
-              className="min-w-0 py-card"
-            >
+            <article key={prediction.prediction_id} className="min-w-0 py-card">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0 flex-1 [overflow-wrap:anywhere]">
                   <div className="flex flex-wrap items-center gap-2">
@@ -158,7 +147,15 @@ export function AdminNativeTaskRiskPredictionsTable({
                   </p>
                 </div>
 
-                <Button asChild variant="ghost" size="icon"><Link href={`/admin/native-task-risk/${prediction.prediction_id}`} aria-label={`${t("viewDetail")}: ${prediction.task_title ?? prediction.task_id}`} title={t("viewDetail")}><ArrowUpRight aria-hidden="true" /></Link></Button>
+                <Button asChild variant="ghost" size="icon">
+                  <Link
+                    href={`/admin/native-task-risk/${prediction.prediction_id}`}
+                    aria-label={`${t("viewDetail")}: ${prediction.task_title ?? prediction.task_id}`}
+                    title={t("viewDetail")}
+                  >
+                    <ArrowUpRight aria-hidden="true" />
+                  </Link>
+                </Button>
               </div>
 
               {prediction.reason_summaries?.length > 0 ? (
@@ -169,17 +166,10 @@ export function AdminNativeTaskRiskPredictionsTable({
 
                   <div className="mt-2 space-y-3">
                     {prediction.reason_summaries.slice(0, 2).map((reason) => (
-                      <div
-                        key={`${prediction.prediction_id}-${reason.title}`}
-                        className="min-w-0"
-                      >
-                        <p className="text-label font-medium text-foreground">
-                          {reason.title}
-                        </p>
+                      <div key={`${prediction.prediction_id}-${reason.title}`} className="min-w-0">
+                        <p className="text-label font-medium text-foreground">{reason.title}</p>
 
-                        <p className="mt-1 text-body text-secondary-text">
-                          {reason.description}
-                        </p>
+                        <p className="mt-1 text-body text-secondary-text">{reason.description}</p>
                       </div>
                     ))}
                   </div>

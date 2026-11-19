@@ -44,13 +44,11 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
             Retention & Habit
           </p>
 
-          <h2 className="mt-2 text-2xl font-bold tracking-tight">
-            Engagement Summary
-          </h2>
+          <h2 className="mt-2 text-2xl font-bold tracking-tight">Engagement Summary</h2>
 
           <p className="mt-2 max-w-3xl text-neutral-600">
-            Track learning streaks, reward tokens, and whether your current
-            streak is active, frozen, or lost.
+            Track learning streaks, reward tokens, and whether your current streak is active,
+            frozen, or lost.
           </p>
         </div>
 
@@ -80,26 +78,19 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
 
             {isFrozen ? (
               <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
-                Restore deadline:{" "}
-                {formatDeadline(stats.streak_restore_deadline_at)}
+                Restore deadline: {formatDeadline(stats.streak_restore_deadline_at)}
               </span>
             ) : null}
           </div>
 
           {isFrozen ? (
             <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4">
-              <p className="font-semibold text-amber-900">
-                Your streak is frozen.
-              </p>
+              <p className="font-semibold text-amber-900">Your streak is frozen.</p>
 
               <p className="mt-2 text-sm leading-6 text-amber-800">
-                You can spend <span className="font-semibold">30 tokens</span>{" "}
-                to restore your streak before the restore window expires. You
-                currently have{" "}
-                <span className="font-semibold">
-                  {stats.token_balance} tokens
-                </span>
-                .
+                You can spend <span className="font-semibold">30 tokens</span> to restore your
+                streak before the restore window expires. You currently have{" "}
+                <span className="font-semibold">{stats.token_balance} tokens</span>.
               </p>
 
               {!canRestore ? (
@@ -111,30 +102,15 @@ export function EngagementSummaryCard({ stats }: EngagementSummaryCardProps) {
           ) : null}
 
           <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <MetricCard
-              label="Current streak"
-              value={`${stats.current_streak_days} day(s)`}
-            />
+            <MetricCard label="Current streak" value={`${stats.current_streak_days} day(s)`} />
 
-            <MetricCard
-              label="Longest streak"
-              value={`${stats.longest_streak_days} day(s)`}
-            />
+            <MetricCard label="Longest streak" value={`${stats.longest_streak_days} day(s)`} />
 
-            <MetricCard
-              label="Token balance"
-              value={`${stats.token_balance}`}
-            />
+            <MetricCard label="Token balance" value={`${stats.token_balance}`} />
 
-            <MetricCard
-              label="Tokens last 7 days"
-              value={`${stats.tokens_earned_last_7d}`}
-            />
+            <MetricCard label="Tokens last 7 days" value={`${stats.tokens_earned_last_7d}`} />
 
-            <MetricCard
-              label="Tokens spent"
-              value={`${stats.total_tokens_spent ?? 0}`}
-            />
+            <MetricCard label="Tokens spent" value={`${stats.total_tokens_spent ?? 0}`} />
 
             <MetricCard
               label="Last valid activity"
@@ -155,9 +131,7 @@ type MetricCardProps = {
 function MetricCard({ label, value }: MetricCardProps) {
   return (
     <div className="rounded-2xl border bg-neutral-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
-        {label}
-      </p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{label}</p>
 
       <p className="mt-3 text-2xl font-bold tracking-tight">{value}</p>
     </div>

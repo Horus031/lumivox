@@ -9,9 +9,7 @@ export const DIRECT_TASK_STATUS_TARGETS = [
 
 export type DirectTaskStatus = (typeof DIRECT_TASK_STATUS_TARGETS)[number];
 
-export function isDirectTaskStatusTarget(
-  value: string,
-): value is DirectTaskStatus {
+export function isDirectTaskStatusTarget(value: string): value is DirectTaskStatus {
   return DIRECT_TASK_STATUS_TARGETS.includes(value as DirectTaskStatus);
 }
 
@@ -21,9 +19,7 @@ export function getTaskCompletedAt(
   referenceNow: Date,
 ) {
   if (targetStatus !== "completed") return null;
-  return task.status === "completed"
-    ? task.completed_at
-    : referenceNow.toISOString();
+  return task.status === "completed" ? task.completed_at : referenceNow.toISOString();
 }
 
 type BoardStatusInput = {
@@ -31,25 +27,14 @@ type BoardStatusInput = {
   due_at: string | null;
 };
 
-export function getTaskBoardStatus(
-  task: BoardStatusInput,
-  referenceNow: Date,
-): TaskStatus {
-  if (
-    task.status === "completed" ||
-    task.status === "cancelled" ||
-    task.status === "in_review"
-  ) {
+export function getTaskBoardStatus(task: BoardStatusInput, referenceNow: Date): TaskStatus {
+  if (task.status === "completed" || task.status === "cancelled" || task.status === "in_review") {
     return task.status;
   }
 
   const dueAt = task.due_at ? new Date(task.due_at) : null;
 
-  if (
-    dueAt &&
-    Number.isFinite(dueAt.getTime()) &&
-    dueAt.getTime() < referenceNow.getTime()
-  ) {
+  if (dueAt && Number.isFinite(dueAt.getTime()) && dueAt.getTime() < referenceNow.getTime()) {
     return "overdue";
   }
 
@@ -76,10 +61,7 @@ const DIRECT_TRANSITIONS: Record<TaskStatus, readonly DirectTaskStatus[]> = {
   in_review: [],
 };
 
-export function canDirectlyTransitionTask(
-  from: TaskStatus,
-  to: DirectTaskStatus,
-) {
+export function canDirectlyTransitionTask(from: TaskStatus, to: DirectTaskStatus) {
   if (from === to) {
     return false;
   }

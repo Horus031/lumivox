@@ -66,26 +66,17 @@ export default function HeroMotionController() {
 
     root.style.setProperty("--hero-content-y", `${progress * -44}px`);
 
-    root.style.setProperty(
-      "--hero-content-opacity",
-      `${Math.max(0, 1 - progress * 1.35)}`,
-    );
+    root.style.setProperty("--hero-content-opacity", `${Math.max(0, 1 - progress * 1.35)}`);
 
     root.style.setProperty("--hero-video-scale", `${1.06 - progress * 0.08}`);
 
     root.style.setProperty("--hero-video-y", `${progress * -18}px`);
 
-    root.style.setProperty(
-      "--hero-signals-opacity",
-      `${Math.max(0, 1 - progress * 1.7)}`,
-    );
+    root.style.setProperty("--hero-signals-opacity", `${Math.max(0, 1 - progress * 1.7)}`);
 
     root.style.setProperty("--hero-signals-y", `${progress * -22}px`);
 
-    root.style.setProperty(
-      "--hero-filament-opacity",
-      `${Math.min(1, progress * 2.2 + 0.2)}`,
-    );
+    root.style.setProperty("--hero-filament-opacity", `${Math.min(1, progress * 2.2 + 0.2)}`);
   });
 
   useEffect(() => {
@@ -98,10 +89,6 @@ export default function HeroMotionController() {
   }, [reduceMotion]);
 
   return (
-    <div
-      ref={targetRef}
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-0"
-    />
+    <div ref={targetRef} aria-hidden="true" className="pointer-events-none absolute inset-0" />
   );
 }

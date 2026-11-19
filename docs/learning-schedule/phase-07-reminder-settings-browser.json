@@ -1,0 +1,93 @@
+{
+  "baseline": "05aa95e801ab8f62e4fa89e656a16877ac50a22a",
+  "startedAt": "2026-11-05T09:37:23.879Z",
+  "runs": [
+    {
+      "name": "NS-01 default OFF, explicit draft only, existing profile form independent",
+      "status": "passed"
+    },
+    {
+      "name": "NS-02/03/10 save consent, reload, keyboard lead change and persisted replan",
+      "status": "passed"
+    },
+    {
+      "name": "NS-04/09 quiet hours via browser; EN/VI mobile accessible and no overflow",
+      "status": "passed"
+    },
+    {
+      "name": "NS-06 Task disable is persisted and only suppresses that Task",
+      "status": "passed"
+    },
+    {
+      "name": "NS-05 persisted opt-out invalidates every pending job; Task true cannot bypass",
+      "status": "passed"
+    },
+    {
+      "name": "NS-07 independent owner B browser cannot read/change A preferences",
+      "status": "passed"
+    },
+    {
+      "name": "NS-08 real read failure, Retry, invalid draft and RPC conflict keep honest localized state",
+      "status": "passed"
+    },
+    {
+      "name": "NS-11 delayed real Server Action response prevents duplicate commands/optimistic success",
+      "status": "passed"
+    },
+    {
+      "name": "NS-12 gates OFF, no submissions/email; anonymous settings protection",
+      "status": "passed"
+    }
+  ],
+  "facts": {
+    "replan": {
+      "before": [
+        {
+          "id": "8a56dab5-d366-4f55-9843-8edd7fb7847e",
+          "due": "2030-01-07T09:45:00+00:00"
+        },
+        {
+          "id": "db329b59-c0dd-40ad-9991-a5165b6a54dc",
+          "due": "2030-01-07T09:45:00+00:00"
+        }
+      ],
+      "after": [
+        {
+          "id": "8a56dab5-d366-4f55-9843-8edd7fb7847e",
+          "due": "2030-01-07T09:30:00+00:00"
+        },
+        {
+          "id": "db329b59-c0dd-40ad-9991-a5165b6a54dc",
+          "due": "2030-01-07T09:30:00+00:00"
+        }
+      ]
+    },
+    "optOut": {
+      "jobs": [
+        {
+          "id": "8a56dab5-d366-4f55-9843-8edd7fb7847e",
+          "status": "suppressed",
+          "cancellationFence": true
+        },
+        {
+          "id": "db329b59-c0dd-40ad-9991-a5165b6a54dc",
+          "status": "suppressed",
+          "cancellationFence": true
+        }
+      ],
+      "currentJobs": 0
+    },
+    "inFlight": {
+      "serverActionRequests": 1,
+      "dbCommittedBeforeResponse": true,
+      "optimisticSuccess": false
+    },
+    "deliveryAttempts": 0
+  },
+  "finishedAt": "2026-11-05T09:38:14.047Z",
+  "cleanup": "PASS",
+  "dispatchGate": false,
+  "sweepGate": false,
+  "reminderCron": 0,
+  "providerRequests": []
+}

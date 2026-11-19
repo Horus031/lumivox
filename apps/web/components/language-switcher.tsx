@@ -25,8 +25,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   const t = useTranslations("common");
   const router = useRouter();
   const pathname = usePathname();
-  const currentLanguage =
-    languages.find((language) => language.value === locale) ?? languages[0];
+  const currentLanguage = languages.find((language) => language.value === locale) ?? languages[0];
 
   function handleChange(nextLocale: string) {
     const locale = nextLocale === "vi" ? "vi" : "en";
@@ -40,7 +39,12 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild aria-label={t("language")}>
-        <Button variant={compact ? "ghost" : "outline"} size={compact ? "icon" : "default"} title={`${t("language")}: ${currentLanguage.label}`} className={compact ? "sm:size-touch lg:size-control" : undefined}>
+        <Button
+          variant={compact ? "ghost" : "outline"}
+          size={compact ? "icon" : "default"}
+          title={`${t("language")}: ${currentLanguage.label}`}
+          className={compact ? "sm:size-touch lg:size-control" : undefined}
+        >
           <Languages /> {!compact && currentLanguage.flag}
         </Button>
       </DropdownMenuTrigger>
@@ -55,9 +59,7 @@ export function LanguageSwitcher({ compact = false }: { compact?: boolean }) {
           >
             <span className="text-base leading-none">{language.flag}</span>
             <span>{language.label}</span>
-            {language.value === locale && (
-              <Check className="ml-auto size-4 text-primary" />
-            )}
+            {language.value === locale && <Check className="ml-auto size-4 text-primary" />}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

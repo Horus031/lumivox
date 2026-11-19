@@ -48,10 +48,13 @@ export function DashboardSummaryCards({
           className="min-w-0 rounded-2xl border border-border bg-card p-4 shadow-sm"
         >
           <div className="flex items-start justify-between gap-2">
-            <p className="min-w-0 text-label text-secondary-text">
-              {t(`${card.key}.title`)}
-            </p>
-            <span aria-hidden="true" className="hidden shrink-0 text-muted-foreground sm:inline-flex [&_svg]:size-icon">{card.icon}</span>
+            <p className="min-w-0 text-label text-secondary-text">{t(`${card.key}.title`)}</p>
+            <span
+              aria-hidden="true"
+              className="hidden shrink-0 text-muted-foreground sm:inline-flex [&_svg]:size-icon"
+            >
+              {card.icon}
+            </span>
           </div>
           <p className="mt-2 text-2xl font-semibold text-foreground tabular-nums [overflow-wrap:anywhere]">
             {formatter.format(card.value)}

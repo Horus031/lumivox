@@ -10,11 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTaskAction } from "@/features/tasks/task.actions";
 
-export function WorkspaceQuickCreateTask({
-  goalId,
-}: {
-  goalId: string | null;
-}) {
+export function WorkspaceQuickCreateTask({ goalId }: { goalId: string | null }) {
   const t = useTranslations("workspace.board");
   const commonT = useTranslations("common");
   const router = useRouter();
@@ -67,11 +63,7 @@ export function WorkspaceQuickCreateTask({
             onChange={(event) => setTitle(event.target.value)}
           />
           <div className="flex flex-wrap gap-2">
-            <Button
-              type="submit"
-              size="sm"
-              disabled={isPending || !title.trim()}
-            >
+            <Button type="submit" size="sm" disabled={isPending || !title.trim()}>
               {t("addTask")}
             </Button>
             <Button

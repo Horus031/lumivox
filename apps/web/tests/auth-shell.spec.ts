@@ -7,7 +7,7 @@ test("signed in user can access dashboard shell", async ({ page }) => {
   await expect(
     page.getByRole("heading", {
       name: /behaviour analytics dashboard/i,
-    })
+    }),
   ).toBeVisible();
 
   await expect(page.getByText(/dashboard/i).first()).toBeVisible();

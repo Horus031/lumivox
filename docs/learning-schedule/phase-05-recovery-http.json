@@ -1,0 +1,174 @@
+{
+  "baseline": "c9a6ae23f77576083e4f491dce329b187b0f244f",
+  "startedAt": "2026-10-31T09:21:59.377Z",
+  "checks": [
+    {
+      "name": "stale",
+      "status": "PASS",
+      "http": 409,
+      "sqlstate": "PT409",
+      "elapsedMs": 25
+    },
+    {
+      "name": "cross-owner-and-RLS",
+      "status": "PASS",
+      "http": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "recover-missed-day2",
+      "status": "PASS",
+      "http": 200,
+      "timezone": "UTC"
+    },
+    {
+      "name": "audit-identity-task-missed-day2",
+      "status": "PASS",
+      "events": 1
+    },
+    {
+      "name": "exact-replay-missed-day2",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "fingerprint-mismatch-missed-day2",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "recover-missed-day7",
+      "status": "PASS",
+      "http": 200,
+      "timezone": "UTC"
+    },
+    {
+      "name": "audit-identity-task-missed-day7",
+      "status": "PASS",
+      "events": 1
+    },
+    {
+      "name": "exact-replay-missed-day7",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "fingerprint-mismatch-missed-day7",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "recover-skipped-day2",
+      "status": "PASS",
+      "http": 200,
+      "timezone": "UTC"
+    },
+    {
+      "name": "audit-identity-task-skipped-day2",
+      "status": "PASS",
+      "events": 1
+    },
+    {
+      "name": "exact-replay-skipped-day2",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "fingerprint-mismatch-skipped-day2",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "recover-skipped-day7",
+      "status": "PASS",
+      "http": 200,
+      "timezone": "UTC"
+    },
+    {
+      "name": "audit-identity-task-skipped-day7",
+      "status": "PASS",
+      "events": 1
+    },
+    {
+      "name": "exact-replay-skipped-day7",
+      "status": "PASS",
+      "http": 200
+    },
+    {
+      "name": "fingerprint-mismatch-skipped-day7",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "expired-missed-day8",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023",
+      "timezone": "UTC"
+    },
+    {
+      "name": "expired-missed-day10",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023",
+      "timezone": "UTC"
+    },
+    {
+      "name": "expired-skipped-day8",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023",
+      "timezone": "UTC"
+    },
+    {
+      "name": "expired-skipped-day10",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023",
+      "timezone": "UTC"
+    },
+    {
+      "name": "invalid-state-scheduled",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "invalid-state-in_progress",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "invalid-state-completed",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "invalid-state-cancelled",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "future-missed",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "future-skipped",
+      "status": "PASS",
+      "http": 400,
+      "sqlstate": "22023"
+    }
+  ],
+  "status": "PASS",
+  "cleanup": "PASS",
+  "finishedAt": "2026-10-31T09:22:00.635Z"
+}

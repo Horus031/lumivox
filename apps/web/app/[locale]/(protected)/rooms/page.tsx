@@ -1,9 +1,6 @@
 import { PageHeader } from "@/features/app-shell/components/page-header";
 
-import {
-  getMyStudyRooms,
-  getPublicStudyRooms,
-} from "@/features/study-rooms/study-room.queries";
+import { getMyStudyRooms, getPublicStudyRooms } from "@/features/study-rooms/study-room.queries";
 
 import { CreateStudyRoomForm } from "@/features/study-rooms/components/create-study-room-form";
 import { RoomListTabs } from "@/features/study-rooms/components/room-list-tabs";
@@ -18,9 +15,7 @@ export default async function RoomsPage() {
 
   const joinedRoomIds = new Set(myRooms.map((item) => item.room_id));
 
-  const discoverablePublicRooms = publicRooms.filter(
-    (room) => !joinedRoomIds.has(room.id),
-  );
+  const discoverablePublicRooms = publicRooms.filter((room) => !joinedRoomIds.has(room.id));
 
   return (
     <section>
@@ -32,10 +27,7 @@ export default async function RoomsPage() {
           action={<CreateStudyRoomForm />}
         />
 
-        <RoomListTabs
-          myRooms={myRooms}
-          discoverablePublicRooms={discoverablePublicRooms}
-        />
+        <RoomListTabs myRooms={myRooms} discoverablePublicRooms={discoverablePublicRooms} />
       </div>
     </section>
   );

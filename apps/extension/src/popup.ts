@@ -5,11 +5,7 @@ import {
   type CheckSiteResponse,
 } from "./shared/protocol";
 
-import {
-  isAuthResponse,
-  type AuthRequest,
-  type AuthResponse,
-} from "./shared/auth-protocol";
+import { isAuthResponse, type AuthRequest, type AuthResponse } from "./shared/auth-protocol";
 
 import { initializeFocusPopup } from "./focus-popup";
 
@@ -115,9 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.hidden = false;
 
     authStatus.textContent =
-      response.state === "unavailable"
-        ? "Không thể xác minh tài khoản"
-        : "Chưa đăng nhập";
+      response.state === "unavailable" ? "Không thể xác minh tài khoản" : "Chưa đăng nhập";
   }
 
   async function refreshSite() {
@@ -161,10 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
     logoutButton.disabled = value;
 
     for (const control of Array.from(loginForm.elements)) {
-      if (
-        control instanceof HTMLInputElement ||
-        control instanceof HTMLButtonElement
-      ) {
+      if (control instanceof HTMLInputElement || control instanceof HTMLButtonElement) {
         control.disabled = value;
       }
     }
@@ -207,9 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     void (async () => {
       try {
-        const response = await sendAuth(
-          makeAuthRequest({ type: "AUTH_LOGOUT" }),
-        );
+        const response = await sendAuth(makeAuthRequest({ type: "AUTH_LOGOUT" }));
 
         renderAuth(response);
       } catch {
@@ -225,9 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setBusy(true);
 
-    void Promise.all([refreshSite(), refreshAuth()]).finally(() =>
-      setBusy(false),
-    );
+    void Promise.all([refreshSite(), refreshAuth()]).finally(() => setBusy(false));
   });
 
   openButton.addEventListener("click", () => {

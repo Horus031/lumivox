@@ -19,7 +19,14 @@ type StudyGroupWeeklyChallengeProps = {
 function ProgressBar({ value, label }: { value: number; label: string }) {
   const percent = Number.isFinite(value) ? Math.min(100, Math.max(0, value)) : 0;
   return (
-    <div role="progressbar" aria-label={label} aria-valuemin={0} aria-valuemax={100} aria-valuenow={percent} className="h-1.5 overflow-hidden rounded-full bg-muted">
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      className="h-1.5 overflow-hidden rounded-full bg-muted"
+    >
       <div
         className="h-full rounded-full bg-primary"
         style={{
@@ -30,9 +37,7 @@ function ProgressBar({ value, label }: { value: number; label: string }) {
   );
 }
 
-export function StudyGroupWeeklyChallenge({
-  progress,
-}: StudyGroupWeeklyChallengeProps) {
+export function StudyGroupWeeklyChallenge({ progress }: StudyGroupWeeklyChallengeProps) {
   const locale = useLocale();
   const t = useTranslations("groups.weeklyChallengePanel");
   const dateFormatter = new Intl.DateTimeFormat(locale, {
@@ -43,26 +48,18 @@ export function StudyGroupWeeklyChallenge({
   if (!progress) {
     return (
       <section className="min-w-0 border-t border-border pt-card">
-        <h2 className="text-section font-semibold text-foreground">
-          {t("eyebrow")}
-        </h2>
+        <h2 className="text-section font-semibold text-foreground">{t("eyebrow")}</h2>
 
-        <p className="mt-2 text-body text-secondary-text">
-          {t("empty")}
-        </p>
+        <p className="mt-2 text-body text-secondary-text">{t("empty")}</p>
       </section>
     );
   }
 
   return (
     <section className="min-w-0 border-t border-border pt-card">
-      <p className="text-caption font-medium text-muted-foreground">
-        {t("eyebrow")}
-      </p>
+      <p className="text-caption font-medium text-muted-foreground">{t("eyebrow")}</p>
 
-      <h2 className="mt-2 text-section font-semibold text-foreground">
-        {t("title")}
-      </h2>
+      <h2 className="mt-2 text-section font-semibold text-foreground">{t("title")}</h2>
 
       <p className="mt-2 text-body text-secondary-text">
         {dateFormatter.format(new Date(progress.week_start))} -{" "}
@@ -72,9 +69,7 @@ export function StudyGroupWeeklyChallenge({
       <div className="mt-card space-y-card">
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-body">
-            <span className="font-medium text-foreground">
-              {t("focusMinutes")}
-            </span>
+            <span className="font-medium text-foreground">{t("focusMinutes")}</span>
 
             <span className="text-secondary-text">
               {t("focusMetric", {
@@ -95,9 +90,7 @@ export function StudyGroupWeeklyChallenge({
 
         <div>
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-body">
-            <span className="font-medium text-foreground">
-              {t("completedTasks")}
-            </span>
+            <span className="font-medium text-foreground">{t("completedTasks")}</span>
 
             <span className="text-secondary-text">
               {t("taskMetric", {

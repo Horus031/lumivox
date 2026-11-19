@@ -92,9 +92,20 @@ export function getUtcAnalyticsWindow(today: Date = new Date(), days = 30) {
 }
 
 export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV2AnalyticsReport {
-  const { sessions, segments, distractions, rewards, engagement, taskNames, startUtc, days, truncated } = input;
+  const {
+    sessions,
+    segments,
+    distractions,
+    rewards,
+    engagement,
+    taskNames,
+    startUtc,
+    days,
+    truncated,
+  } = input;
   const start = Date.parse(startUtc);
-  if (!Number.isFinite(start) || !Number.isInteger(days) || days < 1 || days > 90) throw new Error("Invalid analytics window");
+  if (!Number.isFinite(start) || !Number.isInteger(days) || days < 1 || days > 90)
+    throw new Error("Invalid analytics window");
   const end = start + days * 86_400_000;
   const dailyMap = new Map<string, FocusAnalyticsDaily>();
   for (let offset = 0; offset < days; offset += 1) {
@@ -119,7 +130,13 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
   let pomodoroSessions = 0;
   for (const session of sessions) {
     const started = Date.parse(session.started_at);
-    if (!Number.isFinite(started) || started < start || started >= end || sessionIds.has(session.id)) continue;
+    if (
+      !Number.isFinite(started) ||
+      started < start ||
+      started >= end ||
+      sessionIds.has(session.id)
+    )
+      continue;
     sessionIds.add(session.id);
     if (activeStatuses.has(session.status)) activeSessions += 1;
     if (session.status === "completed") completedSessions += 1;
@@ -128,15 +145,17 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
     const ownSegments = segmentMap.get(session.id) ?? [];
     if (isV2) pomodoroSessions += 1;
     const focus = isV2
-      ? ownSegments.filter(s => s.segment_kind === "focus" && terminalStatuses.has(s.status))
+      ? ownSegments
+          .filter((s) => s.segment_kind === "focus" && terminalStatuses.has(s.status))
           .reduce((sum, s) => sum + Math.max(0, s.actual_seconds), 0)
       : Math.max(0, session.actual_focus_minutes) * 60;
     const breaks = isV2
-      ? ownSegments.filter(s => s.segment_kind !== "focus" && terminalStatuses.has(s.status))
+      ? ownSegments
+          .filter((s) => s.segment_kind !== "focus" && terminalStatuses.has(s.status))
           .reduce((sum, s) => sum + Math.max(0, s.actual_seconds), 0)
       : 0;
     const rounds = isV2
-      ? ownSegments.filter(s => s.segment_kind === "focus" && s.status === "completed").length
+      ? ownSegments.filter((s) => s.segment_kind === "focus" && s.status === "completed").length
       : 0;
     // Closed pause seconds only. The currently open pause is intentionally excluded.
     pausedSeconds += Math.max(0, session.total_paused_seconds);
@@ -151,7 +170,10 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
     }
     if (session.task_id) {
       const old = tasks.get(session.task_id) ?? {
-        taskId: session.task_id, title: taskNames[session.task_id] ?? "", focusSeconds: 0, sessionCount: 0,
+        taskId: session.task_id,
+        title: taskNames[session.task_id] ?? "",
+        focusSeconds: 0,
+        sessionCount: 0,
       };
       old.focusSeconds += focus;
       old.sessionCount += 1;
@@ -165,7 +187,10 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
     if (!sessionIds.has(entry.session_id)) continue;
     distractionsCount += 1;
     distractionSeconds += Math.max(0, entry.duration_seconds);
-    distractionTypes.set(entry.distraction_type, (distractionTypes.get(entry.distraction_type) ?? 0) + 1);
+    distractionTypes.set(
+      entry.distraction_type,
+      (distractionTypes.get(entry.distraction_type) ?? 0) + 1,
+    );
   }
   const closed = completedSessions + cancelledSessions;
   return {
@@ -177,7 +202,7 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
     activeSessions,
     completedSessions,
     cancelledSessions,
-    completionRatePercent: closed > 0 ? Math.round(1000 * completedSessions / closed) / 10 : 0,
+    completionRatePercent: closed > 0 ? Math.round((1000 * completedSessions) / closed) / 10 : 0,
     pomodoroSessions,
     completedRounds,
     focusSeconds,
@@ -185,9 +210,14 @@ export function buildFocusV2AnalyticsReport(input: FocusAnalyticsInputs): FocusV
     pausedSeconds,
     distractionsCount,
     distractionSeconds,
-    distractionTypes: [...distractionTypes].map(([kind, count]) => ({ kind, count })).sort((a, b) => b.count - a.count),
-    rewardsCount: new Set(rewards.map(r => r.id)).size,
-    rewardTokens: [...new Map(rewards.map(r => [r.id, r])).values()].reduce((sum, r) => sum + r.token_delta, 0),
+    distractionTypes: [...distractionTypes]
+      .map(([kind, count]) => ({ kind, count }))
+      .sort((a, b) => b.count - a.count),
+    rewardsCount: new Set(rewards.map((r) => r.id)).size,
+    rewardTokens: [...new Map(rewards.map((r) => [r.id, r])).values()].reduce(
+      (sum, r) => sum + r.token_delta,
+      0,
+    ),
     engagement,
     daily: [...dailyMap.values()],
     tasks: [...tasks.values()].sort((a, b) => b.focusSeconds - a.focusSeconds).slice(0, 8),

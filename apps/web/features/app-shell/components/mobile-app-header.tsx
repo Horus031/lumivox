@@ -14,7 +14,10 @@ export async function MobileAppHeader({ profile }: MobileAppHeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex h-topbar items-center justify-between gap-2 border-b border-border bg-background px-card lg:hidden">
-      <Link href="/dashboard" className="flex min-h-touch min-w-0 items-center text-section font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <Link
+        href="/dashboard"
+        className="flex min-h-touch min-w-0 items-center text-section font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
         {t("eyebrow")}
       </Link>
       <div className="flex shrink-0 items-center gap-1">

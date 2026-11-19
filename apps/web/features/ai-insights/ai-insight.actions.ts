@@ -47,8 +47,7 @@ export async function generateDemoAiInsightAction(): Promise<
     if (!apiBaseUrl || !internalKey) {
       return {
         success: false,
-        message:
-          "AI backend environment variables are not configured correctly.",
+        message: "AI backend environment variables are not configured correctly.",
       };
     }
 
@@ -56,24 +55,21 @@ export async function generateDemoAiInsightAction(): Promise<
     // 1. Generate Deadline Risk Prediction
     // --------------------------------------------------------
 
-    const predictionResponse = await fetch(
-      `${apiBaseUrl}/api/v1/ml/deadline-risk/predict`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-lumivox-internal-key": internalKey,
-        },
-        body: JSON.stringify({
-          user_id: user.id,
-          task_id: null,
-          input_mode: "oulad_compatible_features",
-          persist_prediction: true,
-          features: DEMO_HIGH_RISK_FEATURES,
-        }),
-        cache: "no-store",
-      }
-    );
+    const predictionResponse = await fetch(`${apiBaseUrl}/api/v1/ml/deadline-risk/predict`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-lumivox-internal-key": internalKey,
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        task_id: null,
+        input_mode: "oulad_compatible_features",
+        persist_prediction: true,
+        features: DEMO_HIGH_RISK_FEATURES,
+      }),
+      cache: "no-store",
+    });
 
     if (!predictionResponse.ok) {
       const errorBody = await predictionResponse.text();
@@ -84,8 +80,7 @@ export async function generateDemoAiInsightAction(): Promise<
       };
     }
 
-    const predictionData =
-      (await predictionResponse.json()) as DeadlineRiskPredictionApiResponse;
+    const predictionData = (await predictionResponse.json()) as DeadlineRiskPredictionApiResponse;
 
     if (!predictionData.prediction_id) {
       return {
@@ -98,21 +93,18 @@ export async function generateDemoAiInsightAction(): Promise<
     // 2. Generate Gemini Insight from prediction + SHAP
     // --------------------------------------------------------
 
-    const insightResponse = await fetch(
-      `${apiBaseUrl}/api/v1/ai/deadline-risk-insight/generate`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-lumivox-internal-key": internalKey,
-        },
-        body: JSON.stringify({
-          prediction_id: predictionData.prediction_id,
-          persist_insight: true,
-        }),
-        cache: "no-store",
-      }
-    );
+    const insightResponse = await fetch(`${apiBaseUrl}/api/v1/ai/deadline-risk-insight/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-lumivox-internal-key": internalKey,
+      },
+      body: JSON.stringify({
+        prediction_id: predictionData.prediction_id,
+        persist_insight: true,
+      }),
+      cache: "no-store",
+    });
 
     if (!insightResponse.ok) {
       const errorBody = await insightResponse.text();
@@ -123,9 +115,7 @@ export async function generateDemoAiInsightAction(): Promise<
       };
     }
 
-    const insightData =
-      (await insightResponse.json()) as GeminiInsightApiResponse;
-
+    const insightData = (await insightResponse.json()) as GeminiInsightApiResponse;
 
     return {
       success: true,
@@ -139,9 +129,7 @@ export async function generateDemoAiInsightAction(): Promise<
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while generating AI insight.",
+        error instanceof Error ? error.message : "Unexpected error while generating AI insight.",
     };
   }
 }

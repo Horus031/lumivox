@@ -7,7 +7,7 @@ test("reflections page renders its current reflection state", async ({ page }) =
   await page.goto("/reflections");
 
   await expect(
-    page.getByRole("heading", { name: "Weekly Reflections", exact: true })
+    page.getByRole("heading", { name: "Weekly Reflections", exact: true }),
   ).toBeVisible();
 
   const reflectionSection = page.getByRole("heading", {
@@ -22,7 +22,7 @@ test("reflections page renders its current reflection state", async ({ page }) =
       page.getByRole("heading", {
         name: "No weekly reflections generated yet",
         exact: true,
-      })
+      }),
     ).toBeVisible();
   }
 });

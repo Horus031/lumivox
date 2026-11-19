@@ -5,11 +5,7 @@ import { requireUser } from "@/lib/auth/require-user";
 export const getCurrentProfile = cache(async () => {
   const { supabase, user } = await requireUser();
 
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+  const { data, error } = await supabase.from("profiles").select("*").eq("id", user.id).single();
 
   if (error) {
     throw new Error(`Failed to fetch profile: ${error.message}`);
@@ -28,19 +24,14 @@ export const getCurrentPbiWeightProfile = cache(async () => {
     .single();
 
   if (error) {
-    throw new Error(
-      `Failed to fetch PBI weight profile: ${error.message}`,
-    );
+    throw new Error(`Failed to fetch PBI weight profile: ${error.message}`);
   }
 
   return data;
 });
 
 export async function getCurrentProfileWithWeights() {
-  const [profile, weights] = await Promise.all([
-    getCurrentProfile(),
-    getCurrentPbiWeightProfile(),
-  ]);
+  const [profile, weights] = await Promise.all([getCurrentProfile(), getCurrentPbiWeightProfile()]);
 
   return {
     profile,

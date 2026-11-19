@@ -1,9 +1,6 @@
 import { requireUser } from "@/lib/auth/require-user";
 
-export async function getRecentStudyRoomMessages(
-  roomId: string,
-  limit = 80
-) {
+export async function getRecentStudyRoomMessages(roomId: string, limit = 80) {
   const { supabase } = await requireUser();
 
   const { data, error } = await supabase
@@ -19,7 +16,7 @@ export async function getRecentStudyRoomMessages(
         id,
         full_name
       )
-    `
+    `,
     )
     .eq("room_id", roomId)
     .order("created_at", { ascending: true })

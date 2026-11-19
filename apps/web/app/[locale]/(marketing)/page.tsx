@@ -19,9 +19,7 @@ import { notFound } from "next/navigation";
 
 type PageProps = { params: Promise<{ locale: string }> };
 
-export async function generateMetadata({
-  params,
-}: PageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   if (!isMarketingLocale(locale)) notFound();
 
@@ -38,9 +36,7 @@ export default async function LandingPage({ params }: PageProps) {
 
   return (
     <>
-      {isSearchIndexingEnabled && (
-        <JsonLd data={getLandingStructuredData(locale)} />
-      )}
+      {isSearchIndexingEnabled && <JsonLd data={getLandingStructuredData(locale)} />}
 
       <LandingStoryShell>
         <Hero />

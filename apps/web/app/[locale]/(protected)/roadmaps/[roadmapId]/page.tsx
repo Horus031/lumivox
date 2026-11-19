@@ -9,9 +9,7 @@ type RoadmapDetailPageProps = {
   }>;
 };
 
-export default async function RoadmapDetailPage({
-  params,
-}: RoadmapDetailPageProps) {
+export default async function RoadmapDetailPage({ params }: RoadmapDetailPageProps) {
   const { roadmapId } = await params;
   const t = await getTranslations("roadmaps");
 

@@ -6,11 +6,7 @@ export default function FAQ() {
   const t = useTranslations("landing.faq");
 
   return (
-    <section
-      data-landing-scene="resolution"
-      id="faq"
-      className="quiet-resolution relative isolate"
-    >
+    <section data-landing-scene="resolution" id="faq" className="quiet-resolution relative isolate">
       <div className="quiet-resolution__inner mx-auto max-w-310 px-6">
         <header className="quiet-resolution__heading">
           <p>{t("eyebrow")}</p>

@@ -27,10 +27,7 @@ type DashboardActivityRpc = {
   }>;
 };
 
-export async function getDashboardActivityOverview(
-  supabase: TypedSupabaseClient,
-  days = 7,
-) {
+export async function getDashboardActivityOverview(supabase: TypedSupabaseClient, days = 7) {
   const { data, error } = await supabase.rpc("get_my_dashboard_activity", {
     p_days: days,
   });
@@ -50,10 +47,7 @@ export async function getDashboardActivityOverview(
   };
 }
 
-export async function getDashboardPbiOverview(
-  supabase: TypedSupabaseClient,
-  limit = 8,
-) {
+export async function getDashboardPbiOverview(supabase: TypedSupabaseClient, limit = 8) {
   const [latestResult, historyResult] = await Promise.all([
     supabase
       .from("pbi_snapshots")
@@ -86,13 +80,11 @@ export async function getDashboardPbiOverview(
     throw new Error("Failed to fetch PBI dashboard data.");
   }
 
-  const pbiHistory = [...(historyResult.data ?? [])]
-    .reverse()
-    .map((snapshot) => ({
-      label: snapshot.period_end,
-      standardPbi: Number(snapshot.standard_pbi),
-      personalizedPbi: Number(snapshot.personalized_pbi),
-    }));
+  const pbiHistory = [...(historyResult.data ?? [])].reverse().map((snapshot) => ({
+    label: snapshot.period_end,
+    standardPbi: Number(snapshot.standard_pbi),
+    personalizedPbi: Number(snapshot.personalized_pbi),
+  }));
 
   return {
     latestSnapshot: latestResult.data,

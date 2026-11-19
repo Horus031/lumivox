@@ -26,11 +26,7 @@ export default function ResearchEvidence() {
         <StoryReveal>
           <div className="evidence-orbit">
             <div aria-hidden="true" className="evidence-orbit__field" />
-            <svg
-              aria-hidden="true"
-              className="evidence-orbit__connections"
-              viewBox="0 0 1000 560"
-            >
+            <svg aria-hidden="true" className="evidence-orbit__connections" viewBox="0 0 1000 560">
               <path d="M500 280 L145 160" />
               <path d="M500 280 L855 160" />
               <path d="M500 280 L185 420" />
@@ -38,11 +34,7 @@ export default function ResearchEvidence() {
             </svg>
             <dl className="evidence-orbit__metrics">
               {modelEvidence.map((item, index) => (
-                <div
-                  key={item.key}
-                  data-evidence-position={index}
-                  className="evidence-metric"
-                >
+                <div key={item.key} data-evidence-position={index} className="evidence-metric">
                   <dt>{t(`metrics.${item.key}.label`)}</dt>
                   <dd>
                     <span className="evidence-metric__value">{item.value}</span>

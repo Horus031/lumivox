@@ -13,10 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trackSignUp } from "@/lib/analytics/events";
 
-export function SignUpForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function SignUpForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const locale = useLocale();
   const t = useTranslations("auth.register");
   const authT = useTranslations("auth");
@@ -53,9 +50,7 @@ export function SignUpForm({
 
       router.push(`/${locale}/auth/sign-up-success`);
     } catch (error: unknown) {
-      setError(
-        error instanceof Error ? error.message : authT("errors.generic"),
-      );
+      setError(error instanceof Error ? error.message : authT("errors.generic"));
     } finally {
       setIsLoading(false);
     }
@@ -67,65 +62,71 @@ export function SignUpForm({
         <h1>{t("title")}</h1>
         <p>{t("description")}</p>
       </header>
-          <form onSubmit={handleSignUp} aria-busy={isLoading}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">{authT("fields.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{authT("fields.password")}</Label>
-                </div>
-                <PasswordInput
-                  id="password"
-                  name="password"
-                  autoComplete="new-password"
-                  disabled={isLoading}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">
-                    {authT("fields.repeatPassword")}
-                  </Label>
-                </div>
-                <PasswordInput
-                  id="repeat-password"
-                  name="repeat-password"
-                  autoComplete="new-password"
-                  disabled={isLoading}
-                  required
-                  value={repeatPassword}
-                  onChange={(e) => setRepeatPassword(e.target.value)}
-                />
-              </div>
-              {error && <p role="alert" className="auth-form-error">{error}</p>}
-              <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
-                {isLoading ? t("submitting") : t("submit")}
-                {isLoading ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <ArrowRight aria-hidden="true" />}
-              </Button>
+      <form onSubmit={handleSignUp} aria-busy={isLoading}>
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="email">{authT("fields.email")}</Label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              disabled={isLoading}
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password">{authT("fields.password")}</Label>
             </div>
-            <div className="auth-form-alternative">
-              {t("hasAccount")}{" "}
-              <Link href="/auth/login" className="font-semibold underline-offset-4 hover:underline">
-                {t("loginLink")}
-              </Link>
+            <PasswordInput
+              id="password"
+              name="password"
+              autoComplete="new-password"
+              disabled={isLoading}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="repeat-password">{authT("fields.repeatPassword")}</Label>
             </div>
-          </form>
+            <PasswordInput
+              id="repeat-password"
+              name="repeat-password"
+              autoComplete="new-password"
+              disabled={isLoading}
+              required
+              value={repeatPassword}
+              onChange={(e) => setRepeatPassword(e.target.value)}
+            />
+          </div>
+          {error && (
+            <p role="alert" className="auth-form-error">
+              {error}
+            </p>
+          )}
+          <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
+            {isLoading ? t("submitting") : t("submit")}
+            {isLoading ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <ArrowRight aria-hidden="true" />
+            )}
+          </Button>
+        </div>
+        <div className="auth-form-alternative">
+          {t("hasAccount")}{" "}
+          <Link href="/auth/login" className="font-semibold underline-offset-4 hover:underline">
+            {t("loginLink")}
+          </Link>
+        </div>
+      </form>
     </div>
   );
 }

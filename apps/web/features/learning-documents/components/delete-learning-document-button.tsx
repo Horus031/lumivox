@@ -15,9 +15,7 @@ type DeleteLearningDocumentButtonProps = {
   documentId: string;
 };
 
-export function DeleteLearningDocumentButton({
-  documentId,
-}: DeleteLearningDocumentButtonProps) {
+export function DeleteLearningDocumentButton({ documentId }: DeleteLearningDocumentButtonProps) {
   const t = useTranslations("goals.documents.delete");
   const confirm = useConfirmDialog();
   const commonT = useTranslations("common");
@@ -51,7 +49,8 @@ export function DeleteLearningDocumentButton({
       disabled={isPending}
       className="text-danger hover:bg-danger/10 hover:text-danger"
     >
-      <Trash2 aria-hidden="true" />{isPending ? t("deleting") : commonT("delete")}
+      <Trash2 aria-hidden="true" />
+      {isPending ? t("deleting") : commonT("delete")}
     </Button>
   );
 }

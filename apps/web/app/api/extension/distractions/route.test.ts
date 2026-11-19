@@ -121,16 +121,13 @@ describe("Extension distraction integration API", () => {
     expect(result.duplicate).toBe(false);
 
     expect(mocks.authenticate).toHaveBeenCalledOnce();
-    expect(db.rpc).toHaveBeenCalledExactlyOnceWith(
-      "extension_confirm_distraction",
-      {
-        p_event_id: eventId,
-        p_session_id: sessionId,
-        p_segment_id: segmentId,
-        p_category: input.distractionType,
-        p_duration_seconds: input.durationSeconds,
-      },
-    );
+    expect(db.rpc).toHaveBeenCalledExactlyOnceWith("extension_confirm_distraction", {
+      p_event_id: eventId,
+      p_session_id: sessionId,
+      p_segment_id: segmentId,
+      p_category: input.distractionType,
+      p_duration_seconds: input.durationSeconds,
+    });
   });
 
   it("returns the RPC's duplicate confirmation", async () => {

@@ -12,9 +12,9 @@ const origins = ["https://www.lumivox.it.com", "http://localhost:3000"];
 
 describe("Lumivox Extension protocol", () => {
   it("accepts an approved Lumivox URL", () => {
-    expect(
-      getApprovedSiteOrigin("https://www.lumivox.it.com/en/focus", origins),
-    ).toBe("https://www.lumivox.it.com");
+    expect(getApprovedSiteOrigin("https://www.lumivox.it.com/en/focus", origins)).toBe(
+      "https://www.lumivox.it.com",
+    );
   });
 
   it("rejects another website", () => {
@@ -22,12 +22,7 @@ describe("Lumivox Extension protocol", () => {
   });
 
   it("rejects a deceptive subdomain", () => {
-    expect(
-      getApprovedSiteOrigin(
-        "https://www.lumivox.it.com.evil.example/",
-        origins,
-      ),
-    ).toBeNull();
+    expect(getApprovedSiteOrigin("https://www.lumivox.it.com.evil.example/", origins)).toBeNull();
   });
 
   it("checks the localhost port", () => {

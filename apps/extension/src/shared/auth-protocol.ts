@@ -1,7 +1,4 @@
-import {
-  PROTOCOL_CHANNEL,
-  PROTOCOL_VERSION,
-} from "./protocol";
+import { PROTOCOL_CHANNEL, PROTOCOL_VERSION } from "./protocol";
 
 type Envelope = {
   channel: typeof PROTOCOL_CHANNEL;
@@ -22,15 +19,9 @@ export type AuthLogoutRequest = Envelope & {
   type: "AUTH_LOGOUT";
 };
 
-export type AuthRequest =
-  | AuthStatusRequest
-  | AuthLoginRequest
-  | AuthLogoutRequest;
+export type AuthRequest = AuthStatusRequest | AuthLoginRequest | AuthLogoutRequest;
 
-export type AuthState =
-  | "signed_in"
-  | "signed_out"
-  | "unavailable";
+export type AuthState = "signed_in" | "signed_out" | "unavailable";
 
 export type AuthResponse = Envelope & {
   type: "AUTH_RESULT";
@@ -42,30 +33,18 @@ export type AuthResponse = Envelope & {
   message?: string;
 };
 
-export function isAuthRequest(
-  value: unknown,
-): value is AuthRequest {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    Array.isArray(value)
-  ) {
+export function isAuthRequest(value: unknown): value is AuthRequest {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
 
   const v = value as Record<string, unknown>;
 
-  if (
-    v.channel !== PROTOCOL_CHANNEL ||
-    v.version !== PROTOCOL_VERSION
-  ) {
+  if (v.channel !== PROTOCOL_CHANNEL || v.version !== PROTOCOL_VERSION) {
     return false;
   }
 
-  if (
-    v.type === "AUTH_STATUS" ||
-    v.type === "AUTH_LOGOUT"
-  ) {
+  if (v.type === "AUTH_STATUS" || v.type === "AUTH_LOGOUT") {
     return true;
   }
 
@@ -83,14 +62,8 @@ export function isAuthRequest(
   return false;
 }
 
-export function isAuthResponse(
-  value: unknown,
-): value is AuthResponse {
-  if (
-    typeof value !== "object" ||
-    value === null ||
-    Array.isArray(value)
-  ) {
+export function isAuthResponse(value: unknown): value is AuthResponse {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return false;
   }
 
@@ -104,35 +77,22 @@ export function isAuthResponse(
     return false;
   }
 
-  if (
-    v.state !== "signed_in" &&
-    v.state !== "signed_out" &&
-    v.state !== "unavailable"
-  ) {
+  if (v.state !== "signed_in" && v.state !== "signed_out" && v.state !== "unavailable") {
     return false;
   }
 
-  if (
-    v.message !== undefined &&
-    typeof v.message !== "string"
-  ) {
+  if (v.message !== undefined && typeof v.message !== "string") {
     return false;
   }
 
   if (v.state === "signed_in") {
-    if (
-      typeof v.user !== "object" ||
-      v.user === null
-    ) {
+    if (typeof v.user !== "object" || v.user === null) {
       return false;
     }
 
     const user = v.user as Record<string, unknown>;
 
-    return (
-      typeof user.id === "string" &&
-      typeof user.email === "string"
-    );
+    return typeof user.id === "string" && typeof user.email === "string";
   }
 
   return v.user === undefined;

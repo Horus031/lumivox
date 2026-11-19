@@ -1,4 +1,3 @@
-
 ## UI Screenshots
 
 | Figure ID | Screenshot                         | Dùng cho report        |
@@ -15,7 +14,6 @@
 | UI-10     | Live room chat                     | Realtime communication |
 | UI-11     | Voice room panel                   | Voice collaboration    |
 | UI-12     | Mobile navigation                  | Responsive UI          |
-
 
 ## API Screenshots
 
@@ -50,4 +48,3 @@
 | TEST-02   | Vitest passed          |
 | TEST-03   | Playwright passed      |
 | TEST-04   | Playwright HTML report |
-

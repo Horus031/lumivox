@@ -22,14 +22,10 @@ export function DataTable({
       )}
     >
       <div className={cn("overflow-x-auto", scrollContainerClassName)}>
-        <table
-          className={cn("w-full border-collapse text-sm", className)}
-          {...props}
-        >
+        <table className={cn("w-full border-collapse text-sm", className)} {...props}>
           {children}
         </table>
       </div>
     </div>
   );
 }
-

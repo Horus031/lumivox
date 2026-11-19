@@ -78,14 +78,9 @@ export default async function AdminNativeTaskRiskPage({
 
       <AdminNativeTaskRiskModelsCard models={normalizedModels} />
 
-      <AdminNativeTaskRiskSearchForm
-        initialQuery={query}
-        initialRiskBand={riskBand}
-      />
+      <AdminNativeTaskRiskSearchForm initialQuery={query} initialRiskBand={riskBand} />
 
-      <AdminNativeTaskRiskPredictionsTable
-        predictions={normalizedPredictions}
-      />
+      <AdminNativeTaskRiskPredictionsTable predictions={normalizedPredictions} />
     </div>
   );
 }

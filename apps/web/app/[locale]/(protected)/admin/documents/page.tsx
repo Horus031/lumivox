@@ -11,9 +11,7 @@ type AdminDocumentsPageProps = {
   }>;
 };
 
-export default async function AdminDocumentsPage({
-  searchParams,
-}: AdminDocumentsPageProps) {
+export default async function AdminDocumentsPage({ searchParams }: AdminDocumentsPageProps) {
   const { q, status } = await searchParams;
 
   const query = q ?? "";
@@ -31,10 +29,7 @@ export default async function AdminDocumentsPage({
     <div className="min-w-0 space-y-section">
       <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
-      <AdminDocumentSearchForm
-        initialQuery={query}
-        initialStatus={aiStatus}
-      />
+      <AdminDocumentSearchForm initialQuery={query} initialStatus={aiStatus} />
 
       <AdminDocumentsTable documents={documents} />
     </div>

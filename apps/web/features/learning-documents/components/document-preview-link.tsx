@@ -13,21 +13,13 @@ export function DocumentPreviewLink({ document }: DocumentPreviewLinkProps) {
   const t = useTranslations("goals.documents.list");
 
   function handleOpen() {
-    window.open(
-      `/${locale}/documents/shared/${document.id}`,
-      "_blank",
-      "noopener,noreferrer",
-    );
+    window.open(`/${locale}/documents/shared/${document.id}`, "_blank", "noopener,noreferrer");
   }
 
   return (
-    <Button
-      type="button"
-      onClick={handleOpen}
-      size="sm"
-      variant="outline"
-    >
-      <ExternalLink aria-hidden="true" />{t("preview")}
+    <Button type="button" onClick={handleOpen} size="sm" variant="outline">
+      <ExternalLink aria-hidden="true" />
+      {t("preview")}
     </Button>
   );
 }

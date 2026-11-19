@@ -17,9 +17,7 @@ type AdminAiPageProps = {
   }>;
 };
 
-export default async function AdminAiPage({
-  searchParams,
-}: AdminAiPageProps) {
+export default async function AdminAiPage({ searchParams }: AdminAiPageProps) {
   const { q, mode } = await searchParams;
 
   const query = q ?? "";
@@ -41,10 +39,7 @@ export default async function AdminAiPage({
 
       <AdminAiMetricsOverview metrics={metrics} />
 
-      <AdminAiSearchForm
-        initialQuery={query}
-        initialContextMode={contextMode}
-      />
+      <AdminAiSearchForm initialQuery={query} initialContextMode={contextMode} />
 
       <AdminRagSessionsTable sessions={sessions} />
 

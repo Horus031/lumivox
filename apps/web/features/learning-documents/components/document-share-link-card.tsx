@@ -14,7 +14,9 @@ export function DocumentShareLinkCard({ documentId }: DocumentShareLinkCardProps
   const t = useTranslations("documentUi");
   const sharePath = `/${locale}/documents/shared/${documentId}`;
   const [shareUrl, setShareUrl] = useState(sharePath);
-  useEffect(() => { setShareUrl(`${window.location.origin}${sharePath}`); }, [sharePath]);
+  useEffect(() => {
+    setShareUrl(`${window.location.origin}${sharePath}`);
+  }, [sharePath]);
 
   async function handleCopy() {
     try {
@@ -31,7 +33,16 @@ export function DocumentShareLinkCard({ documentId }: DocumentShareLinkCardProps
       <p className="mt-1 text-body text-secondary-text">{t("linkDescription")}</p>
       <div className="mt-3 flex min-w-0 items-center gap-2">
         <Input readOnly value={shareUrl} aria-label={t("linkTitle")} className="min-w-0 flex-1" />
-        <Button type="button" size="icon" variant="outline" onClick={handleCopy} aria-label={t("copy")} title={t("copy")}><Copy aria-hidden="true" /></Button>
+        <Button
+          type="button"
+          size="icon"
+          variant="outline"
+          onClick={handleCopy}
+          aria-label={t("copy")}
+          title={t("copy")}
+        >
+          <Copy aria-hidden="true" />
+        </Button>
       </div>
     </section>
   );

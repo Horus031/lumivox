@@ -6,19 +6,13 @@ export default function IntelligenceController() {
   const anchorRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const root = anchorRef.current?.closest<HTMLElement>(
-      "[data-intelligence-system]",
-    );
+    const root = anchorRef.current?.closest<HTMLElement>("[data-intelligence-system]");
 
     if (!root) return;
 
-    const chapters = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-intelligence-feature]"),
-    );
+    const chapters = Array.from(root.querySelectorAll<HTMLElement>("[data-intelligence-feature]"));
 
-    const nodes = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-intelligence-node]"),
-    );
+    const nodes = Array.from(root.querySelectorAll<HTMLElement>("[data-intelligence-node]"));
 
     const visible = new Map<Element, number>();
 
@@ -28,17 +22,11 @@ export default function IntelligenceController() {
       root.dataset.activeFeature = feature;
 
       chapters.forEach((chapter) => {
-        chapter.toggleAttribute(
-          "data-active",
-          chapter.dataset.intelligenceFeature === feature,
-        );
+        chapter.toggleAttribute("data-active", chapter.dataset.intelligenceFeature === feature);
       });
 
       nodes.forEach((node) => {
-        node.toggleAttribute(
-          "data-active",
-          node.dataset.intelligenceNode === feature,
-        );
+        node.toggleAttribute("data-active", node.dataset.intelligenceNode === feature);
       });
 
       window.dispatchEvent(
@@ -65,8 +53,7 @@ export default function IntelligenceController() {
         const active = [...visible.entries()].sort(
           (a, b) =>
             b[1] - a[1] ||
-            chapters.indexOf(a[0] as HTMLElement) -
-              chapters.indexOf(b[0] as HTMLElement),
+            chapters.indexOf(a[0] as HTMLElement) - chapters.indexOf(b[0] as HTMLElement),
         )[0]?.[0] as HTMLElement | undefined;
 
         const feature = active?.dataset.intelligenceFeature;

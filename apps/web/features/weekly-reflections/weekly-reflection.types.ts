@@ -1,117 +1,80 @@
-import type {
-  Database,
-} from "@/types/database.types";
+import type { Database } from "@/types/database.types";
 
+export type WeeklyReflection = Database["public"]["Tables"]["weekly_reflections"]["Row"];
 
-export type WeeklyReflection =
-  Database["public"]["Tables"]["weekly_reflections"]["Row"];
-
-
-export type WeeklyReflectionCard =
-  Database["public"]["Tables"]["weekly_reflection_cards"]["Row"];
-
+export type WeeklyReflectionCard = Database["public"]["Tables"]["weekly_reflection_cards"]["Row"];
 
 export type WeeklyReflectionWin = {
   evidence_key: string;
 
-  student_friendly_explanation:
-    string;
+  student_friendly_explanation: string;
 };
-
 
 export type WeeklyReflectionWatchout = {
   evidence_key: string;
 
-  student_friendly_explanation:
-    string;
+  student_friendly_explanation: string;
 };
-
 
 export type WeeklyReflectionAction = {
   action: string;
   rationale: string;
 };
 
-
 export type WeeklyReflectionMetrics = {
   // Behaviour
 
-  average_standard_pbi:
-    number | null;
+  average_standard_pbi: number | null;
 
-  average_personalized_pbi:
-    number | null;
+  average_personalized_pbi: number | null;
 
-  completed_focus_minutes:
-    number;
+  completed_focus_minutes: number;
 
-  completed_focus_sessions:
-    number;
+  completed_focus_sessions: number;
 
-  active_focus_days:
-    number;
+  active_focus_days: number;
 
-  completed_tasks:
-    number;
+  completed_tasks: number;
 
-  late_or_overdue_tasks:
-    number;
+  late_or_overdue_tasks: number;
 
   // Mastery.
   //
   // Optional because reflection rows created before Phase 7
   // do not contain these JSON keys.
 
-  review_attempts?:
-    number;
+  review_attempts?: number;
 
-  reviewed_tasks?:
-    number;
+  reviewed_tasks?: number;
 
-  passed_review_attempts?:
-    number;
+  passed_review_attempts?: number;
 
-  failed_review_attempts?:
-    number;
+  failed_review_attempts?: number;
 
-  review_pass_rate?:
-    number | null;
+  review_pass_rate?: number | null;
 
-  average_review_score?:
-    number | null;
+  average_review_score?: number | null;
 
-  top_review_weak_areas?:
-    string[];
+  top_review_weak_areas?: string[];
 };
 
+export type WeeklyReflectionCardWithReflection = WeeklyReflectionCard & {
+  weekly_reflections: WeeklyReflection | null;
+};
 
-export type WeeklyReflectionCardWithReflection =
-  WeeklyReflectionCard & {
-    weekly_reflections:
-      | WeeklyReflection
-      | null;
-  };
-
-
-export type WeeklyReflectionCardView =
-  Pick<
-    WeeklyReflectionCard,
-    | "id"
-    | "title"
-    | "summary"
-    | "reflection_interpretation"
-    | "confidence_note"
-    | "wins"
-    | "watchouts"
-    | "next_week_actions"
-  > & {
-    weekly_reflections:
-      | Pick<
-          WeeklyReflection,
-          | "reflection_direction"
-          | "current_window_start"
-          | "current_window_end"
-          | "current_metrics"
-        >
-      | null;
-  };
+export type WeeklyReflectionCardView = Pick<
+  WeeklyReflectionCard,
+  | "id"
+  | "title"
+  | "summary"
+  | "reflection_interpretation"
+  | "confidence_note"
+  | "wins"
+  | "watchouts"
+  | "next_week_actions"
+> & {
+  weekly_reflections: Pick<
+    WeeklyReflection,
+    "reflection_direction" | "current_window_start" | "current_window_end" | "current_metrics"
+  > | null;
+};

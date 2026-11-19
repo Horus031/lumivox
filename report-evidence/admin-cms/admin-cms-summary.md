@@ -6,14 +6,14 @@ The Admin CMS was implemented as a production-oriented management layer for Lumi
 
 ## Implemented Modules
 
-| Module | Route | Purpose |
-|---|---|---|
-| Admin Dashboard | `/en/admin` | Monitor high-level platform metrics |
-| User Management | `/en/admin/users` | Search users, inspect user activity, manage roles and leaderboard visibility |
-| Document & RAG Management | `/en/admin/documents` | Monitor uploaded documents, processing status, chunks, and moderation |
-| Group Management | `/en/admin/groups` | Inspect groups, members, messages, archive groups, and moderate chat |
-| AI Monitoring | `/en/admin/ai` | Monitor RAG usage, latency, prompt variants, source quality, and document health |
-| CMS Settings | `/en/admin/settings` | Manage feature flags and default platform settings |
+| Module                    | Route                 | Purpose                                                                          |
+| ------------------------- | --------------------- | -------------------------------------------------------------------------------- |
+| Admin Dashboard           | `/en/admin`           | Monitor high-level platform metrics                                              |
+| User Management           | `/en/admin/users`     | Search users, inspect user activity, manage roles and leaderboard visibility     |
+| Document & RAG Management | `/en/admin/documents` | Monitor uploaded documents, processing status, chunks, and moderation            |
+| Group Management          | `/en/admin/groups`    | Inspect groups, members, messages, archive groups, and moderate chat             |
+| AI Monitoring             | `/en/admin/ai`        | Monitor RAG usage, latency, prompt variants, source quality, and document health |
+| CMS Settings              | `/en/admin/settings`  | Manage feature flags and default platform settings                               |
 
 ## Admin Dashboard Metrics
 

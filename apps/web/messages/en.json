@@ -1,4 +1,119 @@
 {
+  "studyNotifications": {
+    "localeLabel": "Reminder email language",
+    "localePrompt": "Choose and confirm a language",
+    "localeHint": "Reminders cannot be sent until you explicitly save an email language. This does not enable reminders.",
+    "saveLocale": "Save email language",
+    "title": "Study reminders",
+    "description": "Choose when to receive email reminders for your study sessions.",
+    "deliveryPaused": "Reminder delivery is not active yet. Saving records your preferences; no reminders are sent.",
+    "optInUnavailable": "New reminder sign-ups are not available yet. You can still turn existing reminders off.",
+    "emailReminders": "Email reminders",
+    "consent": "Off by default. Turn on and save to consent to study reminder emails. You can turn them off anytime.",
+    "leadLegend": "Remind me before a session",
+    "lead": {
+      "5": "5 minutes",
+      "15": "15 minutes",
+      "30": "30 minutes",
+      "60": "1 hour"
+    },
+    "quietHours": "Quiet hours",
+    "quietExplanation": "Reminders during quiet hours are suppressed, not moved to the next morning.",
+    "quietStart": "Quiet hours start",
+    "quietEnd": "Quiet hours end",
+    "timezone": "Quiet hours timezone",
+    "timezoneHint": "Use an IANA timezone, for example Asia/Ho_Chi_Minh or America/New_York.",
+    "save": "Save reminder settings",
+    "saveTask": "Save task reminder setting",
+    "saving": "Saving reminder settings…",
+    "saved": "Reminder settings saved.",
+    "loading": "Loading reminder settings…",
+    "noData": "Reminder settings are unavailable until they can be loaded.",
+    "checkLatest": "Check latest saved settings",
+    "checkLatestHint": "Checking latest settings replaces this draft with the saved values. If saving was interrupted, check before trying again.",
+    "taskTitle": "Task reminders",
+    "useGlobal": "Use global reminder preference for this task",
+    "taskExplanation": "Turn off to suppress reminders for this task only.",
+    "globalOff": "Global reminders are off. This task setting cannot turn them on.",
+    "errors": {
+      "invalidInput": "Check the lead time, different quiet-hour start and end times, and a valid IANA timezone.",
+      "notAuthorized": "Your session is unavailable or you do not own this task. Sign in and check the latest settings.",
+      "loadFailed": "Reminder settings could not be loaded. Check the latest saved settings to try again.",
+      "saveFailed": "We could not confirm that your reminder settings were saved. Your draft is kept. Check the latest saved settings before trying again.",
+      "conflictRetryable": "Your study schedule changed at the same time. Your draft is kept. Check the latest settings and try saving again."
+    }
+  },
+  "studyPlan": {
+    "focusEffort": {
+      "recorded": "Recorded Focus: {minutes, plural, one {# minute} other {# minutes}}",
+      "planned": "Planned study time: {minutes, plural, one {# minute} other {# minutes}}",
+      "active": "Focus is active. Only saved time is included.",
+      "hint": "Recorded Focus shows saved focus time. Attendance is confirmed separately.",
+      "unavailable": "Recorded Focus could not be loaded."
+    },
+    "focusLaunch": {
+      "start": "Start Focus",
+      "forTask": "Study session for {task}",
+      "back": "Back to Study Plan",
+      "openFocus": "Open Focus",
+      "retry": "Retry the same launch",
+      "invalidInput": "Check the Pomodoro settings and try again.",
+      "notAuthorized": "This study session is unavailable to your account.",
+      "ineligibleSession": "This study session is no longer eligible for Focus.",
+      "activeFocusConflict": "You already have an active Focus session.",
+      "requestConflict": "This launch request conflicts with an earlier request.",
+      "retryableConflict": "The session is busy. Retry the same launch.",
+      "uncertain": "We could not confirm the launch. Retry the same launch or open Focus to check for an active session."
+    },
+    "refreshHint": "Study progress reflects the latest available session records. Reload to view recent attendance changes.",
+    "weekdays": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "eyebrow": "Learning schedule",
+    "title": "Study Planner",
+    "description": "Your learning schedule and progress",
+    "overview": "Study progress",
+    "summaryScope": "Across all your study schedules · current state. Due means session end plus 60 minutes has been reached.",
+    "attendance": "Attendance",
+    "onTime": "On time",
+    "coverage": "Planned coverage",
+    "na": "N/A",
+    "ratio": "{done} / {total} sessions",
+    "todayTitle": "Today's Study Plan",
+    "timezoneHint": "Today follows each session's timezone. Sessions may show different local dates at the same instant.",
+    "todayEmpty": "No study sessions today.",
+    "calendarTitle": "Study calendar",
+    "calendarHint": "Dates follow each session's saved local date. Cancelled sessions remain visible as history.",
+    "monthEmpty": "No study sessions this month.",
+    "monthNavigation": "Calendar month navigation",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "previous": "Previous",
+    "next": "Next",
+    "sessionCount": "{count, plural, one {# session} other {# sessions}}",
+    "loading": "Loading your study plan…",
+    "retry": "Reload current study plan",
+    "asOf": "Current-state data read at {instant} (application-server time).",
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "missed": "Missed",
+      "skipped": "Skipped",
+      "cancelled": "Cancelled"
+    },
+    "error": {
+      "invalidInput": "Choose a valid calendar month.",
+      "loadFailed": "Could not load your study plan. Please try again.",
+      "incompleteData": "A complete study plan could not be verified. Reload or choose a smaller month; no partial totals are shown."
+    }
+  },
   "common": {
     "datePicker": {
       "placeholder": "Select date",
@@ -156,6 +271,10 @@
       "expandSidebar": "Expand sidebar"
     },
     "navigation": {
+      "studyPlan": {
+        "label": "Study Planner",
+        "description": "Study calendar and today's plan"
+      },
       "more": "More",
       "dashboard": {
         "mobileLabel": "Home",
@@ -630,6 +749,7 @@
       "deleteConfirm": "Delete this task? Its subtasks and task learning documents will also be deleted. This action cannot be undone.",
       "tabs": {
         "overview": "Overview",
+        "risk": "Risk",
         "subtasks": "Subtasks ({count})",
         "documents": "Documents ({count})",
         "review": "AI Review"
@@ -691,7 +811,6 @@
       "next": "Next"
     }
   },
-
   "documentUi": {
     "shareEyebrow": "Document Sharing",
     "shareDescription": "Manage access to this learning document.",
@@ -2410,6 +2529,256 @@
       "addTask": "Add task",
       "taskTitle": "Task title",
       "createFailed": "Unable to create the task. Please try again."
+    }
+  },
+  "learningSchedule": {
+    "title": "Study schedule",
+    "taskSection": "Task study schedule",
+    "add": "Add study schedule",
+    "edit": "Edit recurring schedule",
+    "editor": "Study schedule editor",
+    "previewRegion": "Schedule preview",
+    "preview": "Upcoming study sessions",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "timezoneInput": "IANA timezone",
+    "timezone": "Timezone",
+    "weeklySlots": "Weekly study slots",
+    "weekday": "Weekday",
+    "start": "Start",
+    "end": "End",
+    "remove": "Remove",
+    "removeSlot": "Remove slot {index}",
+    "addSlot": "Add weekly slot",
+    "continue": "Continue",
+    "cancel": "Cancel",
+    "close": "Close",
+    "retry": "Retry",
+    "loadMore": "Load more",
+    "loadingSchedule": "Loading study schedule...",
+    "loadingEditor": "Loading schedule editor...",
+    "loadingSessions": "Loading sessions...",
+    "unavailable": "Study scheduling is not available for this Task.",
+    "sessions": "Study sessions",
+    "noSessions": "No study sessions found.",
+    "emptyPreview": "No sessions match this date range.",
+    "previewCount": "{count} sessions across this schedule.",
+    "sessionCount": "{count, plural, one {# session} other {# sessions}}",
+    "firstEight": "Showing the first 8 sessions.",
+    "loadedCount": "{count} of {total}",
+    "statusLabel": "Status",
+    "revisionLabel": "Revision",
+    "reason": "Reason",
+    "revisionEditor": "Recurring schedule revision",
+    "revisionTitle": "Edit recurring study schedule",
+    "versions": "Current revision: {current} · Prospective revision: {next}",
+    "revisionImpact": "Saving cancels future scheduled sessions and generates replacements, including individually rescheduled sessions. Completed and historical sessions remain. Choose today or a later start date, with all new sessions in the future.",
+    "conflictDraft": "Another update changed this schedule. Your draft is kept below. Reloading discards it and loads the latest saved schedule.",
+    "discardReload": "Discard draft and reload",
+    "confirmRevisionTitle": "Confirm recurring schedule revision",
+    "confirmRevisionImpact": "Future scheduled sessions will be cancelled and replaced, including individual session overrides. Completed and past sessions stay in history. Save revision {revision}?",
+    "backToDraft": "Back to draft",
+    "confirmRevision": "Confirm revision",
+    "reschedule": "Reschedule",
+    "rescheduleTitle": "Reschedule study session",
+    "rescheduleDescription": "Move this session only. Other recurring sessions will not be changed. Confirm the new local date and time below.",
+    "current": "Current",
+    "newDate": "New date",
+    "startTime": "Start time",
+    "endTime": "End time",
+    "sessionConflict": "This session changed elsewhere. Check its latest version before making another change.",
+    "unknownHelp": "The previous command may have committed. Inputs are locked; retry sends the same event key, times and expected version. Checking the latest session discards this draft.",
+    "checkLatest": "Check latest session",
+    "saving": "Saving...",
+    "retryExact": "Retry exact command",
+    "confirmReschedule": "Confirm reschedule",
+    "created": "Created {count} study sessions.",
+    "revised": "Study schedule updated to revision {revision}.",
+    "rescheduled": "Study session rescheduled.",
+    "dstHelp": "Times stay in the schedule timezone. Daylight saving gaps are rejected; repeated times use the earlier occurrence.",
+    "selectTimezone": "Choose an IANA timezone from the suggestions.",
+    "status": {
+      "scheduled": "Scheduled",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "missed": "Missed",
+      "skipped": "Skipped",
+      "cancelled": "Cancelled",
+      "active": "Active",
+      "paused": "Paused",
+      "closed": "Closed"
+    },
+    "reasonCode": {
+      "task_closed": "Task closed",
+      "schedule_changed": "Schedule changed",
+      "other": "Session cancelled"
+    },
+    "errors": {
+      "loadFailed": "Could not load study schedule.",
+      "saveFailed": "Could not save study schedule. Check the dates and active sessions.",
+      "invalidInput": "Check the schedule dates, timezone and weekly slots.",
+      "notFound": "Study schedule or session not found.",
+      "notEligible": "This Task or schedule is not eligible for scheduling.",
+      "conflict": "This schedule or session was changed elsewhere. Reload the latest version.",
+      "uncertain": "The result could not be confirmed. Check the latest session or retry the exact same command.",
+      "invalidTime": "End time must be later than start time on the same day.",
+      "dstGap": "This local time does not exist due to daylight saving time.",
+      "invalidDate": "Choose a valid calendar date.",
+      "dateRange": "Schedule must cover between 1 and 366 days.",
+      "slotCount": "Schedule requires 1–21 weekly slots.",
+      "invalidWeekday": "Choose a valid weekday.",
+      "overlap": "Overlapping study times are not allowed.",
+      "invalidTimezone": "Invalid IANA timezone. Choose a suggested timezone.",
+      "occurrenceLimit": "A schedule cannot exceed 1000 sessions.",
+      "futureDates": "Choose a start date of today or later and session times in the future. Existing dates are kept until you change them.",
+      "empty": "No sessions match this date range."
+    },
+    "weekdayName": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "slotLabel": "Weekly slot {index}",
+
+    "attendance": {
+      "action": {
+        "start": "Start",
+        "complete": "Complete",
+        "skip": "Skip",
+        "recover": "Recover"
+      },
+      "title": {
+        "start": "Start study session",
+        "complete": "Complete study session",
+        "skip": "Skip study session",
+        "recover": "Recover missed study session"
+      },
+      "description": {
+        "start": "Confirm that you want to mark this study session as started.",
+        "complete": "Confirm that you attended this study session. This will not complete the parent Task or create Focus minutes.",
+        "skip": "Confirm that you want to skip this study session. You may optionally explain why.",
+        "recover": "Confirm that you completed this previously missed or skipped session. Recovery is available only during the allowed local-calendar window."
+      },
+      "confirm": {
+        "start": "Confirm start",
+        "complete": "Confirm completion",
+        "skip": "Confirm skip",
+        "recover": "Confirm recovery"
+      },
+      "success": {
+        "start": "Study session started.",
+        "complete": "Study session completed.",
+        "skip": "Study session skipped.",
+        "recover": "Study session recovered."
+      },
+      "skipReason": "Reason (optional, max 500 characters)",
+      "uncertainHelp": "The previous request may have committed. Retry sends the exact same command and event key. You can also check the latest saved session.",
+      "conflictHelp": "This session was changed elsewhere. Reload the latest version before deciding what to do.",
+      "errors": {
+        "invalidInput": "Invalid attendance request.",
+        "notAuthorized": "You do not have permission to change this study session.",
+        "conflict": "This study session changed. Reload its latest version.",
+        "notEligible": "This action is no longer available for this session or its time window.",
+        "uncertain": "The result could not be confirmed. Check the latest session or retry the exact same command.",
+        "saveFailed": "Could not update attendance. Please try again."
+      }
+    },
+    "attendanceActionsLabel": "Attendance actions"
+  },
+  "taskRiskRecovery": {
+    "history": {
+      "title": "Recovery history",
+      "loading": "Loading recovery history…",
+      "empty": "No recovery actions yet.",
+      "unavailable": "A comparable estimate is unavailable.",
+      "retry": "Reassessment is unavailable. Try again in a few minutes.",
+      "start_focus": "Start Focus",
+      "split_task": "Split task",
+      "reschedule": "Reschedule",
+      "reduce_scope": "Reduce estimated work",
+      "initiated": "Action selected",
+      "applied": "Action applied",
+      "abandoned": "Action abandoned",
+      "awaiting": "Awaiting reassessment",
+      "awaitingAction": "Waiting for you to apply the action.",
+      "trackingPending": "The change was saved. Recovery tracking is pending.",
+      "unverified": "This action has no verified mutation receipt.",
+      "cancel": "Cancel recovery",
+      "cancelFailed": "Recovery could not be canceled. Check its updated status.",
+      "reload": "Check status",
+      "reassess": "Reassess risk",
+      "originalDue": "Original deadline: {date, date, medium}",
+      "comparison": "Historical reassessment: {before, number, percent} → {after, number, percent} ({delta, number} percentage points). These are model estimates."
+    },
+    "status": {
+      "high": "High risk",
+      "elevated": "Needs attention",
+      "moderate": "Keep an eye on this",
+      "low": "Low risk",
+      "stale": "Refresh needed",
+      "loading": "Checking risk"
+    },
+    "summary": {
+      "title": "Task delay risk",
+      "subtitle": "Prediction based on your learning activity",
+      "loading": "Checking this task's delay risk.",
+      "stale": "This prediction needs to be refreshed before it can be used.",
+      "unavailable": "A reliable risk prediction is not available for this task.",
+      "ineligible": "Risk prediction does not apply to this task.",
+      "estimateLabel": "Model risk estimate",
+      "invalidEstimate": "The risk estimate is currently unavailable.",
+      "disclaimer": "This is an estimate from a predictive model, not a guarantee that the task will be late.",
+      "daysRemaining": "{days, plural, one {# day remaining} other {# days remaining}}",
+      "updated": "Updated {date}",
+      "reasonsTitle": "Why this task may need attention",
+      "noReasons": "No detailed explanations are available yet."
+    },
+    "actions": {
+      "title": "Suggested ways to get back on track",
+      "subtitle": "Review each suggestion before changing your tasks or study schedule.",
+      "empty": "No recovery actions are available for this task.",
+      "choose": "Review action",
+      "readOnlyNotice": "These model-generated suggestions are for reference.",
+      "reviewNotice": "Choose an action to review and confirm before making changes.",
+      "label": {
+        "start_focus": "Start Focus",
+        "split_task": "Break into subtasks",
+        "increase_study_frequency": "Increase study sessions",
+        "reschedule": "Review deadline",
+        "reduce_scope": "Reduce task scope",
+        "view_task": "View task"
+      },
+      "description": {
+        "start_focus": "Prepare a focused work session linked to this task.",
+        "split_task": "Review a plan to turn a large task into smaller steps.",
+        "increase_study_frequency": "Explore adding more study sessions before the deadline.",
+        "reschedule": "Review a possible deadline adjustment before saving it.",
+        "reduce_scope": "Review whether the task's workload can be made more manageable.",
+        "view_task": "Open this task to inspect its details."
+      }
+    },
+    "preview": {
+      "eyebrow": "Internal UI preview",
+      "title": "Task Risk Recovery",
+      "description": "Review risk indicators, explanations, states, and recovery action layouts before connecting real task data.",
+      "disclaimer": "This page uses fixed sample data. Selecting an action only changes the preview; it does not save or modify tasks.",
+      "scenarios": "Risk states",
+      "details": "Selected state",
+      "actionSelected": "Preview selection: {action}. No changes were saved.",
+      "cases": {
+        "high": "Task with high risk",
+        "elevated": "Task needing attention",
+        "moderate": "Task to monitor",
+        "low": "Task with low risk",
+        "stale": "Outdated prediction",
+        "loading": "Prediction loading",
+        "unavailable": "Prediction unavailable",
+        "ineligible": "Task not eligible"
+      }
     }
   }
 }

@@ -20,9 +20,7 @@ function value(input: number | null | undefined) {
   return input ?? 0;
 }
 
-export function AdminRoadmapMetricsOverview({
-  metrics,
-}: AdminRoadmapMetricsOverviewProps) {
+export function AdminRoadmapMetricsOverview({ metrics }: AdminRoadmapMetricsOverviewProps) {
   const t = useTranslations("admin.roadmaps.metrics");
 
   return (

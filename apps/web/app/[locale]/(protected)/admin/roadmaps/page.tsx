@@ -15,9 +15,7 @@ type AdminRoadmapsPageProps = {
   }>;
 };
 
-export default async function AdminRoadmapsPage({
-  searchParams,
-}: AdminRoadmapsPageProps) {
+export default async function AdminRoadmapsPage({ searchParams }: AdminRoadmapsPageProps) {
   const { q, status } = await searchParams;
 
   const query = q ?? "";
@@ -38,10 +36,7 @@ export default async function AdminRoadmapsPage({
 
       <AdminRoadmapMetricsOverview metrics={metrics} />
 
-      <AdminRoadmapSearchForm
-        initialQuery={query}
-        initialStatus={roadmapStatus}
-      />
+      <AdminRoadmapSearchForm initialQuery={query} initialStatus={roadmapStatus} />
 
       <AdminRoadmapsTable roadmaps={roadmaps} />
     </div>

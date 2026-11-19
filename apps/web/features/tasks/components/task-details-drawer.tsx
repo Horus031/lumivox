@@ -2,7 +2,7 @@
 
 import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
 
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -36,7 +36,27 @@ import { GoalOption } from "@/features/goals/goal.types";
 import { TaskEditForm } from "./task-edit-form";
 import { Pencil, Trash2, X } from "lucide-react";
 
-export type TaskDrawerTab = "overview" | "subtasks" | "documents" | "review";
+import { TaskStudyScheduleSection } from "@/features/learning-schedule/components/task-study-schedule-section";
+
+import { TaskRiskSummary } from "@/features/native-task-risk/components/task-risk-summary";
+
+import { startTaskRiskRecoveryAction } from "@/features/native-task-risk/task-risk-recovery.actions";
+import { TaskRiskRecoveryHistory } from "@/features/native-task-risk/components/task-risk-recovery-history";
+import { TaskRiskSuggestions } from "@/features/native-task-risk/components/task-risk-suggestions";
+
+import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+
+import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
+
+import { useRouter as useLocalizedRouter } from "@/i18n/navigation";
+import type { NativeTaskRiskRecommendedAction } from "@/features/native-task-risk/native-task-risk.types";
+
+export type TaskDrawerTab =
+  | "overview"
+  | "risk"
+  | "subtasks"
+  | "documents"
+  | "review";
 
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
@@ -48,6 +68,10 @@ type TaskDetailsDrawerProps = {
   initialTab?: TaskDrawerTab;
 
   initialEditMode?: boolean;
+
+  riskState?: TaskRiskViewState;
+  riskNow?: Date;
+  onTaskDataChanged?: () => void;
 };
 
 export function TaskDetailsDrawer({
@@ -56,10 +80,14 @@ export function TaskDetailsDrawer({
   onClose,
   initialTab,
   initialEditMode,
+  riskState,
+  riskNow,
+  onTaskDataChanged,
 }: TaskDetailsDrawerProps) {
   const t = useTranslations("tasks.details");
   const confirm = useConfirmDialog();
   const locale = useLocale();
+  const localizedRouter = useLocalizedRouter();
 
   const formT = useTranslations("tasks.form");
 
@@ -79,9 +107,13 @@ export function TaskDetailsDrawer({
 
   const [isDeleting, startDeleteTransition] = useTransition();
 
+  const [recovery, setRecovery] = useState<{ taskId: string; id: string; action: string } | null>(null);
+  const recoveryKeys = useRef(new Map<string, string>());
+  const recoveryRequest = useRef(0);
   const taskId = task?.id ?? null;
 
   const taskUpdatedAt = task?.updated_at ?? null;
+  const detailsRequest = useRef(0);
 
   const refreshDetails = useCallback(() => {
     if (!taskId) {
@@ -89,7 +121,9 @@ export function TaskDetailsDrawer({
     }
 
     startDetailsTransition(async () => {
+      const request = ++detailsRequest.current;
       const result = await getTaskDetailsAction(taskId);
+      if (request !== detailsRequest.current) return;
 
       if (!result.success) {
         toast.error(result.message);
@@ -97,7 +131,7 @@ export function TaskDetailsDrawer({
         return;
       }
 
-      setDetails(result.data);
+      if (result.data.task.id === taskId) setDetails(result.data);
     });
   }, [taskId]);
 
@@ -117,20 +151,86 @@ export function TaskDetailsDrawer({
     setIsEditing(initialEditMode ?? false);
 
     refreshDetails();
-  }, [taskId, taskUpdatedAt, task?.status, initialTab, initialEditMode, refreshDetails]);
+    return () => {
+      detailsRequest.current += 1;
+      recoveryRequest.current += 1;
+    };
+  }, [
+    taskId,
+    taskUpdatedAt,
+    task?.status,
+    initialTab,
+    initialEditMode,
+    refreshDetails,
+  ]);
 
   if (!task) {
     return null;
   }
 
-  const currentTask = details?.task ?? task;
+  const currentDetails = details?.task.id === task.id ? details : null;
+  const currentTask = currentDetails?.task ?? task;
 
-  const subtasks = details?.subtasks ?? [];
+  const currentRiskState: TaskRiskViewState = riskNow
+    ? getTaskRiskDisplayState(currentTask, riskState, riskNow)
+    : (riskState ?? { status: "unavailable" });
 
-  const documents = details?.documents ?? [];
+  async function handleRecoveryAction(
+    type: NativeTaskRiskRecommendedAction["action_type"],
+  ) {
+    if (currentRiskState.status !== "ready") {
+      return;
+    }
 
-  const dateFormatter = new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short" });
-  const displayDate = (value: string | null) => value ? dateFormatter.format(new Date(value)) : t("notSet");
+    if (type === "view_task") {
+      setActiveTab("overview");
+      return;
+    }
+    const request = ++recoveryRequest.current;
+    const predictionId = currentRiskState.alert.prediction_id;
+    const key = `${currentTask.id}:${predictionId}:${type}`;
+    const idempotencyKey = recoveryKeys.current.get(key) ?? crypto.randomUUID();
+    recoveryKeys.current.set(key, idempotencyKey);
+    let attemptId: string | null = null;
+    try {
+      attemptId = await startTaskRiskRecoveryAction({ taskId: currentTask.id, predictionId, actionType: type, idempotencyKey });
+    } catch {
+      // The original recovery workflow is still available during a tracking outage.
+    }
+    if (request !== recoveryRequest.current) return;
+    setRecovery(attemptId ? { taskId: currentTask.id, id: attemptId, action: type } : null);
+
+    switch (type) {
+      case "start_focus":
+        localizedRouter.push(
+          `/focus?taskId=${encodeURIComponent(currentTask.id)}${attemptId ? `&recoveryAttemptId=${encodeURIComponent(attemptId)}` : ""}`,
+        );
+        return;
+
+      case "split_task":
+        setIsEditing(false);
+        setActiveTab("subtasks");
+        return;
+
+      case "reschedule":
+      case "reduce_scope":
+        setActiveTab("overview");
+        setIsEditing(true);
+        return;
+
+    }
+  }
+
+  const subtasks = currentDetails?.subtasks ?? [];
+
+  const documents = currentDetails?.documents ?? [];
+
+  const dateFormatter = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const displayDate = (value: string | null) =>
+    value ? dateFormatter.format(new Date(value)) : t("notSet");
 
   const summaryRows = [
     {
@@ -165,7 +265,9 @@ export function TaskDetailsDrawer({
   ];
 
   async function handleDelete() {
-    const confirmed = await confirm(t("deleteConfirm"), { variant: "destructive" });
+    const confirmed = await confirm(t("deleteConfirm"), {
+      variant: "destructive",
+    });
 
     if (!confirmed) {
       return;
@@ -182,6 +284,7 @@ export function TaskDetailsDrawer({
 
       toast.success(result.message);
 
+      onTaskDataChanged?.();
       onClose();
 
       router.refresh();
@@ -197,11 +300,7 @@ export function TaskDetailsDrawer({
       align="right"
       footer={
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
+          <Button type="button" variant="outline" onClick={onClose}>
             {t("close")}
           </Button>
 
@@ -221,18 +320,14 @@ export function TaskDetailsDrawer({
         <div className="flex flex-wrap gap-2">
           <Badge
             variant="secondary"
-            className={`${getPriorityTone(
-              currentTask.priority,
-            )}`}
+            className={`${getPriorityTone(currentTask.priority)}`}
           >
             {formT(`priorities.${currentTask.priority}`)}
           </Badge>
 
           <Badge
             variant="outline"
-            className={`${getStatusTone(
-              currentTask.status,
-            )}`}
+            className={`${getStatusTone(currentTask.status)}`}
           >
             {formT(`statuses.${currentTask.status}`)}
           </Badge>
@@ -250,8 +345,13 @@ export function TaskDetailsDrawer({
           className="w-full"
         >
           <div className="overflow-x-auto pb-1">
-            <TabsList variant="line" className="min-w-max border-b border-border">
+            <TabsList
+              variant="line"
+              className="min-w-max border-b border-border"
+            >
               <TabsTrigger value="overview">{t("tabs.overview")}</TabsTrigger>
+
+              <TabsTrigger value="risk">{t("tabs.risk")}</TabsTrigger>
 
               <TabsTrigger value="subtasks">
                 {t("tabs.subtasks", {
@@ -277,7 +377,11 @@ export function TaskDetailsDrawer({
                 size="sm"
                 onClick={() => setIsEditing((current) => !current)}
               >
-                {isEditing ? <X aria-hidden="true" /> : <Pencil aria-hidden="true" />}
+                {isEditing ? (
+                  <X aria-hidden="true" />
+                ) : (
+                  <Pencil aria-hidden="true" />
+                )}
                 {isEditing ? commonT("cancel") : commonT("edit")}
               </Button>
             </div>
@@ -288,78 +392,105 @@ export function TaskDetailsDrawer({
                   key={currentTask.updated_at}
                   task={currentTask}
                   goals={goals}
-                  onCancel={() => setIsEditing(false)}
+                  recoveryAttemptId={recovery?.taskId === currentTask.id && ["reschedule", "reduce_scope"].includes(recovery.action) ? recovery.id : undefined}
+                  onCancel={() => { setRecovery(null); setIsEditing(false); }}
                   onSaved={() => {
+                    setRecovery(null);
                     setIsEditing(false);
-
+                    onTaskDataChanged?.();
                     refreshDetails();
                   }}
                 />
               </div>
             ) : null}
 
-            {!isEditing ? <div className="space-y-card">
-              <dl className="grid gap-card sm:grid-cols-2">
-                {summaryRows.map((row) => (
-                  <div
-                    key={row.label}
-                    className="min-w-0"
-                  >
-                    <dt className="text-label font-medium text-muted-foreground">
-                      {row.label}
-                    </dt>
+            {!isEditing ? (
+              <div className="space-y-card">
+                <dl className="grid gap-card sm:grid-cols-2">
+                  {summaryRows.map((row) => (
+                    <div key={row.label} className="min-w-0">
+                      <dt className="text-label font-medium text-muted-foreground">
+                        {row.label}
+                      </dt>
 
-                    <dd className="mt-1 text-body font-medium text-foreground [overflow-wrap:anywhere]">
-                      {row.value}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
+                      <dd className="mt-1 text-body font-medium text-foreground wrap-anywhere">
+                        {row.value}
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
 
-              <div className="border-t border-border pt-card">
-                <h3 className="text-label font-medium text-muted-foreground">
-                  {t("notes")}
-                </h3>
+                <div className="border-t border-border pt-card">
+                  <h3 className="text-label font-medium text-muted-foreground">
+                    {t("notes")}
+                  </h3>
 
-                <p className="mt-1 whitespace-pre-wrap text-body text-foreground [overflow-wrap:anywhere]">
-                  {currentTask.description?.trim()
-                    ? currentTask.description
-                    : t("noDescription")}
-                </p>
-              </div>
+                  <p className="mt-1 whitespace-pre-wrap text-body text-foreground wrap-anywhere">
+                    {currentTask.description?.trim()
+                      ? currentTask.description
+                      : t("noDescription")}
+                  </p>
+                </div>
 
-              <div className="border-t border-border pt-card">
-                <h3 className="text-label font-medium text-muted-foreground">
-                  {t("systemFields")}
-                </h3>
+                <div className="border-t border-border pt-card">
+                  <h3 className="text-label font-medium text-muted-foreground">
+                    {t("systemFields")}
+                  </h3>
 
-                <div className="mt-2 grid gap-2 text-body text-muted-foreground">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>{t("created")}</span>
+                  <div className="mt-2 grid gap-2 text-body text-muted-foreground">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span>{t("created")}</span>
 
-                    <span className="font-medium text-foreground">
-                      {displayDate(currentTask.created_at)}
-                    </span>
-                  </div>
+                      <span className="font-medium text-foreground">
+                        {displayDate(currentTask.created_at)}
+                      </span>
+                    </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <span>{t("updated")}</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span>{t("updated")}</span>
 
-                    <span className="font-medium text-foreground">
-                      {displayDate(currentTask.updated_at)}
-                    </span>
+                      <span className="font-medium text-foreground">
+                        {displayDate(currentTask.updated_at)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div> : null}
+            ) : null}
+
+            {!isEditing && (
+              <TaskStudyScheduleSection
+                key={currentTask.id}
+                taskId={currentTask.id}
+                eligible={
+                  currentTask.parent_task_id === null &&
+                  ["todo", "in_progress"].includes(currentTask.status)
+                }
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="risk" className="min-w-0 space-y-card">
+            <TaskRiskSummary state={currentRiskState} />
+
+            <TaskRiskSuggestions
+              state={currentRiskState}
+              onActionRequested={handleRecoveryAction}
+            />
+            <TaskRiskRecoveryHistory key={currentTask.id} taskId={currentTask.id} revision={currentTask.updated_at} />
           </TabsContent>
 
           <TabsContent value="subtasks">
             <TaskSubtasksPanel
               parentTask={currentTask}
+              recoveryAttemptId={recovery?.taskId === currentTask.id && recovery.action === "split_task" ? recovery.id : undefined}
               subtasks={subtasks}
               goals={goals}
-              onChanged={refreshDetails}
+              onChanged={() => {
+                setRecovery(null);
+                onTaskDataChanged?.();
+                refreshDetails();
+              }}
             />
           </TabsContent>
 
@@ -375,7 +506,10 @@ export function TaskDetailsDrawer({
             <TaskReviewPanel
               task={currentTask}
               subtasks={subtasks}
-              onTaskChanged={refreshDetails}
+              onTaskChanged={() => {
+                onTaskDataChanged?.();
+                refreshDetails();
+              }}
             />
           </TabsContent>
         </Tabs>

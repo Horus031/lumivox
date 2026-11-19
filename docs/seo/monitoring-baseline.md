@@ -10,29 +10,29 @@ Expected canonical URLs: 22
 
 Data maturity: Awaiting sufficient Search Console data.
 
-| Metric | Value |
-|---|---:|
-| Clicks | N/A |
-| Impressions | N/A |
-| CTR | N/A |
-| Average position | N/A |
+| Metric           | Value |
+| ---------------- | ----: |
+| Clicks           |   N/A |
+| Impressions      |   N/A |
+| CTR              |   N/A |
+| Average position |   N/A |
 
 ## Product Analytics
 
-| Metric | Value |
-|---|---:|
-| Organic users | N/A |
-| Organic sessions | N/A |
-| Sign-up key events | N/A |
-| Organic sign-ups | N/A |
+| Metric             | Value |
+| ------------------ | ----: |
+| Organic users      |   N/A |
+| Organic sessions   |   N/A |
+| Sign-up key events |   N/A |
+| Organic sign-ups   |   N/A |
 
 ## Core Web Vitals
 
-| Metric | Mobile | Desktop |
-|---|---|---|
-| LCP | Awaiting field data | Awaiting field data |
-| INP | Awaiting field data | Awaiting field data |
-| CLS | Awaiting field data | Awaiting field data |
+| Metric | Mobile              | Desktop             |
+| ------ | ------------------- | ------------------- |
+| LCP    | Awaiting field data | Awaiting field data |
+| INP    | Awaiting field data | Awaiting field data |
+| CLS    | Awaiting field data | Awaiting field data |
 
 ## Observations
 

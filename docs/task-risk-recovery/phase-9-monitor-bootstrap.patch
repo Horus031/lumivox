@@ -1,0 +1,214 @@
+diff --git a/.github/workflows/task-risk-recovery-monitor.yml b/.github/workflows/task-risk-recovery-monitor.yml
+new file mode 100644
+index 0000000..07356bf
+--- /dev/null
++++ b/.github/workflows/task-risk-recovery-monitor.yml
+@@ -0,0 +1,75 @@
++name: Task Risk Recovery Monitor
++
++on:
++  schedule:
++    - cron: "*/5 * * * *"
++  workflow_dispatch:
++    inputs:
++      test_alert:
++        description: "Fail a synthetic job to verify GitHub Actions notification receipt (no database access)"
++        type: boolean
++        default: false
++
++permissions:
++  contents: read
++
++jobs:
++  notification-test:
++    name: Synthetic notification test · no database access
++    if: github.event_name == 'workflow_dispatch' && inputs.test_alert
++    runs-on: ubuntu-24.04
++    timeout-minutes: 1
++    steps:
++      - name: Emit controlled failure
++        run: |
++          echo "Synthetic Task Risk alert: no database query or deployment performed." >> "$GITHUB_STEP_SUMMARY"
++          echo "::error::Synthetic 9C notification test. Confirm receipt on the initiating GitHub account."
++          exit 1
++
++  monitor:
++    name: ${{ matrix.target }} · Task Risk Recovery health
++    if: >-
++      !inputs.test_alert &&
++      github.ref_name == github.event.repository.default_branch &&
++      (vars.TASK_RISK_MONITOR_ENABLED == 'true' || vars.TASK_RISK_PRODUCTION_MONITOR_ENABLED == 'true')
++    strategy:
++      fail-fast: false
++      matrix:
++        include:
++          - target: staging
++            environment: staging
++            enabled_variable: TASK_RISK_MONITOR_ENABLED
++          - target: production
++            environment: production-monitor
++            enabled_variable: TASK_RISK_PRODUCTION_MONITOR_ENABLED
++    runs-on: ubuntu-24.04
++    timeout-minutes: 5
++    concurrency:
++      group: task-risk-recovery-monitor-${{ matrix.target }}
++      cancel-in-progress: false
++    environment:
++      name: ${{ matrix.environment }}
++    steps:
++      - name: Record disabled target
++        if: vars[matrix.enabled_variable] != 'true'
++        run: echo "Monitor disabled for this environment; no health check executed." >> "$GITHUB_STEP_SUMMARY"
++      - uses: actions/checkout@v4
++        if: vars[matrix.enabled_variable] == 'true'
++      - uses: actions/setup-node@v4
++        if: vars[matrix.enabled_variable] == 'true'
++        with:
++          node-version: "22"
++      - name: Check recovery health
++        if: vars[matrix.enabled_variable] == 'true'
++        env:
++          PGHOST: ${{ vars.TASK_RISK_MONITOR_PGHOST }}
++          PGPORT: ${{ vars.TASK_RISK_MONITOR_PGPORT || '5432' }}
++          PGUSER: ${{ secrets.TASK_RISK_MONITOR_PGUSER }}
++          PGPASSWORD: ${{ secrets.TASK_RISK_MONITOR_PGPASSWORD }}
++          TASK_RISK_MONITOR_CA_PEM: ${{ secrets.TASK_RISK_MONITOR_CA_PEM }}
++        run: |
++          if ! command -v psql >/dev/null; then
++            sudo apt-get update
++            sudo apt-get install -y postgresql-client
++          fi
++          bash scripts/ci/task-risk-monitor.sh "${{ matrix.target }}"
+diff --git a/scripts/check-task-risk-recovery-health.mjs b/scripts/check-task-risk-recovery-health.mjs
+new file mode 100644
+index 0000000..ab8761f
+--- /dev/null
++++ b/scripts/check-task-risk-recovery-health.mjs
+@@ -0,0 +1,24 @@
++import { spawnSync } from "node:child_process";
++import { fileURLToPath } from "node:url";
++
++const args = [
++  "-X", "-qAt", "-w", "-v", "ON_ERROR_STOP=1",
++  "-f", fileURLToPath(new URL("./task-risk-recovery-health.sql", import.meta.url)),
++];
++const result = spawnSync(process.env.TASK_RISK_MONITOR_PSQL || "psql", args, {
++  encoding: "utf8",
++  env: { ...process.env, PGCONNECT_TIMEOUT: "5" },
++  timeout: 15_000,
++  windowsHide: true,
++});
++
++try {
++  if (result.status !== 0) throw new Error();
++  const status = JSON.parse(result.stdout);
++  if (!Array.isArray(status.alerts)) throw new Error();
++  console.log(JSON.stringify(status));
++  if (status.alerts.length) process.exitCode = 1;
++} catch {
++  console.error("Task Risk Recovery health probe failed. Check database access and the installed schema.");
++  process.exitCode = 2;
++}
+diff --git a/scripts/ci/task-risk-monitor.sh b/scripts/ci/task-risk-monitor.sh
+new file mode 100644
+index 0000000..6b85299
+--- /dev/null
++++ b/scripts/ci/task-risk-monitor.sh
+@@ -0,0 +1,46 @@
++#!/usr/bin/env bash
++set -euo pipefail
++target="${1:?staging or production is required}"
++case "$target" in
++  staging) project=atbdbbamqjmfkvahqidj ;;
++  production) project=lslybjylsxtnznghrtyj ;;
++  *) echo "::error::Unknown monitor target."; exit 2 ;;
++esac
++if [[ "${PGHOST:-}" != "db.${project}.supabase.co" ]]; then
++  if [[ "${PGHOST:-}" != *.pooler.supabase.com || "${PGUSER:-}" != *."$project" ]]; then
++    echo "::error::Monitor connection does not match the approved $target project."
++    exit 2
++  fi
++fi
++if [[ -z "${PGUSER:-}" || -z "${PGPASSWORD:-}" || -z "${TASK_RISK_MONITOR_CA_PEM:-}" ]]; then
++  echo "::error::Configure the $target read-only observer credentials and TLS CA."
++  exit 2
++fi
++unset PGHOSTADDR PGSERVICE PGSERVICEFILE PGOPTIONS
++export PGDATABASE=postgres PGSSLMODE=verify-full PGCONNECT_TIMEOUT=5
++export PGOPTIONS="-c default_transaction_read_only=on"
++umask 077
++PGSSLROOTCERT="$(mktemp)"
++export PGSSLROOTCERT
++trap 'rm -f -- "$PGSSLROOTCERT"' EXIT
++printf '%s\n' "$TASK_RISK_MONITOR_CA_PEM" > "$PGSSLROOTCERT"
++set +e
++snapshot="$(node scripts/check-task-risk-recovery-health.mjs)"
++status=$?
++set -e
++{
++  echo "## Task Risk Recovery health · $target"
++  if [[ -n "$snapshot" ]]; then
++    echo '```json'
++    printf '%s\n' "$snapshot"
++    echo '```'
++  else
++    echo "Health probe did not return a snapshot."
++  fi
++} >> "${GITHUB_STEP_SUMMARY:?job summary path is required}"
++if [[ "$status" == 1 ]]; then
++  echo "::error::Task Risk Recovery raised an operational alert. See the job summary."
++elif [[ "$status" != 0 ]]; then
++  echo "::error::Task Risk Recovery health probe is unavailable."
++fi
++exit "$status"
+diff --git a/scripts/task-risk-recovery-health.sql b/scripts/task-risk-recovery-health.sql
+new file mode 100644
+index 0000000..6db30ae
+--- /dev/null
++++ b/scripts/task-risk-recovery-health.sql
+@@ -0,0 +1,45 @@
++begin read only;
++set local statement_timeout = '8s';
++with config as (
++  select jobid,active from cron.job where jobname='task-risk-recovery-reconcile'
++), cron_metrics as (
++  select coalesce((select active from config),false) as active,
++    max(start_time) filter (where status='succeeded') as last_success_at,
++    count(*) filter (where status='failed') as failures_15m
++  from cron.job_run_details
++  where jobid=(select jobid from config) and start_time >= now()-interval '15 minutes'
++), receipt_metrics as (
++  select count(*) as pending,
++    count(*) filter (where r.recorded_at < now()-interval '3 minutes') as older_than_3m,
++    max(round(extract(epoch from now()-r.recorded_at))) as oldest_seconds
++  from public.task_risk_recovery_attempts a
++  join task_risk_private.receipts r on r.attempt_id=a.id
++  where a.status='initiated' and a.receipt_recorded_at is not null
++), reassessment_metrics as (
++  select count(*) filter (where j.started_at < now()-interval '10 minutes' and j.finished_at is null) as claimed_older_than_10m,
++    count(*) filter (where j.finished_at >= now()-interval '15 minutes'
++      and (p.id is null or p.prediction_metadata->>'prediction_mode' is distinct from 'native_ml')) as finished_without_native_result_15m,
++    count(*) filter (where j.finished_at >= now()-interval '15 minutes' and p.id is not null
++      and p.prediction_metadata->>'prediction_mode'='native_ml' and a.reassessment_prediction_id is null) as persisted_unpaired_15m
++  from task_risk_private.reassessments j
++  join public.task_risk_recovery_attempts a on a.id=j.attempt_id
++  left join public.deadline_risk_predictions p
++    on (p.id,p.user_id,p.task_id)=(j.request_id,j.user_id,j.task_id)
++  where j.finished_at is null or j.finished_at >= now()-interval '15 minutes'
++)
++select jsonb_build_object(
++  'checked_at',now(),
++  'cron',to_jsonb(c),
++  'receipts',to_jsonb(r),
++  'reassessments',to_jsonb(m),
++  'alerts',to_jsonb(array_remove(array[
++    case when not c.active then 'cron_inactive' end,
++    case when c.last_success_at is null or c.last_success_at < now()-interval '3 minutes' then 'cron_no_recent_success' end,
++    case when c.failures_15m > 0 then 'cron_failure' end,
++    case when r.older_than_3m > 0 then 'receipt_backlog' end,
++    case when m.claimed_older_than_10m > 0 then 'worker_claim_overdue' end,
++    case when m.finished_without_native_result_15m >= 3 then 'reassessment_result_missing' end
++  ],null))
++)
++from cron_metrics c cross join receipt_metrics r cross join reassessment_metrics m;
++rollback;

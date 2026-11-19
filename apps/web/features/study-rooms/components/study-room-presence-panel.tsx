@@ -28,9 +28,7 @@ type PresenceBroadcastPayload = {
   joinedAt: string;
 };
 
-function flattenPresenceState(
-  state: Record<string, PresencePayload[]>,
-): PresencePayload[] {
+function flattenPresenceState(state: Record<string, PresencePayload[]>): PresencePayload[] {
   const raw = Object.values(state).flat();
 
   const unique = new Map<string, PresencePayload>();
@@ -71,13 +69,11 @@ export function StudyRoomPresencePanel({
   */
   const recentlyLeavingRef = useRef<Map<string, number>>(new Map());
 
-  const [connectionState, setConnectionState] = useState<
-    "connecting" | "connected" | "error"
-  >("connecting");
-
-  const [connectionMessage, setConnectionMessage] = useState(
-    t("messages.connecting"),
+  const [connectionState, setConnectionState] = useState<"connecting" | "connected" | "error">(
+    "connecting",
   );
+
+  const [connectionMessage, setConnectionMessage] = useState(t("messages.connecting"));
 
   const [myStatus, setMyStatus] = useState<PresenceStatus>("available");
 
@@ -110,9 +106,7 @@ export function StudyRoomPresencePanel({
     recentlyLeavingRef.current.delete(payload.userId);
 
     setParticipants((current) => {
-      const index = current.findIndex(
-        (participant) => participant.userId === payload.userId,
-      );
+      const index = current.findIndex((participant) => participant.userId === payload.userId);
 
       if (index === -1) {
         return [...current, payload];
@@ -127,9 +121,7 @@ export function StudyRoomPresencePanel({
   const removeParticipant = useCallback((userId: string) => {
     recentlyLeavingRef.current.set(userId, Date.now() + 10_000);
 
-    setParticipants((current) =>
-      current.filter((participant) => participant.userId !== userId),
-    );
+    setParticipants((current) => current.filter((participant) => participant.userId !== userId));
   }, []);
 
   useEffect(() => {
@@ -160,26 +152,17 @@ export function StudyRoomPresencePanel({
 
         channel
           .on("presence", { event: "sync" }, () => {
-            const state = channel.presenceState() as Record<
-              string,
-              PresencePayload[]
-            >;
+            const state = channel.presenceState() as Record<string, PresencePayload[]>;
 
             applyPresenceState(state);
           })
           .on("presence", { event: "join" }, () => {
-            const state = channel.presenceState() as Record<
-              string,
-              PresencePayload[]
-            >;
+            const state = channel.presenceState() as Record<string, PresencePayload[]>;
 
             applyPresenceState(state);
           })
           .on("presence", { event: "leave" }, () => {
-            const state = channel.presenceState() as Record<
-              string,
-              PresencePayload[]
-            >;
+            const state = channel.presenceState() as Record<string, PresencePayload[]>;
 
             applyPresenceState(state);
           })
@@ -196,27 +179,19 @@ export function StudyRoomPresencePanel({
             Client Broadcast:
             immediate status changes
           */
-          .on(
-            "broadcast",
-            { event: "room-presence-status-changed" },
-            ({ payload }) => {
-              upsertParticipant(payload as PresenceBroadcastPayload);
-            },
-          )
+          .on("broadcast", { event: "room-presence-status-changed" }, ({ payload }) => {
+            upsertParticipant(payload as PresenceBroadcastPayload);
+          })
 
           /*
             Client Broadcast:
             immediate disappearance on Leave room
           */
-          .on(
-            "broadcast",
-            { event: "room-presence-leaving" },
-            ({ payload }) => {
-              const leavingPayload = payload as { userId: string };
+          .on("broadcast", { event: "room-presence-leaving" }, ({ payload }) => {
+            const leavingPayload = payload as { userId: string };
 
-              removeParticipant(leavingPayload.userId);
-            },
-          )
+            removeParticipant(leavingPayload.userId);
+          })
 
           .subscribe(async (status, error) => {
             if (status === "SUBSCRIBED") {
@@ -244,9 +219,7 @@ export function StudyRoomPresencePanel({
 
             if (status === "CHANNEL_ERROR") {
               setConnectionState("error");
-              setConnectionMessage(
-                error?.message ?? t("messages.failed"),
-              );
+              setConnectionMessage(error?.message ?? t("messages.failed"));
             }
 
             if (status === "TIMED_OUT") {
@@ -261,11 +234,7 @@ export function StudyRoomPresencePanel({
           });
       } catch (error) {
         setConnectionState("error");
-        setConnectionMessage(
-          error instanceof Error
-            ? error.message
-            : t("messages.unexpected"),
-        );
+        setConnectionMessage(error instanceof Error ? error.message : t("messages.unexpected"));
       }
     }
 
@@ -373,19 +342,35 @@ export function StudyRoomPresencePanel({
       <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-caption">
         <span className="text-muted-foreground">{t("connectionLabel")}</span>
-        <span role="status" className={connectionState === "connected" ? "font-medium text-success" : connectionState === "error" ? "font-medium text-danger" : "text-muted-foreground"}>
+        <span
+          role="status"
+          className={
+            connectionState === "connected"
+              ? "font-medium text-success"
+              : connectionState === "error"
+                ? "font-medium text-danger"
+                : "text-muted-foreground"
+          }
+        >
           {t(`connection.${connectionState}`)}
         </span>
       </div>
-      <p className="mt-1 text-caption text-muted-foreground [overflow-wrap:anywhere]">{connectionMessage}</p>
+      <p className="mt-1 text-caption text-muted-foreground [overflow-wrap:anywhere]">
+        {connectionMessage}
+      </p>
 
       <div className="mt-card border-y border-border py-card">
         <p className="text-label font-medium">{t("myStatus")}</p>
         <div className="mt-2 flex flex-wrap gap-2">
           {(["available", "focusing", "paused"] as const).map((status) => (
-            <Button key={status} size="sm" variant={myStatus === status ? "default" : "outline"}
-              aria-pressed={myStatus === status} disabled={connectionState !== "connected"}
-              onClick={() => updateMyStatus(status)}>
+            <Button
+              key={status}
+              size="sm"
+              variant={myStatus === status ? "default" : "outline"}
+              aria-pressed={myStatus === status}
+              disabled={connectionState !== "connected"}
+              onClick={() => updateMyStatus(status)}
+            >
               {t(`status.${status}`)}
             </Button>
           ))}
@@ -395,19 +380,28 @@ export function StudyRoomPresencePanel({
       <div className="mt-card">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-label font-medium">{t("onlineParticipants")}</h3>
-          <span className="text-caption tabular-nums text-muted-foreground">{t("onlineCount", { count: participants.length })}</span>
+          <span className="text-caption tabular-nums text-muted-foreground">
+            {t("onlineCount", { count: participants.length })}
+          </span>
         </div>
         {participants.length === 0 ? (
           <p className="py-card text-body text-muted-foreground">{t("empty")}</p>
         ) : (
           <div className="divide-y divide-border">
             {participants.map((participant) => (
-              <article key={participant.userId} className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-3">
+              <article
+                key={participant.userId}
+                className="flex min-w-0 flex-wrap items-center justify-between gap-2 py-3"
+              >
                 <div className="min-w-0 flex-1 basis-32">
-                  <p className="text-body font-medium [overflow-wrap:anywhere]">{participant.fullName}</p>
+                  <p className="text-body font-medium [overflow-wrap:anywhere]">
+                    {participant.fullName}
+                  </p>
                   <p className="text-caption text-muted-foreground">{t("connectedNow")}</p>
                 </div>
-                <span className={`rounded-sm px-2 py-0.5 text-caption font-medium ${getStatusBadgeClass(participant.status)}`}>
+                <span
+                  className={`rounded-sm px-2 py-0.5 text-caption font-medium ${getStatusBadgeClass(participant.status)}`}
+                >
                   {t(`status.${participant.status}`)}
                 </span>
               </article>

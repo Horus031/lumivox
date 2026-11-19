@@ -13,11 +13,26 @@ type GoalDatePickerProps = {
   disabled?: boolean;
 };
 
-export function GoalDatePicker({ type, startDate, setStartDate, targetDate, setTargetDate, disabled }: GoalDatePickerProps) {
+export function GoalDatePicker({
+  type,
+  startDate,
+  setStartDate,
+  targetDate,
+  setTargetDate,
+  disabled,
+}: GoalDatePickerProps) {
   const t = useTranslations("goals.form");
   const date = type === "start" ? startDate : targetDate;
   const setDate = type === "start" ? setStartDate : type === "target" ? setTargetDate : undefined;
   if (!setDate) return null;
 
-  return <DatePicker label={t(type === "start" ? "fields.startDate" : "fields.targetDate")} value={date} onChange={setDate} disabled={disabled} placeholder={t("selectDate")} />;
+  return (
+    <DatePicker
+      label={t(type === "start" ? "fields.startDate" : "fields.targetDate")}
+      value={date}
+      onChange={setDate}
+      disabled={disabled}
+      placeholder={t("selectDate")}
+    />
+  );
 }

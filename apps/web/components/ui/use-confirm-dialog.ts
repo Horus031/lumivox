@@ -10,11 +10,15 @@ type ConfirmOptions = Partial<Omit<ConfirmationOptions, "description">>;
 export function useConfirmDialog() {
   const show = useConfirmation();
   const t = useTranslations("common.confirmation");
-  return useCallback((description: string, options: ConfirmOptions = {}) => show({
-    title: t(options.variant === "destructive" ? "destructiveTitle" : "title"),
-    confirmLabel: t(options.variant === "destructive" ? "delete" : "confirm"),
-    cancelLabel: t("cancel"),
-    ...options,
-    description,
-  }), [show, t]);
+  return useCallback(
+    (description: string, options: ConfirmOptions = {}) =>
+      show({
+        title: t(options.variant === "destructive" ? "destructiveTitle" : "title"),
+        confirmLabel: t(options.variant === "destructive" ? "delete" : "confirm"),
+        cancelLabel: t("cancel"),
+        ...options,
+        description,
+      }),
+    [show, t],
+  );
 }

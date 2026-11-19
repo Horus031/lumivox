@@ -1,0 +1,95 @@
+{
+  "scope": "local-attendance-http-security",
+  "startedAt": "2026-11-01T14:19:03.101Z",
+  "baseline": "6e2e93c67d1a40f3ddbe2a5f8d03cbaff6f8d105",
+  "checks": [
+    {
+      "name": "SEC-00 gate-before",
+      "status": "PASS",
+      "enabled": false
+    },
+    {
+      "name": "SEC-anon-batch",
+      "status": "PASS",
+      "httpStatus": 401,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-anon-cron-wrapper",
+      "status": "PASS",
+      "httpStatus": 401,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-anon-control-read",
+      "status": "PASS",
+      "httpStatus": 401,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-batch",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-cron-wrapper",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-control-read",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-ownership-start",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-ownership-complete",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-ownership-skip",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-ownership-recover",
+      "status": "PASS",
+      "httpStatus": 403,
+      "sqlstate": "42501"
+    },
+    {
+      "name": "SEC-auth-invalid-event-key",
+      "status": "PASS",
+      "httpStatus": 400,
+      "sqlstate": "22023"
+    },
+    {
+      "name": "SEC-service-disabled-wrapper",
+      "status": "PASS",
+      "httpStatus": 200,
+      "sqlstate": null
+    },
+    {
+      "name": "SEC-99 gate-after",
+      "status": "PASS",
+      "enabled": false
+    }
+  ],
+  "apiOrigin": "http://127.0.0.1:55321",
+  "status": "PASS",
+  "sessionSignOut": "PASS",
+  "userCleanup": "PASS",
+  "cronConfiguration": "PASS",
+  "finishedAt": "2026-11-01T14:19:06.235Z"
+}

@@ -32,9 +32,7 @@ type TransitionTaskResult = {
   updatedAt: string;
 };
 
-export async function getTaskDetailsAction(
-  taskId: string,
-): Promise<ActionResult<TaskDetailsData>> {
+export async function getTaskDetailsAction(taskId: string): Promise<ActionResult<TaskDetailsData>> {
   try {
     const { supabase, user } = await requireUser();
 
@@ -135,9 +133,7 @@ export async function getTaskDetailsAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while loading task details.",
+        error instanceof Error ? error.message : "Unexpected error while loading task details.",
     };
   }
 }
@@ -162,7 +158,7 @@ export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
   try {
     const { supabase, user } = await requireUser();
 
-    const { parentTaskId, title } = parsed.data;
+    const { parentTaskId, title, recoveryAttemptId } = parsed.data;
 
     const { data: parentTask, error: parentError } = await supabase
       .from("tasks")
@@ -219,6 +215,7 @@ export async function createSubtaskAction(input: CreateSubtaskInput): Promise<
         user_id: user.id,
 
         parent_task_id: parentTask.id,
+        ...(recoveryAttemptId ? { recovery_attempt_id: recoveryAttemptId } : {}),
 
         goal_id: parentTask.goal_id,
 
@@ -270,8 +267,7 @@ export async function transitionTaskStatusAction(
 
   try {
     const { supabase, user } = await requireUser();
-    const { taskId, targetStatus, expectedStatus, expectedUpdatedAt } =
-      parsed.data;
+    const { taskId, targetStatus, expectedStatus, expectedUpdatedAt } = parsed.data;
     const { data: task, error: fetchError } = await supabase
       .from("tasks")
       .select("id, user_id, status, due_at, completed_at, updated_at")
@@ -280,16 +276,11 @@ export async function transitionTaskStatusAction(
       .maybeSingle();
     if (fetchError) return { success: false, message: t("transitionFailed") };
     if (!task) return { success: false, message: t("taskNotFound") };
-    if (
-      task.status !== expectedStatus ||
-      task.updated_at !== expectedUpdatedAt
-    ) {
+    if (task.status !== expectedStatus || task.updated_at !== expectedUpdatedAt) {
       return { success: false, message: t("staleTask") };
     }
     const now = new Date();
-    if (
-      !canDirectlyTransitionTask(getTaskBoardStatus(task, now), targetStatus)
-    ) {
+    if (!canDirectlyTransitionTask(getTaskBoardStatus(task, now), targetStatus)) {
       return { success: false, message: t("invalidTransition") };
     }
     const completedAt = getTaskCompletedAt(task, targetStatus, now);
@@ -332,9 +323,7 @@ export async function transitionTaskStatusAction(
   }
 }
 
-export async function createTaskAction(
-  input: CreateTaskInput,
-): Promise<ActionResult> {
+export async function createTaskAction(input: CreateTaskInput): Promise<ActionResult> {
   const parsed = createTaskSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -348,8 +337,7 @@ export async function createTaskAction(
   try {
     const { supabase, user } = await requireUser();
 
-    const { title, description, goalId, priority, estimatedMinutes, dueAt } =
-      parsed.data;
+    const { title, description, goalId, priority, estimatedMinutes, dueAt } = parsed.data;
 
     const { error } = await supabase.from("tasks").insert({
       user_id: user.id,
@@ -376,17 +364,12 @@ export async function createTaskAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while creating task.",
+      message: error instanceof Error ? error.message : "Unexpected error while creating task.",
     };
   }
 }
 
-export async function updateTaskAction(
-  input: UpdateTaskInput,
-): Promise<ActionResult> {
+export async function updateTaskAction(input: UpdateTaskInput): Promise<ActionResult> {
   const parsed = updateTaskSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -415,7 +398,7 @@ export async function updateTaskAction(
 
     const { data: existingTask, error: existingTaskError } = await supabase
       .from("tasks")
-      .select("status, due_at, completed_at, updated_at")
+      .select("status, due_at, due_date, estimated_minutes, completed_at, updated_at")
       .eq("id", taskId)
       .eq("user_id", user.id)
       .single();
@@ -428,24 +411,19 @@ export async function updateTaskAction(
     }
 
     const t = await getTranslations("workspace.board");
-    if (
-      existingTask.status !== expectedStatus ||
-      existingTask.updated_at !== expectedUpdatedAt
-    ) {
+    if (existingTask.status !== expectedStatus || existingTask.updated_at !== expectedUpdatedAt) {
       return { success: false, message: t("staleTask") };
     }
     const now = new Date();
     if (
       status !== existingTask.status &&
       (!isDirectTaskStatusTarget(status) ||
-        !canDirectlyTransitionTask(
-          getTaskBoardStatus(existingTask, now),
-          status,
-        ))
+        !canDirectlyTransitionTask(getTaskBoardStatus(existingTask, now), status))
     ) {
       return { success: false, message: t("invalidTransition") };
     }
     const completedAtValue = getTaskCompletedAt(existingTask, status, now);
+    const { recoveryAttemptId } = parsed.data;
 
     const { data: updatedTask, error } = await supabase
       .from("tasks")
@@ -458,12 +436,13 @@ export async function updateTaskAction(
         due_at: dueAt || null,
         status,
         completed_at: completedAtValue,
+        ...(recoveryAttemptId ? { recovery_attempt_id: recoveryAttemptId } : {}),
       })
       .eq("id", taskId)
       .eq("user_id", user.id)
       .eq("status", expectedStatus)
       .eq("updated_at", expectedUpdatedAt)
-      .select("id")
+      .select("id,updated_at")
       .maybeSingle();
 
     if (error) {
@@ -503,10 +482,7 @@ export async function updateTaskAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating task.",
+      message: error instanceof Error ? error.message : "Unexpected error while updating task.",
     };
   }
 }
@@ -538,10 +514,7 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
       };
     }
 
-    const { error } = await supabase
-      .from("tasks")
-      .delete()
-      .eq("id", parsed.data.taskId);
+    const { error } = await supabase.from("tasks").delete().eq("id", parsed.data.taskId);
 
     if (error) {
       return {
@@ -565,10 +538,7 @@ export async function deleteTaskAction(taskId: string): Promise<ActionResult> {
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while deleting task.",
+      message: error instanceof Error ? error.message : "Unexpected error while deleting task.",
     };
   }
 }

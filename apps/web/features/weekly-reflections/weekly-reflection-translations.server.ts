@@ -18,10 +18,7 @@ export async function translateWeeklyReflectionCards(
     return cards;
   }
 
-  const sourceHash = createHash("sha256")
-    .update(JSON.stringify(cards))
-    .digest("hex")
-    .slice(0, 20);
+  const sourceHash = createHash("sha256").update(JSON.stringify(cards)).digest("hex").slice(0, 20);
 
   return getOrSetJsonCache({
     key: `lumivox:translation:weekly-reflections:${targetLocale}:${sourceHash}`,
@@ -29,10 +26,8 @@ export async function translateWeeklyReflectionCards(
     fetcher: async () => {
       const translationItems = cards.flatMap((card) => {
         const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
-        const watchouts =
-          (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-        const actions =
-          (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+        const watchouts = (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
+        const actions = (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
 
         return [
           {
@@ -106,18 +101,13 @@ export async function translateWeeklyReflectionCards(
 
       const translations = await translateAiContentBatch(translationItems);
       const translatedTextByField = new Map(
-        translations.map((item) => [
-          `${item.entity_id}:${item.field_name}`,
-          item.translated_text,
-        ]),
+        translations.map((item) => [`${item.entity_id}:${item.field_name}`, item.translated_text]),
       );
 
       return cards.map((card) => {
         const wins = (card.wins as WeeklyReflectionWin[] | null) ?? [];
-        const watchouts =
-          (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
-        const actions =
-          (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
+        const watchouts = (card.watchouts as WeeklyReflectionWatchout[] | null) ?? [];
+        const actions = (card.next_week_actions as WeeklyReflectionAction[] | null) ?? [];
 
         const getTranslation = (fieldName: string, fallback: string) =>
           translatedTextByField.get(`${card.id}:${fieldName}`) ?? fallback;
@@ -130,10 +120,7 @@ export async function translateWeeklyReflectionCards(
             "reflection_interpretation",
             card.reflection_interpretation,
           ),
-          confidence_note: getTranslation(
-            "confidence_note",
-            card.confidence_note,
-          ),
+          confidence_note: getTranslation("confidence_note", card.confidence_note),
           wins: wins.map((item, index) => ({
             ...item,
             student_friendly_explanation: getTranslation(
@@ -150,14 +137,8 @@ export async function translateWeeklyReflectionCards(
           })) as unknown as typeof card.watchouts,
           next_week_actions: actions.map((item, index) => ({
             ...item,
-            action: getTranslation(
-              `next_week_actions.${index}.action`,
-              item.action,
-            ),
-            rationale: getTranslation(
-              `next_week_actions.${index}.rationale`,
-              item.rationale,
-            ),
+            action: getTranslation(`next_week_actions.${index}.action`, item.action),
+            rationale: getTranslation(`next_week_actions.${index}.rationale`, item.rationale),
           })) as unknown as typeof card.next_week_actions,
         };
       });

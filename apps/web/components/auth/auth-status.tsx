@@ -16,7 +16,10 @@ export async function AuthSignUpSuccess() {
       </header>
       <p className="text-sm leading-7 text-muted-foreground">{t("body")}</p>
       <Button asChild variant="outline" className="h-12 w-full">
-        <Link href="/auth/login"><ArrowLeft aria-hidden="true" />{authT("backToLogin")}</Link>
+        <Link href="/auth/login">
+          <ArrowLeft aria-hidden="true" />
+          {authT("backToLogin")}
+        </Link>
       </Button>
     </div>
   );
@@ -41,12 +44,22 @@ export async function AuthErrorPage({ searchParams }: ErrorPageProps) {
   return (
     <div className="flex flex-col gap-6">
       <CircleAlert className="size-9 text-destructive" strokeWidth={1.5} aria-hidden="true" />
-      <header className="auth-form-heading"><h1>{t("title")}</h1></header>
-      <Suspense><ErrorContent searchParams={searchParams} /></Suspense>
+      <header className="auth-form-heading">
+        <h1>{t("title")}</h1>
+      </header>
+      <Suspense>
+        <ErrorContent searchParams={searchParams} />
+      </Suspense>
       <Button asChild className="h-12 w-full">
-        <Link href="/auth/login"><ArrowLeft aria-hidden="true" />{authT("backToLogin")}</Link>
+        <Link href="/auth/login">
+          <ArrowLeft aria-hidden="true" />
+          {authT("backToLogin")}
+        </Link>
       </Button>
-      <Link href="/auth/forgot-password" className="text-center text-sm underline underline-offset-4">
+      <Link
+        href="/auth/forgot-password"
+        className="text-center text-sm underline underline-offset-4"
+      >
         {authT("login.forgotPassword")}
       </Link>
     </div>

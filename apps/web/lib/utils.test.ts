@@ -4,8 +4,7 @@ import { cn } from "./utils";
 
 describe("application token overrides", () => {
   it("resolves typography without dropping independent text colors", () => {
-    expect(cn("text-body text-foreground", "text-lg"))
-      .toBe("text-foreground text-lg");
+    expect(cn("text-body text-foreground", "text-lg")).toBe("text-foreground text-lg");
     expect(cn("text-sm", "text-section")).toBe("text-section");
   });
 
@@ -17,7 +16,6 @@ describe("application token overrides", () => {
   });
 
   it("preserves independent breakpoint overrides", () => {
-    expect(cn("h-touch sm:h-control", "sm:h-10"))
-      .toBe("h-touch sm:h-10");
+    expect(cn("h-touch sm:h-control", "sm:h-10")).toBe("h-touch sm:h-10");
   });
 });

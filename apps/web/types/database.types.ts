@@ -1,4 +1,4 @@
-﻿
+
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[]
 
 export type Database = {
@@ -255,13 +255,16 @@ isOneToOne: false
                   ]
                 },"focus_sessions": {
                   Row: {
+                    recovery_attempt_id: string | null
                     "actual_focus_minutes": number,"created_at": string,"ended_at": string | null,"id": string,"notes": string | null,"paused_at": string | null,"planned_minutes": number,"self_focus_rating": number | null,"session_mode": string,"started_at": string,"status": Database["public"]['Enums']["focus_session_status"],"task_id": string | null,"total_paused_seconds": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
+                    recovery_attempt_id?: string | null
                     "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes": number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
+                    recovery_attempt_id?: string | null
                     "actual_focus_minutes"?: number,"created_at"?: string,"ended_at"?: string | null,"id"?: string,"notes"?: string | null,"paused_at"?: string | null,"planned_minutes"?: number,"self_focus_rating"?: number | null,"session_mode"?: string,"started_at"?: string,"status"?: Database["public"]['Enums']["focus_session_status"],"task_id"?: string | null,"total_paused_seconds"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
@@ -461,6 +464,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"ls_missed_sweep_control": {
+                  Row: {
+                    "enabled": boolean,"singleton": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"ml_model_versions": {
                   Row: {
                     "algorithm": string,"artifact_path": string,"created_at": string,"explainability_metadata": NonNullable<Json>,"feature_schema": NonNullable<Json>,"id": string,"is_active": boolean,"metrics": NonNullable<Json>,"model_key": string,"training_dataset": string,"updated_at": string,"version": string
@@ -497,6 +514,26 @@ isOneToOne: false
       foreignKeyName: "native_task_risk_assessments_user_id_fkey"
       columns: ["user_id"]
 isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"native_task_risk_input_revisions": {
+                  Row: {
+                    "revision": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "revision"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "revision"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "native_task_risk_input_revisions_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: true
       referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
@@ -659,6 +696,200 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"study_notification_deliveries": {
+                  Row: {
+                    "attempt_number": number,"created_at": string,"error_code": string | null,"handoff_token": string | null,"id": string,"job_id": string,"last_provider_event_at": string | null,"locale_policy": string | null,"outcome_fingerprint": string | null,"provider": string,"provider_accepted_at": string | null,"provider_message_id": string | null,"provider_payload_fingerprint": string | null,"recipient_fingerprint": string | null,"status": string,"submission_locale": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempt_number": number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id": string,"last_provider_event_at"?: string | null,"locale_policy"?: string | null,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_accepted_at"?: string | null,"provider_message_id"?: string | null,"provider_payload_fingerprint"?: string | null,"recipient_fingerprint"?: string | null,"status"?: string,"submission_locale"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attempt_number"?: number,"created_at"?: string,"error_code"?: string | null,"handoff_token"?: string | null,"id"?: string,"job_id"?: string,"last_provider_event_at"?: string | null,"locale_policy"?: string | null,"outcome_fingerprint"?: string | null,"provider"?: string,"provider_accepted_at"?: string | null,"provider_message_id"?: string | null,"provider_payload_fingerprint"?: string | null,"recipient_fingerprint"?: string | null,"status"?: string,"submission_locale"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_delivery_owner_fk"
+      columns: ["job_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_jobs"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"study_notification_dispatch_control": {
+                  Row: {
+                    "enabled": boolean,"singleton": boolean,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"singleton"?: boolean,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"study_notification_jobs": {
+                  Row: {
+                    "attempt_count": number,"cancel_requested_at": string | null,"created_at": string,"due_at": string,"id": string,"idempotency_key": string,"lease_token": string | null,"lease_until": string | null,"lifecycle_fingerprint": string | null,"next_attempt_at": string,"notification_type": string,"schedule_revision": number,"session_id": string,"status": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempt_count"?: number,"cancel_requested_at"?: string | null,"created_at"?: string,"due_at": string,"id"?: string,"idempotency_key": string,"lease_token"?: string | null,"lease_until"?: string | null,"lifecycle_fingerprint"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision": number,"session_id": string,"status"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attempt_count"?: number,"cancel_requested_at"?: string | null,"created_at"?: string,"due_at"?: string,"id"?: string,"idempotency_key"?: string,"lease_token"?: string | null,"lease_until"?: string | null,"lifecycle_fingerprint"?: string | null,"next_attempt_at"?: string,"notification_type"?: string,"schedule_revision"?: number,"session_id"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_job_owner_fk"
+      columns: ["session_id","user_id","schedule_revision"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id","schedule_revision"]
+    }
+                  ]
+                },"study_notification_preferences": {
+                  Row: {
+                    "consented_at": string | null,"created_at": string,"lead_minutes": number,"locale_confirmed_at": string | null,"quiet_end_local": string | null,"quiet_hours_enabled": boolean,"quiet_start_local": string | null,"reminder_locale": string | null,"study_email_enabled": boolean,"timezone": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"locale_confirmed_at"?: string | null,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"reminder_locale"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "consented_at"?: string | null,"created_at"?: string,"lead_minutes"?: number,"locale_confirmed_at"?: string | null,"quiet_end_local"?: string | null,"quiet_hours_enabled"?: boolean,"quiet_start_local"?: string | null,"reminder_locale"?: string | null,"study_email_enabled"?: boolean,"timezone"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"study_notification_recipient_identities": {
+                  Row: {
+                    "email_hash": string | null,"recipient_fingerprint": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "email_hash"?: string | null,"recipient_fingerprint": string,"user_id": string
+                  }
+                  Update: {
+                    "email_hash"?: string | null,"recipient_fingerprint"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"study_notification_resend_payloads": {
+                  Row: {
+                    "context_hash": string,"created_at": string,"encrypted_payload": string,"job_id": string,"locale": string,"payload_fingerprint": string,"recipient_fingerprint": string,"token_hash": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "context_hash": string,"created_at"?: string,"encrypted_payload": string,"job_id": string,"locale": string,"payload_fingerprint": string,"recipient_fingerprint": string,"token_hash": string,"user_id": string
+                  }
+                  Update: {
+                    "context_hash"?: string,"created_at"?: string,"encrypted_payload"?: string,"job_id"?: string,"locale"?: string,"payload_fingerprint"?: string,"recipient_fingerprint"?: string,"token_hash"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_resend_pay_token_hash_user_id_recipient_fkey"
+      columns: ["token_hash","user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_unsubscribe_tokens"
+      referencedColumns: ["token_hash","user_id","recipient_fingerprint"]
+    },{
+      foreignKeyName: "study_notification_resend_payloads_job_id_user_id_fkey"
+      columns: ["job_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_jobs"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"study_notification_suppressions": {
+                  Row: {
+                    "created_at": string,"delivery_id": string | null,"id": string,"reason": string,"recipient_fingerprint": string,"revoked_at": string | null,"source_event_id": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"delivery_id"?: string | null,"id"?: string,"reason": string,"recipient_fingerprint": string,"revoked_at"?: string | null,"source_event_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"delivery_id"?: string | null,"id"?: string,"reason"?: string,"recipient_fingerprint"?: string,"revoked_at"?: string | null,"source_event_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_suppressio_user_id_recipient_fingerprin_fkey"
+      columns: ["user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_recipient_identities"
+      referencedColumns: ["user_id","recipient_fingerprint"]
+    },{
+      foreignKeyName: "study_notification_suppressions_delivery_id_user_id_fkey"
+      columns: ["delivery_id","user_id"]
+isOneToOne: false
+      referencedRelation: "study_notification_deliveries"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "study_notification_suppressions_source_event_id_fkey"
+      columns: ["source_event_id"]
+isOneToOne: true
+      referencedRelation: "study_notification_webhook_receipts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"study_notification_task_overrides": {
+                  Row: {
+                    "enabled": boolean,"task_id": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "enabled"?: boolean,"task_id": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "enabled"?: boolean,"task_id"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_task_overrides_task_id_user_id_fkey"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"study_notification_unsubscribe_tokens": {
+                  Row: {
+                    "created_at": string,"expires_at": string,"id": string,"recipient_fingerprint": string,"revoked_at": string | null,"token_hash": string,"used_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"expires_at": string,"id"?: string,"recipient_fingerprint": string,"revoked_at"?: string | null,"token_hash": string,"used_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"expires_at"?: string,"id"?: string,"recipient_fingerprint"?: string,"revoked_at"?: string | null,"token_hash"?: string,"used_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "study_notification_unsubscrib_user_id_recipient_fingerprin_fkey"
+      columns: ["user_id","recipient_fingerprint"]
+isOneToOne: false
+      referencedRelation: "study_notification_recipient_identities"
+      referencedColumns: ["user_id","recipient_fingerprint"]
+    }
+                  ]
+                },"study_notification_webhook_receipts": {
+                  Row: {
+                    "bounce_kind": string | null,"created_at": string,"event_type": string,"id": string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at": string | null,"processing_status": string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "bounce_kind"?: string | null,"created_at"?: string,"event_type": string,"id"?: string,"payload_fingerprint": string,"payload_subset": NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider": string,"provider_event_at": string,"provider_event_id": string,"provider_message_id": string,"recipient_fingerprint": string
+                  }
+                  Update: {
+                    "bounce_kind"?: string | null,"created_at"?: string,"event_type"?: string,"id"?: string,"payload_fingerprint"?: string,"payload_subset"?: NonNullable<Json>,"processed_at"?: string | null,"processing_status"?: string,"provider"?: string,"provider_event_at"?: string,"provider_event_id"?: string,"provider_message_id"?: string,"recipient_fingerprint"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"study_room_members": {
                   Row: {
                     "created_at": string,"id": string,"joined_at": string,"left_at": string | null,"membership_status": Database["public"]['Enums']["study_room_member_status"],"role": Database["public"]['Enums']["study_room_member_role"],"room_id": string,"updated_at": string,"user_id": string
@@ -815,15 +1046,278 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_risk_recovery_attempts": {
+                  Row: {
+                    id: string
+                    user_id: string
+                    task_id: string
+                    source_prediction_id: string
+                    action_type: string
+                    status: string
+                    idempotency_key: string
+                    initiated_at: string
+                    original_due_at: string
+                    applied_at: string | null
+                    applied_entity_id: string | null
+                    reassessment_prediction_id: string | null
+                    receipt_required: boolean
+                    receipt_recorded_at: string | null
+                    evaluated_at: string | null
+                    reassessment_requested_at: string | null
+                  }
+                  Insert: {
+                    id?: string
+                    user_id: string
+                    task_id: string
+                    source_prediction_id: string
+                    action_type: string
+                    status?: string
+                    idempotency_key: string
+                    initiated_at?: string
+                    original_due_at: string
+                    applied_at?: string | null
+                    applied_entity_id?: string | null
+                    reassessment_prediction_id?: string | null
+                    receipt_required?: boolean
+                    receipt_recorded_at?: string | null
+                    evaluated_at?: string | null
+                    reassessment_requested_at?: string | null
+                  }
+                  Update: {
+                    id?: string
+                    user_id?: string
+                    task_id?: string
+                    source_prediction_id?: string
+                    action_type?: string
+                    status?: string
+                    idempotency_key?: string
+                    initiated_at?: string
+                    original_due_at?: string
+                    applied_at?: string | null
+                    applied_entity_id?: string | null
+                    reassessment_prediction_id?: string | null
+                    receipt_required?: boolean
+                    receipt_recorded_at?: string | null
+                    evaluated_at?: string | null
+                    reassessment_requested_at?: string | null
+                  }
+                  Relationships: [
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_task_id_fkey"
+                      columns: ["task_id"]
+                      isOneToOne: false
+                      referencedRelation: "tasks"
+                      referencedColumns: ["id"]
+                    },
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_source_prediction_id_fkey"
+                      columns: ["source_prediction_id"]
+                      isOneToOne: false
+                      referencedRelation: "deadline_risk_predictions"
+                      referencedColumns: ["id"]
+                    },
+                    {
+                      foreignKeyName: "task_risk_recovery_attempts_reassessment_prediction_id_fkey"
+                      columns: ["reassessment_prediction_id"]
+                      isOneToOne: false
+                      referencedRelation: "deadline_risk_predictions"
+                      referencedColumns: ["id"]
+                    },
+                  ]
+                },"task_study_focus_attributions": {
+                  Row: {
+                    "attribution_source": string,"created_at": string,"focus_session_id": string,"id": string,"study_session_id": string,"task_id": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attribution_source"?: string,"created_at"?: string,"focus_session_id": string,"id"?: string,"study_session_id": string,"task_id": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "attribution_source"?: string,"created_at"?: string,"focus_session_id"?: string,"id"?: string,"study_session_id"?: string,"task_id"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_study_focus_attributions_focus_session_id_user_id_tas_fkey"
+      columns: ["focus_session_id","user_id","task_id"]
+isOneToOne: false
+      referencedRelation: "focus_sessions"
+      referencedColumns: ["id","user_id","task_id"]
+    },{
+      foreignKeyName: "task_study_focus_attributions_study_session_id_user_id_tas_fkey"
+      columns: ["study_session_id","user_id","task_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id","task_id"]
+    }
+                  ]
+                },"task_study_focus_launches": {
+                  Row: {
+                    "focus_session_id": string,"launch_request_id": string,"request_payload": NonNullable<Json>,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "focus_session_id": string,"launch_request_id": string,"request_payload": NonNullable<Json>,"user_id": string
+                  }
+                  Update: {
+                    "focus_session_id"?: string,"launch_request_id"?: string,"request_payload"?: NonNullable<Json>,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_study_focus_launches_focus_session_id_fkey"
+      columns: ["focus_session_id"]
+isOneToOne: true
+      referencedRelation: "task_study_focus_attributions"
+      referencedColumns: ["focus_session_id"]
+    }
+                  ]
+                },"task_study_schedule_revisions": {
+                  Row: {
+                    "change_reason": string | null,"changed_by": string | null,"created_at": string,"ends_on": string,"id": string,"revision": number,"schedule_id": string,"slots_snapshot": NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on": string,"id"?: string,"revision": number,"schedule_id": string,"slots_snapshot"?: NonNullable<Json>,"starts_on": string,"timezone": string,"user_id": string
+                  }
+                  Update: {
+                    "change_reason"?: string | null,"changed_by"?: string | null,"created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"schedule_id"?: string,"slots_snapshot"?: NonNullable<Json>,"starts_on"?: string,"timezone"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_rev_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedule_revisions_changed_by_fkey"
+      columns: ["changed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_schedule_slots": {
+                  Row: {
+                    "created_at": string,"end_time": string,"id": string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"end_time": string,"id"?: string,"schedule_id": string,"start_time": string,"user_id": string,"weekday": number
+                  }
+                  Update: {
+                    "created_at"?: string,"end_time"?: string,"id"?: string,"schedule_id"?: string,"start_time"?: string,"user_id"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_slot_schedule_owner_fk"
+      columns: ["schedule_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"task_study_schedules": {
+                  Row: {
+                    "created_at": string,"ends_on": string,"id": string,"revision": number,"starts_on": string,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"ends_on": string,"id"?: string,"revision"?: number,"starts_on": string,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"ends_on"?: string,"id"?: string,"revision"?: number,"starts_on"?: string,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_schedule_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_schedules_user_id_fkey"
+      columns: ["user_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_session_events": {
+                  Row: {
+                    "actor_id": string | null,"created_at": string,"event_key": string,"event_type": string,"from_status": string | null,"id": string,"payload": NonNullable<Json>,"session_id": string,"to_status": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key": string,"event_type": string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id": string,"to_status"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"created_at"?: string,"event_key"?: string,"event_type"?: string,"from_status"?: string | null,"id"?: string,"payload"?: NonNullable<Json>,"session_id"?: string,"to_status"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_event_session_owner_fk"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "task_study_session_events_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"task_study_sessions": {
+                  Row: {
+                    "actual_study_minutes": number | null,"cancellation_reason": string | null,"completed_at": string | null,"created_at": string,"id": string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id": string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id": string | null,"status": string,"task_id": string,"timezone": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date": string,"local_end_time": string,"local_start_time": string,"logical_occurrence_key": string,"replaces_session_id"?: string | null,"schedule_id": string,"schedule_revision": number,"scheduled_end_at": string,"scheduled_start_at": string,"source_slot_id"?: string | null,"status"?: string,"task_id": string,"timezone": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "actual_study_minutes"?: number | null,"cancellation_reason"?: string | null,"completed_at"?: string | null,"created_at"?: string,"id"?: string,"local_date"?: string,"local_end_time"?: string,"local_start_time"?: string,"logical_occurrence_key"?: string,"replaces_session_id"?: string | null,"schedule_id"?: string,"schedule_revision"?: number,"scheduled_end_at"?: string,"scheduled_start_at"?: string,"source_slot_id"?: string | null,"status"?: string,"task_id"?: string,"timezone"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ls_session_replaces_owner_fk"
+      columns: ["replaces_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_schedule_task_owner_fk"
+      columns: ["schedule_id","task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedules"
+      referencedColumns: ["id","task_id","user_id"]
+    },{
+      foreignKeyName: "ls_session_slot_owner_fk"
+      columns: ["source_slot_id","user_id"]
+isOneToOne: false
+      referencedRelation: "task_study_schedule_slots"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "ls_session_task_owner_fk"
+      columns: ["task_id","user_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
                 },"tasks": {
                   Row: {
+                    recovery_attempt_id: string | null
                     "completed_at": string | null,"created_at": string,"description": string | null,"due_at": string | null,"due_date": string | null,"estimated_minutes": number | null,"goal_id": string | null,"id": string,"parent_task_id": string | null,"priority": Database["public"]['Enums']["task_priority"],"source_roadmap_id": string | null,"source_roadmap_node_id": string | null,"status": Database["public"]['Enums']["task_status"],"title": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
+                    recovery_attempt_id?: string | null
                     "completed_at"?: string | null,"created_at"?: string,"description"?: string | null,"due_at"?: string | null,"due_date"?: string | null,"estimated_minutes"?: number | null,"goal_id"?: string | null,"id"?: string,"parent_task_id"?: string | null,"priority"?: Database["public"]['Enums']["task_priority"],"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"status"?: Database["public"]['Enums']["task_status"],"title": string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
+                    recovery_attempt_id?: string | null
                     "completed_at"?: string | null,"created_at"?: string,"description"?: string | null,"due_at"?: string | null,"due_date"?: string | null,"estimated_minutes"?: number | null,"goal_id"?: string | null,"id"?: string,"parent_task_id"?: string | null,"priority"?: Database["public"]['Enums']["task_priority"],"source_roadmap_id"?: string | null,"source_roadmap_node_id"?: string | null,"status"?: Database["public"]['Enums']["task_status"],"title"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
@@ -1196,9 +1690,44 @@ isOneToOne: false
               "algorithm": string,"days_until_due": number,"decision_threshold": number,"due_at": string,"goal_id": string,"goal_title": string,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"reason_summaries": Json,"recommended_actions": Json,"risk_band": string,"risk_probability": number,"risk_score": number,"task_id": string,"task_title": string,"top_attributions": Json
             }[]
                            },
+"abandon_task_risk_recovery":
+{ Args: { p_attempt_id: string }; Returns: boolean
+                           },
+"reserve_task_risk_reassessment":
+{ Args: { p_user_id: string, p_attempt_id: string, p_allow_dispatch?: boolean }; Returns: Json
+                           },
+"pair_task_risk_reassessment":
+{ Args: { p_user_id: string, p_attempt_id: string, p_request_id: string }; Returns: boolean
+                           },
+"claim_task_risk_reassessment":
+{ Args: { p_user_id: string, p_task_id: string, p_request_id: string }; Returns: boolean
+                           },
+"finish_task_risk_reassessment":
+{ Args: { p_user_id: string, p_task_id: string, p_request_id: string }; Returns: undefined
+                           },
+"reconcile_task_risk_recovery":
+{ Args: { p_limit?: number }; Returns: number
+                           },
+"create_recovery_focus_v2":
+{ Args: { p_user_id: string, p_task_id: string, p_attempt_id: string, p_focus_minutes: number, p_short_break_minutes: number, p_long_break_minutes: number, p_round_count: number, p_long_break_every: number, p_auto_start_breaks: boolean, p_auto_start_focus: boolean }; Returns: string
+                           },
+"start_receipted_task_risk_recovery":
+{ Args: { p_user_id: string, p_task_id: string, p_prediction_id: string, p_action_type: string, p_key: string }; Returns: string
+                           },
+"complete_verified_task_risk_recovery":
+{ Args: { p_action_type: string, p_attempt_id: string, p_entity_id?: string, p_previous_due_at?: string, p_previous_minutes?: number, p_task_id: string, p_task_updated_at?: string, p_user_id: string }; Returns: boolean
+                           },
+"start_verified_task_risk_recovery":
+{ Args: { p_action_type: string, p_key: string, p_prediction_id: string, p_task_id: string, p_user_id: string }; Returns: string
+                           },
 "get_my_native_task_risk_candidate_tasks":
 { Args: { "p_horizon_days"?: number,"p_limit"?: number }; Returns: {
               "days_until_due": number,"due_at": string,"goal_id": string,"goal_title": string,"priority": string,"status": string,"task_id": string,"task_title": string
+            }[]
+                           },
+"get_my_native_task_risk_snapshots_for_tasks":
+{ Args: { "p_task_ids": (string)[] }; Returns: {
+              "algorithm": string,"current_input_revision": number,"decision_threshold": number,"effective_due_at": string,"goal_id": string,"goal_title": string,"model_active": boolean,"model_key": string,"model_version": string,"predicted_at": string,"predicted_label": boolean,"prediction_id": string,"prediction_metadata": Json,"risk_probability": number,"task_completed_at": string,"task_id": string,"task_status": string,"task_title": string,"task_updated_at": string,"top_attributions": Json
             }[]
                            },
 "get_native_task_risk_system_candidates":
@@ -1249,6 +1778,191 @@ isOneToOne: false
                            },
 "leave_study_room":
 { Args: { "p_room_id": string }; Returns: undefined
+                           },
+"ls_complete_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_create_attributed_focus_v2":
+{ Args: { "p_auto_start_breaks": boolean,"p_auto_start_focus": boolean,"p_focus_minutes": number,"p_launch_request_id": string,"p_long_break_every": number,"p_long_break_minutes": number,"p_round_count": number,"p_short_break_minutes": number,"p_study_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"ls_create_schedule":
+{ Args: { "p_ends_on": string,"p_occurrences": Json,"p_slots": Json,"p_starts_on": string,"p_task_id": string,"p_timezone": string }; Returns: string
+                           },
+"ls_earliest_local_instant":
+{ Args: { "p_local_date": string,"p_local_time": string,"p_timezone": string }; Returns: string
+                           },
+"ls_learning_schedule_operational_snapshot":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"ls_link_study_focus":
+{ Args: { "p_focus_session_id": string,"p_study_session_id": string }; Returns: string
+                           },
+"ls_mark_missed_batch":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_notification_authorize_attempt":
+{ Args: { "p_job_id": string,"p_lease_token": string }; Returns: Json
+                           },
+"ls_notification_authorize_resend_attempt":
+{ Args: { "p_allowlisted"?: boolean,"p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_locale": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_authorize_resend_payload":
+{ Args: { "p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_bind_recipient":
+{ Args: { "p_expected_email": string,"p_fingerprint": string,"p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_candidates":
+{ Args: { "p_now": string,"p_task_id": string,"p_user_id": string }; Returns: string[]
+                           },
+"ls_notification_claim_batch":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_notification_consume_unsubscribe_token":
+{ Args: { "p_token_hash": string }; Returns: boolean
+                           },
+"ls_notification_dispatch_stats":
+{ Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"ls_notification_in_quiet_hours":
+{ Args: { "p_as_of": string,"p_enabled": boolean,"p_end": string,"p_start": string,"p_timezone": string }; Returns: boolean
+                           },
+"ls_notification_ingest_resend":
+{ Args: { "p_event_at": string,"p_event_id": string,"p_event_type": string,"p_message_id": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           } |
+{ Args: { "p_bounce_kind": string,"p_event_at": string,"p_event_id": string,"p_event_type": string,"p_message_id": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_issue_unsubscribe_token":
+{ Args: { "p_expected_email": string,"p_fingerprint": string,"p_replace"?: boolean,"p_token_hash": string,"p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_load_resend_payload":
+{ Args: { "p_job_id": string,"p_lease_token": string }; Returns: Json
+                           },
+"ls_notification_lock_owner":
+{ Args: { "p_user_id": string }; Returns: undefined
+                           },
+"ls_notification_prepare_resend_payload":
+{ Args: { "p_context_hash": string,"p_encrypted_payload": string,"p_expected_email": string,"p_job_id": string,"p_lease_token": string,"p_locale": string,"p_payload_fingerprint": string,"p_recipient_fingerprint": string,"p_token_hash": string }; Returns: Json
+                           },
+"ls_notification_preview_resend":
+{ Args: { "p_batch_size"?: number }; Returns: Json
+                           },
+"ls_notification_project_resend":
+{ Args: { "p_message_id": string }; Returns: undefined
+                           },
+"ls_notification_project_resend_8b":
+{ Args: { "p_message_id": string }; Returns: undefined
+                           },
+"ls_notification_reconcile_expired_leases":
+{ Args: { "p_batch_size"?: number }; Returns: number
+                           },
+"ls_notification_record_fake_outcome":
+{ Args: { "p_job_id": string,"p_lease_token": string,"p_outcome": Json }; Returns: Json
+                           },
+"ls_notification_record_resend_outcome":
+{ Args: { "p_delivery_id": string,"p_handoff_token": string,"p_message_id"?: string,"p_outcome": string,"p_payload_fingerprint": string }; Returns: Json
+                           },
+"ls_notification_record_resend_rate_limit":
+{ Args: { "p_delivery_id": string,"p_handoff_token": string,"p_payload_fingerprint": string }; Returns: undefined
+                           },
+"ls_notification_resend_context":
+{ Args: { "p_job_id": string }; Returns: Json
+                           },
+"ls_notification_resolve_resend_context":
+{ Args: { "p_job_id": string,"p_lease_token"?: string }; Returns: Json
+                           },
+"ls_notification_revoke_unsubscribe_token":
+{ Args: { "p_token_hash": string }; Returns: undefined
+                           },
+"ls_notification_session_policy":
+{ Args: { "p_session_id": string }; Returns: {
+              "due_at": string,"eligible": boolean,"fingerprint": string,"generation": number,"starts_at": string,"user_id": string
+            }[]
+                           },
+"ls_reconcile_study_notifications":
+{ Args: { "p_task_id"?: string,"p_user_id": string }; Returns: undefined
+                           },
+"ls_recover_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_reschedule_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_new_end_at": string,"p_new_end_time": string,"p_new_local_date": string,"p_new_start_at": string,"p_new_start_time": string,"p_session_id": string }; Returns: string
+                           },
+"ls_revise_schedule":
+{ Args: { "p_ends_on": string,"p_expected_revision": number,"p_occurrences": Json,"p_schedule_id": string,"p_slots": Json,"p_starts_on": string,"p_timezone": string }; Returns: number
+                           },
+"ls_run_missed_sweep_if_enabled":
+{ Args: Record<PropertyKey, never>; Returns: number
+                           },
+"ls_set_study_notification_preferences":
+{ Args: { "p_lead_minutes"?: number,"p_quiet_end_local"?: string,"p_quiet_hours_enabled"?: boolean,"p_quiet_start_local"?: string,"p_study_email_enabled": boolean,"p_timezone"?: string }; Returns: {
+              "consented_at": string | null,
+"created_at": string,
+"lead_minutes": number,
+"locale_confirmed_at": string | null,
+"quiet_end_local": string | null,
+"quiet_hours_enabled": boolean,
+"quiet_start_local": string | null,
+"reminder_locale": string | null,
+"study_email_enabled": boolean,
+"timezone": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_preferences"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"ls_set_study_notification_task_override":
+{ Args: { "p_enabled": boolean,"p_task_id": string }; Returns: {
+              "enabled": boolean,
+"task_id": string,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_task_overrides"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"ls_set_study_reminder_locale":
+{ Args: { "p_locale": string }; Returns: {
+              "consented_at": string | null,
+"created_at": string,
+"lead_minutes": number,
+"locale_confirmed_at": string | null,
+"quiet_end_local": string | null,
+"quiet_hours_enabled": boolean,
+"quiet_start_local": string | null,
+"reminder_locale": string | null,
+"study_email_enabled": boolean,
+"timezone": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "study_notification_preferences"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"ls_skip_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_reason"?: string,"p_session_id": string }; Returns: string
+                           },
+"ls_start_study_session":
+{ Args: { "p_event_key": string,"p_expected_updated_at": string,"p_session_id": string }; Returns: string
+                           },
+"ls_study_notification_job_is_current":
+{ Args: { "p_job_id": string }; Returns: boolean
+                           },
+"ls_study_notification_task_enabled":
+{ Args: { "p_task_id": string }; Returns: boolean
+                           },
+"ls_sync_study_notification_for_session":
+{ Args: { "p_session_id": string }; Returns: undefined
                            },
 "match_learning_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {

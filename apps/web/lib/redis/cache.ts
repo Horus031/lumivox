@@ -8,10 +8,7 @@ type GetOrSetCacheOptions<T> = {
 
 const inFlight = new Map<string, Promise<unknown>>();
 
-async function runSingleFlight<T>(
-  key: string,
-  fetcher: () => Promise<T>,
-): Promise<T> {
+async function runSingleFlight<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
   const existing = inFlight.get(key) as Promise<T> | undefined;
 
   if (existing) return existing;

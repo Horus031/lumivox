@@ -21,17 +21,13 @@ export const TASK_LEARNING_DOCUMENT_MIME_TYPES = [
   "text/markdown",
 ] as const;
 
-export function isAllowedLearningDocumentMimeType(
-  mimeType: string,
-) {
+export function isAllowedLearningDocumentMimeType(mimeType: string) {
   return ALLOWED_LEARNING_DOCUMENT_MIME_TYPES.includes(
     mimeType as (typeof ALLOWED_LEARNING_DOCUMENT_MIME_TYPES)[number],
   );
 }
 
-export function isAllowedTaskLearningDocumentMimeType(
-  mimeType: string,
-) {
+export function isAllowedTaskLearningDocumentMimeType(mimeType: string) {
   return TASK_LEARNING_DOCUMENT_MIME_TYPES.includes(
     mimeType as (typeof TASK_LEARNING_DOCUMENT_MIME_TYPES)[number],
   );

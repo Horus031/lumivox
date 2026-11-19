@@ -65,15 +65,11 @@ export default async function BlogIndexPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-310 px-6 pb-24 pt-32 md:pb-32 md:pt-40">
       <header className="max-w-3xl border-b border-border pb-12">
-        <p className="text-[12px] font-semibold uppercase text-primary">
-          {t.eyebrow}
-        </p>
+        <p className="text-[12px] font-semibold uppercase text-primary">{t.eyebrow}</p>
         <h1 className="mt-4 text-[42px] font-semibold leading-[1.08] tracking-tight md:text-[58px]">
           {t.title}
         </h1>
-        <p className="mt-5 max-w-2xl text-[16px] leading-7 text-secondary">
-          {t.description}
-        </p>
+        <p className="mt-5 max-w-2xl text-[16px] leading-7 text-secondary">{t.description}</p>
       </header>
 
       <div className="mt-12 grid gap-6 lg:grid-cols-3">
@@ -100,9 +96,7 @@ export default async function BlogIndexPage({ params }: PageProps) {
                   {post.title}
                 </Link>
               </h2>
-              <p className="mt-3 text-[14px] leading-6 text-secondary">
-                {post.excerpt}
-              </p>
+              <p className="mt-3 text-[14px] leading-6 text-secondary">{post.excerpt}</p>
               <Link
                 href={`/blog/${post.slug}`}
                 className="mt-6 inline-flex items-center gap-1.5 text-[13px] font-medium text-primary"

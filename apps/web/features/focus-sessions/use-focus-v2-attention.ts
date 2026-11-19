@@ -21,9 +21,13 @@ const isNotificationSupported = () => typeof window !== "undefined" && "Notifica
 
 export function useFocusV2Attention(sessionId: string, projection: FocusV2Projection) {
   const t = useTranslations("focus.attention");
-  const [settings, setSettings] = useState<FocusV2AttentionSettings>(DEFAULT_FOCUS_V2_ATTENTION_SETTINGS);
+  const [settings, setSettings] = useState<FocusV2AttentionSettings>(
+    DEFAULT_FOCUS_V2_ATTENTION_SETTINGS,
+  );
   const [hydrated, setHydrated] = useState(false);
-  const [permission, setPermission] = useState<NotificationPermission | "unsupported">("unsupported");
+  const [permission, setPermission] = useState<NotificationPermission | "unsupported">(
+    "unsupported",
+  );
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [awayCandidate, setAwayCandidate] = useState<FocusV2AwayCandidate | null>(null);
   const projectionRef = useRef(projection);
@@ -35,15 +39,20 @@ export function useFocusV2Attention(sessionId: string, projection: FocusV2Projec
     try {
       const stored = window.localStorage.getItem(FOCUS_V2_ATTENTION_STORAGE_KEY);
       if (stored) setSettings(parseFocusV2AttentionSettings(JSON.parse(stored) as unknown));
-    } catch { /* Settings storage is optional. */ }
+    } catch {
+      /* Settings storage is optional. */
+    }
     setPermission(isNotificationSupported() ? Notification.permission : "unsupported");
     setHydrated(true);
   }, []);
 
   useEffect(() => {
     if (!hydrated) return;
-    try { window.localStorage.setItem(FOCUS_V2_ATTENTION_STORAGE_KEY, JSON.stringify(settings)); }
-    catch { /* Do not block focus sessions if browser storage is denied. */ }
+    try {
+      window.localStorage.setItem(FOCUS_V2_ATTENTION_STORAGE_KEY, JSON.stringify(settings));
+    } catch {
+      /* Do not block focus sessions if browser storage is denied. */
+    }
   }, [hydrated, settings]);
 
   const updateSettings = useCallback((patch: Partial<FocusV2AttentionSettings>) => {
@@ -62,8 +71,8 @@ export function useFocusV2Attention(sessionId: string, projection: FocusV2Projec
       return;
     }
     try {
-      const result = Notification.permission === "granted"
-        ? "granted" : await Notification.requestPermission();
+      const result =
+        Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
       setPermission(result);
       if (result === "granted") {
         updateSettings({ notificationsEnabled: true });
@@ -93,8 +102,13 @@ export function useFocusV2Attention(sessionId: string, projection: FocusV2Projec
         tag: `lumivox-focus-v2-${sessionId}-${kind}-${next.segmentId ?? "final"}`,
         silent: true,
       });
-      notification.onclick = () => { window.focus(); notification.close(); };
-    } catch { /* Desktop/mobile browsers may refuse window-context notifications. */ }
+      notification.onclick = () => {
+        window.focus();
+        notification.close();
+      };
+    } catch {
+      /* Desktop/mobile browsers may refuse window-context notifications. */
+    }
   }, [hydrated, projection, sessionId, settings.notificationsEnabled, t]);
 
   useEffect(() => {
@@ -102,15 +116,19 @@ export function useFocusV2Attention(sessionId: string, projection: FocusV2Projec
     function onVisibilityChange() {
       const current = projectionRef.current;
       if (document.hidden) {
-        hiddenRef.current = canObserveFocusV2PageAway(current) && current.current
-          ? { at: Date.now(), segmentId: current.current.id } : null;
+        hiddenRef.current =
+          canObserveFocusV2PageAway(current) && current.current
+            ? { at: Date.now(), segmentId: current.current.id }
+            : null;
         return;
       }
       const hidden = hiddenRef.current;
       hiddenRef.current = null;
       if (!hidden) return;
       const candidate = getFocusV2AwayCandidate(
-        hidden.at, Date.now(), hidden.segmentId,
+        hidden.at,
+        Date.now(),
+        hidden.segmentId,
         canObserveFocusV2PageAway(current) && current.current?.id === hidden.segmentId,
         settings.minimumAwaySeconds,
       );
@@ -125,16 +143,23 @@ export function useFocusV2Attention(sessionId: string, projection: FocusV2Projec
 
   // A suggestion must never outlive the focus round it was observed in.
   useEffect(() => {
-    if (awayCandidate && (
-      !canObserveFocusV2PageAway(projection) ||
-      projection.current?.id !== awayCandidate.segmentId
-    )) setAwayCandidate(null);
+    if (
+      awayCandidate &&
+      (!canObserveFocusV2PageAway(projection) || projection.current?.id !== awayCandidate.segmentId)
+    )
+      setAwayCandidate(null);
   }, [awayCandidate, projection]);
 
   const dismissAwayCandidate = useCallback(() => setAwayCandidate(null), []);
 
   return {
-    settings, hydrated, permission, permissionError, awayCandidate,
-    updateSettings, enableNotifications, dismissAwayCandidate,
+    settings,
+    hydrated,
+    permission,
+    permissionError,
+    awayCandidate,
+    updateSettings,
+    enableNotifications,
+    dismissAwayCandidate,
   };
 }

@@ -1,6 +1,7 @@
 # Automated Test Summary
 
 ## 1. Backend Unit/API Tests
+
 - Framework: Pytest
 - Target: FastAPI services and scoring logic
 - Coverage focus:
@@ -10,6 +11,7 @@
   - Health API endpoint
 
 ### Result
+
 - Total tests executed: [fill]
 - Passed: [fill]
 - Failed: [fill]
@@ -18,6 +20,7 @@
 ---
 
 ## 2. Frontend Unit Tests
+
 - Framework: Vitest
 - Target:
   - Zod schema validation
@@ -25,6 +28,7 @@
   - Chat message schema validation
 
 ### Result
+
 - Total tests executed: [fill]
 - Passed: [fill]
 - Failed: [fill]
@@ -33,6 +37,7 @@
 ---
 
 ## 3. End-to-End Tests
+
 - Framework: Playwright
 - Target:
   - Authentication redirects
@@ -41,6 +46,7 @@
   - Rooms and reflections page access
 
 ### Result
+
 - Total tests executed: [fill]
 - Passed: [fill]
 - Failed: [fill]
@@ -49,10 +55,10 @@
 ---
 
 ## 4. Supporting Evidence
+
 - Playwright HTML report screenshot
 - Terminal screenshots from `pytest`, `vitest`, and `playwright`
 - Trace files retained for failed-test debugging where applicable
-
 
 ## Mapping to Final Report
 

@@ -11,14 +11,11 @@ vi.mock("next/server", () => ({
   after: mocks.after,
 }));
 
-vi.mock(
-  "@/features/engagement-retention/engagement-retention.server",
-  () => ({
-    invalidateEngagementCache: mocks.invalidateEngagementCache,
-    processEngagementActivityForUser: mocks.processEngagementActivityForUser,
-    recalculateEngagementForUser: mocks.recalculateEngagementForUser,
-  }),
-);
+vi.mock("@/features/engagement-retention/engagement-retention.server", () => ({
+  invalidateEngagementCache: mocks.invalidateEngagementCache,
+  processEngagementActivityForUser: mocks.processEngagementActivityForUser,
+  recalculateEngagementForUser: mocks.recalculateEngagementForUser,
+}));
 
 import { scheduleEngagementRecalculation } from "./engagement-retention.background";
 
@@ -52,13 +49,10 @@ describe("scheduleEngagementRecalculation", () => {
     await scheduledTask?.();
 
     expect(mocks.invalidateEngagementCache).toHaveBeenCalledWith("user-1");
-    expect(mocks.processEngagementActivityForUser).toHaveBeenCalledWith(
-      "user-1",
-      {
-        type: "focus_session",
-        id: "session-1",
-      },
-    );
+    expect(mocks.processEngagementActivityForUser).toHaveBeenCalledWith("user-1", {
+      type: "focus_session",
+      id: "session-1",
+    });
     expect(mocks.recalculateEngagementForUser).not.toHaveBeenCalled();
   });
 
@@ -74,12 +68,9 @@ describe("scheduleEngagementRecalculation", () => {
     expect(mocks.processEngagementActivityForUser).not.toHaveBeenCalled();
   });
 
-
   it("contains background failures", async () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
-    mocks.recalculateEngagementForUser.mockRejectedValue(
-      new Error("API unavailable"),
-    );
+    mocks.recalculateEngagementForUser.mockRejectedValue(new Error("API unavailable"));
 
     scheduleEngagementRecalculation({
       userId: "user-3",

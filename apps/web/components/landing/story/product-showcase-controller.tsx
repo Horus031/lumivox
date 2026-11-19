@@ -6,9 +6,7 @@ export default function ProductShowcaseController() {
   const anchorRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const root = anchorRef.current?.closest<HTMLElement>(
-      "[data-product-story]",
-    );
+    const root = anchorRef.current?.closest<HTMLElement>("[data-product-story]");
 
     if (!root) return;
 
@@ -16,9 +14,7 @@ export default function ProductShowcaseController() {
       root.querySelectorAll<HTMLSourceElement>("[data-showcase-theme-source]"),
     );
     const syncTheme = () => {
-      const media = document.documentElement.classList.contains("dark")
-        ? "all"
-        : "not all";
+      const media = document.documentElement.classList.contains("dark") ? "all" : "not all";
       themeSources.forEach((source) => {
         source.media = media;
       });
@@ -31,13 +27,9 @@ export default function ProductShowcaseController() {
       attributeFilter: ["class"],
     });
 
-    const chapters = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-product-chapter]"),
-    );
+    const chapters = Array.from(root.querySelectorAll<HTMLElement>("[data-product-chapter]"));
 
-    const visuals = Array.from(
-      root.querySelectorAll<HTMLElement>("[data-product-visual]"),
-    );
+    const visuals = Array.from(root.querySelectorAll<HTMLElement>("[data-product-visual]"));
 
     const visible = new Map<Element, number>();
 
@@ -47,10 +39,7 @@ export default function ProductShowcaseController() {
       root.dataset.activeProduct = product;
 
       chapters.forEach((chapter) => {
-        chapter.toggleAttribute(
-          "data-active",
-          chapter.dataset.productChapter === product,
-        );
+        chapter.toggleAttribute("data-active", chapter.dataset.productChapter === product);
       });
 
       visuals.forEach((visual) => {
@@ -84,8 +73,7 @@ export default function ProductShowcaseController() {
         const active = [...visible.entries()].sort(
           (a, b) =>
             b[1] - a[1] ||
-            chapters.indexOf(a[0] as HTMLElement) -
-              chapters.indexOf(b[0] as HTMLElement),
+            chapters.indexOf(a[0] as HTMLElement) - chapters.indexOf(b[0] as HTMLElement),
         )[0]?.[0] as HTMLElement | undefined;
 
         const product = active?.dataset.productChapter;

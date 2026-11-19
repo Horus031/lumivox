@@ -2,10 +2,7 @@
 
 import type { ActionResult } from "@/lib/actions/action-result";
 import { requireUser } from "@/lib/auth/require-user";
-import {
-  focusV2PreferencesSchema,
-  type FocusV2Preferences,
-} from "./focus-v2-preferences";
+import { focusV2PreferencesSchema, type FocusV2Preferences } from "./focus-v2-preferences";
 
 export async function saveFocusV2PreferencesAction(
   input: FocusV2Preferences,

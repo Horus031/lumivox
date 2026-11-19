@@ -17,9 +17,7 @@ type DocumentSharePageProps = {
   }>;
 };
 
-export default async function DocumentSharePage({
-  params,
-}: DocumentSharePageProps) {
+export default async function DocumentSharePage({ params }: DocumentSharePageProps) {
   const { documentId } = await params;
 
   const [document, permissions, t] = await Promise.all([
@@ -34,7 +32,11 @@ export default async function DocumentSharePage({
 
   return (
     <section className="min-w-0 max-w-5xl space-y-section">
-      <PageHeader eyebrow={t("shareEyebrow")} title={document.file_name} description={t("shareDescription")} />
+      <PageHeader
+        eyebrow={t("shareEyebrow")}
+        title={document.file_name}
+        description={t("shareDescription")}
+      />
 
       <DocumentShareLinkCard documentId={document.id} />
 

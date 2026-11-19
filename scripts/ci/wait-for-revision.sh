@@ -36,7 +36,7 @@ while true; do
     status="$(jq -r '.status // empty' <<<"$response" 2>/dev/null || true)"
     revision="$(jq -r '.revision // empty' <<<"$response" 2>/dev/null || true)"
 
-    if [[ "$status" == "ok" && "$revision" == "$expected_sha" ]]; then
+    if [[ "$http_code" == "200" && "$status" == "ok" && "$revision" == "$expected_sha" ]]; then
       if [[ -z "$expected_model_version" ]]; then
         echo "Deployment is healthy and matches revision $expected_sha"
         exit 0

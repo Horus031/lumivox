@@ -11,9 +11,7 @@ type AdminGroupsPageProps = {
   }>;
 };
 
-export default async function AdminGroupsPage({
-  searchParams,
-}: AdminGroupsPageProps) {
+export default async function AdminGroupsPage({ searchParams }: AdminGroupsPageProps) {
   const { q, status } = await searchParams;
 
   const query = q ?? "";
@@ -31,10 +29,7 @@ export default async function AdminGroupsPage({
     <div className="min-w-0 space-y-section">
       <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
-      <AdminGroupSearchForm
-        initialQuery={query}
-        initialStatus={groupStatus}
-      />
+      <AdminGroupSearchForm initialQuery={query} initialStatus={groupStatus} />
 
       <AdminGroupsTable groups={groups} />
     </div>

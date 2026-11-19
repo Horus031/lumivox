@@ -18,10 +18,7 @@ function getStatusDotClass(status: string | null | undefined) {
   return "bg-red-500";
 }
 
-export function SidebarEngagementMiniStats({
-  userId,
-  stats,
-}: SidebarEngagementMiniStatsProps) {
+export function SidebarEngagementMiniStats({ userId, stats }: SidebarEngagementMiniStatsProps) {
   const t = useTranslations("appShell.engagement");
   const [engageStats, setEngageStats] = useState(stats);
   const supabase = useMemo(() => createClient(), []);
@@ -62,8 +59,7 @@ export function SidebarEngagementMiniStats({
 
             return {
               ...current,
-              current_streak_days:
-                update.current_streak_days ?? current.current_streak_days,
+              current_streak_days: update.current_streak_days ?? current.current_streak_days,
               streak_status: update.streak_status ?? current.streak_status,
               token_balance: update.token_balance ?? current.token_balance,
             };
@@ -94,9 +90,7 @@ export function SidebarEngagementMiniStats({
       <div className="flex items-center gap-2">
         {engageStats.streak_status !== "lost" && (
           <span
-            className={`h-2.5 w-2.5 rounded-full ${getStatusDotClass(
-              engageStats.streak_status,
-            )}`}
+            className={`h-2.5 w-2.5 rounded-full ${getStatusDotClass(engageStats.streak_status)}`}
           />
         )}
 
@@ -110,10 +104,7 @@ export function SidebarEngagementMiniStats({
       <div className="mt-3 gap-2 text-xs">
         <div className="flex items-center justify-between text-xs">
           <span className="flex items-center gap-1.5 text-secondary">
-            <Flame
-              className="size-3.5"
-              style={{ color: "var(--streak-fire)" }}
-            />
+            <Flame className="size-3.5" style={{ color: "var(--streak-fire)" }} />
             {t("streak")}
           </span>
           <span className="font-mono font-semibold">
@@ -123,15 +114,10 @@ export function SidebarEngagementMiniStats({
         </div>
         <div className="mt-2 flex items-center justify-between text-xs">
           <span className="flex items-center gap-1.5 text-secondary">
-            <Coins
-              className="size-3.5"
-              style={{ color: "var(--token-gold)" }}
-            />
+            <Coins className="size-3.5" style={{ color: "var(--token-gold)" }} />
             {t("tokens")}
           </span>
-          <span className="font-mono font-semibold">
-            {engageStats.token_balance}
-          </span>
+          <span className="font-mono font-semibold">{engageStats.token_balance}</span>
         </div>
       </div>
     </div>

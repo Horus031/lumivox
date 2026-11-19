@@ -1,9 +1,7 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { SupportedLocale } from "@/features/ai-translations/ai-translation.types";
 import { translateAiInsightCards } from "@/features/ai-insights/ai-insight-translations.server";
-import type {
-  NativeTaskAiInsightCardWithAssessment,
-} from "@/features/native-task-insights/native-task-insight.types";
+import type { NativeTaskAiInsightCardWithAssessment } from "@/features/native-task-insights/native-task-insight.types";
 
 export async function getLatestNativeTaskAiInsights(
   limit = 3,
@@ -29,16 +27,14 @@ export async function getLatestNativeTaskAiInsights(
           status
         )
       )
-    `
+    `,
     )
     .eq("insight_type", "native_task_risk")
     .order("created_at", { ascending: false })
     .limit(limit);
 
   if (error) {
-    throw new Error(
-      `Failed to fetch native task AI insights: ${error.message}`
-    );
+    throw new Error(`Failed to fetch native task AI insights: ${error.message}`);
   }
 
   const cards = (data ?? []) as NativeTaskAiInsightCardWithAssessment[];

@@ -21,23 +21,17 @@ export function StudyGroupMemberList({ members }: StudyGroupMemberListProps) {
 
   return (
     <section className="min-w-0 border-t border-border pt-card">
-      <h2 className="text-section font-semibold text-foreground">
-        {t("title")}
-      </h2>
+      <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
 
       <div className="mt-2 divide-y divide-border">
         {members.map((member) => (
-          <article
-            key={member.member_id}
-            className="min-w-0 py-3"
-          >
+          <article key={member.member_id} className="min-w-0 py-3">
             <p className="text-body font-medium text-foreground [overflow-wrap:anywhere]">
               {getDisplayName(member)}
             </p>
 
             <p className="mt-1 text-caption text-muted-foreground">
-              {t(`roles.${member.role}`)} -{" "}
-              {t(`status.${member.membership_status}`)}
+              {t(`roles.${member.role}`)} - {t(`status.${member.membership_status}`)}
             </p>
           </article>
         ))}

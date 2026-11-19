@@ -12,3 +12,4 @@ The system uses `profiles.role` to distinguish normal users from administrators.
 profiles.role
 ├── user
 └── admin
+```

@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  type FormEvent,
-  useEffect,
-  useId,
-  useMemo,
-  useState,
-  useTransition,
-} from "react";
+import { type FormEvent, useEffect, useId, useMemo, useState, useTransition } from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -35,10 +28,7 @@ function clampPage(page: number, totalPages: number) {
   return Math.min(totalPages, Math.max(1, Math.floor(page)));
 }
 
-function getPaginationItems(
-  totalPages: number,
-  windowCenter: number,
-): PaginationItem[] {
+function getPaginationItems(totalPages: number, windowCenter: number): PaginationItem[] {
   if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, index) => ({
       type: "page" as const,
@@ -155,10 +145,7 @@ export function DataTablePagination({
   const nextPage = clampPage(safePage + 1, safeTotalPages);
 
   return (
-    <nav
-      aria-label={t("ariaLabel")}
-      className={cn("border-t border-border/50 pt-4", className)}
-    >
+    <nav aria-label={t("ariaLabel")} className={cn("border-t border-border/50 pt-4", className)}>
       <div className="flex flex-col items-center justify-between gap-3 lg:flex-row">
         {/* <p className="text-sm text-muted-foreground">
           {t("showing", { page: safePage, totalPages: safeTotalPages })}
@@ -167,10 +154,7 @@ export function DataTablePagination({
           className="mt-4 flex flex-wrap items-center justify-center gap-2 lg:justify-end"
           onSubmit={handleJump}
         >
-          <label
-            className="text-sm text-muted-foreground"
-            htmlFor={jumpInputId}
-          >
+          <label className="text-sm text-muted-foreground" htmlFor={jumpInputId}>
             {t("jumpLabel")}
           </label>
           <Input
@@ -227,19 +211,13 @@ export function DataTablePagination({
             ) : (
               <Button
                 aria-label={t(
-                  item.direction === "backward"
-                    ? "showPreviousPages"
-                    : "showNextPages",
+                  item.direction === "backward" ? "showPreviousPages" : "showNextPages",
                 )}
                 className="size-9 px-0 text-muted-foreground"
                 key={`${item.direction}-${item.target}`}
                 onClick={() => setWindowCenter(item.target)}
                 size="icon"
-                title={t(
-                  item.direction === "backward"
-                    ? "showPreviousPages"
-                    : "showNextPages",
-                )}
+                title={t(item.direction === "backward" ? "showPreviousPages" : "showNextPages")}
                 type="button"
                 variant="ghost"
               >
@@ -252,9 +230,7 @@ export function DataTablePagination({
             <Link
               aria-disabled={safePage === safeTotalPages}
               aria-label={t("next")}
-              className={cn(
-                safePage === safeTotalPages && "pointer-events-none opacity-50",
-              )}
+              className={cn(safePage === safeTotalPages && "pointer-events-none opacity-50")}
               href={buildHref(nextPage)}
               title={t("next")}
             >

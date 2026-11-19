@@ -10,6 +10,4 @@ export const sendStudyRoomMessageSchema = z.object({
     .max(2000, "Message cannot exceed 2000 characters."),
 });
 
-export type SendStudyRoomMessageInput = z.infer<
-  typeof sendStudyRoomMessageSchema
->;
+export type SendStudyRoomMessageInput = z.infer<typeof sendStudyRoomMessageSchema>;

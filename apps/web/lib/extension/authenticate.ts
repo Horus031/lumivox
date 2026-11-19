@@ -1,9 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/types/database.types";
 
-export function extractExtensionBearer(
-  authorization: string | null,
-): string | null {
+export function extractExtensionBearer(authorization: string | null): string | null {
   if (!authorization) return null;
 
   const match = /^Bearer ([^\s]+)$/.exec(authorization);

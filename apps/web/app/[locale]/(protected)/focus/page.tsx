@@ -15,8 +15,17 @@ import { getFocusV2Preferences } from "@/features/focus-sessions/focus-v2-prefer
 import { FocusV2SessionBuilder } from "@/features/focus-sessions/components/focus-v2-session-builder";
 import { FocusV2LifecycleView } from "@/features/focus-sessions/components/focus-v2-lifecycle-view";
 import { isFocusV2CreationEnabled } from "@/features/focus-sessions/focus-v2-release";
+import { requireUser } from "@/lib/auth/require-user";
+import { Link } from "@/i18n/navigation";
+import { z } from "zod";
 
-async function FocusRagSection({ focusSessionId, fillHeight = false }: { focusSessionId: string; fillHeight?: boolean }) {
+async function FocusRagSection({
+  focusSessionId,
+  fillHeight = false,
+}: {
+  focusSessionId: string;
+  fillHeight?: boolean;
+}) {
   const [documents, ragDefaults] = await Promise.all([
     getAccessibleProcessedLearningDocuments(),
     getRagDefaultSettings(),
@@ -37,42 +46,125 @@ async function FocusRagSection({ focusSessionId, fillHeight = false }: { focusSe
 
 function RagLoadingFallback() {
   return (
-    <div aria-hidden="true" className="h-full min-h-64 animate-pulse rounded-lg border border-border bg-muted" />
+    <div
+      aria-hidden="true"
+      className="h-full min-h-64 animate-pulse rounded-lg border border-border bg-muted"
+    />
   );
 }
 
-export default async function FocusPage() {
-  const activeV2 = process.env.FOCUS_V2_ENABLED === "true"
-    ? await getActiveFocusV2Snapshot()
-    : null;
+export default async function FocusPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    studySession?: string | string[];
+    taskId?: string | string[];
+    recoveryAttemptId?: string | string[];
+  }>;
+}) {
+  const { studySession, taskId: requestedTaskId, recoveryAttemptId } = await searchParams;
+  const activeV2 =
+    process.env.FOCUS_V2_ENABLED === "true"
+      ? await getActiveFocusV2Snapshot()
+      : null;
   const [tasks, activeSession, t] = await Promise.all([
     getAvailableFocusTasks(),
     getActiveFocusSession(),
     getTranslations("focus.page"),
   ]);
-  const initialPreferences = isFocusV2CreationEnabled() && !activeSession && !activeV2
-    ? await getFocusV2Preferences()
-    : null;
+
+  const focusTaskId =
+    typeof requestedTaskId === "string" &&
+    z.uuid().safeParse(requestedTaskId).success
+      ? requestedTaskId.toLowerCase()
+      : null;
+  let taskOptions = tasks;
+  let initialTaskId: string | undefined;
+  if (focusTaskId && !activeV2 && !activeSession && studySession === undefined) {
+    if (tasks.some((task) => task.id === focusTaskId)) {
+      initialTaskId = focusTaskId;
+    } else {
+      const { supabase, user } = await requireUser();
+      const { data: linkedTask, error } = await supabase
+        .from("tasks")
+        .select("id, title")
+        .eq("id", focusTaskId)
+        .eq("user_id", user.id)
+        .in("status", ["todo", "in_progress", "overdue"])
+        .maybeSingle();
+
+      if (error === null && linkedTask) {
+        initialTaskId = linkedTask.id;
+        taskOptions = [...tasks, linkedTask];
+      }
+    }
+  }
+
+  const initialPreferences =
+    isFocusV2CreationEnabled() && !activeSession && !activeV2
+      ? await getFocusV2Preferences()
+      : null;
+  const launchText =
+    studySession === undefined
+      ? null
+      : await getTranslations("studyPlan.focusLaunch");
+  const sessionId = z.uuid().safeParse(studySession);
+  let studyLaunch;
+  if (initialPreferences && sessionId.success) {
+    const { supabase, user } = await requireUser();
+    const { data } = await supabase
+      .from("task_study_sessions")
+      .select("id,task_id")
+      .eq("id", sessionId.data)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    if (data) {
+      const { data: task } = await supabase
+        .from("tasks")
+        .select("id,title")
+        .eq("id", data.task_id)
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (task)
+        studyLaunch = { studySessionId: data.id, task, userId: user.id };
+    }
+  }
+
+  const recoveryId = initialTaskId && typeof recoveryAttemptId === "string" && z.uuid().safeParse(recoveryAttemptId).success
+    ? recoveryAttemptId : undefined;
 
   return (
     <section>
       <div className="mx-auto min-w-0 space-y-5">
-        {!activeV2 && <PageHeader
-          eyebrow={t("eyebrow")}
-          title={t("title")}
-          description={t("description")}
-        />}
+        {!activeV2 && (
+          <PageHeader
+            eyebrow={t("eyebrow")}
+            title={t("title")}
+            description={t("description")}
+          />
+        )}
 
         <div className="min-w-0">
+          {launchText && (activeV2 || activeSession) && (
+            <p role="status" className="mb-4 text-sm">
+              {launchText("activeFocusConflict")}
+            </p>
+          )}
           <div className="min-w-0 space-y-card">
             {activeV2 ? (
               <>
                 <FocusV2LifecycleView
                   initialSnapshot={activeV2}
-                  taskTitle={tasks.find((task) => task.id === activeV2.session.task_id)?.title ?? null}
+                  taskTitle={
+                    tasks.find((task) => task.id === activeV2.session.task_id)
+                      ?.title ?? null
+                  }
                 >
                   <Suspense fallback={<RagLoadingFallback />}>
-                    <FocusRagSection focusSessionId={activeV2.session.id} fillHeight />
+                    <FocusRagSection
+                      focusSessionId={activeV2.session.id}
+                      fillHeight
+                    />
                   </Suspense>
                 </FocusV2LifecycleView>
               </>
@@ -83,10 +175,29 @@ export default async function FocusPage() {
                   <FocusRagSection focusSessionId={activeSession.id} />
                 </Suspense>
               </>
+            ) : launchText && !studyLaunch ? (
+              <div role="alert">
+                <p>{launchText("ineligibleSession")}</p>
+                <Link className="underline" href="/study-plan">
+                  {launchText("back")}
+                </Link>
+              </div>
+            ) : initialPreferences ? (
+              <FocusV2SessionBuilder
+                key={studyLaunch ? `study:${studyLaunch.studySessionId}` : initialTaskId}
+                tasks={taskOptions}
+                initialTaskId={initialTaskId}
+                recoveryAttemptId={recoveryId}
+                initialPreferences={initialPreferences}
+                studyLaunch={studyLaunch}
+              />
             ) : (
-              initialPreferences
-                ? <FocusV2SessionBuilder tasks={tasks} initialPreferences={initialPreferences} />
-                : <StartFocusSessionForm tasks={tasks} />
+              <StartFocusSessionForm
+                key={initialTaskId}
+                tasks={taskOptions}
+                initialTaskId={initialTaskId}
+                recoveryAttemptId={recoveryId}
+              />
             )}
           </div>
         </div>

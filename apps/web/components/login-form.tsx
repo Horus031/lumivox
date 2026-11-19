@@ -13,10 +13,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { trackLogin } from "@/lib/analytics/events";
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const locale = useLocale();
   const t = useTranslations("auth.login");
   const authT = useTranslations("auth");
@@ -55,58 +52,63 @@ export function LoginForm({
         <h1>{t("title")}</h1>
         <p>{t("description")}</p>
       </header>
-          <form onSubmit={handleLogin} aria-busy={isLoading}>
-            <div className="flex flex-col gap-6">
-              <div className="grid gap-2">
-                <Label htmlFor="email">{authT("fields.email")}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  disabled={isLoading}
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">{authT("fields.password")}</Label>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    {t("forgotPassword")}
-                  </Link>
-                </div>
-                <PasswordInput
-                  id="password"
-                  name="password"
-                  autoComplete="current-password"
-                  disabled={isLoading}
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </div>
-              {error && <p role="alert" className="auth-form-error">{error}</p>}
-              <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
-                {isLoading ? t("submitting") : t("submit")}
-                {isLoading ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <ArrowRight aria-hidden="true" />}
-              </Button>
-            </div>
-            <div className="auth-form-alternative">
-              {t("noAccount")}{" "}
+      <form onSubmit={handleLogin} aria-busy={isLoading}>
+        <div className="flex flex-col gap-6">
+          <div className="grid gap-2">
+            <Label htmlFor="email">{authT("fields.email")}</Label>
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              disabled={isLoading}
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <div className="flex items-center">
+              <Label htmlFor="password">{authT("fields.password")}</Label>
               <Link
-                href="/auth/sign-up"
-                className="font-semibold underline-offset-4 hover:underline"
+                href="/auth/forgot-password"
+                className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
               >
-                {t("signUpLink")}
+                {t("forgotPassword")}
               </Link>
             </div>
-          </form>
+            <PasswordInput
+              id="password"
+              name="password"
+              autoComplete="current-password"
+              disabled={isLoading}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
+          {error && (
+            <p role="alert" className="auth-form-error">
+              {error}
+            </p>
+          )}
+          <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
+            {isLoading ? t("submitting") : t("submit")}
+            {isLoading ? (
+              <LoaderCircle className="animate-spin" aria-hidden="true" />
+            ) : (
+              <ArrowRight aria-hidden="true" />
+            )}
+          </Button>
+        </div>
+        <div className="auth-form-alternative">
+          {t("noAccount")}{" "}
+          <Link href="/auth/sign-up" className="font-semibold underline-offset-4 hover:underline">
+            {t("signUpLink")}
+          </Link>
+        </div>
+      </form>
     </div>
   );
 }

@@ -1,8 +1,6 @@
 import { useTranslations } from "next-intl";
 import ProductShowcaseController from "./story/product-showcase-controller";
-import ProductShowcaseStage, {
-  ProductShowcaseMobileVisual,
-} from "./story/product-showcase-stage";
+import ProductShowcaseStage, { ProductShowcaseMobileVisual } from "./story/product-showcase-stage";
 
 export default function Showcase() {
   const t = useTranslations("landing.showcase");
@@ -25,11 +23,7 @@ export default function Showcase() {
         </div>
 
         <div className="product-theater__chapters">
-          <article
-            data-product-chapter="analytics"
-            data-active
-            className="product-chapter"
-          >
+          <article data-product-chapter="analytics" data-active className="product-chapter">
             <span className="product-chapter__index">01 / Analytics</span>
 
             <h3>{t("analytics.title")}</h3>
@@ -44,10 +38,7 @@ export default function Showcase() {
                 </li>
               ))}
             </ul>
-            <ProductShowcaseMobileVisual
-              product="analytics"
-              alt={t("analytics.imageAlt")}
-            />
+            <ProductShowcaseMobileVisual product="analytics" alt={t("analytics.imageAlt")} />
           </article>
 
           <article data-product-chapter="focus" className="product-chapter">
@@ -62,20 +53,14 @@ export default function Showcase() {
                 </span>
               ))}
             </div>
-            <ProductShowcaseMobileVisual
-              product="focus"
-              alt={t("focus.imageAlt")}
-            />
+            <ProductShowcaseMobileVisual product="focus" alt={t("focus.imageAlt")} />
           </article>
 
           <article data-product-chapter="rooms" className="product-chapter">
             <span className="product-chapter__index">03 / Study rooms</span>
             <h3>{t("rooms.title")}</h3>
             <p>{t("rooms.desc")}</p>
-            <ProductShowcaseMobileVisual
-              product="rooms"
-              alt={t("rooms.imageAlt")}
-            />
+            <ProductShowcaseMobileVisual product="rooms" alt={t("rooms.imageAlt")} />
           </article>
         </div>
       </div>

@@ -20,17 +20,17 @@
 | FT-18 | Native Risk AI    | Generate Gemini task insight           | Native risk assessment exists          | Click Generate AI Insight        | AI card saved and displayed           |               | Pass/Fail |
 | FT-19 | Weekly Reflection | Generate weekly reflection             | Behavioural data across windows exists | Click Generate Weekly Reflection | Reflection card displayed             |               | Pass/Fail |
 | FT-20 | Engagement        | Refresh engagement summary             | Completed tasks/focus exist            | Click Refresh Engagement         | Streak/token summary updated          |               | Pass/Fail |
-| FT-21 | Rooms            | Create public study room         | Signed in                 | Submit room form                | Room created and opened     |               | Pass/Fail |
-| FT-22 | Rooms            | Create private room              | Signed in                 | Select private and create       | Invite code generated       |               | Pass/Fail |
-| FT-23 | Rooms            | Join private room by invite code | Valid invite code         | Submit code                     | User joins room             |               | Pass/Fail |
-| FT-24 | Rooms            | Leave room                       | Joined room, not owner    | Click Leave Room                | User leaves and redirects   |               | Pass/Fail |
-| FT-25 | Realtime Members | Member join updates roster       | Two accounts              | B joins room while A is viewing | A roster updates live       |               | Pass/Fail |
-| FT-26 | Realtime Members | Member leave updates roster      | Two accounts              | B leaves room                   | A roster updates live       |               | Pass/Fail |
-| FT-27 | Presence         | Online participants sync         | Two accounts in same room | Both open room                  | Both see 2 online users     |               | Pass/Fail |
-| FT-28 | Presence         | Focus status sync                | Two accounts              | B switches Available → Focusing | A sees change live          |               | Pass/Fail |
-| FT-29 | Chat             | Send realtime chat message       | Two accounts in same room | A sends message                 | B receives without refresh  |               | Pass/Fail |
-| FT-30 | Chat             | Persist chat history             | Existing messages         | Refresh page                    | Messages remain visible     |               | Pass/Fail |
-| FT-31 | Voice            | Join voice room                  | Valid room membership     | Click Join Voice                | User connects to voice      |               | Pass/Fail |
-| FT-32 | Voice            | Voice participant count updates  | Two accounts              | Both join voice                 | Both see 2 participants     |               | Pass/Fail |
-| FT-33 | Voice            | Mute/unmute microphone           | Joined voice              | Toggle mic                      | Audio publish state changes |               | Pass/Fail |
-| FT-34 | Voice            | Leave voice room                 | Joined voice              | Click Leave Voice               | User disconnects from voice |               | Pass/Fail |
+| FT-21 | Rooms             | Create public study room               | Signed in                              | Submit room form                 | Room created and opened               |               | Pass/Fail |
+| FT-22 | Rooms             | Create private room                    | Signed in                              | Select private and create        | Invite code generated                 |               | Pass/Fail |
+| FT-23 | Rooms             | Join private room by invite code       | Valid invite code                      | Submit code                      | User joins room                       |               | Pass/Fail |
+| FT-24 | Rooms             | Leave room                             | Joined room, not owner                 | Click Leave Room                 | User leaves and redirects             |               | Pass/Fail |
+| FT-25 | Realtime Members  | Member join updates roster             | Two accounts                           | B joins room while A is viewing  | A roster updates live                 |               | Pass/Fail |
+| FT-26 | Realtime Members  | Member leave updates roster            | Two accounts                           | B leaves room                    | A roster updates live                 |               | Pass/Fail |
+| FT-27 | Presence          | Online participants sync               | Two accounts in same room              | Both open room                   | Both see 2 online users               |               | Pass/Fail |
+| FT-28 | Presence          | Focus status sync                      | Two accounts                           | B switches Available → Focusing  | A sees change live                    |               | Pass/Fail |
+| FT-29 | Chat              | Send realtime chat message             | Two accounts in same room              | A sends message                  | B receives without refresh            |               | Pass/Fail |
+| FT-30 | Chat              | Persist chat history                   | Existing messages                      | Refresh page                     | Messages remain visible               |               | Pass/Fail |
+| FT-31 | Voice             | Join voice room                        | Valid room membership                  | Click Join Voice                 | User connects to voice                |               | Pass/Fail |
+| FT-32 | Voice             | Voice participant count updates        | Two accounts                           | Both join voice                  | Both see 2 participants               |               | Pass/Fail |
+| FT-33 | Voice             | Mute/unmute microphone                 | Joined voice                           | Toggle mic                       | Audio publish state changes           |               | Pass/Fail |
+| FT-34 | Voice             | Leave voice room                       | Joined voice                           | Click Leave Voice                | User disconnects from voice           |               | Pass/Fail |

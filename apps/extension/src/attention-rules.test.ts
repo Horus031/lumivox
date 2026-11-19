@@ -23,27 +23,21 @@ const sameFocus = {
 
 describe("Attention classification", () => {
   it("classifies supported social media domains", () => {
-    expect(
-      classifyPotentialDistraction("https://www.facebook.com/groups/example"),
-    ).toBe("social_media");
-  });
-
-  it("classifies messaging websites", () => {
-    expect(classifyPotentialDistraction("https://web.whatsapp.com/")).toBe(
-      "messaging",
+    expect(classifyPotentialDistraction("https://www.facebook.com/groups/example")).toBe(
+      "social_media",
     );
   });
 
+  it("classifies messaging websites", () => {
+    expect(classifyPotentialDistraction("https://web.whatsapp.com/")).toBe("messaging");
+  });
+
   it("does not classify unrelated study websites", () => {
-    expect(
-      classifyPotentialDistraction("https://docs.google.com/document/"),
-    ).toBeNull();
+    expect(classifyPotentialDistraction("https://docs.google.com/document/")).toBeNull();
   });
 
   it("rejects deceptive subdomains", () => {
-    expect(
-      classifyPotentialDistraction("https://facebook.com.attacker.example/"),
-    ).toBeNull();
+    expect(classifyPotentialDistraction("https://facebook.com.attacker.example/")).toBeNull();
   });
 
   it("does not classify Chrome internal URLs", () => {
@@ -51,9 +45,7 @@ describe("Attention classification", () => {
   });
 
   it("only produces the category, not the URL", () => {
-    const result = classifyPotentialDistraction(
-      "https://instagram.com/private?secret=example",
-    );
+    const result = classifyPotentialDistraction("https://instagram.com/private?secret=example");
 
     expect(result).toBe("social_media");
     expect(JSON.stringify(result)).not.toContain("secret");
@@ -100,9 +92,7 @@ describe("Attention observation", () => {
   });
 
   it("rejects overly long observations", () => {
-    expect(
-      finishObservation(initial, 1_000 + 16 * 60 * 1_000, sameFocus),
-    ).toBeNull();
+    expect(finishObservation(initial, 1_000 + 16 * 60 * 1_000, sameFocus)).toBeNull();
   });
 
   it("rejects observation without active Focus", () => {

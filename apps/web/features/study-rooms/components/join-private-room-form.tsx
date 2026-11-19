@@ -38,15 +38,15 @@ export function JoinPrivateRoomForm() {
   return (
     <section className="min-w-0 max-w-xl">
       <div className="mb-card">
-        <h2 className="text-section text-foreground font-semibold">
-          {t("title")}
-        </h2>
-        <p className="mt-1 text-body text-secondary-text">
-          {t("description")}
-        </p>
+        <h2 className="text-section text-foreground font-semibold">{t("title")}</h2>
+        <p className="mt-1 text-body text-secondary-text">{t("description")}</p>
       </div>
 
-      <form onSubmit={handleSubmit} aria-busy={isPending} className="flex min-w-0 flex-col gap-3 sm:flex-row">
+      <form
+        onSubmit={handleSubmit}
+        aria-busy={isPending}
+        className="flex min-w-0 flex-col gap-3 sm:flex-row"
+      >
         <Input
           type="text"
           aria-label={t("placeholder")}

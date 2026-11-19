@@ -59,7 +59,11 @@ export function AdminGroupMessageDeleteButton({
       title={isPending ? t("deleting") : t("delete")}
       aria-busy={isPending}
     >
-      {isPending ? <Loader2 className="animate-spin" aria-hidden="true" /> : <Trash2 aria-hidden="true" />}
+      {isPending ? (
+        <Loader2 className="animate-spin" aria-hidden="true" />
+      ) : (
+        <Trash2 aria-hidden="true" />
+      )}
     </Button>
   );
 }

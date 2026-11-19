@@ -20,27 +20,18 @@ type AppShellFrameProps = {
 
 const SIDEBAR_COLLAPSED_STORAGE_KEY = "lumivox-sidebar-collapsed";
 
-export function AppShellFrame({
-  profile,
-  sidebar,
-  children,
-}: AppShellFrameProps) {
+export function AppShellFrame({ profile, sidebar, children }: AppShellFrameProps) {
   const t = useTranslations("appShell.sidebar");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
-    setIsSidebarCollapsed(
-      window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "true",
-    );
+    setIsSidebarCollapsed(window.localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY) === "true");
   }, []);
 
   function toggleSidebar() {
     setIsSidebarCollapsed((currentValue) => {
       const nextValue = !currentValue;
-      window.localStorage.setItem(
-        SIDEBAR_COLLAPSED_STORAGE_KEY,
-        String(nextValue),
-      );
+      window.localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(nextValue));
       return nextValue;
     });
   }

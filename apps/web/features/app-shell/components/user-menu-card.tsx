@@ -30,9 +30,7 @@ export function UserMenuCard({ profile }: UserMenuCardProps) {
           <p className="truncate text-sm font-semibold text-foreground">
             {profile.full_name ?? t("fallbackUser")}
           </p>
-          <p className="truncate text-xs text-muted-foreground">
-            {profile.timezone}
-          </p>
+          <p className="truncate text-xs text-muted-foreground">{profile.timezone}</p>
         </div>
       </div>
     </section>

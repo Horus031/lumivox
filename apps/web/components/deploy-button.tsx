@@ -1,4 +1,4 @@
-import { Link } from "@/i18n/navigation";;
+import { Link } from "@/i18n/navigation";
 import { Button } from "./ui/button";
 
 export function DeployButton() {

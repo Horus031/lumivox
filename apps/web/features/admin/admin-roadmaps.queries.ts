@@ -21,15 +21,12 @@ export async function searchAdminLearningRoadmaps({
 }) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_search_learning_roadmaps",
-    {
-      p_query: query,
-      p_status: status,
-      p_limit: 50,
-      p_offset: 0,
-    }
-  );
+  const { data, error } = await supabase.rpc("admin_search_learning_roadmaps", {
+    p_query: query,
+    p_status: status,
+    p_limit: 50,
+    p_offset: 0,
+  });
 
   if (error) {
     throw new Error(`Failed to search roadmaps: ${error.message}`);

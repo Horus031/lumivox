@@ -3,10 +3,9 @@ import { workspaceTask } from "../workspace/workspace.test-fixtures";
 
 const mocks = vi.hoisted(() => ({ requireUser: vi.fn(), schedule: vi.fn() }));
 vi.mock("@/lib/auth/require-user", () => ({ requireUser: mocks.requireUser }));
-vi.mock(
-  "@/features/engagement-retention/engagement-retention.background",
-  () => ({ scheduleEngagementRecalculation: mocks.schedule }),
-);
+vi.mock("@/features/engagement-retention/engagement-retention.background", () => ({
+  scheduleEngagementRecalculation: mocks.schedule,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: async () => (key: string) => key,
 }));
@@ -25,8 +24,7 @@ describe("task workflow actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     query = {};
-    for (const key of ["from", "select", "eq", "update"])
-      query[key] = vi.fn(() => query);
+    for (const key of ["from", "select", "eq", "update"]) query[key] = vi.fn(() => query);
     query.maybeSingle = vi
       .fn()
       .mockResolvedValueOnce({ data: task, error: null })
@@ -80,12 +78,10 @@ describe("task workflow actions", () => {
     expect(mocks.schedule).not.toHaveBeenCalled();
   });
   it("cannot move overdue into progress even when DB status is todo", async () => {
-    query.maybeSingle
-      .mockReset()
-      .mockResolvedValue({
-        data: { ...task, due_at: "2000-01-01T00:00:00Z" },
-        error: null,
-      });
+    query.maybeSingle.mockReset().mockResolvedValue({
+      data: { ...task, due_at: "2000-01-01T00:00:00Z" },
+      error: null,
+    });
     expect(
       await transitionTaskStatusAction({
         ...input,
@@ -129,9 +125,7 @@ describe("task workflow actions", () => {
     });
   });
   it("rejects missing/unowned tasks", async () => {
-    query.maybeSingle
-      .mockReset()
-      .mockResolvedValue({ data: null, error: null });
+    query.maybeSingle.mockReset().mockResolvedValue({ data: null, error: null });
     expect(await transitionTaskStatusAction(input)).toMatchObject({
       success: false,
       message: "taskNotFound",
@@ -207,8 +201,6 @@ describe("task workflow actions", () => {
         } as Parameters<typeof updateTaskAction>[0])
       ).success,
     ).toBe(true);
-    expect(query.update).toHaveBeenCalledWith(
-      expect.objectContaining({ completed_at }),
-    );
+    expect(query.update).toHaveBeenCalledWith(expect.objectContaining({ completed_at }));
   });
 });

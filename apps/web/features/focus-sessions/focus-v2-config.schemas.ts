@@ -1,15 +1,17 @@
 import { z } from "zod";
 
-export const focusV2ConfigSchema = z.object({
-  taskId: z.union([z.uuid(), z.literal("")]).default(""),
-  focusMinutes: z.number().int().min(5).max(120),
-  shortBreakMinutes: z.number().int().min(1).max(30),
-  longBreakMinutes: z.number().int().min(5).max(60),
-  roundCount: z.number().int().min(1).max(8),
-  longBreakEvery: z.number().int().min(2).max(8),
-  autoStartBreaks: z.boolean(),
-  autoStartFocus: z.boolean(),
-}).strict();
+export const focusV2ConfigSchema = z
+  .object({
+    taskId: z.union([z.uuid(), z.literal("")]).default(""),
+    focusMinutes: z.number().int().min(5).max(120),
+    shortBreakMinutes: z.number().int().min(1).max(30),
+    longBreakMinutes: z.number().int().min(5).max(60),
+    roundCount: z.number().int().min(1).max(8),
+    longBreakEvery: z.number().int().min(2).max(8),
+    autoStartBreaks: z.boolean(),
+    autoStartFocus: z.boolean(),
+  })
+  .strict();
 
 export type FocusV2Config = z.infer<typeof focusV2ConfigSchema>;
 export type FocusV2SegmentKind = "focus" | "short_break" | "long_break";
@@ -52,9 +54,7 @@ export function buildFocusV2Schedule(input: FocusV2Config): {
 
     if (roundNumber < config.roundCount) {
       const isLongBreak = roundNumber % config.longBreakEvery === 0;
-      const breakMinutes = isLongBreak
-        ? config.longBreakMinutes
-        : config.shortBreakMinutes;
+      const breakMinutes = isLongBreak ? config.longBreakMinutes : config.shortBreakMinutes;
       segments.push({
         position: 2 * roundNumber,
         roundNumber,

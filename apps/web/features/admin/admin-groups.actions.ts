@@ -54,10 +54,7 @@ export async function adminDeleteStudyGroupMessageAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while deleting message.",
+      message: error instanceof Error ? error.message : "Unexpected error while deleting message.",
     };
   }
 }
@@ -102,9 +99,7 @@ export async function adminSetStudyGroupArchivedAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating group status.",
+        error instanceof Error ? error.message : "Unexpected error while updating group status.",
     };
   }
 }

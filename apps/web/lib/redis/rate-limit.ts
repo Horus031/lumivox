@@ -32,8 +32,7 @@ export async function checkRateLimit({
         limit,
         remaining: 0,
         reset: Date.now() + 5_000,
-        message:
-          "Request protection is temporarily unavailable. Please try again shortly.",
+        message: "Request protection is temporarily unavailable. Please try again shortly.",
       };
     }
 
@@ -42,8 +41,7 @@ export async function checkRateLimit({
       limit,
       remaining: limit,
       reset: Date.now(),
-      message:
-        "Redis is not configured. Rate limiting is bypassed in this environment.",
+      message: "Redis is not configured. Rate limiting is bypassed in this environment.",
     };
   }
 
@@ -70,8 +68,7 @@ export async function checkRateLimit({
         limit,
         remaining: 0,
         reset: Date.now() + 5_000,
-        message:
-          "Request protection is temporarily unavailable. Please try again shortly.",
+        message: "Request protection is temporarily unavailable. Please try again shortly.",
       };
     }
 
@@ -80,18 +77,14 @@ export async function checkRateLimit({
       limit,
       remaining: limit,
       reset: Date.now(),
-      message:
-        "Rate limiting is temporarily unavailable and bypassed in this environment.",
+      message: "Rate limiting is temporarily unavailable and bypassed in this environment.",
     };
   }
 }
 
 export function formatRateLimitMessage(reset: number) {
   const resetDate = new Date(reset);
-  const seconds = Math.max(
-    1,
-    Math.ceil((resetDate.getTime() - Date.now()) / 1000),
-  );
+  const seconds = Math.max(1, Math.ceil((resetDate.getTime() - Date.now()) / 1000));
 
   if (seconds < 60) {
     return `Too many requests. Please try again in ${seconds} second(s).`;

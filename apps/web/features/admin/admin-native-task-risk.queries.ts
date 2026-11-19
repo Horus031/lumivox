@@ -5,9 +5,7 @@ import { requireAdmin } from "@/features/admin/admin-auth";
 export async function getAdminNativeTaskRiskMetrics() {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_get_native_task_risk_metrics"
-  );
+  const { data, error } = await supabase.rpc("admin_get_native_task_risk_metrics");
 
   if (error) {
     throw new Error(`Failed to load native task risk metrics: ${error.message}`);
@@ -19,9 +17,7 @@ export async function getAdminNativeTaskRiskMetrics() {
 export async function getAdminNativeTaskRiskModelVersions() {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_get_native_task_risk_model_versions"
-  );
+  const { data, error } = await supabase.rpc("admin_get_native_task_risk_model_versions");
 
   if (error) {
     throw new Error(`Failed to load native task risk models: ${error.message}`);
@@ -39,41 +35,29 @@ export async function searchAdminNativeTaskRiskPredictions({
 }) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_search_native_task_risk_predictions",
-    {
-      p_query: query,
-      p_risk_band: riskBand,
-      p_limit: 50,
-      p_offset: 0,
-    }
-  );
+  const { data, error } = await supabase.rpc("admin_search_native_task_risk_predictions", {
+    p_query: query,
+    p_risk_band: riskBand,
+    p_limit: 50,
+    p_offset: 0,
+  });
 
   if (error) {
-    throw new Error(
-      `Failed to search native task risk predictions: ${error.message}`
-    );
+    throw new Error(`Failed to search native task risk predictions: ${error.message}`);
   }
 
   return data ?? [];
 }
 
-export async function getAdminNativeTaskRiskPredictionDetail(
-  predictionId: string
-) {
+export async function getAdminNativeTaskRiskPredictionDetail(predictionId: string) {
   const { supabase } = await requireAdmin();
 
-  const { data, error } = await supabase.rpc(
-    "admin_get_native_task_risk_prediction_detail",
-    {
-      p_prediction_id: predictionId,
-    }
-  );
+  const { data, error } = await supabase.rpc("admin_get_native_task_risk_prediction_detail", {
+    p_prediction_id: predictionId,
+  });
 
   if (error) {
-    throw new Error(
-      `Failed to load native task risk prediction detail: ${error.message}`
-    );
+    throw new Error(`Failed to load native task risk prediction detail: ${error.message}`);
   }
 
   const prediction = data?.[0] ?? null;

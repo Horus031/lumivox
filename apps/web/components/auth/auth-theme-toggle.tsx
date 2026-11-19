@@ -9,9 +9,15 @@ export function AuthThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
   const t = useTranslations("auth.shell");
   return (
-    <Button type="button" variant="ghost" size="icon" className="auth-theme-toggle"
-      title={t("toggleTheme")} aria-label={t("toggleTheme")}
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
+    <Button
+      type="button"
+      variant="ghost"
+      size="icon"
+      className="auth-theme-toggle"
+      title={t("toggleTheme")}
+      aria-label={t("toggleTheme")}
+      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+    >
       <Moon className="dark:hidden" aria-hidden="true" />
       <Sun className="hidden dark:block" aria-hidden="true" />
     </Button>

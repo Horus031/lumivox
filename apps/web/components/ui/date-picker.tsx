@@ -27,7 +27,18 @@ type DatePickerProps = {
 };
 
 /** Shared local-date field. Dates stay in local time; callers own date/time serialization. */
-export function DatePicker({ id, label, value, onChange, disabled, required = false, placeholder, minDate, maxDate, className }: DatePickerProps) {
+export function DatePicker({
+  id,
+  label,
+  value,
+  onChange,
+  disabled,
+  required = false,
+  placeholder,
+  minDate,
+  maxDate,
+  className,
+}: DatePickerProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
   const locale = useLocale();
@@ -52,33 +63,112 @@ export function DatePicker({ id, label, value, onChange, disabled, required = fa
   return (
     <div className={cn("min-w-0 space-y-2", className)}>
       <Label htmlFor={fieldId}>{label}</Label>
-      <Popover open={open && !disabled} onOpenChange={(nextOpen) => {
-        if (nextOpen) setMonth(value ?? today);
-        setOpen(nextOpen);
-      }}>
+      <Popover
+        open={open && !disabled}
+        onOpenChange={(nextOpen) => {
+          if (nextOpen) setMonth(value ?? today);
+          setOpen(nextOpen);
+        }}
+      >
         <PopoverTrigger asChild>
-          <Button ref={trigger} id={fieldId} type="button" variant="outline" disabled={disabled}
-            aria-label={`${label}: ${value ? new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(value) : placeholder ?? t("placeholder")}`}
-            className={cn("w-full justify-start gap-2 font-normal", !value && "text-muted-foreground")}>
+          <Button
+            ref={trigger}
+            id={fieldId}
+            type="button"
+            variant="outline"
+            disabled={disabled}
+            aria-label={`${label}: ${value ? new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(value) : (placeholder ?? t("placeholder"))}`}
+            className={cn(
+              "w-full justify-start gap-2 font-normal",
+              !value && "text-muted-foreground",
+            )}
+          >
             <CalendarDays className="shrink-0 text-muted-foreground" aria-hidden="true" />
-            <span className="min-w-0 truncate">{value ? new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", day: "numeric" }).format(value) : placeholder ?? t("placeholder")}</span>
+            <span className="min-w-0 truncate">
+              {value
+                ? new Intl.DateTimeFormat(locale, {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  }).format(value)
+                : (placeholder ?? t("placeholder"))}
+            </span>
           </Button>
         </PopoverTrigger>
-        <PopoverContent align="start" aria-label={label} className="w-auto max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border-border p-0 shadow-xl">
-          <Calendar mode="single" selected={value} month={month} onMonthChange={setMonth}
-            locale={locale === "vi" ? vi : enUS} captionLayout="dropdown" navLayout="after" fixedWeeks
-            startMonth={startMonth} endMonth={endMonth} disabled={unavailable} required={required}
-            labels={{ labelMonthDropdown: () => t("month"), labelYearDropdown: () => t("year"), labelPrevious: () => t("previousMonth"), labelNext: () => t("nextMonth") }}
-            formatters={{ formatMonthDropdown: (date) => new Intl.DateTimeFormat(locale, { month: "short" }).format(date) }}
-            onSelect={select} autoFocus className="[--cell-size:2.25rem] sm:[--cell-size:2.5rem]" />
+        <PopoverContent
+          align="start"
+          aria-label={label}
+          className="w-auto max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border-border p-0 shadow-xl"
+        >
+          <Calendar
+            mode="single"
+            selected={value}
+            month={month}
+            onMonthChange={setMonth}
+            locale={locale === "vi" ? vi : enUS}
+            captionLayout="dropdown"
+            navLayout="after"
+            fixedWeeks
+            startMonth={startMonth}
+            endMonth={endMonth}
+            disabled={unavailable}
+            required={required}
+            labels={{
+              labelMonthDropdown: () => t("month"),
+              labelYearDropdown: () => t("year"),
+              labelPrevious: () => t("previousMonth"),
+              labelNext: () => t("nextMonth"),
+            }}
+            formatters={{
+              formatMonthDropdown: (date) =>
+                new Intl.DateTimeFormat(locale, { month: "short" }).format(date),
+            }}
+            onSelect={select}
+            autoFocus
+            className="[--cell-size:2.25rem] sm:[--cell-size:2.5rem]"
+          />
           <div className="flex items-center justify-between gap-3 border-t border-border bg-muted/30 p-2">
-            <Button type="button" variant="ghost" size="sm" disabled={unavailable(today)} onClick={() => select(today)}>{t("today")}</Button>
-            {!required ? <Button type="button" variant="ghost" size="sm" disabled={!value} onClick={() => select(undefined)} className="text-muted-foreground">{t("clear")}</Button> : null}
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              disabled={unavailable(today)}
+              onClick={() => select(today)}
+            >
+              {t("today")}
+            </Button>
+            {!required ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={!value}
+                onClick={() => select(undefined)}
+                className="text-muted-foreground"
+              >
+                {t("clear")}
+              </Button>
+            ) : null}
           </div>
         </PopoverContent>
       </Popover>
-      {required ? <input type="text" required disabled={disabled} value={formatLocalDate(value)} onChange={() => {}} tabIndex={-1} aria-hidden="true" className="sr-only"
-        onInvalid={(event) => { event.preventDefault(); trigger.current?.focus(); setOpen(true); }} /> : null}
+      {required ? (
+        <input
+          type="text"
+          required
+          disabled={disabled}
+          value={formatLocalDate(value)}
+          onChange={() => {}}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="sr-only"
+          onInvalid={(event) => {
+            event.preventDefault();
+            trigger.current?.focus();
+            setOpen(true);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

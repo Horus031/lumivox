@@ -17,7 +17,11 @@ export async function logFocusV2DistractionAction(
   }
   const parsed = logFocusV2DistractionSchema.safeParse(input);
   if (!parsed.success) {
-    return { success: false, message: "Invalid distraction data.", fieldErrors: parsed.error.flatten().fieldErrors };
+    return {
+      success: false,
+      message: "Invalid distraction data.",
+      fieldErrors: parsed.error.flatten().fieldErrors,
+    };
   }
   try {
     const { supabase, user } = await requireUser();
@@ -41,7 +45,8 @@ export async function logFocusV2DistractionAction(
       .in("status", ["running", "paused"])
       .maybeSingle();
     if (segmentError) return { success: false, message: "Could not verify the focus round." };
-    if (!focus) return { success: false, message: "Distractions can only be logged during a focus round." };
+    if (!focus)
+      return { success: false, message: "Distractions can only be logged during a focus round." };
 
     const { error } = await supabase.from("distraction_events").insert({
       user_id: user.id,

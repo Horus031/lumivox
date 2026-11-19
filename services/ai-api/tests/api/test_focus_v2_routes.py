@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from postgrest.exceptions import APIError
 from app.main import app
 from app.core.config import settings
 from app.api.routes import focus_v2
@@ -48,3 +49,20 @@ def test_bad_input_rejected_before_service(monkeypatch):
         "action": "delete_everything",
     }, headers={"x-lumivox-internal-key": settings.ai_internal_api_key})
     assert response.status_code == 422
+
+
+def test_study_launch_conflict_emits_only_a_known_outcome(monkeypatch, caplog):
+    def conflict(_payload):
+        raise APIError({"code": "PT423", "message": f"private database diagnostic for {USER}"})
+
+    monkeypatch.setattr(focus_v2, "create_study_focus", conflict)
+    response = client.post("/api/v1/focus-v2/create-from-study-session", json={
+        "user_id": USER, "study_session_id": SESSION, "launch_request_id": SEGMENT,
+        "focus_minutes": 25, "short_break_minutes": 5, "long_break_minutes": 15,
+        "round_count": 4, "long_break_every": 4, "auto_start_breaks": False, "auto_start_focus": False,
+    }, headers={"x-lumivox-internal-key": settings.ai_internal_api_key})
+    assert response.status_code == 423
+    assert response.json() == {"detail": "activeFocusConflict"}
+    assert "study_focus_launch_conflict outcome=activeFocusConflict" in caplog.messages
+    assert USER not in caplog.text
+    assert "private database diagnostic" not in caplog.text

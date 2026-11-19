@@ -1,4 +1,4 @@
 {
-    "materialkv.pythonFile": "main.py",
-    "python-envs.defaultEnvManager": "ms-python.python:system"
+  "materialkv.pythonFile": "main.py",
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

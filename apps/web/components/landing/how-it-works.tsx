@@ -3,9 +3,7 @@ import { useTranslations } from "next-intl";
 import { steps } from "@/lib/constants";
 
 import LearningJourneyController from "./story/learning-journey-controller";
-import JourneyVisualStage, {
-  JourneyIllustration,
-} from "./story/journey-visual-stage";
+import JourneyVisualStage, { JourneyIllustration } from "./story/journey-visual-stage";
 
 export default function HowItWorks() {
   const t = useTranslations("landing.howItWorks");
@@ -35,11 +33,7 @@ export default function HowItWorks() {
               const Icon = step.icon;
 
               return (
-                <article
-                  key={step.key}
-                  data-journey-step={step.key}
-                  className="journey-chapter"
-                >
+                <article key={step.key} data-journey-step={step.key} className="journey-chapter">
                   <div className="journey-chapter__meta">
                     <span>{step.n}</span>
                     <span className="journey-chapter__rule" />

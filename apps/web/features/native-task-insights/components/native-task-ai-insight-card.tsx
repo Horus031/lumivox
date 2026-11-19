@@ -8,9 +8,7 @@ type NativeTaskAiInsightCardProps = {
   card: NativeTaskAiInsightCardWithAssessment;
 };
 
-function getRiskBadgeClass(
-  band: "low" | "moderate" | "elevated" | "high" | undefined,
-) {
+function getRiskBadgeClass(band: "low" | "moderate" | "elevated" | "high" | undefined) {
   if (band === "high") {
     return "bg-red-100 text-red-800";
   }
@@ -35,18 +33,14 @@ function formatDate(value: string | null | undefined) {
   }).format(new Date(value));
 }
 
-export function NativeTaskAiInsightCard({
-  card,
-}: NativeTaskAiInsightCardProps) {
+export function NativeTaskAiInsightCard({ card }: NativeTaskAiInsightCardProps) {
   const assessment = card.native_task_risk_assessments;
   const task = assessment?.tasks;
 
-  const evidence =
-    (card.evidence as NativeTaskInsightEvidenceItem[] | null) ?? [];
+  const evidence = (card.evidence as NativeTaskInsightEvidenceItem[] | null) ?? [];
 
   const recommendedActions =
-    (card.recommended_actions as NativeTaskInsightRecommendedAction[] | null) ??
-    [];
+    (card.recommended_actions as NativeTaskInsightRecommendedAction[] | null) ?? [];
 
   return (
     <article className="rounded-[28px] border border-border/70 bg-card/90 p-6 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
@@ -71,12 +65,8 @@ export function NativeTaskAiInsightCard({
           <p className="mt-3 text-foreground/75">{card.summary}</p>
 
           <div className="mt-4 rounded-2xl border border-border/70 bg-secondary/35 p-4">
-            <p className="text-sm font-semibold text-muted-foreground">
-              Interpretation
-            </p>
-            <p className="mt-2 text-sm leading-6 text-foreground/75">
-              {card.risk_interpretation}
-            </p>
+            <p className="text-sm font-semibold text-muted-foreground">Interpretation</p>
+            <p className="mt-2 text-sm leading-6 text-foreground/75">{card.risk_interpretation}</p>
           </div>
         </div>
 
@@ -85,9 +75,7 @@ export function NativeTaskAiInsightCard({
 
           <p className="mt-2 font-semibold text-foreground">{task?.title ?? "Unknown task"}</p>
 
-          <p className="mt-2 text-sm text-muted-foreground">
-            Due: {formatDate(task?.due_at)}
-          </p>
+          <p className="mt-2 text-sm text-muted-foreground">Due: {formatDate(task?.due_at)}</p>
 
           <p className="mt-1 text-sm capitalize text-muted-foreground">
             Priority: {task?.priority ?? "unknown"}
@@ -104,9 +92,7 @@ export function NativeTaskAiInsightCard({
       <details className="group mt-6 rounded-[24px] border border-border/70 bg-secondary/20 p-4">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none">
           <div>
-            <h4 className="text-lg font-semibold text-foreground">
-              Evidence and actions
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">Evidence and actions</h4>
             <p className="mt-1 text-sm text-muted-foreground">
               Task-specific evidence and recommended next steps.
             </p>
@@ -144,11 +130,12 @@ export function NativeTaskAiInsightCard({
 
             <div className="mt-4 space-y-3">
               {recommendedActions.map((item) => (
-                <div key={item.action} className="rounded-xl border border-border/70 bg-secondary/25 p-4">
+                <div
+                  key={item.action}
+                  className="rounded-xl border border-border/70 bg-secondary/25 p-4"
+                >
                   <p className="font-medium text-foreground">{item.action}</p>
-                  <p className="mt-2 text-sm leading-6 text-foreground/75">
-                    {item.rationale}
-                  </p>
+                  <p className="mt-2 text-sm leading-6 text-foreground/75">{item.rationale}</p>
                 </div>
               ))}
             </div>
@@ -157,12 +144,8 @@ export function NativeTaskAiInsightCard({
       </details>
 
       <div className="mt-6 rounded-2xl border border-dashed border-border/70 p-4">
-        <p className="text-sm font-semibold text-foreground">
-          Confidence note
-        </p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {card.confidence_note}
-        </p>
+        <p className="text-sm font-semibold text-foreground">Confidence note</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.confidence_note}</p>
       </div>
 
       <footer className="mt-5 flex flex-col justify-between gap-2 border-t border-border/70 pt-4 text-xs text-muted-foreground md:flex-row md:items-center">
@@ -171,8 +154,7 @@ export function NativeTaskAiInsightCard({
         </p>
 
         <p>
-          Prompt: {card.prompt_version} · Schema:{" "}
-          {card.structured_output_schema_version}
+          Prompt: {card.prompt_version} · Schema: {card.structured_output_schema_version}
         </p>
       </footer>
     </article>

@@ -203,17 +203,11 @@ Giữ nguyên translations:
 
 ```tsx
 <header className="evidence-chamber__heading">
-  <p className="evidence-chamber__eyebrow">
-    {t("eyebrow")}
-  </p>
+  <p className="evidence-chamber__eyebrow">{t("eyebrow")}</p>
 
-  <h2>
-    {t("title")}
-  </h2>
+  <h2>{t("title")}</h2>
 
-  <p className="evidence-chamber__description">
-    {t("description")}
-  </p>
+  <p className="evidence-chamber__description">{t("description")}</p>
 </header>
 ```
 
@@ -221,20 +215,14 @@ CSS:
 
 ```css
 .evidence-chamber {
-  padding-block:
-    clamp(7rem, 12vw, 11rem);
+  padding-block: clamp(7rem, 12vw, 11rem);
 
-  background:
-    linear-gradient(
-      180deg,
-      var(--background),
-      color-mix(
-        in oklab,
-        var(--landing-forest) 4%,
-        var(--background)
-      ) 48%,
-      var(--background)
-    );
+  background: linear-gradient(
+    180deg,
+    var(--background),
+    color-mix(in oklab, var(--landing-forest) 4%, var(--background)) 48%,
+    var(--background)
+  );
 }
 
 .evidence-chamber__heading {
@@ -246,8 +234,7 @@ CSS:
 .evidence-chamber__heading h2 {
   margin-top: 0.75rem;
 
-  font-size:
-    clamp(2.4rem, 5vw, 4.8rem);
+  font-size: clamp(2.4rem, 5vw, 4.8rem);
 
   font-weight: 600;
   line-height: 0.98;
@@ -275,14 +262,11 @@ CSS:
 .evidence-orbit {
   position: relative;
 
-  width:
-    min(64rem, calc(100vw - 3rem));
+  width: min(64rem, calc(100vw - 3rem));
 
   aspect-ratio: 16 / 9;
 
-  margin:
-    clamp(4rem, 8vw, 7rem)
-    auto 0;
+  margin: clamp(4rem, 8vw, 7rem) auto 0;
 }
 ```
 
@@ -300,15 +284,9 @@ Field:
 
   border-radius: 50%;
 
-  background:
-    radial-gradient(
-      circle,
-      rgb(51 125 77 / 0.08),
-      transparent 66%
-    );
+  background: radial-gradient(circle, rgb(51 125 77 / 0.08), transparent 66%);
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 }
 ```
 
@@ -317,10 +295,7 @@ Field:
 # 5. Central model core
 
 ```tsx
-<div
-  aria-hidden="true"
-  className="evidence-orbit__core"
->
+<div aria-hidden="true" className="evidence-orbit__core">
   <span>MODEL</span>
   <strong>v2</strong>
 </div>
@@ -339,22 +314,15 @@ Field:
   width: 112px;
   aspect-ratio: 1;
 
-  border:
-    1px solid rgb(51 125 77 / 0.16);
+  border: 1px solid rgb(51 125 77 / 0.16);
 
   border-radius: 50%;
 
-  background:
-    color-mix(
-      in oklab,
-      var(--background) 88%,
-      transparent
-    );
+  background: color-mix(in oklab, var(--background) 88%, transparent);
 
   text-align: center;
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 
   box-shadow:
     0 0 0 18px rgb(51 125 77 / 0.025),
@@ -390,20 +358,12 @@ Field:
 Markup:
 
 ```tsx
-<div
-  key={item.key}
-  data-evidence-position={index}
-  className="evidence-metric"
->
+<div key={item.key} data-evidence-position={index} className="evidence-metric">
   <dd>{item.value}</dd>
 
-  <dt>
-    {t(`metrics.${item.key}.label`)}
-  </dt>
+  <dt>{t(`metrics.${item.key}.label`)}</dt>
 
-  <p>
-    {t(`metrics.${item.key}.description`)}
-  </p>
+  <p>{t(`metrics.${item.key}.description`)}</p>
 </div>
 ```
 
@@ -419,8 +379,7 @@ CSS:
 }
 
 .evidence-metric dd {
-  font-size:
-    clamp(2rem, 4vw, 3.8rem);
+  font-size: clamp(2rem, 4vw, 3.8rem);
 
   font-weight: 600;
 
@@ -494,12 +453,7 @@ Chỉ static hairlines:
 
   fill: none;
 
-  stroke:
-    color-mix(
-      in oklab,
-      var(--landing-emerald) 15%,
-      transparent
-    );
+  stroke: color-mix(in oklab, var(--landing-emerald) 15%, transparent);
 
   stroke-width: 1;
 }
@@ -544,13 +498,7 @@ CSS:
 
   padding-top: 1.5rem;
 
-  border-top:
-    1px solid
-    color-mix(
-      in oklab,
-      var(--foreground) 9%,
-      transparent
-    );
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
 }
 
 .evidence-chamber__source > div {
@@ -594,8 +542,7 @@ Không orbit positioning trên mobile.
   .evidence-orbit__metrics {
     display: grid;
 
-    grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 2.5rem 1.5rem;
   }
@@ -707,16 +654,9 @@ bg-elevated/40
 
 ```css
 .transparent-core {
-  padding-block:
-    clamp(7rem, 11vw, 10rem);
+  padding-block: clamp(7rem, 11vw, 10rem);
 
-  background:
-    linear-gradient(
-      180deg,
-      transparent,
-      rgb(25 65 38 / 0.035),
-      transparent
-    );
+  background: linear-gradient(180deg, transparent, rgb(25 65 38 / 0.035), transparent);
 }
 
 .transparent-core__heading {
@@ -724,8 +664,7 @@ bg-elevated/40
 }
 
 .transparent-core__heading h2 {
-  font-size:
-    clamp(2.4rem, 5vw, 4.7rem);
+  font-size: clamp(2.4rem, 5vw, 4.7rem);
 
   font-weight: 600;
 
@@ -748,12 +687,7 @@ apps/web/components/landing/story/trust-pipeline.tsx
 Không cần `"use client"`.
 
 ```tsx
-import {
-  BrainCircuit,
-  Database,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { BrainCircuit, Database, ShieldCheck, UserRound } from "lucide-react";
 
 const stages = [
   {
@@ -775,22 +709,14 @@ const stages = [
 
 export default function TrustPipeline() {
   return (
-    <div
-      aria-hidden="true"
-      className="trust-pipeline"
-    >
+    <div aria-hidden="true" className="trust-pipeline">
       {stages.map(({ key, label, icon: Icon }) => (
-        <div
-          key={key}
-          className="trust-pipeline__stage"
-        >
+        <div key={key} className="trust-pipeline__stage">
           <span className="trust-pipeline__node">
             <Icon />
           </span>
 
-          <span className="trust-pipeline__label">
-            {label}
-          </span>
+          <span className="trust-pipeline__label">{label}</span>
         </div>
       ))}
 
@@ -834,14 +760,13 @@ Mình nghiêng về **bỏ labels** hoặc chỉ dùng `01/02/03`.
 
   width: 1px;
 
-  background:
-    linear-gradient(
-      to bottom,
-      transparent,
-      rgb(51 125 77 / 0.24) 18%,
-      rgb(51 125 77 / 0.24) 82%,
-      transparent
-    );
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgb(51 125 77 / 0.24) 18%,
+    rgb(51 125 77 / 0.24) 82%,
+    transparent
+  );
 
   transform: translateX(-50%);
 }
@@ -863,8 +788,7 @@ Mình nghiêng về **bỏ labels** hoặc chỉ dùng `01/02/03`.
   width: 72px;
   aspect-ratio: 1;
 
-  border:
-    1px solid rgb(51 125 77 / 0.14);
+  border: 1px solid rgb(51 125 77 / 0.14);
 
   border-radius: 50%;
 
@@ -872,13 +796,7 @@ Mình nghiêng về **bỏ labels** hoặc chỉ dùng `01/02/03`.
 
   color: var(--landing-emerald);
 
-  box-shadow:
-    0 0 0 10px
-    color-mix(
-      in oklab,
-      var(--landing-emerald) 3%,
-      transparent
-    );
+  box-shadow: 0 0 0 10px color-mix(in oklab, var(--landing-emerald) 3%, transparent);
 }
 
 .trust-pipeline__node svg {
@@ -890,10 +808,8 @@ Mình nghiêng về **bỏ labels** hoặc chỉ dùng `01/02/03`.
 Last node/user có thể mạnh hơn:
 
 ```css
-.trust-pipeline__stage:last-of-type
-.trust-pipeline__node {
-  border-color:
-    rgb(51 125 77 / 0.28);
+.trust-pipeline__stage:last-of-type .trust-pipeline__node {
+  border-color: rgb(51 125 77 / 0.28);
 
   box-shadow:
     0 0 0 12px rgb(51 125 77 / 0.04),
@@ -910,28 +826,18 @@ Thay 2×2 card grid bằng vertical statements.
 ```tsx
 <div className="transparent-core__principles">
   {items.map(({ key, icon: Icon }, index) => (
-    <article
-      key={key}
-      className="trust-principle"
-    >
-      <span
-        aria-hidden="true"
-        className="trust-principle__index"
-      >
+    <article key={key} className="trust-principle">
+      <span aria-hidden="true" className="trust-principle__index">
         {String(index + 1).padStart(2, "0")}
       </span>
 
       <div>
         <div className="trust-principle__title">
           <Icon aria-hidden="true" />
-          <h3>
-            {t(`items.${key}.title`)}
-          </h3>
+          <h3>{t(`items.${key}.title`)}</h3>
         </div>
 
-        <p>
-          {t(`items.${key}.description`)}
-        </p>
+        <p>{t(`items.${key}.description`)}</p>
       </div>
     </article>
   ))}
@@ -956,20 +862,13 @@ CSS:
 .trust-principle {
   display: grid;
 
-  grid-template-columns:
-    2rem 1fr;
+  grid-template-columns: 2rem 1fr;
 
   gap: 1.25rem;
 
   padding-block: 2rem;
 
-  border-bottom:
-    1px solid
-    color-mix(
-      in oklab,
-      var(--foreground) 8%,
-      transparent
-    );
+  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 
 .trust-principle__index {
@@ -1065,9 +964,7 @@ CSS:
   width: 15px;
   height: 15px;
 
-  transition:
-    transform 300ms
-    var(--landing-ease-out);
+  transition: transform 300ms var(--landing-ease-out);
 }
 
 .transparent-core__cta:hover svg {
@@ -1095,12 +992,7 @@ Thêm cuối Evidence:
   width: 1px;
   height: 5rem;
 
-  background:
-    linear-gradient(
-      to bottom,
-      transparent,
-      rgb(51 125 77 / 0.16)
-    );
+  background: linear-gradient(to bottom, transparent, rgb(51 125 77 / 0.16));
 }
 ```
 
@@ -1122,11 +1014,9 @@ Trust:
 
   background: var(--landing-emerald);
 
-  transform:
-    translate(-50%, -50%);
+  transform: translate(-50%, -50%);
 
-  box-shadow:
-    0 0 18px rgb(51 125 77 / 0.22);
+  box-shadow: 0 0 18px rgb(51 125 77 / 0.22);
 }
 ```
 
@@ -1166,13 +1056,7 @@ Trust:
 
     transform: none;
 
-    background:
-      linear-gradient(
-        to right,
-        transparent,
-        rgb(51 125 77 / 0.22),
-        transparent
-      );
+    background: linear-gradient(to right, transparent, rgb(51 125 77 / 0.22), transparent);
   }
 
   .trust-pipeline__node {
@@ -1218,7 +1102,7 @@ Làm ở đầu commit Phase 6:
 Analytics chapter:
 
 ```tsx
-data-active
+data - active;
 ```
 
 Analytics desktop visual:
@@ -1237,7 +1121,7 @@ Controller vẫn giữ logic cũ.
 Không sửa:
 
 ```ts
-apps/web/lib/marketing/evidence.ts
+apps / web / lib / marketing / evidence.ts;
 ```
 
 Không làm tròn lại:
@@ -1268,19 +1152,19 @@ Chúng sẽ vượt quá evidence hiện có.
 
 ## Phase 6 acceptance gate
 
-| Gate | Requirement |
-|---|---|
-| Research | Không còn four-column bordered metric grid |
-| Metrics | 70,379 / 6,643 / 76.9% / 0.751 giữ nguyên |
-| Claims | Vẫn nói rõ held-out evaluation, không student-outcome claim |
-| Evidence visual | Scientific/orbital, không dashboard cards |
-| Trust | Không còn 2×2 card grid |
-| Transparency | Có data → AI → user/control visual hierarchy |
-| Copy | Không đổi trust/research translations |
-| CTA | `/research` và `/privacy` vẫn tồn tại |
-| SSR | Toàn bộ metric/trust copy vẫn server-rendered |
-| JS | Không thêm controller nếu không cần |
-| Mobile | Orbit trở thành readable 2×2; pipeline horizontal |
-| A11y | Decorative diagrams `aria-hidden` |
-| Product cleanup | Analytics visible ngay cả trước hydration |
-| Build | lint/test/build pass |
+| Gate            | Requirement                                                 |
+| --------------- | ----------------------------------------------------------- |
+| Research        | Không còn four-column bordered metric grid                  |
+| Metrics         | 70,379 / 6,643 / 76.9% / 0.751 giữ nguyên                   |
+| Claims          | Vẫn nói rõ held-out evaluation, không student-outcome claim |
+| Evidence visual | Scientific/orbital, không dashboard cards                   |
+| Trust           | Không còn 2×2 card grid                                     |
+| Transparency    | Có data → AI → user/control visual hierarchy                |
+| Copy            | Không đổi trust/research translations                       |
+| CTA             | `/research` và `/privacy` vẫn tồn tại                       |
+| SSR             | Toàn bộ metric/trust copy vẫn server-rendered               |
+| JS              | Không thêm controller nếu không cần                         |
+| Mobile          | Orbit trở thành readable 2×2; pipeline horizontal           |
+| A11y            | Decorative diagrams `aria-hidden`                           |
+| Product cleanup | Analytics visible ngay cả trước hydration                   |
+| Build           | lint/test/build pass                                        |

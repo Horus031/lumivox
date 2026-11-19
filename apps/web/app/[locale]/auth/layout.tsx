@@ -8,10 +8,6 @@ export const metadata: Metadata = {
   },
 };
 
-export default function LocalizedAuthLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function LocalizedAuthLayout({ children }: { children: React.ReactNode }) {
   return <AuthShell>{children}</AuthShell>;
 }

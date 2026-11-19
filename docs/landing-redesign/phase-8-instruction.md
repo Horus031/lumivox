@@ -14,28 +14,21 @@ Phase này **không thêm visual effect mới**. Mục tiêu là chứng minh la
 
 Baseline chính thức để so sánh vẫn là Phase 0:
 
-| Route | Device | Perf | LCP | CLS | TBT |
-|---|---|---:|---:|---:|---:|
-| `/en` | Mobile | 95 | 3.0s | 0 | 50ms |
-| `/en` | Desktop | 92 | 1.2s | 0 | 190ms |
-| `/vi` | Mobile | 74 | 4.9s | 0 | 170ms |
-| `/vi` | Desktop | 98 | 0.6s | 0.001 | 140ms |
+| Route | Device  | Perf |  LCP |   CLS |   TBT |
+| ----- | ------- | ---: | ---: | ----: | ----: |
+| `/en` | Mobile  |   95 | 3.0s |     0 |  50ms |
+| `/en` | Desktop |   92 | 1.2s |     0 | 190ms |
+| `/vi` | Mobile  |   74 | 4.9s |     0 | 170ms |
+| `/vi` | Desktop |   98 | 0.6s | 0.001 | 140ms |
 
 Đặc biệt `/vi` mobile vẫn là route cần bảo vệ nhất.
 
 1. **Fix `StoryReveal` để no-JS luôn readable.** Hiện tại `initial={{ opacity: 0, y: distance }}` là rủi ro lớn nhất. Trong hardening phase, mình khuyến nghị ưu tiên robustness hơn generic fade-up: đổi `StoryReveal` thành `initial={false}` và bỏ trạng thái visually-hidden trước hydration. Nếu muốn giữ component để không phải sửa imports hàng loạt:
 
 ```tsx
-export default function StoryReveal({
-  children,
-  className,
-}: StoryRevealProps) {
+export default function StoryReveal({ children, className }: StoryRevealProps) {
   return (
-    <motion.div
-      data-landing-motion="decorative"
-      className={className}
-      initial={false}
-    >
+    <motion.div data-landing-motion="decorative" className={className} initial={false}>
       {children}
     </motion.div>
   );
@@ -144,7 +137,7 @@ document.querySelector(...)
 dùng:
 
 ```tsx
-root.querySelector<HTMLVideoElement>("[data-hero-video]")
+root.querySelector<HTMLVideoElement>("[data-hero-video]");
 ```
 
 4. **Harden `StoryAtmosphere` observer.** Đây là technical debt mình đã nhắc từ Phase 1. Nó vẫn chỉ sort `entries` của callback hiện tại, không phải toàn bộ sections đang visible. Journey/Product/Intelligence đã dùng persistent visibility map đúng cách; hãy đưa Atmosphere về cùng pattern:
@@ -162,13 +155,11 @@ const observer = new IntersectionObserver(
       }
     });
 
-    const active = [...visible.entries()]
-      .sort(
-        (a, b) =>
-          b[1] - a[1] ||
-          sections.indexOf(a[0] as HTMLElement) -
-            sections.indexOf(b[0] as HTMLElement),
-      )[0]?.[0] as HTMLElement | undefined;
+    const active = [...visible.entries()].sort(
+      (a, b) =>
+        b[1] - a[1] ||
+        sections.indexOf(a[0] as HTMLElement) - sections.indexOf(b[0] as HTMLElement),
+    )[0]?.[0] as HTMLElement | undefined;
 
     const scene = active?.dataset.landingScene;
 
@@ -249,9 +240,7 @@ for (const route of routes) {
     await expect(page.locator("#faq")).toBeVisible();
 
     const overflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth,
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
 
     expect(overflow).toBeLessThanOrEqual(1);
@@ -268,9 +257,7 @@ for (const route of routes) {
     await expect(page.locator("h1")).toBeVisible();
 
     const overflow = await page.evaluate(
-      () =>
-        document.documentElement.scrollWidth -
-        document.documentElement.clientWidth,
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
 
     expect(overflow).toBeLessThanOrEqual(1);
@@ -289,18 +276,14 @@ test("FAQ works with keyboard", async ({ page }) => {
   await summary.focus();
   await page.keyboard.press("Enter");
 
-  await expect(
-    page.locator("#faq details").first(),
-  ).toHaveAttribute("open", "");
+  await expect(page.locator("#faq details").first()).toHaveAttribute("open", "");
 });
 ```
 
 No-JS test là gate quan trọng nhất:
 
 ```tsx
-test("critical landing content remains visible without JS", async ({
-  browser,
-}) => {
+test("critical landing content remains visible without JS", async ({ browser }) => {
   const context = await browser.newContext({
     javaScriptEnabled: false,
     viewport: {
@@ -316,9 +299,7 @@ test("critical landing content remains visible without JS", async ({
   await expect(page.locator("h1")).toBeVisible();
   await expect(page.locator("#features h2")).toBeVisible();
   await expect(page.locator("#evidence h2")).toBeVisible();
-  await expect(
-    page.locator("[data-landing-scene='convergence'] h2"),
-  ).toBeVisible();
+  await expect(page.locator("[data-landing-scene='convergence'] h2")).toBeVisible();
 
   await context.close();
 });
@@ -338,9 +319,7 @@ test("reduced motion keeps landing readable", async ({ page }) => {
 
   const video = page.locator("[data-hero-video]");
 
-  const currentSrc = await video.evaluate(
-    (element: HTMLVideoElement) => element.currentSrc,
-  );
+  const currentSrc = await video.evaluate((element: HTMLVideoElement) => element.currentSrc);
 
   expect(currentSrc).toBe("");
 });
@@ -350,12 +329,12 @@ test("reduced motion keeps landing readable", async ({ page }) => {
 
 8. **Đo lại performance bằng cùng phương pháp Phase 0 và ghi thành Phase 8 report.** Chạy mỗi route/device ba lần và dùng median để giảm noise. Hard gate mình đề xuất như sau:
 
-| Route | Hard gate Phase 8 | Target tốt |
-|---|---|---|
-| `/en` Mobile | Perf ≥ 90, LCP ≤ 3.5s, CLS ≤ .05 | Perf ≥ 95, LCP ≤ 3.0s |
-| `/en` Desktop | Perf ≥ 87, LCP ≤ 1.7s, CLS ≤ .05 | giữ/gần baseline |
-| `/vi` Mobile | không tệ hơn 74 / 4.9s | Perf ≥ 80, LCP ≤ 4.0s |
-| `/vi` Desktop | Perf ≥ 93, LCP ≤ 1.1s | giữ gần 98 / 0.6s |
+| Route         | Hard gate Phase 8                | Target tốt            |
+| ------------- | -------------------------------- | --------------------- |
+| `/en` Mobile  | Perf ≥ 90, LCP ≤ 3.5s, CLS ≤ .05 | Perf ≥ 95, LCP ≤ 3.0s |
+| `/en` Desktop | Perf ≥ 87, LCP ≤ 1.7s, CLS ≤ .05 | giữ/gần baseline      |
+| `/vi` Mobile  | không tệ hơn 74 / 4.9s           | Perf ≥ 80, LCP ≤ 4.0s |
+| `/vi` Desktop | Perf ≥ 93, LCP ≤ 1.1s            | giữ gần 98 / 0.6s     |
 
 Với TBT, mình muốn **≤250ms ở tất cả bốn case**, tốt hơn nếu mobile vẫn dưới ~200ms.
 

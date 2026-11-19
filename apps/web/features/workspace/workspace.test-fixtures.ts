@@ -1,13 +1,12 @@
 import type { WorkspaceTask } from "./workspace.types";
 
-export function workspaceTask(
-  overrides: Partial<WorkspaceTask> = {},
-): WorkspaceTask {
+export function workspaceTask(overrides: Partial<WorkspaceTask> = {}): WorkspaceTask {
   return {
     id: "00000000-0000-4000-8000-000000000001",
     user_id: "00000000-0000-4000-8000-000000000002",
     goal_id: null,
     parent_task_id: null,
+    recovery_attempt_id: null,
     title: "Study task",
     description: null,
     source_roadmap_id: null,

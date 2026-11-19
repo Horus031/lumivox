@@ -15,15 +15,11 @@ type AiTranslationBatchApiResponse = {
 const AI_TRANSLATION_BATCH_SIZE = 30;
 const AI_TRANSLATION_MAX_CONCURRENT_BATCHES = 2;
 
-function normalizeSourceLocale(
-  sourceLocale: "auto" | SupportedLocale | undefined
-) {
+function normalizeSourceLocale(sourceLocale: "auto" | SupportedLocale | undefined) {
   return sourceLocale ?? "auto";
 }
 
-function createFallbackTranslation(
-  item: AiTranslationRequestItem
-): AiTranslationResponseItem {
+function createFallbackTranslation(item: AiTranslationRequestItem): AiTranslationResponseItem {
   return {
     entity_type: item.entityType,
     entity_id: item.entityId,
@@ -41,12 +37,12 @@ function createFallbackTranslation(
 function logTranslationFallback(error: unknown) {
   console.error(
     "AI translation failed; falling back to source text.",
-    error instanceof Error ? error.message : error
+    error instanceof Error ? error.message : error,
   );
 }
 
 export async function translateAiContent(
-  item: AiTranslationRequestItem
+  item: AiTranslationRequestItem,
 ): Promise<AiTranslationResponseItem> {
   const { user } = await requireUser();
 
@@ -78,7 +74,7 @@ export async function translateAiContent(
 }
 
 export async function translateAiContentBatch(
-  items: AiTranslationRequestItem[]
+  items: AiTranslationRequestItem[],
 ): Promise<AiTranslationResponseItem[]> {
   const { user } = await requireUser();
 
@@ -102,12 +98,7 @@ export async function translateAiContentBatch(
     startIndex < itemsToTranslate.length;
     startIndex += AI_TRANSLATION_BATCH_SIZE
   ) {
-    chunks.push(
-      itemsToTranslate.slice(
-        startIndex,
-        startIndex + AI_TRANSLATION_BATCH_SIZE,
-      ),
-    );
+    chunks.push(itemsToTranslate.slice(startIndex, startIndex + AI_TRANSLATION_BATCH_SIZE));
   }
 
   try {
@@ -153,7 +144,7 @@ export async function translateAiContentBatch(
     translatedItems.map((item) => [
       `${item.entity_type}:${item.entity_id}:${item.field_name}`,
       item,
-    ])
+    ]),
   );
 
   return items.map((item) => {

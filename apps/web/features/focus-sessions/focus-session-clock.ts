@@ -6,10 +6,7 @@ type LegacyClockInput = {
   status: "ongoing" | "paused" | "completed" | "cancelled";
 };
 
-export function getElapsedFocusSeconds(
-  session: LegacyClockInput,
-  now: Date = new Date(),
-): number {
+export function getElapsedFocusSeconds(session: LegacyClockInput, now: Date = new Date()): number {
   const startMs = new Date(session.started_at).getTime();
 
   // An active pause freezes elapsed focus time.
@@ -27,18 +24,9 @@ export function getRemainingFocusSeconds(
   session: LegacyClockInput,
   now: Date = new Date(),
 ): number {
-  return Math.max(
-    0,
-    session.planned_minutes * 60 - getElapsedFocusSeconds(session, now),
-  );
+  return Math.max(0, session.planned_minutes * 60 - getElapsedFocusSeconds(session, now));
 }
 
-export function getActualFocusMinutes(
-  session: LegacyClockInput,
-  now: Date = new Date(),
-): number {
-  return Math.min(
-    session.planned_minutes,
-    Math.floor(getElapsedFocusSeconds(session, now) / 60),
-  );
+export function getActualFocusMinutes(session: LegacyClockInput, now: Date = new Date()): number {
+  return Math.min(session.planned_minutes, Math.floor(getElapsedFocusSeconds(session, now) / 60));
 }

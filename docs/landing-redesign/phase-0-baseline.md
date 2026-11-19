@@ -12,12 +12,12 @@ Branch: redesign/landing-storytelling-page
 
 ## Production baseline
 
-| Route | Device | Performance | LCP | CLS | TBT | FCP |
-|---|---|---:|---:|---:|---:|---:|
-| /en | Mobile | 95 | 3.0s | 0 | 50ms | 1.1s |
-| /en | Desktop | 92 | 1.2s | 0 | 190ms | 0.3s |
-| /vi | Mobile | 74 | 4.9s | 0 | 170ms | 3.0s |
-| /vi | Desktop | 98 | 0.6s | 0.001 | 140ms | 0.3s |
+| Route | Device  | Performance |  LCP |   CLS |   TBT |  FCP |
+| ----- | ------- | ----------: | ---: | ----: | ----: | ---: |
+| /en   | Mobile  |          95 | 3.0s |     0 |  50ms | 1.1s |
+| /en   | Desktop |          92 | 1.2s |     0 | 190ms | 0.3s |
+| /vi   | Mobile  |          74 | 4.9s |     0 | 170ms | 3.0s |
+| /vi   | Desktop |          98 | 0.6s | 0.001 | 140ms | 0.3s |
 
 ## SEO invariants
 

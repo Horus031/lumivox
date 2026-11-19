@@ -15,13 +15,9 @@ const expectedApiOrigin = "https://www.lumivox.it.com";
 // Update this only when production Supabase changes.
 const expectedSupabaseOrigin = "https://lslybjylsxtnznghrtyj.supabase.co";
 
-const manifest = JSON.parse(
-  await readFile(resolve(dist, "manifest.json"), "utf8"),
-);
+const manifest = JSON.parse(await readFile(resolve(dist, "manifest.json"), "utf8"));
 
-const packageJson = JSON.parse(
-  await readFile(resolve(root, "package.json"), "utf8"),
-);
+const packageJson = JSON.parse(await readFile(resolve(root, "package.json"), "utf8"));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -29,14 +25,10 @@ function assert(condition, message) {
 
 assert(manifest.manifest_version === 3, "Manifest V3 required");
 
-assert(
-  manifest.version === packageJson.version,
-  "Manifest/package version mismatch",
-);
+assert(manifest.version === packageJson.version, "Manifest/package version mismatch");
 
 assert(
-  JSON.stringify(manifest.permissions) ===
-    JSON.stringify(["activeTab", "storage"]),
+  JSON.stringify(manifest.permissions) === JSON.stringify(["activeTab", "storage"]),
   "Unexpected required permissions",
 );
 
@@ -48,8 +40,7 @@ assert(
 const expectedHosts = [`${expectedSupabaseOrigin}/*`, `${expectedApiOrigin}/*`];
 
 assert(
-  JSON.stringify([...manifest.host_permissions].sort()) ===
-    JSON.stringify(expectedHosts.sort()),
+  JSON.stringify([...manifest.host_permissions].sort()) === JSON.stringify(expectedHosts.sort()),
   "Unexpected production host permissions",
 );
 
@@ -62,10 +53,7 @@ assert(
 for (const size of [16, 32, 48, 128]) {
   const path = manifest.icons?.[String(size)];
 
-  assert(
-    path === `icons/icon-${size}.png`,
-    `Missing icon declaration: ${size}`,
-  );
+  assert(path === `icons/icon-${size}.png`, `Missing icon declaration: ${size}`);
 
   const data = await readFile(resolve(dist, path));
 
@@ -90,10 +78,7 @@ for (const name of jsFiles) {
     "AI_INTERNAL_API_KEY",
     "ci-public-placeholder",
   ]) {
-    assert(
-      !source.includes(forbidden),
-      `Forbidden configuration marker in ${name}`,
-    );
+    assert(!source.includes(forbidden), `Forbidden configuration marker in ${name}`);
   }
 }
 
@@ -118,27 +103,18 @@ async function walk(directory) {
 
 const files = await walk(dist);
 
-assert(
-  !files.some((file) => file.endsWith(".map")),
-  "Release must not contain source maps",
-);
+assert(!files.some((file) => file.endsWith(".map")), "Release must not contain source maps");
 
 assert(
   !files.some(
-    (file) =>
-      file.includes(".env") ||
-      file.includes("node_modules") ||
-      file.includes(".git/"),
+    (file) => file.includes(".env") || file.includes("node_modules") || file.includes(".git/"),
   ),
   "Unexpected release files",
 );
 
 const background = await readFile(resolve(dist, "background.js"), "utf8");
 
-assert(
-  background.includes(expectedSupabaseOrigin),
-  "Production Supabase origin not embedded",
-);
+assert(background.includes(expectedSupabaseOrigin), "Production Supabase origin not embedded");
 
 console.log("Production release artifact verified.");
 console.log("Version:", manifest.version);

@@ -11,7 +11,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 export function CreateStudyGroupForm() {
   const router = useRouter();
@@ -53,7 +62,10 @@ export function CreateStudyGroupForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button"><Plus aria-hidden="true" />{t("create")}</Button>
+        <Button type="button">
+          <Plus aria-hidden="true" />
+          {t("create")}
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
         <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
@@ -65,24 +77,36 @@ export function CreateStudyGroupForm() {
             <div className="space-y-2">
               <Label htmlFor={`${id}-name`}>{t("fields.name")}</Label>
               <Input
-                id={`${id}-name`} value={title} onChange={(event) => setTitle(event.target.value)}
-                required minLength={2} maxLength={80} placeholder={t("placeholders.name")}
+                id={`${id}-name`}
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                required
+                minLength={2}
+                maxLength={80}
+                placeholder={t("placeholders.name")}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor={`${id}-description`}>{t("fields.description")}</Label>
               <Textarea
-                id={`${id}-description`} value={description} onChange={(event) => setDescription(event.target.value)}
-                rows={3} maxLength={500} placeholder={t("placeholders.description")}
+                id={`${id}-description`}
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                rows={3}
+                maxLength={500}
+                placeholder={t("placeholders.description")}
               />
             </div>
           </fieldset>
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline" disabled={isPending}>{t("cancel")}</Button>
+              <Button type="button" variant="outline" disabled={isPending}>
+                {t("cancel")}
+              </Button>
             </DialogClose>
             <Button type="submit" disabled={isPending}>
-              <Plus aria-hidden="true" />{isPending ? t("creating") : t("create")}
+              <Plus aria-hidden="true" />
+              {isPending ? t("creating") : t("create")}
             </Button>
           </DialogFooter>
         </form>

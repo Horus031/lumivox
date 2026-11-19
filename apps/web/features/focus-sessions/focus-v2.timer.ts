@@ -26,22 +26,37 @@ export function projectFocusV2Timer(
   nowMilliseconds: number = Date.now(),
 ): FocusV2Projection {
   const segments = [...snapshot.segments].sort((a, b) => a.position - b.position);
-  const live = segments.filter((segment) => segment.status === "running" || segment.status === "paused");
+  const live = segments.filter(
+    (segment) => segment.status === "running" || segment.status === "paused",
+  );
   const next = segments.find((segment) => segment.status === "pending") ?? null;
   const current = live[0] ?? null;
   const terminal = snapshot.session.status;
   const phase: FocusV2Projection["phase"] =
-    terminal === "completed" ? "completed" :
-    terminal === "cancelled" ? "cancelled" :
-    live.length > 1 ? "invalid" :
-    current?.status === "paused" ? "paused" :
-    current?.status === "running" ? "running" :
-    terminal === "ongoing" && next ? "awaiting_next" : "invalid";
+    terminal === "completed"
+      ? "completed"
+      : terminal === "cancelled"
+        ? "cancelled"
+        : live.length > 1
+          ? "invalid"
+          : current?.status === "paused"
+            ? "paused"
+            : current?.status === "running"
+              ? "running"
+              : terminal === "ongoing" && next
+                ? "awaiting_next"
+                : "invalid";
   const elapsedSeconds = current ? calculateFocusV2ElapsedSeconds(current, nowMilliseconds) : 0;
   const remainingSeconds = current ? Math.max(0, current.planned_seconds - elapsedSeconds) : 0;
   return {
-    phase, current, next, elapsedSeconds, remainingSeconds,
-    progressPercent: current ? Math.min(100, Math.max(0, elapsedSeconds * 100 / current.planned_seconds)) : 0,
+    phase,
+    current,
+    next,
+    elapsedSeconds,
+    remainingSeconds,
+    progressPercent: current
+      ? Math.min(100, Math.max(0, (elapsedSeconds * 100) / current.planned_seconds))
+      : 0,
     isDue: phase === "running" && remainingSeconds === 0,
   };
 }

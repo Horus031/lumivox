@@ -13,8 +13,15 @@ import { FocusV2AnalyticsView } from "./focus-v2-analytics-view";
 
 function report(days: 7 | 30) {
   return buildFocusV2AnalyticsReport({
-    sessions: [], segments: [], distractions: [], rewards: [], engagement: null,
-    taskNames: {}, startUtc: "2026-10-01T00:00:00.000Z", days, truncated: false,
+    sessions: [],
+    segments: [],
+    distractions: [],
+    rewards: [],
+    engagement: null,
+    taskNames: {},
+    startUtc: "2026-10-01T00:00:00.000Z",
+    days,
+    truncated: false,
   });
 }
 
@@ -34,15 +41,26 @@ describe("Focus analytics period selection", () => {
     container.remove();
   });
   function mount(locale: "en" | "vi" = "en") {
-    act(() => root.render(
-      <NextIntlClientProvider locale={locale} messages={locale === "en" ? en : viMessages} timeZone="UTC">
-        <FocusV2AnalyticsView initialReport={report(30)} recentSessions={<p>Session history</p>} />
-      </NextIntlClientProvider>,
-    ));
+    act(() =>
+      root.render(
+        <NextIntlClientProvider
+          locale={locale}
+          messages={locale === "en" ? en : viMessages}
+          timeZone="UTC"
+        >
+          <FocusV2AnalyticsView
+            initialReport={report(30)}
+            recentSessions={<p>Session history</p>}
+          />
+        </NextIntlClientProvider>,
+      ),
+    );
   }
-  function sevenDays() { return container.querySelector<HTMLButtonElement>("nav button")!; }
+  function sevenDays() {
+    return container.querySelector<HTMLButtonElement>("nav button")!;
+  }
 
-  it.each(["en", "vi"] as const)("resolves the details and loading messages for %s", locale => {
+  it.each(["en", "vi"] as const)("resolves the details and loading messages for %s", (locale) => {
     mount(locale);
     const messages = locale === "en" ? en : viMessages;
     expect(container.querySelector("summary")?.textContent).toBe(messages.focus.analytics.details);
@@ -52,7 +70,11 @@ describe("Focus analytics period selection", () => {
 
   it("shows a local skeleton while loading and updates without navigating the document", async () => {
     let resolve!: (value: { success: true; report: ReturnType<typeof report> }) => void;
-    mocks.load.mockReturnValue(new Promise(done => { resolve = done; }));
+    mocks.load.mockReturnValue(
+      new Promise((done) => {
+        resolve = done;
+      }),
+    );
     mount();
     const header = container.querySelector("h2");
     await act(async () => sevenDays().click());

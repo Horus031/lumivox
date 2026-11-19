@@ -4,9 +4,7 @@ const routes = ["/en", "/vi"] as const;
 
 async function expectNoHorizontalOverflow(page: Page) {
   const overflow = await page.evaluate(
-    () =>
-      document.documentElement.scrollWidth -
-      document.documentElement.clientWidth,
+    () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
   );
 
   expect(overflow).toBeLessThanOrEqual(1);
@@ -59,16 +57,10 @@ test("FAQ works with keyboard", async ({ page }) => {
   await summary.focus();
   await page.keyboard.press("Enter");
 
-  await expect(page.locator("#faq details").first()).toHaveAttribute(
-    "open",
-    "",
-  );
+  await expect(page.locator("#faq details").first()).toHaveAttribute("open", "");
 });
 
-test("critical landing content remains visible without JS", async ({
-  baseURL,
-  browser,
-}) => {
+test("critical landing content remains visible without JS", async ({ baseURL, browser }) => {
   const context = await browser.newContext({
     baseURL,
     javaScriptEnabled: false,
@@ -86,9 +78,7 @@ test("critical landing content remains visible without JS", async ({
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("#features h2")).toBeVisible();
     await expect(page.locator("#evidence h2")).toBeVisible();
-    await expect(
-      page.locator("[data-landing-scene='convergence'] h2"),
-    ).toBeVisible();
+    await expect(page.locator("[data-landing-scene='convergence'] h2")).toBeVisible();
   } finally {
     await context.close();
   }
@@ -104,9 +94,7 @@ test("reduced motion keeps landing readable", async ({ page }) => {
   await expect(page.locator("h1")).toBeVisible();
 
   const video = page.locator("[data-hero-video]");
-  const currentSrc = await video.evaluate(
-    (element: HTMLVideoElement) => element.currentSrc,
-  );
+  const currentSrc = await video.evaluate((element: HTMLVideoElement) => element.currentSrc);
 
   expect(currentSrc).toBe("");
 });

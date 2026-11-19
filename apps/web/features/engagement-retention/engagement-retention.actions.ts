@@ -76,10 +76,7 @@ export async function restoreStreakWithTokensAction(): Promise<ActionResult> {
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while restoring streak.",
+      message: error instanceof Error ? error.message : "Unexpected error while restoring streak.",
     };
   }
 }

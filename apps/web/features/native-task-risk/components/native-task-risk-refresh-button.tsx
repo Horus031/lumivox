@@ -31,11 +31,7 @@ export function NativeTaskRiskRefreshButton() {
   }
 
   return (
-    <Button
-      type="button"
-      onClick={handleRefresh}
-      disabled={isPending}
-    >
+    <Button type="button" onClick={handleRefresh} disabled={isPending}>
       {isPending ? "Checking..." : "Refresh risk"}
     </Button>
   );

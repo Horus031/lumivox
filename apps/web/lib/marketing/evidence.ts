@@ -39,29 +39,25 @@ export const modelEvidence = [
     key: "snapshots",
     value: "70,379",
     label: "Task snapshots",
-    description:
-      "Samples used in the native task-risk modeling dataset.",
+    description: "Samples used in the native task-risk modeling dataset.",
   },
   {
     key: "tasks",
     value: "6,643",
     label: "Unique tasks",
-    description:
-      "Distinct tasks represented in the model dataset.",
+    description: "Distinct tasks represented in the model dataset.",
   },
   {
     key: "recall",
     value: "76.9%",
     label: "Test recall",
-    description:
-      "Recall for identifying delayed tasks on the held-out test set.",
+    description: "Recall for identifying delayed tasks on the held-out test set.",
   },
   {
     key: "rocAuc",
     value: "0.751",
     label: "ROC-AUC",
-    description:
-      "Discrimination performance on the held-out test set.",
+    description: "Discrimination performance on the held-out test set.",
   },
 ] as const;
 

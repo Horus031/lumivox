@@ -30,9 +30,7 @@ export function RefreshEngagementButton() {
       disabled={isPending}
       className="rounded-xl bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
     >
-      {isPending
-        ? "Refreshing engagement..."
-        : "Refresh Engagement"}
+      {isPending ? "Refreshing engagement..." : "Refresh Engagement"}
     </button>
   );
 }

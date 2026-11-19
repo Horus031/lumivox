@@ -17,9 +17,7 @@ function value(input: number | null | undefined) {
   return input ?? 0;
 }
 
-export function AdminTranslationMetricsOverview({
-  metrics,
-}: AdminTranslationMetricsOverviewProps) {
+export function AdminTranslationMetricsOverview({ metrics }: AdminTranslationMetricsOverviewProps) {
   const t = useTranslations("admin.translations.metrics");
 
   return (

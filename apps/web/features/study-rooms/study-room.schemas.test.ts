@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  createStudyRoomSchema,
-  joinPrivateRoomSchema,
-} from "./study-room.schemas";
+import { createStudyRoomSchema, joinPrivateRoomSchema } from "./study-room.schemas";
 
 describe("study room schemas", () => {
   it("accepts a valid room creation payload", () => {

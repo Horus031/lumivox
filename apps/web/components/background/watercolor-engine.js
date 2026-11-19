@@ -20,9 +20,7 @@ function vt(e) {
   let t = e !== null && typeof e == "object" && !Array.isArray(e) ? e : {},
     n = (o, s = 0, r = 100) => {
       let i = t[o];
-      return typeof i == "number" && Number.isFinite(i)
-        ? Math.min(r, Math.max(s, i))
-        : kn[o];
+      return typeof i == "number" && Number.isFinite(i) ? Math.min(r, Math.max(s, i)) : kn[o];
     },
     a = t.technique;
   return {
@@ -46,23 +44,18 @@ var qt = 256;
 var Zt = 8;
 function La(e) {
   let t = e >>> 0;
-  return () => (
-    (t = (Math.imul(t, 1664525) + 1013904223) >>> 0),
-    t / 4294967296
-  );
+  return () => ((t = (Math.imul(t, 1664525) + 1013904223) >>> 0), t / 4294967296);
 }
 var st = new Uint8Array(qt * qt * 4);
 var Or = La(1977);
 function Dr(e) {
   let t = e.filter((n) => /^#[0-9a-f]{6}$/i.test(n)).slice(0, 12);
-  return (t.length ? t : ["#387D99", "#8B79AD", "#DF929F", "#E4B879"]).map(
-    (n) => {
-      let a = parseInt(n.slice(1), 16);
-      return [(a >> 16) & 255, (a >> 8) & 255, a & 255].map(
-        (o) => -Math.log(Math.max(0.025, o / 255)),
-      );
-    },
-  );
+  return (t.length ? t : ["#387D99", "#8B79AD", "#DF929F", "#E4B879"]).map((n) => {
+    let a = parseInt(n.slice(1), 16);
+    return [(a >> 16) & 255, (a >> 8) & 255, a & 255].map(
+      (o) => -Math.log(Math.max(0.025, o / 255)),
+    );
+  });
 }
 var Te = (e, t, n) => Math.sin(e * t + n) - Math.sin(n);
 var Aa = (e) => (Number.isFinite(e) ? Math.max(0, Math.min(1e6, e)) : 0);
@@ -90,10 +83,7 @@ function Ra(e, t, n, a = 0) {
     l = [];
   for (let u = 0; u < e.layers; u++) {
     let p = (u + 0.5) / e.layers,
-      m = c.map(
-        (L, w) =>
-          L * Math.exp(-0.5 * ((p - d[w]) / (0.13 + 0.2 / e.layers)) ** 2),
-      ),
+      m = c.map((L, w) => L * Math.exp(-0.5 * ((p - d[w]) / (0.13 + 0.2 / e.layers)) ** 2)),
       f = Math.max(
         1e-8,
         m.reduce((L, w) => L + w, 0),
@@ -108,12 +98,8 @@ function Ra(e, t, n, a = 0) {
         Math.sin(p * Math.PI * 2 + e.seed * 0.7) * 0.2 +
         (o() - 0.5) * 0.28 +
         0.075 * Te(a, 0.59, h + 1.6),
-      rx:
-        v * (e.technique === "veil" ? 1.7 : 1.22) * (1 + 0.09 * Te(a, 0.81, h)),
-      ry:
-        v *
-        (e.technique === "pools" ? 0.84 : 1.1) *
-        (1 + 0.09 * Te(a, 0.63, h + 1.8)),
+      rx: v * (e.technique === "veil" ? 1.7 : 1.22) * (1 + 0.09 * Te(a, 0.81, h)),
+      ry: v * (e.technique === "pools" ? 0.84 : 1.1) * (1 + 0.09 * Te(a, 0.63, h + 1.8)),
       c: Math.cos(g),
       s: Math.sin(g),
       strength: 0.68 + o() * 0.4,
@@ -210,51 +196,27 @@ function Br() {
       [t.FRAGMENT_SHADER, Tr],
     ]) {
       let u = t.createShader(d);
-      if (
-        (t.shaderSource(u, l),
-        t.compileShader(u),
-        !t.getShaderParameter(u, t.COMPILE_STATUS))
-      ) {
+      if ((t.shaderSource(u, l), t.compileShader(u), !t.getShaderParameter(u, t.COMPILE_STATUS))) {
         let p = t.getShaderInfoLog(u);
-        throw (
-          t.deleteShader(u),
-          new Error(p ?? "Watercolor shader could not compile")
-        );
+        throw (t.deleteShader(u), new Error(p ?? "Watercolor shader could not compile"));
       }
       (t.attachShader(n, u), t.deleteShader(u));
     }
     if ((t.linkProgram(n), !t.getProgramParameter(n, t.LINK_STATUS)))
-      throw new Error(
-        t.getProgramInfoLog(n) ?? "Watercolor shader could not link",
-      );
+      throw new Error(t.getProgramInfoLog(n) ?? "Watercolor shader could not link");
     t.useProgram(n);
     let a = t.createBuffer();
     (t.bindBuffer(t.ARRAY_BUFFER, a),
-      t.bufferData(
-        t.ARRAY_BUFFER,
-        new Float32Array([-1, -1, 3, -1, -1, 3]),
-        t.STATIC_DRAW,
-      ));
+      t.bufferData(t.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), t.STATIC_DRAW));
     let o = t.getAttribLocation(n, "position");
-    (t.enableVertexAttribArray(o),
-      t.vertexAttribPointer(o, 2, t.FLOAT, !1, 0, 0));
+    (t.enableVertexAttribArray(o), t.vertexAttribPointer(o, 2, t.FLOAT, !1, 0, 0));
     let s = t.createTexture();
     (t.bindTexture(t.TEXTURE_2D, s),
       t.texParameteri(t.TEXTURE_2D, t.TEXTURE_MIN_FILTER, t.LINEAR),
       t.texParameteri(t.TEXTURE_2D, t.TEXTURE_MAG_FILTER, t.LINEAR),
       t.texParameteri(t.TEXTURE_2D, t.TEXTURE_WRAP_S, t.REPEAT),
       t.texParameteri(t.TEXTURE_2D, t.TEXTURE_WRAP_T, t.REPEAT),
-      t.texImage2D(
-        t.TEXTURE_2D,
-        0,
-        t.RGBA,
-        qt,
-        qt,
-        0,
-        t.RGBA,
-        t.UNSIGNED_BYTE,
-        st,
-      ));
+      t.texImage2D(t.TEXTURE_2D, 0, t.RGBA, qt, qt, 0, t.RGBA, t.UNSIGNED_BYTE, st));
     let r = {};
     for (let d of [
       "dark",
@@ -348,14 +310,7 @@ function Nt(e, t, n, a, o, s, r = "export", i = 0) {
     m.uniform2fv(h.turn, L),
     m.uniform3fv(h.bloom, w),
     m.uniform4fv(h.flow, ka(d)));
-  for (let I of [
-    "spread",
-    "wetness",
-    "blooms",
-    "granulation",
-    "edges",
-    "texture",
-  ])
+  for (let I of ["spread", "wetness", "blooms", "granulation", "edges", "texture"])
     m.uniform1f(h[I], c[I] / 100);
   (m.uniform1f(h.warmth, c.paperWarmth / 100),
     m.uniform1f(h.layers, c.layers),

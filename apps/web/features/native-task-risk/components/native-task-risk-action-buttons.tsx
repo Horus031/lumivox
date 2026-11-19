@@ -1,10 +1,8 @@
 "use client";
 
-import { useTransition } from "react";
-import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
-import { Link, useRouter } from "@/i18n/navigation";
-import { rescheduleTaskFromRiskAlertAction } from "@/features/native-task-risk/native-task-risk.actions";
+import { Link } from "@/i18n/navigation";
 import type { NativeTaskRiskRecommendedAction } from "@/features/native-task-risk/native-task-risk.types";
 
 type NativeTaskRiskActionButtonsProps = {
@@ -16,25 +14,7 @@ export function NativeTaskRiskActionButtons({
   taskId,
   actions,
 }: NativeTaskRiskActionButtonsProps) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  function handleReschedule(daysToAdd: number) {
-    startTransition(async () => {
-      const result = await rescheduleTaskFromRiskAlertAction({
-        taskId,
-        daysToAdd,
-      });
-
-      if (!result.success) {
-        toast.error(result.message);
-        return;
-      }
-
-      toast.success(result.message);
-      router.refresh();
-    });
-  }
+  const t = useTranslations("taskRiskRecovery.actions.label");
 
   return (
     <div className="mt-4 flex flex-wrap gap-2">
@@ -52,21 +32,14 @@ export function NativeTaskRiskActionButtons({
         }
 
         if (action.action_type === "reschedule") {
-          const daysToAdd =
-            typeof action.payload.days_to_add === "number"
-              ? action.payload.days_to_add
-              : 1;
-
           return (
-            <button
+            <Link
               key={action.action_id}
-              type="button"
-              disabled={isPending}
-              onClick={() => handleReschedule(daysToAdd)}
-              className="rounded-xl border px-4 py-2 text-sm font-medium transition hover:bg-neutral-50 disabled:opacity-60 dark:border-neutral-800 dark:hover:bg-neutral-900"
+              href={`/workspace?task=${taskId}&tab=overview&edit=1`}
+              className="rounded-xl border px-4 py-2 text-sm font-medium"
             >
-              {isPending ? "Updating..." : action.label}
-            </button>
+              {t("reschedule")}
+            </Link>
           );
         }
 

@@ -55,9 +55,7 @@ function formatPercent(value: number) {
 //   return labels[featureName] ?? featureName;
 // }
 
-export function NativeTaskRiskAlertsCard({
-  alerts,
-}: NativeTaskRiskAlertsCardProps) {
+export function NativeTaskRiskAlertsCard({ alerts }: NativeTaskRiskAlertsCardProps) {
   return (
     <section className="rounded-2xl border bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
@@ -71,8 +69,8 @@ export function NativeTaskRiskAlertsCard({
           </h2>
 
           <p className="mt-2 max-w-2xl text-sm text-neutral-600 dark:text-neutral-400">
-            Lumivox uses your own task, goal and focus-session data to estimate
-            which upcoming tasks may need attention.
+            Lumivox uses your own task, goal and focus-session data to estimate which upcoming tasks
+            may need attention.
           </p>
         </div>
 

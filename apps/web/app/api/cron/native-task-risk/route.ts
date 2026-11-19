@@ -3,10 +3,7 @@ import type { NextRequest } from "next/server";
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
 
-  if (
-    !process.env.CRON_SECRET ||
-    authHeader !== `Bearer ${process.env.CRON_SECRET}`
-  ) {
+  if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return Response.json(
       {
         success: false,
@@ -14,7 +11,7 @@ export async function GET(request: NextRequest) {
       },
       {
         status: 401,
-      }
+      },
     );
   }
 
@@ -25,32 +22,28 @@ export async function GET(request: NextRequest) {
     return Response.json(
       {
         success: false,
-        message:
-          "AI_API_BASE_URL and NATIVE_TASK_RISK_CRON_SECRET must be configured.",
+        message: "AI_API_BASE_URL and NATIVE_TASK_RISK_CRON_SECRET must be configured.",
       },
       {
         status: 500,
-      }
+      },
     );
   }
 
-  const response = await fetch(
-    `${aiApiBaseUrl}/api/v1/native-task-risk/cron-refresh`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-Cron-Secret": nativeTaskRiskCronSecret,
-      },
-      body: JSON.stringify({
-        horizon_days: 14,
-        max_users: 50,
-        max_tasks_per_user: 8,
-        skip_recent_hours: 6,
-      }),
-      cache: "no-store",
-    }
-  );
+  const response = await fetch(`${aiApiBaseUrl}/api/v1/native-task-risk/cron-refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Cron-Secret": nativeTaskRiskCronSecret,
+    },
+    body: JSON.stringify({
+      horizon_days: 14,
+      max_users: 50,
+      max_tasks_per_user: 8,
+      skip_recent_hours: 6,
+    }),
+    cache: "no-store",
+  });
 
   const payload = await response.json().catch(() => null);
 
@@ -63,7 +56,7 @@ export async function GET(request: NextRequest) {
       },
       {
         status: response.status,
-      }
+      },
     );
   }
 

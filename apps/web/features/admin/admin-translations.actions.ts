@@ -16,7 +16,7 @@ const clearEntityTranslationsSchema = z.object({
 });
 
 export async function adminDeleteAiContentTranslationAction(
-  input: z.infer<typeof deleteTranslationSchema>
+  input: z.infer<typeof deleteTranslationSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -30,12 +30,9 @@ export async function adminDeleteAiContentTranslationAction(
       };
     }
 
-    const { error } = await supabase.rpc(
-      "admin_delete_ai_content_translation",
-      {
-        p_translation_id: parsed.data.translationId,
-      }
-    );
+    const { error } = await supabase.rpc("admin_delete_ai_content_translation", {
+      p_translation_id: parsed.data.translationId,
+    });
 
     if (error) {
       return {
@@ -64,7 +61,7 @@ export async function adminDeleteAiContentTranslationAction(
 }
 
 export async function adminClearAiEntityTranslationsAction(
-  input: z.infer<typeof clearEntityTranslationsSchema>
+  input: z.infer<typeof clearEntityTranslationsSchema>,
 ): Promise<ActionResult<{ deletedCount: number }>> {
   try {
     const { supabase } = await requireAdmin();
@@ -78,13 +75,10 @@ export async function adminClearAiEntityTranslationsAction(
       };
     }
 
-    const { data, error } = await supabase.rpc(
-      "admin_clear_ai_entity_translations",
-      {
-        p_entity_type: parsed.data.entityType,
-        p_entity_id: parsed.data.entityId,
-      }
-    );
+    const { data, error } = await supabase.rpc("admin_clear_ai_entity_translations", {
+      p_entity_type: parsed.data.entityType,
+      p_entity_id: parsed.data.entityId,
+    });
 
     if (error) {
       return {

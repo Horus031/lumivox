@@ -1,7 +1,9 @@
 # Lumivox Usability Study Plan
 
 ## Objective
+
 Evaluate whether users can understand and use Lumivox's core workflows:
+
 - goal/task management
 - focus tracking
 - AI task risk insight
@@ -9,14 +11,17 @@ Evaluate whether users can understand and use Lumivox's core workflows:
 - study room collaboration
 
 ## Participants
+
 Target: 10–15 seed users
 
 ## Study Format
+
 - Short guided task session
 - Followed by SUS questionnaire
 - Optional open-text feedback
 
 ## Suggested Tasks
+
 1. Sign in and view dashboard
 2. Create a goal
 3. Create a task linked to that goal
@@ -27,6 +32,7 @@ Target: 10–15 seed users
 8. Join voice room briefly
 
 ## Collected Data
+
 - Task completion success/failure
 - Observed usability issues
 - SUS score

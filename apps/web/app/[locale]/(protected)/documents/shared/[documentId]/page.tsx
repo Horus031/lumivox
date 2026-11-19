@@ -14,12 +14,13 @@ type SharedDocumentPageProps = {
   }>;
 };
 
-export default async function SharedDocumentPage({
-  params,
-}: SharedDocumentPageProps) {
+export default async function SharedDocumentPage({ params }: SharedDocumentPageProps) {
   const { documentId } = await params;
 
-  const [document, t] = await Promise.all([getAccessibleLearningDocumentOrThrow(documentId), getTranslations("documentUi")]);
+  const [document, t] = await Promise.all([
+    getAccessibleLearningDocumentOrThrow(documentId),
+    getTranslations("documentUi"),
+  ]);
 
   if (!document) {
     notFound();
@@ -29,8 +30,12 @@ export default async function SharedDocumentPage({
 
   return (
     <section className="min-w-0 space-y-section">
-      <PageHeader eyebrow={t("sharedEyebrow")} title={document.file_name} description={`${t("visibilityField")}: ${t(`visibility.${document.visibility}`)}`} />
-        <LearningDocumentPreview document={document} signedUrl={signedUrl} />
+      <PageHeader
+        eyebrow={t("sharedEyebrow")}
+        title={document.file_name}
+        description={`${t("visibilityField")}: ${t(`visibility.${document.visibility}`)}`}
+      />
+      <LearningDocumentPreview document={document} signedUrl={signedUrl} />
     </section>
   );
 }

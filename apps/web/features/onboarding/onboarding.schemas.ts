@@ -35,10 +35,7 @@ export const onboardingSchema = z
       .min(1, "Full name is required.")
       .max(120, "Full name must be at most 120 characters."),
 
-    timezone: z
-      .string()
-      .trim()
-      .min(1, "Timezone is required."),
+    timezone: z.string().trim().min(1, "Timezone is required."),
 
     ...pbiWeightFields,
   })
@@ -54,9 +51,7 @@ export const onboardingSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["taskCompletionWeight"],
-        message: `The total PBI weight must equal 1.0. Current total: ${total.toFixed(
-          2
-        )}`,
+        message: `The total PBI weight must equal 1.0. Current total: ${total.toFixed(2)}`,
       });
     }
   });

@@ -32,11 +32,7 @@ function getInitials(name: string | null) {
     .join("");
 }
 
-export function AccountDropdown({
-  profile,
-  align = "end",
-  compact = false,
-}: AccountDropdownProps) {
+export function AccountDropdown({ profile, align = "end", compact = false }: AccountDropdownProps) {
   const sidebarT = useTranslations("appShell.sidebar");
   const navigationT = useTranslations("appShell.navigation");
 
@@ -54,7 +50,10 @@ export function AccountDropdown({
             compact && "size-touch justify-center px-0",
           )}
         >
-          <span aria-hidden="true" className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-caption font-semibold text-foreground">
+          <span
+            aria-hidden="true"
+            className="flex size-7 shrink-0 items-center justify-center rounded-full bg-muted text-caption font-semibold text-foreground"
+          >
             {getInitials(profile.full_name)}
           </span>
           {!compact ? (
@@ -77,9 +76,7 @@ export function AccountDropdown({
               {getInitials(profile.full_name)}
             </span>
             <span className="min-w-0">
-              <span className="block truncate text-sm font-semibold">
-                {displayName}
-              </span>
+              <span className="block truncate text-sm font-semibold">{displayName}</span>
               <span className="block truncate text-xs font-normal text-muted-foreground">
                 {profile.timezone}
               </span>
@@ -89,7 +86,10 @@ export function AccountDropdown({
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem asChild className="min-h-touch cursor-pointer rounded-md px-3 py-2 lg:min-h-control">
+        <DropdownMenuItem
+          asChild
+          className="min-h-touch cursor-pointer rounded-md px-3 py-2 lg:min-h-control"
+        >
           <Link href="/settings">
             <Settings />
             {navigationT("settings.label")}

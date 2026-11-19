@@ -4,12 +4,12 @@
 
 Phase 8 keeps Phase 0 as the historical comparison point.
 
-| Route | Device | Perf | LCP | CLS | TBT |
-|---|---:|---:|---:|---:|---:|
-| `/en` | Mobile | 95 | 3.0s | 0 | 50ms |
-| `/en` | Desktop | 92 | 1.2s | 0 | 190ms |
-| `/vi` | Mobile | 74 | 4.9s | 0 | 170ms |
-| `/vi` | Desktop | 98 | 0.6s | 0.001 | 140ms |
+| Route |  Device | Perf |  LCP |   CLS |   TBT |
+| ----- | ------: | ---: | ---: | ----: | ----: |
+| `/en` |  Mobile |   95 | 3.0s |     0 |  50ms |
+| `/en` | Desktop |   92 | 1.2s |     0 | 190ms |
+| `/vi` |  Mobile |   74 | 4.9s |     0 | 170ms |
+| `/vi` | Desktop |   98 | 0.6s | 0.001 | 140ms |
 
 ## Hardening Applied
 
@@ -22,26 +22,26 @@ Phase 8 keeps Phase 0 as the historical comparison point.
 
 ## Verification Status
 
-| Command | Status |
-|---|---|
-| `npm ci` | Pass |
-| `npm run lint` | Pass |
-| `npm run test:unit` | Pass |
-| `npm run build` | Pass |
+| Command                                                              | Status                                           |
+| -------------------------------------------------------------------- | ------------------------------------------------ |
+| `npm ci`                                                             | Pass                                             |
+| `npm run lint`                                                       | Pass                                             |
+| `npm run test:unit`                                                  | Pass                                             |
+| `npm run build`                                                      | Pass                                             |
 | `npx playwright test tests/landing-story.spec.ts --project=chromium` | Not run because dependency install is incomplete |
 
 ## Pending Manual Audit
 
 Run the viewport matrix after the dependency lock is released and the app can build or serve locally:
 
-| Viewport | Routes |
-|---|---|
-| `390x844` | `/en`, `/vi` |
-| `430x932` | `/en`, `/vi` |
-| `768x1024` | `/en`, `/vi` |
-| `1024x768` | `/en`, `/vi` |
-| `1280x800` | `/en`, `/vi` |
-| `1440x900` | `/en`, `/vi` |
+| Viewport    | Routes       |
+| ----------- | ------------ |
+| `390x844`   | `/en`, `/vi` |
+| `430x932`   | `/en`, `/vi` |
+| `768x1024`  | `/en`, `/vi` |
+| `1024x768`  | `/en`, `/vi` |
+| `1280x800`  | `/en`, `/vi` |
+| `1440x900`  | `/en`, `/vi` |
 | `1920x1080` | `/en`, `/vi` |
 
 Audit focus: Hero H1/signals, Intelligence nodes, Journey mobile visuals, Product Theater copy over screenshots, Evidence mobile layout, Trust pipeline, FAQ Vietnamese wrapping, Convergence, and horizontal overflow.

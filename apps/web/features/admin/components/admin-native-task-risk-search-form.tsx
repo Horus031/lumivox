@@ -5,7 +5,13 @@ import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useTranslations } from "next-intl";
 
 import { useRouter } from "@/i18n/navigation";
@@ -39,9 +45,7 @@ export function AdminNativeTaskRiskSearchForm({
       params.set("risk", riskBand);
     }
 
-    router.push(
-      `/admin/native-task-risk${params.toString() ? `?${params.toString()}` : ""}`
-    );
+    router.push(`/admin/native-task-risk${params.toString() ? `?${params.toString()}` : ""}`);
   }
 
   return (
@@ -49,16 +53,32 @@ export function AdminNativeTaskRiskSearchForm({
       <div className="grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-end gap-3 md:grid-cols-[minmax(0,1fr)_12rem_auto]">
         <div className="col-span-2 grid min-w-0 gap-2 md:col-span-1">
           <Label htmlFor={`${id}-query`}>{t("queryLabel")}</Label>
-          <Input id={`${id}-query`} type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder={t("queryPlaceholder")} />
+          <Input
+            id={`${id}-query`}
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder={t("queryPlaceholder")}
+          />
         </div>
         <div className="grid min-w-0 gap-2">
           <Label htmlFor={`${id}-risk`}>{t("riskBandLabel")}</Label>
           <Select value={riskBand} onValueChange={setRiskBand}>
-            <SelectTrigger id={`${id}-risk`} className="w-full"><SelectValue /></SelectTrigger>
-            <SelectContent>{["all", "low", "moderate", "elevated", "high"].map((value) => <SelectItem key={value} value={value}>{t(`riskBands.${value}`)}</SelectItem>)}</SelectContent>
+            <SelectTrigger id={`${id}-risk`} className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {["all", "low", "moderate", "elevated", "high"].map((value) => (
+                <SelectItem key={value} value={value}>
+                  {t(`riskBands.${value}`)}
+                </SelectItem>
+              ))}
+            </SelectContent>
           </Select>
         </div>
-        <Button type="submit" size="icon" aria-label={t("submit")} title={t("submit")}><Search aria-hidden="true" /></Button>
+        <Button type="submit" size="icon" aria-label={t("submit")} title={t("submit")}>
+          <Search aria-hidden="true" />
+        </Button>
       </div>
     </form>
   );

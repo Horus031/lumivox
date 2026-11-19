@@ -44,8 +44,8 @@ prompt_variant = grounded_rule
 | A5_smaller_dimension |       1800 |     250 |                 384 | Smaller embedding dimension |
 | A6_larger_dimension  |       1800 |     250 |                1536 | Larger embedding dimension  |
 
-
 ## Retrieval Benchmark Summary
+
 All configurations achieved strong retrieval performance on the expanded evaluation dataset:
 
 ```text
@@ -53,6 +53,7 @@ Recall@5 = 1.0
 MRR@5 = 1.0
 Keyword hit rate = 1.0
 ```
+
 This means all tested configurations were able to retrieve the expected source documents within the top 5 retrieved chunks.
 
 However, the configurations differed in efficiency:
@@ -66,7 +67,6 @@ However, the configurations differed in efficiency:
 | A4_larger_overlap    |           22 |                0.0645 MB |                  25.83s |
 | A5_smaller_dimension |           22 |                0.0322 MB |                  22.06s |
 | A6_larger_dimension  |           22 |                0.1289 MB |                  20.06s |
-
 
 ## Answer Quality Evaluation Summary
 

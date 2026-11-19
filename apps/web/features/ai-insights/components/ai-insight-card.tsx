@@ -38,9 +38,7 @@ function getRiskBadgeClass(probability: number | undefined) {
   return "bg-emerald-100 text-emerald-800";
 }
 
-function getDirectionBadgeClass(
-  direction: "increases_risk" | "decreases_risk",
-) {
+function getDirectionBadgeClass(direction: "increases_risk" | "decreases_risk") {
   if (direction === "increases_risk") {
     return "bg-red-100 text-red-800";
   }
@@ -56,9 +54,7 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
   const recommendedActions =
     (card.recommended_actions as AiInsightRecommendedAction[] | null) ?? [];
 
-  const riskProbability = prediction
-    ? Number(prediction.risk_probability)
-    : undefined;
+  const riskProbability = prediction ? Number(prediction.risk_probability) : undefined;
 
   return (
     <article className="rounded-[28px] border border-border/70 bg-card/90 p-6 shadow-[0_18px_60px_-50px_hsl(var(--primary)/0.55)]">
@@ -82,26 +78,18 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
             </span>
           </div>
 
-          <h3 className="text-2xl font-semibold tracking-tight text-foreground">
-            {card.title}
-          </h3>
+          <h3 className="text-2xl font-semibold tracking-tight text-foreground">{card.title}</h3>
 
           <p className="mt-3 text-foreground/75">{card.summary}</p>
 
           <div className="mt-4 rounded-2xl border border-border/70 bg-secondary/35 p-4">
-            <p className="text-sm font-semibold text-muted-foreground">
-              Interpretation
-            </p>
-            <p className="mt-2 text-sm leading-6 text-foreground/75">
-              {card.risk_interpretation}
-            </p>
+            <p className="text-sm font-semibold text-muted-foreground">Interpretation</p>
+            <p className="mt-2 text-sm leading-6 text-foreground/75">{card.risk_interpretation}</p>
           </div>
         </div>
 
         <div className="min-w-[180px] rounded-2xl border border-border/70 bg-secondary/35 p-4">
-          <p className="text-sm font-medium text-muted-foreground">
-            Predicted risk
-          </p>
+          <p className="text-sm font-medium text-muted-foreground">Predicted risk</p>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-foreground">
             {formatRiskProbability(riskProbability)}
           </p>
@@ -114,9 +102,7 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
       <details className="group mt-6 rounded-[24px] border border-border/70 bg-secondary/20 p-4">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 outline-none">
           <div>
-            <h4 className="text-lg font-semibold text-foreground">
-              Evidence and actions
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">Evidence and actions</h4>
             <p className="mt-1 text-sm text-muted-foreground">
               SHAP contributors and suggested next steps are kept here to keep the card compact.
             </p>
@@ -136,9 +122,7 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
 
             <div className="mt-4 space-y-3">
               {evidence.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No evidence items stored.
-                </p>
+                <p className="text-sm text-muted-foreground">No evidence items stored.</p>
               ) : (
                 evidence.map((item, index) => (
                   <div
@@ -169,18 +153,14 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
           </section>
 
           <section className="rounded-[24px] border border-border/70 bg-card/90 p-5">
-            <h4 className="text-lg font-semibold text-foreground">
-              Recommended actions
-            </h4>
+            <h4 className="text-lg font-semibold text-foreground">Recommended actions</h4>
             <p className="mt-1 text-sm text-muted-foreground">
               Suggested next steps generated from the grounded explanation.
             </p>
 
             <div className="mt-4 space-y-3">
               {recommendedActions.length === 0 ? (
-                <p className="text-sm text-muted-foreground">
-                  No recommended actions stored.
-                </p>
+                <p className="text-sm text-muted-foreground">No recommended actions stored.</p>
               ) : (
                 recommendedActions.map((item) => (
                   <div
@@ -188,9 +168,7 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
                     className="rounded-xl border border-border/70 bg-secondary/25 p-4"
                   >
                     <p className="font-medium text-foreground">{item.action}</p>
-                    <p className="mt-2 text-sm leading-6 text-foreground/75">
-                      {item.rationale}
-                    </p>
+                    <p className="mt-2 text-sm leading-6 text-foreground/75">{item.rationale}</p>
                   </div>
                 ))
               )}
@@ -201,9 +179,7 @@ export function AiInsightCard({ card }: AiInsightCardProps) {
 
       <div className="mt-6 rounded-2xl border border-dashed border-border/70 p-4">
         <p className="text-sm font-semibold text-foreground">Confidence note</p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          {card.confidence_note}
-        </p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{card.confidence_note}</p>
       </div>
 
       <footer className="mt-5 flex flex-col justify-between gap-2 border-t border-border/70 pt-4 text-xs text-muted-foreground md:flex-row md:items-center">

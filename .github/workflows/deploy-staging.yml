@@ -99,7 +99,16 @@ jobs:
 
       - name: Install Playwright Chromium
         working-directory: apps/web
-        run: npx playwright install --with-deps chromium
+        run: |
+          for attempt in 1 2 3; do
+            if npx playwright install --with-deps chromium; then
+              exit 0
+            fi
+            if [ "$attempt" -lt 3 ]; then
+              sleep 15
+            fi
+          done
+          exit 1
 
       - name: Run staging E2E tests
         working-directory: apps/web

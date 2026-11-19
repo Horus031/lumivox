@@ -15,10 +15,7 @@ import type {
 
 type RoadmapNodeEditPanelProps = {
   selectedNode: RoadmapFlowNode | null;
-  onChangeNode: (
-    nodeId: string,
-    data: Partial<RoadmapFlowNodeData>
-  ) => void;
+  onChangeNode: (nodeId: string, data: Partial<RoadmapFlowNodeData>) => void;
   onDeleteNode: (nodeId: string) => void;
 };
 
@@ -31,14 +28,9 @@ export function RoadmapNodeEditPanel({
   if (!selectedNode) {
     return (
       <aside className="min-w-0 border-t border-border pt-card xl:border-t-0 xl:border-l xl:pl-card xl:pt-0">
-        <p className="text-caption text-muted-foreground">
-          {t("nodeEditor")}
-        </p>
+        <p className="text-caption text-muted-foreground">{t("nodeEditor")}</p>
 
-        <h2 className="mt-2 text-section font-semibold text-foreground">
-          {t("noSelection")}
-        </h2>
-
+        <h2 className="mt-2 text-section font-semibold text-foreground">{t("noSelection")}</h2>
       </aside>
     );
   }
@@ -49,9 +41,7 @@ export function RoadmapNodeEditPanel({
     <aside className="min-w-0 border-t border-border pt-card xl:border-t-0 xl:border-l xl:pl-card xl:pt-0">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-caption text-muted-foreground">
-            {t("nodeEditor")}
-          </p>
+          <p className="text-caption text-muted-foreground">{t("nodeEditor")}</p>
 
           <h2 className="mt-2 text-section font-semibold text-foreground">
             {t("editNode", { type: t(`types.${data.nodeType}`) })}
@@ -65,9 +55,7 @@ export function RoadmapNodeEditPanel({
 
       <div className="mt-5 space-y-4">
         <label className="block min-w-0 space-y-1.5">
-          <span className="text-label font-medium text-foreground">
-            {t("fields.title")}
-          </span>
+          <span className="text-label font-medium text-foreground">{t("fields.title")}</span>
 
           <Input
             value={data.title}
@@ -81,9 +69,7 @@ export function RoadmapNodeEditPanel({
         </label>
 
         <label className="block min-w-0 space-y-1.5">
-          <span className="text-label font-medium text-foreground">
-            {t("fields.description")}
-          </span>
+          <span className="text-label font-medium text-foreground">{t("fields.description")}</span>
 
           <Textarea
             value={data.description ?? ""}
@@ -99,9 +85,7 @@ export function RoadmapNodeEditPanel({
 
         <div className="grid gap-3 md:grid-cols-2">
           <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.hours")}
-            </span>
+            <span className="text-label font-medium text-foreground">{t("fields.hours")}</span>
 
             <Input
               type="number"
@@ -118,9 +102,7 @@ export function RoadmapNodeEditPanel({
           </label>
 
           <label className="block min-w-0 space-y-1.5">
-            <span className="text-label font-medium text-foreground">
-              {t("fields.priority")}
-            </span>
+            <span className="text-label font-medium text-foreground">{t("fields.priority")}</span>
 
             <select
               value={data.priority}
@@ -141,9 +123,21 @@ export function RoadmapNodeEditPanel({
         </div>
 
         <div className="grid gap-3 md:grid-cols-2">
-          <DatePicker label={t("fields.startDate")} value={parseLocalDate(data.suggestedStartDate)} onChange={(date) => onChangeNode(selectedNode.id, { suggestedStartDate: formatLocalDate(date) || null })} />
+          <DatePicker
+            label={t("fields.startDate")}
+            value={parseLocalDate(data.suggestedStartDate)}
+            onChange={(date) =>
+              onChangeNode(selectedNode.id, { suggestedStartDate: formatLocalDate(date) || null })
+            }
+          />
 
-          <DatePicker label={t("fields.endDate")} value={parseLocalDate(data.suggestedEndDate)} onChange={(date) => onChangeNode(selectedNode.id, { suggestedEndDate: formatLocalDate(date) || null })} />
+          <DatePicker
+            label={t("fields.endDate")}
+            value={parseLocalDate(data.suggestedEndDate)}
+            onChange={(date) =>
+              onChangeNode(selectedNode.id, { suggestedEndDate: formatLocalDate(date) || null })
+            }
+          />
         </div>
 
         <Button
@@ -152,7 +146,8 @@ export function RoadmapNodeEditPanel({
           variant="outline"
           className="hover:bg-danger/10"
         >
-          <Trash2 aria-hidden="true" />{t("deleteNode")}
+          <Trash2 aria-hidden="true" />
+          {t("deleteNode")}
         </Button>
       </div>
     </aside>

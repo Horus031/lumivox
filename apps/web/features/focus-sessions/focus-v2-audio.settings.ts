@@ -1,7 +1,12 @@
 export const FOCUS_V2_AUDIO_STORAGE_KEY = "lumivox.focus-v2.audio.v1";
 
 export const FOCUS_V2_AUDIO_SOUNDS = [
-  "white", "pink", "brown", "rain", "ocean", "ambient_pad",
+  "white",
+  "pink",
+  "brown",
+  "rain",
+  "ocean",
+  "ambient_pad",
 ] as const;
 
 export type FocusV2AudioSound = (typeof FOCUS_V2_AUDIO_SOUNDS)[number];
@@ -36,14 +41,23 @@ export function parseFocusV2AudioSettings(input: unknown): FocusV2AudioSettings 
   const record = input as Record<string, unknown>;
   const defaults = DEFAULT_FOCUS_V2_AUDIO_SETTINGS;
   return {
-    sound: typeof record.sound === "string" &&
+    sound:
+      typeof record.sound === "string" &&
       FOCUS_V2_AUDIO_SOUNDS.some((sound) => sound === record.sound)
-      ? (record.sound as FocusV2AudioSound) : defaults.sound,
+        ? (record.sound as FocusV2AudioSound)
+        : defaults.sound,
     volume: typeof record.volume === "number" ? clampAudioPercent(record.volume) : defaults.volume,
     muted: typeof record.muted === "boolean" ? record.muted : defaults.muted,
-    cuesEnabled: typeof record.cuesEnabled === "boolean" ? record.cuesEnabled : defaults.cuesEnabled,
-    cueVolume: typeof record.cueVolume === "number" ? clampAudioPercent(record.cueVolume) : defaults.cueVolume,
-    playDuringBreak: typeof record.playDuringBreak === "boolean" ? record.playDuringBreak : defaults.playDuringBreak,
+    cuesEnabled:
+      typeof record.cuesEnabled === "boolean" ? record.cuesEnabled : defaults.cuesEnabled,
+    cueVolume:
+      typeof record.cueVolume === "number"
+        ? clampAudioPercent(record.cueVolume)
+        : defaults.cueVolume,
+    playDuringBreak:
+      typeof record.playDuringBreak === "boolean"
+        ? record.playDuringBreak
+        : defaults.playDuringBreak,
   };
 }
 
@@ -54,6 +68,8 @@ export function shouldPlayFocusV2Ambient(
   settings: FocusV2AudioSettings,
 ): boolean {
   if (!active || phase !== "running") return false;
-  return segmentKind === "focus" ||
-    (settings.playDuringBreak && (segmentKind === "short_break" || segmentKind === "long_break"));
+  return (
+    segmentKind === "focus" ||
+    (settings.playDuringBreak && (segmentKind === "short_break" || segmentKind === "long_break"))
+  );
 }

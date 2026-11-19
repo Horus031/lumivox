@@ -1,9 +1,6 @@
 import { useLocale, useTranslations } from "next-intl";
 
-import type {
-  PbiComponentExplanation,
-  PbiExplanationPayload,
-} from "@/features/pbi/pbi.types";
+import type { PbiComponentExplanation, PbiExplanationPayload } from "@/features/pbi/pbi.types";
 
 type PbiSnapshot = {
   standard_pbi: number;
@@ -44,10 +41,26 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
   }
 
   const fallbackComponents: PbiComponentExplanation[] = [
-    { key: "task_completion", title: t("components.taskCompletion"), score: snapshot.task_completion_rate },
-    { key: "focus_quality", title: t("components.focusQuality"), score: snapshot.focus_quality_score },
-    { key: "deadline_adherence", title: t("components.deadlineAdherence"), score: snapshot.deadline_adherence_score },
-    { key: "goal_momentum", title: t("components.goalMomentum"), score: snapshot.goal_momentum_score },
+    {
+      key: "task_completion",
+      title: t("components.taskCompletion"),
+      score: snapshot.task_completion_rate,
+    },
+    {
+      key: "focus_quality",
+      title: t("components.focusQuality"),
+      score: snapshot.focus_quality_score,
+    },
+    {
+      key: "deadline_adherence",
+      title: t("components.deadlineAdherence"),
+      score: snapshot.deadline_adherence_score,
+    },
+    {
+      key: "goal_momentum",
+      title: t("components.goalMomentum"),
+      score: snapshot.goal_momentum_score,
+    },
     { key: "consistency", title: t("components.consistency"), score: snapshot.consistency_score },
   ].map((component) => ({ ...component, level: getScoreLevel(component.score), message: "" }));
   const components = explanation?.component_explanations?.length
@@ -57,11 +70,17 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
   return (
     <section className="flex h-full min-w-0 flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
       <div className="grid grid-cols-2 gap-card border-b border-border pb-card">
-        {[{ key: "personalized", score: snapshot.personalized_pbi }, { key: "standard", score: snapshot.standard_pbi }].map((metric) => (
+        {[
+          { key: "personalized", score: snapshot.personalized_pbi },
+          { key: "standard", score: snapshot.standard_pbi },
+        ].map((metric) => (
           <div key={metric.key} className="min-w-0">
-            <h2 className="text-label font-medium text-secondary-text">{t(`${metric.key}.title`)}</h2>
+            <h2 className="text-label font-medium text-secondary-text">
+              {t(`${metric.key}.title`)}
+            </h2>
             <p className="mt-1 text-metric font-semibold tabular-nums [overflow-wrap:anywhere]">
-              {formatter.format(metric.score)} <span className="text-caption font-normal text-muted-foreground">/ 100</span>
+              {formatter.format(metric.score)}{" "}
+              <span className="text-caption font-normal text-muted-foreground">/ 100</span>
             </p>
           </div>
         ))}
@@ -83,10 +102,19 @@ export function PbiScoreCards({ snapshot, explanation }: PbiScoreCardsProps) {
                   <span className="font-medium tabular-nums">{formatter.format(score)}%</span>
                 </span>
               </div>
-              <div role="meter" aria-label={component.title} aria-valuemin={0} aria-valuemax={100} aria-valuenow={score}
+              <div
+                role="meter"
+                aria-label={component.title}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-valuenow={score}
                 aria-valuetext={`${formatter.format(score)}% - ${levelLabel}`}
-                className="h-1.5 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-primary dark:bg-success" style={{ width: `${score}%` }} />
+                className="h-1.5 overflow-hidden rounded-full bg-muted"
+              >
+                <div
+                  className="h-full rounded-full bg-primary dark:bg-success"
+                  style={{ width: `${score}%` }}
+                />
               </div>
               {component.message ? <p className="sr-only">{component.message}</p> : null}
             </div>

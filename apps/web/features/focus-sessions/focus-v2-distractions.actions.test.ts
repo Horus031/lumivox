@@ -6,7 +6,12 @@ import { logFocusV2DistractionAction as log } from "./focus-v2-distractions.acti
 
 const sessionId = "11111111-1111-4111-8111-111111111111";
 const userId = "22222222-2222-4222-8222-222222222222";
-const valid = { sessionId, distractionType: "other" as const, durationSeconds: 30, note: "User confirmed." };
+const valid = {
+  sessionId,
+  distractionType: "other" as const,
+  durationSeconds: 30,
+  note: "User confirmed.",
+};
 let query: Record<string, ReturnType<typeof vi.fn>>;
 
 beforeEach(() => {
@@ -14,7 +19,8 @@ beforeEach(() => {
   vi.stubEnv("FOCUS_V2_ENABLED", "true");
   query = {};
   for (const key of ["from", "select", "eq", "in"]) query[key] = vi.fn(() => query);
-  query.maybeSingle = vi.fn()
+  query.maybeSingle = vi
+    .fn()
     .mockResolvedValueOnce({ data: { id: sessionId }, error: null })
     .mockResolvedValueOnce({ data: { id: "segment" }, error: null });
   query.insert = vi.fn().mockResolvedValue({ error: null });
@@ -41,8 +47,11 @@ describe("Focus V2 manual distraction action", () => {
     expect(query.in).toHaveBeenCalledWith("status", ["ongoing", "paused"]);
     expect(query.in).toHaveBeenCalledWith("status", ["running", "paused"]);
     expect(query.insert).toHaveBeenCalledExactlyOnceWith({
-      user_id: userId, session_id: sessionId, distraction_type: "other",
-      duration_seconds: 30, note: "User confirmed.",
+      user_id: userId,
+      session_id: sessionId,
+      distraction_type: "other",
+      duration_seconds: 30,
+      note: "User confirmed.",
     });
   });
   it("rejects another user's, missing or ended session without writing", async () => {
@@ -51,7 +60,8 @@ describe("Focus V2 manual distraction action", () => {
     expect(query.insert).not.toHaveBeenCalled();
   });
   it("rejects a break or awaiting-next session without writing", async () => {
-    query.maybeSingle.mockReset()
+    query.maybeSingle
+      .mockReset()
       .mockResolvedValueOnce({ data: { id: sessionId }, error: null })
       .mockResolvedValueOnce({ data: null, error: null });
     expect((await log(valid)).success).toBe(false);

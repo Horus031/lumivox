@@ -35,12 +35,7 @@ export default function EvidenceStrip() {
 
         <ul className="principle-constellation__nodes">
           {items.map(({ key, icon: Icon }, index) => (
-            <li
-              key={key}
-              data-principle-node
-              data-node-position={index}
-              className="principle-node"
-            >
+            <li key={key} data-principle-node data-node-position={index} className="principle-node">
               <span aria-hidden="true" className="principle-node__signal">
                 <Icon className="size-4" />
               </span>

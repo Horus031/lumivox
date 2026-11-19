@@ -61,10 +61,7 @@ const NODE_HEIGHT = 224;
 const NODE_X_GAP = 96;
 const NODE_Y_GAP = 240;
 
-function isValidParentChild(
-  parentType: RoadmapNodeType,
-  childType: RoadmapNodeType,
-) {
+function isValidParentChild(parentType: RoadmapNodeType, childType: RoadmapNodeType) {
   return (
     (parentType === "goal" && childType === "task") ||
     (parentType === "task" && childType === "subtask")
@@ -105,9 +102,7 @@ function toFlowEdges(nodes: LearningRoadmapNode[]): Edge[] {
     }));
 }
 
-function computeSortOrders(
-  nodes: RoadmapFlowNodeType[],
-): RoadmapFlowNodeType[] {
+function computeSortOrders(nodes: RoadmapFlowNodeType[]): RoadmapFlowNodeType[] {
   const childrenByParent = new Map<string | null, RoadmapFlowNodeType[]>();
 
   for (const node of nodes) {
@@ -142,10 +137,7 @@ function computeSortOrders(
   }));
 }
 
-function compareRoadmapNodes(
-  a: RoadmapFlowNodeType,
-  b: RoadmapFlowNodeType,
-) {
+function compareRoadmapNodes(a: RoadmapFlowNodeType, b: RoadmapFlowNodeType) {
   if (a.data.sortOrder !== b.data.sortOrder) {
     return a.data.sortOrder - b.data.sortOrder;
   }
@@ -161,9 +153,7 @@ function compareRoadmapNodes(
   return a.data.title.localeCompare(b.data.title);
 }
 
-function layoutRoadmapNodes(
-  nodes: RoadmapFlowNodeType[],
-): RoadmapFlowNodeType[] {
+function layoutRoadmapNodes(nodes: RoadmapFlowNodeType[]): RoadmapFlowNodeType[] {
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
   const childrenByParent = new Map<string | null, RoadmapFlowNodeType[]>();
 
@@ -201,9 +191,7 @@ function layoutRoadmapNodes(
       return x;
     }
 
-    const childXs: number[] = children.map((child) =>
-      placeSubtree(child, depth + 1),
-    );
+    const childXs: number[] = children.map((child) => placeSubtree(child, depth + 1));
     const x: number = (childXs[0] + childXs[childXs.length - 1]) / 2;
 
     positionedNodes.set(node.id, {
@@ -217,9 +205,7 @@ function layoutRoadmapNodes(
   const rootNodes = childrenByParent.get(null) ?? [];
   rootNodes.forEach((node) => placeSubtree(node, 0));
 
-  return computeSortOrders(
-    nodes.map((node) => positionedNodes.get(node.id) ?? node),
-  );
+  return computeSortOrders(nodes.map((node) => positionedNodes.get(node.id) ?? node));
 }
 
 function hasOverlappingNodes(nodes: RoadmapFlowNodeType[]) {
@@ -227,10 +213,8 @@ function hasOverlappingNodes(nodes: RoadmapFlowNodeType[]) {
     for (let j = i + 1; j < nodes.length; j += 1) {
       const a = nodes[i];
       const b = nodes[j];
-      const overlapsHorizontally =
-        Math.abs(a.position.x - b.position.x) < NODE_WIDTH;
-      const overlapsVertically =
-        Math.abs(a.position.y - b.position.y) < NODE_HEIGHT;
+      const overlapsHorizontally = Math.abs(a.position.x - b.position.x) < NODE_WIDTH;
+      const overlapsVertically = Math.abs(a.position.y - b.position.y) < NODE_HEIGHT;
 
       if (overlapsHorizontally && overlapsVertically) {
         return true;
@@ -296,24 +280,18 @@ function makeNewChildNode({
   };
 }
 
-export function RoadmapVisualEditor({
-  roadmap,
-  initialNodes,
-}: RoadmapVisualEditorProps) {
+export function RoadmapVisualEditor({ roadmap, initialNodes }: RoadmapVisualEditorProps) {
   const t = useTranslations("roadmaps");
   const confirm = useConfirmDialog();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [fitViewAfterLayout, setFitViewAfterLayout] =
-    useState<(() => void) | null>(null);
+  const [fitViewAfterLayout, setFitViewAfterLayout] = useState<(() => void) | null>(null);
 
   const [nodes, setNodes, onNodesChangeBase] = useNodesState<RoadmapFlowNodeType>(
     prepareInitialFlowNodes(initialNodes),
   );
-  const [edges, setEdges, onEdgesChange] = useEdgesState(
-    toFlowEdges(initialNodes),
-  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(toFlowEdges(initialNodes));
 
   const selectedNode = useMemo(() => {
     if (!selectedNodeId) return null;
@@ -334,10 +312,7 @@ export function RoadmapVisualEditor({
 
       if (!sourceNode || !targetNode) return false;
 
-      return isValidParentChild(
-        sourceNode.data.nodeType,
-        targetNode.data.nodeType,
-      );
+      return isValidParentChild(sourceNode.data.nodeType, targetNode.data.nodeType);
     },
     [nodeById],
   );
@@ -349,17 +324,14 @@ export function RoadmapVisualEditor({
     [onNodesChangeBase],
   );
 
-  const onInit = useCallback<OnInit<RoadmapFlowNodeType, Edge>>(
-    (instance) => {
-      setFitViewAfterLayout(
-        () => () =>
-          window.requestAnimationFrame(() => {
-            instance.fitView({ duration: 300, padding: 0.2 });
-          }),
-      );
-    },
-    [],
-  );
+  const onInit = useCallback<OnInit<RoadmapFlowNodeType, Edge>>((instance) => {
+    setFitViewAfterLayout(
+      () => () =>
+        window.requestAnimationFrame(() => {
+          instance.fitView({ duration: 300, padding: 0.2 });
+        }),
+    );
+  }, []);
 
   const handleAutoLayout = useCallback(() => {
     setNodes((currentNodes) => layoutRoadmapNodes(currentNodes));
@@ -466,8 +438,7 @@ export function RoadmapVisualEditor({
           return currentNodes;
         }
 
-        const childType: RoadmapNodeType =
-          parent.data.nodeType === "goal" ? "task" : "subtask";
+        const childType: RoadmapNodeType = parent.data.nodeType === "goal" ? "task" : "subtask";
 
         const newNode = makeNewChildNode({
           parent,
@@ -477,10 +448,7 @@ export function RoadmapVisualEditor({
 
         setSelectedNodeId(newNode.id);
 
-        setEdges((currentEdges) => [
-          ...currentEdges,
-          makeEdge(parent.id, newNode.id),
-        ]);
+        setEdges((currentEdges) => [...currentEdges, makeEdge(parent.id, newNode.id)]);
 
         return layoutRoadmapNodes([...currentNodes, newNode]);
       });
@@ -489,10 +457,7 @@ export function RoadmapVisualEditor({
     [fitViewAfterLayout, setEdges, setNodes, t],
   );
 
-  function handleChangeNode(
-    nodeId: string,
-    data: Partial<RoadmapFlowNodeData>,
-  ) {
+  function handleChangeNode(nodeId: string, data: Partial<RoadmapFlowNodeData>) {
     setNodes((currentNodes) =>
       currentNodes.map((node) =>
         node.id === nodeId
@@ -545,14 +510,11 @@ export function RoadmapVisualEditor({
         return;
       }
 
-      setNodes((currentNodes) =>
-        currentNodes.filter((item) => !idsToDelete.has(item.id)),
-      );
+      setNodes((currentNodes) => currentNodes.filter((item) => !idsToDelete.has(item.id)));
 
       setEdges((currentEdges) =>
         currentEdges.filter(
-          (edge) =>
-            !idsToDelete.has(edge.source) && !idsToDelete.has(edge.target),
+          (edge) => !idsToDelete.has(edge.source) && !idsToDelete.has(edge.target),
         ),
       );
 
@@ -616,27 +578,74 @@ export function RoadmapVisualEditor({
 
   return (
     <div className="min-w-0 space-y-section">
-      <PageHeader eyebrow={t("editorTitle")} title={roadmap.title} action={<>
-        <Button type="button" variant="outline" size="icon" onClick={handleBackToDetail} aria-label={t("back")} title={t("back")}><ArrowLeft aria-hidden="true" /></Button>
-        <Button type="button" variant="outline" size="icon" onClick={handleAutoLayout} disabled={isPending} aria-label={t("autoLayout")} title={t("autoLayout")}><Workflow aria-hidden="true" /></Button>
-        <Button type="button" onClick={handleSave} disabled={isPending} aria-busy={isPending}><Save aria-hidden="true" />{isPending ? t("saving") : t("save")}</Button>
-      </>} />
+      <PageHeader
+        eyebrow={t("editorTitle")}
+        title={roadmap.title}
+        action={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handleBackToDetail}
+              aria-label={t("back")}
+              title={t("back")}
+            >
+              <ArrowLeft aria-hidden="true" />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={handleAutoLayout}
+              disabled={isPending}
+              aria-label={t("autoLayout")}
+              title={t("autoLayout")}
+            >
+              <Workflow aria-hidden="true" />
+            </Button>
+            <Button type="button" onClick={handleSave} disabled={isPending} aria-busy={isPending}>
+              <Save aria-hidden="true" />
+              {isPending ? t("saving") : t("save")}
+            </Button>
+          </>
+        }
+      />
       <div className="grid min-w-0 items-start gap-card xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <section aria-label={t("editorTitle")} className="min-w-0 overflow-hidden rounded-lg border border-border">
+        <section
+          aria-label={t("editorTitle")}
+          className="min-w-0 overflow-hidden rounded-lg border border-border"
+        >
           <div className="h-112 min-w-0 md:h-136">
-            <ReactFlow className="roadmap-editor-flow"
-              nodes={nodesWithCallbacks} edges={edges} nodeTypes={nodeTypes}
-              defaultEdgeOptions={defaultEdgeOptions} onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange} onConnect={onConnect} onReconnect={onReconnect}
-              onInit={onInit} isValidConnection={isValidConnection} edgesReconnectable
-              deleteKeyCode={null} minZoom={0.2} fitView fitViewOptions={{ padding: 0.15 }}>
+            <ReactFlow
+              className="roadmap-editor-flow"
+              nodes={nodesWithCallbacks}
+              edges={edges}
+              nodeTypes={nodeTypes}
+              defaultEdgeOptions={defaultEdgeOptions}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onReconnect={onReconnect}
+              onInit={onInit}
+              isValidConnection={isValidConnection}
+              edgesReconnectable
+              deleteKeyCode={null}
+              minZoom={0.2}
+              fitView
+              fitViewOptions={{ padding: 0.15 }}
+            >
               <MiniMap className="hidden md:block" pannable zoomable nodeColor="var(--elevated)" />
               <Controls />
               <Background color="var(--overlay)" />
             </ReactFlow>
           </div>
         </section>
-        <RoadmapNodeEditPanel selectedNode={selectedNode} onChangeNode={handleChangeNode} onDeleteNode={handleDeleteNode} />
+        <RoadmapNodeEditPanel
+          selectedNode={selectedNode}
+          onChangeNode={handleChangeNode}
+          onDeleteNode={handleDeleteNode}
+        />
       </div>
     </div>
   );

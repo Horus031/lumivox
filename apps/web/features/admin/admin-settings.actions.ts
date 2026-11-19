@@ -22,7 +22,7 @@ const updateCmsSettingSchema = z.object({
 });
 
 export async function updateAdminCmsSettingAction(
-  input: z.infer<typeof updateCmsSettingSchema>
+  input: z.infer<typeof updateCmsSettingSchema>,
 ): Promise<ActionResult> {
   try {
     const { supabase } = await requireAdmin();
@@ -62,9 +62,7 @@ export async function updateAdminCmsSettingAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating CMS setting.",
+        error instanceof Error ? error.message : "Unexpected error while updating CMS setting.",
     };
   }
 }

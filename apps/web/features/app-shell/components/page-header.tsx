@@ -7,12 +7,7 @@ type PageHeaderProps = {
   action?: ReactNode;
 };
 
-export function PageHeader({
-  eyebrow,
-  title,
-  description,
-  action,
-}: PageHeaderProps) {
+export function PageHeader({ eyebrow, title, description, action }: PageHeaderProps) {
   return (
     <header data-slot="page-header" className="min-w-0">
       {eyebrow ? (
@@ -32,7 +27,10 @@ export function PageHeader({
           ) : null}
         </div>
         {action ? (
-          <div data-slot="page-header-actions" className="flex min-w-0 max-w-full flex-wrap items-center gap-2 [&>*]:max-w-full">
+          <div
+            data-slot="page-header-actions"
+            className="flex min-w-0 max-w-full flex-wrap items-center gap-2 [&>*]:max-w-full"
+          >
             {action}
           </div>
         ) : null}

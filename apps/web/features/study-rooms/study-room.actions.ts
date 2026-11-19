@@ -56,9 +56,7 @@ export async function createStudyRoomAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while creating the study room.",
+        error instanceof Error ? error.message : "Unexpected error while creating the study room.",
     };
   }
 }
@@ -103,9 +101,7 @@ export async function joinPublicStudyRoomAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while joining the study room.",
+        error instanceof Error ? error.message : "Unexpected error while joining the study room.",
     };
   }
 }
@@ -150,16 +146,12 @@ export async function joinPrivateStudyRoomByCodeAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while joining the private room.",
+        error instanceof Error ? error.message : "Unexpected error while joining the private room.",
     };
   }
 }
 
-export async function leaveStudyRoomAction(
-  roomId: string,
-): Promise<ActionResult> {
+export async function leaveStudyRoomAction(roomId: string): Promise<ActionResult> {
   const parsed = roomIdSchema.safeParse({ roomId });
 
   if (!parsed.success) {
@@ -194,9 +186,7 @@ export async function leaveStudyRoomAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while leaving the study room.",
+        error instanceof Error ? error.message : "Unexpected error while leaving the study room.",
     };
   }
 }

@@ -292,27 +292,24 @@ async function confirmCandidate(): Promise<AttentionResponse> {
   }
 
   try {
-    const response = await fetch(
-      `${__LUMIVOX_API_ORIGIN__}/api/extension/distractions`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${data.session.access_token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          eventId: candidate.eventId,
-          sessionId: candidate.sessionId,
-          segmentId: candidate.segmentId,
-          distractionType: candidate.category,
-          durationSeconds: candidate.durationSeconds,
-        }),
-        credentials: "omit",
-        cache: "no-store",
-        signal: AbortSignal.timeout(15_000),
+    const response = await fetch(`${__LUMIVOX_API_ORIGIN__}/api/extension/distractions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${data.session.access_token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json",
       },
-    );
+      body: JSON.stringify({
+        eventId: candidate.eventId,
+        sessionId: candidate.sessionId,
+        segmentId: candidate.segmentId,
+        distractionType: candidate.category,
+        durationSeconds: candidate.durationSeconds,
+      }),
+      credentials: "omit",
+      cache: "no-store",
+      signal: AbortSignal.timeout(15_000),
+    });
 
     if (response.status === 401) {
       await clearTemporaryState();
@@ -374,13 +371,7 @@ async function confirmCandidate(): Promise<AttentionResponse> {
       await chrome.storage.session.remove(CANDIDATE_KEY);
     }
 
-    return attentionResult(
-      await enabled(),
-      await hasTabsPermission(),
-      null,
-      undefined,
-      true,
-    );
+    return attentionResult(await enabled(), await hasTabsPermission(), null, undefined, true);
   } catch {
     // Timeout is NOT proof of failure; keep candidate for retry.
     return attentionResult(
@@ -415,12 +406,7 @@ export async function handleAttentionRequest(
 
       case "ATTENTION_ENABLE":
         if (!(await hasTabsPermission())) {
-          return attentionResult(
-            false,
-            false,
-            null,
-            "Chrome chưa cấp quyền tabs.",
-          );
+          return attentionResult(false, false, null, "Chrome chưa cấp quyền tabs.");
         }
 
         await chrome.storage.local.setAccessLevel({
@@ -448,12 +434,7 @@ export async function handleAttentionRequest(
         return await confirmOnce();
     }
   } catch {
-    return attentionResult(
-      false,
-      false,
-      null,
-      "Không thể cập nhật trạng thái theo dõi.",
-    );
+    return attentionResult(false, false, null, "Không thể cập nhật trạng thái theo dõi.");
   }
 }
 
@@ -477,10 +458,7 @@ export function registerAttentionListeners(): void {
   });
 
   chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
-    if (
-      tab.active &&
-      (changeInfo.url !== undefined || changeInfo.status === "complete")
-    ) {
+    if (tab.active && (changeInfo.url !== undefined || changeInfo.status === "complete")) {
       queueObservation();
     }
   });
@@ -511,8 +489,7 @@ type StoredAttentionCandidate = AttentionCandidate & {
 const CANDIDATE_TTL_MS = 10 * 60 * 1000;
 
 function isStoredCandidate(value: unknown): value is StoredAttentionCandidate {
-  if (typeof value !== "object" || value === null || Array.isArray(value))
-    return false;
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
 
   const v = value as Record<string, unknown>;
 

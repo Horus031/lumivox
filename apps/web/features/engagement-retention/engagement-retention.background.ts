@@ -30,10 +30,7 @@ type ScheduleEngagementRecalculationOptions = {
 // optimization.
 const userEngagementQueues = new Map<string, Promise<void>>();
 
-function enqueueUserEngagementWork(
-  userId: string,
-  work: () => Promise<void>,
-): Promise<void> {
+function enqueueUserEngagementWork(userId: string, work: () => Promise<void>): Promise<void> {
   const previous = userEngagementQueues.get(userId) ?? Promise.resolve();
 
   const next = previous
@@ -66,10 +63,7 @@ export function scheduleEngagementRecalculation({
           await recalculateEngagementForUser(userId);
         }
       } catch (error) {
-        console.error(
-          `[Engagement] Deferred recalculation failed after ${source}:`,
-          error,
-        );
+        console.error(`[Engagement] Deferred recalculation failed after ${source}:`, error);
       }
     }),
   );

@@ -9,7 +9,7 @@ import {
 } from "@/features/study-room-chat/study-room-chat.schemas";
 
 export async function sendStudyRoomMessageAction(
-  input: SendStudyRoomMessageInput
+  input: SendStudyRoomMessageInput,
 ): Promise<ActionResult<{ messageId: string }>> {
   const parsed = sendStudyRoomMessageSchema.safeParse(input);
 
@@ -52,9 +52,7 @@ export async function sendStudyRoomMessageAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while sending the message.",
+        error instanceof Error ? error.message : "Unexpected error while sending the message.",
     };
   }
 }

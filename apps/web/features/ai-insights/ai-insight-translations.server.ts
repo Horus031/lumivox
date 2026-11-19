@@ -11,9 +11,10 @@ type AiInsightCardWithJsonPayloads = AiInsightCard & {
   recommended_actions: unknown;
 };
 
-export async function translateAiInsightCards<
-  TCard extends AiInsightCardWithJsonPayloads,
->(cards: TCard[], targetLocale: SupportedLocale): Promise<TCard[]> {
+export async function translateAiInsightCards<TCard extends AiInsightCardWithJsonPayloads>(
+  cards: TCard[],
+  targetLocale: SupportedLocale,
+): Promise<TCard[]> {
   if (cards.length === 0 || targetLocale === "en") {
     return cards;
   }
@@ -87,10 +88,7 @@ export async function translateAiInsightCards<
 
   const translations = await translateAiContentBatch(translationItems);
   const translatedTextByField = new Map(
-    translations.map((item) => [
-      `${item.entity_id}:${item.field_name}`,
-      item.translated_text,
-    ]),
+    translations.map((item) => [`${item.entity_id}:${item.field_name}`, item.translated_text]),
   );
 
   return cards.map((card) => {
@@ -105,10 +103,7 @@ export async function translateAiInsightCards<
       ...card,
       title: getTranslation("title", card.title),
       summary: getTranslation("summary", card.summary),
-      risk_interpretation: getTranslation(
-        "risk_interpretation",
-        card.risk_interpretation,
-      ),
+      risk_interpretation: getTranslation("risk_interpretation", card.risk_interpretation),
       confidence_note: getTranslation("confidence_note", card.confidence_note),
       evidence: evidence.map((item, index) => ({
         ...item,
@@ -120,10 +115,7 @@ export async function translateAiInsightCards<
       recommended_actions: recommendedActions.map((item, index) => ({
         ...item,
         action: getTranslation(`recommended_actions.${index}.action`, item.action),
-        rationale: getTranslation(
-          `recommended_actions.${index}.rationale`,
-          item.rationale,
-        ),
+        rationale: getTranslation(`recommended_actions.${index}.rationale`, item.rationale),
       })) as TCard["recommended_actions"],
     };
   });

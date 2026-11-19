@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  attentionResult,
-  isAttentionRequest,
-  isAttentionResponse,
-} from "./attention-protocol";
+import { attentionResult, isAttentionRequest, isAttentionResponse } from "./attention-protocol";
 
 const envelope = {
   channel: "lumivox.extension",
@@ -83,9 +79,7 @@ describe("Attention message protocol", () => {
   });
 
   it("accepts a confirmed save response", () => {
-    expect(
-      isAttentionResponse(attentionResult(true, true, null, undefined, true)),
-    ).toBe(true);
+    expect(isAttentionResponse(attentionResult(true, true, null, undefined, true))).toBe(true);
   });
 
   it("does not allow arbitrary saved values", () => {

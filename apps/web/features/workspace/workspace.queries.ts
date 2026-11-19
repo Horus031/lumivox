@@ -1,13 +1,8 @@
 import { requireUser } from "@/lib/auth/require-user";
 
-import type {
-  WorkspaceScope,
-  WorkspaceTask,
-} from "./workspace.types";
+import type { WorkspaceScope, WorkspaceTask } from "./workspace.types";
 
-export async function getWorkspaceTasks(
-  scope: WorkspaceScope,
-): Promise<WorkspaceTask[]> {
+export async function getWorkspaceTasks(scope: WorkspaceScope): Promise<WorkspaceTask[]> {
   const { supabase, user } = await requireUser();
 
   let rootTasksQuery = supabase
@@ -34,42 +29,26 @@ export async function getWorkspaceTasks(
     });
 
   if (scope.type === "goal") {
-    rootTasksQuery = rootTasksQuery.eq(
-      "goal_id",
-      scope.goalId,
-    );
+    rootTasksQuery = rootTasksQuery.eq("goal_id", scope.goalId);
   }
 
   if (scope.type === "unassigned") {
-    rootTasksQuery = rootTasksQuery.is(
-      "goal_id",
-      null,
-    );
+    rootTasksQuery = rootTasksQuery.is("goal_id", null);
   }
 
-  const {
-    data: rootTasks,
-    error: rootTasksError,
-  } = await rootTasksQuery;
+  const { data: rootTasks, error: rootTasksError } = await rootTasksQuery;
 
   if (rootTasksError) {
-    throw new Error(
-      `Failed to load workspace tasks: ${rootTasksError.message}`,
-    );
+    throw new Error(`Failed to load workspace tasks: ${rootTasksError.message}`);
   }
 
   if (!rootTasks?.length) {
     return [];
   }
 
-  const rootTaskIds = rootTasks.map(
-    (task) => task.id,
-  );
+  const rootTaskIds = rootTasks.map((task) => task.id);
 
-  const {
-    data: subtasks,
-    error: subtasksError,
-  } = await supabase
+  const { data: subtasks, error: subtasksError } = await supabase
     .from("tasks")
     .select(
       `
@@ -89,37 +68,25 @@ export async function getWorkspaceTasks(
     });
 
   if (subtasksError) {
-    throw new Error(
-      `Failed to load workspace subtasks: ${subtasksError.message}`,
-    );
+    throw new Error(`Failed to load workspace subtasks: ${subtasksError.message}`);
   }
 
-  const subtasksByParent = new Map<
-    string,
-    typeof subtasks
-  >();
+  const subtasksByParent = new Map<string, typeof subtasks>();
 
   for (const subtask of subtasks ?? []) {
     if (!subtask.parent_task_id) {
       continue;
     }
 
-    const existing =
-      subtasksByParent.get(
-        subtask.parent_task_id,
-      ) ?? [];
+    const existing = subtasksByParent.get(subtask.parent_task_id) ?? [];
 
     existing.push(subtask);
 
-    subtasksByParent.set(
-      subtask.parent_task_id,
-      existing,
-    );
+    subtasksByParent.set(subtask.parent_task_id, existing);
   }
 
   return rootTasks.map((task) => ({
     ...task,
-    subtasks:
-      subtasksByParent.get(task.id) ?? [],
+    subtasks: subtasksByParent.get(task.id) ?? [],
   })) as WorkspaceTask[];
 }

@@ -11,9 +11,7 @@ import {
   type UpdateGoalInput,
 } from "./goal.schemas";
 
-export async function createGoalAction(
-  input: CreateGoalInput,
-): Promise<ActionResult> {
+export async function createGoalAction(input: CreateGoalInput): Promise<ActionResult> {
   const parsed = createGoalSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -45,7 +43,6 @@ export async function createGoalAction(
       };
     }
 
-
     return {
       success: true,
       message: "Goal created successfully.",
@@ -54,17 +51,12 @@ export async function createGoalAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while creating goal.",
+      message: error instanceof Error ? error.message : "Unexpected error while creating goal.",
     };
   }
 }
 
-export async function updateGoalAction(
-  input: UpdateGoalInput,
-): Promise<ActionResult> {
+export async function updateGoalAction(input: UpdateGoalInput): Promise<ActionResult> {
   const parsed = updateGoalSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -78,15 +70,7 @@ export async function updateGoalAction(
   try {
     const { supabase } = await requireUser();
 
-    const {
-      goalId,
-      title,
-      description,
-      goalType,
-      status,
-      startDate,
-      targetDate,
-    } = parsed.data;
+    const { goalId, title, description, goalType, status, startDate, targetDate } = parsed.data;
 
     const { error } = await supabase
       .from("goals")
@@ -107,7 +91,6 @@ export async function updateGoalAction(
       };
     }
 
-
     return {
       success: true,
       message: "Goal updated successfully.",
@@ -116,10 +99,7 @@ export async function updateGoalAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while updating goal.",
+      message: error instanceof Error ? error.message : "Unexpected error while updating goal.",
     };
   }
 }
@@ -138,10 +118,7 @@ export async function deleteGoalAction(goalId: string): Promise<ActionResult> {
   try {
     const { supabase } = await requireUser();
 
-    const { error } = await supabase
-      .from("goals")
-      .delete()
-      .eq("id", parsed.data.goalId);
+    const { error } = await supabase.from("goals").delete().eq("id", parsed.data.goalId);
 
     if (error) {
       return {
@@ -149,7 +126,6 @@ export async function deleteGoalAction(goalId: string): Promise<ActionResult> {
         message: `Failed to delete goal: ${error.message}`,
       };
     }
-
 
     return {
       success: true,
@@ -159,10 +135,7 @@ export async function deleteGoalAction(goalId: string): Promise<ActionResult> {
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while deleting goal.",
+      message: error instanceof Error ? error.message : "Unexpected error while deleting goal.",
     };
   }
 }

@@ -52,9 +52,7 @@ function resolvePost(locale: "en" | "vi", slug: string) {
   if (exactPost) return exactPost;
 
   const sourcePost = getBlogPostBySlug(slug);
-  const translation = sourcePost
-    ? getBlogTranslation(sourcePost, locale)
-    : undefined;
+  const translation = sourcePost ? getBlogTranslation(sourcePost, locale) : undefined;
 
   if (translation) {
     permanentRedirect(`/${locale}/blog/${translation.slug}`);
@@ -105,11 +103,21 @@ export default async function BlogPostPage({ params }: PageProps) {
         <div className="mx-auto max-w-4xl">
           <nav aria-label="Breadcrumb" className="text-[12px] text-secondary">
             <ol className="flex flex-wrap items-center gap-2">
-              <li><Link href="/" className="hover:text-foreground">{t.home}</Link></li>
+              <li>
+                <Link href="/" className="hover:text-foreground">
+                  {t.home}
+                </Link>
+              </li>
               <li aria-hidden="true">/</li>
-              <li><Link href="/blog" className="hover:text-foreground">{t.blog}</Link></li>
+              <li>
+                <Link href="/blog" className="hover:text-foreground">
+                  {t.blog}
+                </Link>
+              </li>
               <li aria-hidden="true">/</li>
-              <li className="truncate text-foreground" aria-current="page">{post.title}</li>
+              <li className="truncate text-foreground" aria-current="page">
+                {post.title}
+              </li>
             </ol>
           </nav>
 
@@ -123,12 +131,21 @@ export default async function BlogPostPage({ params }: PageProps) {
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-[13px] text-secondary">
               <span>
                 {t.by}{" "}
-                <Link href="/about" className="font-medium text-foreground underline underline-offset-4">
+                <Link
+                  href="/about"
+                  className="font-medium text-foreground underline underline-offset-4"
+                >
                   Lumivox
                 </Link>
               </span>
-              <span>{t.published} <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time></span>
-              <span>{t.updated} <time dateTime={post.modifiedAt}>{formatDate(post.modifiedAt, locale)}</time></span>
+              <span>
+                {t.published}{" "}
+                <time dateTime={post.publishedAt}>{formatDate(post.publishedAt, locale)}</time>
+              </span>
+              <span>
+                {t.updated}{" "}
+                <time dateTime={post.modifiedAt}>{formatDate(post.modifiedAt, locale)}</time>
+              </span>
             </div>
           </header>
 

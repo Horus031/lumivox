@@ -10,10 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 
-export function ForgotPasswordForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+export function ForgotPasswordForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const locale = useLocale();
   const t = useTranslations("auth.forgotPassword");
   const authT = useTranslations("auth");
@@ -74,17 +71,29 @@ export function ForgotPasswordForm({
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              {error && <p role="alert" className="auth-form-error">{error}</p>}
+              {error && (
+                <p role="alert" className="auth-form-error">
+                  {error}
+                </p>
+              )}
               <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
                 {isLoading ? t("submitting") : t("submit")}
-                {isLoading ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : <ArrowRight aria-hidden="true" />}
+                {isLoading ? (
+                  <LoaderCircle className="animate-spin" aria-hidden="true" />
+                ) : (
+                  <ArrowRight aria-hidden="true" />
+                )}
               </Button>
             </div>
           </form>
         </>
       )}
-      <Link href="/auth/login" className="flex items-center justify-center gap-2 text-sm underline-offset-4 hover:underline">
-        <ArrowLeft size={16} aria-hidden="true" />{authT("backToLogin")}
+      <Link
+        href="/auth/login"
+        className="flex items-center justify-center gap-2 text-sm underline-offset-4 hover:underline"
+      >
+        <ArrowLeft size={16} aria-hidden="true" />
+        {authT("backToLogin")}
       </Link>
     </div>
   );

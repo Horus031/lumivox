@@ -33,9 +33,7 @@ function matchesDomain(hostname: string, domain: string): boolean {
   return hostname === domain || hostname.endsWith(`.${domain}`);
 }
 
-export function classifyPotentialDistraction(
-  url: string,
-): AttentionCategory | null {
+export function classifyPotentialDistraction(url: string): AttentionCategory | null {
   let parsed: URL;
 
   try {
@@ -51,9 +49,7 @@ export function classifyPotentialDistraction(
   const hostname = parsed.hostname.toLowerCase();
 
   for (const category of ["social_media", "messaging"] as const) {
-    if (
-      siteGroups[category].some((domain) => matchesDomain(hostname, domain))
-    ) {
+    if (siteGroups[category].some((domain) => matchesDomain(hostname, domain))) {
       return category;
     }
   }

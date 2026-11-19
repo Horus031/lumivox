@@ -14,9 +14,7 @@ export default function TrustPipeline() {
           <span className="trust-pipeline__node">
             <Icon />
           </span>
-          <span className="trust-pipeline__label">
-            {String(index + 1).padStart(2, "0")}
-          </span>
+          <span className="trust-pipeline__label">{String(index + 1).padStart(2, "0")}</span>
         </div>
       ))}
       <div className="trust-pipeline__line" />

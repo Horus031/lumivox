@@ -20,28 +20,28 @@ The evaluation answers the following questions:
 
 ## 3. Test Conditions
 
-| Condition | Description |
-|---|---|
-| General AI | No document selected |
-| RAG top-k 3 no_rule | Selected document, top-k 3, no strict grounding |
-| RAG top-k 5 no_rule | Selected document, top-k 5, no strict grounding |
-| RAG top-k 7 no_rule | Selected document, top-k 7, no strict grounding |
-| RAG top-k 3 grounded_rule | Selected document, top-k 3, strict grounding |
-| RAG top-k 5 grounded_rule | Selected document, top-k 5, strict grounding |
-| RAG top-k 7 grounded_rule | Selected document, top-k 7, strict grounding |
+| Condition                 | Description                                     |
+| ------------------------- | ----------------------------------------------- |
+| General AI                | No document selected                            |
+| RAG top-k 3 no_rule       | Selected document, top-k 3, no strict grounding |
+| RAG top-k 5 no_rule       | Selected document, top-k 5, no strict grounding |
+| RAG top-k 7 no_rule       | Selected document, top-k 7, no strict grounding |
+| RAG top-k 3 grounded_rule | Selected document, top-k 3, strict grounding    |
+| RAG top-k 5 grounded_rule | Selected document, top-k 5, strict grounding    |
+| RAG top-k 7 grounded_rule | Selected document, top-k 7, strict grounding    |
 
 ## 4. Evaluation Metrics
 
 Each answer is scored from 1 to 5.
 
-| Metric | Meaning |
-|---|---|
-| Relevance | How well the answer addresses the question |
-| Groundedness | How well the answer is supported by selected document context |
-| Clarity | How understandable the answer is for a student |
-| Completeness | Whether the answer covers the necessary key points |
-| Hallucination Safety | Whether the answer avoids unsupported claims |
-| Usefulness | How helpful the answer is for study |
+| Metric               | Meaning                                                       |
+| -------------------- | ------------------------------------------------------------- |
+| Relevance            | How well the answer addresses the question                    |
+| Groundedness         | How well the answer is supported by selected document context |
+| Clarity              | How understandable the answer is for a student                |
+| Completeness         | Whether the answer covers the necessary key points            |
+| Hallucination Safety | Whether the answer avoids unsupported claims                  |
+| Usefulness           | How helpful the answer is for study                           |
 
 ## 5. Recommended Production Default
 

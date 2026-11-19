@@ -21,6 +21,13 @@ import {
 
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
+import {
+  getWorkspaceTaskRiskStates,
+  type WorkspaceTaskRiskMap,
+} from "@/features/native-task-risk/task-risk-workspace.queries";
+
+import { resolveTaskRiskSnapshot } from "@/features/native-task-risk/task-risk-snapshot.adapter";
+
 type WorkspacePageProps = {
   searchParams: Promise<{
     goal?: string;
@@ -36,6 +43,7 @@ type WorkspacePageProps = {
 function resolveTaskTab(value: string | undefined): TaskDrawerTab {
   if (
     value === "overview" ||
+    value === "risk" ||
     value === "subtasks" ||
     value === "documents" ||
     value === "review"
@@ -65,6 +73,26 @@ export default async function WorkspacePage({
 
   const tasks = await getWorkspaceTasks(scope);
 
+  const referenceNow = new Date().toISOString();
+  const riskNow = new Date(referenceNow);
+
+  let riskStates: WorkspaceTaskRiskMap;
+
+  try {
+    riskStates = await getWorkspaceTaskRiskStates(tasks, {
+      now: riskNow,
+    });
+  } catch {
+    // Risk is an enhancement, not a prerequisite for Workspace.
+    // Never interpret a failed risk query as low risk.
+    riskStates = Object.fromEntries(
+      tasks.map((task) => [
+        task.id,
+        resolveTaskRiskSnapshot(task, undefined, riskNow),
+      ]),
+    ) as WorkspaceTaskRiskMap;
+  }
+
   const selectedKey = getWorkspaceScopeKey(scope);
 
   const defaultGoalId = scope.type === "goal" ? scope.goalId : undefined;
@@ -77,8 +105,6 @@ export default async function WorkspacePage({
   const initialTaskTab = resolveTaskTab(params.tab);
 
   const initialEditMode = params.edit === "1";
-
-  const referenceNow = new Date().toISOString();
 
   return (
     <section className="min-w-0 space-y-section">
@@ -111,6 +137,7 @@ export default async function WorkspacePage({
           initialTaskId={initialTaskId}
           initialTaskTab={initialTaskTab}
           initialEditMode={initialEditMode}
+          riskStates={riskStates}
         />
       </div>
     </section>

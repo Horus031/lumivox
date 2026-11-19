@@ -58,15 +58,9 @@ type StoryRevealProps = {
   className?: string;
 };
 
-export default function StoryReveal({
-  children,
-  className,
-}: StoryRevealProps) {
+export default function StoryReveal({ children, className }: StoryRevealProps) {
   return (
-    <div
-      data-landing-motion="decorative"
-      className={className}
-    >
+    <div data-landing-motion="decorative" className={className}>
       {children}
     </div>
   );
@@ -100,9 +94,9 @@ Nếu `MotionConfig` chỉ còn tồn tại trong `story-motion-provider.tsx` v�
 Giữ package `motion`, vì chúng ta vẫn dùng:
 
 ```ts
-useScroll
-useMotionValueEvent
-useReducedMotion
+useScroll;
+useMotionValueEvent;
+useReducedMotion;
 ```
 
 trong Hero/Journey controllers.
@@ -203,13 +197,13 @@ Và `JsonLd` vẫn nằm ngoài/bên cạnh story presentation logic, không b�
 
 Chạy 3 lần mỗi case và lấy median:
 
-| Route | Hard gate |
-|---|---|
-| `/en` mobile | Perf ≥ 90, LCP ≤ 3.5s, CLS ≤ .05 |
-| `/en` desktop | Perf ≥ 87, LCP ≤ 1.7s, CLS ≤ .05 |
-| `/vi` mobile | Không thấp hơn Perf 74 / LCP 4.9s |
-| `/vi` desktop | Perf ≥ 93, LCP ≤ 1.1s |
-| tất cả | TBT ≤ 250ms |
+| Route         | Hard gate                         |
+| ------------- | --------------------------------- |
+| `/en` mobile  | Perf ≥ 90, LCP ≤ 3.5s, CLS ≤ .05  |
+| `/en` desktop | Perf ≥ 87, LCP ≤ 1.7s, CLS ≤ .05  |
+| `/vi` mobile  | Không thấp hơn Perf 74 / LCP 4.9s |
+| `/vi` desktop | Perf ≥ 93, LCP ≤ 1.1s             |
+| tất cả        | TBT ≤ 250ms                       |
 
 Nếu `/vi` mobile tốt hơn baseline thì càng tốt, nhưng hard rule ở Phase 9 là **không regression**.
 
@@ -233,6 +227,7 @@ Candidate:
 redesign/landing-storytelling-page <SHA>
 
 ## Quality gates
+
 - npm ci: PASS
 - lint: PASS
 - unit: PASS
@@ -241,15 +236,18 @@ redesign/landing-storytelling-page <SHA>
 - Vercel: READY
 
 ## Performance
+
 <Phase 0 vs final>
 
 ## Accessibility
+
 - No-JS critical content: PASS
 - Reduced motion: PASS
 - FAQ keyboard: PASS
 - Horizontal overflow EN/VI: PASS
 
 ## SEO invariants
+
 - EN H1: PASS
 - VI H1: PASS
 - metadata unchanged: PASS
@@ -257,29 +255,32 @@ redesign/landing-storytelling-page <SHA>
 - internal links: PASS
 
 ## Responsive audit
+
 <viewport matrix>
 
 ## Merge decision
+
 READY / BLOCKED
 
 Acceptance gate cuối cùng:
 
-| Area | Phase 9 phải đạt |
-|---|---|
-| Branch | `behind main = 0` |
-| Vercel | READY |
-| Install | `npm ci` PASS |
-| Lint | PASS |
-| Unit | PASS |
-| Build | PASS |
-| Landing Playwright | PASS |
-| No-JS | PASS |
-| Reduced motion | PASS |
-| EN/VI overflow | PASS |
-| Performance | Không regression quá guardrail |
-| SEO metadata | Unchanged |
-| H1 ownership | Unchanged |
-| JSON-LD | Unchanged |
-| Client cleanup | StoryReveal không hydrate vô ích |
-| Package drift | `@types/react` cleanup |
-| Final report | Có merge decision rõ ràng |
+| Area               | Phase 9 phải đạt                 |
+| ------------------ | -------------------------------- |
+| Branch             | `behind main = 0`                |
+| Vercel             | READY                            |
+| Install            | `npm ci` PASS                    |
+| Lint               | PASS                             |
+| Unit               | PASS                             |
+| Build              | PASS                             |
+| Landing Playwright | PASS                             |
+| No-JS              | PASS                             |
+| Reduced motion     | PASS                             |
+| EN/VI overflow     | PASS                             |
+| Performance        | Không regression quá guardrail   |
+| SEO metadata       | Unchanged                        |
+| H1 ownership       | Unchanged                        |
+| JSON-LD            | Unchanged                        |
+| Client cleanup     | StoryReveal không hydrate vô ích |
+| Package drift      | `@types/react` cleanup           |
+| Final report       | Có merge decision rõ ràng        |
+```

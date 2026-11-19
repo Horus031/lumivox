@@ -11,20 +11,14 @@ type ProtectedAppShellProps = {
   children: ReactNode;
 };
 
-export function ProtectedAppShell({
-  profile,
-  children,
-}: ProtectedAppShellProps) {
+export function ProtectedAppShell({ profile, children }: ProtectedAppShellProps) {
   return (
     <div className="relative min-h-screen w-full bg-background text-foreground">
       {/* <div className="fixed h-screen w-full bg-[url('/app-bg6.jpg')] bg-cover bg-no-repeat bg-center z-0 blur-xs brightness-75 "></div> */}
 
       <MobileAppHeader profile={profile} />
 
-      <AppShellFrame
-        profile={profile}
-        sidebar={<DesktopSidebar profile={profile} />}
-      >
+      <AppShellFrame profile={profile} sidebar={<DesktopSidebar profile={profile} />}>
         {children}
       </AppShellFrame>
 

@@ -1,10 +1,7 @@
 import { AdminMetricCard } from "@/features/admin/components/admin-metric-card";
 import { AdminRecentUsersTable } from "@/features/admin/components/admin-recent-users-table";
 import { PageHeader } from "@/features/app-shell/components/page-header";
-import {
-  getAdminDashboardMetrics,
-  getAdminRecentUsers,
-} from "@/features/admin/admin.queries";
+import { getAdminDashboardMetrics, getAdminRecentUsers } from "@/features/admin/admin.queries";
 import { getLocale, getTranslations } from "next-intl/server";
 
 function formatNumber(value: number | null | undefined, locale: string) {
@@ -23,7 +20,10 @@ export default async function AdminDashboardPage() {
     <div className="min-w-0 space-y-section">
       <PageHeader eyebrow={t("eyebrow")} title={t("title")} description={t("description")} />
 
-      <section aria-label={t("metricsLabel")} className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section
+        aria-label={t("metricsLabel")}
+        className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-4"
+      >
         <AdminMetricCard
           label={t("metrics.totalUsers")}
           value={formatNumber(metrics?.total_users, locale)}

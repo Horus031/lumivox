@@ -14,12 +14,7 @@ type SupabaseServerClient = Awaited<ReturnType<typeof requireUser>>["supabase"];
 
 const weekdaySchema = z.enum(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
 
-const roadmapLevelSchema = z.enum([
-  "beginner",
-  "intermediate",
-  "advanced",
-  "custom",
-]);
+const roadmapLevelSchema = z.enum(["beginner", "intermediate", "advanced", "custom"]);
 
 const supportedLocaleSchema = z.enum(["en", "vi"]);
 
@@ -154,9 +149,7 @@ export async function generateLearningRoadmapAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while generating roadmap.",
+        error instanceof Error ? error.message : "Unexpected error while generating roadmap.",
     };
   }
 }
@@ -198,9 +191,7 @@ function isValidRoadmapConnection(
   );
 }
 
-function validateEditorTree(
-  nodes: z.infer<typeof roadmapEditorNodeSchema>[],
-): string | null {
+function validateEditorTree(nodes: z.infer<typeof roadmapEditorNodeSchema>[]): string | null {
   const nodeById = new Map(nodes.map((node) => [node.id, node]));
 
   for (const node of nodes) {
@@ -268,8 +259,7 @@ export async function saveRoadmapEditorStateAction(
     if (!parsed.success) {
       return {
         success: false,
-        message:
-          parsed.error.issues[0]?.message ?? "Invalid roadmap editor state.",
+        message: parsed.error.issues[0]?.message ?? "Invalid roadmap editor state.",
       };
     }
 
@@ -305,11 +295,9 @@ export async function saveRoadmapEditorStateAction(
       position_y: node.positionY,
     }));
 
-    const { error } = await supabase
-      .from("learning_roadmap_nodes")
-      .upsert(rows, {
-        onConflict: "id",
-      });
+    const { error } = await supabase.from("learning_roadmap_nodes").upsert(rows, {
+      onConflict: "id",
+    });
 
     if (error) {
       return {
@@ -386,9 +374,7 @@ export async function deleteRoadmapNodeAction(
     return {
       success: false,
       message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while deleting roadmap node.",
+        error instanceof Error ? error.message : "Unexpected error while deleting roadmap node.",
     };
   }
 }
@@ -451,10 +437,7 @@ export async function applyLearningRoadmapAction(
   } catch (error) {
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while applying roadmap.",
+      message: error instanceof Error ? error.message : "Unexpected error while applying roadmap.",
     };
   }
 }

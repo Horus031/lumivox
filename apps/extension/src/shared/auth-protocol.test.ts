@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  authResult,
-  isAuthRequest,
-  isAuthResponse,
-} from "./auth-protocol";
+import { authResult, isAuthRequest, isAuthResponse } from "./auth-protocol";
 
 const envelope = {
   channel: "lumivox.extension",
@@ -61,13 +57,10 @@ describe("Extension authentication protocol", () => {
   });
 
   it("only accepts well-formed auth responses", () => {
-    const response = authResult(
-      "signed_in",
-      {
-        id: "user-id",
-        email: "student@example.test",
-      },
-    );
+    const response = authResult("signed_in", {
+      id: "user-id",
+      email: "student@example.test",
+    });
 
     expect(isAuthResponse(response)).toBe(true);
 
@@ -80,24 +73,15 @@ describe("Extension authentication protocol", () => {
   });
 
   it("never serializes credentials into results", () => {
-    const response = authResult(
-      "signed_in",
-      {
-        id: "user-id",
-        email: "student@example.test",
-      },
-    );
+    const response = authResult("signed_in", {
+      id: "user-id",
+      email: "student@example.test",
+    });
 
-    expect(response).not.toHaveProperty(
-      "access_token",
-    );
+    expect(response).not.toHaveProperty("access_token");
 
-    expect(response).not.toHaveProperty(
-      "refresh_token",
-    );
+    expect(response).not.toHaveProperty("refresh_token");
 
-    expect(response).not.toHaveProperty(
-      "password",
-    );
+    expect(response).not.toHaveProperty("password");
   });
 });

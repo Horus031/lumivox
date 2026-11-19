@@ -1,8 +1,13 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
+from postgrest.exceptions import APIError
 
 from app.schemas.focus_v2 import (
     CreateFocusV2Request,
     CreateFocusV2Response,
+    CreateStudyFocusRequest,
+    CreateStudyFocusResponse,
     TransitionFocusV2Request,
     TransitionFocusV2Response,
 )
@@ -11,10 +16,23 @@ from app.services.focus_v2_service import (
     FocusV2BadRequest,
     FocusV2Conflict,
     create_focus_v2,
+    create_study_focus,
     transition_focus_v2,
 )
 
 router = APIRouter(dependencies=[Depends(verify_internal_api_key)])
+logger = logging.getLogger(__name__)
+
+STUDY_FOCUS_ERRORS = {
+    "22023": (400, "invalidInput"),
+    "PT403": (403, "notAuthorized"),
+    "PT422": (410, "ineligibleSession"),
+    "PT409": (409, "requestConflict"),
+    "PT423": (423, "activeFocusConflict"),
+    "55P03": (429, "retryableConflict"),
+    "40001": (429, "retryableConflict"),
+    "40P01": (429, "retryableConflict"),
+}
 
 
 @router.post("/create", response_model=CreateFocusV2Response)
@@ -25,6 +43,20 @@ def create(payload: CreateFocusV2Request):
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except FocusV2Conflict as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/create-from-study-session", response_model=CreateStudyFocusResponse)
+def create_from_study_session(payload: CreateStudyFocusRequest):
+    try:
+        return create_study_focus(payload)
+    except APIError as exc:
+        error = STUDY_FOCUS_ERRORS.get(exc.code)
+        if error is None:
+            raise
+        status, detail = error
+        if status in (409, 423, 429):
+            logger.warning("study_focus_launch_conflict outcome=%s", detail)
+        raise HTTPException(status_code=status, detail=detail) from exc
 
 
 @router.post("/transition", response_model=TransitionFocusV2Response)

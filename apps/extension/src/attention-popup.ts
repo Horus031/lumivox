@@ -14,9 +14,7 @@ function required<T extends HTMLElement>(id: string): T {
   return el as T;
 }
 
-async function send(
-  type: AttentionRequest["type"],
-): Promise<AttentionResponse> {
+async function send(type: AttentionRequest["type"]): Promise<AttentionResponse> {
   const response: unknown = await chrome.runtime.sendMessage({
     channel: PROTOCOL_CHANNEL,
     version: PROTOCOL_VERSION,
@@ -80,8 +78,7 @@ export function initializeAttentionPopup(): void {
     candidatePanel.hidden = candidate === null;
 
     if (candidate) {
-      const group =
-        candidate.category === "social_media" ? "mạng xã hội" : "nhắn tin";
+      const group = candidate.category === "social_media" ? "mạng xã hội" : "nhắn tin";
 
       candidateText.textContent =
         `Có thể bạn đã dành khoảng ` +
@@ -144,8 +141,7 @@ export function initializeAttentionPopup(): void {
 
         await refresh();
       } catch {
-        error.textContent =
-          "Chưa thể thu hồi quyền. Kiểm tra chrome://extensions.";
+        error.textContent = "Chưa thể thu hồi quyền. Kiểm tra chrome://extensions.";
       } finally {
         setBusy(false);
       }
