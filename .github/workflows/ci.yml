@@ -56,6 +56,10 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Production release safeguards
+        working-directory: .
+        run: node --test scripts/ci/production-safeguards.test.mjs
+
       - name: Unit tests
         run: npm run test:unit
 
