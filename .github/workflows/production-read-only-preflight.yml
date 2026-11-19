@@ -1,0 +1,32 @@
+name: Production Read-only Preflight
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-read-only-preflight
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Production · Vercel read-only preflight
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    environment:
+      name: Production
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      EXPECTED_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verify project binding with GET only
+        run: node scripts/ci/production-vercel-release.mjs preflight
