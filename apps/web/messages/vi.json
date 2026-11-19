@@ -2716,6 +2716,14 @@
       "stale": "Cần cập nhật",
       "loading": "Đang kiểm tra"
     },
+    "prediction": {
+      "create": "Đánh giá rủi ro",
+      "refresh": "Cập nhật dự báo",
+      "pending": "Đang đánh giá rủi ro…",
+      "unavailable": "Chưa thể tải dự báo đủ tin cậy. Vui lòng thử lại.",
+      "ineligible": "Hãy chọn Task chưa hoàn thành có hạn chót trong 14 ngày tới.",
+      "limited": "Tạm thời chưa thể đánh giá hoặc đã đạt giới hạn yêu cầu. Vui lòng thử lại sau."
+    },
     "summary": {
       "title": "Nguy cơ trễ hạn Task",
       "subtitle": "Dự báo dựa trên hoạt động học tập của bạn",
