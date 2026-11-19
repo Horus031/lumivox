@@ -39,12 +39,14 @@ import { Pencil, Trash2, X } from "lucide-react";
 import { TaskStudyScheduleSection } from "@/features/learning-schedule/components/task-study-schedule-section";
 
 import { TaskRiskSummary } from "@/features/native-task-risk/components/task-risk-summary";
+import { TaskRiskPredictionButton } from "@/features/native-task-risk/components/task-risk-prediction-button";
 
 import { startTaskRiskRecoveryAction } from "@/features/native-task-risk/task-risk-recovery.actions";
 import { TaskRiskRecoveryHistory } from "@/features/native-task-risk/components/task-risk-recovery-history";
 import { TaskRiskSuggestions } from "@/features/native-task-risk/components/task-risk-suggestions";
 
 import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+import { isTaskRiskEligible } from "@/features/native-task-risk/task-risk-snapshot.adapter";
 
 import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-presentation.types";
 
@@ -108,6 +110,10 @@ export function TaskDetailsDrawer({
   const [isDeleting, startDeleteTransition] = useTransition();
 
   const [recovery, setRecovery] = useState<{ taskId: string; id: string; action: string } | null>(null);
+  const [predictedRisk, setPredictedRisk] = useState<{
+    taskId: string; updatedAt: string; baseState: TaskRiskViewState | undefined;
+    state: TaskRiskViewState;
+  } | null>(null);
   const recoveryKeys = useRef(new Map<string, string>());
   const recoveryRequest = useRef(0);
   const taskId = task?.id ?? null;
@@ -171,8 +177,12 @@ export function TaskDetailsDrawer({
   const currentDetails = details?.task.id === task.id ? details : null;
   const currentTask = currentDetails?.task ?? task;
 
-  const currentRiskState: TaskRiskViewState = riskNow
-    ? getTaskRiskDisplayState(currentTask, riskState, riskNow)
+  const localRisk = predictedRisk?.taskId === currentTask.id &&
+    predictedRisk.updatedAt === currentTask.updated_at && predictedRisk.baseState === riskState
+    ? predictedRisk : null;
+  const riskCheckedAt = localRisk ? new Date() : riskNow;
+  const currentRiskState: TaskRiskViewState = riskCheckedAt
+    ? getTaskRiskDisplayState(currentTask, localRisk?.state ?? riskState, riskCheckedAt)
     : (riskState ?? { status: "unavailable" });
 
   async function handleRecoveryAction(
@@ -472,6 +482,18 @@ export function TaskDetailsDrawer({
 
           <TabsContent value="risk" className="min-w-0 space-y-card">
             <TaskRiskSummary state={currentRiskState} />
+            {(currentRiskState.status === "unavailable" || currentRiskState.status === "stale") &&
+              isTaskRiskEligible(currentTask, new Date()) && (
+              <TaskRiskPredictionButton
+                key={`${currentTask.id}:${currentTask.updated_at}`}
+                taskId={currentTask.id}
+                stale={currentRiskState.status === "stale"}
+                onPredicted={(state) => {
+                  setPredictedRisk({ taskId: currentTask.id, updatedAt: currentTask.updated_at, baseState: riskState, state });
+                  router.refresh();
+                }}
+              />
+            )}
 
             <TaskRiskSuggestions
               state={currentRiskState}

@@ -33,6 +33,7 @@ const mocks = vi.hoisted(() => ({
   error: vi.fn(),
   success: vi.fn(),
   confirm: vi.fn(),
+  predictRisk: vi.fn(),
 }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: mocks.refresh }) }));
 vi.mock("@/i18n/navigation", () => ({
@@ -47,6 +48,9 @@ vi.mock("@/features/native-task-risk/task-risk-recovery.actions", () => ({
   startTaskRiskRecoveryAction: async () => "813faa4e-3d01-4d62-8099-e53d79c33331",
   loadTaskRiskRecoveryHistoryAction: async () => [],
   reassessTaskRiskAfterRecoveryAction: async () => false,
+}));
+vi.mock("@/features/native-task-risk/task-risk-prediction.actions", () => ({
+  predictTaskRiskAction: mocks.predictRisk,
 }));
 vi.mock("@/features/tasks/task.actions", () => ({
   getTaskDetailsAction: mocks.details,
@@ -213,6 +217,55 @@ describe("Task scheduling UI", () => {
       [`/focus?taskId=${a.id}&recoveryAttemptId=813faa4e-3d01-4d62-8099-e53d79c33331`],
     ]);
     expect(mocks.details).toHaveBeenCalledOnce();
+  });
+
+  function predictionFixture() {
+    const task = {
+      ...a, due_at: new Date(Date.now() + 86400000).toISOString(), due_date: null,
+      updated_at: new Date(Date.now() - 60000).toISOString(),
+    };
+    const high = TASK_RISK_UI_FIXTURES.find(item => item.id === "high")!.state;
+    if (high.status !== "ready") throw new Error("Expected ready fixture");
+    const state = { ...high, alert: {
+      ...high.alert, task_id: task.id, due_at: task.due_at, predicted_at: new Date().toISOString(),
+    } };
+    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
+    return { task, state };
+  }
+
+  it("assesses a task with no prediction and updates its risk summary immediately", async () => {
+    const { task, state } = predictionFixture();
+    mocks.predictRisk.mockResolvedValue({ success: true, state });
+    await render(<TaskDetailsDrawer task={task} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    expect(host.querySelector('[data-risk-view-state="unavailable"]')).not.toBeNull();
+    await click("create");
+    expect(mocks.predictRisk).toHaveBeenCalledWith(task.id);
+    expect(host.querySelector('[data-risk-view-state="ready"]')).not.toBeNull();
+    expect(mocks.refresh).toHaveBeenCalled();
+    expect([...host.querySelectorAll("button")].some(x => x.textContent === "create")).toBe(false);
+  });
+
+  it("does not put a delayed prediction for Task A into Task B", async () => {
+    const { task, state } = predictionFixture();
+    const response = deferred<{ success: true; state: typeof state }>();
+    mocks.predictRisk.mockReturnValue(response.promise);
+    await render(<TaskDetailsDrawer task={task} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    act(() => button("create").click());
+    const nextTask = { ...task, id: b.id };
+    mocks.details.mockResolvedValue({ success: true, data: { task: nextTask, subtasks: [], documents: [] } });
+    await render(<TaskDetailsDrawer task={nextTask} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    await act(async () => response.resolve({ success: true, state }));
+    expect(host.querySelector('[data-risk-view-state="ready"]')).toBeNull();
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+
+  it("does not offer initial assessment for an ineligible Task", async () => {
+    const { task } = predictionFixture();
+    const completed = { ...task, status: "completed" as const };
+    mocks.details.mockResolvedValue({ success: true, data: { task: completed, subtasks: [], documents: [] } });
+    await render(<TaskDetailsDrawer task={completed} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    expect([...host.querySelectorAll("button")].some(x => x.textContent === "create")).toBe(false);
+    expect(mocks.predictRisk).not.toHaveBeenCalled();
   });
 
   it("4.1 renders engine preview and passes the same valid draft without mutations", async () => {
