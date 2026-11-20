@@ -110,6 +110,18 @@ jobs:
 
       - name: Production smoke checks
         run: |
-          curl --fail --silent --show-error "${AI_API_URL%/}/api/v1/health" >/dev/null
-          curl --fail --silent --show-error "${WEB_URL%/}/api/health" >/dev/null
-          curl --fail --silent --show-error --location "${WEB_URL%/}/" >/dev/null
+          for url in \
+            "${AI_API_URL%/}/api/v1/health" \
+            "${WEB_URL%/}/api/health" \
+            "${WEB_URL%/}/"
+          do
+            echo "Smoke check: $url"
+            curl --fail --silent --show-error --location \
+              --connect-timeout 10 \
+              --max-time 30 \
+              --retry 3 \
+              --retry-all-errors \
+              --retry-delay 3 \
+              --retry-max-time 120 \
+              "$url" >/dev/null
+          done
