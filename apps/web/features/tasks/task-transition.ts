@@ -62,9 +62,9 @@ const DIRECT_TRANSITIONS: Record<TaskStatus, readonly DirectTaskStatus[]> = {
 };
 
 export function canDirectlyTransitionTask(from: TaskStatus, to: DirectTaskStatus) {
-  if (from === to) {
-    return false;
-  }
+  return from !== to && getDirectTaskStatusTargets(from).includes(to);
+}
 
-  return DIRECT_TRANSITIONS[from].includes(to);
+export function getDirectTaskStatusTargets(from: TaskStatus): readonly DirectTaskStatus[] {
+  return DIRECT_TRANSITIONS[from];
 }

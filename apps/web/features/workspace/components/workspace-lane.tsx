@@ -1,13 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { pointerIntersection } from "@dnd-kit/collision";
 import { useDroppable } from "@dnd-kit/react";
 import { ChevronLeft, ChevronRight, LockKeyhole } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isDirectTaskStatusTarget } from "@/features/tasks/task-transition";
+import { getDirectTaskStatusTargets } from "@/features/tasks/task-transition";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
+import type { MouseEvent } from "react";
 import type { TaskStatus } from "@/features/tasks/task-status";
 import type { WorkspaceTask } from "../workspace.types";
 import { WorkspaceTaskCard } from "./workspace-task-card";
@@ -20,7 +22,10 @@ type WorkspaceLaneProps = {
   tasks: WorkspaceTask[];
   total: number;
   pagination?: { page: number; totalPages: number; previousHref?: string; nextHref?: string };
-  onOpenTask: (task: WorkspaceTask, trigger: HTMLButtonElement) => void;
+  dropAllowed: boolean;
+  onCardPointerDown: () => void;
+  onOpenTask: (task: WorkspaceTask, event: MouseEvent<HTMLButtonElement>) => void;
+  onMoveTask: (taskId: string, targetStatus: TaskStatus) => void;
   disabled: boolean;
   quickCreateGoalId: string | null;
   quickCreateBoardHref?: string;
@@ -33,7 +38,10 @@ export function WorkspaceLane({
   tasks,
   total,
   pagination,
+  dropAllowed,
+  onCardPointerDown,
   onOpenTask,
+  onMoveTask,
   disabled,
   quickCreateGoalId,
   quickCreateBoardHref,
@@ -44,17 +52,22 @@ export function WorkspaceLane({
     id: `lane:${status}`,
     type: "workspace-lane",
     accept: "workspace-task",
-    disabled: disabled || !isDirectTaskStatusTarget(status),
-    data: { status },
+    disabled,
+    collisionDetector: pointerIntersection,
   });
+  const moveTargets = getDirectTaskStatusTargets(status);
+  const isDropTarget = droppable.isDropTarget && dropAllowed;
 
   return (
     <section
       ref={droppable.ref}
       data-status={status}
+      data-drop-allowed={dropAllowed || undefined}
+      data-drop-target={isDropTarget || undefined}
       className={cn(
-        "flex h-fit min-h-56 w-64 max-w-full shrink-0 flex-col",
-        droppable.isDropTarget && "rounded-lg bg-muted ring-2 ring-ring",
+        "flex h-fit min-h-56 w-64 max-w-full shrink-0 flex-col rounded-lg",
+        dropAllowed && "bg-accent/30 ring-1 ring-inset ring-ring/30",
+        isDropTarget && "bg-accent/70 ring-2 ring-ring",
       )}
     >
       <header className="mb-3 flex min-h-control items-center justify-between gap-3 border-b border-border pb-2">
@@ -104,8 +117,11 @@ export function WorkspaceLane({
             <WorkspaceTaskCard
               key={task.id}
               task={task}
+              onPointerDown={onCardPointerDown}
               onOpen={onOpenTask}
-              disabled={disabled || status === "in_review"}
+              onMove={onMoveTask}
+              moveTargets={moveTargets}
+              disabled={disabled}
               riskState={riskStateForTask(task)}
             />
           ))

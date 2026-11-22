@@ -365,9 +365,9 @@ test("E2E-10 unscheduled Task retains edit, status transition and delete", async
   await page.goto(`/en/workspace?goal=${goalId}`);
   await quickCreate(page, name);
   const card = page.locator('[data-status="todo"] article').filter({ hasText: name });
-  const handle = card.getByRole("button", { name: "Drag task", exact: true });
-  await handle.scrollIntoViewIfNeeded();
-  const source = await handle.boundingBox();
+  const surface = card.getByRole("button", { name, exact: true });
+  await surface.scrollIntoViewIfNeeded();
+  const source = await surface.boundingBox();
   if (!source) throw new Error("Missing drag source");
   await page.mouse.move(source.x + source.width / 2, source.y + source.height / 2);
   await page.mouse.down();
@@ -379,6 +379,7 @@ test("E2E-10 unscheduled Task retains edit, status transition and delete", async
   const destination = await target.boundingBox();
   if (!destination) throw new Error("Missing drop target");
   await page.mouse.move(destination.x + destination.width / 2, destination.y + 55, { steps: 20 });
+  await expect(target).toHaveAttribute("data-drop-target", "true");
   await page.mouse.up();
   await expect(
     page.locator('[data-status="in_progress"] article').filter({ hasText: name }),

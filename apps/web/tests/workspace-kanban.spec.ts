@@ -68,12 +68,11 @@ async function pointerMove(page: Page, title: string, from: string, to: string) 
   const board = page.getByRole("region", { name: "Task board" });
   await expect(board.locator("..")).toHaveAttribute("aria-busy", "false");
   const card = page.locator(`[data-status="${from}"] article`).filter({ hasText: title });
-  const handle = card.getByRole("button", { name: "Drag task", exact: true });
+  const surface = card.getByRole("button", { name: title, exact: true });
   const target = page.locator(`[data-status="${to}"]`);
-  await expect(handle).toHaveAttribute("aria-describedby", /dnd/);
-  await handle.scrollIntoViewIfNeeded();
-  const sourceBox = await handle.boundingBox();
-  if (!sourceBox) throw new Error("Missing drag handle");
+  await surface.scrollIntoViewIfNeeded();
+  const sourceBox = await surface.boundingBox();
+  if (!sourceBox) throw new Error("Missing card geometry");
   await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
   await page.mouse.down();
   await page.mouse.move(
@@ -87,7 +86,9 @@ async function pointerMove(page: Page, title: string, from: string, to: string) 
   await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 55, {
     steps: 20,
   });
+  await expect(target).toHaveAttribute("data-drop-target", "true");
   await page.mouse.up();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.locator(`[data-status="${to}"] article`).filter({ hasText: title }),
   ).toBeVisible();
@@ -153,12 +154,12 @@ test("pointer workflow, scoped creation, managed lanes, stale update and respons
     .locator('[data-status="in_progress"] article')
     .filter({ hasText: "Phase 3 pointer task" });
   await expect(oldCard).toBeVisible();
-  const oldHandle = oldCard.getByRole("button", {
-    name: "Drag task",
+  const oldSurface = oldCard.getByRole("button", {
+    name: "Phase 3 pointer task",
     exact: true,
   });
-  await oldHandle.scrollIntoViewIfNeeded();
-  const sourceBox = await oldHandle.boundingBox();
+  await oldSurface.scrollIntoViewIfNeeded();
+  const sourceBox = await oldSurface.boundingBox();
   const completed = page.locator('[data-status="completed"]');
   const box = await completed.boundingBox();
   if (!sourceBox || !box) throw new Error("Missing drag geometry");
@@ -166,6 +167,7 @@ test("pointer workflow, scoped creation, managed lanes, stale update and respons
   await page.mouse.down();
   await page.mouse.move(sourceBox.x + 25, sourceBox.y + 15, { steps: 5 });
   await page.mouse.move(box.x + box.width / 2, box.y + 55, { steps: 20 });
+  await expect(completed).toHaveAttribute("data-drop-target", "true");
   await page.mouse.up();
   await expect(page.getByText("Task changed somewhere else. Refresh and try again.")).toBeVisible();
   await expect(
@@ -199,7 +201,7 @@ test("pointer workflow, scoped creation, managed lanes, stale update and respons
   });
 });
 
-test("keyboard sensor moves through the drag handle", async ({ page }) => {
+test("keyboard opens task details and moves the task through its status menu", async ({ page }) => {
   test.setTimeout(90_000);
   const inserted = await client
     .from("tasks")
@@ -208,21 +210,149 @@ test("keyboard sensor moves through the drag handle", async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await login(page);
   await page.goto("/en/workspace?goal=unassigned");
-  const handle = page
+  const card = page
     .locator('[data-status="todo"] article')
-    .filter({ hasText: "Phase 3 keyboard task" })
-    .getByRole("button", { name: "Drag task", exact: true });
-  await expect(handle).toHaveAttribute("aria-describedby", /dnd/);
-  await handle.focus();
-  await page.keyboard.press("Space");
-  await expect(handle).toHaveAttribute("aria-grabbed", "true");
-  for (let index = 0; index < 6; index++) await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Space");
+    .filter({ hasText: "Phase 3 keyboard task" });
+  const surface = card.getByRole("button", { name: "Phase 3 keyboard task", exact: true });
+  await surface.press("Space");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(surface).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(card.getByRole("button", { name: "Move task Phase 3 keyboard task" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("menuitem", { name: "In progress" })).toBeFocused();
+  await expect(page.getByRole("menuitem", { name: "In review" })).toHaveCount(0);
+  await page.keyboard.press("Enter");
   await expect(
     page
       .locator('[data-status="in_progress"] article')
       .filter({ hasText: "Phase 3 keyboard task" }),
   ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeFocused();
+});
+
+test("whole-card drag cancels cleanly and scrolls to a lane beyond the viewport", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Whole-card drag test";
+  const { error } = await client.from("tasks").insert({ user_id: userId, goal_id: goalId, title });
+  if (error) throw error;
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const board = page.getByRole("region", { name: "Task board" });
+  const surface = board.getByRole("button", { name: title, exact: true });
+  const todo = board.locator('[data-status="todo"]');
+  const review = board.locator('[data-status="in_review"]');
+  const cancelled = board.locator('[data-status="cancelled"]');
+  await surface.scrollIntoViewIfNeeded();
+  const origin = await surface.boundingBox();
+  const viewport = await board.boundingBox();
+  const locked = await review.boundingBox();
+  if (!origin || !viewport || !locked) throw new Error("Missing board geometry");
+
+  const x = origin.x + 22;
+  const y = origin.y + 20;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 2, y);
+  await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+  await page.mouse.up();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  async function beginDrag() {
+    await expect(page.locator("[data-dnd-dragging]")).toHaveCount(0);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 12, y, { steps: 3 });
+    await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(3);
+  }
+
+  await beginDrag();
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+
+  await beginDrag();
+  await page.mouse.move(locked.x + locked.width / 2, locked.y + 55, { steps: 20 });
+  await expect(review).not.toHaveAttribute("data-drop-allowed", "true");
+  await page.mouse.up();
+  await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await beginDrag();
+  await page.mouse.move(viewport.x + 10, viewport.y - 12, { steps: 8 });
+  await expect(board.locator('[data-drop-target="true"]')).toHaveCount(0);
+  await page.mouse.up();
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+
+  await beginDrag();
+  await page.mouse.move(viewport.x + viewport.width - 12, viewport.y + 65, { steps: 25 });
+  await expect.poll(() => board.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  await expect.poll(async () => {
+    const box = await cancelled.boundingBox();
+    return !!box && box.x + box.width / 2 < viewport.x + viewport.width - 24;
+  }).toBe(true);
+  const destination = await cancelled.boundingBox();
+  if (!destination) throw new Error("Missing visible drop lane");
+  await page.mouse.move(destination.x + destination.width / 2, destination.y + 55, { steps: 6 });
+  await expect(cancelled).toHaveAttribute("data-drop-target", "true");
+  await page.mouse.up();
+  await expect(cancelled.getByRole("button", { name: title, exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test.describe("touch workspace", () => {
+  test.use({ hasTouch: true, viewport: { width: 900, height: 900 } });
+
+  test("tap opens details, swipe scrolls, and holding the card starts a drag", async ({ page }) => {
+    test.setTimeout(90_000);
+    const title = "Touch drag test";
+    const { error } = await client.from("tasks").insert({ user_id: userId, goal_id: goalId, title });
+    if (error) throw error;
+    await login(page);
+    await page.goto(`/en/workspace?goal=${goalId}`);
+    const board = page.getByRole("region", { name: "Task board" });
+    const surface = board.getByRole("button", { name: title, exact: true });
+    const progress = board.locator('[data-status="in_progress"]');
+    await surface.tap();
+    const details = page.getByRole("dialog");
+    await expect(details).toBeVisible();
+    await details.getByRole("button", { name: "Close dialog", exact: true }).tap();
+    await expect(details).toHaveCount(0);
+
+    const box = await surface.boundingBox();
+    const destination = await progress.boundingBox();
+    if (!box || !destination) throw new Error("Missing touch geometry");
+    const x = Math.round(box.x + box.width / 2);
+    const y = Math.round(box.y + box.height / 2);
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: "touchStart" | "touchMove", x: number, y: number) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: [{ x, y }] });
+    const touchEnd = () => cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+
+    await touch("touchStart", x, y);
+    for (const delta of [25, 50, 75, 100]) await touch("touchMove", x - delta, y);
+    await touchEnd();
+    await expect.poll(() => board.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(details).toHaveCount(0);
+    await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+
+    await surface.scrollIntoViewIfNeeded();
+    await board.evaluate((el) => { el.scrollLeft = 0; });
+    await touch("touchStart", x, y);
+    await expect(progress).toHaveAttribute("data-drop-allowed", "true");
+    await touch("touchMove", Math.round(destination.x + destination.width / 2), Math.round(destination.y + 75));
+    await expect(progress).toHaveAttribute("data-drop-target", "true");
+    await touchEnd();
+    await expect(progress.getByRole("button", { name: title, exact: true })).toBeVisible();
+    await expect(details).toHaveCount(0);
+    await cdp.detach();
+  });
 });
 
 test("cancel/restore, deadline precedence, reschedule and legacy pages", async ({ page }) => {
@@ -260,7 +390,8 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
   const review = page
     .locator('[data-status="in_review"] article')
     .filter({ hasText: "Phase 3 review task" });
-  await expect(review.getByRole("button", { name: "Drag task", exact: true })).toBeDisabled();
+  await expect(review.getByRole("button")).toHaveCount(1);
+  await expect(review.getByRole("button", { name: "Phase 3 review task", exact: true })).toBeEnabled();
   await pointerMove(page, "Phase 3 restore task", "todo", "cancelled");
   await expect(page.locator("[aria-busy]")).toHaveAttribute("aria-busy", "false");
   await pointerMove(page, "Phase 3 restore task", "cancelled", "todo");
@@ -301,7 +432,7 @@ test("task details center on desktop, fit mobile, and restore focus after close 
   await page.setViewportSize({ width: 1600, height: 1000 });
   await login(page);
   await page.goto(`/en/workspace?goal=${goalId}`);
-  const card = page.getByRole("button", { name: new RegExp(title) });
+  const card = page.getByRole("button", { name: title, exact: true });
   await card.focus();
   await page.keyboard.press("Enter");
   const modal = page.getByRole("dialog", { name: title });

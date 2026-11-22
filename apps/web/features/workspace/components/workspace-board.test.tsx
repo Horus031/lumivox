@@ -18,6 +18,10 @@ const mocks = vi.hoisted(() => ({
   error: vi.fn(),
   dragEnd: undefined as ((event: DragEndEvent) => void) | undefined,
 }));
+vi.mock("@dnd-kit/dom", () => ({
+  PointerSensor: { configure: (options: unknown) => options },
+  PointerActivationConstraints: {},
+}));
 vi.mock("@dnd-kit/react", () => ({
   DragDropProvider: ({
     children,
