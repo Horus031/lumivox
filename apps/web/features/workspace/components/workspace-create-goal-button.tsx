@@ -5,22 +5,14 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
 
-// Radix's asChild trigger must be created inside the client boundary.
-export function WorkspaceCreateGoalButton({ iconOnly = false }: { iconOnly?: boolean }) {
-  const t = useTranslations("workspace");
+export function WorkspaceCreateGoalButton() {
+  const t = useTranslations("workspace.rail");
+
   return (
     <CreateGoalForm
       trigger={
-        <Button
-          type="button"
-          variant="outline"
-          size={iconOnly ? "icon" : "default"}
-          className={iconOnly ? "sm:size-touch lg:size-control-sm" : "gap-2"}
-          aria-label={iconOnly ? t("rail.createGoal") : undefined}
-          title={iconOnly ? t("rail.createGoal") : undefined}
-        >
-          <Plus className="h-4 w-4" />
-          {iconOnly ? null : t("page.newGoal")}
+        <Button type="button" variant="outline" size="icon" className="shrink-0 sm:size-touch lg:size-control-sm" aria-label={t("createGoal")} title={t("createGoal")}>
+          <Plus aria-hidden="true" className="size-4" />
         </Button>
       }
     />

@@ -161,7 +161,7 @@ describe("Task scheduling UI", () => {
     });
   }
   const drawer = (task: TaskWithGoal) => (
-    <TaskDetailsDrawer task={task} goals={[]} onClose={() => {}} initialTab="overview" />
+    <TaskDetailsDrawer task={task} onClose={() => {}} initialTab="overview" />
   );
 
   function recoveryDrawer(actionType: NativeTaskRiskRecommendedAction["action_type"]) {
@@ -171,7 +171,6 @@ describe("Task scheduling UI", () => {
     return (
       <TaskDetailsDrawer
         task={a}
-        goals={[]}
         onClose={() => {}}
         initialTab="risk"
         riskState={{
@@ -236,7 +235,7 @@ describe("Task scheduling UI", () => {
   it("assesses a task with no prediction and updates its risk summary immediately", async () => {
     const { task, state } = predictionFixture();
     mocks.predictRisk.mockResolvedValue({ success: true, state });
-    await render(<TaskDetailsDrawer task={task} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsDrawer task={task} onClose={vi.fn()} initialTab="risk" />);
     expect(host.querySelector('[data-risk-view-state="unavailable"]')).not.toBeNull();
     await click("create");
     expect(mocks.predictRisk).toHaveBeenCalledWith(task.id);
@@ -249,11 +248,11 @@ describe("Task scheduling UI", () => {
     const { task, state } = predictionFixture();
     const response = deferred<{ success: true; state: typeof state }>();
     mocks.predictRisk.mockReturnValue(response.promise);
-    await render(<TaskDetailsDrawer task={task} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsDrawer task={task} onClose={vi.fn()} initialTab="risk" />);
     act(() => button("create").click());
     const nextTask = { ...task, id: b.id };
     mocks.details.mockResolvedValue({ success: true, data: { task: nextTask, subtasks: [], documents: [] } });
-    await render(<TaskDetailsDrawer task={nextTask} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsDrawer task={nextTask} onClose={vi.fn()} initialTab="risk" />);
     await act(async () => response.resolve({ success: true, state }));
     expect(host.querySelector('[data-risk-view-state="ready"]')).toBeNull();
     expect(mocks.refresh).not.toHaveBeenCalled();
@@ -263,7 +262,7 @@ describe("Task scheduling UI", () => {
     const { task } = predictionFixture();
     const completed = { ...task, status: "completed" as const };
     mocks.details.mockResolvedValue({ success: true, data: { task: completed, subtasks: [], documents: [] } });
-    await render(<TaskDetailsDrawer task={completed} goals={[]} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsDrawer task={completed} onClose={vi.fn()} initialTab="risk" />);
     expect([...host.querySelectorAll("button")].some(x => x.textContent === "create")).toBe(false);
     expect(mocks.predictRisk).not.toHaveBeenCalled();
   });

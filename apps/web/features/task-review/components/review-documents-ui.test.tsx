@@ -211,7 +211,6 @@ describe("review and document UI", () => {
         <TaskSubtasksPanel
           parentTask={{ ...task, status }}
           subtasks={[]}
-          goals={[]}
           onChanged={mocks.changed}
         />,
       );
@@ -233,7 +232,6 @@ describe("review and document UI", () => {
       <TaskSubtasksPanel
         parentTask={task}
         subtasks={[subtask]}
-        goals={[]}
         onChanged={mocks.changed}
       />,
     );

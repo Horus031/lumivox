@@ -4,30 +4,22 @@ import type { WorkspaceScope, WorkspaceTask } from "./workspace.types";
 
 export function resolveWorkspaceScope(
   value: string | undefined,
-  goalIds: readonly string[],
-): WorkspaceScope {
-  if (!value || value === "all") {
-    return {
-      type: "all",
-    };
-  }
-
+  selectedGoalId: string | undefined,
+): WorkspaceScope | null {
   if (value === "unassigned") {
     return {
       type: "unassigned",
     };
   }
 
-  if (goalIds.includes(value)) {
+  if (selectedGoalId) {
     return {
       type: "goal",
-      goalId: value,
+      goalId: selectedGoalId,
     };
   }
 
-  return {
-    type: "all",
-  };
+  return null;
 }
 
 export function getWorkspaceScopeKey(scope: WorkspaceScope) {

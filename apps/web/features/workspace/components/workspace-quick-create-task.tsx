@@ -87,7 +87,7 @@ export function WorkspaceQuickCreateTask({ goalId }: { goalId: string | null }) 
           className="w-full justify-start gap-2 text-secondary-text"
           onClick={() => setOpen(true)}
         >
-          <Plus className="h-4 w-4" />
+          <Plus aria-hidden="true" className="h-4 w-4" />
           {t("addTask")}
         </Button>
       )}

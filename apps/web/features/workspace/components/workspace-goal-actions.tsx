@@ -6,7 +6,6 @@ import { MoreHorizontal } from "lucide-react";
 
 import { useTransition } from "react";
 
-import { useRouter } from "next/navigation";
 
 import { useTranslations } from "next-intl";
 
@@ -26,12 +25,12 @@ import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
 
 import { deleteGoalAction } from "@/features/goals/goal.actions";
 
-import type { GoalWithProgress } from "@/features/goals/goal.types";
+import type { Goal } from "@/features/goals/goal.types";
 
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 
 type WorkspaceGoalActionsProps = {
-  goal: GoalWithProgress;
+  goal: Goal;
 };
 
 export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
@@ -60,7 +59,7 @@ export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
 
       toast.success(result.message);
 
-      router.push("/workspace?goal=all");
+      router.replace("/workspace");
 
       router.refresh();
     });

@@ -908,6 +908,15 @@
     }
   },
   "goals": {
+    "search": {
+      "label": "Tìm mục tiêu",
+      "loading": "Đang tải mục tiêu…",
+      "error": "Không tải được mục tiêu.",
+      "retry": "Thử lại",
+      "empty": "Chưa có mục tiêu.",
+      "noResults": "Không tìm thấy mục tiêu phù hợp.",
+      "more": "Tải thêm"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Mục tiêu",
@@ -2493,21 +2502,22 @@
   },
   "workspace": {
     "page": {
-      "eyebrow": "Lumivox",
       "title": "Không gian học tập",
-      "description": "Quản lý mục tiêu và nhiệm vụ ở cùng một nơi và theo dõi tiến độ qua từng giai đoạn.",
-      "newGoal": "Mục tiêu mới"
+      "content": "Nội dung không gian học tập",
+      "chooseGoal": "Chọn mục tiêu để bắt đầu",
+      "chooseGoalDescription": "Chọn mục tiêu để xem nhiệm vụ hoặc dùng nút dấu cộng để tạo mục tiêu.",
+      "goalUnavailable": "Mục tiêu không khả dụng",
+      "taskUnavailable": "Nhiệm vụ này không khả dụng."
     },
     "rail": {
       "title": "Mục tiêu",
-      "description": "Chọn một mục tiêu để tập trung bảng nhiệm vụ.",
-      "allTasks": "Tất cả nhiệm vụ",
       "unassigned": "Không có mục tiêu",
       "createGoal": "Tạo mục tiêu",
       "goalActions": "Thao tác mục tiêu",
       "documents": "Tài liệu học tập",
       "deleteGoalConfirm": "Xóa mục tiêu này? Các nhiệm vụ đang liên kết với mục tiêu có thể bị ảnh hưởng.",
-      "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành"
+      "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành",
+      "chooseGoal": "Chọn mục tiêu"
     },
     "board": {
       "empty": "Chưa có nhiệm vụ ở giai đoạn này.",

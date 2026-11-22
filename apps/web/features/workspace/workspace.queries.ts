@@ -1,23 +1,31 @@
 import { requireUser } from "@/lib/auth/require-user";
+import { z } from "zod";
 
 import type { WorkspaceScope, WorkspaceTask } from "./workspace.types";
+
+const taskWithGoal = "*, goals (id, title, goal_type, status)";
+
+export async function getWorkspaceLinkedTask(taskId: string): Promise<WorkspaceTask | null> {
+  if (!z.guid().safeParse(taskId).success) return null;
+
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select(taskWithGoal)
+    .eq("id", taskId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load linked task: ${error.message}`);
+  return data ? { ...data, subtasks: [] } : null;
+}
 
 export async function getWorkspaceTasks(scope: WorkspaceScope): Promise<WorkspaceTask[]> {
   const { supabase, user } = await requireUser();
 
-  let rootTasksQuery = supabase
+  const rootTasksQuery = supabase
     .from("tasks")
-    .select(
-      `
-        *,
-        goals (
-          id,
-          title,
-          goal_type,
-          status
-        )
-      `,
-    )
+    .select(taskWithGoal)
     .eq("user_id", user.id)
     .is("parent_task_id", null)
     .order("due_at", {
@@ -28,15 +36,9 @@ export async function getWorkspaceTasks(scope: WorkspaceScope): Promise<Workspac
       ascending: false,
     });
 
-  if (scope.type === "goal") {
-    rootTasksQuery = rootTasksQuery.eq("goal_id", scope.goalId);
-  }
-
-  if (scope.type === "unassigned") {
-    rootTasksQuery = rootTasksQuery.is("goal_id", null);
-  }
-
-  const { data: rootTasks, error: rootTasksError } = await rootTasksQuery;
+  const { data: rootTasks, error: rootTasksError } = await (scope.type === "goal"
+    ? rootTasksQuery.eq("goal_id", scope.goalId)
+    : rootTasksQuery.is("goal_id", null));
 
   if (rootTasksError) {
     throw new Error(`Failed to load workspace tasks: ${rootTasksError.message}`);
@@ -50,17 +52,7 @@ export async function getWorkspaceTasks(scope: WorkspaceScope): Promise<Workspac
 
   const { data: subtasks, error: subtasksError } = await supabase
     .from("tasks")
-    .select(
-      `
-        *,
-        goals (
-          id,
-          title,
-          goal_type,
-          status
-        )
-      `,
-    )
+    .select(taskWithGoal)
     .eq("user_id", user.id)
     .in("parent_task_id", rootTaskIds)
     .order("created_at", {

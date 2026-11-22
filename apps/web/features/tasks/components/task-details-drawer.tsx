@@ -32,7 +32,6 @@ import { TaskModalShell } from "./task-modal-shell";
 import { TaskSubtasksPanel } from "./task-subtasks-panel";
 
 import { TaskReviewPanel } from "@/features/task-review/components/task-review-panel";
-import { GoalOption } from "@/features/goals/goal.types";
 import { TaskEditForm } from "./task-edit-form";
 import { Pencil, Trash2, X } from "lucide-react";
 
@@ -63,7 +62,6 @@ export type TaskDrawerTab =
 type TaskDetailsDrawerProps = {
   task: TaskWithGoal | null;
 
-  goals: GoalOption[];
 
   onClose: () => void;
 
@@ -78,7 +76,6 @@ type TaskDetailsDrawerProps = {
 
 export function TaskDetailsDrawer({
   task,
-  goals,
   onClose,
   initialTab,
   initialEditMode,
@@ -401,7 +398,6 @@ export function TaskDetailsDrawer({
                 <TaskEditForm
                   key={currentTask.updated_at}
                   task={currentTask}
-                  goals={goals}
                   recoveryAttemptId={recovery?.taskId === currentTask.id && ["reschedule", "reduce_scope"].includes(recovery.action) ? recovery.id : undefined}
                   onCancel={() => { setRecovery(null); setIsEditing(false); }}
                   onSaved={() => {
@@ -507,7 +503,6 @@ export function TaskDetailsDrawer({
               parentTask={currentTask}
               recoveryAttemptId={recovery?.taskId === currentTask.id && recovery.action === "split_task" ? recovery.id : undefined}
               subtasks={subtasks}
-              goals={goals}
               onChanged={() => {
                 setRecovery(null);
                 onTaskDataChanged?.();

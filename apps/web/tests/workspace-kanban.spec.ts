@@ -65,6 +65,8 @@ async function login(page: Page) {
 }
 
 async function pointerMove(page: Page, title: string, from: string, to: string) {
+  const board = page.getByRole("region", { name: "Task board" });
+  await expect(board.locator("..")).toHaveAttribute("aria-busy", "false");
   const card = page.locator(`[data-status="${from}"] article`).filter({ hasText: title });
   const handle = card.getByRole("button", { name: "Drag task", exact: true });
   const target = page.locator(`[data-status="${to}"]`);
@@ -91,7 +93,7 @@ async function pointerMove(page: Page, title: string, from: string, to: string) 
   ).toBeVisible();
 }
 
-test("pointer workflow, quick create, managed lanes, stale update and responsive translations", async ({
+test("pointer workflow, scoped creation, managed lanes, stale update and responsive translations", async ({
   page,
 }) => {
   test.setTimeout(120_000);
@@ -189,9 +191,7 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
     page.getByRole("heading", { name: "Không gian học tập", exact: true }),
   ).toBeVisible();
   await expect(
-    page
-      .locator('[data-status="todo"]')
-      .getByRole("button", { name: "Thêm nhiệm vụ", exact: true }),
+    page.locator('[data-status="todo"]').getByRole("button", { name: "Thêm nhiệm vụ", exact: true }),
   ).toBeVisible();
   await page.screenshot({
     path: "test-results/workspace-mobile.png",
@@ -253,7 +253,7 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
     .select("id, title");
   expect(fixtures.error).toBeNull();
   await login(page);
-  await page.goto("/en/workspace?goal=all");
+  await page.goto("/en/workspace?goal=unassigned");
   await expect(
     page.locator('[data-status="overdue"] article').filter({ hasText: "Phase 3 past task" }),
   ).toHaveCount(1);
@@ -277,20 +277,49 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
   ).toBeVisible();
   await page.goto("/en/goals");
   await expect(page.getByText("Phase 3 test goal").first()).toBeVisible();
-  await page.goto("/en/tasks");
-  const row = page.getByRole("row").filter({ hasText: "Phase 3 review task" });
-  await row.getByRole("button", { name: /edit/i }).click();
-  const editor = page.locator("tr").filter({ has: page.locator("form") });
-  // Title, Goal, Priority and Status are the existing row editor controls.
-  await editor.getByRole("combobox").nth(2).click();
-  await expect(page.getByRole("option", { name: "In review", exact: true })).toHaveAttribute(
-    "aria-disabled",
-    "true",
-  );
-  await expect(page.getByRole("option", { name: "Overdue", exact: true })).toHaveAttribute(
-    "aria-disabled",
-    "true",
-  );
+  const reviewId = fixtures.data!.find((task) => task.title === "Phase 3 review task")!.id;
+  await page.goto(`/en/tasks?taskId=${reviewId}&action=edit`);
+  const editor = page.getByRole("dialog");
+  await expect(editor).toBeVisible();
+  await expect(editor.getByRole("textbox", { name: "Task title" })).toHaveValue("Phase 3 review task");
+  await expect(editor.getByRole("combobox", { name: "Status" })).toHaveCount(0);
+});
+
+test("goal browsing is paginated and searchable without opening the board", async ({ page }) => {
+  const titles = Array.from({ length: 24 }, (_, index) => `Workspace pagination ${index + 1}`);
+  const { data, error } = await client
+    .from("goals")
+    .insert(titles.map((title, index) => ({
+      user_id: userId,
+      title,
+      goal_type: "short_term",
+      created_at: new Date(Date.UTC(2026, 0, index + 1)).toISOString(),
+    })))
+    .select("id, title");
+  if (error) throw error;
+  const oldest = data.find((goal) => goal.title === titles[0])!;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto("/en/workspace?goal=all");
+  await expect(page.getByRole("heading", { name: "Choose a goal to get started" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+
+  const rail = page.getByRole("navigation", { name: "Goals", exact: true });
+  const oldestLink = rail.getByRole("link").filter({ has: page.getByText(titles[0], { exact: true }) });
+  await expect(rail.getByRole("listitem")).toHaveCount(20);
+  await expect(oldestLink).toHaveCount(0);
+  await rail.getByRole("button", { name: "Load more" }).click();
+  await expect(oldestLink).toBeVisible();
+
+  await page.reload();
+  await rail.getByRole("searchbox", { name: "Search goals" }).fill(titles[0]);
+  await expect(oldestLink).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+  await oldestLink.click();
+  await expect(page).toHaveURL(new RegExp(`goal=${oldest.id}$`));
+  await expect(page.getByRole("heading", { name: titles[0], exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
 });
 
 test("recovery destinations require Save or Start before writing", async ({ page }) => {

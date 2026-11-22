@@ -68,13 +68,7 @@ export function WorkspaceLane({
           {t(status === "in_review" ? "reviewManaged" : "overdueManaged")}
         </p>
       )}
-      {status === "todo" && (
-        <WorkspaceQuickCreateTask
-          key={quickCreateGoalId ?? "unassigned"}
-          goalId={quickCreateGoalId}
-        />
-      )}
-
+      {status === "todo" && <WorkspaceQuickCreateTask goalId={quickCreateGoalId} />}
       <div className="space-y-2">
         {tasks.length ? (
           tasks.map((task) => (

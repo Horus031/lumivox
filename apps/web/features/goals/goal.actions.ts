@@ -2,6 +2,9 @@
 
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
+import { z } from "zod";
+import { getGoalPage } from "./goal.queries";
+import type { GoalPage } from "./goal.types";
 
 import {
   createGoalSchema,
@@ -10,6 +13,24 @@ import {
   type CreateGoalInput,
   type UpdateGoalInput,
 } from "./goal.schemas";
+
+const goalPageSchema = z.object({
+  search: z.string().trim().max(160),
+  cursor: z.object({ created_at: z.iso.datetime({ offset: true }), id: z.guid() }).nullable(),
+  includeProgress: z.boolean(),
+});
+
+export async function searchGoalsAction(input: z.input<typeof goalPageSchema>): Promise<GoalPage | null> {
+  const parsed = goalPageSchema.safeParse(input);
+  if (!parsed.success) return null;
+
+  try {
+    return await getGoalPage(parsed.data);
+  } catch (error) {
+    console.error("Failed to search workspace goals", error);
+    return null;
+  }
+}
 
 export async function createGoalAction(input: CreateGoalInput): Promise<ActionResult> {
   const parsed = createGoalSchema.safeParse(input);

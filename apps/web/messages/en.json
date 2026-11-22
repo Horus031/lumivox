@@ -913,6 +913,15 @@
     }
   },
   "goals": {
+    "search": {
+      "label": "Search goals",
+      "loading": "Loading goals…",
+      "error": "Couldn’t load goals.",
+      "retry": "Try again",
+      "empty": "No goals yet.",
+      "noResults": "No matching goals.",
+      "more": "Load more"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Goals",
@@ -2498,21 +2507,22 @@
   },
   "workspace": {
     "page": {
-      "eyebrow": "Lumivox",
       "title": "Learning Workspace",
-      "description": "Manage your goals and tasks from one place and see work progress across each stage.",
-      "newGoal": "New goal"
+      "content": "Workspace content",
+      "chooseGoal": "Choose a goal to get started",
+      "chooseGoalDescription": "Select a goal to view its tasks, or use the plus button to create a goal.",
+      "goalUnavailable": "Goal unavailable",
+      "taskUnavailable": "This task is unavailable."
     },
     "rail": {
       "title": "Goals",
-      "description": "Choose a goal to focus the board.",
-      "allTasks": "All tasks",
       "unassigned": "No goal",
       "createGoal": "Create goal",
       "goalActions": "Goal actions",
       "documents": "Learning documents",
       "deleteGoalConfirm": "Delete this goal? Tasks linked to it may be affected.",
-      "taskProgress": "{completed}/{total} tasks completed"
+      "taskProgress": "{completed}/{total} tasks completed",
+      "chooseGoal": "Choose a goal"
     },
     "board": {
       "empty": "No tasks in this stage.",

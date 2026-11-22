@@ -77,7 +77,7 @@ describe("workspace optimistic controller", () => {
   const task = workspaceTask();
   const props = {
     tasks: [task],
-    scope: { type: "all" as const },
+    goalId: null,
     referenceNow: "2026-10-04T12:00:00Z",
     riskStates: {},
   };
@@ -91,8 +91,7 @@ describe("workspace optimistic controller", () => {
     act(() =>
       root.render(
         <WorkspaceBoard
-          goals={[]}
-          initialTaskId={null}
+          linkedTask={null}
           initialTaskTab={"overview"}
           initialEditMode={false}
           {...props}
@@ -156,8 +155,7 @@ describe("workspace optimistic controller", () => {
     act(() =>
       root.render(
         <WorkspaceBoard
-          goals={[]}
-          initialTaskId={null}
+          linkedTask={null}
           initialTaskTab={"overview"}
           initialEditMode={false}
           {...props}
@@ -177,59 +175,42 @@ describe("workspace optimistic controller", () => {
     expect(mocks.transition).not.toHaveBeenCalled();
   });
 
-  it.each([
-    { scope: { type: "all" as const }, goalId: "" },
-    { scope: { type: "unassigned" as const }, goalId: "" },
-    { scope: { type: "goal" as const, goalId: task.id }, goalId: task.id },
-  ])(
-    "quick create uses the correct goal for $scope.type",
-    async ({ scope, goalId }) => {
-      mocks.create.mockResolvedValue({
-        success: true,
-        message: "created",
-        data: null,
-      });
-      act(() =>
-        root.render(
-          <WorkspaceBoard
-            goals={[]}
-            initialTaskId={null}
-            initialTaskTab={"overview"}
-            initialEditMode={false}
-            {...props}
-            scope={scope}
-          />,
-        ),
-      );
-      act(() =>
-        (lane("todo").querySelector("button") as HTMLButtonElement).click(),
-      );
-      const input = lane("todo").querySelector("input")!;
-      act(() => {
-        Object.getOwnPropertyDescriptor(
-          HTMLInputElement.prototype,
-          "value",
-        )!.set!.call(input, "Quick task");
-        input.dispatchEvent(new Event("input", { bubbles: true }));
-      });
-      await act(async () => {
-        lane("todo")
-          .querySelector("form")!
-          .dispatchEvent(
-            new Event("submit", { bubbles: true, cancelable: true }),
-          );
-      });
-      expect(mocks.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Quick task",
-          goalId,
-          priority: "medium",
-          dueAt: "",
-        }),
-      );
-      expect(mocks.refresh).toHaveBeenCalledOnce();
-    },
-  );
+  it.each(["goal-1", null])("quick creates in Todo for goal %s", async (goalId) => {
+    mocks.create.mockResolvedValue({ success: true, message: "Created", data: null });
+    act(() => root.render(
+      <WorkspaceBoard {...props} goalId={goalId} linkedTask={null} initialEditMode={false} />,
+    ));
+    const trigger = Array.from(lane("todo").querySelectorAll("button"))
+      .find((button) => button.textContent === "addTask")!;
+    act(() => trigger.click());
+    const input = lane("todo").querySelector("input")!;
+    act(() => {
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, "Quick task");
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+    await act(async () => {
+      lane("todo").querySelector("form")!.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    });
+    expect(mocks.create).toHaveBeenCalledWith(expect.objectContaining({
+      title: "Quick task",
+      goalId: goalId ?? "",
+      priority: "medium",
+      dueAt: "",
+    }));
+    expect(lane("todo").querySelector("form")).toBeNull();
+    expect(mocks.refresh).toHaveBeenCalledOnce();
+  });
+
+  it("opens a linked task even when that task is outside the board cards", () => {
+    const linkedTask = workspaceTask({ id: "subtask", parent_task_id: task.id, title: "Linked subtask" });
+    act(() => root.render(
+      <WorkspaceBoard key={linkedTask.id} {...props} linkedTask={linkedTask} initialTaskTab="subtasks" initialEditMode={false} />,
+    ));
+    const drawer = container.querySelector("[data-drawer]");
+    expect(drawer?.textContent).toBe("Linked subtask");
+    expect(drawer?.getAttribute("data-tab")).toBe("subtasks");
+    expect(container.querySelectorAll("article")).toHaveLength(1);
+  });
 
   it("invalidates visible risk during optimistic task transition", async () => {
     const high = TASK_RISK_UI_FIXTURES.find(
@@ -258,8 +239,7 @@ describe("workspace optimistic controller", () => {
     act(() => {
       root.render(
         <WorkspaceBoard
-          goals={[]}
-          initialTaskId={null}
+          linkedTask={null}
           initialTaskTab="overview"
           initialEditMode={false}
           {...props}

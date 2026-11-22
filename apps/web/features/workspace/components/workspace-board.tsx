@@ -16,10 +16,9 @@ import {
   isDirectTaskStatusTarget,
 } from "@/features/tasks/task-transition";
 
-import type { WorkspaceScope, WorkspaceTask } from "../workspace.types";
+import type { WorkspaceTask } from "../workspace.types";
 import { groupWorkspaceTasksByStatus } from "../workspace.utils";
 import { WorkspaceLane } from "./workspace-lane";
-import type { GoalOption } from "@/features/goals/goal.types";
 
 import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
 
@@ -29,16 +28,13 @@ import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-d
 
 type WorkspaceBoardProps = {
   tasks: WorkspaceTask[];
-
-  goals: GoalOption[];
-
-  scope: WorkspaceScope;
+  goalId: string | null;
 
   referenceNow: string;
 
-  initialTaskId: string | null;
+  linkedTask: WorkspaceTask | null;
 
-  initialTaskTab: TaskDrawerTab;
+  initialTaskTab?: TaskDrawerTab;
 
   initialEditMode: boolean;
 
@@ -47,10 +43,9 @@ type WorkspaceBoardProps = {
 
 export function WorkspaceBoard({
   tasks,
-  goals,
-  scope,
+  goalId,
   referenceNow,
-  initialTaskId,
+  linkedTask,
   initialTaskTab,
   initialEditMode,
   riskStates,
@@ -59,7 +54,7 @@ export function WorkspaceBoard({
   const t = useTranslations("workspace.board");
   const router = useRouter();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
-    initialTaskId,
+    linkedTask?.id ?? null,
   );
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
@@ -88,7 +83,6 @@ export function WorkspaceBoard({
       window.clearInterval(intervalId);
     };
   }, []);
-  const quickCreateGoalId = scope.type === "goal" ? scope.goalId : null;
 
   // Reset the local snapshot when refreshed server props arrive, before paint.
   if (serverTasks !== tasks || serverRiskStates !== riskStates) {
@@ -98,8 +92,8 @@ export function WorkspaceBoard({
     setServerRiskStates(riskStates);
     setRiskInvalidated(false);
   }
-  const selectedTask =
-    boardTasks.find((task) => task.id === selectedTaskId) ?? null;
+  const selectedTask = boardTasks.find((task) => task.id === selectedTaskId)
+    ?? (linkedTask?.id === selectedTaskId ? linkedTask : null);
 
   const groupedTasks = useMemo(
     () => groupWorkspaceTasksByStatus(boardTasks, boardNow),
@@ -202,7 +196,7 @@ export function WorkspaceBoard({
                 tasks={groupedTasks[status]}
                 onOpenTask={(task) => setSelectedTaskId(task.id)}
                 disabled={isPending}
-                quickCreateGoalId={quickCreateGoalId}
+                quickCreateGoalId={goalId}
                 riskStateForTask={riskForTask}
               />
             ))}
@@ -212,9 +206,8 @@ export function WorkspaceBoard({
 
       <TaskDetailsDrawer
         task={selectedTask}
-        goals={goals}
-        initialTab={initialTaskTab}
-        initialEditMode={initialEditMode}
+        initialTab={selectedTaskId === linkedTask?.id ? initialTaskTab : undefined}
+        initialEditMode={selectedTaskId === linkedTask?.id && initialEditMode}
         onClose={() => setSelectedTaskId(null)}
         riskState={selectedTask ? riskForTask(selectedTask) : undefined}
         riskNow={riskNow}

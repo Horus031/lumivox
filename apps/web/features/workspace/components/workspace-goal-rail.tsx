@@ -1,120 +1,62 @@
-import { getTranslations } from "next-intl/server";
+"use client";
 
-import { WorkspaceCreateGoalButton } from "./workspace-create-goal-button";
-import type { GoalWithProgress } from "@/features/goals/goal.types";
+import { useId, useState } from "react";
+import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { GoalPageSearch } from "@/features/goals/components/goal-page-search";
+import type { GoalOption, GoalPage } from "@/features/goals/goal.types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { WorkspaceCreateGoalButton } from "./workspace-create-goal-button";
 
-import { WorkspaceGoalActions } from "./workspace-goal-actions";
-import { WorkspaceGoalSelector } from "./workspace-goal-selector";
-
-type WorkspaceGoalRailProps = {
-  goals: GoalWithProgress[];
-  selectedKey: string;
-};
-
-export async function WorkspaceGoalRail({ goals, selectedKey }: WorkspaceGoalRailProps) {
-  const t = await getTranslations("workspace.rail");
-  const linkClassName =
-    "block min-h-touch shrink-0 rounded-md px-2 py-2 text-label font-medium text-secondary-text transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:min-h-control";
+export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned }: {
+  initialPage: GoalPage;
+  selectedGoal: GoalOption | null;
+  unassigned: boolean;
+}) {
+  const t = useTranslations("workspace.rail");
+  const listId = useId();
+  const [expanded, setExpanded] = useState(false);
+  const selectionLabel = selectedGoal?.title ?? (unassigned ? t("unassigned") : t("chooseGoal"));
+  const linkClass = "block min-h-touch rounded-md px-2 py-2 text-label font-medium text-secondary-text hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring lg:min-h-control";
 
   return (
-    <aside className="min-w-0">
-      <div className="min-w-0 border-b border-border pb-card lg:border-r lg:border-b-0 lg:pr-card lg:pb-0">
-        <div className="mb-3 flex items-start justify-between gap-2">
-          <div className="min-w-0">
-            <h2 className="text-section font-semibold text-foreground">{t("title")}</h2>
-            <p className="mt-1 text-caption text-muted-foreground">{t("description")}</p>
-          </div>
-          <WorkspaceCreateGoalButton iconOnly />
-        </div>
-        <WorkspaceGoalSelector goals={goals} selectedKey={selectedKey} />
-        <nav aria-label={t("title")} className="hidden min-w-0 lg:block lg:space-y-1">
-          <Link
-            href="/workspace?goal=all"
-            aria-current={selectedKey === "all" ? "page" : undefined}
-            className={cn(linkClassName, selectedKey === "all" && "bg-muted text-foreground")}
-          >
-            {t("allTasks")}
-          </Link>
-          <Link
-            href="/workspace?goal=unassigned"
-            aria-current={selectedKey === "unassigned" ? "page" : undefined}
-            className={cn(
-              linkClassName,
-              selectedKey === "unassigned" && "bg-muted text-foreground",
-            )}
-          >
-            {t("unassigned")}
-          </Link>
-          {goals.map((goal) => {
-            const selected = selectedKey === goal.id;
-            const progress = Math.min(100, Math.max(0, goal.computed_progress));
-
-            return (
-              <div
-                key={goal.id}
-                className={cn(
-                  "flex w-56 shrink-0 items-start rounded-md lg:w-full",
-                  selected && "bg-muted",
-                )}
-              >
-                <Link
-                  href={`/workspace?goal=${goal.id}`}
-                  aria-current={selected ? "page" : undefined}
-                  className={cn(
-                    linkClassName,
-
-                    "min-w-0 flex-1",
-
-                    selected && "text-foreground",
-                  )}
-                >
-                  <div className="min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <p title={goal.title} className="min-w-0 truncate text-label font-medium">
-                        {goal.title}
-                      </p>
-
-                      <span className="shrink-0 text-caption text-muted-foreground tabular-nums">
-                        {Math.round(progress)}%
-                      </span>
-                    </div>
-
-                    <div
-                      role="meter"
-                      aria-label={goal.title}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={progress}
-                      className="mt-1.5 h-1 overflow-hidden rounded-full bg-border"
-                    >
-                      <div
-                        className="h-full rounded-full bg-primary transition-[width] motion-reduce:transition-none dark:bg-success"
-                        style={{
-                          width: `${progress}%`,
-                        }}
-                      />
-                    </div>
-
-                    <p className="mt-1 text-caption text-muted-foreground">
-                      {t("taskProgress", {
-                        completed: goal.completed_tasks,
-
-                        total: goal.total_tasks,
-                      })}
-                    </p>
-                  </div>
-                </Link>
-
-                <div className="shrink-0">
-                  <WorkspaceGoalActions goal={goal} />
-                </div>
-              </div>
-            );
-          })}
-        </nav>
+    <aside className="min-w-0 border-b border-border pb-card lg:border-r lg:border-b-0 lg:pr-card lg:pb-0">
+      <div className="mb-2 flex min-w-0 items-center justify-between gap-2">
+        <h2 className="hidden text-section font-semibold lg:block">{t("title")}</h2>
+        <Button type="button" variant="outline" className="min-w-0 flex-1 justify-between lg:hidden" aria-expanded={expanded} aria-controls={listId} onClick={() => setExpanded((value) => !value)}>
+          <span className="truncate">{selectionLabel}</span>
+          <ChevronDown aria-hidden="true" className={cn("size-4", expanded && "rotate-180")} />
+        </Button>
+        <WorkspaceCreateGoalButton />
       </div>
+      <nav id={listId} aria-label={t("title")} className={cn("space-y-2 lg:block", !expanded && "hidden")}>
+        <GoalPageSearch initialPage={initialPage} includeProgress renderItem={(goal) => {
+          const selected = selectedGoal?.id === goal.id;
+          const completed = goal.completed_tasks ?? 0;
+          const total = goal.total_tasks ?? 0;
+          const progress = total ? Math.round((100 * completed) / total) : 0;
+
+          return (
+            <Link href={`/workspace?goal=${goal.id}`} prefetch={false} onClick={() => setExpanded(false)}
+              aria-current={selected ? "page" : undefined} className={cn(linkClass, selected && "bg-muted text-foreground")}>
+              <div className="flex items-center gap-2">
+                <span title={goal.title} className="min-w-0 flex-1 truncate">{goal.title}</span>
+                <span className="shrink-0 text-caption text-muted-foreground tabular-nums">{progress}%</span>
+              </div>
+              <div role="meter" aria-label={t("taskProgress", { completed, total })} aria-valuemin={0} aria-valuemax={100}
+                aria-valuenow={progress} className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
+                <div className="h-full rounded-full bg-primary dark:bg-success" style={{ width: `${progress}%` }} />
+              </div>
+            </Link>
+          );
+        }} />
+        <Link href="/workspace?goal=unassigned" prefetch={false} onClick={() => setExpanded(false)} aria-current={unassigned ? "page" : undefined}
+          className={cn(linkClass, "border-t border-border text-muted-foreground", unassigned && "bg-muted text-foreground")}>
+          {t("unassigned")}
+        </Link>
+      </nav>
     </aside>
   );
 }
