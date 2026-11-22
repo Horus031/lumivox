@@ -2,7 +2,7 @@
 
 import { useId, useState, useTransition, type FormEvent } from "react";
 import { Plus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createTaskAction } from "@/features/tasks/task.actions";
 
-export function WorkspaceQuickCreateTask({ goalId }: { goalId: string | null }) {
+export function WorkspaceQuickCreateTask({ goalId, boardHref }: { goalId: string | null; boardHref?: string }) {
   const t = useTranslations("workspace.board");
   const commonT = useTranslations("common");
   const router = useRouter();
@@ -38,6 +38,15 @@ export function WorkspaceQuickCreateTask({ goalId }: { goalId: string | null }) 
         }
         setTitle("");
         setOpen(false);
+        if (boardHref) {
+          const detailsHref = `${boardHref}&${new URLSearchParams({ task: result.data.taskId })}`;
+          toast.success(t("quickCreated"), {
+            action: {
+              label: t("openCreatedTask"),
+              onClick: () => router.push(detailsHref, { scroll: false }),
+            },
+          });
+        }
         router.refresh();
       } catch {
         toast.error(t("createFailed"));

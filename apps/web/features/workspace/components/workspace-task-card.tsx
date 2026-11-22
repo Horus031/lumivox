@@ -41,9 +41,6 @@ export function WorkspaceTaskCard({
     data: { taskId: task.id },
   });
 
-  const completedSubtasks = task.subtasks.filter(
-    (subtask) => subtask.status === "completed",
-  ).length;
 
   const showRiskIndicator =
     riskState.status === "stale" ||
@@ -87,7 +84,7 @@ export function WorkspaceTaskCard({
           ) : null}
         </div>
 
-        {task.due_at || task.subtasks.length > 0 ? (
+        {task.due_at || task.totalSubtasks > 0 ? (
           <div className="mt-2 flex flex-wrap items-center gap-3 text-caption text-muted-foreground">
             {task.due_at ? (
               <span className="flex items-center gap-1">
@@ -100,7 +97,7 @@ export function WorkspaceTaskCard({
               </span>
             ) : null}
 
-            {task.subtasks.length > 0 ? (
+            {task.totalSubtasks > 0 ? (
               <span className="flex items-center gap-1">
                 <CheckSquare2
                   aria-hidden="true"
@@ -108,8 +105,8 @@ export function WorkspaceTaskCard({
                 />
 
                 {t("subtaskProgress", {
-                  completed: completedSubtasks,
-                  total: task.subtasks.length,
+                  completed: task.completedSubtasks,
+                  total: task.totalSubtasks,
                 })}
               </span>
             ) : null}

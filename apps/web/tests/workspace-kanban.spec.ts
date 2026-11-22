@@ -285,6 +285,123 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
   await expect(editor.getByRole("combobox", { name: "Status" })).toHaveCount(0);
 });
 
+test("List scopes, sorts and filters tasks, opens details, and restores the view through browser history", async ({ page }) => {
+  test.setTimeout(90_000);
+  const { data: goal, error: goalError } = await client.from("goals").insert({
+    user_id: userId,
+    title: "List test goal",
+    goal_type: "short_term",
+  }).select("id").single();
+  if (goalError) throw goalError;
+  const scope = { user_id: userId, goal_id: goal.id };
+  const { data: tasks, error: taskError } = await client.from("tasks").insert([
+    { ...scope, title: "Active overdue", status: "todo", due_at: "2000-01-01T00:00:00Z" },
+    { ...scope, title: "Completed with an old deadline", status: "completed", due_at: "2001-01-01T00:00:00Z" },
+    { ...scope, title: "Latest deadline", status: "todo", due_at: "2099-01-01T00:00:00Z" },
+    ...Array.from({ length: 20 }, (_, index) => ({
+      ...scope, title: `Undated item ${index + 1}`, status: "todo", due_at: null,
+    })),
+  ]).select("id,title,created_at,updated_at");
+  if (taskError) throw taskError;
+  const overdue = tasks.find((task) => task.title === "Active overdue")!;
+  const { error: childError } = await client.from("tasks").insert([
+    { ...scope, parent_task_id: overdue.id, title: "Done child", status: "completed" },
+    { ...scope, parent_task_id: overdue.id, title: "Open child", status: "todo" },
+  ]);
+  if (childError) throw childError;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  const tabs = page.getByRole("navigation", { name: "Workspace views" });
+  await expect(tabs.getByRole("link", { name: "Board" })).toHaveAttribute("aria-current", "page");
+  await tabs.getByRole("link", { name: "List" }).click();
+  const table = page.getByRole("table", { name: "Task list" });
+  await expect(table.getByRole("row")).toHaveCount(21);
+  await expect(table.getByRole("columnheader", { name: "Created at" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Updated at" })).toBeVisible();
+  const overdueRow = table.getByRole("row").filter({ hasText: "Active overdue" });
+  await expect(overdueRow.locator("time").nth(1)).toHaveAttribute("datetime", overdue.created_at);
+  await expect(overdueRow.locator("time").nth(2)).toHaveAttribute("datetime", overdue.updated_at);
+  await expect(overdueRow.getByText("Overdue", { exact: true })).toBeVisible();
+  await expect(overdueRow.getByLabel("1 of 2 subtasks completed")).toBeVisible();
+  await expect(table.getByText("Done child")).toHaveCount(0);
+  await page.screenshot({ path: "test-results/workspace-list.png" });
+
+  await page.getByRole("link", { name: "Next page" }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await expect(table.getByRole("row")).toHaveCount(4);
+  await table.getByRole("link", { name: "Show latest due dates first" }).click();
+  await expect(table.getByRole("row").nth(1)).toContainText("Latest deadline");
+
+  await page.getByRole("combobox", { name: "Status", exact: true }).click();
+  await page.getByRole("option", { name: "Overdue", exact: true }).click();
+  await expect(table.getByRole("row")).toHaveCount(2);
+  await expect(table.getByText("Completed with an old deadline")).toHaveCount(0);
+  await overdueRow.getByRole("link", { name: "Active overdue" }).click();
+  const details = page.getByRole("dialog", { name: "Active overdue" });
+  await expect(details).toBeVisible();
+  await details.getByRole("button", { name: "Edit", exact: true }).click();
+  await details.getByRole("textbox", { name: "Task title" }).fill("Renamed overdue task");
+  await details.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Renamed overdue task" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/view=list&status=overdue&sort=desc$/);
+  await expect(table.getByRole("link", { name: "Renamed overdue task" })).toBeVisible();
+  const renamedRow = table.getByRole("row").filter({ hasText: "Renamed overdue task" });
+  await expect(renamedRow.locator("time").nth(1)).toHaveAttribute("datetime", overdue.created_at);
+  await expect(renamedRow.locator("time").nth(2)).not.toHaveAttribute("datetime", overdue.updated_at);
+
+  await tabs.getByRole("link", { name: "Timeline" }).click();
+  await expect(page.getByRole("heading", { name: "Timeline", exact: true })).toBeVisible();
+  await expect(table).toHaveCount(0);
+  await page.goBack();
+  await expect(tabs.getByRole("link", { name: "List" })).toHaveAttribute("aria-current", "page");
+  await page.reload();
+  await expect(table.getByRole("row")).toHaveCount(2);
+  await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveText("Overdue");
+});
+
+test("large Board goals page each lane independently and keep a link to newly created tasks", async ({ page }) => {
+  test.setTimeout(90_000);
+  const { data: goal, error: goalError } = await client.from("goals").insert({
+    user_id: userId,
+    title: "Large Board goal",
+    goal_type: "short_term",
+  }).select("id").single();
+  if (goalError) throw goalError;
+  const { error: taskError } = await client.from("tasks").insert(
+    Array.from({ length: 101 }, (_, index) => ({
+      user_id: userId,
+      goal_id: goal.id,
+      title: `Board paging #${index + 1}`,
+      status: index < 45 ? "todo" : "in_progress",
+    })),
+  );
+  if (taskError) throw taskError;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  const todo = page.locator('[data-status="todo"]');
+  const active = page.locator('[data-status="in_progress"]');
+  const firstActiveTask = await active.locator("article h3").first().textContent();
+  await expect(todo.locator("header").getByText("45", { exact: true })).toBeVisible();
+  await expect(todo.locator("article")).toHaveCount(20);
+  await todo.getByRole("link", { name: "Next page in Todo" }).click();
+  await expect(todo.getByText("Page 2 of 3")).toBeVisible();
+  await expect(active.locator("article h3").first()).toHaveText(firstActiveTask!);
+
+  await todo.getByRole("button", { name: "Add task", exact: true }).click();
+  await todo.getByRole("textbox", { name: "Task title" }).fill("Quick create on a later page");
+  await todo.getByRole("button", { name: "Add task", exact: true }).click();
+  await page.getByRole("button", { name: "Open task", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Quick create on a later page" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(todo.getByText("Page 2 of 3")).toBeVisible();
+  await expect(todo.locator("header").getByText("46", { exact: true })).toBeVisible();
+});
+
 test("goal browsing is paginated and searchable without opening the board", async ({ page }) => {
   const titles = Array.from({ length: 24 }, (_, index) => `Workspace pagination ${index + 1}`);
   const { data, error } = await client

@@ -2,8 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useDroppable } from "@dnd-kit/react";
-import { LockKeyhole } from "lucide-react";
+import { ChevronLeft, ChevronRight, LockKeyhole } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { isDirectTaskStatusTarget } from "@/features/tasks/task-transition";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 import type { TaskStatus } from "@/features/tasks/task-status";
@@ -16,9 +18,12 @@ type WorkspaceLaneProps = {
   status: TaskStatus;
   label: string;
   tasks: WorkspaceTask[];
+  total: number;
+  pagination?: { page: number; totalPages: number; previousHref?: string; nextHref?: string };
   onOpenTask: (task: WorkspaceTask) => void;
   disabled: boolean;
   quickCreateGoalId: string | null;
+  quickCreateBoardHref?: string;
   riskStateForTask: (task: WorkspaceTask) => TaskRiskViewState;
 };
 
@@ -26,9 +31,12 @@ export function WorkspaceLane({
   status,
   label,
   tasks,
+  total,
+  pagination,
   onOpenTask,
   disabled,
   quickCreateGoalId,
+  quickCreateBoardHref,
   riskStateForTask,
 }: WorkspaceLaneProps) {
   const t = useTranslations("workspace.board");
@@ -55,7 +63,7 @@ export function WorkspaceLane({
         </h2>
 
         <span className="shrink-0 text-caption font-medium text-muted-foreground tabular-nums">
-          {tasks.length}
+          {total}
         </span>
       </header>
 
@@ -68,7 +76,28 @@ export function WorkspaceLane({
           {t(status === "in_review" ? "reviewManaged" : "overdueManaged")}
         </p>
       )}
-      {status === "todo" && <WorkspaceQuickCreateTask goalId={quickCreateGoalId} />}
+      {status === "todo" && <WorkspaceQuickCreateTask goalId={quickCreateGoalId} boardHref={quickCreateBoardHref} />}
+      {pagination && (
+        <nav aria-label={t("lanePages", { lane: label })} className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-caption text-muted-foreground">{t("pageOf", { page: pagination.page, totalPages: pagination.totalPages })}</p>
+          <div className="flex gap-1">
+            {pagination.previousHref && (
+              <Button asChild size="icon" variant="ghost">
+                <Link href={pagination.previousHref} prefetch={false} scroll={false} aria-label={t("previousLanePage", { lane: label })}>
+                  <ChevronLeft aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
+            {pagination.nextHref && (
+              <Button asChild size="icon" variant="ghost">
+                <Link href={pagination.nextHref} prefetch={false} scroll={false} aria-label={t("nextLanePage", { lane: label })}>
+                  <ChevronRight aria-hidden="true" />
+                </Link>
+              </Button>
+            )}
+          </div>
+        </nav>
+      )}
       <div className="space-y-2">
         {tasks.length ? (
           tasks.map((task) => (

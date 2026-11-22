@@ -1,12 +1,11 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, useEffect } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-drawer";
 import { TASK_BOARD_LANES } from "@/features/tasks/task-status";
 import { transitionTaskStatusAction } from "@/features/tasks/task.actions";
 import {
@@ -16,98 +15,54 @@ import {
   isDirectTaskStatusTarget,
 } from "@/features/tasks/task-transition";
 
-import type { WorkspaceTask } from "../workspace.types";
-import { groupWorkspaceTasksByStatus } from "../workspace.utils";
+import type { WorkspaceBoardPages, WorkspaceBoardPagination, WorkspaceTask } from "../workspace.types";
+import { groupWorkspaceTasksByStatus, workspaceBoardHref } from "../workspace.utils";
 import { WorkspaceLane } from "./workspace-lane";
 
-import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
-
-import type { WorkspaceTaskRiskMap } from "@/features/native-task-risk/task-risk-workspace.queries";
-
-import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+import { useWorkspaceTaskDetails } from "./workspace-task-details";
 
 type WorkspaceBoardProps = {
   tasks: WorkspaceTask[];
   goalId: string | null;
 
   referenceNow: string;
-
-  linkedTask: WorkspaceTask | null;
-
-  initialTaskTab?: TaskDrawerTab;
-
-  initialEditMode: boolean;
-
-  riskStates: WorkspaceTaskRiskMap;
+  pagination?: WorkspaceBoardPagination;
 };
 
 export function WorkspaceBoard({
   tasks,
   goalId,
   referenceNow,
-  linkedTask,
-  initialTaskTab,
-  initialEditMode,
-  riskStates,
+  pagination,
 }: WorkspaceBoardProps) {
   const taskT = useTranslations("tasks.form");
   const t = useTranslations("workspace.board");
   const router = useRouter();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
-    linkedTask?.id ?? null,
-  );
+  const { openTask, riskForTask, invalidateRisk } = useWorkspaceTaskDetails();
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
-  const [serverRiskStates, setServerRiskStates] = useState(riskStates);
-
-  const [riskInvalidated, setRiskInvalidated] = useState(false);
-
-  const [riskClockMs, setRiskClockMs] = useState(() =>
-    Date.parse(referenceNow),
-  );
   const [isPending, startTransition] = useTransition();
   const requestInFlight = useRef(false);
   const boardNow = useMemo(() => new Date(referenceNow), [referenceNow]);
 
-  const riskNow = useMemo(
-    () => new Date(Math.max(riskClockMs, boardNow.getTime())),
-    [riskClockMs, boardNow],
-  );
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setRiskClockMs(Date.now());
-    }, 60_000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
-
-  // Reset the local snapshot when refreshed server props arrive, before paint.
-  if (serverTasks !== tasks || serverRiskStates !== riskStates) {
+  if (serverTasks !== tasks) {
     setServerTasks(tasks);
     setBoardTasks(tasks);
-
-    setServerRiskStates(riskStates);
-    setRiskInvalidated(false);
   }
-  const selectedTask = boardTasks.find((task) => task.id === selectedTaskId)
-    ?? (linkedTask?.id === selectedTaskId ? linkedTask : null);
 
   const groupedTasks = useMemo(
     () => groupWorkspaceTasksByStatus(boardTasks, boardNow),
     [boardTasks, boardNow],
   );
-
-  function riskForTask(task: WorkspaceTask) {
-    return getTaskRiskDisplayState(
-      task,
-      riskStates[task.id],
-      riskNow,
-      riskInvalidated,
-    );
+  const serverGroups = useMemo(
+    () => pagination ? groupWorkspaceTasksByStatus(tasks, boardNow) : null,
+    [tasks, boardNow, pagination],
+  );
+  const lanePages: WorkspaceBoardPages = {};
+  if (pagination) {
+    for (const status of TASK_BOARD_LANES) lanePages[status] = pagination[status].page;
   }
+  const currentBoardHref = pagination ? workspaceBoardHref(goalId ?? "unassigned", lanePages) : undefined;
 
   function handleDragEnd(event: DragEndEvent) {
     if (event.canceled || requestInFlight.current || isPending) return;
@@ -131,7 +86,7 @@ export function WorkspaceBoard({
 
     const previousTasks = boardTasks;
     requestInFlight.current = true;
-    setRiskInvalidated(true);
+    invalidateRisk();
     setBoardTasks((current) =>
       current.map((item) =>
         item.id === taskId
@@ -179,42 +134,42 @@ export function WorkspaceBoard({
   }
 
   return (
-    <>
-      <DragDropProvider onDragEnd={handleDragEnd}>
-        <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
-          <div
-            role="region"
-            aria-label={t("title")}
-            tabIndex={0}
-            className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-          >
-            {TASK_BOARD_LANES.map((status) => (
+    <DragDropProvider onDragEnd={handleDragEnd}>
+      <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
+        <div
+          role="region"
+          aria-label={t("title")}
+          tabIndex={0}
+          className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        >
+          {TASK_BOARD_LANES.map((status) => {
+            const lane = pagination?.[status];
+            const pageHref = (page: number) => workspaceBoardHref(goalId ?? "unassigned", { ...lanePages, [status]: page });
+            const shown = groupedTasks[status];
+            const total = lane && serverGroups ? lane.total + shown.length - serverGroups[status].length : shown.length;
+            return (
               <WorkspaceLane
                 key={status}
                 status={status}
                 label={taskT(`statuses.${status}`)}
-                tasks={groupedTasks[status]}
-                onOpenTask={(task) => setSelectedTaskId(task.id)}
+                tasks={shown}
+                total={total}
+                pagination={lane && lane.totalPages > 1 ? {
+                  page: lane.page,
+                  totalPages: lane.totalPages,
+                  previousHref: lane.page > 1 ? pageHref(lane.page - 1) : undefined,
+                  nextHref: lane.page < lane.totalPages ? pageHref(lane.page + 1) : undefined,
+                } : undefined}
+                onOpenTask={(task) => openTask(task.id)}
                 disabled={isPending}
                 quickCreateGoalId={goalId}
+                quickCreateBoardHref={currentBoardHref}
                 riskStateForTask={riskForTask}
               />
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </DragDropProvider>
-
-      <TaskDetailsDrawer
-        task={selectedTask}
-        initialTab={selectedTaskId === linkedTask?.id ? initialTaskTab : undefined}
-        initialEditMode={selectedTaskId === linkedTask?.id && initialEditMode}
-        onClose={() => setSelectedTaskId(null)}
-        riskState={selectedTask ? riskForTask(selectedTask) : undefined}
-        riskNow={riskNow}
-        onTaskDataChanged={() => {
-          setRiskInvalidated(true);
-        }}
-      />
-    </>
+      </div>
+    </DragDropProvider>
   );
 }

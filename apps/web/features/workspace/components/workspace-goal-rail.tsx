@@ -9,11 +9,14 @@ import type { GoalOption, GoalPage } from "@/features/goals/goal.types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { WorkspaceCreateGoalButton } from "./workspace-create-goal-button";
+import { workspaceHref } from "../workspace.utils";
+import type { WorkspaceView } from "../workspace.types";
 
-export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned }: {
+export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned, view }: {
   initialPage: GoalPage;
   selectedGoal: GoalOption | null;
   unassigned: boolean;
+  view: WorkspaceView;
 }) {
   const t = useTranslations("workspace.rail");
   const listId = useId();
@@ -39,7 +42,7 @@ export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned }: {
           const progress = total ? Math.round((100 * completed) / total) : 0;
 
           return (
-            <Link href={`/workspace?goal=${goal.id}`} prefetch={false} onClick={() => setExpanded(false)}
+            <Link href={workspaceHref(goal.id, view)} prefetch={false} onClick={() => setExpanded(false)}
               aria-current={selected ? "page" : undefined} className={cn(linkClass, selected && "bg-muted text-foreground")}>
               <div className="flex items-center gap-2">
                 <span title={goal.title} className="min-w-0 flex-1 truncate">{goal.title}</span>
@@ -52,7 +55,7 @@ export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned }: {
             </Link>
           );
         }} />
-        <Link href="/workspace?goal=unassigned" prefetch={false} onClick={() => setExpanded(false)} aria-current={unassigned ? "page" : undefined}
+        <Link href={workspaceHref("unassigned", view)} prefetch={false} onClick={() => setExpanded(false)} aria-current={unassigned ? "page" : undefined}
           className={cn(linkClass, "border-t border-border text-muted-foreground", unassigned && "bg-muted text-foreground")}>
           {t("unassigned")}
         </Link>

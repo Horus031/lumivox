@@ -2506,6 +2506,30 @@
     }
   },
   "workspace": {
+    "views": {
+      "label": "Workspace views",
+      "list": "List",
+      "board": "Board",
+      "timeline": "Timeline",
+      "timelinePlaceholder": "Task schedules will appear here when Timeline is available."
+    },
+    "list": {
+      "title": "Task list",
+      "task": "Task",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "priority": "Priority",
+      "due": "Due date",
+      "subtasks": "Subtasks",
+      "subtaskProgress": "{completed} of {total} subtasks completed",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "noDue": "No due date",
+      "sortLatest": "Show latest due dates first",
+      "sortEarliest": "Show earliest due dates first",
+      "empty": "No tasks in this goal yet.",
+      "noMatches": "No tasks match this status."
+    },
     "page": {
       "title": "Learning Workspace",
       "content": "Workspace content",
@@ -2531,6 +2555,12 @@
       "reviewManaged": "AI-managed stage",
       "overdueManaged": "Automatically determined by deadline",
       "dragTask": "Drag task",
+      "lanePages": "Pages in {lane}",
+      "pageOf": "Page {page} of {totalPages}",
+      "previousLanePage": "Previous page in {lane}",
+      "nextLanePage": "Next page in {lane}",
+      "quickCreated": "Task added to Todo.",
+      "openCreatedTask": "Open task",
       "invalidTransition": "This task cannot move to that stage.",
       "staleTask": "Task changed somewhere else. Refresh and try again.",
       "transitionFailed": "Unable to move the task. Please try again.",

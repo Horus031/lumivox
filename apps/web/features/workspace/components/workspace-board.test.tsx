@@ -1,4 +1,4 @@
-import { act } from "react";
+import { act, type ComponentProps } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { DragEndEvent } from "@dnd-kit/react";
@@ -38,6 +38,7 @@ vi.mock("@dnd-kit/react", () => ({
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
 }));
+vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: mocks.refresh }) }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 vi.mock("sonner", () => ({ toast: { error: mocks.error } }));
 vi.mock("@/features/tasks/task.actions", () => ({
@@ -69,7 +70,30 @@ vi.mock("@/features/tasks/components/task-details-drawer", () => ({
     ) : null,
 }));
 
-import { WorkspaceBoard } from "./workspace-board";
+import { WorkspaceBoard as Board } from "./workspace-board";
+import { WorkspaceTaskDetails } from "./workspace-task-details";
+
+type TestBoardProps = ComponentProps<typeof Board> &
+  Pick<ComponentProps<typeof WorkspaceTaskDetails>, "linkedTask" | "riskStates"> & {
+    initialTaskTab?: ComponentProps<typeof WorkspaceTaskDetails>["tab"];
+    initialEditMode: boolean;
+  };
+
+function WorkspaceBoard({ linkedTask, initialTaskTab, initialEditMode, riskStates, ...boardProps }: TestBoardProps) {
+  return (
+    <WorkspaceTaskDetails
+      linkedTask={linkedTask}
+      boardTasks={boardProps.tasks}
+      tab={initialTaskTab}
+      edit={initialEditMode}
+      closeHref="/workspace"
+      referenceNow={boardProps.referenceNow}
+      riskStates={riskStates}
+    >
+      <Board {...boardProps} />
+    </WorkspaceTaskDetails>
+  );
+}
 
 describe("workspace optimistic controller", () => {
   let container: HTMLDivElement;
