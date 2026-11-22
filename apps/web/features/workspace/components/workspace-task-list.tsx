@@ -27,7 +27,7 @@ export function WorkspaceTaskList({ goal, options, tasks, totalPages, referenceN
   const format = useFormatter();
   const router = useRouter();
   const statusId = useId();
-  const { riskForTask } = useWorkspaceTaskDetails();
+  const { onTaskLinkClick, riskForTask } = useWorkspaceTaskDetails();
   const now = new Date(referenceNow);
   const asc = options.sort === "asc";
   const SortIcon = asc ? ArrowUp : ArrowDown;
@@ -86,6 +86,11 @@ export function WorkspaceTaskList({ goal, options, tasks, totalPages, referenceN
                       href={workspaceHref(goal, "list", options, task.id)}
                       prefetch={false}
                       scroll={false}
+                      onClick={(event) => {
+                        if (!event.defaultPrevented && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+                          onTaskLinkClick(task.id, event.currentTarget);
+                        }
+                      }}
                       className="wrap-anywhere after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:ring-2 focus-visible:after:ring-inset focus-visible:after:ring-ring"
                     >
                       {task.title}

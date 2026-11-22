@@ -389,7 +389,8 @@ test("E2E-10 unscheduled Task retains edit, status transition and delete", async
   await page.getByLabel("Task title", { exact: true }).fill(name + " edited");
   await page.getByRole("button", { name: "Save", exact: true }).click();
   await expect(page.getByRole("dialog", { name: name + " edited", exact: true })).toBeVisible();
-  await page.getByRole("button", { name: "Delete task", exact: true }).click();
+  await page.getByRole("button", { name: "Task actions", exact: true }).click();
+  await page.getByRole("menuitem", { name: "Delete task", exact: true }).click();
   await page.getByRole("alertdialog").getByRole("button", { name: "Delete", exact: true }).click();
   await expect(page.locator("article").filter({ hasText: name })).toHaveCount(0);
 });

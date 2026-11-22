@@ -20,7 +20,7 @@ type WorkspaceLaneProps = {
   tasks: WorkspaceTask[];
   total: number;
   pagination?: { page: number; totalPages: number; previousHref?: string; nextHref?: string };
-  onOpenTask: (task: WorkspaceTask) => void;
+  onOpenTask: (task: WorkspaceTask, trigger: HTMLButtonElement) => void;
   disabled: boolean;
   quickCreateGoalId: string | null;
   quickCreateBoardHref?: string;

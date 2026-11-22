@@ -14,7 +14,7 @@ import type { TaskRiskViewState } from "@/features/native-task-risk/task-risk-pr
 
 type WorkspaceTaskCardProps = {
   task: WorkspaceTask;
-  onOpen: (task: WorkspaceTask) => void;
+  onOpen: (task: WorkspaceTask, trigger: HTMLButtonElement) => void;
   disabled?: boolean;
   riskState: TaskRiskViewState;
 };
@@ -57,7 +57,7 @@ export function WorkspaceTaskCard({
     >
       <button
         type="button"
-        onClick={() => onOpen(task)}
+        onClick={(event) => onOpen(task, event.currentTarget)}
         className="block min-h-touch w-full rounded-lg p-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <h3

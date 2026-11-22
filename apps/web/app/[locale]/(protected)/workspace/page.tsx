@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import { CalendarRange, Target } from "lucide-react";
 
 import { getGoalById, getGoalPage } from "@/features/goals/goal.queries";
-import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
+import type { TaskDetailsTab } from "@/features/tasks/components/task-details-modal";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { WorkspaceBoard } from "@/features/workspace/components/workspace-board";
 import { WorkspaceGoalActions } from "@/features/workspace/components/workspace-goal-actions";
@@ -30,7 +30,7 @@ type WorkspacePageProps = {
   }>;
 };
 
-function resolveTaskTab(value: string | undefined): TaskDrawerTab | undefined {
+function resolveTaskTab(value: string | undefined): TaskDetailsTab | undefined {
   if (value === "overview" || value === "risk" || value === "subtasks" || value === "documents" || value === "review") {
     return value;
   }
@@ -55,7 +55,7 @@ async function WorkspaceViewContent({ scope, view, list, boardPages, linkedTask,
   list: WorkspaceListOptions;
   boardPages: WorkspaceBoardPages;
   linkedTask: TaskWithGoal | null;
-  tab?: TaskDrawerTab;
+  tab?: TaskDetailsTab;
   edit: boolean;
 }) {
   const goal = getWorkspaceScopeKey(scope);

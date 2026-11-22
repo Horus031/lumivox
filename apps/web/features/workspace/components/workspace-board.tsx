@@ -160,7 +160,7 @@ export function WorkspaceBoard({
                   previousHref: lane.page > 1 ? pageHref(lane.page - 1) : undefined,
                   nextHref: lane.page < lane.totalPages ? pageHref(lane.page + 1) : undefined,
                 } : undefined}
-                onOpenTask={(task) => openTask(task.id)}
+                onOpenTask={(task, trigger) => openTask(task.id, trigger)}
                 disabled={isPending}
                 quickCreateGoalId={goalId}
                 quickCreateBoardHref={currentBoardHref}

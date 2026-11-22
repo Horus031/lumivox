@@ -61,8 +61,8 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
   const canContinue = !preview.error && preview.occurrences.length > 0;
 
   return (
-    <section aria-label={t("editor")} className="min-w-0 space-y-5">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <section aria-label={t("editor")} className="@container min-w-0 space-y-5">
+      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
         <label className="space-y-2">
           <span className="block text-sm font-medium">{t("startDate")}</span>
           <input
@@ -115,7 +115,7 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
             key={index}
             role="group"
             aria-label={t("slotLabel", { index: index + 1 })}
-            className="grid grid-cols-1 gap-2 rounded-md border p-3 sm:grid-cols-4"
+            className="grid grid-cols-1 gap-2 rounded-md border p-3 @md:grid-cols-2 @xl:grid-cols-4"
           >
             <label className="space-y-1">
               <span id={`${fieldId}-weekday-${index}`} className="block text-xs">

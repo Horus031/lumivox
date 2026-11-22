@@ -58,15 +58,25 @@ vi.mock("@/features/tasks/task.actions", () => ({
 }));
 vi.mock("@/components/ui/use-confirm-dialog", () => ({ useConfirmDialog: () => mocks.confirm }));
 vi.mock("@/features/tasks/components/task-modal-shell", () => ({
-  TaskModalShell: ({ children, footer }: { children: ReactNode; footer: ReactNode }) => (
+  TaskModalShell: ({ children, actions }: { children: ReactNode; actions: ReactNode }) => (
     <div>
       {children}
-      {footer}
+      {actions}
     </div>
   ),
 }));
+vi.mock("@/components/ui/dropdown-menu", () => ({
+  DropdownMenu: ({ children }: { children: ReactNode }) => children,
+  DropdownMenuTrigger: ({ children }: { children: ReactNode }) => children,
+  DropdownMenuContent: ({ children }: { children: ReactNode }) => children,
+  DropdownMenuItem: ({ children, onSelect }: { children: ReactNode; onSelect: () => void }) => (
+    <button type="button" onClick={onSelect}>{children}</button>
+  ),
+}));
 vi.mock("@/features/tasks/components/task-edit-form", () => ({
-  TaskEditForm: () => <div>Task edit form</div>,
+  TaskEditForm: ({ onCancel }: { onCancel: () => void }) => (
+    <div>Task edit form <button type="button" onClick={onCancel}>cancel</button></div>
+  ),
 }));
 vi.mock("@/features/tasks/components/task-documents-panel", () => ({
   TaskDocumentsPanel: () => null,
@@ -80,7 +90,7 @@ vi.mock("@/features/task-review/components/task-review-panel", () => ({
 
 import { TaskStudyScheduleSection } from "./task-study-schedule-section";
 import { ScheduleDraftEditor } from "./schedule-draft-editor";
-import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-drawer";
+import { TaskDetailsModal } from "@/features/tasks/components/task-details-modal";
 
 const a = workspaceTask();
 const b = workspaceTask({ id: "00000000-0000-4000-8000-000000000003", title: "Task B" });
@@ -160,16 +170,16 @@ describe("Task scheduling UI", () => {
       input.dispatchEvent(new Event("input", { bubbles: true }));
     });
   }
-  const drawer = (task: TaskWithGoal) => (
-    <TaskDetailsDrawer task={task} onClose={() => {}} initialTab="overview" />
+  const taskModal = (task: TaskWithGoal) => (
+    <TaskDetailsModal task={task} onClose={() => {}} initialTab="overview" />
   );
 
-  function recoveryDrawer(actionType: NativeTaskRiskRecommendedAction["action_type"]) {
+  function recoveryModal(actionType: NativeTaskRiskRecommendedAction["action_type"]) {
     const high = TASK_RISK_UI_FIXTURES.find(({ id }) => id === "high")?.state;
     if (high?.status !== "ready") throw new Error("Expected ready fixture");
 
     return (
-      <TaskDetailsDrawer
+      <TaskDetailsModal
         task={a}
         onClose={() => {}}
         initialTab="risk"
@@ -197,7 +207,7 @@ describe("Task scheduling UI", () => {
     { actionType: "reschedule", content: "Task edit form" },
     { actionType: "reduce_scope", content: "Task edit form" },
   ] as const)("opens the existing form for $actionType", async ({ actionType, content }) => {
-    await render(recoveryDrawer(actionType));
+    await render(recoveryModal(actionType));
     expect(host.textContent).not.toContain(content);
     await click("actions.choose");
     expect(host.textContent).toContain(content);
@@ -206,7 +216,7 @@ describe("Task scheduling UI", () => {
   });
 
   it("navigates once to Focus with a tracked attempt on repeated Review clicks", async () => {
-    await render(recoveryDrawer("start_focus"));
+    await render(recoveryModal("start_focus"));
     await act(async () => {
       const choose = button("actions.choose");
       choose.click();
@@ -235,7 +245,7 @@ describe("Task scheduling UI", () => {
   it("assesses a task with no prediction and updates its risk summary immediately", async () => {
     const { task, state } = predictionFixture();
     mocks.predictRisk.mockResolvedValue({ success: true, state });
-    await render(<TaskDetailsDrawer task={task} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsModal task={task} onClose={vi.fn()} initialTab="risk" />);
     expect(host.querySelector('[data-risk-view-state="unavailable"]')).not.toBeNull();
     await click("create");
     expect(mocks.predictRisk).toHaveBeenCalledWith(task.id);
@@ -248,11 +258,11 @@ describe("Task scheduling UI", () => {
     const { task, state } = predictionFixture();
     const response = deferred<{ success: true; state: typeof state }>();
     mocks.predictRisk.mockReturnValue(response.promise);
-    await render(<TaskDetailsDrawer task={task} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsModal task={task} onClose={vi.fn()} initialTab="risk" />);
     act(() => button("create").click());
     const nextTask = { ...task, id: b.id };
     mocks.details.mockResolvedValue({ success: true, data: { task: nextTask, subtasks: [], documents: [] } });
-    await render(<TaskDetailsDrawer task={nextTask} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsModal task={nextTask} onClose={vi.fn()} initialTab="risk" />);
     await act(async () => response.resolve({ success: true, state }));
     expect(host.querySelector('[data-risk-view-state="ready"]')).toBeNull();
     expect(mocks.refresh).not.toHaveBeenCalled();
@@ -262,7 +272,7 @@ describe("Task scheduling UI", () => {
     const { task } = predictionFixture();
     const completed = { ...task, status: "completed" as const };
     mocks.details.mockResolvedValue({ success: true, data: { task: completed, subtasks: [], documents: [] } });
-    await render(<TaskDetailsDrawer task={completed} onClose={vi.fn()} initialTab="risk" />);
+    await render(<TaskDetailsModal task={completed} onClose={vi.fn()} initialTab="risk" />);
     expect([...host.querySelectorAll("button")].some(x => x.textContent === "create")).toBe(false);
     expect(mocks.predictRisk).not.toHaveBeenCalled();
   });
@@ -345,7 +355,7 @@ describe("Task scheduling UI", () => {
         success: true,
         data: { task, subtasks: [], documents: [] },
       });
-      await render(drawer(task));
+      await render(taskModal(task));
       expect(button("Add study schedule")).toBeDefined();
       await click("edit");
       expect(host.textContent).toContain("Task edit form");
@@ -362,7 +372,7 @@ describe("Task scheduling UI", () => {
         success: true,
         data: { task, subtasks: [], documents: [] },
       });
-      await render(drawer(task));
+      await render(taskModal(task));
       expect(host.textContent).toContain("Study scheduling is not available");
       expect(host.textContent).not.toContain("Add study schedule");
     },
@@ -370,7 +380,7 @@ describe("Task scheduling UI", () => {
   it("4.2 subtask cannot create and an existing schedule is summary-only", async () => {
     const task = workspaceTask({ parent_task_id: b.id });
     mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
-    await render(drawer(task));
+    await render(taskModal(task));
     expect(host.textContent).not.toContain("Add study schedule");
     mocks.load.mockResolvedValue({ success: true, schedule: summary });
     await render(<TaskStudyScheduleSection key="summary" taskId={a.id} eligible />);
@@ -448,12 +458,12 @@ describe("Task scheduling UI", () => {
       page: 0,
       hasMore: false,
     });
-    await render(drawer(a));
+    await render(taskModal(a));
     expect(host.textContent).toContain("Revision: 1");
     expect(host.textContent).toContain("2030-01-09");
     // Check the immediate render too, before effects clear old detail state.
     act(() => {
-      root.render(drawer(b));
+      root.render(taskModal(b));
     });
     expect(host.textContent).not.toContain("Revision: 1");
     expect(host.textContent).not.toContain("2030-01-09");
@@ -534,7 +544,7 @@ describe("Task scheduling UI", () => {
         page: 0,
         hasMore: false,
       });
-      await render(drawer(task));
+      await render(taskModal(task));
       expect(host.querySelector('[aria-label="Study sessions"]')).not.toBeNull();
       expect(host.querySelectorAll('[aria-label="Study sessions"] li button')).toHaveLength(0);
     },

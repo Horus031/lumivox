@@ -118,7 +118,7 @@ test("pointer workflow, scoped creation, managed lanes, stale update and respons
   expect(await card.locator("button button").count()).toBe(0);
   await card.getByRole("button").first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("button", { name: "Close", exact: true }).last().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Close dialog", exact: true }).click();
   await pointerMove(page, "Phase 3 pointer task", "todo", "in_progress");
   await expect
     .poll(
@@ -283,6 +283,83 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
   await expect(editor).toBeVisible();
   await expect(editor.getByRole("textbox", { name: "Task title" })).toHaveValue("Phase 3 review task");
   await expect(editor.getByRole("combobox", { name: "Status" })).toHaveCount(0);
+});
+
+test("task details center on desktop, fit mobile, and restore focus after close or delete", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Review lecture notes and summarize the key concepts before the next study session";
+  const description = "Summarize the key concepts and attach the supporting notes.";
+  const { data: task, error } = await client.from("tasks").insert({
+    user_id: userId,
+    goal_id: goalId,
+    title,
+    description,
+    estimated_minutes: 45,
+  }).select("id").single();
+  if (error) throw error;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const card = page.getByRole("button", { name: new RegExp(title) });
+  await card.focus();
+  await page.keyboard.press("Enter");
+  const modal = page.getByRole("dialog", { name: title });
+  await expect(modal).toBeVisible();
+  const modalBox = (await modal.boundingBox())!;
+  expect(Math.abs(modalBox.x + modalBox.width / 2 - 800)).toBeLessThan(2);
+  const descriptionHeading = modal.getByRole("heading", { name: "Description" });
+  const metadata = modal.getByRole("complementary", { name: "Details" });
+  await expect(modal.getByText(description)).toBeVisible();
+  await expect(metadata.getByText("45 minutes")).toBeVisible();
+  await expect(metadata.getByRole("region", { name: "Task study schedule" })).toBeVisible();
+  await expect(metadata.getByRole("button", { name: "Add study schedule" })).toBeVisible();
+  expect((await metadata.boundingBox())!.x).toBeGreaterThan((await descriptionHeading.boundingBox())!.x);
+  await page.screenshot({ path: "test-results/workspace-task-modal-desktop.png" });
+  await page.keyboard.press("Tab");
+  expect(await modal.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(modal).toHaveCount(0);
+  await expect(card).toBeFocused();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto(`/vi/workspace?goal=${goalId}&view=list&task=${task.id}&tab=documents`);
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await expect(modal.getByRole("tab", { name: /Tài liệu/ })).toHaveAttribute("aria-selected", "true");
+  await modal.getByRole("tab", { name: "Tổng quan" }).click();
+  const mobileBox = (await modal.boundingBox())!;
+  expect(mobileBox.width).toBeGreaterThan(350);
+  expect(mobileBox.height).toBeGreaterThan(800);
+  expect(await modal.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await expect(modal.getByRole("button", { name: "Đóng hộp thoại", exact: true })).toBeVisible();
+  await expect(modal.getByRole("region", { name: "Lịch học của công việc" }).getByRole("button", { name: /Thêm/ })).toBeVisible();
+  await page.screenshot({ path: "test-results/workspace-task-modal-mobile.png" });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("group", { name: "Vùng hiển thị nhiệm vụ" })).toBeFocused();
+
+  await page.goto(`/en/workspace?goal=${goalId}&view=list`);
+  const rowLink = page.getByRole("link", { name: title });
+  await rowLink.click();
+  await expect(modal).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(rowLink).toBeFocused();
+
+  await rowLink.click();
+  await expect(modal).toBeVisible();
+  const actions = modal.getByRole("button", { name: "Task actions" });
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Delete task" }).click();
+  let confirmation = page.getByRole("alertdialog");
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: "Cancel" }).click();
+  await expect(actions).toBeFocused();
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Delete task" }).click();
+  confirmation = page.getByRole("alertdialog");
+  await confirmation.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(rowLink).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "Task view" })).toBeFocused();
 });
 
 test("List scopes, sorts and filters tasks, opens details, and restores the view through browser history", async ({ page }) => {

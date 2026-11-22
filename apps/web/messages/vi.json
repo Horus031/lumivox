@@ -737,9 +737,14 @@
     },
     "details": {
       "fallbackDescription": "Chi tiết nhiệm vụ",
+      "actions": "Thao tác nhiệm vụ",
+      "sections": "Các mục chi tiết nhiệm vụ",
+      "metadata": "Chi tiết",
+      "loadFailed": "Không tải được chi tiết nhiệm vụ. Hãy thử lại.",
       "loadingDetails": "Đang tải đầy đủ chi tiết nhiệm vụ...",
       "close": "Đóng",
       "deleteTask": "Xóa nhiệm vụ",
+      "deleteFailed": "Không thể xóa nhiệm vụ. Hãy thử lại.",
       "deleting": "Đang xóa...",
       "deleteConfirm": "Xóa nhiệm vụ này? Các nhiệm vụ con và tài liệu học tập gắn với nhiệm vụ cũng sẽ bị xóa. Hành động này không thể hoàn tác.",
       "tabs": {
@@ -758,9 +763,8 @@
       },
       "minutes": "{minutes} phút",
       "notSet": "Chưa đặt",
-      "notes": "Ghi chú",
+      "notes": "Mô tả",
       "noDescription": "Chưa thêm mô tả cho nhiệm vụ này.",
-      "systemFields": "Trường hệ thống",
       "created": "Đã tạo",
       "updated": "Đã cập nhật",
       "subtasks": {
@@ -2528,6 +2532,7 @@
     "page": {
       "title": "Không gian học tập",
       "content": "Nội dung không gian học tập",
+      "taskView": "Vùng hiển thị nhiệm vụ",
       "chooseGoal": "Chọn mục tiêu để bắt đầu",
       "chooseGoalDescription": "Chọn mục tiêu để xem nhiệm vụ hoặc dùng nút dấu cộng để tạo mục tiêu.",
       "goalUnavailable": "Mục tiêu không khả dụng",
