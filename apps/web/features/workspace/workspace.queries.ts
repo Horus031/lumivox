@@ -11,7 +11,9 @@ import type {
   WorkspaceScope,
   WorkspaceSubtaskCounts,
   WorkspaceTask,
+  WorkspaceTimelineTask,
 } from "./workspace.types";
+import type { WorkspaceTimelinePeriod } from "./workspace-timeline";
 
 const taskWithGoal = "*,goals(id,title,goal_type,status)";
 const subtaskCounts = "subtasks:tasks!parent_task_id(count),completed:tasks!parent_task_id(count)";
@@ -91,6 +93,45 @@ export async function getWorkspaceListPage(scope: WorkspaceScope, options: Works
   });
 
   return { tasks: result.rows.map(workspaceTaskCounts), page: result.page, totalPages: result.totalPages };
+}
+
+export async function getWorkspaceTimeline(scope: WorkspaceScope, period: WorkspaceTimelinePeriod, page: number, undatedPage: number) {
+  const { supabase, user } = await requireUser();
+
+  function readPage(requestedPage: number, undated: boolean) {
+    return readTaskPage(requestedPage, LIST_PAGE_SIZE, (currentPage) => {
+      const query = supabase.from("tasks")
+        .select("id,title,status,due_at,due_date,schedule:task_study_schedules!ls_schedule_task_owner_fk(starts_on,ends_on,status)", { count: "exact" })
+        .eq("user_id", user.id)
+        .is("parent_task_id", null);
+
+      if (scope.type === "goal") query.eq("goal_id", scope.goalId);
+      else query.is("goal_id", null);
+
+      if (undated) {
+        query.is("due_at", null).is("due_date", null).filter("schedule", "is", "null");
+      } else {
+        // The embedded schedule is null unless it overlaps this date window.
+        query.lte("schedule.starts_on", period.end).gte("schedule.ends_on", period.start).or([
+          "schedule.not.is.null",
+          `and(due_at.gte.${period.fromInstant},due_at.lt.${period.untilInstant})`,
+          `and(due_at.is.null,due_date.gte.${period.start},due_date.lte.${period.end})`,
+        ].join(","));
+      }
+
+      const offset = (currentPage - 1) * LIST_PAGE_SIZE;
+      return query
+        .order("due_at", { nullsFirst: false })
+        .order("due_date", { nullsFirst: false })
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(offset, offset + LIST_PAGE_SIZE - 1)
+        .overrideTypes<WorkspaceTimelineTask[], { merge: false }>();
+    });
+  }
+
+  const [dated, undated] = await Promise.all([readPage(page, false), readPage(undatedPage, true)]);
+  return { dated, undated };
 }
 
 export async function getWorkspaceLinkedTask(taskId: string): Promise<TaskWithGoal | null> {

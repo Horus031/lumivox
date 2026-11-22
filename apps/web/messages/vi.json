@@ -2509,8 +2509,25 @@
       "label": "Chế độ xem không gian học tập",
       "list": "Danh sách",
       "board": "Bảng",
-      "timeline": "Lịch trình",
-      "timelinePlaceholder": "Lịch của các nhiệm vụ sẽ hiển thị tại đây khi tính năng Lịch trình sẵn sàng."
+      "timeline": "Lịch trình"
+    },
+    "timeline": {
+      "title": "Lịch trình nhiệm vụ",
+      "chart": "Biểu đồ lịch trình",
+      "task": "Nhiệm vụ",
+      "previous": "Bốn tuần trước",
+      "next": "Bốn tuần sau",
+      "today": "Hôm nay",
+      "jumpDate": "Đến ngày",
+      "studyPlan": "Lịch học",
+      "deadline": "Hạn chót",
+      "timezone": "Hạn chót theo múi giờ {timezone}",
+      "plannedDates": "Lịch học từ {start} đến {end}",
+      "deadlineDate": "Hạn chót {date}",
+      "paused": "Lịch học tạm dừng",
+      "closed": "Lịch học đã đóng",
+      "emptyPeriod": "Khoảng thời gian này chưa có lịch học hoặc hạn chót.",
+      "undated": "Nhiệm vụ chưa có ngày"
     },
     "list": {
       "title": "Danh sách nhiệm vụ",

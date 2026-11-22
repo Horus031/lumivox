@@ -561,7 +561,7 @@ test("List scopes, sorts and filters tasks, opens details, and restores the view
   await expect(renamedRow.locator("time").nth(2)).not.toHaveAttribute("datetime", overdue.updated_at);
 
   await tabs.getByRole("link", { name: "Timeline" }).click();
-  await expect(page.getByRole("heading", { name: "Timeline", exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Timeline chart", exact: true })).toBeVisible();
   await expect(table).toHaveCount(0);
   await page.goBack();
   await expect(tabs.getByRole("link", { name: "List" })).toHaveAttribute("aria-current", "page");
@@ -645,6 +645,89 @@ test("goal browsing is paginated and searchable without opening the board", asyn
   await expect(page).toHaveURL(new RegExp(`goal=${oldest.id}$`));
   await expect(page.getByRole("heading", { name: titles[0], exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+});
+
+test("Timeline shows scoped study plans and deadlines, paginates, and opens task details", async ({ page }) => {
+  test.setTimeout(120_000);
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  const { data: goal, error: goalError } = await client.from("goals")
+    .insert({ user_id: userId, title: "Timeline test goal", goal_type: "short_term" }).select("id").single();
+  if (goalError) throw goalError;
+  const { data: planned, error: plannedError } = await client.from("tasks")
+    .insert({ user_id: userId, goal_id: goal.id, title: "Planned study task" }).select("id").single();
+  if (plannedError) throw plannedError;
+  const { error: scheduleError } = await admin.from("task_study_schedules").insert({
+    user_id: userId, task_id: planned.id, starts_on: "2030-02-28", ends_on: "2030-03-11", timezone: "UTC",
+  });
+  if (scheduleError) throw scheduleError;
+  const { error: taskError } = await client.from("tasks").insert([
+    { user_id: userId, goal_id: goal.id, title: "Deadline-only task", due_at: "2030-03-04T19:00:00Z" },
+    { user_id: userId, goal_id: goal.id, title: "Legacy date task", due_date: "2030-03-08" },
+    { user_id: userId, goal_id: goal.id, title: "Next period task", due_at: "2030-04-01T00:00:00Z" },
+    { user_id: userId, title: "Unassigned deadline", due_at: "2030-03-06T12:00:00Z" },
+    { user_id: userId, goal_id: goal.id, parent_task_id: planned.id, title: "Hidden subtask", due_at: "2030-03-06T12:00:00Z" },
+    ...Array.from({ length: 21 }, (_, index) => ({ user_id: userId, goal_id: goal.id, title: `Undated task ${index + 1}` })),
+  ]);
+  if (taskError) throw taskError;
+
+  await page.setViewportSize({ width: 1440, height: 920 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  await page.getByRole("link", { name: "Timeline", exact: true }).click();
+  const timeline = page.getByRole("region", { name: "Task timeline", exact: true });
+  const chart = timeline.getByRole("region", { name: "Timeline chart" });
+  await expect(chart).toBeVisible();
+  await timeline.getByLabel("Go to date").fill("2030-03-07");
+  await timeline.getByRole("button", { name: "Go to date" }).click();
+  await expect(timeline.getByLabel("Go to date")).toHaveValue("2030-03-04");
+  await expect(chart.getByRole("link", { name: /Planned study task.*Study plan from Feb 28, 2030 to Mar 11, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Deadline-only task.*Deadline Mar 4, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Legacy date task.*Deadline Mar 8, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link")).toHaveCount(3);
+
+  const undated = page.getByRole("region", { name: "Tasks without dates" });
+  await expect(undated.getByRole("listitem")).toHaveCount(20);
+  await undated.getByRole("link", { name: "2", exact: true }).click();
+  await expect(undated.getByRole("listitem")).toHaveCount(1);
+  const trigger = chart.getByRole("link", { name: /Planned study task/ });
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Planned study task", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(page).toHaveURL(/start=2030-03-04&undatedPage=2$/);
+
+  await timeline.getByRole("link", { name: "Next four weeks" }).click();
+  await expect(chart.getByRole("link", { name: /Next period task/ })).toBeVisible();
+  await expect(chart.getByRole("link")).toHaveCount(1);
+  await timeline.getByRole("link", { name: "Previous four weeks" }).click();
+  await expect(chart.getByRole("link")).toHaveCount(3);
+
+  const { error: bulkError } = await client.from("tasks").insert(Array.from({ length: 20 }, (_, index) => ({
+    user_id: userId, goal_id: goal.id, title: `April task ${index + 1}`, due_at: "2030-04-02T12:00:00Z",
+  })));
+  if (bulkError) throw bulkError;
+  await page.goto(`/en/workspace?goal=${goal.id}&view=timeline&start=2030-04-01&undatedPage=2`);
+  await expect(chart.getByRole("link")).toHaveCount(20);
+  await timeline.getByRole("link", { name: "2", exact: true }).click();
+  await expect(chart.getByRole("link")).toHaveCount(1);
+  await expect(undated.getByRole("listitem")).toHaveCount(1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/vi/workspace?goal=${goal.id}&view=timeline&start=2030-03-04`);
+  const mobileChart = page.getByRole("region", { name: "Biểu đồ lịch trình" });
+  await expect(mobileChart.getByRole("link", { name: /Planned study task/ })).toBeVisible();
+  expect(await mobileChart.evaluate((el) => {
+    el.scrollLeft = 220;
+    const titleColumn = el.querySelector("li a > span")!;
+    return el.scrollLeft > 0 && Math.abs(titleColumn.getBoundingClientRect().left - el.getBoundingClientRect().left) <= 2
+      && document.documentElement.scrollWidth <= window.innerWidth;
+  })).toBe(true);
+
+  await page.goto("/en/workspace?goal=unassigned&view=timeline&start=2030-03-04");
+  await expect(chart.getByRole("link", { name: /Unassigned deadline/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Deadline-only task/ })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });
 
 test("recovery destinations require Save or Start before writing", async ({ page }) => {

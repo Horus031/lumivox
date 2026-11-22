@@ -11,12 +11,16 @@ export function resolveWorkspaceListOptions(params: {
   sort?: string;
   page?: string;
 }): WorkspaceListOptions {
-  const page = typeof params.page === "string" && /^\d+$/.test(params.page) ? Number(params.page) : 1;
   return {
     status: params.status && isTaskStatus(params.status) ? params.status : undefined,
     sort: params.sort === "desc" ? "desc" : "asc",
-    page: Number.isSafeInteger(page) && page >= 1 ? page : 1,
+    page: resolveWorkspacePage(params.page),
   };
+}
+
+export function resolveWorkspacePage(value: string | undefined) {
+  const page = typeof value === "string" && /^\d+$/.test(value) ? Number(value) : 1;
+  return Number.isSafeInteger(page) && page >= 1 ? page : 1;
 }
 
 export function workspaceViewParams(goal: string, view: WorkspaceView, list?: WorkspaceListOptions) {
@@ -58,6 +62,14 @@ export function workspaceBoardHref(goal: string, pages: WorkspaceBoardPages) {
   });
   const href = workspaceHref(goal, "board");
   return lanes.length ? `${href}&${new URLSearchParams({ lanes: lanes.join(",") })}` : href;
+}
+
+export function workspaceTimelineHref(goal: string, start: string, page = 1, undatedPage = 1, task?: string) {
+  const params = new URLSearchParams({ goal, view: "timeline", start });
+  if (page > 1) params.set("page", String(page));
+  if (undatedPage > 1) params.set("undatedPage", String(undatedPage));
+  if (task) params.set("task", task);
+  return `/workspace?${params}`;
 }
 
 export function resolveWorkspaceScope(

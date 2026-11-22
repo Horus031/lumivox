@@ -2514,8 +2514,25 @@
       "label": "Workspace views",
       "list": "List",
       "board": "Board",
-      "timeline": "Timeline",
-      "timelinePlaceholder": "Task schedules will appear here when Timeline is available."
+      "timeline": "Timeline"
+    },
+    "timeline": {
+      "title": "Task timeline",
+      "chart": "Timeline chart",
+      "task": "Task",
+      "previous": "Previous four weeks",
+      "next": "Next four weeks",
+      "today": "Today",
+      "jumpDate": "Go to date",
+      "studyPlan": "Study plan",
+      "deadline": "Deadline",
+      "timezone": "Deadlines shown in {timezone}",
+      "plannedDates": "Study plan from {start} to {end}",
+      "deadlineDate": "Deadline {date}",
+      "paused": "Paused schedule",
+      "closed": "Closed schedule",
+      "emptyPeriod": "No study plans or deadlines in this period.",
+      "undated": "Tasks without dates"
     },
     "list": {
       "title": "Task list",

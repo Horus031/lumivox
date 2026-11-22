@@ -32,3 +32,7 @@ export type WorkspaceListTask = Pick<
   Task,
   "id" | "title" | "status" | "priority" | "due_at" | "due_date" | "completed_at" | "created_at" | "updated_at"
 > & WorkspaceSubtaskCounts;
+
+export type WorkspaceTimelineTask = Pick<Task, "id" | "title" | "status" | "due_at" | "due_date"> & {
+  schedule: { starts_on: string; ends_on: string; status: string }[];
+};
