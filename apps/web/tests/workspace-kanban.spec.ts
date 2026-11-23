@@ -647,6 +647,58 @@ test("goal browsing is paginated and searchable without opening the board", asyn
   await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
 });
 
+test("legacy deep links resolve owned subtasks and reject deleted goals and other owners", async ({ page }) => {
+  test.setTimeout(90_000);
+  const other = await admin.auth.admin.createUser({
+    email: `workspace-other-${randomUUID()}@example.test`, password: randomUUID(), email_confirm: true,
+  });
+  if (other.error) throw other.error;
+  const otherId = other.data.user.id;
+  try {
+    const { data: foreignGoal, error: foreignGoalError } = await admin.from("goals")
+      .insert({ user_id: otherId, title: "Private foreign goal", goal_type: "short_term" }).select("id").single();
+    if (foreignGoalError) throw foreignGoalError;
+    const { data: foreignTask, error: foreignTaskError } = await admin.from("tasks")
+      .insert({ user_id: otherId, goal_id: foreignGoal.id, title: "Private foreign task" }).select("id").single();
+    if (foreignTaskError) throw foreignTaskError;
+    const { data: removed, error: goalError } = await client.from("goals")
+      .insert({ user_id: userId, title: "Temporary removed goal", goal_type: "short_term" }).select("id").single();
+    if (goalError) throw goalError;
+    const { data: parent, error: parentError } = await client.from("tasks")
+      .insert({ user_id: userId, goal_id: removed.id, title: "Owned parent task" }).select("id").single();
+    if (parentError) throw parentError;
+    const { data: child, error: childError } = await client.from("tasks")
+      .insert({ user_id: userId, goal_id: removed.id, parent_task_id: parent.id, title: "Owned hidden subtask" }).select("id").single();
+    if (childError) throw childError;
+
+    await login(page);
+    await page.goto(`/en/workspace?goal=all&task=${child.id}&tab=documents`);
+    const dialog = page.getByRole("dialog", { name: "Owned hidden subtask", exact: true });
+    await expect(dialog.getByRole("tab", { name: "Documents" })).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("heading", { name: "Temporary removed goal", exact: true })).toBeVisible();
+
+    await page.goto(`/en/workspace?goal=${foreignGoal.id}&task=${foreignTask.id}`);
+    await expect(page.getByRole("heading", { name: "Goal unavailable", exact: true })).toBeVisible();
+    await expect(page.getByText("This task is unavailable.")).toBeVisible();
+    await expect(page.getByText("Private foreign task")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+
+    const deletion = await client.from("goals").delete().eq("id", removed.id);
+    if (deletion.error) throw deletion.error;
+    await page.goto(`/en/workspace?goal=${removed.id}`);
+    await expect(page.getByRole("heading", { name: "Goal unavailable", exact: true })).toBeVisible();
+    await page.goto(`/en/workspace?task=${parent.id}`);
+    await expect(page.getByRole("dialog", { name: "Owned parent task", exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page).toHaveURL(/goal=unassigned$/);
+  } finally {
+    const cleanup = await admin.auth.admin.deleteUser(otherId);
+    if (cleanup.error) throw cleanup.error;
+  }
+});
+
 test("Timeline shows scoped study plans and deadlines, paginates, and opens task details", async ({ page }) => {
   test.setTimeout(120_000);
   const pageErrors: string[] = [];

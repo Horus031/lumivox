@@ -128,6 +128,20 @@ test("shared login helper handles the password toggle and restores a rejected fo
   await expect(page.getByRole("button", { name: "Login", exact: true })).toBeEnabled();
 });
 
+test("login cannot submit credentials before JavaScript is ready", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, javaScriptEnabled: false });
+  try {
+    const page = await context.newPage();
+    await page.goto("/en/auth/login");
+    await expect(page.locator("form")).toHaveAttribute("method", "post");
+    await expect(page.getByLabel("Email", { exact: true })).toBeDisabled();
+    await expect(page.getByLabel("Password", { exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Login", exact: true })).toBeDisabled();
+  } finally {
+    await context.close();
+  }
+});
+
 test("narrow auth layout remains usable without JavaScript", async ({ browser, baseURL }) => {
   const context = await browser.newContext({
     baseURL,
