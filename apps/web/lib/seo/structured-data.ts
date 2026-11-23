@@ -30,7 +30,7 @@ export function getLandingStructuredData(locale: SeoLocale) {
         "@id": organizationId,
         name: siteConfig.name,
         url: siteConfig.url,
-        logo: `${siteConfig.url}/logo.png`,
+        logo: `${siteConfig.url}/logo-new.webp`,
         description: siteConfig.defaultDescription,
       },
 
