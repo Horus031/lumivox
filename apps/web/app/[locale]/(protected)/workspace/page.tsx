@@ -3,10 +3,9 @@ import { Target } from "lucide-react";
 
 import { getGoalById, getGoalPage } from "@/features/goals/goal.queries";
 import { getCurrentProfile } from "@/features/profiles/profile.queries";
-import type { TaskDetailsTab } from "@/features/tasks/components/task-details-modal";
 import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { WorkspaceBoard } from "@/features/workspace/components/workspace-board";
-import { WorkspaceGoalActions } from "@/features/workspace/components/workspace-goal-actions";
+import { GoalLearningDocuments } from "@/features/learning-documents/components/goal-learning-documents";
 import { WorkspaceGoalRail } from "@/features/workspace/components/workspace-goal-rail";
 import { WorkspaceTaskDetails } from "@/features/workspace/components/workspace-task-details";
 import { WorkspaceTaskList } from "@/features/workspace/components/workspace-task-list";
@@ -30,26 +29,16 @@ type WorkspacePageProps = {
     start?: string;
     undatedPage?: string;
     task?: string;
-    tab?: string;
-    edit?: string;
   }>;
 };
 
-function resolveTaskTab(value: string | undefined): TaskDetailsTab | undefined {
-  if (value === "overview" || value === "risk" || value === "subtasks" || value === "documents" || value === "review") {
-    return value;
-  }
-}
-
-async function WorkspaceViewContent({ scope, view, list, boardPages, timelineQuery, linkedTask, tab, edit }: {
+async function WorkspaceViewContent({ scope, view, list, boardPages, timelineQuery, linkedTask }: {
   scope: WorkspaceScope;
   view: WorkspaceView;
   list: WorkspaceListOptions;
   boardPages: WorkspaceBoardPages;
   timelineQuery: { start?: string; page: number; undatedPage: number };
   linkedTask: TaskWithGoal | null;
-  tab?: TaskDetailsTab;
-  edit: boolean;
 }) {
   const goal = getWorkspaceScopeKey(scope);
   const now = new Date();
@@ -81,8 +70,6 @@ async function WorkspaceViewContent({ scope, view, list, boardPages, timelineQue
       key={`${goal}:${view}`}
       linkedTask={linkedTask}
       boardTasks={board?.tasks}
-      tab={tab}
-      edit={edit}
       closeHref={closeHref}
       referenceNow={referenceNow}
       riskStates={riskStates}
@@ -124,13 +111,14 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
     getGoalPage({ includeProgress: true }),
   ]);
 
-  const view = resolveWorkspaceView(params.view);
+  const requestedView = resolveWorkspaceView(params.view);
   const linkedTask = params.task ? await getWorkspaceLinkedTask(params.task) : null;
   const requestedGoal = linkedTask ? linkedTask.goal_id ?? "unassigned" : params.goal;
   const goal = requestedGoal && requestedGoal !== "all" && requestedGoal !== "unassigned"
     ? await getGoalById(requestedGoal)
     : null;
   const scope = resolveWorkspaceScope(requestedGoal, goal?.id);
+  const view = requestedView === "documents" && scope?.type === "unassigned" ? "board" : requestedView;
   const goalOption = goal ? { id: goal.id, title: goal.title } : null;
   const missingGoal = !scope && requestedGoal && requestedGoal !== "all";
   const missingTask = Boolean(params.task && !linkedTask);
@@ -146,21 +134,18 @@ export default async function WorkspacePage({ searchParams }: WorkspacePageProps
           {missingTask && <p role="status" className="text-body text-muted-foreground">{t("taskUnavailable")}</p>}
           {scope ? (
             <>
-              <header className="flex min-w-0 items-center justify-between gap-3 border-b border-border pb-2">
+              <header className="min-w-0 border-b border-border pb-2">
                 <h2 className="min-w-0 text-section font-semibold wrap-anywhere">{goal?.title ?? railT("unassigned")}</h2>
-                {goal && <WorkspaceGoalActions goal={goal} />}
               </header>
               <WorkspaceViewTabs goal={getWorkspaceScopeKey(scope)} view={view} />
-              <WorkspaceViewContent
+              {view === "documents" && scope.type === "goal" ? <GoalLearningDocuments goalId={scope.goalId} /> : <WorkspaceViewContent
                 scope={scope}
                 view={view}
                 list={resolveWorkspaceListOptions(params)}
                 boardPages={resolveWorkspaceBoardPages(params.lanes)}
                 timelineQuery={{ start: params.start, page: resolveWorkspacePage(params.page), undatedPage: resolveWorkspacePage(params.undatedPage) }}
                 linkedTask={linkedTask}
-                tab={resolveTaskTab(params.tab)}
-                edit={params.edit === "1"}
-              />
+              />}
             </>
           ) : (
             <div className="grid min-h-64 place-items-center rounded-lg border border-dashed border-border p-card text-center">

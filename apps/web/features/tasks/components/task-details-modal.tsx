@@ -67,6 +67,7 @@ type TaskDetailsModalProps = {
   getReturnFocus?: (previous: HTMLElement | null, deleted: boolean) => HTMLElement | null;
 
   initialTab?: TaskDetailsTab;
+  onTabChange?: (tab: TaskDetailsTab) => void;
 
   initialEditMode?: boolean;
 
@@ -75,16 +76,21 @@ type TaskDetailsModalProps = {
   onTaskDataChanged?: () => void;
 };
 
-export function TaskDetailsModal({
+export function TaskDetailsModal({ task, ...props }: TaskDetailsModalProps) {
+  return task ? <TaskDetailsSession key={task.id} task={task} {...props} /> : null;
+}
+
+function TaskDetailsSession({
   task,
   onClose,
   getReturnFocus,
   initialTab,
+  onTabChange,
   initialEditMode,
   riskState,
   riskNow,
   onTaskDataChanged,
-}: TaskDetailsModalProps) {
+}: Omit<TaskDetailsModalProps, "task"> & { task: TaskWithGoal }) {
   const t = useTranslations("tasks.details");
   const confirm = useConfirmDialog();
   const locale = useLocale();
@@ -98,9 +104,21 @@ export function TaskDetailsModal({
 
   const [details, setDetails] = useState<TaskDetailsData | null>(null);
 
-  const [activeTab, setActiveTab] = useState<TaskDetailsTab>(
-    initialTab ?? "overview",
-  );
+  const [defaultTab] = useState<TaskDetailsTab>(task.status === "in_review" ? "review" : "overview");
+  const [selectedTab, setSelectedTab] = useState<TaskDetailsTab | null>(null);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const activeTab = selectedTab ?? initialTab ?? defaultTab;
+
+  function selectTab(tab: TaskDetailsTab) {
+    if (tab === activeTab) return;
+    setIsScheduling(false);
+    setSelectedTab(tab);
+  }
+
+  useEffect(() => {
+    // A server refresh can return older URL props while the user is viewing another tab.
+    if (selectedTab && selectedTab !== initialTab) onTabChange?.(selectedTab);
+  }, [initialTab, onTabChange, selectedTab]);
 
   const [isEditing, setIsEditing] = useState(initialEditMode ?? false);
 
@@ -115,9 +133,9 @@ export function TaskDetailsModal({
   } | null>(null);
   const recoveryKeys = useRef(new Map<string, string>());
   const recoveryRequest = useRef(0);
-  const taskId = task?.id ?? null;
+  const taskId = task.id;
 
-  const taskUpdatedAt = task?.updated_at ?? null;
+  const taskUpdatedAt = task.updated_at;
   const detailsRequest = useRef(0);
   const deleteRequest = useRef(0);
   const confirmingDelete = useRef(false);
@@ -127,10 +145,6 @@ export function TaskDetailsModal({
   const loadFailure = t("loadFailed");
 
   const refreshDetails = useCallback(() => {
-    if (!taskId) {
-      return;
-    }
-
     startDetailsTransition(async () => {
       const request = ++detailsRequest.current;
       const result = await getTaskDetailsAction(taskId).catch(() => null);
@@ -145,27 +159,21 @@ export function TaskDetailsModal({
     });
   }, [loadFailure, taskId]);
 
-  const requestedTab = initialTab ?? (task?.status === "in_review" ? "review" : "overview");
   useEffect(() => {
-    setActiveTab(requestedTab);
     setIsEditing(initialEditMode ?? false);
-    setRecovery(null);
-  }, [taskId, requestedTab, initialEditMode]);
+  }, [initialEditMode]);
 
   useEffect(() => {
-    setDetails(null);
-    if (!taskId) return;
-
     refreshDetails();
     return () => {
       detailsRequest.current += 1;
-      recoveryRequest.current += 1;
     };
-  }, [taskId, taskUpdatedAt, refreshDetails]);
+  }, [taskUpdatedAt, refreshDetails]);
 
   useEffect(() => () => {
     deleteRequest.current += 1;
-  }, [taskId]);
+    recoveryRequest.current += 1;
+  }, []);
 
   useEffect(() => {
     if (isEditing && activeTab === "overview") {
@@ -173,10 +181,8 @@ export function TaskDetailsModal({
     }
   }, [activeTab, isEditing, taskId]);
 
-  if (!task) return null;
-
-  const currentDetails = details?.task.id === task.id ? details : null;
-  const currentTask = currentDetails?.task ?? task;
+  const currentTask = details && Date.parse(details.task.updated_at) >= Date.parse(taskUpdatedAt)
+    ? details.task : task;
 
   const localRisk = predictedRisk?.taskId === currentTask.id &&
     predictedRisk.updatedAt === currentTask.updated_at && predictedRisk.baseState === riskState
@@ -194,7 +200,7 @@ export function TaskDetailsModal({
     }
 
     if (type === "view_task") {
-      setActiveTab("overview");
+      selectTab("overview");
       return;
     }
     const request = ++recoveryRequest.current;
@@ -220,21 +226,21 @@ export function TaskDetailsModal({
 
       case "split_task":
         setIsEditing(false);
-        setActiveTab("subtasks");
+        selectTab("subtasks");
         return;
 
       case "reschedule":
       case "reduce_scope":
-        setActiveTab("overview");
+        selectTab("overview");
         setIsEditing(true);
         return;
 
     }
   }
 
-  const subtasks = currentDetails?.subtasks ?? [];
+  const subtasks = details?.subtasks ?? [];
 
-  const documents = currentDetails?.documents ?? [];
+  const documents = details?.documents ?? [];
 
   const dateFormatter = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium",
@@ -324,7 +330,7 @@ export function TaskDetailsModal({
       }
       actions={
         <>
-          {(!isEditing || activeTab !== "overview") && (
+          {!isScheduling && (!isEditing || activeTab !== "overview") && (
             <Button
               ref={editButtonRef}
               type="button"
@@ -334,7 +340,7 @@ export function TaskDetailsModal({
               title={commonT("edit")}
               className="size-touch sm:h-control sm:w-auto"
               onClick={() => {
-                setActiveTab("overview");
+                selectTab("overview");
                 setIsEditing(true);
               }}
             >
@@ -363,7 +369,7 @@ export function TaskDetailsModal({
       }
     >
       <div className="grid min-w-0 items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,21rem)] lg:gap-7">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as TaskDetailsTab)}>
+        <Tabs value={activeTab} onValueChange={(value) => selectTab(value as TaskDetailsTab)}>
           <TabsList
             variant="line"
             aria-label={t("sections")}
@@ -376,10 +382,10 @@ export function TaskDetailsModal({
             <TabsTrigger value="risk" className={tabClass}>{t("tabs.risk")}</TabsTrigger>
           </TabsList>
 
-          {isLoadingDetails && !currentDetails && (
+          {isLoadingDetails && !details && (
             <p role="status" className="text-caption text-muted-foreground">{t("loadingDetails")}</p>
           )}
-          <TabsContent value="overview" className="min-w-0">
+          <TabsContent value="overview" className="min-w-0 space-y-section">
             {isEditing ? (
               <div ref={editPanelRef} className="min-w-0">
                 <TaskEditForm
@@ -395,14 +401,23 @@ export function TaskDetailsModal({
                 />
               </div>
             ) : (
-              <section className="space-y-2">
-                <h3 className="text-section font-semibold">{t("notes")}</h3>
-                <p className={currentTask.description?.trim()
-                  ? "whitespace-pre-wrap text-body leading-relaxed wrap-anywhere"
-                  : "text-body text-muted-foreground"}>
-                  {currentTask.description?.trim() ? currentTask.description : t("noDescription")}
-                </p>
-              </section>
+              <>
+                <section className="space-y-2">
+                  <h3 className="text-section font-semibold">{t("notes")}</h3>
+                  <p className={currentTask.description?.trim()
+                    ? "whitespace-pre-wrap text-body leading-relaxed wrap-anywhere"
+                    : "text-body text-muted-foreground"}>
+                    {currentTask.description?.trim() ? currentTask.description : t("noDescription")}
+                  </p>
+                </section>
+                {activeTab === "overview" && (
+                  <TaskStudyScheduleSection
+                    taskId={currentTask.id}
+                    eligible={currentTask.parent_task_id === null && ["todo", "in_progress"].includes(currentTask.status)}
+                    onEditingChange={setIsScheduling}
+                  />
+                )}
+              </>
             )}
           </TabsContent>
 
@@ -473,14 +488,6 @@ export function TaskDetailsModal({
               ))}
             </dl>
           </section>
-
-          {activeTab === "overview" && !isEditing && (
-            <TaskStudyScheduleSection
-              key={currentTask.id}
-              taskId={currentTask.id}
-              eligible={currentTask.parent_task_id === null && ["todo", "in_progress"].includes(currentTask.status)}
-            />
-          )}
 
           <dl className="space-y-1.5 px-1 text-caption text-muted-foreground">
             <div className="flex flex-wrap justify-between gap-x-3">

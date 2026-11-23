@@ -4,7 +4,9 @@ import { useLocale, useTranslations } from "next-intl";
 import { formatStudyDate } from "../schedule-presentation";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import { getStudySessionsAction } from "../session.queries.actions";
 import { SessionRescheduleDialog } from "./session-reschedule-dialog";
 import { SessionAttendanceDialog } from "./session-attendance-dialog";
@@ -13,6 +15,13 @@ import type { AttendanceCommand } from "../session-attendance.actions";
 
 type SuccessResult = Extract<Awaited<ReturnType<typeof getStudySessionsAction>>, { success: true }>;
 type Session = SuccessResult["sessions"][number];
+const attendanceActions: Partial<Record<Session["status"], AttendanceCommand["command"][]>> = {
+  scheduled: ["start", "complete", "skip"],
+  in_progress: ["complete"],
+  missed: ["recover", "skip"],
+  skipped: ["recover"],
+};
+
 type Props = {
   scheduleId: string;
   canReschedule?: boolean;
@@ -125,6 +134,8 @@ function SessionRows({
     };
   }, [loadPage]);
 
+  const actionsDisabled = loading || selectedSession !== null || selectedAttendance !== null;
+
   return (
     <section
       aria-label={t("sessions")}
@@ -132,22 +143,20 @@ function SessionRows({
       className="min-w-0 space-y-3 [overflow-wrap:anywhere]"
     >
       <div className="flex items-center justify-between">
-        <h4 data-study-sessions-heading tabIndex={-1} className="font-medium">
+        <h4 data-study-sessions-heading tabIndex={-1} className="text-label font-semibold">
           {t("sessions")}
         </h4>
-        <span className="text-xs text-muted-foreground">
+        <span className="text-caption text-muted-foreground">
           {t("loadedCount", { count: sessions.length, total })}
         </span>
       </div>
       {error && (
         <div className="space-y-2">
-          <p role="alert" className="text-sm text-red-600">
-            {error}
-          </p>
+          <FieldError>{error}</FieldError>
           <Button
             type="button"
             variant="outline"
-            disabled={loading || selectedSession !== null || selectedAttendance !== null}
+            disabled={actionsDisabled}
             onClick={() => void loadPage(retryPage)}
           >
             {t("retry")}
@@ -157,129 +166,51 @@ function SessionRows({
       {!loading && sessions.length === 0 && !error && (
         <p className="text-sm text-muted-foreground">{t("noSessions")}</p>
       )}
-      <ul className="space-y-2">
+      <ul className="divide-y divide-border rounded-md border border-border empty:hidden">
         {sessions.map((session) => (
-          <li key={session.id} className="rounded-md border border-border p-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <p className="text-sm font-medium">{formatStudyDate(session.local_date, locale)}</p>
-                <p className="text-xs text-muted-foreground">
+          <li key={session.id} className="p-3">
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <time dateTime={session.local_date} className="text-label font-semibold">{formatStudyDate(session.local_date, locale)}</time>
+                  <Badge variant="outline">{t(`status.${session.status}`)}</Badge>
+                </div>
+                <p className="text-caption text-muted-foreground">
                   {session.local_start_time.slice(0, 5)} – {session.local_end_time.slice(0, 5)} ·{" "}
                   {session.timezone}
                 </p>
               </div>
-              <span className="rounded-md border px-2 py-1 text-xs">
-                {t(`status.${session.status}`)}
-              </span>
-              {canReschedule &&
-                session.status === "scheduled" &&
-                new Date(session.scheduled_start_at).getTime() > Date.now() && (
+              <div
+                role="group"
+                aria-label={t("attendanceActionsLabel")}
+                className="ms-auto flex flex-wrap items-center justify-end gap-1 empty:hidden"
+              >
+                {canReschedule &&
+                  session.status === "scheduled" &&
+                  new Date(session.scheduled_start_at).getTime() > Date.now() && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={actionsDisabled}
+                      onClick={() => openReschedule(session)}
+                    >
+                      {t("reschedule")}
+                    </Button>
+                  )}
+                {canAttend && attendanceActions[session.status]?.map((kind) => (
                   <Button
+                    key={kind}
                     type="button"
-                    variant="outline"
                     size="sm"
-                    disabled={loading || selectedSession !== null || selectedAttendance !== null}
-                    onClick={() => openReschedule(session)}
+                    variant={kind === "complete" || kind === "recover" ? "default" : "ghost"}
+                    disabled={actionsDisabled}
+                    onClick={() => openAttendance(session, kind)}
                   >
-                    {t("reschedule")}
+                    {t(`attendance.action.${kind}`)}
                   </Button>
-                )}
-
-              {canAttend && (
-                <div
-                  role="group"
-                  className="flex flex-wrap items-center gap-2"
-                  aria-label={t("attendanceActionsLabel")}
-                >
-                  {session.status === "scheduled" && (
-                    <>
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={
-                          loading || selectedSession !== null || selectedAttendance !== null
-                        }
-                        onClick={() => openAttendance(session, "start")}
-                      >
-                        {t("attendance.action.start")}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        size="sm"
-                        disabled={
-                          loading || selectedSession !== null || selectedAttendance !== null
-                        }
-                        onClick={() => openAttendance(session, "complete")}
-                      >
-                        {t("attendance.action.complete")}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={
-                          loading || selectedSession !== null || selectedAttendance !== null
-                        }
-                        onClick={() => openAttendance(session, "skip")}
-                      >
-                        {t("attendance.action.skip")}
-                      </Button>
-                    </>
-                  )}
-
-                  {session.status === "in_progress" && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={loading || selectedSession !== null || selectedAttendance !== null}
-                      onClick={() => openAttendance(session, "complete")}
-                    >
-                      {t("attendance.action.complete")}
-                    </Button>
-                  )}
-
-                  {session.status === "missed" && (
-                    <>
-                      <Button
-                        type="button"
-                        size="sm"
-                        onClick={() => openAttendance(session, "recover")}
-                        disabled={
-                          loading || selectedSession !== null || selectedAttendance !== null
-                        }
-                      >
-                        {t("attendance.action.recover")}
-                      </Button>
-
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => openAttendance(session, "skip")}
-                        disabled={
-                          loading || selectedSession !== null || selectedAttendance !== null
-                        }
-                      >
-                        {t("attendance.action.skip")}
-                      </Button>
-                    </>
-                  )}
-
-                  {session.status === "skipped" && (
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => openAttendance(session, "recover")}
-                      disabled={loading || selectedSession !== null || selectedAttendance !== null}
-                    >
-                      {t("attendance.action.recover")}
-                    </Button>
-                  )}
-                </div>
-              )}
+                ))}
+              </div>
             </div>
             {session.status === "cancelled" && session.cancellation_reason && (
               <p className="mt-2 text-xs text-muted-foreground">
@@ -330,7 +261,7 @@ function SessionRows({
         <Button
           type="button"
           variant="outline"
-          disabled={loading || selectedSession !== null || selectedAttendance !== null}
+          disabled={actionsDisabled}
           onClick={() => void loadPage(page + 1)}
         >
           {t("loadMore")}

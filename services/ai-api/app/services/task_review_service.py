@@ -130,7 +130,11 @@ def _fetch_task_context(
         .execute()
     )
 
-    task = task_response.data
+    task = (
+        task_response.data
+        if task_response is not None
+        else None
+    )
 
     if not task:
         raise PermissionError(
@@ -231,7 +235,8 @@ def _fetch_task_context(
             .execute()
         )
 
-        goal = goal_response.data
+        if goal_response is not None:
+            goal = goal_response.data
 
     return (
         task,
@@ -1608,7 +1613,7 @@ def _load_attempt(
         .execute()
     )
 
-    if not response.data:
+    if response is None or not response.data:
         raise RuntimeError(
             "Review attempt could "
             "not be loaded."
@@ -1906,7 +1911,7 @@ def get_latest_task_review(
         .execute()
     )
 
-    if not owned_task.data:
+    if owned_task is None or not owned_task.data:
         raise PermissionError(
             "Task not found or "
             "not owned by this user."
@@ -1999,14 +2004,11 @@ def submit_task_review(
         .execute()
     )
 
-    attempt = (
-        attempt_response.data
-    )
-
-    if not attempt:
+    if attempt_response is None or not attempt_response.data:
         raise PermissionError(
             "Review attempt not found."
         )
+    attempt = attempt_response.data
 
     if attempt["status"] in {
         "passed",
@@ -2048,15 +2050,12 @@ def submit_task_review(
         .execute()
     )
 
-    task = (
-        task_response.data
-    )
-
-    if not task:
+    if task_response is None or not task_response.data:
         raise PermissionError(
             "Task not found or "
             "not owned by this user."
         )
+    task = task_response.data
 
     if (
         task.get(
@@ -2109,15 +2108,12 @@ def submit_task_review(
         .execute()
     )
 
-    answer_key_row = (
-        answer_key_response.data
-    )
-
-    if not answer_key_row:
+    if answer_key_response is None or not answer_key_response.data:
         raise RuntimeError(
             "Review answer key "
             "was not found."
         )
+    answer_key_row = answer_key_response.data
 
     (
         feedback,

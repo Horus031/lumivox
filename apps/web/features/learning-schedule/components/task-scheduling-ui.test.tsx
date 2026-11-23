@@ -144,6 +144,7 @@ describe("Task scheduling UI", () => {
   afterEach(() => {
     act(() => root.unmount());
     host.remove();
+    vi.useRealTimers();
   });
   async function render(node: ReactNode) {
     await act(async () => {
@@ -162,9 +163,10 @@ describe("Task scheduling UI", () => {
   }
   function enter(label: string, value: string, index = 0) {
     const labels = [...host.querySelectorAll("label")].filter(
-      (x) => x.querySelector("span")?.textContent === label,
+      (x) => x.textContent?.trim() === label,
     );
-    const input = labels[index].querySelector("input")!;
+    const input = labels[index]?.control;
+    if (!(input instanceof HTMLInputElement)) throw new Error(`Missing input ${label}`);
     act(() => {
       Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!.call(input, value);
       input.dispatchEvent(new Event("input", { bubbles: true }));
@@ -277,6 +279,22 @@ describe("Task scheduling UI", () => {
     expect(mocks.predictRisk).not.toHaveBeenCalled();
   });
 
+  it.each(["review", "risk"])("keeps the %s tab selected after review status changes", async (tab) => {
+    const task = { ...a, status: "in_review" as const };
+    mocks.details.mockResolvedValue({ success: true, data: { task, subtasks: [], documents: [] } });
+    await render(<TaskDetailsModal task={task} onClose={vi.fn()} />);
+    const trigger = button(`tabs.${tab}`);
+    if (tab === "risk") await act(async () => {
+      trigger.dispatchEvent(new MouseEvent("mousedown", { bubbles: true, button: 0 }));
+    });
+    expect(trigger.getAttribute("aria-selected")).toBe("true");
+
+    const refreshed = { ...task, status: "completed" as const, updated_at: new Date().toISOString() };
+    mocks.details.mockResolvedValue({ success: true, data: { task: refreshed, subtasks: [], documents: [] } });
+    await render(<TaskDetailsModal task={refreshed} onClose={vi.fn()} />);
+    expect(button(`tabs.${tab}`).getAttribute("aria-selected")).toBe("true");
+  });
+
   it("4.1 renders engine preview and passes the same valid draft without mutations", async () => {
     const next = vi.fn();
     await render(<ScheduleDraftEditor initialValue={draft} onContinue={next} />);
@@ -304,13 +322,17 @@ describe("Task scheduling UI", () => {
     });
     expect(host.querySelectorAll("li")).toHaveLength(3);
   });
-  it.each([
-    ["End date", "2029-01-01", /Schedule must cover/],
-    ["IANA timezone", "Bad/Zone", /Invalid IANA/],
-  ] as const)("4.1 rejects invalid %s", async (label, value, message) => {
-    await render(<ScheduleDraftEditor initialValue={draft} onContinue={vi.fn()} />);
-    enter(label, value);
-    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(message);
+  it("4.1 rejects an end date before the start date and invalid timezones", async () => {
+    const next = vi.fn();
+    await render(
+      <ScheduleDraftEditor initialValue={{ ...draft, endsOn: "2029-01-01" }} onContinue={next} />,
+    );
+    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/Schedule must cover/);
+    expect(button("Continue").disabled).toBe(true);
+
+    await render(<ScheduleDraftEditor key="timezone" initialValue={draft} onContinue={next} />);
+    enter("IANA timezone", "Bad/Zone");
+    expect(host.querySelector('[role="alert"]')?.textContent).toMatch(/Invalid IANA/);
     expect(button("Continue").disabled).toBe(true);
   });
   it("4.1 rejects a DST gap and disables empty previews or missing callback", async () => {
@@ -388,17 +410,18 @@ describe("Task scheduling UI", () => {
     expect(host.textContent).not.toContain("Add study schedule");
   });
   it("4.2 RPC rejection retains editor and edited draft, then successful retry loads summary", async () => {
+    vi.setSystemTime(new Date(2030, 0, 7, 12));
     mocks.create
       .mockResolvedValueOnce({ success: false, message: "Rejected by RPC" })
       .mockResolvedValueOnce({ success: true, scheduleId: summary.id, sessionCount: 3 });
     await render(<TaskStudyScheduleSection taskId={a.id} eligible />);
     await click("Add study schedule");
-    enter("Start date", "2030-01-07");
-    enter("End date", "2030-01-21");
-    act(() => {
-      const weekday = host.querySelector("select")!;
-      weekday.value = "1";
-      weekday.dispatchEvent(new Event("change", { bubbles: true }));
+    await act(async () => {
+      host.querySelector<HTMLButtonElement>('button[aria-label^="End date:"]')!.click();
+    });
+    await act(async () => {
+      const date = new Date(2030, 0, 21).toLocaleDateString();
+      document.querySelector<HTMLButtonElement>(`[data-day="${date}"]`)!.click();
     });
     await click("Continue");
     expect(mocks.error).toHaveBeenCalledWith(
@@ -407,7 +430,7 @@ describe("Task scheduling UI", () => {
     expect(host.querySelector('[role="alert"]')?.textContent).toBe(
       "Could not save study schedule. Check the dates and active sessions.",
     );
-    expect(host.querySelector<HTMLInputElement>('input[type="date"]')!.value).toBe("2030-01-07");
+    expect(host.querySelector('button[aria-label^="End date:"]')?.textContent).toBe("Jan 21, 2030");
     expect(host.querySelector('[aria-label="Study schedule editor"]')).not.toBeNull();
     mocks.load.mockResolvedValue({ success: true, schedule: summary });
     await click("Continue");
@@ -460,6 +483,8 @@ describe("Task scheduling UI", () => {
     });
     await render(taskModal(a));
     expect(host.textContent).toContain("Revision: 1");
+    expect(mocks.sessions).not.toHaveBeenCalled();
+    await click("Study sessions");
     expect(host.textContent).toContain("2030-01-09");
     // Check the immediate render too, before effects clear old detail state.
     act(() => {
@@ -506,6 +531,7 @@ describe("Task scheduling UI", () => {
         hasMore: false,
       });
       await render(<TaskStudyScheduleSection taskId={a.id} eligible={eligible} />);
+      await click("Study sessions");
       const labels = [...host.querySelectorAll('[aria-label="Study sessions"] li button')].map(
         (x) => x.textContent,
       );
@@ -545,6 +571,7 @@ describe("Task scheduling UI", () => {
         hasMore: false,
       });
       await render(taskModal(task));
+      await click("Study sessions");
       expect(host.querySelector('[aria-label="Study sessions"]')).not.toBeNull();
       expect(host.querySelectorAll('[aria-label="Study sessions"] li button')).toHaveLength(0);
     },

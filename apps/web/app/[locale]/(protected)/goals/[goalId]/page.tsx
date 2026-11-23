@@ -1,9 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { getGoalById } from "@/features/goals/goal.queries";
-import { getGoalLearningDocuments } from "@/features/learning-documents/learning-document.queries";
-import { GoalDocumentUploadForm } from "@/features/learning-documents/components/goal-document-upload-form";
-import { GoalDocumentList } from "@/features/learning-documents/components/goal-document-list";
+import { GoalLearningDocuments } from "@/features/learning-documents/components/goal-learning-documents";
 import { getTranslations } from "next-intl/server";
 
 type GoalDetailPageProps = {
@@ -15,10 +13,9 @@ type GoalDetailPageProps = {
 export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { goalId } = await params;
 
-  const [t, goal, documents] = await Promise.all([
+  const [t, goal] = await Promise.all([
     getTranslations("goals.detail"),
     getGoalById(goalId),
-    getGoalLearningDocuments(goalId),
   ]);
 
   if (!goal) {
@@ -39,9 +36,7 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
         ) : null}
       </section>
 
-      <GoalDocumentUploadForm goalId={goalId} />
-
-      <GoalDocumentList documents={documents} />
+      <GoalLearningDocuments goalId={goalId} />
     </main>
   );
 }

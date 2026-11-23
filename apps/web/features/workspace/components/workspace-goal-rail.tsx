@@ -9,6 +9,7 @@ import type { GoalOption, GoalPage } from "@/features/goals/goal.types";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { WorkspaceCreateGoalButton } from "./workspace-create-goal-button";
+import { WorkspaceGoalActions } from "./workspace-goal-actions";
 import { workspaceHref } from "../workspace.utils";
 import type { WorkspaceView } from "../workspace.types";
 
@@ -42,20 +43,23 @@ export function WorkspaceGoalRail({ initialPage, selectedGoal, unassigned, view 
           const progress = total ? Math.round((100 * completed) / total) : 0;
 
           return (
-            <Link href={workspaceHref(goal.id, view)} prefetch={false} onClick={() => setExpanded(false)}
-              aria-current={selected ? "page" : undefined} className={cn(linkClass, selected && "bg-muted text-foreground")}>
-              <div className="flex items-center gap-2">
-                <span title={goal.title} className="min-w-0 flex-1 truncate">{goal.title}</span>
-                <span className="shrink-0 text-caption text-muted-foreground tabular-nums">{progress}%</span>
-              </div>
-              <div role="meter" aria-label={t("taskProgress", { completed, total })} aria-valuemin={0} aria-valuemax={100}
-                aria-valuenow={progress} className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
-                <div className="h-full rounded-full bg-primary dark:bg-success" style={{ width: `${progress}%` }} />
-              </div>
-            </Link>
+            <div className="group relative">
+              <Link href={workspaceHref(goal.id, view)} prefetch={false} onClick={() => setExpanded(false)}
+                aria-current={selected ? "page" : undefined} className={cn(linkClass, "pe-12 sm:pe-10", selected && "bg-muted text-foreground")}>
+                <div className="flex items-center gap-2">
+                  <span title={goal.title} className="min-w-0 flex-1 truncate">{goal.title}</span>
+                  <span className="shrink-0 text-caption text-muted-foreground tabular-nums">{progress}%</span>
+                </div>
+                <div role="meter" aria-label={t("taskProgress", { completed, total })} aria-valuemin={0} aria-valuemax={100}
+                  aria-valuenow={progress} className="mt-1.5 h-1 overflow-hidden rounded-full bg-border">
+                  <div className="h-full rounded-full bg-primary dark:bg-success" style={{ width: `${progress}%` }} />
+                </div>
+              </Link>
+              <WorkspaceGoalActions goal={goal} selected={selected}/>
+            </div>
           );
         }} />
-        <Link href={workspaceHref("unassigned", view)} prefetch={false} onClick={() => setExpanded(false)} aria-current={unassigned ? "page" : undefined}
+        <Link href={workspaceHref("unassigned", view === "documents" ? "board" : view)} prefetch={false} onClick={() => setExpanded(false)} aria-current={unassigned ? "page" : undefined}
           className={cn(linkClass, "border-t border-border text-muted-foreground", unassigned && "bg-muted text-foreground")}>
           {t("unassigned")}
         </Link>

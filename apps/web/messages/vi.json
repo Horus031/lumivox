@@ -845,6 +845,7 @@
   },
   "taskReview": {
     "loading": "Đang tải AI Review...",
+    "loadFailed": "Không tải được AI Review. Vui lòng thử lại.",
     "attempt": "Lần đánh giá {number}",
     "threshold": "Đạt từ {value}%",
     "generating": "Đang tạo...",
@@ -2509,7 +2510,8 @@
       "label": "Chế độ xem không gian học tập",
       "list": "Danh sách",
       "board": "Bảng",
-      "timeline": "Lịch trình"
+      "timeline": "Lịch trình",
+      "documents": "Tài liệu học tập"
     },
     "timeline": {
       "title": "Lịch trình nhiệm vụ",
@@ -2560,6 +2562,8 @@
       "unassigned": "Không có mục tiêu",
       "createGoal": "Tạo mục tiêu",
       "goalActions": "Thao tác mục tiêu",
+      "goalActionsFor": "Thao tác cho mục tiêu {title}",
+      "editUnavailable": "Không mở được mục tiêu để chỉnh sửa. Hãy thử lại.",
       "documents": "Tài liệu học tập",
       "deleteGoalConfirm": "Xóa mục tiêu này? Các nhiệm vụ đang liên kết với mục tiêu có thể bị ảnh hưởng.",
       "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành",
@@ -2605,6 +2609,8 @@
     "weekday": "Thứ",
     "start": "Bắt đầu",
     "end": "Kết thúc",
+    "pickStartTime": "Chọn giờ bắt đầu",
+    "pickEndTime": "Chọn giờ kết thúc",
     "remove": "Xóa",
     "removeSlot": "Xóa khung giờ {index}",
     "addSlot": "Thêm khung giờ hằng tuần",

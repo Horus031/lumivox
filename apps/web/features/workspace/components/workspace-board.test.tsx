@@ -15,6 +15,8 @@ const mocks = vi.hoisted(() => ({
   create: vi.fn(),
   refresh: vi.fn(),
   linkedTaskId: null as string | null,
+  linkedTaskTab: undefined as string | undefined,
+  linkedTaskEdit: false,
   error: vi.fn(),
   dragEnd: undefined as ((event: DragEndEvent) => void) | undefined,
 }));
@@ -42,7 +44,11 @@ vi.mock("@dnd-kit/react", () => ({
 }));
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: mocks.refresh }),
-  useSearchParams: () => new URLSearchParams(mocks.linkedTaskId ? { task: mocks.linkedTaskId } : undefined),
+  useSearchParams: () => new URLSearchParams(mocks.linkedTaskId ? {
+    task: mocks.linkedTaskId,
+    ...(mocks.linkedTaskTab && { tab: mocks.linkedTaskTab }),
+    ...(mocks.linkedTaskEdit && { edit: "1" }),
+  } : undefined),
 }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ replace: vi.fn(), refresh: mocks.refresh }) }));
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
@@ -81,18 +87,18 @@ import { WorkspaceTaskDetails } from "./workspace-task-details";
 
 type TestBoardProps = ComponentProps<typeof Board> &
   Pick<ComponentProps<typeof WorkspaceTaskDetails>, "linkedTask" | "riskStates"> & {
-    initialTaskTab?: ComponentProps<typeof WorkspaceTaskDetails>["tab"];
+    initialTaskTab?: "overview" | "risk" | "subtasks" | "documents" | "review";
     initialEditMode: boolean;
   };
 
 function WorkspaceBoard({ linkedTask, initialTaskTab, initialEditMode, riskStates, ...boardProps }: TestBoardProps) {
   mocks.linkedTaskId = linkedTask?.id ?? null;
+  mocks.linkedTaskTab = initialTaskTab;
+  mocks.linkedTaskEdit = initialEditMode;
   return (
     <WorkspaceTaskDetails
       linkedTask={linkedTask}
       boardTasks={boardProps.tasks}
-      tab={initialTaskTab}
-      edit={initialEditMode}
       closeHref="/workspace"
       referenceNow={boardProps.referenceNow}
       riskStates={riskStates}

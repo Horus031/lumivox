@@ -20,7 +20,7 @@ export type WorkspaceTask = TaskWithGoal & WorkspaceSubtaskCounts;
 export type WorkspaceBoardPages = Partial<Record<TaskStatus, number>>;
 export type WorkspaceBoardPagination = Record<TaskStatus, { page: number; totalPages: number; total: number }>;
 
-export type WorkspaceView = "list" | "board" | "timeline";
+export type WorkspaceView = "list" | "board" | "timeline" | "documents";
 
 export type WorkspaceListOptions = {
   status?: TaskStatus;

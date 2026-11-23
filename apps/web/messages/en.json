@@ -850,6 +850,7 @@
   },
   "taskReview": {
     "loading": "Loading AI Review...",
+    "loadFailed": "Could not load AI Review. Please try again.",
     "attempt": "Attempt {number}",
     "threshold": "Pass at {value}%",
     "generating": "Generating...",
@@ -2514,7 +2515,8 @@
       "label": "Workspace views",
       "list": "List",
       "board": "Board",
-      "timeline": "Timeline"
+      "timeline": "Timeline",
+      "documents": "Learning documents"
     },
     "timeline": {
       "title": "Task timeline",
@@ -2565,6 +2567,8 @@
       "unassigned": "No goal",
       "createGoal": "Create goal",
       "goalActions": "Goal actions",
+      "goalActionsFor": "Goal actions for {title}",
+      "editUnavailable": "Could not open this goal for editing. Try again.",
       "documents": "Learning documents",
       "deleteGoalConfirm": "Delete this goal? Tasks linked to it may be affected.",
       "taskProgress": "{completed}/{total} tasks completed",
@@ -2610,6 +2614,8 @@
     "weekday": "Weekday",
     "start": "Start",
     "end": "End",
+    "pickStartTime": "Choose start time",
+    "pickEndTime": "Choose end time",
     "remove": "Remove",
     "removeSlot": "Remove slot {index}",
     "addSlot": "Add weekly slot",

@@ -174,10 +174,11 @@ export async function requestTaskReviewAction(input: {
       data: response,
     };
   } catch (error) {
+    console.error("Failed to generate AI Review", error);
     return {
       success: false,
 
-      message: error instanceof Error ? error.message : "Failed to generate AI Review.",
+      message: "Could not generate AI Review. Please try again.",
     };
   }
 }
@@ -218,10 +219,11 @@ export async function getLatestTaskReviewAction(
       data: response.attempt,
     };
   } catch (error) {
+    console.error("Failed to load AI Review", error);
     return {
       success: false,
 
-      message: error instanceof Error ? error.message : "Failed to load AI Review.",
+      message: "Could not load AI Review. Please try again.",
     };
   }
 }
@@ -314,10 +316,11 @@ export async function submitTaskReviewAction(input: {
       data: response,
     };
   } catch (error) {
+    console.error("Failed to submit AI Review", error);
     return {
       success: false,
 
-      message: error instanceof Error ? error.message : "Failed to submit AI Review.",
+      message: "Could not submit AI Review. Please try again.",
     };
   }
 }

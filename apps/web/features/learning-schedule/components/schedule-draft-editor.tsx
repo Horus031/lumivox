@@ -1,20 +1,36 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { ScheduleValidationError, formatStudyDate } from "../schedule-presentation";
-
 import { useId, useMemo, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
+import { Field, FieldDescription, FieldError, FieldLabel, FieldLegend } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TimePicker } from "@/components/ui/time-picker";
+import { formatLocalDate, parseLocalDate } from "@/lib/local-date";
+
 import { generateStudyOccurrences, type StudyScheduleInput } from "../schedule-engine";
+import { ScheduleValidationError, formatStudyDate } from "../schedule-presentation";
 
 type Props = {
   initialValue: StudyScheduleInput;
+  disabled?: boolean;
   onContinue?: (draft: StudyScheduleInput) => void;
+  onCancel?: () => void;
+  cancelDisabled?: boolean;
 };
 
 const weekdays = [1, 2, 3, 4, 5, 6, 7];
 
-export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
+export function ScheduleDraftEditor({
+  initialValue,
+  disabled,
+  onContinue,
+  onCancel,
+  cancelDisabled = disabled,
+}: Props) {
   const t = useTranslations("learningSchedule");
   const locale = useLocale();
   const fieldId = useId();
@@ -59,114 +75,114 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
   };
 
   const canContinue = !preview.error && preview.occurrences.length > 0;
+  const invalidDates = preview.error === "invalidDate" || preview.error === "dateRange";
 
   return (
-    <section aria-label={t("editor")} className="@container min-w-0 space-y-5">
-      <div className="grid grid-cols-1 gap-4 @md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="block text-sm font-medium">{t("startDate")}</span>
-          <input
-            aria-invalid={Boolean(preview.error)}
-            aria-describedby={preview.error ? `${fieldId}-error` : undefined}
-            type="date"
-            value={draft.startsOn}
-            onChange={(event) => update({ startsOn: event.target.value })}
-            className="min-w-0 w-full rounded-md border p-2"
+    <section aria-label={t("editor")} className="@container min-w-0 space-y-card">
+      <div className="grid gap-card @md:grid-cols-2">
+        {(["startsOn", "endsOn"] as const).map((field) => (
+          <DatePicker
+            key={field}
+            label={field === "startsOn" ? t("startDate") : t("endDate")}
+            value={parseLocalDate(draft[field])}
+            onChange={(date) => update({ [field]: formatLocalDate(date) })}
+            disabled={disabled}
+            required
+            aria-invalid={invalidDates}
+            aria-describedby={invalidDates ? `${fieldId}-error` : undefined}
           />
-        </label>
-
-        <label className="space-y-2">
-          <span className="block text-sm font-medium">{t("endDate")}</span>
-          <input
-            type="date"
-            value={draft.endsOn}
-            onChange={(event) => update({ endsOn: event.target.value })}
-            className="min-w-0 w-full rounded-md border p-2"
-          />
-        </label>
+        ))}
       </div>
 
-      <label className="block space-y-2">
-        <span className="block text-sm font-medium">{t("timezoneInput")}</span>
-        <input
+      <Field>
+        <FieldLabel htmlFor={`${fieldId}-timezone`}>{t("timezoneInput")}</FieldLabel>
+        <Input
+          id={`${fieldId}-timezone`}
           aria-describedby={`${fieldId}-timezone-help${preview.error ? " " + fieldId + "-error" : ""}`}
           aria-invalid={Boolean(preview.error)}
           list={`${fieldId}-zones`}
           value={draft.timezone}
+          disabled={disabled}
           onChange={(event) => update({ timezone: event.target.value })}
           placeholder="Asia/Ho_Chi_Minh"
-          className="min-w-0 w-full rounded-md border p-2"
         />
-      </label>
-
-      <datalist id={`${fieldId}-zones`}>
-        {zones.map((zone) => (
-          <option key={zone} value={zone} />
-        ))}
-      </datalist>
-      <p id={`${fieldId}-timezone-help`} className="text-xs text-muted-foreground">
-        {t("selectTimezone")} {t("dstHelp")}
-      </p>
+        <datalist id={`${fieldId}-zones`}>
+          {zones.map((zone) => (
+            <option key={zone} value={zone} />
+          ))}
+        </datalist>
+        <FieldDescription id={`${fieldId}-timezone-help`} className="text-caption">
+          {t("selectTimezone")} {t("dstHelp")}
+        </FieldDescription>
+      </Field>
       <fieldset className="min-w-0 space-y-3 [overflow-wrap:anywhere]">
-        <legend className="font-medium">{t("weeklySlots")}</legend>
+        <FieldLegend variant="label">{t("weeklySlots")}</FieldLegend>
 
         {draft.slots.map((slot, index) => (
           <div
             key={index}
             role="group"
             aria-label={t("slotLabel", { index: index + 1 })}
-            className="grid grid-cols-1 gap-2 rounded-md border p-3 @md:grid-cols-2 @xl:grid-cols-4"
+            className="grid grid-cols-1 items-end gap-3 rounded-md border bg-muted/30 p-3 @md:grid-cols-2 @xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_auto]"
           >
-            <label className="space-y-1">
-              <span id={`${fieldId}-weekday-${index}`} className="block text-xs">
+            <Field className="min-w-0">
+              <FieldLabel htmlFor={`${fieldId}-weekday-${index}`}>
                 {t("weekday")}
-              </span>
-              <select
-                aria-labelledby={`${fieldId}-weekday-${index}`}
-                value={slot.weekday}
-                onChange={(event) => updateSlot(index, "weekday", Number(event.target.value))}
-                className="min-w-0 w-full rounded-md border p-2"
+              </FieldLabel>
+              <Select
+                disabled={disabled}
+                value={String(slot.weekday)}
+                onValueChange={(value) => updateSlot(index, "weekday", Number(value))}
               >
-                {weekdays.map((day, i) => (
-                  <option key={day} value={i + 1}>
-                    {t(`weekdayName.${day}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <SelectTrigger id={`${fieldId}-weekday-${index}`} className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {weekdays.map((day) => (
+                    <SelectItem key={day} value={String(day)}>
+                      {t(`weekdayName.${day}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
 
-            {(["startTime", "endTime"] as const).map((field) => (
-              <label key={field} className="space-y-1">
-                <span className="block text-xs">
-                  {field === "startTime" ? t("start") : t("end")}
-                </span>
-                <input
-                  type="time"
+            {(["startTime", "endTime"] as const).map((field) => {
+              const isStart = field === "startTime";
+              return (
+                <TimePicker
+                  key={field}
+                  label={isStart ? t("start") : t("end")}
+                  pickerLabel={isStart ? t("pickStartTime") : t("pickEndTime")}
                   value={slot[field]}
-                  onChange={(event) => updateSlot(index, field, event.target.value)}
-                  className="min-w-0 w-full rounded-md border p-2"
+                  onChange={(time) => updateSlot(index, field, time)}
+                  disabled={disabled}
                 />
-              </label>
-            ))}
+              );
+            })}
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              disabled={disabled}
               aria-label={t("removeSlot", { index: index + 1 })}
               onClick={() =>
                 update({
                   slots: draft.slots.filter((_, i) => i !== index),
                 })
               }
-              className="rounded-md border px-3 py-2 text-sm"
+              className="justify-self-start @md:justify-self-end"
             >
               {t("remove")}
-            </button>
+            </Button>
           </div>
         ))}
 
-        <button
+        <Button
           type="button"
-          disabled={draft.slots.length >= 21}
+          variant="outline"
+          size="sm"
+          disabled={disabled || draft.slots.length >= 21}
           onClick={() =>
             update({
               slots: [
@@ -179,19 +195,18 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
               ],
             })
           }
-          className="rounded-md border px-3 py-2 text-sm disabled:opacity-50"
         >
           {t("addSlot")}
-        </button>
+        </Button>
       </fieldset>
 
-      <section aria-label={t("previewRegion")} className="space-y-2 rounded-md border p-4">
-        <h3 className="font-medium">{t("preview")}</h3>
+      <section aria-label={t("previewRegion")} className="space-y-2 rounded-md border p-card">
+        <h3 className="text-label font-medium">{t("preview")}</h3>
 
         {preview.error ? (
-          <p role="alert" id={`${fieldId}-error`} className="text-sm text-red-600">
+          <FieldError id={`${fieldId}-error`}>
             {t(`errors.${preview.error}`)}
-          </p>
+          </FieldError>
         ) : preview.occurrences.length === 0 ? (
           <p className="text-sm">{t("errors.empty")}</p>
         ) : (
@@ -208,20 +223,26 @@ export function ScheduleDraftEditor({ initialValue, onContinue }: Props) {
             </ul>
 
             {preview.occurrences.length > 8 && (
-              <p className="text-xs opacity-70">{t("firstEight")}</p>
+              <p className="text-caption text-muted-foreground">{t("firstEight")}</p>
             )}
           </>
         )}
       </section>
 
-      <button
-        type="button"
-        disabled={!canContinue || !onContinue}
-        onClick={() => onContinue?.(draft)}
-        className="rounded-md border px-4 py-2 disabled:opacity-50"
-      >
-        {t("continue")}
-      </button>
+      <div className="flex flex-wrap justify-end gap-2">
+        {onCancel && (
+          <Button type="button" variant="outline" disabled={cancelDisabled} onClick={onCancel}>
+            {t("cancel")}
+          </Button>
+        )}
+        <Button
+          type="button"
+          disabled={disabled || !canContinue || !onContinue}
+          onClick={() => onContinue?.(draft)}
+        >
+          {t("continue")}
+        </Button>
+      </div>
     </section>
   );
 }

@@ -1,4 +1,4 @@
-import { CalendarRange, Columns3, List as ListIcon } from "lucide-react";
+import { CalendarRange, Columns3, Files, List as ListIcon } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -9,14 +9,15 @@ const VIEWS = [
   { id: "list", icon: ListIcon },
   { id: "board", icon: Columns3 },
   { id: "timeline", icon: CalendarRange },
+  { id: "documents", icon: Files },
 ] as const;
 
 export async function WorkspaceViewTabs({ goal, view }: { goal: string; view: WorkspaceView }) {
   const t = await getTranslations("workspace.views");
 
   return (
-    <nav aria-label={t("label")} className="flex gap-1 border-b border-border">
-      {VIEWS.map(({ id, icon: Icon }) => (
+    <nav aria-label={t("label")} className="flex flex-wrap gap-1 border-b border-border">
+      {VIEWS.filter(({ id }) => id !== "documents" || goal !== "unassigned").map(({ id, icon: Icon }) => (
         <Link
           key={id}
           href={workspaceHref(goal, id)}

@@ -1,4 +1,4 @@
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createTranslator, NextIntlClientProvider } from "next-intl";
@@ -46,9 +46,9 @@ vi.mock("next-intl/server", () => ({
   getTranslations: async () =>
     createTranslator({ locale: "vi", messages, namespace: "documentUi" }),
 }));
-// eslint-disable-next-line @next/next/no-img-element -- Inspect the Next Image props without its runtime loader.
 vi.mock("next/image", () => ({
   default: ({ src, alt, fill }: { src: string; alt: string; fill: boolean }) => (
+    // eslint-disable-next-line @next/next/no-img-element -- Inspect the Next Image props without its runtime loader.
     <img src={src} alt={alt} data-fill={fill} />
   ),
 }));
@@ -409,6 +409,39 @@ describe("review and document UI", () => {
       expect(mocks.generate).not.toHaveBeenCalled();
     },
   );
+
+  const technicalReviewError = "Task not found or not owned by this user. Reference: 00000000-0000-4000-8000-000000000001";
+
+  it("shows the In Progress guidance on Todo when review history fails to load", async () => {
+    mocks.latest.mockResolvedValueOnce({ success: false, message: technicalReviewError });
+    await act(async () => root.render(localized(
+      <TaskReviewPanel task={{ ...task, status: "todo" }} subtasks={[]} onTaskChanged={mocks.changed} />,
+    )));
+
+    expect(container.textContent).toContain(messages.taskReview.startTaskFirst);
+    expect(container.textContent).not.toContain(messages.taskReview.loadFailed);
+    expect(container.textContent).not.toContain("Reference:");
+    expect(button(messages.taskReview.refresh)).toBeUndefined();
+    expect(mocks.error).not.toHaveBeenCalled();
+  });
+
+  it("loads once in Strict Mode and offers a retry without showing technical details", async () => {
+    mocks.latest.mockResolvedValueOnce({ success: false, message: technicalReviewError });
+    mocks.latest.mockResolvedValueOnce({ success: true, data: null });
+    await act(async () => root.render(
+      <StrictMode>{localized(<TaskReviewPanel task={task} subtasks={[]} onTaskChanged={mocks.changed} />)}</StrictMode>,
+    ));
+    expect(mocks.latest).toHaveBeenCalledOnce();
+    expect(container.querySelectorAll('[role="status"]')).toHaveLength(1);
+    expect(container.querySelector('[role="status"]')?.textContent).toBe(messages.taskReview.loadFailed);
+    expect(container.textContent).not.toContain("Reference:");
+    expect(mocks.error).not.toHaveBeenCalled();
+
+    await act(async () => button(messages.taskReview.refresh).click());
+    expect(mocks.latest).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    expect(button(messages.taskReview.generate)).toBeDefined();
+  });
 
   it("retains locale, threshold and request identity when generating review", async () => {
     mocks.latest.mockResolvedValue({ success: true, data: null });

@@ -3,7 +3,7 @@ import { getTaskBoardStatus } from "@/features/tasks/task-transition";
 import type { WorkspaceBoardPages, WorkspaceListOptions, WorkspaceScope, WorkspaceTask, WorkspaceView } from "./workspace.types";
 
 export function resolveWorkspaceView(value: string | undefined): WorkspaceView {
-  return value === "list" || value === "timeline" ? value : "board";
+  return value === "list" || value === "timeline" || value === "documents" ? value : "board";
 }
 
 export function resolveWorkspaceListOptions(params: {

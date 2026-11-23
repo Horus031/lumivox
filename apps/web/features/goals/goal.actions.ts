@@ -3,8 +3,8 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { z } from "zod";
-import { getGoalPage } from "./goal.queries";
-import type { GoalPage } from "./goal.types";
+import { getGoalById, getGoalPage } from "./goal.queries";
+import type { Goal, GoalPage } from "./goal.types";
 
 import {
   createGoalSchema,
@@ -30,6 +30,10 @@ export async function searchGoalsAction(input: z.input<typeof goalPageSchema>): 
     console.error("Failed to search workspace goals", error);
     return null;
   }
+}
+
+export async function getGoalForEditAction(goalId: string): Promise<Goal | null> {
+  return getGoalById(goalId);
 }
 
 export async function createGoalAction(input: CreateGoalInput): Promise<ActionResult> {

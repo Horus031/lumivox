@@ -493,6 +493,37 @@ test("task details center on desktop, fit mobile, and restore focus after close 
   await expect(page.getByRole("group", { name: "Task view" })).toBeFocused();
 });
 
+test("task detail keeps the selected AI Review or Risk tab after reloading updated task data", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Keep task detail tab";
+  const { data: task, error } = await client.from("tasks")
+    .insert({ user_id: userId, goal_id: goalId, title, status: "in_progress" }).select("id").single();
+  if (error) throw error;
+
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  await page.getByRole("button", { name: title, exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: title, exact: true });
+  const review = dialog.getByRole("tab", { name: "AI Review", exact: true });
+  const risk = dialog.getByRole("tab", { name: "Risk", exact: true });
+
+  await review.click();
+  await expect(page).toHaveURL(new RegExp(`task=${task.id}&tab=review$`));
+  const reviewed = await admin.from("tasks").update({ status: "in_review" }).eq("id", task.id);
+  if (reviewed.error) throw reviewed.error;
+  await page.reload();
+  await expect(review).toHaveAttribute("aria-selected", "true");
+
+  await risk.click();
+  await expect(page).toHaveURL(new RegExp(`task=${task.id}&tab=risk$`));
+  const completed = await admin.from("tasks").update({ status: "completed" }).eq("id", task.id);
+  if (completed.error) throw completed.error;
+  await page.reload();
+  await expect(risk).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(new RegExp(`goal=${goalId}$`));
+});
+
 test("List scopes, sorts and filters tasks, opens details, and restores the view through browser history", async ({ page }) => {
   test.setTimeout(90_000);
   const { data: goal, error: goalError } = await client.from("goals").insert({
@@ -565,6 +596,7 @@ test("List scopes, sorts and filters tasks, opens details, and restores the view
   await expect(table).toHaveCount(0);
   await page.goBack();
   await expect(tabs.getByRole("link", { name: "List" })).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/view=list&status=overdue&sort=desc$/);
   await page.reload();
   await expect(table.getByRole("row")).toHaveCount(2);
   await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveText("Overdue");
@@ -645,6 +677,53 @@ test("goal browsing is paginated and searchable without opening the board", asyn
   await expect(page).toHaveURL(new RegExp(`goal=${oldest.id}$`));
   await expect(page.getByRole("heading", { name: titles[0], exact: true })).toBeVisible();
   await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+});
+
+test("goal actions live on each card and Learning documents opens inside Workspace", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Goal card menu fixture";
+  const { data: other, error } = await client.from("goals")
+    .insert({ user_id: userId, title, description: "Details loaded on edit", goal_type: "short_term" }).select("id").single();
+  if (error) throw error;
+
+  await page.setViewportSize({ width: 1440, height: 920 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const rail = page.getByRole("navigation", { name: "Goals", exact: true });
+  const card = rail.getByRole("listitem").filter({ hasText: title });
+  const actions = card.getByRole("button", { name: `Goal actions for ${title}` });
+  const views = page.getByRole("navigation", { name: "Workspace views" });
+  await page.getByRole("heading", { level: 1 }).hover();
+  await expect(actions).toHaveCSS("opacity", "0");
+  await card.hover();
+  await expect(actions).toHaveCSS("opacity", "1");
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "Update goal", exact: true });
+  await expect(form.locator("input").first()).toHaveValue(title);
+  await expect(form.locator("textarea")).toHaveValue("Details loaded on edit");
+  await page.keyboard.press("Escape");
+  await expect(actions).toBeFocused();
+  await expect(page).toHaveURL(new RegExp(`goal=${goalId}$`));
+
+  await actions.press("Enter");
+  await page.getByRole("menuitem", { name: "Learning documents", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`goal=${other.id}&view=documents$`));
+  await expect(views.getByRole("link", { name: "Learning documents", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('input[type="file"]')).toBeVisible();
+  await views.getByRole("link", { name: "Board", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+  await views.getByRole("link", { name: "Learning documents", exact: true }).click();
+  await expect(page.locator('input[type="file"]')).toBeVisible();
+
+  await rail.getByRole("link", { name: "No goal", exact: true }).click();
+  await expect(views.getByRole("link", { name: "Learning documents", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+  await actions.press("Enter");
+  await page.getByRole("menuitem", { name: "Delete", exact: true }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page).toHaveURL(/goal=unassigned$/);
 });
 
 test("legacy deep links resolve owned subtasks and reject deleted goals and other owners", async ({ page }) => {

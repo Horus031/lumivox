@@ -70,6 +70,14 @@ async function openTask(page: Page, locale = "en", taskTitle = title) {
 }
 const section = (page: Page) =>
   page.getByRole("region", { name: "Task study schedule", exact: true });
+async function openSessions(page: Page, locale = "en") {
+  const trigger = page.getByRole("button", {
+    name: locale === "en" ? "Study sessions" : "Các buổi học",
+    exact: true,
+  });
+  await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+}
 async function rows() {
   const r = await admin
     .from("task_study_sessions")
@@ -87,18 +95,48 @@ async function quickCreate(page: Page, name: string) {
   await expect(todo.locator("article").filter({ hasText: name })).toBeVisible();
 }
 
+async function selectJanuary2030Date(page: Page, label: string, day: number) {
+  await page.getByRole("button", { name: new RegExp(`^${label}:`) }).click();
+  const calendar = page.getByRole("dialog", { name: label, exact: true });
+  const year = calendar.getByRole("combobox", { name: "Year", exact: true });
+  if ((await year.textContent())?.trim() !== "2030") {
+    await year.click();
+    await page.getByRole("option", { name: "2030", exact: true }).click();
+  }
+  const month = calendar.getByRole("combobox", { name: "Month", exact: true });
+  if ((await month.textContent())?.trim() !== "Jan") {
+    await month.click();
+    await page.getByRole("option", { name: "Jan", exact: true }).click();
+  }
+  await calendar.locator(`button[data-day="1/${day}/2030"]`).click();
+}
+
 test("E2E-01 authenticated browser creates Task and Schedule via real Server Actions", async ({
   page,
 }) => {
   await page.goto(`/en/workspace?goal=${goalId}`);
   await quickCreate(page, title);
   await openTask(page);
+  const overview = page.getByRole("tabpanel", { name: "Overview" });
+  const editor = overview.getByRole("region", { name: "Task study schedule", exact: true });
+  await expect(editor).toBeVisible();
+  const description = overview.getByRole("heading", { name: "Description", exact: true });
+  expect(await description.evaluate((heading) =>
+    Boolean(heading.closest("section")?.nextElementSibling?.matches('[aria-label="Task study schedule"]')),
+  )).toBe(true);
   await section(page).getByRole("button", { name: "Add study schedule", exact: true }).click();
-  await page.getByLabel("End date", { exact: true }).fill("2030-01-21");
-  await page.getByLabel("Start date", { exact: true }).fill("2030-01-07");
+  await expect(editor.getByRole("heading", { name: "Add study schedule", exact: true })).toBeFocused();
+  await expect(page.getByRole("complementary", { name: "Details" }).getByRole("region", { name: "Task study schedule" })).toHaveCount(0);
+  await selectJanuary2030Date(page, "End date", 21);
+  await selectJanuary2030Date(page, "Start date", 7);
   await page.getByLabel("IANA timezone", { exact: true }).fill("Asia/Ho_Chi_Minh");
-  await page.getByLabel("Weekday", { exact: true }).selectOption("1");
-  await page.getByLabel("Start", { exact: true }).fill("19:00");
+  await editor.getByRole("combobox", { name: "Weekday", exact: true }).click();
+  await page.getByRole("option", { name: "Mon", exact: true }).click();
+  const start = editor.getByRole("textbox", { name: "Start", exact: true });
+  await start.fill("18:07");
+  await editor.getByRole("combobox", { name: "Choose start time", exact: true }).click();
+  await page.getByRole("option", { name: "19:00", exact: true }).click();
+  await expect(start).toHaveValue("19:00");
   await page.getByLabel("End", { exact: true }).fill("20:30");
   await section(page).getByRole("button", { name: "Continue", exact: true }).click();
   await expect(section(page).getByText("Revision: 1", { exact: true })).toBeVisible();
@@ -126,6 +164,11 @@ test("E2E-02 browser reload retains persisted Schedule and local wall-clock time
   await page.reload();
   await page.locator("article").filter({ hasText: title }).getByRole("button").first().click();
   await expect(section(page).getByText("Revision: 1", { exact: true })).toBeVisible();
+  await expect(section(page).getByRole("region", { name: "Study sessions" })).toHaveCount(0);
+  await section(page).getByRole("button", { name: "Task reminders", exact: true }).click();
+  await expect(section(page).getByRole("switch")).toBeVisible();
+  await openSessions(page);
+  await expect(section(page).getByRole("switch")).toHaveCount(0);
   await expect(section(page).getByRole("listitem")).toHaveCount(3);
   await expect(
     section(page)
@@ -167,14 +210,16 @@ test("E2E-04 revised schedule preserves cancellation history and audit", async (
     .eq("event_type", "cancelled");
   expect(events.error).toBeNull();
   expect(events.data).toHaveLength(3);
+  await openSessions(page);
   await expect(section(page).getByText("Cancelled", { exact: true })).toHaveCount(3);
 });
 test("E2E-05 reschedules selected ID only and reloads updated time", async ({ page }) => {
   await openTask(page);
   const before = await rows();
+  await openSessions(page);
   await section(page).getByRole("button", { name: "Reschedule", exact: true }).first().click();
   const dialog = page.getByRole("dialog", { name: "Reschedule study session", exact: true });
-  await dialog.getByLabel("New date", { exact: true }).fill("2030-01-08");
+  await selectJanuary2030Date(page, "New date", 8);
   await dialog.getByLabel("Start time", { exact: true }).fill("18:00");
   await dialog.getByLabel("End time", { exact: true }).fill("19:00");
   // Delay transport, then continue the real request; never replace the action/RPC response.
@@ -253,18 +298,20 @@ test("E2E-07 Vietnamese UI keeps schedule timezone even on a Tokyo device", asyn
   await openTask(page, "vi");
   const vi = page.getByRole("region", { name: "Lịch học của công việc", exact: true });
   await expect(vi.getByRole("heading", { name: "Lịch học", exact: true })).toBeVisible();
+  await openSessions(page, "vi");
   await expect(vi.getByText("Đã hủy", { exact: true }).first()).toBeVisible();
   await expect(vi.getByRole("button", { name: "Dời lịch", exact: true }).first()).toBeVisible();
   await vi.getByRole("button", { name: "Dời lịch", exact: true }).first().click();
   const dialog = page.getByRole("dialog", { name: "Dời lịch buổi học" });
   await expect(dialog.getByText("Múi giờ: Asia/Ho_Chi_Minh", { exact: true })).toBeVisible();
-  await expect(dialog.getByLabel("Giờ bắt đầu")).toHaveValue("21:00");
+  await expect(dialog.getByRole("textbox", { name: "Giờ bắt đầu", exact: true })).toHaveValue("21:00");
   await dialog.getByRole("button", { name: "Hủy", exact: true }).click();
 });
 test("E2E-08 keyboard opens, traverses and closes Dialog with focus restoration", async ({
   page,
 }) => {
   await openTask(page);
+  await openSessions(page);
   const opener = section(page).getByRole("button", { name: "Reschedule", exact: true }).first();
   // Wait for the asynchronous session list before positioning keyboard focus.
   await expect(opener).toBeEnabled();
@@ -284,7 +331,7 @@ test("E2E-08 keyboard opens, traverses and closes Dialog with focus restoration"
     visited.add(
       await page.evaluate(
         () =>
-          document.activeElement?.closest("label")?.querySelector("span")?.textContent ??
+          (document.activeElement as HTMLInputElement | HTMLButtonElement | null)?.labels?.[0]?.textContent ??
           document.activeElement?.textContent ??
           "",
       ),
@@ -327,7 +374,7 @@ test("E2E-09 mobile EN/VI has no document or scheduling horizontal overflow", as
       })
       .click();
     await expect(
-      page.getByLabel(locale === "en" ? "Start date" : "Ngày bắt đầu", { exact: true }),
+      page.getByRole("button", { name: locale === "en" ? /^Start date:/ : /^Ngày bắt đầu:/ }),
     ).toBeVisible();
     expect(await schedule.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
     await page.screenshot({
@@ -337,6 +384,7 @@ test("E2E-09 mobile EN/VI has no document or scheduling horizontal overflow", as
     await schedule
       .getByRole("button", { name: locale === "en" ? "Cancel" : "Hủy", exact: true })
       .click();
+    await openSessions(page, locale);
     await schedule
       .getByRole("button", { name: locale === "en" ? "Reschedule" : "Dời lịch", exact: true })
       .first()

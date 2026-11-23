@@ -1,3 +1,7 @@
+from types import SimpleNamespace
+from unittest.mock import Mock
+from uuid import uuid4
+
 import pytest
 
 from app.schemas.task_review import (
@@ -12,7 +16,32 @@ from app.services.task_review_service import (
     _build_review_prompt,
     _score_review_answers,
     _submission_fingerprint,
+    get_latest_task_review,
 )
+
+
+def test_latest_review_handles_missing_or_unowned_task(monkeypatch):
+    supabase = Mock()
+    task_query = supabase.table.return_value.select.return_value
+    task_query.eq.return_value = task_query
+    task_query.maybe_single.return_value.execute.return_value = None
+    monkeypatch.setattr("app.services.task_review_service.get_supabase_client", lambda: supabase)
+
+    with pytest.raises(PermissionError, match="Task not found or not owned"):
+        get_latest_task_review(user_id=uuid4(), task_id=uuid4())
+
+    supabase.table.assert_called_once_with("tasks")
+
+
+def test_latest_review_returns_no_attempt_for_owned_task(monkeypatch):
+    supabase = Mock()
+    query = supabase.table.return_value.select.return_value
+    query.eq.return_value = query
+    query.maybe_single.return_value.execute.return_value = SimpleNamespace(data={"id": "task"})
+    query.order.return_value.limit.return_value.execute.return_value = SimpleNamespace(data=[])
+    monkeypatch.setattr("app.services.task_review_service.get_supabase_client", lambda: supabase)
+
+    assert get_latest_task_review(user_id=uuid4(), task_id=uuid4()).attempt is None
 
 def build_generation():
     return ReviewGenerationOutput(

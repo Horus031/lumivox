@@ -4,8 +4,7 @@ import { useConfirmDialog } from "@/components/ui/use-confirm-dialog";
 
 import { MoreHorizontal } from "lucide-react";
 
-import { useTransition } from "react";
-
+import { useRef, useState, useTransition } from "react";
 
 import { useTranslations } from "next-intl";
 
@@ -23,17 +22,18 @@ import {
 
 import { CreateGoalForm } from "@/features/goals/components/create-goal.form";
 
-import { deleteGoalAction } from "@/features/goals/goal.actions";
+import { deleteGoalAction, getGoalForEditAction } from "@/features/goals/goal.actions";
 
-import type { Goal } from "@/features/goals/goal.types";
+import type { Goal, GoalOption } from "@/features/goals/goal.types";
 
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 
 type WorkspaceGoalActionsProps = {
-  goal: Goal;
+  goal: GoalOption;
+  selected: boolean;
 };
 
-export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
+export function WorkspaceGoalActions({ goal, selected }: WorkspaceGoalActionsProps) {
   const t = useTranslations("workspace.rail");
   const confirm = useConfirmDialog();
 
@@ -42,6 +42,16 @@ export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
   const router = useRouter();
 
   const [isPending, startTransition] = useTransition();
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  function handleEdit() {
+    startTransition(async () => {
+      const details = await getGoalForEditAction(goal.id).catch(() => null);
+      if (details) setEditingGoal(details);
+      else toast.error(t("editUnavailable"));
+    });
+  }
 
   async function handleDelete() {
     if (!(await confirm(t("deleteGoalConfirm"), { variant: "destructive" }))) {
@@ -59,56 +69,62 @@ export function WorkspaceGoalActions({ goal }: WorkspaceGoalActionsProps) {
 
       toast.success(result.message);
 
-      router.replace("/workspace");
-
+      if (selected) router.replace("/workspace");
       router.refresh();
     });
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="shrink-0 sm:size-touch lg:size-control-sm"
-          aria-label={t("goalActions")}
-          title={t("goalActions")}
-        >
-          <MoreHorizontal className="size-4" />
-        </Button>
-      </DropdownMenuTrigger>
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            ref={triggerRef}
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="absolute end-0.5 top-1/2 -translate-y-1/2 [@media(hover:hover)_and_(pointer:fine)]:opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 data-[state=open]:opacity-100"
+            aria-label={t("goalActionsFor", { title: goal.title })}
+            title={t("goalActions")}
+          >
+            <MoreHorizontal aria-hidden="true" className="size-4" />
+          </Button>
+        </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end">
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem disabled={isPending} onSelect={handleEdit}>
+            {commonT("edit")}
+          </DropdownMenuItem>
+
+          {/* <DropdownMenuItem asChild>
+            <Link href={workspaceHref(goal.id, "documents")} prefetch={false} onClick={onNavigate}>
+              {t("documents")}
+            </Link>
+          </DropdownMenuItem> */}
+
+          <DropdownMenuSeparator />
+
+          <DropdownMenuItem
+            disabled={isPending}
+            className="text-destructive focus:text-destructive"
+            onSelect={(event) => {
+              event.preventDefault();
+              void handleDelete();
+            }}
+          >
+            {commonT("delete")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      {editingGoal && (
         <CreateGoalForm
           mode="edit"
-          goal={goal}
-          trigger={
-            <DropdownMenuItem onSelect={(event) => event.preventDefault()}>
-              {commonT("edit")}
-            </DropdownMenuItem>
-          }
+          goal={editingGoal}
+          open
+          returnFocusRef={triggerRef}
+          onOpenChange={(open) => { if (!open) setEditingGoal(null); }}
         />
-
-        <DropdownMenuItem asChild>
-          <Link href={`/goals/${goal.id}`}>{t("documents")}</Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem
-          disabled={isPending}
-          className="text-destructive focus:text-destructive"
-          onSelect={(event) => {
-            event.preventDefault();
-
-            handleDelete();
-          }}
-        >
-          {commonT("delete")}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      )}
+    </>
   );
 }
