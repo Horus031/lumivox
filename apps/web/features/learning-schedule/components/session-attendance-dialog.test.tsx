@@ -353,7 +353,7 @@ describe("Attendance confirmation dialog", () => {
     mocks.mutate.mockResolvedValue({ success: false, code: "uncertain", uncertain: true });
     await render("skip");
     expect(document.querySelector('[role="dialog"]')?.textContent).toContain("Bỏ qua buổi học");
-    expect(document.querySelector("textarea")?.closest("label")?.textContent).toContain("Lý do");
+    expect(document.querySelector("textarea")?.labels?.[0]?.textContent).toContain("Lý do");
     await click("Xác nhận bỏ qua");
     expect(document.querySelector('[role="alert"]')?.textContent).not.toContain(
       "attendance.errors",

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, ReactNode, useId, useMemo, useState, useTransition } from "react";
+import { FormEvent, ReactNode, useId, useMemo, useState, useTransition, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -35,6 +35,9 @@ type CreateGoalFormProps = {
   mode?: "create" | "edit";
   goal?: Goal;
   trigger?: ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  returnFocusRef?: RefObject<HTMLButtonElement | null>;
 };
 
 function parseDateValue(dateString: string | null): Date | undefined {
@@ -51,13 +54,14 @@ function parseDateValue(dateString: string | null): Date | undefined {
   return new Date(year, month - 1, day);
 }
 
-export function CreateGoalForm({ mode = "create", goal, trigger }: CreateGoalFormProps) {
+export function CreateGoalForm({ mode = "create", goal, trigger, open: controlledOpen, onOpenChange, returnFocusRef }: CreateGoalFormProps) {
   const t = useTranslations("goals.form");
   const commonT = useTranslations("common");
   const router = useRouter();
   const id = useId();
   const [isPending, startTransition] = useTransition();
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
 
   const isEditMode = mode === "edit";
 
@@ -97,7 +101,8 @@ export function CreateGoalForm({ mode = "create", goal, trigger }: CreateGoalFor
   }
 
   function handleOpenChange(nextOpen: boolean) {
-    setOpen(nextOpen);
+    if (controlledOpen === undefined) setOpen(nextOpen);
+    onOpenChange?.(nextOpen);
 
     if (nextOpen) {
       resetForm();
@@ -133,7 +138,7 @@ export function CreateGoalForm({ mode = "create", goal, trigger }: CreateGoalFor
 
       toast.success(result.message);
       resetForm();
-      setOpen(false);
+      handleOpenChange(false);
       router.refresh();
     });
   }
@@ -144,15 +149,19 @@ export function CreateGoalForm({ mode = "create", goal, trigger }: CreateGoalFor
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+      {(trigger || controlledOpen === undefined) && <DialogTrigger asChild>
         {trigger ?? (
           <Button type="button">
             <Plus aria-hidden="true" />
             {t("trigger")}
           </Button>
         )}
-      </DialogTrigger>
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
+      </DialogTrigger>}
+      <DialogContent onCloseAutoFocus={returnFocusRef ? (event) => {
+        if (!returnFocusRef.current?.isConnected) return;
+        event.preventDefault();
+        returnFocusRef.current.focus();
+      } : undefined} className="max-h-[calc(100dvh-2rem)] overflow-y-auto p-card sm:max-w-xl [&>[data-slot=dialog-close]]:top-1 [&>[data-slot=dialog-close]]:right-1 [&>[data-slot=dialog-close]]:grid [&>[data-slot=dialog-close]]:size-touch [&>[data-slot=dialog-close]]:place-items-center sm:[&>[data-slot=dialog-close]]:size-control">
         <form onSubmit={handleSubmit} aria-busy={isPending} className="min-w-0 space-y-card">
           <DialogTitle className="pr-10 text-section">
             {isEditMode ? t("editTitle") : t("createTitle")}

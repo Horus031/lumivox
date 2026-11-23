@@ -1,7 +1,10 @@
+import logging
+
 from fastapi import (
     APIRouter,
     Depends,
     HTTPException,
+    Request,
 )
 
 from app.schemas.task_review import (
@@ -23,6 +26,7 @@ from app.services.task_review_service import (
     submit_task_review,
 )
 
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     dependencies=[
@@ -41,6 +45,7 @@ router = APIRouter(
 )
 def generate_task_review_endpoint(
     payload: GenerateTaskReviewRequest,
+    request: Request,
 ):
     try:
         return generate_task_review(
@@ -66,9 +71,10 @@ def generate_task_review_endpoint(
         ) from error
 
     except Exception as error:
+        logger.exception("AI Review generation failed request_id=%s", request.headers.get("x-lumivox-request-id"))
         raise HTTPException(
             status_code=500,
-            detail=str(error),
+            detail="Could not generate AI Review. Please try again.",
         ) from error
 
 @router.post(
@@ -79,6 +85,7 @@ def generate_task_review_endpoint(
 )
 def submit_task_review_endpoint(
     payload: SubmitTaskReviewRequest,
+    request: Request,
 ):
     try:
         return submit_task_review(
@@ -104,9 +111,10 @@ def submit_task_review_endpoint(
         ) from error
 
     except Exception as error:
+        logger.exception("AI Review submission failed request_id=%s", request.headers.get("x-lumivox-request-id"))
         raise HTTPException(
             status_code=500,
-            detail=str(error),
+            detail="Could not submit AI Review. Please try again.",
         ) from error
 
 
@@ -118,6 +126,7 @@ def submit_task_review_endpoint(
 )
 def latest_task_review_endpoint(
     payload: GetLatestTaskReviewRequest,
+    request: Request,
 ):
     try:
         return get_latest_task_review(
@@ -136,7 +145,8 @@ def latest_task_review_endpoint(
         ) from error
 
     except Exception as error:
+        logger.exception("AI Review load failed request_id=%s", request.headers.get("x-lumivox-request-id"))
         raise HTTPException(
             status_code=500,
-            detail=str(error),
+            detail="Could not load AI Review. Please try again.",
         ) from error

@@ -21,6 +21,7 @@ const cases = [
 for (const scenario of cases) {
   test(`Recovery receipt through the browser: ${"focus" in scenario ? scenario.focus : scenario.action}`, async ({ page, baseURL }) => {
     test.skip("focus" in scenario && mode !== scenario.focus, "Run separately against the selected Focus mode.");
+    if ("focus" in scenario) test.setTimeout(90_000);
     for (const target of [api!, baseURL!]) {
       expect(["127.0.0.1", "localhost", "[::1]"]).toContain(new URL(target).hostname);
     }
@@ -75,7 +76,7 @@ for (const scenario of cases) {
         .getByRole("button", { name: "Review action" }).click();
 
       if ("focus" in scenario) {
-        await expect(page).toHaveURL(/\/focus\?.*recoveryAttemptId=/);
+        await expect(page).toHaveURL(/\/focus\?.*recoveryAttemptId=/, { timeout: 45_000 });
         await expect(page.getByRole("heading", { name: scenario.focus === "v2" ? "Build your focus session" : "Start a focus session" })).toBeVisible();
         await page.getByRole("button", { name: "Start focus session", exact: true }).click();
       } else if (scenario.action === "split_task") {

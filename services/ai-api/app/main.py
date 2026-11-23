@@ -3,10 +3,13 @@ import os
 from contextlib import (
     asynccontextmanager,
 )
+from pathlib import Path
 
 from dotenv import load_dotenv
 
 
+# Runtime environment variables take precedence over the local and shared files.
+load_dotenv(Path(__file__).resolve().parents[1] / ".env.local")
 load_dotenv()
 
 

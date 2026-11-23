@@ -1,12 +1,12 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition, useEffect } from "react";
-import { DragDropProvider, type DragEndEvent } from "@dnd-kit/react";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { Accessibility, PointerActivationConstraints, PointerSensor } from "@dnd-kit/dom";
+import { DragDropProvider, type DragEndEvent, type DragStartEvent } from "@dnd-kit/react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
-import { TaskDetailsDrawer } from "@/features/tasks/components/task-details-drawer";
 import { TASK_BOARD_LANES } from "@/features/tasks/task-status";
 import { transitionTaskStatusAction } from "@/features/tasks/task.actions";
 import {
@@ -16,113 +16,99 @@ import {
   isDirectTaskStatusTarget,
 } from "@/features/tasks/task-transition";
 
-import type { WorkspaceScope, WorkspaceTask } from "../workspace.types";
-import { groupWorkspaceTasksByStatus } from "../workspace.utils";
+import type { WorkspaceBoardPages, WorkspaceBoardPagination, WorkspaceTask } from "../workspace.types";
+import { groupWorkspaceTasksByStatus, workspaceBoardHref } from "../workspace.utils";
 import { WorkspaceLane } from "./workspace-lane";
-import type { GoalOption } from "@/features/goals/goal.types";
 
-import type { TaskDrawerTab } from "@/features/tasks/components/task-details-drawer";
-
-import type { WorkspaceTaskRiskMap } from "@/features/native-task-risk/task-risk-workspace.queries";
-
-import { getTaskRiskDisplayState } from "@/features/native-task-risk/task-risk-display-state";
+import { useWorkspaceTaskDetails } from "./workspace-task-details";
 
 type WorkspaceBoardProps = {
   tasks: WorkspaceTask[];
-
-  goals: GoalOption[];
-
-  scope: WorkspaceScope;
+  goalId: string | null;
 
   referenceNow: string;
-
-  initialTaskId: string | null;
-
-  initialTaskTab: TaskDrawerTab;
-
-  initialEditMode: boolean;
-
-  riskStates: WorkspaceTaskRiskMap;
+  pagination?: WorkspaceBoardPagination;
 };
+
+const BOARD_SENSORS = [
+  PointerSensor.configure({
+    activationConstraints: (event) => event.pointerType === "touch"
+      ? [new PointerActivationConstraints.Delay({ value: 250, tolerance: 8 })]
+      : [new PointerActivationConstraints.Distance({ value: 6 })],
+  }),
+];
 
 export function WorkspaceBoard({
   tasks,
-  goals,
-  scope,
+  goalId,
   referenceNow,
-  initialTaskId,
-  initialTaskTab,
-  initialEditMode,
-  riskStates,
+  pagination,
 }: WorkspaceBoardProps) {
   const taskT = useTranslations("tasks.form");
   const t = useTranslations("workspace.board");
   const router = useRouter();
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(
-    initialTaskId,
-  );
+  const { openTask, riskForTask, invalidateRisk } = useWorkspaceTaskDetails();
   const [boardTasks, setBoardTasks] = useState(tasks);
   const [serverTasks, setServerTasks] = useState(tasks);
-  const [serverRiskStates, setServerRiskStates] = useState(riskStates);
-
-  const [riskInvalidated, setRiskInvalidated] = useState(false);
-
-  const [riskClockMs, setRiskClockMs] = useState(() =>
-    Date.parse(referenceNow),
-  );
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const requestInFlight = useRef(false);
+  const draggedTaskId = useRef<string | null>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
   const boardNow = useMemo(() => new Date(referenceNow), [referenceNow]);
 
-  const riskNow = useMemo(
-    () => new Date(Math.max(riskClockMs, boardNow.getTime())),
-    [riskClockMs, boardNow],
-  );
-
-  useEffect(() => {
-    const intervalId = window.setInterval(() => {
-      setRiskClockMs(Date.now());
-    }, 60_000);
-
-    return () => {
-      window.clearInterval(intervalId);
-    };
-  }, []);
-  const quickCreateGoalId = scope.type === "goal" ? scope.goalId : null;
-
-  // Reset the local snapshot when refreshed server props arrive, before paint.
-  if (serverTasks !== tasks || serverRiskStates !== riskStates) {
+  if (serverTasks !== tasks) {
     setServerTasks(tasks);
     setBoardTasks(tasks);
-
-    setServerRiskStates(riskStates);
-    setRiskInvalidated(false);
   }
-  const selectedTask =
-    boardTasks.find((task) => task.id === selectedTaskId) ?? null;
 
   const groupedTasks = useMemo(
     () => groupWorkspaceTasksByStatus(boardTasks, boardNow),
     [boardTasks, boardNow],
   );
+  const serverGroups = useMemo(
+    () => pagination ? groupWorkspaceTasksByStatus(tasks, boardNow) : null,
+    [tasks, boardNow, pagination],
+  );
+  const lanePages: WorkspaceBoardPages = {};
+  if (pagination) {
+    for (const status of TASK_BOARD_LANES) lanePages[status] = pagination[status].page;
+  }
+  const currentBoardHref = pagination ? workspaceBoardHref(goalId ?? "unassigned", lanePages) : undefined;
+  const activeTask = activeTaskId ? boardTasks.find((task) => task.id === activeTaskId) : undefined;
+  const activeStatus = activeTask ? getTaskBoardStatus(activeTask, boardNow) : null;
 
-  function riskForTask(task: WorkspaceTask) {
-    return getTaskRiskDisplayState(
-      task,
-      riskStates[task.id],
-      riskNow,
-      riskInvalidated,
-    );
+  function handleDragStart(event: DragStartEvent) {
+    const source = event.operation.source;
+    if (!source) return;
+    const taskId = String(source.id).slice(5);
+    draggedTaskId.current = taskId;
+    setActiveTaskId(taskId);
   }
 
   function handleDragEnd(event: DragEndEvent) {
-    if (event.canceled || requestInFlight.current || isPending) return;
+    setActiveTaskId(null);
+    if (event.canceled) return;
     const { source, target } = event.operation;
-    if (!source || !target) return;
-    const taskId = String(source.id).replace(/^task:/, "");
-    const targetId = String(target.id);
+    if (!source) return;
+
+    const board = boardRef.current;
+    if (board && event.nativeEvent instanceof MouseEvent) {
+      // Hit-test the release point so clipped lanes and stale collisions cannot receive a drop.
+      const { clientX, clientY } = event.nativeEvent;
+      const lane = board.ownerDocument.elementFromPoint(clientX, clientY)?.closest("[data-status]");
+      const status = lane?.getAttribute("data-status");
+      if (lane && status && board.contains(lane)) moveTask(String(source.id).slice(5), status);
+      return;
+    }
+
+    const targetId = String(target?.id ?? "");
     if (!targetId.startsWith("lane:")) return;
-    const targetStatus = targetId.slice(5);
+    moveTask(String(source.id).slice(5), targetId.slice(5));
+  }
+
+  function moveTask(taskId: string, targetStatus: string) {
+    if (requestInFlight.current || isPending) return;
     const task = boardTasks.find((item) => item.id === taskId);
     if (!task) return;
     const currentStatus = getTaskBoardStatus(task, boardNow);
@@ -137,7 +123,7 @@ export function WorkspaceBoard({
 
     const previousTasks = boardTasks;
     requestInFlight.current = true;
-    setRiskInvalidated(true);
+    invalidateRisk();
     setBoardTasks((current) =>
       current.map((item) =>
         item.id === taskId
@@ -185,43 +171,59 @@ export function WorkspaceBoard({
   }
 
   return (
-    <>
-      <DragDropProvider onDragEnd={handleDragEnd}>
-        <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
-          <div
-            role="region"
-            aria-label={t("title")}
-            tabIndex={0}
-            className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
-          >
-            {TASK_BOARD_LANES.map((status) => (
+    <DragDropProvider
+      sensors={BOARD_SENSORS}
+      plugins={(defaults) => defaults.filter((plugin) => plugin !== Accessibility)}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+    >
+      <div className="min-w-0 overflow-hidden" aria-busy={isPending}>
+        <div
+          ref={boardRef}
+          role="region"
+          aria-label={t("title")}
+          tabIndex={0}
+          className="flex items-start gap-card overflow-x-auto px-0.5 pt-0.5 pb-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+        >
+          {TASK_BOARD_LANES.map((status) => {
+            const lane = pagination?.[status];
+            const pageHref = (page: number) => workspaceBoardHref(goalId ?? "unassigned", { ...lanePages, [status]: page });
+            const shown = groupedTasks[status];
+            const total = lane && serverGroups ? lane.total + shown.length - serverGroups[status].length : shown.length;
+            return (
               <WorkspaceLane
                 key={status}
                 status={status}
                 label={taskT(`statuses.${status}`)}
-                tasks={groupedTasks[status]}
-                onOpenTask={(task) => setSelectedTaskId(task.id)}
+                tasks={shown}
+                total={total}
+                pagination={lane && lane.totalPages > 1 ? {
+                  page: lane.page,
+                  totalPages: lane.totalPages,
+                  previousHref: lane.page > 1 ? pageHref(lane.page - 1) : undefined,
+                  nextHref: lane.page < lane.totalPages ? pageHref(lane.page + 1) : undefined,
+                } : undefined}
+                dropAllowed={activeStatus !== null && isDirectTaskStatusTarget(status) && canDirectlyTransitionTask(activeStatus, status)}
+                onCardPointerDown={() => { draggedTaskId.current = null; }}
+                onOpenTask={(task, event) => {
+                  // Escape can end a drag before pointerup generates a click.
+                  if (event.detail !== 0 && draggedTaskId.current === task.id) return;
+                  openTask(task.id, event.currentTarget);
+                }}
+                onMoveTask={(taskId, targetStatus) => {
+                  // Moving across lanes remounts the card and its menu trigger.
+                  boardRef.current?.focus({ preventScroll: true });
+                  moveTask(taskId, targetStatus);
+                }}
                 disabled={isPending}
-                quickCreateGoalId={quickCreateGoalId}
+                quickCreateGoalId={goalId}
+                quickCreateBoardHref={currentBoardHref}
                 riskStateForTask={riskForTask}
               />
-            ))}
-          </div>
+            );
+          })}
         </div>
-      </DragDropProvider>
-
-      <TaskDetailsDrawer
-        task={selectedTask}
-        goals={goals}
-        initialTab={initialTaskTab}
-        initialEditMode={initialEditMode}
-        onClose={() => setSelectedTaskId(null)}
-        riskState={selectedTask ? riskForTask(selectedTask) : undefined}
-        riskNow={riskNow}
-        onTaskDataChanged={() => {
-          setRiskInvalidated(true);
-        }}
-      />
-    </>
+      </div>
+    </DragDropProvider>
   );
 }

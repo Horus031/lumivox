@@ -1,6 +1,5 @@
 import { requireUser } from "@/lib/auth/require-user";
 import type { TypedSupabaseClient } from "@/types/supabase.types";
-import type { WorkspaceTask } from "@/features/workspace/workspace.types";
 
 import type { TaskRiskViewState } from "./task-risk-presentation.types";
 import {
@@ -12,6 +11,7 @@ import {
 const BATCH_SIZE = 100;
 
 export type WorkspaceTaskRiskMap = Record<string, TaskRiskViewState>;
+export type WorkspaceRiskTask = Parameters<typeof resolveTaskRiskSnapshot>[0];
 
 type QueryOptions = {
   supabase?: TypedSupabaseClient;
@@ -19,7 +19,7 @@ type QueryOptions = {
 };
 
 export async function getWorkspaceTaskRiskStates(
-  tasks: readonly WorkspaceTask[],
+  tasks: readonly WorkspaceRiskTask[],
   options: QueryOptions = {},
 ): Promise<WorkspaceTaskRiskMap> {
   const now = options.now ?? new Date();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { RefreshCw, Sparkles } from "lucide-react";
 
@@ -43,7 +43,10 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
 
   const [attempt, setAttempt] = useState<TaskReviewAttempt | null>(null);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const pendingLoad = useRef<{ taskId: string; promise: ReturnType<typeof getLatestTaskReviewAction> } | null>(null);
+  const loadVersion = useRef(0);
 
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -62,25 +65,28 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
     blockingSubtasks.length === 0;
 
   const loadLatest = useCallback(async () => {
+    const version = ++loadVersion.current;
+    const promise = pendingLoad.current?.taskId === taskId
+      ? pendingLoad.current.promise
+      : getLatestTaskReviewAction(taskId);
+    pendingLoad.current = { taskId, promise };
     setIsLoading(true);
-
     try {
-      const result = await getLatestTaskReviewAction(taskId);
-
-      if (!result.success) {
-        toast.error(result.message);
-
-        return;
-      }
-
-      setAttempt(result.data);
+      const result = await promise;
+      if (version !== loadVersion.current) return;
+      if (result.success) setAttempt(result.data);
+      setLoadFailed(!result.success);
+    } catch {
+      if (version === loadVersion.current) setLoadFailed(true);
     } finally {
-      setIsLoading(false);
+      if (pendingLoad.current?.promise === promise) pendingLoad.current = null;
+      if (version === loadVersion.current) setIsLoading(false);
     }
   }, [taskId]);
 
   useEffect(() => {
     void loadLatest();
+    return () => { loadVersion.current += 1; };
   }, [loadLatest]);
 
   async function handleGenerate() {
@@ -124,7 +130,7 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
   }
 
   useEffect(() => {
-    if (attempt?.status !== "generating") {
+    if (attempt?.status !== "generating" || loadFailed) {
       return;
     }
 
@@ -135,7 +141,7 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
     return () => {
       window.clearInterval(interval);
     };
-  }, [attempt?.status, attempt?.attempt_id, loadLatest]);
+  }, [attempt?.status, attempt?.attempt_id, loadFailed, loadLatest]);
 
   function handleSubmitted(submittedAttempt: TaskReviewAttempt) {
     setAttempt(submittedAttempt);
@@ -155,6 +161,26 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
     }
 
     return t("source.topicInferred");
+  }
+
+  if (!attempt && task.parent_task_id === null && task.status === "todo") {
+    return (
+      <p className="border-y border-border py-card text-body text-muted-foreground">
+        {t("startTaskFirst")}
+      </p>
+    );
+  }
+
+  if (loadFailed) {
+    return (
+      <div className="space-y-3 border-y border-border py-card">
+        <p role="status" className="text-body text-muted-foreground">{t("loadFailed")}</p>
+        <Button type="button" variant="outline" disabled={isLoading} onClick={() => void loadLatest()}>
+          <RefreshCw aria-hidden="true" />
+          {t("refresh")}
+        </Button>
+      </div>
+    );
   }
 
   if (isLoading && !attempt) {
@@ -250,7 +276,7 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
         <h3 className="text-section font-semibold text-foreground">{t("generationFailedTitle")}</h3>
 
         <p className="mt-2 text-body text-secondary-text">
-          {attempt.generation_error || t("generationFailedDescription")}
+          {t("generationFailedDescription")}
         </p>
 
         {taskCanGenerate ? (
@@ -282,14 +308,6 @@ export function TaskReviewPanel({ task, subtasks, onTaskChanged }: TaskReviewPan
             count: blockingSubtasks.length,
           })}
         </p>
-      </div>
-    );
-  }
-
-  if (task.status === "todo") {
-    return (
-      <div className="border-y border-border py-card text-body text-muted-foreground">
-        {t("startTaskFirst")}
       </div>
     );
   }

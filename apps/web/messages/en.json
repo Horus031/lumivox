@@ -742,9 +742,14 @@
     },
     "details": {
       "fallbackDescription": "Task details",
+      "actions": "Task actions",
+      "sections": "Task detail sections",
+      "metadata": "Details",
+      "loadFailed": "Could not load task details. Try again.",
       "loadingDetails": "Loading full task details...",
       "close": "Close",
       "deleteTask": "Delete task",
+      "deleteFailed": "Could not delete the task. Try again.",
       "deleting": "Deleting...",
       "deleteConfirm": "Delete this task? Its subtasks and task learning documents will also be deleted. This action cannot be undone.",
       "tabs": {
@@ -763,9 +768,8 @@
       },
       "minutes": "{minutes} minutes",
       "notSet": "Not set",
-      "notes": "Notes",
+      "notes": "Description",
       "noDescription": "No description has been added for this task yet.",
-      "systemFields": "System fields",
       "created": "Created",
       "updated": "Updated",
       "subtasks": {
@@ -846,6 +850,7 @@
   },
   "taskReview": {
     "loading": "Loading AI Review...",
+    "loadFailed": "Could not load AI Review. Please try again.",
     "attempt": "Attempt {number}",
     "threshold": "Pass at {value}%",
     "generating": "Generating...",
@@ -913,6 +918,15 @@
     }
   },
   "goals": {
+    "search": {
+      "label": "Search goals",
+      "loading": "Loading goals…",
+      "error": "Couldn’t load goals.",
+      "retry": "Try again",
+      "empty": "No goals yet.",
+      "noResults": "No matching goals.",
+      "more": "Load more"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Goals",
@@ -2497,22 +2511,68 @@
     }
   },
   "workspace": {
+    "views": {
+      "label": "Workspace views",
+      "list": "List",
+      "board": "Board",
+      "timeline": "Timeline",
+      "documents": "Learning documents"
+    },
+    "timeline": {
+      "title": "Task timeline",
+      "chart": "Timeline chart",
+      "task": "Task",
+      "previous": "Previous four weeks",
+      "next": "Next four weeks",
+      "today": "Today",
+      "jumpDate": "Go to date",
+      "studyPlan": "Study plan",
+      "deadline": "Deadline",
+      "timezone": "Deadlines shown in {timezone}",
+      "plannedDates": "Study plan from {start} to {end}",
+      "deadlineDate": "Deadline {date}",
+      "paused": "Paused schedule",
+      "closed": "Closed schedule",
+      "emptyPeriod": "No study plans or deadlines in this period.",
+      "undated": "Tasks without dates"
+    },
+    "list": {
+      "title": "Task list",
+      "task": "Task",
+      "status": "Status",
+      "allStatuses": "All statuses",
+      "priority": "Priority",
+      "due": "Due date",
+      "subtasks": "Subtasks",
+      "subtaskProgress": "{completed} of {total} subtasks completed",
+      "createdAt": "Created at",
+      "updatedAt": "Updated at",
+      "noDue": "No due date",
+      "sortLatest": "Show latest due dates first",
+      "sortEarliest": "Show earliest due dates first",
+      "empty": "No tasks in this goal yet.",
+      "noMatches": "No tasks match this status."
+    },
     "page": {
-      "eyebrow": "Lumivox",
       "title": "Learning Workspace",
-      "description": "Manage your goals and tasks from one place and see work progress across each stage.",
-      "newGoal": "New goal"
+      "content": "Workspace content",
+      "taskView": "Task view",
+      "chooseGoal": "Choose a goal to get started",
+      "chooseGoalDescription": "Select a goal to view its tasks, or use the plus button to create a goal.",
+      "goalUnavailable": "Goal unavailable",
+      "taskUnavailable": "This task is unavailable."
     },
     "rail": {
       "title": "Goals",
-      "description": "Choose a goal to focus the board.",
-      "allTasks": "All tasks",
       "unassigned": "No goal",
       "createGoal": "Create goal",
       "goalActions": "Goal actions",
+      "goalActionsFor": "Goal actions for {title}",
+      "editUnavailable": "Could not open this goal for editing. Try again.",
       "documents": "Learning documents",
       "deleteGoalConfirm": "Delete this goal? Tasks linked to it may be affected.",
-      "taskProgress": "{completed}/{total} tasks completed"
+      "taskProgress": "{completed}/{total} tasks completed",
+      "chooseGoal": "Choose a goal"
     },
     "board": {
       "empty": "No tasks in this stage.",
@@ -2520,7 +2580,14 @@
       "title": "Task board",
       "reviewManaged": "AI-managed stage",
       "overdueManaged": "Automatically determined by deadline",
-      "dragTask": "Drag task",
+      "moveTask": "Move task {title}",
+      "moveTaskAction": "Move task",
+      "lanePages": "Pages in {lane}",
+      "pageOf": "Page {page} of {totalPages}",
+      "previousLanePage": "Previous page in {lane}",
+      "nextLanePage": "Next page in {lane}",
+      "quickCreated": "Task added to Todo.",
+      "openCreatedTask": "Open task",
       "invalidTransition": "This task cannot move to that stage.",
       "staleTask": "Task changed somewhere else. Refresh and try again.",
       "transitionFailed": "Unable to move the task. Please try again.",
@@ -2547,6 +2614,8 @@
     "weekday": "Weekday",
     "start": "Start",
     "end": "End",
+    "pickStartTime": "Choose start time",
+    "pickEndTime": "Choose end time",
     "remove": "Remove",
     "removeSlot": "Remove slot {index}",
     "addSlot": "Add weekly slot",

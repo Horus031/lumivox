@@ -98,9 +98,11 @@ describe("recurring schedule revision UI", () => {
     });
   }
   function input(label: string) {
-    return [...host.querySelectorAll("label")]
-      .find((x) => x.querySelector("span")?.textContent === label)!
-      .querySelector("input")!;
+    const control = [...host.querySelectorAll("label")].find(
+      (x) => x.textContent?.trim() === label,
+    )?.control;
+    if (!(control instanceof HTMLInputElement)) throw new Error(`Missing input ${label}`);
+    return control;
   }
   function enter(label: string, value: string) {
     act(() => {
@@ -109,20 +111,35 @@ describe("recurring schedule revision UI", () => {
       el.dispatchEvent(new Event("input", { bubbles: true }));
     });
   }
+  async function selectJanuaryDay(label: string, day: number) {
+    await act(async () => {
+      host.querySelector<HTMLButtonElement>(`button[aria-label^="${label}:"]`)!.click();
+    });
+    await act(async () => {
+      const date = new Date(2030, 0, day).toLocaleDateString();
+      document.querySelector<HTMLButtonElement>(`[data-day="${date}"]`)!.click();
+    });
+  }
   it("prefills saved slots and updates date/time/weekday preview using engine", async () => {
     await render();
     expect(input("Start").value).toBe("19:00");
     expect(input("IANA timezone").value).toBe("UTC");
-    enter("Start date", "2030-01-08");
-    enter("End date", "2030-01-22");
-    enter("Start", "20:00");
+    await selectJanuaryDay("Start date", 8);
+    await selectJanuaryDay("End date", 22);
+    enter("Start", "20:07");
     enter("End", "21:30");
     act(() => {
-      const select = host.querySelector("select")!;
-      select.value = "2";
-      select.dispatchEvent(new Event("change", { bubbles: true }));
+      host.querySelector('[role="combobox"]')!.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true }),
+      );
     });
-    expect(host.textContent).toContain("2030-01-08 · 20:00–21:30");
+    act(() => {
+      const tuesday = [...document.querySelectorAll('[role="option"]')].find(
+        (option) => option.textContent === "Tue",
+      )!;
+      tuesday.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    expect(host.textContent).toContain("2030-01-08 · 20:07–21:30");
     expect(host.querySelectorAll("li")).toHaveLength(3);
     expect(mocks.revise).not.toHaveBeenCalled();
   });
@@ -188,7 +205,7 @@ describe("recurring schedule revision UI", () => {
     await click("Continue");
     await click("Confirm revision");
     expect(input("Start").value).toBe("18:00");
-    expect(button("Continue").closest("fieldset")!.disabled).toBe(true);
+    expect(button("Continue").disabled).toBe(true);
     mocks.load.mockResolvedValue({ success: true, revision: 2, draft });
     await click("Discard draft and reload");
     expect(input("Start").value).toBe("19:00");
@@ -214,7 +231,7 @@ describe("recurring schedule revision UI", () => {
     });
     await render();
     await click("Continue");
-    expect(input("Start date").value).toBe("2020-01-06");
+    expect(host.querySelector('button[aria-label^="Start date:"]')?.textContent).toBe("Jan 6, 2020");
     expect(host.textContent).toContain("Choose a start date of today or later");
     expect(mocks.revise).not.toHaveBeenCalled();
   });
@@ -244,6 +261,7 @@ describe("recurring schedule revision UI", () => {
     await act(async () => {
       root.render(<TaskStudyScheduleSection taskId="task" eligible />);
     });
+    await click("Study sessions");
     for (const revision of [2, 3]) {
       await click("Edit recurring schedule");
       mocks.summary.mockResolvedValue({ success: true, schedule: { ...summary, revision } });

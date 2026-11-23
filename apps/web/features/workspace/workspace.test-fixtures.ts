@@ -1,6 +1,9 @@
+import type { TaskWithSubtasks } from "@/features/tasks/task.types";
 import type { WorkspaceTask } from "./workspace.types";
 
-export function workspaceTask(overrides: Partial<WorkspaceTask> = {}): WorkspaceTask {
+type WorkspaceTaskFixture = WorkspaceTask & TaskWithSubtasks;
+
+export function workspaceTask(overrides: Partial<WorkspaceTaskFixture> = {}): WorkspaceTaskFixture {
   return {
     id: "00000000-0000-4000-8000-000000000001",
     user_id: "00000000-0000-4000-8000-000000000002",
@@ -21,6 +24,8 @@ export function workspaceTask(overrides: Partial<WorkspaceTask> = {}): Workspace
     updated_at: "2026-10-04T10:00:00Z",
     goals: null,
     subtasks: [],
+    totalSubtasks: 0,
+    completedSubtasks: 0,
     ...overrides,
   };
 }

@@ -65,13 +65,14 @@ async function login(page: Page) {
 }
 
 async function pointerMove(page: Page, title: string, from: string, to: string) {
+  const board = page.getByRole("region", { name: "Task board" });
+  await expect(board.locator("..")).toHaveAttribute("aria-busy", "false");
   const card = page.locator(`[data-status="${from}"] article`).filter({ hasText: title });
-  const handle = card.getByRole("button", { name: "Drag task", exact: true });
+  const surface = card.getByRole("button", { name: title, exact: true });
   const target = page.locator(`[data-status="${to}"]`);
-  await expect(handle).toHaveAttribute("aria-describedby", /dnd/);
-  await handle.scrollIntoViewIfNeeded();
-  const sourceBox = await handle.boundingBox();
-  if (!sourceBox) throw new Error("Missing drag handle");
+  await surface.scrollIntoViewIfNeeded();
+  const sourceBox = await surface.boundingBox();
+  if (!sourceBox) throw new Error("Missing card geometry");
   await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
   await page.mouse.down();
   await page.mouse.move(
@@ -85,13 +86,15 @@ async function pointerMove(page: Page, title: string, from: string, to: string) 
   await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + 55, {
     steps: 20,
   });
+  await expect(target).toHaveAttribute("data-drop-target", "true");
   await page.mouse.up();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(
     page.locator(`[data-status="${to}"] article`).filter({ hasText: title }),
   ).toBeVisible();
 }
 
-test("pointer workflow, quick create, managed lanes, stale update and responsive translations", async ({
+test("pointer workflow, scoped creation, managed lanes, stale update and responsive translations", async ({
   page,
 }) => {
   test.setTimeout(120_000);
@@ -116,7 +119,7 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
   expect(await card.locator("button button").count()).toBe(0);
   await card.getByRole("button").first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
-  await page.getByRole("button", { name: "Close", exact: true }).last().click();
+  await page.getByRole("dialog").getByRole("button", { name: "Close dialog", exact: true }).click();
   await pointerMove(page, "Phase 3 pointer task", "todo", "in_progress");
   await expect
     .poll(
@@ -151,12 +154,12 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
     .locator('[data-status="in_progress"] article')
     .filter({ hasText: "Phase 3 pointer task" });
   await expect(oldCard).toBeVisible();
-  const oldHandle = oldCard.getByRole("button", {
-    name: "Drag task",
+  const oldSurface = oldCard.getByRole("button", {
+    name: "Phase 3 pointer task",
     exact: true,
   });
-  await oldHandle.scrollIntoViewIfNeeded();
-  const sourceBox = await oldHandle.boundingBox();
+  await oldSurface.scrollIntoViewIfNeeded();
+  const sourceBox = await oldSurface.boundingBox();
   const completed = page.locator('[data-status="completed"]');
   const box = await completed.boundingBox();
   if (!sourceBox || !box) throw new Error("Missing drag geometry");
@@ -164,6 +167,7 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
   await page.mouse.down();
   await page.mouse.move(sourceBox.x + 25, sourceBox.y + 15, { steps: 5 });
   await page.mouse.move(box.x + box.width / 2, box.y + 55, { steps: 20 });
+  await expect(completed).toHaveAttribute("data-drop-target", "true");
   await page.mouse.up();
   await expect(page.getByText("Task changed somewhere else. Refresh and try again.")).toBeVisible();
   await expect(
@@ -189,9 +193,7 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
     page.getByRole("heading", { name: "Không gian học tập", exact: true }),
   ).toBeVisible();
   await expect(
-    page
-      .locator('[data-status="todo"]')
-      .getByRole("button", { name: "Thêm nhiệm vụ", exact: true }),
+    page.locator('[data-status="todo"]').getByRole("button", { name: "Thêm nhiệm vụ", exact: true }),
   ).toBeVisible();
   await page.screenshot({
     path: "test-results/workspace-mobile.png",
@@ -199,7 +201,7 @@ test("pointer workflow, quick create, managed lanes, stale update and responsive
   });
 });
 
-test("keyboard sensor moves through the drag handle", async ({ page }) => {
+test("keyboard opens task details and moves the task through its status menu", async ({ page }) => {
   test.setTimeout(90_000);
   const inserted = await client
     .from("tasks")
@@ -208,21 +210,149 @@ test("keyboard sensor moves through the drag handle", async ({ page }) => {
   await page.setViewportSize({ width: 1600, height: 1000 });
   await login(page);
   await page.goto("/en/workspace?goal=unassigned");
-  const handle = page
+  const card = page
     .locator('[data-status="todo"] article')
-    .filter({ hasText: "Phase 3 keyboard task" })
-    .getByRole("button", { name: "Drag task", exact: true });
-  await expect(handle).toHaveAttribute("aria-describedby", /dnd/);
-  await handle.focus();
-  await page.keyboard.press("Space");
-  await expect(handle).toHaveAttribute("aria-grabbed", "true");
-  for (let index = 0; index < 6; index++) await page.keyboard.press("Shift+ArrowRight");
-  await page.keyboard.press("Space");
+    .filter({ hasText: "Phase 3 keyboard task" });
+  const surface = card.getByRole("button", { name: "Phase 3 keyboard task", exact: true });
+  await surface.press("Space");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(surface).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(card.getByRole("button", { name: "Move task Phase 3 keyboard task" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("menuitem", { name: "In progress" })).toBeFocused();
+  await expect(page.getByRole("menuitem", { name: "In review" })).toHaveCount(0);
+  await page.keyboard.press("Enter");
   await expect(
     page
       .locator('[data-status="in_progress"] article')
       .filter({ hasText: "Phase 3 keyboard task" }),
   ).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeFocused();
+});
+
+test("whole-card drag cancels cleanly and scrolls to a lane beyond the viewport", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Whole-card drag test";
+  const { error } = await client.from("tasks").insert({ user_id: userId, goal_id: goalId, title });
+  if (error) throw error;
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const board = page.getByRole("region", { name: "Task board" });
+  const surface = board.getByRole("button", { name: title, exact: true });
+  const todo = board.locator('[data-status="todo"]');
+  const review = board.locator('[data-status="in_review"]');
+  const cancelled = board.locator('[data-status="cancelled"]');
+  await surface.scrollIntoViewIfNeeded();
+  const origin = await surface.boundingBox();
+  const viewport = await board.boundingBox();
+  const locked = await review.boundingBox();
+  if (!origin || !viewport || !locked) throw new Error("Missing board geometry");
+
+  const x = origin.x + 22;
+  const y = origin.y + 20;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x + 2, y);
+  await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+  await page.mouse.up();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  async function beginDrag() {
+    await expect(page.locator("[data-dnd-dragging]")).toHaveCount(0);
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + 12, y, { steps: 3 });
+    await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(3);
+  }
+
+  await beginDrag();
+  await page.keyboard.press("Escape");
+  await page.mouse.up();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+
+  await beginDrag();
+  await page.mouse.move(locked.x + locked.width / 2, locked.y + 55, { steps: 20 });
+  await expect(review).not.toHaveAttribute("data-drop-allowed", "true");
+  await page.mouse.up();
+  await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await beginDrag();
+  await page.mouse.move(viewport.x + 10, viewport.y - 12, { steps: 8 });
+  await expect(board.locator('[data-drop-target="true"]')).toHaveCount(0);
+  await page.mouse.up();
+  await expect(todo.getByRole("button", { name: title, exact: true })).toBeVisible();
+
+  await beginDrag();
+  await page.mouse.move(viewport.x + viewport.width - 12, viewport.y + 65, { steps: 25 });
+  await expect.poll(() => board.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+  await expect.poll(async () => {
+    const box = await cancelled.boundingBox();
+    return !!box && box.x + box.width / 2 < viewport.x + viewport.width - 24;
+  }).toBe(true);
+  const destination = await cancelled.boundingBox();
+  if (!destination) throw new Error("Missing visible drop lane");
+  await page.mouse.move(destination.x + destination.width / 2, destination.y + 55, { steps: 6 });
+  await expect(cancelled).toHaveAttribute("data-drop-target", "true");
+  await page.mouse.up();
+  await expect(cancelled.getByRole("button", { name: title, exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+});
+
+test.describe("touch workspace", () => {
+  test.use({ hasTouch: true, viewport: { width: 900, height: 900 } });
+
+  test("tap opens details, swipe scrolls, and holding the card starts a drag", async ({ page }) => {
+    test.setTimeout(90_000);
+    const title = "Touch drag test";
+    const { error } = await client.from("tasks").insert({ user_id: userId, goal_id: goalId, title });
+    if (error) throw error;
+    await login(page);
+    await page.goto(`/en/workspace?goal=${goalId}`);
+    const board = page.getByRole("region", { name: "Task board" });
+    const surface = board.getByRole("button", { name: title, exact: true });
+    const progress = board.locator('[data-status="in_progress"]');
+    await surface.tap();
+    const details = page.getByRole("dialog");
+    await expect(details).toBeVisible();
+    await details.getByRole("button", { name: "Close dialog", exact: true }).tap();
+    await expect(details).toHaveCount(0);
+
+    const box = await surface.boundingBox();
+    const destination = await progress.boundingBox();
+    if (!box || !destination) throw new Error("Missing touch geometry");
+    const x = Math.round(box.x + box.width / 2);
+    const y = Math.round(box.y + box.height / 2);
+    const cdp = await page.context().newCDPSession(page);
+    const touch = (type: "touchStart" | "touchMove", x: number, y: number) =>
+      cdp.send("Input.dispatchTouchEvent", { type, touchPoints: [{ x, y }] });
+    const touchEnd = () => cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+
+    await touch("touchStart", x, y);
+    for (const delta of [25, 50, 75, 100]) await touch("touchMove", x - delta, y);
+    await touchEnd();
+    await expect.poll(() => board.evaluate((el) => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(details).toHaveCount(0);
+    await expect(board.locator('[data-drop-allowed="true"]')).toHaveCount(0);
+
+    await surface.scrollIntoViewIfNeeded();
+    await board.evaluate((el) => { el.scrollLeft = 0; });
+    await touch("touchStart", x, y);
+    await expect(progress).toHaveAttribute("data-drop-allowed", "true");
+    await touch("touchMove", Math.round(destination.x + destination.width / 2), Math.round(destination.y + 75));
+    await expect(progress).toHaveAttribute("data-drop-target", "true");
+    await touchEnd();
+    await expect(progress.getByRole("button", { name: title, exact: true })).toBeVisible();
+    await expect(details).toHaveCount(0);
+    await cdp.detach();
+  });
 });
 
 test("cancel/restore, deadline precedence, reschedule and legacy pages", async ({ page }) => {
@@ -253,14 +383,15 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
     .select("id, title");
   expect(fixtures.error).toBeNull();
   await login(page);
-  await page.goto("/en/workspace?goal=all");
+  await page.goto("/en/workspace?goal=unassigned");
   await expect(
     page.locator('[data-status="overdue"] article').filter({ hasText: "Phase 3 past task" }),
   ).toHaveCount(1);
   const review = page
     .locator('[data-status="in_review"] article')
     .filter({ hasText: "Phase 3 review task" });
-  await expect(review.getByRole("button", { name: "Drag task", exact: true })).toBeDisabled();
+  await expect(review.getByRole("button")).toHaveCount(1);
+  await expect(review.getByRole("button", { name: "Phase 3 review task", exact: true })).toBeEnabled();
   await pointerMove(page, "Phase 3 restore task", "todo", "cancelled");
   await expect(page.locator("[aria-busy]")).toHaveAttribute("aria-busy", "false");
   await pointerMove(page, "Phase 3 restore task", "cancelled", "todo");
@@ -277,20 +408,457 @@ test("cancel/restore, deadline precedence, reschedule and legacy pages", async (
   ).toBeVisible();
   await page.goto("/en/goals");
   await expect(page.getByText("Phase 3 test goal").first()).toBeVisible();
-  await page.goto("/en/tasks");
-  const row = page.getByRole("row").filter({ hasText: "Phase 3 review task" });
-  await row.getByRole("button", { name: /edit/i }).click();
-  const editor = page.locator("tr").filter({ has: page.locator("form") });
-  // Title, Goal, Priority and Status are the existing row editor controls.
-  await editor.getByRole("combobox").nth(2).click();
-  await expect(page.getByRole("option", { name: "In review", exact: true })).toHaveAttribute(
-    "aria-disabled",
-    "true",
+  const reviewId = fixtures.data!.find((task) => task.title === "Phase 3 review task")!.id;
+  await page.goto(`/en/tasks?taskId=${reviewId}&action=edit`);
+  const editor = page.getByRole("dialog");
+  await expect(editor).toBeVisible();
+  await expect(editor.getByRole("textbox", { name: "Task title" })).toHaveValue("Phase 3 review task");
+  await expect(editor.getByRole("combobox", { name: "Status" })).toHaveCount(0);
+});
+
+test("task details center on desktop, fit mobile, and restore focus after close or delete", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Review lecture notes and summarize the key concepts before the next study session";
+  const description = "Summarize the key concepts and attach the supporting notes.";
+  const { data: task, error } = await client.from("tasks").insert({
+    user_id: userId,
+    goal_id: goalId,
+    title,
+    description,
+    estimated_minutes: 45,
+  }).select("id").single();
+  if (error) throw error;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const card = page.getByRole("button", { name: title, exact: true });
+  await card.focus();
+  await page.keyboard.press("Enter");
+  const modal = page.getByRole("dialog", { name: title });
+  await expect(modal).toBeVisible();
+  const modalBox = (await modal.boundingBox())!;
+  expect(Math.abs(modalBox.x + modalBox.width / 2 - 800)).toBeLessThan(2);
+  const descriptionHeading = modal.getByRole("heading", { name: "Description" });
+  const metadata = modal.getByRole("complementary", { name: "Details" });
+  await expect(modal.getByText(description)).toBeVisible();
+  await expect(metadata.getByText("45 minutes")).toBeVisible();
+  await expect(metadata.getByRole("region", { name: "Task study schedule" })).toBeVisible();
+  await expect(metadata.getByRole("button", { name: "Add study schedule" })).toBeVisible();
+  expect((await metadata.boundingBox())!.x).toBeGreaterThan((await descriptionHeading.boundingBox())!.x);
+  await page.screenshot({ path: "test-results/workspace-task-modal-desktop.png" });
+  await page.keyboard.press("Tab");
+  expect(await modal.evaluate((element) => element.contains(document.activeElement))).toBe(true);
+  await page.keyboard.press("Escape");
+  await expect(modal).toHaveCount(0);
+  await expect(card).toBeFocused();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page.goto(`/vi/workspace?goal=${goalId}&view=list&task=${task.id}&tab=documents`);
+  await expect(page.locator("html")).toHaveClass(/\bdark\b/);
+  await expect(modal.getByRole("tab", { name: /Tài liệu/ })).toHaveAttribute("aria-selected", "true");
+  await modal.getByRole("tab", { name: "Tổng quan" }).click();
+  const mobileBox = (await modal.boundingBox())!;
+  expect(mobileBox.width).toBeGreaterThan(350);
+  expect(mobileBox.height).toBeGreaterThan(800);
+  expect(await modal.evaluate((element) => element.scrollWidth <= element.clientWidth + 1)).toBe(true);
+  await expect(modal.getByRole("button", { name: "Đóng hộp thoại", exact: true })).toBeVisible();
+  await expect(modal.getByRole("region", { name: "Lịch học của công việc" }).getByRole("button", { name: /Thêm/ })).toBeVisible();
+  await page.screenshot({ path: "test-results/workspace-task-modal-mobile.png" });
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("group", { name: "Vùng hiển thị nhiệm vụ" })).toBeFocused();
+
+  await page.goto(`/en/workspace?goal=${goalId}&view=list`);
+  const rowLink = page.getByRole("link", { name: title });
+  await rowLink.click();
+  await expect(modal).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(rowLink).toBeFocused();
+
+  await rowLink.click();
+  await expect(modal).toBeVisible();
+  const actions = modal.getByRole("button", { name: "Task actions" });
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Delete task" }).click();
+  let confirmation = page.getByRole("alertdialog");
+  await expect(confirmation).toBeVisible();
+  await confirmation.getByRole("button", { name: "Cancel" }).click();
+  await expect(actions).toBeFocused();
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Delete task" }).click();
+  confirmation = page.getByRole("alertdialog");
+  await confirmation.getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(rowLink).toHaveCount(0);
+  await expect(page.getByRole("group", { name: "Task view" })).toBeFocused();
+});
+
+test("task detail keeps the selected AI Review or Risk tab after reloading updated task data", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Keep task detail tab";
+  const { data: task, error } = await client.from("tasks")
+    .insert({ user_id: userId, goal_id: goalId, title, status: "in_progress" }).select("id").single();
+  if (error) throw error;
+
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  await page.getByRole("button", { name: title, exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: title, exact: true });
+  const review = dialog.getByRole("tab", { name: "AI Review", exact: true });
+  const risk = dialog.getByRole("tab", { name: "Risk", exact: true });
+
+  await review.click();
+  await expect(page).toHaveURL(new RegExp(`task=${task.id}&tab=review$`));
+  const reviewed = await admin.from("tasks").update({ status: "in_review" }).eq("id", task.id);
+  if (reviewed.error) throw reviewed.error;
+  await page.reload();
+  await expect(review).toHaveAttribute("aria-selected", "true");
+
+  await risk.click();
+  await expect(page).toHaveURL(new RegExp(`task=${task.id}&tab=risk$`));
+  const completed = await admin.from("tasks").update({ status: "completed" }).eq("id", task.id);
+  if (completed.error) throw completed.error;
+  await page.reload();
+  await expect(risk).toHaveAttribute("aria-selected", "true");
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(new RegExp(`goal=${goalId}$`));
+});
+
+test("List scopes, sorts and filters tasks, opens details, and restores the view through browser history", async ({ page }) => {
+  test.setTimeout(90_000);
+  const { data: goal, error: goalError } = await client.from("goals").insert({
+    user_id: userId,
+    title: "List test goal",
+    goal_type: "short_term",
+  }).select("id").single();
+  if (goalError) throw goalError;
+  const scope = { user_id: userId, goal_id: goal.id };
+  const { data: tasks, error: taskError } = await client.from("tasks").insert([
+    { ...scope, title: "Active overdue", status: "todo", due_at: "2000-01-01T00:00:00Z" },
+    { ...scope, title: "Completed with an old deadline", status: "completed", due_at: "2001-01-01T00:00:00Z" },
+    { ...scope, title: "Latest deadline", status: "todo", due_at: "2099-01-01T00:00:00Z" },
+    ...Array.from({ length: 20 }, (_, index) => ({
+      ...scope, title: `Undated item ${index + 1}`, status: "todo", due_at: null,
+    })),
+  ]).select("id,title,created_at,updated_at");
+  if (taskError) throw taskError;
+  const overdue = tasks.find((task) => task.title === "Active overdue")!;
+  const { error: childError } = await client.from("tasks").insert([
+    { ...scope, parent_task_id: overdue.id, title: "Done child", status: "completed" },
+    { ...scope, parent_task_id: overdue.id, title: "Open child", status: "todo" },
+  ]);
+  if (childError) throw childError;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  const tabs = page.getByRole("navigation", { name: "Workspace views" });
+  await expect(tabs.getByRole("link", { name: "Board" })).toHaveAttribute("aria-current", "page");
+  await tabs.getByRole("link", { name: "List" }).click();
+  const table = page.getByRole("table", { name: "Task list" });
+  await expect(table.getByRole("row")).toHaveCount(21);
+  await expect(table.getByRole("columnheader", { name: "Created at" })).toBeVisible();
+  await expect(table.getByRole("columnheader", { name: "Updated at" })).toBeVisible();
+  const overdueRow = table.getByRole("row").filter({ hasText: "Active overdue" });
+  await expect(overdueRow.locator("time").nth(1)).toHaveAttribute("datetime", overdue.created_at);
+  await expect(overdueRow.locator("time").nth(2)).toHaveAttribute("datetime", overdue.updated_at);
+  await expect(overdueRow.getByText("Overdue", { exact: true })).toBeVisible();
+  await expect(overdueRow.getByLabel("1 of 2 subtasks completed")).toBeVisible();
+  await expect(table.getByText("Done child")).toHaveCount(0);
+  await page.screenshot({ path: "test-results/workspace-list.png" });
+
+  await page.getByRole("link", { name: "Next page" }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await expect(table.getByRole("row")).toHaveCount(4);
+  await table.getByRole("link", { name: "Show latest due dates first" }).click();
+  await expect(table.getByRole("row").nth(1)).toContainText("Latest deadline");
+
+  await page.getByRole("combobox", { name: "Status", exact: true }).click();
+  await page.getByRole("option", { name: "Overdue", exact: true }).click();
+  await expect(table.getByRole("row")).toHaveCount(2);
+  await expect(table.getByText("Completed with an old deadline")).toHaveCount(0);
+  await overdueRow.getByRole("link", { name: "Active overdue" }).click();
+  const details = page.getByRole("dialog", { name: "Active overdue" });
+  await expect(details).toBeVisible();
+  await details.getByRole("button", { name: "Edit", exact: true }).click();
+  await details.getByRole("textbox", { name: "Task title" }).fill("Renamed overdue task");
+  await details.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Renamed overdue task" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page).toHaveURL(/view=list&status=overdue&sort=desc$/);
+  await expect(table.getByRole("link", { name: "Renamed overdue task" })).toBeVisible();
+  const renamedRow = table.getByRole("row").filter({ hasText: "Renamed overdue task" });
+  await expect(renamedRow.locator("time").nth(1)).toHaveAttribute("datetime", overdue.created_at);
+  await expect(renamedRow.locator("time").nth(2)).not.toHaveAttribute("datetime", overdue.updated_at);
+
+  await tabs.getByRole("link", { name: "Timeline" }).click();
+  await expect(page.getByRole("region", { name: "Timeline chart", exact: true })).toBeVisible();
+  await expect(table).toHaveCount(0);
+  await page.goBack();
+  await expect(tabs.getByRole("link", { name: "List" })).toHaveAttribute("aria-current", "page");
+  await expect(page).toHaveURL(/view=list&status=overdue&sort=desc$/);
+  await page.reload();
+  await expect(table.getByRole("row")).toHaveCount(2);
+  await expect(page.getByRole("combobox", { name: "Status", exact: true })).toHaveText("Overdue");
+});
+
+test("large Board goals page each lane independently and keep a link to newly created tasks", async ({ page }) => {
+  test.setTimeout(90_000);
+  const { data: goal, error: goalError } = await client.from("goals").insert({
+    user_id: userId,
+    title: "Large Board goal",
+    goal_type: "short_term",
+  }).select("id").single();
+  if (goalError) throw goalError;
+  const { error: taskError } = await client.from("tasks").insert(
+    Array.from({ length: 101 }, (_, index) => ({
+      user_id: userId,
+      goal_id: goal.id,
+      title: `Board paging #${index + 1}`,
+      status: index < 45 ? "todo" : "in_progress",
+    })),
   );
-  await expect(page.getByRole("option", { name: "Overdue", exact: true })).toHaveAttribute(
-    "aria-disabled",
-    "true",
-  );
+  if (taskError) throw taskError;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  const todo = page.locator('[data-status="todo"]');
+  const active = page.locator('[data-status="in_progress"]');
+  const firstActiveTask = await active.locator("article h3").first().textContent();
+  await expect(todo.locator("header").getByText("45", { exact: true })).toBeVisible();
+  await expect(todo.locator("article")).toHaveCount(20);
+  await todo.getByRole("link", { name: "Next page in Todo" }).click();
+  await expect(todo.getByText("Page 2 of 3")).toBeVisible();
+  await expect(active.locator("article h3").first()).toHaveText(firstActiveTask!);
+
+  await todo.getByRole("button", { name: "Add task", exact: true }).click();
+  await todo.getByRole("textbox", { name: "Task title" }).fill("Quick create on a later page");
+  await todo.getByRole("button", { name: "Add task", exact: true }).click();
+  await page.getByRole("button", { name: "Open task", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Quick create on a later page" })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(todo.getByText("Page 2 of 3")).toBeVisible();
+  await expect(todo.locator("header").getByText("46", { exact: true })).toBeVisible();
+});
+
+test("goal browsing is paginated and searchable without opening the board", async ({ page }) => {
+  const titles = Array.from({ length: 24 }, (_, index) => `Workspace pagination ${index + 1}`);
+  const { data, error } = await client
+    .from("goals")
+    .insert(titles.map((title, index) => ({
+      user_id: userId,
+      title,
+      goal_type: "short_term",
+      created_at: new Date(Date.UTC(2026, 0, index + 1)).toISOString(),
+    })))
+    .select("id, title");
+  if (error) throw error;
+  const oldest = data.find((goal) => goal.title === titles[0])!;
+
+  await page.setViewportSize({ width: 1600, height: 1000 });
+  await login(page);
+  await page.goto("/en/workspace?goal=all");
+  await expect(page.getByRole("heading", { name: "Choose a goal to get started" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+
+  const rail = page.getByRole("navigation", { name: "Goals", exact: true });
+  const oldestLink = rail.getByRole("link").filter({ has: page.getByText(titles[0], { exact: true }) });
+  await expect(rail.getByRole("listitem")).toHaveCount(20);
+  await expect(oldestLink).toHaveCount(0);
+  await rail.getByRole("button", { name: "Load more" }).click();
+  await expect(oldestLink).toBeVisible();
+
+  await page.reload();
+  await rail.getByRole("searchbox", { name: "Search goals" }).fill(titles[0]);
+  await expect(oldestLink).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+  await oldestLink.click();
+  await expect(page).toHaveURL(new RegExp(`goal=${oldest.id}$`));
+  await expect(page.getByRole("heading", { name: titles[0], exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+});
+
+test("goal actions live on each card and Learning documents opens inside Workspace", async ({ page }) => {
+  test.setTimeout(90_000);
+  const title = "Goal card menu fixture";
+  const { data: other, error } = await client.from("goals")
+    .insert({ user_id: userId, title, description: "Details loaded on edit", goal_type: "short_term" }).select("id").single();
+  if (error) throw error;
+
+  await page.setViewportSize({ width: 1440, height: 920 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goalId}`);
+  const rail = page.getByRole("navigation", { name: "Goals", exact: true });
+  const card = rail.getByRole("listitem").filter({ hasText: title });
+  const actions = card.getByRole("button", { name: `Goal actions for ${title}` });
+  const views = page.getByRole("navigation", { name: "Workspace views" });
+  await page.getByRole("heading", { level: 1 }).hover();
+  await expect(actions).toHaveCSS("opacity", "0");
+  await card.hover();
+  await expect(actions).toHaveCSS("opacity", "1");
+  await actions.click();
+  await page.getByRole("menuitem", { name: "Edit", exact: true }).click();
+  const form = page.getByRole("dialog", { name: "Update goal", exact: true });
+  await expect(form.locator("input").first()).toHaveValue(title);
+  await expect(form.locator("textarea")).toHaveValue("Details loaded on edit");
+  await page.keyboard.press("Escape");
+  await expect(actions).toBeFocused();
+  await expect(page).toHaveURL(new RegExp(`goal=${goalId}$`));
+
+  await actions.press("Enter");
+  await page.getByRole("menuitem", { name: "Learning documents", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`goal=${other.id}&view=documents$`));
+  await expect(views.getByRole("link", { name: "Learning documents", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.locator('input[type="file"]')).toBeVisible();
+  await views.getByRole("link", { name: "Board", exact: true }).click();
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+  await views.getByRole("link", { name: "Learning documents", exact: true }).click();
+  await expect(page.locator('input[type="file"]')).toBeVisible();
+
+  await rail.getByRole("link", { name: "No goal", exact: true }).click();
+  await expect(views.getByRole("link", { name: "Learning documents", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "Task board" })).toBeVisible();
+  await actions.press("Enter");
+  await page.getByRole("menuitem", { name: "Delete", exact: true }).click();
+  await page.getByRole("alertdialog").getByRole("button", { name: "Delete", exact: true }).click();
+  await expect(card).toHaveCount(0);
+  await expect(page).toHaveURL(/goal=unassigned$/);
+});
+
+test("legacy deep links resolve owned subtasks and reject deleted goals and other owners", async ({ page }) => {
+  test.setTimeout(90_000);
+  const other = await admin.auth.admin.createUser({
+    email: `workspace-other-${randomUUID()}@example.test`, password: randomUUID(), email_confirm: true,
+  });
+  if (other.error) throw other.error;
+  const otherId = other.data.user.id;
+  try {
+    const { data: foreignGoal, error: foreignGoalError } = await admin.from("goals")
+      .insert({ user_id: otherId, title: "Private foreign goal", goal_type: "short_term" }).select("id").single();
+    if (foreignGoalError) throw foreignGoalError;
+    const { data: foreignTask, error: foreignTaskError } = await admin.from("tasks")
+      .insert({ user_id: otherId, goal_id: foreignGoal.id, title: "Private foreign task" }).select("id").single();
+    if (foreignTaskError) throw foreignTaskError;
+    const { data: removed, error: goalError } = await client.from("goals")
+      .insert({ user_id: userId, title: "Temporary removed goal", goal_type: "short_term" }).select("id").single();
+    if (goalError) throw goalError;
+    const { data: parent, error: parentError } = await client.from("tasks")
+      .insert({ user_id: userId, goal_id: removed.id, title: "Owned parent task" }).select("id").single();
+    if (parentError) throw parentError;
+    const { data: child, error: childError } = await client.from("tasks")
+      .insert({ user_id: userId, goal_id: removed.id, parent_task_id: parent.id, title: "Owned hidden subtask" }).select("id").single();
+    if (childError) throw childError;
+
+    await login(page);
+    await page.goto(`/en/workspace?goal=all&task=${child.id}&tab=documents`);
+    const dialog = page.getByRole("dialog", { name: "Owned hidden subtask", exact: true });
+    await expect(dialog.getByRole("tab", { name: "Documents" })).toHaveAttribute("aria-selected", "true");
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("heading", { name: "Temporary removed goal", exact: true })).toBeVisible();
+
+    await page.goto(`/en/workspace?goal=${foreignGoal.id}&task=${foreignTask.id}`);
+    await expect(page.getByRole("heading", { name: "Goal unavailable", exact: true })).toBeVisible();
+    await expect(page.getByText("This task is unavailable.")).toBeVisible();
+    await expect(page.getByText("Private foreign task")).toHaveCount(0);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "Task board" })).toHaveCount(0);
+
+    const deletion = await client.from("goals").delete().eq("id", removed.id);
+    if (deletion.error) throw deletion.error;
+    await page.goto(`/en/workspace?goal=${removed.id}`);
+    await expect(page.getByRole("heading", { name: "Goal unavailable", exact: true })).toBeVisible();
+    await page.goto(`/en/workspace?task=${parent.id}`);
+    await expect(page.getByRole("dialog", { name: "Owned parent task", exact: true })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page).toHaveURL(/goal=unassigned$/);
+  } finally {
+    const cleanup = await admin.auth.admin.deleteUser(otherId);
+    if (cleanup.error) throw cleanup.error;
+  }
+});
+
+test("Timeline shows scoped study plans and deadlines, paginates, and opens task details", async ({ page }) => {
+  test.setTimeout(120_000);
+  const pageErrors: string[] = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  const { data: goal, error: goalError } = await client.from("goals")
+    .insert({ user_id: userId, title: "Timeline test goal", goal_type: "short_term" }).select("id").single();
+  if (goalError) throw goalError;
+  const { data: planned, error: plannedError } = await client.from("tasks")
+    .insert({ user_id: userId, goal_id: goal.id, title: "Planned study task" }).select("id").single();
+  if (plannedError) throw plannedError;
+  const { error: scheduleError } = await admin.from("task_study_schedules").insert({
+    user_id: userId, task_id: planned.id, starts_on: "2030-02-28", ends_on: "2030-03-11", timezone: "UTC",
+  });
+  if (scheduleError) throw scheduleError;
+  const { error: taskError } = await client.from("tasks").insert([
+    { user_id: userId, goal_id: goal.id, title: "Deadline-only task", due_at: "2030-03-04T19:00:00Z" },
+    { user_id: userId, goal_id: goal.id, title: "Legacy date task", due_date: "2030-03-08" },
+    { user_id: userId, goal_id: goal.id, title: "Next period task", due_at: "2030-04-01T00:00:00Z" },
+    { user_id: userId, title: "Unassigned deadline", due_at: "2030-03-06T12:00:00Z" },
+    { user_id: userId, goal_id: goal.id, parent_task_id: planned.id, title: "Hidden subtask", due_at: "2030-03-06T12:00:00Z" },
+    ...Array.from({ length: 21 }, (_, index) => ({ user_id: userId, goal_id: goal.id, title: `Undated task ${index + 1}` })),
+  ]);
+  if (taskError) throw taskError;
+
+  await page.setViewportSize({ width: 1440, height: 920 });
+  await login(page);
+  await page.goto(`/en/workspace?goal=${goal.id}`);
+  await page.getByRole("link", { name: "Timeline", exact: true }).click();
+  const timeline = page.getByRole("region", { name: "Task timeline", exact: true });
+  const chart = timeline.getByRole("region", { name: "Timeline chart" });
+  await expect(chart).toBeVisible();
+  await timeline.getByLabel("Go to date").fill("2030-03-07");
+  await timeline.getByRole("button", { name: "Go to date" }).click();
+  await expect(timeline.getByLabel("Go to date")).toHaveValue("2030-03-04");
+  await expect(chart.getByRole("link", { name: /Planned study task.*Study plan from Feb 28, 2030 to Mar 11, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Deadline-only task.*Deadline Mar 4, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Legacy date task.*Deadline Mar 8, 2030/ })).toBeVisible();
+  await expect(chart.getByRole("link")).toHaveCount(3);
+
+  const undated = page.getByRole("region", { name: "Tasks without dates" });
+  await expect(undated.getByRole("listitem")).toHaveCount(20);
+  await undated.getByRole("link", { name: "2", exact: true }).click();
+  await expect(undated.getByRole("listitem")).toHaveCount(1);
+  const trigger = chart.getByRole("link", { name: /Planned study task/ });
+  await trigger.click();
+  await expect(page.getByRole("dialog", { name: "Planned study task", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(trigger).toBeFocused();
+  await expect(page).toHaveURL(/start=2030-03-04&undatedPage=2$/);
+
+  await timeline.getByRole("link", { name: "Next four weeks" }).click();
+  await expect(chart.getByRole("link", { name: /Next period task/ })).toBeVisible();
+  await expect(chart.getByRole("link")).toHaveCount(1);
+  await timeline.getByRole("link", { name: "Previous four weeks" }).click();
+  await expect(chart.getByRole("link")).toHaveCount(3);
+
+  const { error: bulkError } = await client.from("tasks").insert(Array.from({ length: 20 }, (_, index) => ({
+    user_id: userId, goal_id: goal.id, title: `April task ${index + 1}`, due_at: "2030-04-02T12:00:00Z",
+  })));
+  if (bulkError) throw bulkError;
+  await page.goto(`/en/workspace?goal=${goal.id}&view=timeline&start=2030-04-01&undatedPage=2`);
+  await expect(chart.getByRole("link")).toHaveCount(20);
+  await timeline.getByRole("link", { name: "2", exact: true }).click();
+  await expect(chart.getByRole("link")).toHaveCount(1);
+  await expect(undated.getByRole("listitem")).toHaveCount(1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/vi/workspace?goal=${goal.id}&view=timeline&start=2030-03-04`);
+  const mobileChart = page.getByRole("region", { name: "Biểu đồ lịch trình" });
+  await expect(mobileChart.getByRole("link", { name: /Planned study task/ })).toBeVisible();
+  expect(await mobileChart.evaluate((el) => {
+    el.scrollLeft = 220;
+    const titleColumn = el.querySelector("li a > span")!;
+    return el.scrollLeft > 0 && Math.abs(titleColumn.getBoundingClientRect().left - el.getBoundingClientRect().left) <= 2
+      && document.documentElement.scrollWidth <= window.innerWidth;
+  })).toBe(true);
+
+  await page.goto("/en/workspace?goal=unassigned&view=timeline&start=2030-03-04");
+  await expect(chart.getByRole("link", { name: /Unassigned deadline/ })).toBeVisible();
+  await expect(chart.getByRole("link", { name: /Deadline-only task/ })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });
 
 test("recovery destinations require Save or Start before writing", async ({ page }) => {

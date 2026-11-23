@@ -82,7 +82,7 @@ test("Task and Schedule to multi-round Focus, interrupted Focus and concurrent m
   expect(
     (await admin.from("profiles").upsert({ id: userId, onboarding_completed: true })).error,
   ).toBeNull();
-  const workspace = "/en/workspace?goal=all";
+  const workspace = "/en/workspace?goal=unassigned";
   const title = "Full learning journey";
   await page.goto("/en/auth/login");
   await submitLoginForm(page, email, password);

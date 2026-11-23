@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useId, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 
 import { formatStudyDate } from "../schedule-presentation";
 import { useScheduleDialogFocus } from "../use-schedule-dialog-focus";
@@ -56,6 +61,7 @@ function AttendanceForm({ session, kind, open, onOpenChange, onSaved, onReload }
   const t = useTranslations("learningSchedule");
   const locale = useLocale();
   const dialogFocus = useScheduleDialogFocus();
+  const reasonId = useId();
 
   const [reason, setReason] = useState("");
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -190,30 +196,27 @@ function AttendanceForm({ session, kind, open, onOpenChange, onSaved, onReload }
           if (inFlight.current) event.preventDefault();
         }}
       >
-        <DialogTitle>{t(`attendance.title.${kind}`)}</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>{t(`attendance.title.${kind}`)}</DialogTitle>
+          <DialogDescription>{t(`attendance.description.${kind}`)}</DialogDescription>
+        </DialogHeader>
 
-        <DialogDescription>{t(`attendance.description.${kind}`)}</DialogDescription>
-
-        <div className="space-y-1 rounded-md border p-3 text-sm">
-          <p className="font-medium">{formatStudyDate(session.local_date, locale)}</p>
-
-          <p>
-            {session.local_start_time.slice(0, 5)}
-            {" – "}
-            {session.local_end_time.slice(0, 5)}
+        <Card className="space-y-1 bg-muted/30 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <time dateTime={session.local_date} className="text-label font-semibold">{formatStudyDate(session.local_date, locale)}</time>
+            <Badge variant="outline">{t(`status.${session.status}`)}</Badge>
+          </div>
+          <p className="text-caption text-muted-foreground wrap-anywhere">
+            {session.local_start_time.slice(0, 5)} – {session.local_end_time.slice(0, 5)} · {session.timezone}
           </p>
-
-          <p className="text-muted-foreground">{session.timezone}</p>
-
-          <p className="text-muted-foreground">{t(`status.${session.status}`)}</p>
-        </div>
+        </Card>
 
         {kind === "skip" && (
           <fieldset disabled={saving || uncertain || conflict} aria-busy={saving}>
-            <label className="block space-y-2 text-sm">
-              <span>{t("attendance.skipReason")}</span>
-
-              <textarea
+            <Field>
+              <FieldLabel htmlFor={reasonId}>{t("attendance.skipReason")}</FieldLabel>
+              <Textarea
+                id={reasonId}
                 value={reason}
                 maxLength={500}
                 rows={3}
@@ -224,14 +227,14 @@ function AttendanceForm({ session, kind, open, onOpenChange, onSaved, onReload }
                   setErrorCode(null);
                   setReason(event.target.value);
                 }}
-                className="w-full resize-y rounded-md border border-input bg-background p-2"
+                className="resize-y"
               />
-            </label>
+            </Field>
           </fieldset>
         )}
 
         {errorCode && (
-          <p role="alert" className="text-sm text-destructive">
+          <FieldError>
             {t(
               `attendance.errors.${
                 [
@@ -246,7 +249,7 @@ function AttendanceForm({ session, kind, open, onOpenChange, onSaved, onReload }
                   : "saveFailed"
               }`,
             )}
-          </p>
+          </FieldError>
         )}
 
         {uncertain && (

@@ -27,6 +27,7 @@ vi.mock("../task.actions", () => ({
 vi.mock("@/features/goals/goal.actions", () => ({
   createGoalAction: mocks.createGoal,
   updateGoalAction: mocks.updateGoal,
+  searchGoalsAction: vi.fn().mockResolvedValue({ items: [], nextCursor: null }),
 }));
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: mocks.push }) }));
 vi.mock("@/features/roadmaps/roadmap.actions", () => ({
@@ -78,13 +79,13 @@ describe("task form presentation and payloads", () => {
     title: "Study",
     description: "Notes",
     goal_id: "goal",
+    goals: { id: "goal", title: "Algebra", goal_type: "short_term", status: "active" },
     priority: "high",
     estimated_minutes: 30,
     due_at: "2026-10-20T08:30:00Z",
     status: "in_review",
     updated_at: "2026-10-12T08:00:00Z",
   } as TaskWithGoal;
-  const goals = [{ id: "goal", title: "Algebra" }];
   beforeEach(() => {
     vi.clearAllMocks();
     Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
@@ -124,8 +125,9 @@ describe("task form presentation and payloads", () => {
 
   it("preserves workflow status and optimistic edit guards", async () => {
     mocks.update.mockResolvedValue({ success: true, message: "Saved" });
-    render(<TaskEditForm task={task} goals={goals} onSaved={mocks.saved} onCancel={vi.fn()} />);
-    expect(container.querySelectorAll('[role="combobox"]')).toHaveLength(2);
+    render(<TaskEditForm task={task} onSaved={mocks.saved} onCancel={vi.fn()} />);
+    expect(container.querySelectorAll('[role="combobox"]')).toHaveLength(1);
+    expect(container.querySelector('button[id$="-linkedGoal"]')?.textContent).toContain("Algebra");
     await submit();
     expect(mocks.update).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -145,7 +147,6 @@ describe("task form presentation and payloads", () => {
     render(
       <TaskEditForm
         task={task}
-        goals={goals}
         allowGoalChange={false}
         onSaved={mocks.saved}
         onCancel={vi.fn()}
@@ -161,7 +162,7 @@ describe("task form presentation and payloads", () => {
 
   it("combines selected dates with due time and allows clearing the date", async () => {
     mocks.update.mockResolvedValue({ success: false, message: "Rejected" });
-    render(<TaskEditForm task={task} goals={goals} onSaved={mocks.saved} onCancel={vi.fn()} />);
+    render(<TaskEditForm task={task} onSaved={mocks.saved} onCancel={vi.fn()} />);
     enter(container.querySelector('input[type="time"]')!, "16:45:00");
     act(() => container.querySelector<HTMLButtonElement>("[data-date]")!.click());
     await submit();
@@ -173,7 +174,7 @@ describe("task form presentation and payloads", () => {
 
   it("retains fields and restores editing after rejection", async () => {
     mocks.update.mockResolvedValue({ success: false, message: "Rejected" });
-    render(<TaskEditForm task={task} goals={goals} onSaved={mocks.saved} onCancel={vi.fn()} />);
+    render(<TaskEditForm task={task} onSaved={mocks.saved} onCancel={vi.fn()} />);
     enter(container.querySelector("input:not([type])")!, "Revised");
     await submit();
     expect(container.querySelector<HTMLInputElement>("input:not([type])")!.value).toBe("Revised");
@@ -184,8 +185,8 @@ describe("task form presentation and payloads", () => {
 
   it("selects the unlinked default and labels each creation field", async () => {
     mocks.create.mockResolvedValue({ success: true, message: "Created" });
-    render(<CreateTaskModal goals={goals} />);
-    expect(container.querySelectorAll('[role="combobox"]')[0].textContent).toContain(
+    render(<CreateTaskModal />);
+    expect(container.querySelector('button[id$="-linkedGoal"]')?.textContent).toContain(
       messages.tasks.form.noGoal,
     );
     for (const input of container.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(

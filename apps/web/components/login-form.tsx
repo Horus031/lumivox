@@ -10,8 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { trackLogin } from "@/lib/analytics/events";
+
+const subscribeToHydration = () => () => {};
+const clientReady = () => true;
+const serverReady = () => false;
 
 export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const locale = useLocale();
@@ -21,6 +25,8 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const hydrated = useSyncExternalStore(subscribeToHydration, clientReady, serverReady);
+  const formDisabled = !hydrated || isLoading;
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -52,7 +58,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
         <h1>{t("title")}</h1>
         <p>{t("description")}</p>
       </header>
-      <form onSubmit={handleLogin} aria-busy={isLoading}>
+      <form method="post" onSubmit={handleLogin} aria-busy={isLoading}>
         <div className="flex flex-col gap-6">
           <div className="grid gap-2">
             <Label htmlFor="email">{authT("fields.email")}</Label>
@@ -62,7 +68,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               name="email"
               autoComplete="email"
               placeholder="you@example.com"
-              disabled={isLoading}
+              disabled={formDisabled}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -82,7 +88,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               id="password"
               name="password"
               autoComplete="current-password"
-              disabled={isLoading}
+              disabled={formDisabled}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -93,7 +99,7 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
               {error}
             </p>
           )}
-          <Button type="submit" className="auth-submit w-full" disabled={isLoading}>
+          <Button type="submit" className="auth-submit w-full" disabled={formDisabled}>
             {isLoading ? t("submitting") : t("submit")}
             {isLoading ? (
               <LoaderCircle className="animate-spin" aria-hidden="true" />
