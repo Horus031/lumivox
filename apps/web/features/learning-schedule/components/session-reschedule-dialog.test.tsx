@@ -80,9 +80,18 @@ describe("single session reschedule dialog", () => {
     });
   }
   function input(label: string) {
-    return [...document.querySelectorAll("label")]
-      .find((x) => x.querySelector("span")?.textContent === label)!
-      .querySelector("input")!;
+    const control = [...document.querySelectorAll("label")]
+      .find((x) => x.textContent?.trim() === label)?.control;
+    if (!(control instanceof HTMLInputElement)) throw new Error(`Missing input ${label}`);
+    return control;
+  }
+  const newDate = () => document.querySelector<HTMLButtonElement>('button[aria-label^="New date:"]')!;
+  async function selectJanuary8() {
+    await act(async () => newDate().click());
+    await act(async () => {
+      const date = new Date(2030, 0, 8).toLocaleDateString();
+      document.querySelector<HTMLButtonElement>(`[data-day="${date}"]`)!.click();
+    });
   }
   function enter(label: string, value: string) {
     act(() => {
@@ -95,7 +104,7 @@ describe("single session reschedule dialog", () => {
     await render();
     expect(input("Start time").value).toBe("19:00");
     expect(document.body.textContent).toContain(session.timezone);
-    enter("New date", "2030-01-08");
+    await selectJanuary8();
     enter("Start time", "18:00");
     enter("End time", "19:00");
     expect(mocks.action).not.toHaveBeenCalled();
@@ -136,7 +145,7 @@ describe("single session reschedule dialog", () => {
       save.click();
     });
     expect(mocks.action).toHaveBeenCalledOnce();
-    expect(input("New date").closest("fieldset")!.disabled).toBe(true);
+    expect(newDate().disabled).toBe(true);
     expect(button("Cancel").disabled).toBe(true);
     await act(async () => {
       request.resolve({ success: true, sessionId: session.id });
@@ -146,13 +155,13 @@ describe("single session reschedule dialog", () => {
   it("keeps draft after rejection, retries unchanged with same key and changes key for new payload", async () => {
     mocks.action.mockResolvedValue({ success: false, message: "Overlap rejected" });
     await render();
-    enter("New date", "2030-01-08");
+    await selectJanuary8();
     await click("Confirm reschedule");
     const first = mocks.action.mock.calls[0][0];
     expect(document.body.textContent).toContain(
       "Could not save study schedule. Check the dates and active sessions.",
     );
-    expect(input("New date").value).toBe("2030-01-08");
+    expect(newDate().textContent).toBe("Jan 8, 2030");
     expect(mocks.toast).not.toHaveBeenCalled();
     await click("Confirm reschedule");
     expect(mocks.action.mock.calls[1][0]).toEqual(first);
@@ -163,12 +172,12 @@ describe("single session reschedule dialog", () => {
   it("locks unknown outcome and retries immutable exact command without auto retry", async () => {
     mocks.action.mockResolvedValueOnce({ success: false, uncertain: true, message: "Timeout" });
     await render();
-    enter("New date", "2030-01-08");
+    await selectJanuary8();
     await click("Confirm reschedule");
     const original = mocks.action.mock.calls[0][0];
     expect(Object.isFrozen(original)).toBe(true);
     expect(mocks.action).toHaveBeenCalledOnce();
-    expect(input("New date").closest("fieldset")!.disabled).toBe(true);
+    expect(newDate().disabled).toBe(true);
     await click("Retry exact command");
     expect(mocks.action.mock.calls[1][0]).toBe(original);
     expect(mocks.saved).toHaveBeenCalledOnce();
@@ -201,7 +210,7 @@ describe("single session reschedule dialog", () => {
     await act(async () => {
       old.resolve({ success: true, sessionId: session.id });
     });
-    expect(input("New date").value).toBe("2030-01-14");
+    expect(newDate().textContent).toBe("Jan 14, 2030");
     expect(mocks.saved).not.toHaveBeenCalled();
     expect(mocks.toast).not.toHaveBeenCalled();
   });

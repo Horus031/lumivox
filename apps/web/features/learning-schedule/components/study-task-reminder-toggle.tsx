@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { FieldDescription, FieldError, FieldLabel } from "@/components/ui/field";
 import {
   getStudyNotificationTaskOverrideAction,
   saveStudyNotificationTaskOverrideAction,
@@ -10,6 +12,7 @@ import {
 
 export function StudyTaskReminderToggle({ taskId }: { taskId: string }) {
   const t = useTranslations("studyNotifications");
+  const id = useId();
   const [loaded, setLoaded] = useState<{ enabled: boolean; globalEnabled: boolean } | null>(null);
   const [enabled, setEnabled] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -90,48 +93,52 @@ export function StudyTaskReminderToggle({ taskId }: { taskId: string }) {
     <section
       aria-label={t("taskTitle")}
       aria-busy={busy}
-      className="min-w-0 space-y-3 rounded-lg border border-border p-3"
+      className="min-w-0 space-y-3"
     >
-      <h4 className="font-medium">{t("taskTitle")}</h4>
-      {error && (
-        <p role="alert" className="text-sm text-destructive">
-          {t(`errors.${error}`)}
+      <FieldError>{error && t(`errors.${error}`)}</FieldError>
+      {loaded ? (
+        <div className="flex items-start gap-3">
+          <Checkbox
+            id={id}
+            role="switch"
+            aria-describedby={`${id}-description`}
+            checked={enabled}
+            disabled={busy}
+            onCheckedChange={(checked) => {
+              setEnabled(checked === true);
+              setSuccess(false);
+              setError(null);
+            }}
+            className="mt-0.5"
+          />
+          <div className="min-w-0">
+            <FieldLabel htmlFor={id}>{t("useGlobal")}</FieldLabel>
+            <FieldDescription id={`${id}-description`}>
+              {t("taskExplanation")} {!loaded.globalEnabled && t("globalOff")}
+            </FieldDescription>
+          </div>
+        </div>
+      ) : (
+        <p role="status" className="text-caption text-muted-foreground">
+          {t(error ? "noData" : "loading")}
         </p>
       )}
-      {loaded ? (
-        <>
-          <label className="flex items-start gap-3">
-            <input
-              type="checkbox"
-              role="switch"
-              checked={enabled}
-              disabled={busy}
-              onChange={(e) => {
-                setEnabled(e.target.checked);
-                setSuccess(false);
-                setError(null);
-              }}
-              className="mt-1 size-4 shrink-0"
-            />
-            <span>{t("useGlobal")}</span>
-          </label>
-          <p className="text-sm text-muted-foreground">{t("taskExplanation")}</p>
-          {!loaded.globalEnabled && <p className="text-sm">{t("globalOff")}</p>}
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        {success && <p role="status" className="me-auto text-caption text-muted-foreground">{t("saved")}</p>}
+        <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => void reload()}>
+          {t("checkLatest")}
+        </Button>
+        {loaded && (
           <Button
             type="button"
+            size="sm"
             disabled={busy || enabled === loaded.enabled}
             onClick={() => void save()}
           >
             {busy ? t("saving") : t("saveTask")}
           </Button>
-        </>
-      ) : (
-        <p role="status">{t(error ? "noData" : "loading")}</p>
-      )}
-      <Button type="button" variant="outline" disabled={busy} onClick={() => void reload()}>
-        {t("checkLatest")}
-      </Button>
-      {success && <p role="status">{t("saved")}</p>}
+        )}
+      </div>
     </section>
   );
 }

@@ -34,12 +34,11 @@ import type { TaskWithGoal } from "@/features/tasks/task.types";
 import { updateTaskAction } from "@/features/tasks/task.actions";
 
 import { TaskDatePicker } from "./task-date-picker";
+import { GoalPicker } from "@/features/goals/components/goal-picker";
 
 type TaskEditFormProps = {
   recoveryAttemptId?: string;
   task: TaskWithGoal;
-
-  goals: GoalOption[];
 
   onSaved: () => void;
 
@@ -65,7 +64,6 @@ function initialDueTime(dueAt: string | null) {
 export function TaskEditForm({
   recoveryAttemptId,
   task,
-  goals,
   onSaved,
   onCancel,
   allowGoalChange = true,
@@ -83,7 +81,8 @@ export function TaskEditForm({
 
   const [description, setDescription] = useState(task.description ?? "");
 
-  const [goalId, setGoalId] = useState(task.goal_id ?? "");
+  const [goal, setGoal] = useState<GoalOption | null>(task.goals);
+  const [goalChanged, setGoalChanged] = useState(false);
 
   const [priority, setPriority] = useState<"low" | "medium" | "high" | "critical">(task.priority);
 
@@ -109,7 +108,7 @@ export function TaskEditForm({
 
         description,
 
-        goalId,
+        goalId: goalChanged ? goal?.id ?? "" : task.goal_id ?? "",
 
         priority,
 
@@ -175,27 +174,15 @@ export function TaskEditForm({
             <div className="space-y-2">
               <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
 
-              <Select
+              <GoalPicker
+                id={`${id}-linkedGoal`}
+                value={goal}
+                onChange={(value) => {
+                  setGoal(value);
+                  setGoalChanged(true);
+                }}
                 disabled={isPending}
-                value={goalId || "no-goal"}
-                onValueChange={(value) => setGoalId(value === "no-goal" ? "" : value)}
-              >
-                <SelectTrigger id={`${id}-linkedGoal`} className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="no-goal">{t("noGoal")}</SelectItem>
-
-                    {goals.map((goal) => (
-                      <SelectItem key={goal.id} value={goal.id}>
-                        {goal.title}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
+              />
             </div>
           ) : null}
 

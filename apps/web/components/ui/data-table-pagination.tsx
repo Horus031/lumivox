@@ -18,6 +18,7 @@ type DataTablePaginationProps = {
   className?: string;
   page: number;
   pageParam?: string;
+  prefetch?: boolean;
   searchParams?: Record<string, string | number | null | undefined>;
   totalPages: number;
 };
@@ -73,6 +74,7 @@ export function DataTablePagination({
   className,
   page,
   pageParam = "page",
+  prefetch,
   searchParams = {},
   totalPages,
 }: DataTablePaginationProps) {
@@ -186,6 +188,7 @@ export function DataTablePagination({
               aria-label={t("previous")}
               className={cn(safePage === 1 && "pointer-events-none opacity-50")}
               href={buildHref(previousPage)}
+              prefetch={prefetch}
               title={t("previous")}
             >
               <ChevronLeft />
@@ -204,6 +207,7 @@ export function DataTablePagination({
                 <Link
                   aria-current={item.value === safePage ? "page" : undefined}
                   href={buildHref(item.value)}
+                  prefetch={prefetch}
                 >
                   {item.value}
                 </Link>
@@ -232,6 +236,7 @@ export function DataTablePagination({
               aria-label={t("next")}
               className={cn(safePage === safeTotalPages && "pointer-events-none opacity-50")}
               href={buildHref(nextPage)}
+              prefetch={prefetch}
               title={t("next")}
             >
               <ChevronRight />

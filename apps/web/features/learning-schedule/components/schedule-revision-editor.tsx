@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useScheduleDialogFocus } from "../use-schedule-dialog-focus";
 import { Button } from "@/components/ui/button";
+import { FieldError } from "@/components/ui/field";
 import {
   Dialog,
   DialogContent,
@@ -147,14 +148,12 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
       aria-label={t("revisionEditor")}
       className="min-w-0 space-y-4 [overflow-wrap:anywhere]"
     >
-      <h4 className="font-medium">{t("revisionTitle")}</h4>
-      <p>{t("versions", { current: loaded.revision, next: loaded.revision + 1 })}</p>
-      <p className="text-sm text-muted-foreground">{t("revisionImpact")}</p>
-      {error && (
-        <p role="alert" className="text-sm text-red-600">
-          {error}
-        </p>
-      )}
+      <div className="space-y-1">
+        <h4 className="text-label font-semibold">{t("revisionTitle")}</h4>
+        <p className="text-caption font-medium">{t("versions", { current: loaded.revision, next: loaded.revision + 1 })}</p>
+        <p className="text-caption text-muted-foreground">{t("revisionImpact")}</p>
+      </div>
+      <FieldError>{error}</FieldError>
       {conflict && (
         <div className="space-y-2">
           <p>{t("conflictDraft")}</p>
@@ -169,20 +168,16 @@ function RevisionEditor({ scheduleId, onSaved, onCancel }: Props) {
           </Button>
         </div>
       )}
-      <fieldset
-        disabled={saving || conflict || pending !== null}
-        aria-busy={saving}
-        className="min-w-0 space-y-3 [overflow-wrap:anywhere]"
-      >
+      <div aria-busy={saving} className="min-w-0">
         <ScheduleDraftEditor
           key={`${scheduleId}-${loaded.revision}`}
           initialValue={loaded.draft}
+          disabled={saving || conflict || pending !== null}
           onContinue={review}
+          onCancel={onCancel}
+          cancelDisabled={saving}
         />
-      </fieldset>
-      <Button type="button" variant="outline" disabled={saving} onClick={onCancel}>
-        {t("cancel")}
-      </Button>
+      </div>
       <Dialog
         open={pending !== null}
         onOpenChange={(open) => {

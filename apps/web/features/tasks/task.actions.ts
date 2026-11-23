@@ -323,7 +323,7 @@ export async function transitionTaskStatusAction(
   }
 }
 
-export async function createTaskAction(input: CreateTaskInput): Promise<ActionResult> {
+export async function createTaskAction(input: CreateTaskInput): Promise<ActionResult<{ taskId: string }>> {
   const parsed = createTaskSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -339,7 +339,7 @@ export async function createTaskAction(input: CreateTaskInput): Promise<ActionRe
 
     const { title, description, goalId, priority, estimatedMinutes, dueAt } = parsed.data;
 
-    const { error } = await supabase.from("tasks").insert({
+    const { data, error } = await supabase.from("tasks").insert({
       user_id: user.id,
       goal_id: goalId || null,
       title,
@@ -347,7 +347,7 @@ export async function createTaskAction(input: CreateTaskInput): Promise<ActionRe
       priority,
       estimated_minutes: estimatedMinutes ?? null,
       due_at: dueAt || null,
-    });
+    }).select("id").single();
 
     if (error) {
       return {
@@ -359,7 +359,7 @@ export async function createTaskAction(input: CreateTaskInput): Promise<ActionRe
     return {
       success: true,
       message: "Task created successfully.",
-      data: null,
+      data: { taskId: data.id },
     };
   } catch (error) {
     return {

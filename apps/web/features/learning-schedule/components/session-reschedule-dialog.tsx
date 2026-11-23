@@ -8,11 +8,17 @@ import { Temporal } from "@js-temporal/polyfill";
 import { toast } from "sonner";
 import { useScheduleDialogFocus } from "../use-schedule-dialog-focus";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { DatePicker } from "@/components/ui/date-picker";
+import { FieldError } from "@/components/ui/field";
+import { TimePicker } from "@/components/ui/time-picker";
+import { formatLocalDate, parseLocalDate } from "@/lib/local-date";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { rescheduleStudySessionAction } from "../session-reschedule.actions";
@@ -59,6 +65,7 @@ function RescheduleForm({ session, open, onOpenChange, onSaved, onReload }: Prop
   const [uncertain, setUncertain] = useState(false);
   const [saving, startSaving] = useTransition();
   const command = useRef<Command | null>(null);
+  const fieldsDisabled = saving || conflict || uncertain;
   const inFlight = useRef(false);
   const mounted = useRef(false);
   useEffect(() => {
@@ -76,7 +83,7 @@ function RescheduleForm({ session, open, onOpenChange, onSaved, onReload }: Prop
       /^([01]\d|2[0-3]):[0-5]\d$/.test(endTime) &&
       startTime < endTime;
   } catch {
-    /* Native date fields can temporarily be empty. */
+    /* A missing or invalid date cannot be submitted. */
   }
 
   function edit(update: () => void) {
@@ -147,55 +154,49 @@ function RescheduleForm({ session, open, onOpenChange, onSaved, onReload }: Prop
           if (inFlight.current) event.preventDefault();
         }}
       >
-        <DialogTitle>{t("rescheduleTitle")}</DialogTitle>
-        <DialogDescription>{t("rescheduleDescription")}</DialogDescription>
-        <p className="text-sm">
-          {t("current")}: {formatStudyDate(session.local_date, locale)} ·{" "}
-          {session.local_start_time.slice(0, 5)}–{session.local_end_time.slice(0, 5)}
-        </p>
+        <DialogHeader>
+          <DialogTitle>{t("rescheduleTitle")}</DialogTitle>
+          <DialogDescription>{t("rescheduleDescription")}</DialogDescription>
+        </DialogHeader>
+        <Card className="space-y-1 bg-muted/30 p-3 text-body">
+          <p className="font-medium">
+            {t("current")}: {formatStudyDate(session.local_date, locale)} ·{" "}
+            {session.local_start_time.slice(0, 5)}–{session.local_end_time.slice(0, 5)}
+          </p>
+          <p className="text-caption text-muted-foreground wrap-anywhere">
+            {t("timezone")}: {session.timezone}
+          </p>
+        </Card>
         <fieldset
-          disabled={saving || conflict || uncertain}
+          disabled={fieldsDisabled}
           aria-busy={saving}
           className="min-w-0 space-y-3 [overflow-wrap:anywhere]"
         >
-          <label className="block space-y-1">
-            <span>{t("newDate")}</span>
-            <input
-              type="date"
-              value={localDate}
-              onChange={(e) => edit(() => setLocalDate(e.target.value))}
-              className="min-w-0 w-full rounded-md border p-2"
-            />
-          </label>
+          <DatePicker
+            label={t("newDate")}
+            value={parseLocalDate(localDate)}
+            onChange={(date) => edit(() => setLocalDate(formatLocalDate(date)))}
+            disabled={fieldsDisabled}
+            required
+          />
           <div className="grid grid-cols-2 gap-3">
-            <label className="space-y-1">
-              <span>{t("startTime")}</span>
-              <input
-                type="time"
-                value={startTime}
-                onChange={(e) => edit(() => setStartTime(e.target.value))}
-                className="min-w-0 w-full rounded-md border p-2"
-              />
-            </label>
-            <label className="space-y-1">
-              <span>{t("endTime")}</span>
-              <input
-                type="time"
-                value={endTime}
-                onChange={(e) => edit(() => setEndTime(e.target.value))}
-                className="min-w-0 w-full rounded-md border p-2"
-              />
-            </label>
+            <TimePicker
+              label={t("startTime")}
+              pickerLabel={t("pickStartTime")}
+              value={startTime}
+              onChange={(time) => edit(() => setStartTime(time))}
+              disabled={fieldsDisabled}
+            />
+            <TimePicker
+              label={t("endTime")}
+              pickerLabel={t("pickEndTime")}
+              value={endTime}
+              onChange={(time) => edit(() => setEndTime(time))}
+              disabled={fieldsDisabled}
+            />
           </div>
-          <p className="text-sm text-muted-foreground">
-            {t("timezone")}: {session.timezone}
-          </p>
         </fieldset>
-        {error && (
-          <p role="alert" className="text-sm text-red-600">
-            {error}
-          </p>
-        )}
+        <FieldError>{error}</FieldError>
         {conflict && <p className="text-sm">{t("sessionConflict")}</p>}
         {uncertain && <p className="text-sm">{t("unknownHelp")}</p>}
         {(uncertain || conflict) && (

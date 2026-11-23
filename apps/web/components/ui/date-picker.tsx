@@ -24,6 +24,8 @@ type DatePickerProps = {
   minDate?: Date;
   maxDate?: Date;
   className?: string;
+  "aria-describedby"?: string;
+  "aria-invalid"?: boolean;
 };
 
 /** Shared local-date field. Dates stay in local time; callers own date/time serialization. */
@@ -38,6 +40,8 @@ export function DatePicker({
   minDate,
   maxDate,
   className,
+  "aria-describedby": describedBy,
+  "aria-invalid": invalid,
 }: DatePickerProps) {
   const generatedId = useId();
   const fieldId = id ?? generatedId;
@@ -77,6 +81,8 @@ export function DatePicker({
             type="button"
             variant="outline"
             disabled={disabled}
+            aria-describedby={describedBy}
+            aria-invalid={invalid}
             aria-label={`${label}: ${value ? new Intl.DateTimeFormat(locale, { dateStyle: "long" }).format(value) : (placeholder ?? t("placeholder"))}`}
             className={cn(
               "w-full justify-start gap-2 font-normal",

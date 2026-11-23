@@ -737,9 +737,14 @@
     },
     "details": {
       "fallbackDescription": "Chi tiết nhiệm vụ",
+      "actions": "Thao tác nhiệm vụ",
+      "sections": "Các mục chi tiết nhiệm vụ",
+      "metadata": "Chi tiết",
+      "loadFailed": "Không tải được chi tiết nhiệm vụ. Hãy thử lại.",
       "loadingDetails": "Đang tải đầy đủ chi tiết nhiệm vụ...",
       "close": "Đóng",
       "deleteTask": "Xóa nhiệm vụ",
+      "deleteFailed": "Không thể xóa nhiệm vụ. Hãy thử lại.",
       "deleting": "Đang xóa...",
       "deleteConfirm": "Xóa nhiệm vụ này? Các nhiệm vụ con và tài liệu học tập gắn với nhiệm vụ cũng sẽ bị xóa. Hành động này không thể hoàn tác.",
       "tabs": {
@@ -758,9 +763,8 @@
       },
       "minutes": "{minutes} phút",
       "notSet": "Chưa đặt",
-      "notes": "Ghi chú",
+      "notes": "Mô tả",
       "noDescription": "Chưa thêm mô tả cho nhiệm vụ này.",
-      "systemFields": "Trường hệ thống",
       "created": "Đã tạo",
       "updated": "Đã cập nhật",
       "subtasks": {
@@ -841,6 +845,7 @@
   },
   "taskReview": {
     "loading": "Đang tải AI Review...",
+    "loadFailed": "Không tải được AI Review. Vui lòng thử lại.",
     "attempt": "Lần đánh giá {number}",
     "threshold": "Đạt từ {value}%",
     "generating": "Đang tạo...",
@@ -908,6 +913,15 @@
     }
   },
   "goals": {
+    "search": {
+      "label": "Tìm mục tiêu",
+      "loading": "Đang tải mục tiêu…",
+      "error": "Không tải được mục tiêu.",
+      "retry": "Thử lại",
+      "empty": "Chưa có mục tiêu.",
+      "noResults": "Không tìm thấy mục tiêu phù hợp.",
+      "more": "Tải thêm"
+    },
     "page": {
       "eyebrow": "Lumivox",
       "title": "Mục tiêu",
@@ -2492,22 +2506,68 @@
     }
   },
   "workspace": {
+    "views": {
+      "label": "Chế độ xem không gian học tập",
+      "list": "Danh sách",
+      "board": "Bảng",
+      "timeline": "Lịch trình",
+      "documents": "Tài liệu học tập"
+    },
+    "timeline": {
+      "title": "Lịch trình nhiệm vụ",
+      "chart": "Biểu đồ lịch trình",
+      "task": "Nhiệm vụ",
+      "previous": "Bốn tuần trước",
+      "next": "Bốn tuần sau",
+      "today": "Hôm nay",
+      "jumpDate": "Đến ngày",
+      "studyPlan": "Lịch học",
+      "deadline": "Hạn chót",
+      "timezone": "Hạn chót theo múi giờ {timezone}",
+      "plannedDates": "Lịch học từ {start} đến {end}",
+      "deadlineDate": "Hạn chót {date}",
+      "paused": "Lịch học tạm dừng",
+      "closed": "Lịch học đã đóng",
+      "emptyPeriod": "Khoảng thời gian này chưa có lịch học hoặc hạn chót.",
+      "undated": "Nhiệm vụ chưa có ngày"
+    },
+    "list": {
+      "title": "Danh sách nhiệm vụ",
+      "task": "Nhiệm vụ",
+      "status": "Trạng thái",
+      "allStatuses": "Tất cả trạng thái",
+      "priority": "Ưu tiên",
+      "due": "Hạn chót",
+      "subtasks": "Nhiệm vụ con",
+      "subtaskProgress": "Đã hoàn thành {completed}/{total} nhiệm vụ con",
+      "createdAt": "Ngày tạo",
+      "updatedAt": "Cập nhật lần cuối",
+      "noDue": "Chưa có hạn chót",
+      "sortLatest": "Hiển thị hạn chót muộn nhất trước",
+      "sortEarliest": "Hiển thị hạn chót sớm nhất trước",
+      "empty": "Mục tiêu này chưa có nhiệm vụ.",
+      "noMatches": "Không có nhiệm vụ ở trạng thái này."
+    },
     "page": {
-      "eyebrow": "Lumivox",
       "title": "Không gian học tập",
-      "description": "Quản lý mục tiêu và nhiệm vụ ở cùng một nơi và theo dõi tiến độ qua từng giai đoạn.",
-      "newGoal": "Mục tiêu mới"
+      "content": "Nội dung không gian học tập",
+      "taskView": "Vùng hiển thị nhiệm vụ",
+      "chooseGoal": "Chọn mục tiêu để bắt đầu",
+      "chooseGoalDescription": "Chọn mục tiêu để xem nhiệm vụ hoặc dùng nút dấu cộng để tạo mục tiêu.",
+      "goalUnavailable": "Mục tiêu không khả dụng",
+      "taskUnavailable": "Nhiệm vụ này không khả dụng."
     },
     "rail": {
       "title": "Mục tiêu",
-      "description": "Chọn một mục tiêu để tập trung bảng nhiệm vụ.",
-      "allTasks": "Tất cả nhiệm vụ",
       "unassigned": "Không có mục tiêu",
       "createGoal": "Tạo mục tiêu",
       "goalActions": "Thao tác mục tiêu",
+      "goalActionsFor": "Thao tác cho mục tiêu {title}",
+      "editUnavailable": "Không mở được mục tiêu để chỉnh sửa. Hãy thử lại.",
       "documents": "Tài liệu học tập",
       "deleteGoalConfirm": "Xóa mục tiêu này? Các nhiệm vụ đang liên kết với mục tiêu có thể bị ảnh hưởng.",
-      "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành"
+      "taskProgress": "{completed}/{total} nhiệm vụ hoàn thành",
+      "chooseGoal": "Chọn mục tiêu"
     },
     "board": {
       "empty": "Chưa có nhiệm vụ ở giai đoạn này.",
@@ -2515,7 +2575,14 @@
       "title": "Bảng nhiệm vụ",
       "reviewManaged": "Giai đoạn do AI quản lý",
       "overdueManaged": "Tự động xác định theo thời hạn",
-      "dragTask": "Kéo nhiệm vụ",
+      "moveTask": "Chuyển trạng thái nhiệm vụ {title}",
+      "moveTaskAction": "Chuyển trạng thái",
+      "lanePages": "Phân trang cột {lane}",
+      "pageOf": "Trang {page}/{totalPages}",
+      "previousLanePage": "Trang trước của cột {lane}",
+      "nextLanePage": "Trang sau của cột {lane}",
+      "quickCreated": "Đã thêm nhiệm vụ vào cột Cần làm.",
+      "openCreatedTask": "Mở nhiệm vụ",
       "invalidTransition": "Không thể chuyển nhiệm vụ sang giai đoạn này.",
       "staleTask": "Nhiệm vụ đã thay đổi ở nơi khác. Hãy làm mới và thử lại.",
       "transitionFailed": "Không thể chuyển nhiệm vụ. Vui lòng thử lại.",
@@ -2542,6 +2609,8 @@
     "weekday": "Thứ",
     "start": "Bắt đầu",
     "end": "Kết thúc",
+    "pickStartTime": "Chọn giờ bắt đầu",
+    "pickEndTime": "Chọn giờ kết thúc",
     "remove": "Xóa",
     "removeSlot": "Xóa khung giờ {index}",
     "addSlot": "Thêm khung giờ hằng tuần",

@@ -245,8 +245,8 @@ describe("Reminder settings UI", () => {
   it("Task override reads its own true default even while global OFF, then saves only that Task", async () => {
     await render(<StudyTaskReminderToggle taskId="a" />);
     expect(host.textContent).toContain("Global reminders are off");
-    const control = host.querySelector<HTMLInputElement>('input[role="switch"]')!;
-    expect(control.checked).toBe(true);
+    const control = host.querySelector<HTMLButtonElement>('[role="switch"]')!;
+    expect(control.getAttribute("aria-checked")).toBe("true");
     await click(control);
     await click(button("Save task reminder setting"));
     expect(mocks.taskSave).toHaveBeenCalledExactlyOnceWith({ taskId: "a", enabled: false });
@@ -254,7 +254,7 @@ describe("Reminder settings UI", () => {
   it("Task read error is visible and cannot become an enabled/disabled default", async () => {
     mocks.taskRead.mockResolvedValue({ success: false, code: "loadFailed" });
     await render(<StudyTaskReminderToggle taskId="a" />);
-    expect(host.querySelector("input")).toBeNull();
+    expect(host.querySelector('[role="switch"]')).toBeNull();
     expect(host.querySelector('[role="alert"]')).not.toBeNull();
   });
   it("switching keyed Tasks discards the previous request result", async () => {
@@ -270,6 +270,6 @@ describe("Reminder settings UI", () => {
     await act(async () =>
       old.resolve({ success: true, override: { taskId: "a", enabled: true }, globalEnabled: true }),
     );
-    expect(host.querySelector<HTMLInputElement>("input")?.checked).toBe(false);
+    expect(host.querySelector('[role="switch"]')?.getAttribute("aria-checked")).toBe("false");
   });
 });

@@ -979,7 +979,8 @@ test("ATE-07 cross-owner cannot read or mutate Attendance", async ({ page, brows
     await otherPage.waitForURL("**/en/dashboard");
 
     // User B must not see User A's Task in the workspace.
-    await otherPage.goto("/en/workspace?goal=all");
+    await otherPage.goto(`/en/workspace?task=${fixture.taskId}`);
+    await expect(otherPage.getByText("This task is unavailable.")).toBeVisible();
 
     await expect(
       otherPage.locator("article").filter({

@@ -24,14 +24,14 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { TaskDatePicker } from "./task-date-picker";
+import { GoalPicker } from "@/features/goals/components/goal-picker";
 import { Label } from "@/components/ui/label";
 
 type CreateTaskModalProps = {
-  goals: GoalOption[];
-  defaultGoalId?: string;
+  defaultGoal?: GoalOption | null;
 };
 
-export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) {
+export function CreateTaskModal({ defaultGoal = null }: CreateTaskModalProps) {
   const t = useTranslations("tasks.form");
   const commonT = useTranslations("common");
   const router = useRouter();
@@ -41,7 +41,7 @@ export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) 
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [goalId, setGoalId] = useState(defaultGoalId ?? "");
+  const [goal, setGoal] = useState(defaultGoal);
   const [priority, setPriority] = useState<"low" | "medium" | "high" | "critical">("medium");
   const [estimatedMinutes, setEstimatedMinutes] = useState("");
   const [dueAt, setDueAt] = useState<Date | undefined>(undefined);
@@ -63,7 +63,7 @@ export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) 
   function resetForm() {
     setTitle("");
     setDescription("");
-    setGoalId(defaultGoalId ?? "");
+    setGoal(defaultGoal);
     setPriority("medium");
     setEstimatedMinutes("");
     setDueAt(undefined);
@@ -85,7 +85,7 @@ export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) 
       const result = await createTaskAction({
         title,
         description,
-        goalId,
+        goalId: goal?.id ?? "",
         priority,
         estimatedMinutes: estimatedMinutes.trim() === "" ? undefined : Number(estimatedMinutes),
         dueAt: combineDateAndTime(dueAt, dueTime),
@@ -105,9 +105,8 @@ export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) 
 
   return (
     <>
-      <Button onClick={() => setIsOpen(true)} type="button">
+      <Button onClick={() => setIsOpen(true)} type="button" size="icon" aria-label={t("trigger")} title={t("trigger")}>
         <Plus aria-hidden="true" />
-        {t("trigger")}
       </Button>
 
       <TaskModalShell
@@ -146,28 +145,7 @@ export function CreateTaskModal({ goals, defaultGoalId }: CreateTaskModalProps) 
             <div className="grid min-w-0 gap-card sm:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor={`${id}-linkedGoal`}>{t("fields.linkedGoal")}</Label>
-                <Select
-                  disabled={isPending}
-                  value={goalId || "no-goal"}
-                  onValueChange={(value) =>
-                    value === "no-goal" ? setGoalId("") : setGoalId(value)
-                  }
-                >
-                  <SelectTrigger id={`${id}-linkedGoal`} className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectLabel>{t("fields.linkedGoal")}</SelectLabel>
-                      <SelectItem value="no-goal">{t("noGoal")}</SelectItem>
-                      {goals.map((goal) => (
-                        <SelectItem key={goal.id} value={goal.id}>
-                          {goal.title}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
+                <GoalPicker id={`${id}-linkedGoal`} value={goal} onChange={setGoal} disabled={isPending} />
               </div>
 
               <div className="space-y-2">

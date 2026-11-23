@@ -10,6 +10,8 @@
     "test:unit:watch": "vitest"
   },
   "dependencies": {
+    "@dnd-kit/collision": "^0.5.0",
+    "@dnd-kit/dom": "^0.5.0",
     "@dnd-kit/react": "^0.5.0",
     "@js-temporal/polyfill": "^0.5.1",
     "@livekit/components-react": "^2.9.21",

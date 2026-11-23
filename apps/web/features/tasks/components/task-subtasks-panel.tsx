@@ -29,7 +29,6 @@ import type { TaskWithGoal } from "@/features/tasks/task.types";
 
 import { getPriorityTone, getStatusTone } from "@/lib/utils/color";
 
-import type { GoalOption } from "@/features/goals/goal.types";
 
 import { TaskEditForm } from "./task-edit-form";
 
@@ -39,7 +38,6 @@ type TaskSubtasksPanelProps = {
 
   subtasks: TaskWithGoal[];
 
-  goals: GoalOption[];
 
   onChanged: () => void;
 };
@@ -48,7 +46,6 @@ export function TaskSubtasksPanel({
   recoveryAttemptId,
   parentTask,
   subtasks,
-  goals,
   onChanged,
 }: TaskSubtasksPanelProps) {
   const t = useTranslations("tasks.details.subtasks");
@@ -317,7 +314,6 @@ export function TaskSubtasksPanel({
                     <TaskEditForm
                       key={subtask.updated_at}
                       task={subtask}
-                      goals={goals}
                       allowGoalChange={false}
                       onCancel={() => setEditingSubtaskId(null)}
                       onSaved={() => {

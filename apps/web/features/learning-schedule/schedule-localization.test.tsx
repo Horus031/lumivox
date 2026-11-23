@@ -145,7 +145,7 @@ describe("Learning Schedule real EN/VI catalogs", () => {
       expect(document.querySelector('[role="dialog"]')?.textContent).toContain(
         messages.learningSchedule.rescheduleTitle,
       );
-      expect(document.querySelector<HTMLInputElement>('input[type="time"]')?.value).toBe("19:00");
+      expect(document.querySelector<HTMLInputElement>('input[placeholder="HH:mm"]')?.value).toBe("19:00");
       expect(document.querySelector('[role="dialog"]')?.textContent).toContain("Asia/Ho_Chi_Minh");
     },
   );

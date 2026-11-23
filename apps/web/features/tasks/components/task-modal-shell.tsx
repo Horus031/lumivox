@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 type TaskModalShellProps = {
   open: boolean;
@@ -12,8 +13,10 @@ type TaskModalShellProps = {
   description?: string;
   onClose: () => void;
   children: ReactNode;
-  footer?: ReactNode;
-  align?: "center" | "right";
+  size?: "compact" | "wide";
+  context?: ReactNode;
+  actions?: ReactNode;
+  getReturnFocus?: (previous: HTMLElement | null) => HTMLElement | null;
 };
 
 export function TaskModalShell({
@@ -22,15 +25,15 @@ export function TaskModalShell({
   description,
   onClose,
   children,
-  footer,
-  align = "center",
+  size = "compact",
+  context,
+  actions,
+  getReturnFocus,
 }: TaskModalShellProps) {
   const t = useTranslations("tasks.modalShell");
   const returnFocus = useRef<HTMLElement | null>(null);
-  const alignment =
-    align === "right"
-      ? "top-0 right-0 left-auto h-dvh max-h-dvh max-w-full translate-x-0 translate-y-0 rounded-none border-y-0 border-r-0 sm:max-w-[36rem]"
-      : "max-h-[calc(100dvh-2rem)] rounded-lg sm:max-w-2xl";
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const wide = size === "wide";
 
   return (
     <Dialog
@@ -42,40 +45,60 @@ export function TaskModalShell({
       <DialogContent
         showCloseButton={false}
         {...(!description ? { "aria-describedby": undefined } : {})}
-        onOpenAutoFocus={() => {
+        onOpenAutoFocus={(event) => {
           returnFocus.current =
             document.activeElement instanceof HTMLElement ? document.activeElement : null;
-        }}
-        onCloseAutoFocus={(event) => {
-          if (returnFocus.current?.isConnected) {
+          if (wide && titleRef.current) {
             event.preventDefault();
-            returnFocus.current.focus();
+            titleRef.current.focus({ preventScroll: true });
           }
         }}
-        className={`flex flex-col gap-0 overflow-hidden p-0 ${alignment}`}
+        onCloseAutoFocus={(event) => {
+          const target = getReturnFocus ? getReturnFocus(returnFocus.current) : returnFocus.current;
+          if (target?.isConnected) {
+            event.preventDefault();
+            target.focus({ preventScroll: true });
+          }
+        }}
+        className={cn(
+          "flex flex-col gap-0 overflow-hidden p-0 motion-reduce:animate-none",
+          wide
+            ? "h-[calc(100dvh-1rem)] w-[calc(100%-1rem)] max-w-[calc(100%-1rem)] rounded-xl sm:h-auto sm:w-[calc(100%-2rem)] sm:max-h-[calc(100dvh-2rem)] sm:min-h-[min(30rem,calc(100dvh-2rem))] sm:max-w-[calc(100%-2rem)] lg:max-w-5xl xl:max-w-6xl"
+            : "max-h-[calc(100dvh-2rem)] rounded-lg sm:max-w-2xl",
+        )}
       >
-        <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border p-card">
+        <header className={cn("flex shrink-0 items-start justify-between gap-2 border-b border-border p-card", wide && "sm:px-6 sm:py-4")}>
           <div className="min-w-0">
-            <DialogTitle className="text-section font-semibold leading-6 [overflow-wrap:anywhere]">
+            {context}
+            <DialogTitle
+              ref={titleRef}
+              tabIndex={wide ? -1 : undefined}
+              className={cn("wrap-anywhere font-semibold leading-6 outline-none", wide ? "text-lg sm:text-xl" : "text-section")}
+            >
               {title}
             </DialogTitle>
             {description ? (
               <DialogDescription className="sr-only">{description}</DialogDescription>
             ) : null}
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={onClose}
-            aria-label={t("close")}
-            title={t("close")}
-          >
-            <X aria-hidden="true" />
-          </Button>
+          <div className="flex shrink-0 items-center gap-1">
+            {actions}
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              aria-label={t("close")}
+              title={t("close")}
+              className={wide ? "size-touch sm:size-control" : undefined}
+            >
+              <X aria-hidden="true" />
+            </Button>
+          </div>
+        </header>
+        <div className={cn("min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-y-contain p-card", wide && "sm:p-6")}>
+          {children}
         </div>
-        <div className="min-h-0 min-w-0 flex-1 overflow-y-auto p-card">{children}</div>
-        {footer ? <div className="shrink-0 border-t border-border p-card">{footer}</div> : null}
       </DialogContent>
     </Dialog>
   );
