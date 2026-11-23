@@ -64,6 +64,31 @@ async function login(page: Page) {
   await page.waitForURL("**/en/dashboard");
 }
 
+test("workspace navigation uses the new brand in both themes and sidebar sizes", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("theme", "light"));
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await login(page);
+  await page.goto("/en/workspace");
+
+  const sidebar = page.locator("#desktop-sidebar");
+  const brand = sidebar.getByRole("link", { name: "Lumivox", exact: true });
+  const logo = brand.locator("img:visible");
+  await expect(logo).toHaveAttribute("src", /logo-text\.webp/);
+
+  await page.getByRole("button", { name: "Collapse sidebar", exact: true }).click();
+  await expect(logo).toHaveAttribute("src", /logo-new\.webp/);
+  await page.getByRole("button", { name: "Theme", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
+  await expect(logo).toHaveAttribute("src", /logo-new-white\.webp/);
+  await page.getByRole("button", { name: "Expand sidebar", exact: true }).click();
+  await expect(logo).toHaveAttribute("src", /logo-text-white\.webp/);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobileLogo = page.getByRole("link", { name: "Lumivox", exact: true }).locator("img:visible");
+  await expect(mobileLogo).toHaveAttribute("src", /logo-text-white\.webp/);
+  await expect.poll(() => mobileLogo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+});
+
 async function pointerMove(page: Page, title: string, from: string, to: string) {
   const board = page.getByRole("region", { name: "Task board" });
   await expect(board.locator("..")).toHaveAttribute("aria-busy", "false");

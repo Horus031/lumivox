@@ -63,7 +63,10 @@ for (const theme of ["light", "dark"] as const) {
 }
 
 test("password visibility, theme, and localized navigation", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("theme", "light"));
   await page.goto("/en/auth/login");
+  const authLogo = page.locator(".auth-brand img:visible");
+  await expect(authLogo).toHaveAttribute("src", /logo-text\.webp/);
   await page.locator("#password").fill("example-password");
   await page.getByRole("button", { name: "Show password" }).click();
   await expect(page.locator("#password")).toHaveAttribute("type", "text");
@@ -72,6 +75,8 @@ test("password visibility, theme, and localized navigation", async ({ page }) =>
   const before = await page.locator("html").getAttribute("class");
   await page.getByRole("button", { name: "Switch light / dark theme" }).click();
   await expect.poll(() => page.locator("html").getAttribute("class")).not.toBe(before);
+  await expect(authLogo).toHaveAttribute("src", /logo-text-white\.webp/);
+  await expect.poll(() => authLogo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   await page.getByRole("link", { name: "Sign up", exact: true }).click();
   await expect(page).toHaveURL(/\/en\/auth\/sign-up$/);
   await expect(page.locator("#repeat-password")).toBeVisible();

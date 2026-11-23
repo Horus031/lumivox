@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import { Suspense } from "react";
 import { useTranslations } from "next-intl";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { Link } from "@/i18n/navigation";
 import { ThemeSwitcher } from "@/features/theme/theme-switcher";
@@ -14,13 +14,9 @@ export default function NavBar() {
   return (
     <header className="marketing-navbar fixed top-0 z-40 w-full backdrop-blur-xl">
       <div className="max-w-310 mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
-        <Link href="/" className="flex shrink-0 items-center gap-2 rounded-md">
-          <div className="size-8 rounded-lg flex items-center justify-center">
-            <Image src={"/logo.png"} alt="lumivox-logo" width={48} height={48} />
-          </div>
-          <span className="font-semibold text-foreground tracking-tight text-[15px]">
-            {common("appName")}
-          </span>
+        <Link href="/" aria-label={common("appName")} className="flex shrink-0 items-center rounded-md">
+          <BrandLogo variant="mark" width={32} className="sm:hidden" />
+          <BrandLogo variant="wordmark" width={96} className="hidden sm:inline-block" />
         </Link>
         <nav className="hidden lg:flex items-center gap-7 text-[13.5px]">
           <Link href="/features" className="marketing-navbar__link rounded-sm transition-colors">

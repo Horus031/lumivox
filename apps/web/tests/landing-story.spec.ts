@@ -98,3 +98,59 @@ test("reduced motion keeps landing readable", async ({ page }) => {
 
   expect(currentSrc).toBe("");
 });
+
+test("landing logos follow the selected theme and navbar size", async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem("theme", "light"));
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/en");
+
+  const header = page.locator(".marketing-navbar");
+  const brand = header.getByRole("link", { name: "Lumivox", exact: true });
+  const navbarLogo = brand.locator("img:visible");
+  const footerLogo = page.locator("footer").getByRole("img", { name: "Lumivox", exact: true });
+  const featureLogo = page.locator(".intelligence-core__center img:visible");
+
+  await expect(navbarLogo).toHaveAttribute("src", /logo-text\.webp/);
+  await expect(footerLogo).toHaveAttribute("src", /logo-text\.webp/);
+  await expect(featureLogo).toHaveAttribute("src", /logo-new\.webp/);
+
+  await header.getByRole("button", { name: "Theme", exact: true }).click();
+  await page.getByRole("menuitemradio", { name: "Dark", exact: true }).click();
+  await expect(navbarLogo).toHaveAttribute("src", /logo-text-white\.webp/);
+  await expect(footerLogo).toHaveAttribute("src", /logo-text-white\.webp/);
+  await expect(featureLogo).toHaveAttribute("src", /logo-new-white\.webp/);
+
+  await page.setViewportSize({ width: 320, height: 844 });
+  await expect(navbarLogo).toHaveAttribute("src", /logo-new-white\.webp/);
+  await expect.poll(() => navbarLogo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+  await expectNoHorizontalOverflow(page);
+});
+
+test("landing advertises the new favicon and organization logo", async ({ page, request }) => {
+  for (const route of routes) {
+    await page.goto(route);
+
+    const icon = page.locator('link[rel="icon"]');
+    await expect(icon).toHaveAttribute("href", /^\/favicon\.ico(?:\?|$)/);
+    const favicon = await request.get((await icon.getAttribute("href"))!);
+    expect(favicon.ok()).toBe(true);
+    const ico = await favicon.body();
+    expect(ico.readUInt16LE(2)).toBe(1);
+    const sizes = Array.from({ length: ico.readUInt16LE(4) }, (_, i) => ({
+      width: ico[6 + 16 * i],
+      height: ico[7 + 16 * i],
+    }));
+    expect(sizes).toContainEqual({ width: 96, height: 96 });
+
+    if (process.env.SEO_INDEXING_ENABLED === "true") {
+      const markup = JSON.parse((await page.locator('script[type="application/ld+json"]').first().textContent())!);
+      expect(markup["@graph"]).toContainEqual(
+        expect.objectContaining({ "@type": "Organization", logo: expect.stringMatching(/^https?:\/\/.+\/logo-new\.webp$/) }),
+      );
+    }
+  }
+  const logo = await request.get("/logo-new.webp");
+  expect(logo.ok()).toBe(true);
+  expect(logo.headers()["content-type"]).toBe("image/webp");
+});

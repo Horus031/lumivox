@@ -1,7 +1,7 @@
-import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { BrandLogo } from "@/components/brand-logo";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { AuthWatercolor } from "@/components/background/auth-watercolor";
 import { AuthThemeToggle } from "./auth-theme-toggle";
@@ -15,8 +15,7 @@ export async function AuthShell({ children }: { children: React.ReactNode }) {
       </div>
       <header className="auth-header">
         <Link href="/" className="auth-brand" aria-label={t("home")}>
-          <Image src="/logo.png" width={36} height={36} alt="" />
-          <span>Lumivox</span>
+          <BrandLogo variant="wordmark" width={108} />
         </Link>
         <div className="auth-preferences">
           <LanguageSwitcher />

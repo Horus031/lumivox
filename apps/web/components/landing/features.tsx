@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { features } from "@/lib/constants";
 
 import IntelligenceController from "./story/intelligence-controller";
@@ -30,7 +30,7 @@ export default function Features() {
               <div className="intelligence-core__halo" />
 
               <div className="intelligence-core__center">
-                <Image src="/logo.png" alt="" width={52} height={52} />
+                <BrandLogo variant="mark" width={48} />
               </div>
 
               {features.map((feature, index) => {
