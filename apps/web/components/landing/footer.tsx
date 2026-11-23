@@ -1,6 +1,6 @@
-import Image from "next/image";
 import { useTranslations } from "next-intl";
 
+import { BrandLogo } from "@/components/brand-logo";
 import { Link } from "@/i18n/navigation";
 
 const currentYear = new Date().getFullYear();
@@ -13,10 +13,7 @@ export default function Footer() {
     <footer className="relative z-10 border-t border-border bg-surface text-foreground">
       <div className="max-w-310 mx-auto px-6 py-12 grid md:grid-cols-4 gap-8">
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2 mb-3">
-            <Image src="/logo.png" alt="" width={28} height={28} />
-            <span className="font-semibold tracking-tight">{common("appName")}</span>
-          </div>
+          <BrandLogo variant="wordmark" width={120} alt={common("appName")} className="mb-3" />
           <p className="text-[13.5px] text-secondary max-w-sm leading-relaxed">
             {t("description")}
           </p>

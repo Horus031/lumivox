@@ -248,12 +248,6 @@
 .auth-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  font-size: 18px;
-  font-weight: 650;
-}
-.auth-brand img {
-  border-radius: 50%;
 }
 .auth-preferences {
   display: flex;

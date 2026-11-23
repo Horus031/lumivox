@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { BrandLogo } from "@/components/brand-logo";
 import type { Profile } from "@/features/profiles/profile.types";
 
 import { AppNavigation } from "@/features/app-shell/components/app-navigation";
@@ -35,17 +36,10 @@ export async function DesktopSidebar({ profile }: DesktopSidebarProps) {
           href="/dashboard"
           aria-label={t("eyebrow")}
           title={t("eyebrow")}
-          className="flex h-topbar shrink-0 items-center gap-3 border-b border-sidebar-border px-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring"
+          className="flex h-topbar shrink-0 items-center border-b border-sidebar-border px-card focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring group-data-[sidebar-collapsed=true]/sidebar-shell:justify-center group-data-[sidebar-collapsed=true]/sidebar-shell:px-0"
         >
-          <span
-            aria-hidden="true"
-            className="desktop-sidebar-brand-mark flex size-control-sm shrink-0 items-center justify-center rounded-md bg-primary text-body font-semibold text-primary-foreground"
-          >
-            L
-          </span>
-          <span className="desktop-sidebar-brand-copy text-section font-semibold">
-            {t("eyebrow")}
-          </span>
+          <BrandLogo variant="wordmark" width={108} className="desktop-sidebar-brand-copy" />
+          <BrandLogo variant="mark" width={32} className="desktop-sidebar-brand-mark hidden" />
         </Link>
 
         <div className="desktop-sidebar-nav-scroll min-h-0 w-full flex-1 overflow-y-auto px-2 py-3">
