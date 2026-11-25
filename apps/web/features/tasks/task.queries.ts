@@ -7,6 +7,7 @@ export async function getAvailableFocusTasks() {
     .from("tasks")
     .select("id, title")
     .in("status", ["todo", "in_progress", "overdue"])
+    .is("parent_task_id", null)
     .order("due_at", { ascending: true, nullsFirst: false })
     .limit(100);
 
