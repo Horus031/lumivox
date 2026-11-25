@@ -1,3 +1,6 @@
+from typing import Literal
+
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -45,13 +48,68 @@ class Settings(BaseSettings):
     )
 
     groq_chat_models: str = (
-        "llama-3.1-8b-instant,"
-        "llama-3.3-70b-versatile,"
-        "openai/gpt-oss-20b"
+        "openai/gpt-oss-20b,"
+        "openai/gpt-oss-120b"
     )
 
     llm_request_timeout_seconds: float = 30.0
     llm_max_attempts_per_model: int = 2
+    # ========================================================
+    # RAG CONVERSATION V2
+    # ========================================================
+
+    rag_conversation_v2_enabled: bool = False
+
+    rag_chat_models: str = (
+        "openai/gpt-oss-20b,"
+        "openai/gpt-oss-120b"
+    )
+
+    rag_summary_models: str = (
+        "openai/gpt-oss-20b,"
+        "openai/gpt-oss-120b"
+    )
+
+    rag_max_prompt_tokens: int = Field(
+        default=4000, ge=512, le=32768
+    )
+
+    rag_max_completion_tokens: int = Field(
+        default=1200, ge=256, le=8192
+    )
+
+    rag_max_summary_tokens: int = Field(
+        default=500, ge=128, le=2048
+    )
+
+    rag_recent_turns: int = Field(
+        default=4, ge=1, le=12
+    )
+
+    rag_soft_turn_limit: int = Field(
+        default=18, ge=1, le=100
+    )
+
+    rag_hard_turn_limit: int = Field(
+        default=24, ge=2, le=120
+    )
+
+    rag_request_timeout_seconds: float = Field(
+        default=8.0, gt=0, le=30
+    )
+
+    rag_generation_deadline_seconds: float = Field(
+        default=18.0, gt=0, le=60
+    )
+
+    rag_max_attempts_per_model: int = Field(
+        default=1, ge=1, le=2
+    )
+
+    rag_reasoning_effort: Literal[
+        "low", "medium", "high"
+    ] = "low"
+
 
     # ========================================================
     # TASK REVIEW AI
