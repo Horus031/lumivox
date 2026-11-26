@@ -1945,7 +1945,18 @@
     },
     "askPlaceholder": "Hỏi về tài liệu học tập của bạn...",
     "ask": "Hỏi",
-    "thinking": "Đang suy nghĩ..."
+    "thinking": "Đang suy nghĩ...",
+    "retryRequest": "Thử lại yêu cầu",
+    "requestOutcomeUnknown": "Chưa xác nhận được kết quả. Hãy thử lại để kiểm tra yêu cầu này.",
+    "turnFailed": "Trợ lý học tập không thể hoàn tất yêu cầu. Bạn có thể gửi lại câu hỏi.",
+    "idempotencyConflict": "Yêu cầu này xung đột với một yêu cầu đã ghi nhận. Hãy tải lại không gian học tập để kiểm tra hội thoại.",
+    "documentAccessDenied": "Bạn không còn quyền truy cập một hoặc nhiều tài liệu trong yêu cầu này.",
+    "restoringConversation": "Đang khôi phục hội thoại...",
+    "restoreFailed": "Không thể khôi phục hội thoại. Vui lòng tải lại không gian học tập.",
+    "conversationTurns": "Đã hoàn thành {count} lượt hỏi đáp",
+    "conversationScopeLocked": "Tài liệu đã chọn được cố định cho hội thoại này.",
+    "turnInProgress": "Câu hỏi trước của bạn vẫn đang được xử lý.",
+    "conversationUnavailable": "Hội thoại hiện không khả dụng."
   },
   "admin": {
     "common": {

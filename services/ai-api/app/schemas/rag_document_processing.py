@@ -1,5 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal
+from uuid import UUID
 
 
 
@@ -26,6 +27,7 @@ class RagAskRequest(BaseModel):
     top_k: int = Field(default=5, ge=1, le=9)
     prompt_variant: Literal["no_rule", "grounded_rule"] = "grounded_rule"
     preferred_locale: Literal["auto", "en", "vi"] = "auto"
+    client_request_id: UUID | None = None
 
 
 class RagSourceChunk(BaseModel):
@@ -46,3 +48,42 @@ class RagAskResponse(BaseModel):
     selected_document_ids: list[str]
     top_k: int
     latency_ms: int
+    turn_id: str | None = None
+    turn_index: int | None = None
+    completed_turn_count: int | None = None
+    preferred_locale: str | None = None
+
+
+class RagConversationRestoreRequest(BaseModel):
+    user_id: UUID
+    focus_session_id: UUID
+
+
+class RagConversationMessage(BaseModel):
+    id: str
+    turn_id: str
+    role: Literal["user", "assistant"]
+    content: str
+    turn_index: int
+
+
+class RagConversationRestoreResponse(BaseModel):
+    enabled: bool
+
+    session_id: str | None = None
+
+    completed_turn_count: int = 0
+
+    selected_document_ids: list[str] = Field(
+        default_factory=list
+    )
+
+    top_k: int = 5
+
+    prompt_variant: Literal[
+        "no_rule", "grounded_rule"
+    ] = "grounded_rule"
+
+    messages: list[RagConversationMessage] = Field(
+        default_factory=list
+    )

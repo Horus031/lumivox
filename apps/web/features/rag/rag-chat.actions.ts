@@ -1,6 +1,6 @@
 "use server";
 
-import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
+import { AiApiError, AiApiTransportError, fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
@@ -24,6 +24,7 @@ export type RagAskActionPayload = {
   topK?: number;
   promptVariant?: RagPromptVariant;
   preferredLocale?: "vi" | "en";
+  clientRequestId?: string;
 };
 
 export type RagAskActionResponse = {
@@ -35,11 +36,24 @@ export type RagAskActionResponse = {
   selected_document_ids: string[];
   top_k: number;
   latency_ms: number;
+  turn_id?: string | null;
+  turn_index?: number | null;
+  completed_turn_count?: number | null;
 };
+
+type RagAskActionResult =
+  | Extract<ActionResult<RagAskActionResponse>, { success: true }>
+  | {
+      success: false;
+      message: string;
+      code?: string;
+      retrySameRequest: boolean;
+      sessionId?: string;
+    };
 
 export async function askRagQuestionAction(
   payload: RagAskActionPayload,
-): Promise<ActionResult<RagAskActionResponse>> {
+): Promise<RagAskActionResult> {
   try {
     const { user } = await requireUser();
 
@@ -49,6 +63,7 @@ export async function askRagQuestionAction(
       return {
         success: false,
         message: "Please enter a question.",
+        retrySameRequest: false,
       };
     }
 
@@ -56,6 +71,7 @@ export async function askRagQuestionAction(
       return {
         success: false,
         message: "Question is too long. Please keep it under 2000 characters.",
+        retrySameRequest: false,
       };
     }
 
@@ -69,6 +85,7 @@ export async function askRagQuestionAction(
       return {
         success: false,
         message: formatRateLimitMessage(rateLimit.reset),
+        retrySameRequest: true,
       };
     }
 
@@ -85,6 +102,7 @@ export async function askRagQuestionAction(
         top_k: topK ?? 5,
         prompt_variant: payload.promptVariant ?? "grounded_rule",
         preferred_locale: payload.preferredLocale ?? "auto",
+        client_request_id: payload.clientRequestId ?? null,
       },
     });
 
@@ -94,12 +112,78 @@ export async function askRagQuestionAction(
       data: result,
     };
   } catch (error) {
+    if (error instanceof AiApiError) {
+      const sessionId = error.details?.session_id;
+
+      return {
+        success: false,
+        message: error.message,
+        code: error.code,
+        sessionId: typeof sessionId === "string" ? sessionId : undefined,
+        retrySameRequest:
+          error.code !== "RAG_GENERATION_FAILED" &&
+          (error.code === "RAG_TURN_IN_PROGRESS" ||
+            error.code === "RAG_INVALID_LEASE" ||
+            error.status === 408 ||
+            error.status === 429 ||
+            error.status >= 500),
+      };
+    }
+
     return {
       success: false,
+      code: error instanceof AiApiTransportError ? error.code : undefined,
+      retrySameRequest: true,
       message:
         error instanceof Error
           ? error.message
           : "Unexpected error while asking the study assistant.",
+    };
+  }
+}
+
+export type RagRestoredMessage = {
+  id: string;
+  turn_id: string;
+  role: "user" | "assistant";
+  content: string;
+  turn_index: number;
+};
+
+export type RagConversationRestoreResponse = {
+  enabled: boolean;
+  session_id: string | null;
+  completed_turn_count: number;
+  selected_document_ids: string[];
+  top_k: number;
+  prompt_variant: RagPromptVariant;
+  messages: RagRestoredMessage[];
+};
+
+export async function restoreRagConversationAction(
+  focusSessionId: string,
+): Promise<ActionResult<RagConversationRestoreResponse>> {
+  try {
+    const { user } = await requireUser();
+
+    const result = await fetchAiApi<RagConversationRestoreResponse>({
+      path: "/api/v1/rag/chat/restore",
+      body: {
+        user_id: user.id,
+        focus_session_id: focusSessionId,
+      },
+      retries: 0,
+    });
+
+    return {
+      success: true,
+      message: "Conversation loaded.",
+      data: result,
+    };
+  } catch {
+    return {
+      success: false,
+      message: "Unable to restore conversation.",
     };
   }
 }

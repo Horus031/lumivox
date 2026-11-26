@@ -7,6 +7,7 @@ from app.clients.gemini_client import get_gemini_client
 from app.clients.llm_client import LLMTextGeneration, generate_text
 from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
+from app.services.rag_conversation_store import RagConversationError
 
 
 MARKDOWN_FORMATTING_RULES = r"""Formatting:
@@ -105,18 +106,24 @@ def _get_or_create_session(
     question: str,
     preferred_locale: str | None,
 ) -> str:
-    if session_id:
+    if session_id is not None:
+        if not session_id:
+            raise RagConversationError("RAG_SESSION_NOT_FOUND", 404)
+
         response = (
             supabase.table("rag_chat_sessions")
             .select("id,user_id")
             .eq("id", session_id)
             .eq("user_id", user_id)
+            .eq("conversation_version", 1)
             .maybe_single()
             .execute()
         )
 
-        if response.data:
+        if response is not None and response.data:
             return response.data["id"]
+
+        raise RagConversationError("RAG_SESSION_NOT_FOUND", 404)
 
     insert_response = (
         supabase.table("rag_chat_sessions")
@@ -302,6 +309,77 @@ def _store_message(
             "preferred_locale": preferred_locale or "auto",
         }
     ).execute()
+
+
+def generate_rag_answer(
+    *,
+    supabase: Any,
+    user_id: str,
+    question: str,
+    selected_document_ids: list[str],
+    top_k: int,
+    prompt_variant: Literal[
+        "no_rule", "grounded_rule"
+    ],
+    preferred_locale: str,
+) -> tuple[
+    str,
+    list[dict[str, Any]],
+    LLMTextGeneration | None,
+]:
+    if not selected_document_ids:
+        prompt = _build_general_prompt(
+            question,
+            preferred_locale=preferred_locale,
+        )
+
+        generation = _generate_answer_from_prompt(
+            prompt
+        )
+
+        return generation.text, [], generation
+
+    query_embedding = _generate_query_embedding(
+        question
+    )
+
+    sources = _retrieve_chunks(
+        supabase,
+        user_id=user_id,
+        query_embedding=query_embedding,
+        selected_document_ids=selected_document_ids,
+        top_k=top_k,
+    )
+
+    if not sources:
+        answer = (
+            "Mình không tìm thấy thông tin phù hợp "
+            "trong các tài liệu đã chọn."
+            if preferred_locale == "vi"
+            else
+            "I could not find relevant information "
+            "in the selected documents."
+        )
+
+        return answer, [], None
+
+    builder = (
+        _build_no_rule_prompt
+        if prompt_variant == "no_rule"
+        else _build_grounded_prompt
+    )
+
+    prompt = builder(
+        question=question,
+        chunks=sources,
+        preferred_locale=preferred_locale,
+    )
+
+    generation = _generate_answer_from_prompt(
+        prompt
+    )
+
+    return generation.text, sources, generation
 
 
 def ask_rag_question(
