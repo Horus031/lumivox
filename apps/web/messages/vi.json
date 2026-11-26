@@ -1956,7 +1956,12 @@
     "conversationTurns": "Đã hoàn thành {count} lượt hỏi đáp",
     "conversationScopeLocked": "Tài liệu đã chọn được cố định cho hội thoại này.",
     "turnInProgress": "Câu hỏi trước của bạn vẫn đang được xử lý.",
-    "conversationUnavailable": "Hội thoại hiện không khả dụng."
+    "conversationUnavailable": "Hội thoại hiện không khả dụng.",
+    "conversationContext": "Ngữ cảnh hội thoại",
+    "contextTurnsUsed": "Đang sử dụng {count} lượt hỏi đáp gần đây",
+    "recentContextOnly": "Một phần nội dung trước đó nằm ngoài ngữ cảnh hiện tại.",
+    "conversationNearLimit": "Hội thoại này đang tiến gần đến giới hạn.",
+    "conversationLimitReached": "Hội thoại này đã đạt giới hạn và không thể nhận thêm câu hỏi."
   },
   "admin": {
     "common": {

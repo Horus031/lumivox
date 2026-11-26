@@ -1961,7 +1961,12 @@
     "conversationTurns": "{count, plural, one {# completed turn} other {# completed turns}}",
     "conversationScopeLocked": "The document selection is fixed for this conversation.",
     "turnInProgress": "Your previous question is still being processed.",
-    "conversationUnavailable": "This conversation is currently unavailable."
+    "conversationUnavailable": "This conversation is currently unavailable.",
+    "conversationContext": "Conversation context",
+    "contextTurnsUsed": "{count, plural, one {Using # recent turn} other {Using # recent turns}}",
+    "recentContextOnly": "Some earlier content is outside the current context.",
+    "conversationNearLimit": "This conversation is approaching its limit.",
+    "conversationLimitReached": "This conversation has reached its limit and cannot accept new questions."
   },
   "admin": {
     "common": {

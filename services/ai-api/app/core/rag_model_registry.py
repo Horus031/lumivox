@@ -77,6 +77,9 @@ def get_rag_model_capability(
 
 
 def validate_rag_configuration() -> None:
+    if settings.rag_hard_turn_limit > 24:
+        raise RagConfigurationError("RAG hard turn limit exceeds the database safety ceiling.")
+
     chat_models = parse_rag_model_chain(
         settings.rag_chat_models
     )

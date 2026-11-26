@@ -5,6 +5,8 @@ from unittest.mock import Mock
 import pytest
 from postgrest.exceptions import APIError
 
+from app.clients.rag_llm_client import RagTokenUsage
+from app.schemas.rag_conversation_context import RagContextMetadata
 from app.services import (
     rag_conversation_service as service,
 )
@@ -42,15 +44,24 @@ def dependencies(monkeypatch):
     )
 
     generate = Mock(
-        return_value=(
-            "Study answer",
-            [],
-            SimpleNamespace(
+        return_value=SimpleNamespace(
+            answer="Study answer",
+            sources=[],
+            generation=SimpleNamespace(
                 provider="groq",
                 model="openai/gpt-oss-20b",
+                usage=RagTokenUsage(500, 30, 530),
+            ),
+            context=RagContextMetadata(
+                estimated_prompt_tokens=600, history_turns_used=0,
+                retrieved_chunks_used=0, context_truncated=False,
+                retrieval_strategy="none", generation_attempts=1,
             ),
         )
     )
+    load = Mock(return_value={
+        "session_id": "session-1", "current_turn_index": 1, "completed_turn_count": 0,
+    })
 
     complete = Mock(
         return_value={
@@ -73,8 +84,9 @@ def dependencies(monkeypatch):
     )
 
     monkeypatch.setattr(
-        service, "generate_rag_answer", generate
+        service, "generate_conversational_answer", generate
     )
+    monkeypatch.setattr(service, "load_conversation_context", load)
 
     monkeypatch.setattr(
         service, "complete_turn", complete
@@ -86,6 +98,7 @@ def dependencies(monkeypatch):
 
     return SimpleNamespace(
         reserve=reserve,
+        load=load,
         generate=generate,
         complete=complete,
         fail=fail,
@@ -103,6 +116,11 @@ def test_successful_turn(dependencies):
     dependencies.generate.assert_called_once()
     dependencies.complete.assert_called_once()
     dependencies.fail.assert_not_called()
+    usage = dependencies.complete.call_args.kwargs["usage"]
+    assert (usage["prompt_tokens"], usage["completion_tokens"], usage["total_tokens"]) == (500, 30, 530)
+    assert usage["context"]["estimated_prompt_tokens"] == 600
+    assert usage["context"]["generation_attempts"] == 1
+    assert dependencies.load.call_args.kwargs["lease_token"] == "lease-1"
 
 
 def test_completed_request_replays_response(
@@ -121,6 +139,7 @@ def test_completed_request_replays_response(
 
     assert result["answer"] == "Persisted answer"
 
+    dependencies.load.assert_not_called()
     dependencies.generate.assert_not_called()
     dependencies.complete.assert_not_called()
 
@@ -249,16 +268,8 @@ def test_reservation_error_prevents_generation(
     dependencies.complete.assert_not_called()
 
 
-def test_restore_validates_access_before_fetching_document_history(monkeypatch):
+def test_restore_maps_revoked_document_access_from_snapshot(monkeypatch):
     supabase = Mock()
-    scope, session, unexpected_history = Mock(), Mock(), Mock()
-    scope.select.return_value.eq.return_value.eq.return_value.limit.return_value.execute.return_value.data = [
-        {"id": "focus-1"}
-    ]
-    session.select.return_value.eq.return_value.eq.return_value.eq.return_value.eq.return_value.limit.return_value.execute.return_value.data = [
-        {"id": "session-1", "selected_document_ids": ["document-1"]}
-    ]
-    supabase.table.side_effect = [scope, session, unexpected_history]
     supabase.rpc.return_value.execute.side_effect = APIError(
         {"message": "RAG_DOCUMENT_ACCESS_DENIED", "code": "P0001"}
     )
@@ -269,17 +280,46 @@ def test_restore_validates_access_before_fetching_document_history(monkeypatch):
 
     assert error.value.status_code == 403
     supabase.rpc.assert_called_once_with(
-        "rag_v2_validate_scope",
+        "rag_v2_restore_context",
         {
             "p_user_id": "user-1",
             "p_focus_session_id": "focus-1",
-            "p_document_ids": ["document-1"],
         },
     )
-    assert [call.args[0] for call in supabase.table.call_args_list] == [
-        "focus_sessions",
-        "rag_chat_sessions",
-    ]
+    supabase.table.assert_not_called()
+
+
+def test_context_denial_prevents_generation(dependencies):
+    dependencies.load.side_effect = RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+
+    with pytest.raises(RagConversationError, match="RAG_CONTEXT_UNAVAILABLE"):
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+
+    dependencies.generate.assert_not_called()
+    dependencies.complete.assert_not_called()
+    dependencies.fail.assert_called_once()
+
+
+def test_configured_limit_below_database_ceiling_blocks_generation(dependencies, monkeypatch):
+    monkeypatch.setattr(service.settings, "rag_soft_turn_limit", 5)
+    monkeypatch.setattr(service.settings, "rag_hard_turn_limit", 10)
+    dependencies.load.return_value.update(completed_turn_count=10, current_turn_index=11)
+
+    with pytest.raises(RagConversationError, match="RAG_CONVERSATION_LIMIT_REACHED"):
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+
+    dependencies.generate.assert_not_called()
+    dependencies.complete.assert_not_called()
+    dependencies.fail.assert_called_once()
+
+
+def test_invalid_configuration_does_not_reserve(dependencies, monkeypatch):
+    monkeypatch.setattr(service.settings, "rag_hard_turn_limit", 25)
+
+    with pytest.raises(ValueError, match="database safety ceiling"):
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+
+    dependencies.reserve.assert_not_called()
 
 
 @pytest.mark.parametrize("found", [True, False])

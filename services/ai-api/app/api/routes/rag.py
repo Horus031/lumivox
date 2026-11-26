@@ -124,6 +124,11 @@ def ask_question(
                 prompt_variant=payload.prompt_variant,
                 preferred_locale=payload.preferred_locale,
             )
+            result = {
+                **result,
+                "soft_turn_limit": settings.rag_soft_turn_limit,
+                "hard_turn_limit": settings.rag_hard_turn_limit,
+            }
 
         else:
             result = ask_rag_question(
@@ -186,7 +191,11 @@ def restore_conversation(
         )
 
         return RagConversationRestoreResponse(
-            **result
+            **{
+                **result,
+                "soft_turn_limit": settings.rag_soft_turn_limit,
+                "hard_turn_limit": settings.rag_hard_turn_limit,
+            }
         )
 
     except RagConversationError as error:

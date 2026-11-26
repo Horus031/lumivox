@@ -7,6 +7,15 @@ import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
 
 type RagPromptVariant = "no_rule" | "grounded_rule";
 
+export type RagContextMetadata = {
+  estimated_prompt_tokens: number;
+  history_turns_used: number;
+  retrieved_chunks_used: number;
+  context_truncated: boolean;
+  retrieval_strategy: "none" | "current_question" | "history_augmented";
+  generation_attempts: number;
+};
+
 export type RagSourceChunk = {
   chunk_id: string;
   document_id: string;
@@ -39,6 +48,9 @@ export type RagAskActionResponse = {
   turn_id?: string | null;
   turn_index?: number | null;
   completed_turn_count?: number | null;
+  context?: RagContextMetadata | null;
+  soft_turn_limit?: number | null;
+  hard_turn_limit?: number | null;
 };
 
 type RagAskActionResult =
@@ -154,6 +166,8 @@ export type RagConversationRestoreResponse = {
   enabled: boolean;
   session_id: string | null;
   completed_turn_count: number;
+  soft_turn_limit?: number | null;
+  hard_turn_limit?: number | null;
   selected_document_ids: string[];
   top_k: number;
   prompt_variant: RagPromptVariant;
