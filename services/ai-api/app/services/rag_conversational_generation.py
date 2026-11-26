@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 from app.clients.rag_llm_client import RagChatGeneration, generate_rag_chat
+from app.core.config import settings
 from app.schemas.rag_conversation_context import (
     RagContextMetadata,
     RagConversationContext,
@@ -35,7 +36,11 @@ def generate_conversational_answer(
     strategy: RagRetrievalStrategy = "none"
     sources: list[dict[str, Any]] = []
     if document_mode:
-        query = build_retrieval_query(question, context.recent_turns)
+        query = build_retrieval_query(
+            question,
+            context.recent_turns,
+            context.summary if settings.rag_rolling_summary_enabled else None,
+        )
         strategy = query.strategy
         sources = _retrieve_chunks(
             supabase,
@@ -66,7 +71,15 @@ def generate_conversational_answer(
             sources=[],
             generation=None,
             context=built.metadata.model_copy(
-                update={"estimated_prompt_tokens": 0, "history_turns_used": 0}
+                update={
+                    "estimated_prompt_tokens": 0,
+                    "history_turns_used": 0,
+                    "summary_version_used": None,
+                    "summary_tokens_used": 0,
+                    "summary_covered_turn_index": None,
+                    "summary_generation_method": None,
+                    "generation_attempts": 0,
+                }
             ),
         )
 

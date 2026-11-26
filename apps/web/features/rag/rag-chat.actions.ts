@@ -14,6 +14,10 @@ export type RagContextMetadata = {
   context_truncated: boolean;
   retrieval_strategy: "none" | "current_question" | "history_augmented";
   generation_attempts: number;
+  summary_version_used?: number | null;
+  summary_tokens_used?: number;
+  summary_covered_turn_index?: number | null;
+  summary_generation_method?: "llm" | "extractive" | null;
 };
 
 export type RagSourceChunk = {

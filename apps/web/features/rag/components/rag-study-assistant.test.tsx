@@ -420,4 +420,30 @@ describe("Study workspace RAG chat", () => {
     expect(mocks.ask).toHaveBeenCalledTimes(1);
     expect(retryButton()).toBeUndefined();
   });
+
+  it.each([
+    { version: 1, tokens: 72, visible: true },
+    { version: 1, tokens: 0, visible: false },
+    { version: null, tokens: 72, visible: false },
+  ])("shows summarized memory only when the answer used it ($version, $tokens)", async ({
+    version, tokens, visible,
+  }) => {
+    mocks.ask.mockResolvedValueOnce({
+      success: true,
+      data: {
+        session_id: "chat-session", answer: "Study answer", sources: [],
+        completed_turn_count: 7, soft_turn_limit: 20, hard_turn_limit: 24,
+        context: {
+          estimated_prompt_tokens: 900, history_turns_used: 4, retrieved_chunks_used: 0,
+          context_truncated: true, retrieval_strategy: "none", generation_attempts: 1,
+          summary_version_used: version, summary_tokens_used: tokens,
+          summary_covered_turn_index: 2, summary_generation_method: "extractive",
+        },
+      },
+    });
+    enterQuestion("Follow-up question");
+    await submitQuestion();
+    expect(container.textContent?.includes(messages.rag.compressedMemoryActive)).toBe(visible);
+    expect(container.textContent).not.toContain("extractive");
+  });
 });

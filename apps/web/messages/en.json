@@ -1965,6 +1965,8 @@
     "conversationContext": "Conversation context",
     "contextTurnsUsed": "{count, plural, one {Using # recent turn} other {Using # recent turns}}",
     "recentContextOnly": "Some earlier content is outside the current context.",
+    "compressedMemoryActive": "Using summarized conversation memory",
+    "compressedMemoryDescription": "Earlier exchanges are summarized to preserve important learning context.",
     "conversationNearLimit": "This conversation is approaching its limit.",
     "conversationLimitReached": "This conversation has reached its limit and cannot accept new questions."
   },

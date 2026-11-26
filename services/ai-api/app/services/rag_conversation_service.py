@@ -16,6 +16,7 @@ from app.core.rag_model_registry import validate_rag_configuration
 from app.schemas.rag_conversation_context import RagConversationContext
 from app.services.rag_chat_service import _normalize_top_k
 from app.services.rag_conversational_generation import generate_conversational_answer
+from app.services.rag_summary_service import maybe_refresh_summary
 
 from app.services.rag_conversation_store import (
     RagConversationError,
@@ -111,20 +112,47 @@ def ask_rag_conversation_question(
     reserved_session_id = reservation["session_id"]
 
     try:
-        context = RagConversationContext.model_validate(
-            load_conversation_context(
-                supabase,
-                user_id=user_id,
-                session_id=reserved_session_id,
-                turn_id=turn_id,
-                lease_token=lease_token,
-                recent_turns=settings.rag_recent_turns,
-            ),
+        snapshot = load_conversation_context(
+            supabase,
+            user_id=user_id,
+            session_id=reserved_session_id,
+            turn_id=turn_id,
+            lease_token=lease_token,
+            recent_turns=settings.rag_recent_turns,
         )
+        if not settings.rag_rolling_summary_enabled:
+            snapshot = {**snapshot, "summary": None}
+        context = RagConversationContext.model_validate(snapshot)
         if context.completed_turn_count >= settings.rag_hard_turn_limit:
             raise RagConversationError(
                 "RAG_CONVERSATION_LIMIT_REACHED", 409, session_id=reserved_session_id,
             )
+        if settings.rag_rolling_summary_enabled:
+            try:
+                context = maybe_refresh_summary(
+                    supabase=supabase,
+                    user_id=user_id,
+                    session_id=reserved_session_id,
+                    turn_id=turn_id,
+                    lease_token=lease_token,
+                    context=context,
+                )
+            except Exception as summary_error:
+                if isinstance(summary_error, RagConversationError) and summary_error.code in {
+                    "RAG_DOCUMENT_ACCESS_DENIED",
+                    "RAG_INVALID_LEASE",
+                    "RAG_SESSION_NOT_FOUND",
+                }:
+                    raise
+                logger.warning("RAG summary refresh unavailable; reloading authorized context.")
+                context = RagConversationContext.model_validate(load_conversation_context(
+                    supabase,
+                    user_id=user_id,
+                    session_id=reserved_session_id,
+                    turn_id=turn_id,
+                    lease_token=lease_token,
+                    recent_turns=settings.rag_recent_turns,
+                ))
         generated = generate_conversational_answer(
             supabase=supabase,
             user_id=user_id,

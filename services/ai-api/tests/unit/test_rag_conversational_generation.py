@@ -22,17 +22,17 @@ def dependencies(monkeypatch):
     return SimpleNamespace(embedding=embedding, retrieval=retrieval, generation=generation)
 
 
-def ask(*, history=False, document=False, variant="grounded_rule", locale="en"):
+def ask(*, history=False, document=False, variant="grounded_rule", locale="en", summary=None):
     recent = [RagCompletedTurn(
-        turn_index=1, question="Explain binary search.", answer="It halves a sorted search interval.",
+        turn_index=3, question="Explain binary search.", answer="It halves a sorted search interval.",
     )] if history else []
     return service.generate_conversational_answer(
         supabase=object(), user_id="user", question="Why is it efficient?",
         selected_document_ids=["document"] if document else [],
         top_k=5, prompt_variant=variant, preferred_locale=locale,
         context=RagConversationContext(
-            session_id="session", completed_turn_count=len(recent), current_turn_index=len(recent) + 1,
-            recent_turns=recent,
+            session_id="session", completed_turn_count=len(recent), current_turn_index=4,
+            recent_turns=recent, summary=summary,
         ),
     )
 
@@ -89,3 +89,25 @@ def test_no_rule_document_mode_can_use_general_knowledge(dependencies):
     assert result.answer == "Study answer"
     assert result.sources == []
     dependencies.generation.assert_called_once()
+
+
+def test_summary_retrieval_cannot_expand_scope_and_strict_no_evidence_has_no_usage(
+    monkeypatch, dependencies, stored_summary,
+):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    result = ask(history=True, document=True, summary=stored_summary)
+    assert stored_summary.summary.main_topic in dependencies.embedding.call_args.args[0]
+    assert "historical-notes.pdf" not in dependencies.embedding.call_args.args[0]
+    assert dependencies.retrieval.call_args.kwargs["selected_document_ids"] == ["document"]
+    assert result.generation is None
+    dependencies.generation.assert_not_called()
+    assert result.context.summary_tokens_used == 0
+    assert result.context.summary_version_used is None
+    assert result.context.summary_covered_turn_index is None
+    assert result.context.summary_generation_method is None
+
+
+def test_summary_disabled_does_not_augment_retrieval(monkeypatch, dependencies, stored_summary):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", False)
+    ask(history=True, document=True, summary=stored_summary)
+    assert stored_summary.summary.main_topic not in dependencies.embedding.call_args.args[0]

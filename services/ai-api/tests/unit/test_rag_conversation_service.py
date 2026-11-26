@@ -105,6 +105,55 @@ def dependencies(monkeypatch):
     )
 
 
+@pytest.mark.parametrize("code", ["RAG_SUMMARY_CONFLICT", "RAG_PERSISTENCE_UNAVAILABLE"])
+def test_summary_conflict_or_uncertain_write_reconciles_before_generation(
+    monkeypatch, dependencies, stored_summary, code,
+):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    monkeypatch.setattr(service, "maybe_refresh_summary", Mock(
+        side_effect=RagConversationError(code, 409),
+    ))
+    snapshot = {"session_id": "session-1", "current_turn_index": 9, "completed_turn_count": 8}
+    dependencies.load.side_effect = [
+        snapshot, {**snapshot, "summary": stored_summary.model_dump()},
+    ]
+    service.ask_rag_conversation_question(**BASE_REQUEST)
+    assert dependencies.load.call_count == 2
+    assert dependencies.generate.call_args.kwargs["context"].summary == stored_summary
+
+
+@pytest.mark.parametrize("code", ["RAG_DOCUMENT_ACCESS_DENIED", "RAG_INVALID_LEASE", "RAG_CONTEXT_UNAVAILABLE"])
+def test_summary_authorization_or_lease_failure_blocks_answer(monkeypatch, dependencies, code):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    error = RagConversationError(code, 409)
+    monkeypatch.setattr(service, "maybe_refresh_summary", Mock(side_effect=error))
+    dependencies.load.side_effect = [dependencies.load.return_value, error]
+    with pytest.raises(RagConversationError) as caught:
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+    assert caught.value.code == code
+    dependencies.generate.assert_not_called()
+    dependencies.complete.assert_not_called()
+
+
+def test_answer_failure_after_summary_commit_leaves_earlier_coverage(
+    monkeypatch, dependencies, stored_summary,
+):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    snapshot = {"session_id": "session-1", "current_turn_index": 7, "completed_turn_count": 6}
+    dependencies.load.return_value = snapshot
+    refresh = Mock(side_effect=lambda **kwargs: kwargs["context"].model_copy(
+        update={"summary": stored_summary},
+    ))
+    monkeypatch.setattr(service, "maybe_refresh_summary", refresh)
+    dependencies.generate.side_effect = RuntimeError("Synthetic answer failure")
+    with pytest.raises(RagConversationError, match="RAG_GENERATION_FAILED"):
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+    assert stored_summary.covered_turn_index < snapshot["current_turn_index"]
+    dependencies.fail.assert_called_once()
+    dependencies.complete.assert_not_called()
+    assert dependencies.generate.call_args.kwargs["context"].summary is stored_summary
+
+
 def test_successful_turn(dependencies):
     result = service.ask_rag_conversation_question(
         **BASE_REQUEST

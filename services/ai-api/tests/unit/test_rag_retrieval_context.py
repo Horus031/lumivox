@@ -43,3 +43,23 @@ def test_augmented_query_bounds_history_without_shortening_the_question():
     assert result.text.startswith(f"Current question:\n{question}\n")
     assert "Explain binary search." not in result.text
     assert count_text_tokens(result.text) < count_text_tokens(question) + 270
+
+
+def test_summary_adds_only_bounded_topic_and_last_three_concepts(stored_summary):
+    summary = stored_summary.summary.model_copy(update={
+        "covered_concepts": ["unused concept", "Complexity", "Sorted arrays", "Boundary " * 300],
+    })
+    result = build_retrieval_query("Why is it efficient?", HISTORY,
+                                  stored_summary.model_copy(update={"summary": summary}))
+    assert result.strategy == "history_augmented"
+    topic = result.text.split("Earlier study topic:\n")[1]
+    assert "Binary search invariants" in topic and "Sorted arrays" in topic
+    assert "unused concept" not in topic and "historical-notes.pdf" not in topic
+    assert count_text_tokens(topic) <= 100
+
+
+def test_explicit_topic_change_excludes_summary(stored_summary):
+    question = "Đổi chủ đề: tại sao nên học đại số?"
+    result = build_retrieval_query(question, HISTORY, stored_summary)
+    assert result.strategy == "current_question"
+    assert result.text == question
