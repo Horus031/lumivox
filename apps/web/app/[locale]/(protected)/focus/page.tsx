@@ -26,9 +26,10 @@ async function FocusRagSection({
   focusSessionId: string;
   fillHeight?: boolean;
 }) {
-  const [documents, ragDefaults] = await Promise.all([
+  const [documents, ragDefaults, { user }] = await Promise.all([
     getAccessibleProcessedLearningDocuments(),
     getRagDefaultSettings(),
+    requireUser(),
   ]);
 
   return (
@@ -37,6 +38,7 @@ async function FocusRagSection({
       fillHeight={fillHeight}
       className="min-w-0 rounded-xl border-border bg-card p-3 shadow-none"
       focusSessionId={focusSessionId}
+      accountScope={user.id}
       documents={documents}
       defaultTopK={ragDefaults.defaultTopK}
       defaultPromptVariant={ragDefaults.defaultPromptVariant}

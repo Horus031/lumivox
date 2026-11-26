@@ -45,6 +45,7 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
         "user_id": str(request.user_id), "focus_session_id": str(request.focus_session_id),
         "source_session_id": str(request.source_session_id), "client_request_id": str(request.client_request_id),
         "request_payload": payload,
+        "include_rolling_summary": settings.rag_rolling_summary_enabled,
     }
     supabase = get_supabase_client()
     try:
@@ -58,6 +59,8 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
     if request.mode == "continue":
         inherited = prepared.inherited_memory
         rolling = prepared.previous_summary
+        if rolling is not None and not args["include_rolling_summary"]:
+            raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
         expected_count = prepared.revision.source_completed_turn_count
         if rolling:
             expected_count -= rolling.covered_turn_count

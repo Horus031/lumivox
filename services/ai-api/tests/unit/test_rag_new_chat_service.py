@@ -92,3 +92,12 @@ def test_build_failure_does_not_close_source_or_emit_raw_input(dependencies, cap
         service.start_new_conversation(request_for("continue"))
     assert "Study question" not in caplog.text
     dependencies.commit.assert_not_called()
+
+
+def test_rolling_rollback_uses_full_snapshot_with_same_policy_at_commit(monkeypatch, dependencies):
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", False)
+    service.start_new_conversation(request_for("continue"))
+    assert dependencies.prepare.call_args.kwargs["include_rolling_summary"] is False
+    assert dependencies.commit.call_args.kwargs["include_rolling_summary"] is False
+    assert dependencies.build.call_args.kwargs["rolling"] is None
+    assert [turn.turn_index for turn in dependencies.build.call_args.kwargs["turns"]] == [1]

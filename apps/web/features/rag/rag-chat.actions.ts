@@ -41,6 +41,7 @@ export type RagAskActionPayload = {
   promptVariant?: RagPromptVariant;
   preferredLocale?: "vi" | "en";
   clientRequestId?: string;
+  conversationProtocol?: "legacy" | "v2";
 };
 
 export type RagAskActionResponse = {
@@ -68,6 +69,7 @@ type RagAskActionResult =
       code?: string;
       retrySameRequest: boolean;
       sessionId?: string;
+      outcome?: "failed" | "unknown";
     };
 
 export async function askRagQuestionAction(
@@ -122,6 +124,7 @@ export async function askRagQuestionAction(
         prompt_variant: payload.promptVariant ?? "grounded_rule",
         preferred_locale: payload.preferredLocale ?? "auto",
         client_request_id: payload.clientRequestId ?? null,
+        conversation_protocol: payload.conversationProtocol ?? null,
       },
     });
 
@@ -133,19 +136,23 @@ export async function askRagQuestionAction(
   } catch (error) {
     if (error instanceof AiApiError) {
       const sessionId = error.details?.session_id;
+      const outcome = error.details?.outcome;
 
       return {
         success: false,
         message: error.message,
         code: error.code,
         sessionId: typeof sessionId === "string" ? sessionId : undefined,
+        outcome: outcome === "failed" || outcome === "unknown" ? outcome : undefined,
         retrySameRequest:
+          outcome === "unknown" || (outcome !== "failed" &&
           error.code !== "RAG_GENERATION_FAILED" &&
+          error.code !== "RAG_INVALID_RESPONSE" &&
           (error.code === "RAG_TURN_IN_PROGRESS" ||
             error.code === "RAG_INVALID_LEASE" ||
             error.status === 408 ||
             error.status === 429 ||
-            error.status >= 500),
+            error.status >= 500)),
       };
     }
 
@@ -171,6 +178,13 @@ export type RagRestoredMessage = {
 
 export type RagConversationRestoreResponse = {
   enabled: boolean;
+  recovery_enabled?: boolean;
+  pending_operation?: {
+    operation: "ask";
+    client_request_id: string;
+    status: "processing" | "expired";
+    lease_expires_at: string;
+  } | null;
   new_chat_enabled?: boolean;
   handoff_enabled?: boolean;
   has_handoff?: boolean;
@@ -210,6 +224,51 @@ export async function restoreRagConversationAction(
       success: false,
       message: "Unable to restore conversation.",
     };
+  }
+}
+
+export type RagOperationStatus =
+  | "unknown" | "processing" | "completed" | "failed" | "expired" | "access_unavailable";
+
+export type RagOperationStatusResponse = {
+  operation: "ask" | "new_chat";
+  status: RagOperationStatus;
+  session_id?: string | null;
+  session_status?: "active" | "closed" | null;
+  turn_id?: string | null;
+  turn_index?: number | null;
+  completed_turn_count?: number | null;
+  source_session_id?: string | null;
+  target_session_id?: string | null;
+  lease_expires_at?: string | null;
+};
+
+const operationStatusSchema = z.object({
+  focusSessionId: z.uuid(), clientRequestId: z.uuid(),
+  operation: z.enum(["ask", "new_chat"]), recoverExpired: z.boolean().optional(),
+}).refine((input) => !input.recoverExpired || input.operation === "ask");
+
+export async function reconcileRagOperationAction(
+  input: z.input<typeof operationStatusSchema>,
+): Promise<ActionResult<RagOperationStatusResponse>> {
+  const parsed = operationStatusSchema.safeParse(input);
+  if (!parsed.success) return { success: false, message: "Invalid operation reference." };
+  const data = parsed.data;
+  try {
+    const { user } = await requireUser();
+    const rateLimit = await checkRateLimit({ key: `rag-recovery:${user.id}`, limit: 30, window: "1 m" });
+    if (!rateLimit.success) return { success: false, message: formatRateLimitMessage(rateLimit.reset) };
+    const result = await fetchAiApi<RagOperationStatusResponse>({
+      path: "/api/v1/rag/chat/operation-status",
+      body: {
+        user_id: user.id, focus_session_id: data.focusSessionId, client_request_id: data.clientRequestId,
+        operation: data.operation, recover_expired: data.recoverExpired ?? false,
+      },
+      retries: 0, timeoutMs: 10_000,
+    });
+    return { success: true, message: "Operation reconciled.", data: result };
+  } catch {
+    return { success: false, message: "Unable to reconcile operation." };
   }
 }
 

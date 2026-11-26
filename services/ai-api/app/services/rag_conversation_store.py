@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 
 from postgrest.exceptions import APIError
 
@@ -18,6 +18,7 @@ ERROR_STATUS = {
     "RAG_INVALID_RESPONSE": 500,
     "RAG_CONTEXT_UNAVAILABLE": 409,
     "RAG_SUMMARY_CONFLICT": 409,
+    "RAG_RECOVERY_DISABLED": 409,
     "RAG_NEW_CHAT_DISABLED": 409,
     "RAG_HANDOFF_DISABLED": 409,
     "RAG_HANDOFF_SOURCE_CHANGED": 409,
@@ -34,10 +35,12 @@ class RagConversationError(RuntimeError):
         status_code: int,
         *,
         session_id: str | None = None,
+        outcome: Literal["failed", "unknown"] | None = None,
     ) -> None:
         self.code = code
         self.status_code = status_code
         self.session_id = session_id
+        self.outcome = outcome
         super().__init__(code)
 
 
@@ -165,26 +168,45 @@ def _conversation_object(supabase: Any, name: str, params: dict[str, Any]) -> di
     return result
 
 
+def load_operation_status(
+    supabase: Any, *, user_id: str, focus_session_id: str, client_request_id: str, operation: str,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_get_operation_status", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id,
+        "p_client_request_id": client_request_id, "p_operation": operation,
+    })
+
+
+def recover_expired_turn(
+    supabase: Any, *, user_id: str, focus_session_id: str, client_request_id: str,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_recover_expired_turn", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id, "p_client_request_id": client_request_id,
+    })
+
+
 def prepare_new_chat(
     supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
-    client_request_id: str, request_payload: dict[str, Any],
+    client_request_id: str, request_payload: dict[str, Any], include_rolling_summary: bool,
 ) -> dict[str, Any]:
-    return _conversation_object(supabase, "rag_v2_prepare_new_chat", {
+    return _conversation_object(supabase, "rag_v2_prepare_new_chat_recovery", {
         "p_user_id": user_id, "p_focus_session_id": focus_session_id,
         "p_source_session_id": source_session_id, "p_client_request_id": client_request_id,
         "p_request": request_payload,
+        "p_include_rolling_summary": include_rolling_summary,
     })
 
 
 def commit_new_chat(
     supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
     client_request_id: str, request_payload: dict[str, Any],
-    expected_revision: dict[str, Any], handoff: dict[str, Any] | None,
+    expected_revision: dict[str, Any], handoff: dict[str, Any] | None, include_rolling_summary: bool,
 ) -> dict[str, Any]:
-    return _conversation_object(supabase, "rag_v2_commit_new_chat", {
+    return _conversation_object(supabase, "rag_v2_commit_new_chat_recovery", {
         "p_user_id": user_id, "p_focus_session_id": focus_session_id,
         "p_source_session_id": source_session_id, "p_client_request_id": client_request_id,
         "p_request": request_payload, "p_expected_revision": expected_revision, "p_handoff": handoff,
+        "p_include_rolling_summary": include_rolling_summary,
     })
 
 

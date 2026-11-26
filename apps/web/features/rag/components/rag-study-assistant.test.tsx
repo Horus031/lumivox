@@ -4,8 +4,9 @@ import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import vietnamese from "@/messages/vi.json";
+import { readRecoveryReference, writeRecoveryReference, type RagRecoveryReference } from "../lib/rag-recovery-journal";
 const mocks = vi.hoisted(() => ({
-  ask: vi.fn(), restore: vi.fn(), newChat: vi.fn(), history: vi.fn(), detail: vi.fn(),
+  ask: vi.fn(), restore: vi.fn(), newChat: vi.fn(), history: vi.fn(), detail: vi.fn(), status: vi.fn(),
 }));
 vi.mock("../rag-chat.actions", () => ({
   askRagQuestionAction: mocks.ask,
@@ -13,6 +14,7 @@ vi.mock("../rag-chat.actions", () => ({
   startNewRagConversationAction: mocks.newChat,
   listRagConversationsAction: mocks.history,
   restoreRagHistoryAction: mocks.detail,
+  reconcileRagOperationAction: mocks.status,
 }));
 import { RagStudyAssistant } from "./rag-study-assistant";
 
@@ -51,6 +53,8 @@ describe("Study workspace RAG chat", () => {
     mocks.newChat.mockReset();
     mocks.history.mockReset();
     mocks.detail.mockReset();
+    mocks.status.mockReset();
+    sessionStorage.clear();
     mocks.restore.mockReset().mockResolvedValue({
       success: true,
       data: { ...emptyConversation, enabled: false },
@@ -63,7 +67,10 @@ describe("Study workspace RAG chat", () => {
     await renderAssistant();
   });
 
-  async function renderAssistant(focusSessionId = "focus-session", locale: "en" | "vi" = "en") {
+  async function renderAssistant(
+    focusSessionId = "focus-session", locale: "en" | "vi" = "en",
+    props?: { accountScope?: string; defaultTopK?: number; defaultPromptVariant?: "grounded_rule" | "no_rule" },
+  ) {
     await act(async () =>
       root.render(
         <NextIntlClientProvider locale={locale} messages={locale === "vi" ? vietnamese : messages} timeZone="UTC">
@@ -72,6 +79,7 @@ describe("Study workspace RAG chat", () => {
             fillHeight
             focusSessionId={focusSessionId}
             documents={[{ id: "document", file_name: "Study notes.pdf", visibility: "private" }]}
+            {...props}
           />
         </NextIntlClientProvider>,
       ),
@@ -524,7 +532,7 @@ describe("Study workspace RAG chat", () => {
   });
 
   it("keeps the old conversation after a determined rejection", async () => {
-    mocks.restore.mockResolvedValueOnce(capableChat);
+    mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce(capableChat);
     mocks.newChat.mockResolvedValueOnce({
       success: false, code: "RAG_HANDOFF_SOURCE_CHANGED", retrySameRequest: false, message: "fixture",
     });
@@ -532,7 +540,7 @@ describe("Study workspace RAG chat", () => {
     const modal = await openNewChat();
     await act(async () => button(messages.rag.newChat, modal).click());
     expect(container.textContent).toContain("Previous answer");
-    expect(container.textContent).toContain(messages.rag.handoffSourceChanged);
+    expect(container.textContent).toContain(messages.rag.sessionChanged);
     expect(retryButton()).toBeUndefined();
   });
 
@@ -611,5 +619,140 @@ describe("Study workspace RAG chat", () => {
     const modal = await openNewChat();
     expect((modal.querySelectorAll('[role="radio"]')[1] as HTMLButtonElement).disabled).toBe(revoked);
     if (revoked) expect(container.textContent).toContain(messages.rag.historyAccessUnavailable);
+  });
+
+  const recoveryFocus = "f6100000-0000-4000-8000-000000000011";
+  const recoverySession = "f6100000-0000-4000-8000-000000000041";
+  const recoveryId = "f6110000-0000-4000-8000-000000000001";
+  const recoveredChat = {
+    ...capableChat,
+    data: { ...capableChat.data, session_id: recoverySession, recovery_enabled: true },
+  };
+  const accountScope = "opaque-account";
+  const recoveryProps = { accountScope };
+
+  function savedReference(operation: "ask" | "new_chat"): RagRecoveryReference {
+    return {
+      version: 1, protocol: "rag-v2", operation, clientRequestId: recoveryId,
+      focusSessionId: recoveryFocus, sessionId: recoverySession, createdAt: Date.now(),
+    };
+  }
+
+  it("writes only the v2 Ask reference before the network call", async () => {
+    mocks.restore.mockResolvedValueOnce(recoveredChat);
+    mocks.ask.mockImplementationOnce(async (request) => {
+      const stored = readRecoveryReference(accountScope, recoveryFocus);
+      expect(stored).toMatchObject({ operation: "ask", clientRequestId: request.clientRequestId });
+      expect(stored).not.toHaveProperty("question");
+      expect(stored).not.toHaveProperty("selectedDocumentIds");
+      return { success: false, message: "outcome unclear", code: "AI_API_TIMEOUT", retrySameRequest: true };
+    });
+    mocks.status.mockResolvedValueOnce({ success: true, data: { operation: "ask", status: "unknown" } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    enterQuestion("A private draft");
+    await submitQuestion();
+    expect(mocks.ask.mock.calls[0][0].conversationProtocol).toBe("v2");
+    expect(container.textContent).toContain(messages.rag.recoveryUnknown);
+    expect(readRecoveryReference(accountScope, recoveryFocus)).not.toBeNull();
+  });
+
+  it.each(["ask", "new_chat"] as const)("recovers a completed %s after refresh without resubmitting", async (operation) => {
+    writeRecoveryReference(accountScope, savedReference(operation));
+    mocks.restore.mockResolvedValueOnce(recoveredChat).mockResolvedValueOnce({
+      ...recoveredChat, data: { ...recoveredChat.data, messages: [
+        { id: "canonical", role: "assistant", content: "Persisted canonical answer" },
+      ] },
+    });
+    mocks.status.mockResolvedValueOnce({ success: true, data: { operation, status: "completed" } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    expect(container.textContent).toContain("Persisted canonical answer");
+    expect(mocks.ask).not.toHaveBeenCalled();
+    expect(mocks.newChat).not.toHaveBeenCalled();
+    expect(readRecoveryReference(accountScope, recoveryFocus)).toBeNull();
+  });
+
+  it("discovers a live Ask from restore without browser storage", async () => {
+    mocks.restore.mockResolvedValueOnce({ ...recoveredChat, data: { ...recoveredChat.data,
+      pending_operation: { operation: "ask", status: "processing", client_request_id: recoveryId,
+        lease_expires_at: new Date(Date.now() + 60_000).toISOString() },
+    } });
+    mocks.status.mockResolvedValueOnce({ success: true, data: { operation: "ask", status: "processing" } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    expect(container.textContent).toContain(messages.rag.requestStillProcessing);
+    expect(container.querySelector("textarea")?.disabled).toBe(true);
+    expect(mocks.ask).not.toHaveBeenCalled();
+  });
+
+  it("restores a stale session and preserves the draft without automatically asking again", async () => {
+    mocks.restore.mockResolvedValueOnce(recoveredChat).mockResolvedValueOnce(canonicalChat);
+    mocks.ask.mockResolvedValueOnce({ success: false, code: "RAG_SESSION_CLOSED", retrySameRequest: false });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    enterQuestion("Review this draft");
+    await submitQuestion();
+    expect(container.querySelector("textarea")?.value).toBe("Review this draft");
+    expect(container.textContent).toContain(messages.rag.sessionChanged);
+    expect(mocks.ask).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not duplicate a restored assistant or regress the count on an older replay", async () => {
+    mocks.restore.mockResolvedValueOnce({
+      ...recoveredChat, data: {
+        ...recoveredChat.data, recovery_enabled: false, completed_turn_count: 4, messages: [
+          { id: "existing", role: "assistant", turn_id: "old-turn", turn_index: 1, content: "Existing answer" },
+        ],
+      },
+    }).mockResolvedValueOnce({ success: false, message: "restore unavailable" });
+    mocks.ask.mockResolvedValueOnce({ success: true, data: {
+      session_id: recoverySession, turn_id: "old-turn", turn_index: 1,
+      completed_turn_count: 1, answer: "Existing answer", sources: [],
+    } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    enterQuestion("Synthetic replay");
+    await submitQuestion();
+    expect(container.textContent).toContain("4/24");
+    expect(container.textContent?.match(/Existing answer/g)).toHaveLength(1);
+    expect(container.textContent).not.toContain("Synthetic replay");
+  });
+
+  it("retries failed restore and preserves configured defaults for an empty conversation", async () => {
+    mocks.restore.mockResolvedValueOnce({ success: false, message: "initial timeout" })
+      .mockResolvedValueOnce({ success: true, data: emptyConversation });
+    mocks.ask.mockResolvedValueOnce({ success: false, message: "fixture", retrySameRequest: false });
+    await renderAssistant(recoveryFocus, "en", { defaultTopK: 7, defaultPromptVariant: "no_rule" });
+    await act(async () => button(messages.rag.retryRestore).click());
+    enterQuestion("First question");
+    await submitQuestion();
+    expect(mocks.ask.mock.calls[0][0]).toMatchObject({
+      topK: 7, promptVariant: "no_rule", conversationProtocol: "v2",
+    });
+    expect(container.textContent).not.toContain(messages.rag.restoreFailed);
+  });
+
+  it("reconciles a v2 request reference during flag rollback without legacy generation", async () => {
+    writeRecoveryReference(accountScope, savedReference("ask"));
+    const disabled = { success: true, data: { ...emptyConversation, enabled: false, recovery_enabled: true } };
+    mocks.restore.mockResolvedValueOnce(disabled).mockResolvedValueOnce(disabled);
+    mocks.status.mockResolvedValueOnce({ success: true, data: { operation: "ask", status: "completed" } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    expect(container.textContent).toContain(messages.rag.conversationReconciled);
+    expect(mocks.ask).not.toHaveBeenCalled();
+    expect(readRecoveryReference(accountScope, recoveryFocus)).toBeNull();
+  });
+
+  it("checks the original outcome when a v2 retry is rejected after rollback", async () => {
+    const disabled = { success: true, data: { ...emptyConversation, enabled: false, recovery_enabled: true } };
+    mocks.restore.mockResolvedValueOnce(recoveredChat).mockResolvedValueOnce(disabled);
+    mocks.ask.mockResolvedValueOnce({ success: false, message: "timeout", retrySameRequest: true })
+      .mockResolvedValueOnce({ success: false, code: "RAG_V2_DISABLED", retrySameRequest: false });
+    mocks.status.mockResolvedValueOnce({ success: true, data: { operation: "ask", status: "unknown" } })
+      .mockResolvedValueOnce({ success: true, data: { operation: "ask", status: "completed" } });
+    await renderAssistant(recoveryFocus, "en", recoveryProps);
+    enterQuestion("In-flight v2 question");
+    await submitQuestion();
+    await act(async () => retryButton()!.click());
+    expect(mocks.ask.mock.calls[1][0]).toEqual(mocks.ask.mock.calls[0][0]);
+    expect(mocks.status).toHaveBeenCalledTimes(2);
+    expect(container.textContent).toContain(messages.rag.conversationReconciled);
+    expect(readRecoveryReference(accountScope, recoveryFocus)).toBeNull();
   });
 });

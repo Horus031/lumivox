@@ -2086,6 +2086,9 @@ isOneToOne: false
 "rag_v2_commit_new_chat":
 { Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
                            },
+"rag_v2_commit_new_chat_recovery":
+{ Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
 "rag_v2_complete_turn":
 { Args: { "p_answer": string,"p_latency_ms": number,"p_lease_token": string,"p_model_name": string,"p_provider": string,"p_sources": Json,"p_turn_id": string,"p_usage": Json,"p_user_id": string }; Returns: Json
                            },
@@ -2098,6 +2101,9 @@ isOneToOne: false
 "rag_v2_get_history_detail":
 { Args: { "p_focus_session_id": string,"p_session_id": string,"p_user_id": string }; Returns: Json
                            },
+"rag_v2_get_operation_status":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_operation": string,"p_user_id": string }; Returns: Json
+                           },
 "rag_v2_get_summary_input":
 { Args: { "p_batch_size": number,"p_lease_token": string,"p_recent_turns": number,"p_session_id": string,"p_turn_id": string,"p_user_id": string }; Returns: Json
                            },
@@ -2106,6 +2112,12 @@ isOneToOne: false
                            },
 "rag_v2_prepare_new_chat":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_prepare_new_chat_recovery":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_recover_expired_turn":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "rag_v2_reserve_turn":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_session_id": string,"p_user_id": string }; Returns: Json
