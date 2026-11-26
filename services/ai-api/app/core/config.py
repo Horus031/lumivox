@@ -65,6 +65,13 @@ class Settings(BaseSettings):
         "openai/gpt-oss-120b"
     )
 
+    rag_rolling_summary_enabled: bool = False
+    rag_summary_start_turns: int = Field(default=6, ge=2, le=24)
+    rag_summary_update_interval: int = Field(default=2, ge=1, le=8)
+    rag_summary_max_batch_turns: int = Field(default=8, ge=1, le=24)
+    rag_summary_completion_tokens: int = Field(default=800, ge=256, le=2048)
+    rag_summary_request_timeout_seconds: float = Field(default=4.0, gt=0, le=10)
+    rag_summary_deadline_seconds: float = Field(default=6.0, gt=0, le=15)
     rag_summary_models: str = (
         "openai/gpt-oss-20b,"
         "openai/gpt-oss-120b"

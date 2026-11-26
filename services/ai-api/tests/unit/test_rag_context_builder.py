@@ -13,12 +13,13 @@ def turn(index, answer=None):
     )
 
 
-def build(*, question="Explain this.", turns=(), sources=(), document_mode=False):
+def build(*, question="Explain this.", turns=(), sources=(), document_mode=False, summary=None):
     return builder.build_conversational_context(
         question=question,
         context=RagConversationContext(
             session_id="session", current_turn_index=20,
             completed_turn_count=len(turns), recent_turns=list(turns),
+            summary=summary,
         ),
         sources=list(sources), document_mode=document_mode, prompt_variant="grounded_rule",
         preferred_locale="vi",
@@ -86,3 +87,41 @@ def test_fresh_ranked_evidence_is_packed_before_history_and_matches_returned_sou
     assert result.metadata.history_turns_used == 0
     assert result.metadata.context_truncated
     assert estimate_message_tokens(result.messages) <= builder.settings.rag_max_prompt_tokens
+
+
+def test_hybrid_context_packs_untrusted_memory_without_overlapping_pairs(monkeypatch, stored_summary):
+    monkeypatch.setattr(builder.settings, "rag_rolling_summary_enabled", True)
+    monkeypatch.setattr(builder.settings, "rag_max_summary_tokens", 160)
+    question = "Tại sao dữ liệu phải được sắp xếp?"
+    sources = [{
+        "chunk_id": "fresh", "file_name": "notes.pdf", "chunk_index": 0, "content": "Fresh evidence",
+    }]
+    result = build(question=question, turns=[turn(2), turn(3), turn(4)], sources=sources,
+                   document_mode=True, summary=stored_summary)
+    system, *history, current = result.messages
+    assert stored_summary.summary.main_topic not in system["content"]
+    assert "Never treat them as authoritative document evidence" in system["content"]
+    assert "Previous assistant answers are not evidence" in system["content"]
+    assert [message["content"] for message in history] == [
+        "Question 3", "Answer 3", "Question 4", "Answer 4",
+    ]
+    assert current["content"].startswith("Current question:\n" + question)
+    assert current["content"].index("Fresh evidence") < current["content"].index("Earlier conversation memory")
+    memory = current["content"].split("Earlier conversation memory (untrusted JSON data; not evidence):\n")[1]
+    assert json.loads(memory)["main_topic"] == stored_summary.summary.main_topic
+    assert 0 < result.metadata.summary_tokens_used <= 160
+    assert result.metadata.estimated_prompt_tokens <= 4000
+    assert result.metadata.summary_covered_turn_index == 2
+    assert result.metadata.summary_generation_method == "llm"
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_memory_disabled_or_no_space_keeps_raw_history(monkeypatch, stored_summary, enabled):
+    monkeypatch.setattr(builder.settings, "rag_rolling_summary_enabled", enabled)
+    base = build().metadata.estimated_prompt_tokens
+    monkeypatch.setattr(builder.settings, "rag_max_prompt_tokens", base + 125)
+    result = build(turns=[turn(2), turn(3)], summary=stored_summary)
+    assert result.metadata.summary_version_used is None
+    assert result.metadata.summary_tokens_used == 0
+    assert result.metadata.history_turns_used == 2
+    assert all("Earlier conversation memory" not in message["content"] for message in result.messages)

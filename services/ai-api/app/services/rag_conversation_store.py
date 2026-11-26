@@ -17,6 +17,7 @@ ERROR_STATUS = {
     "RAG_INVALID_LEASE": 409,
     "RAG_INVALID_RESPONSE": 500,
     "RAG_CONTEXT_UNAVAILABLE": 409,
+    "RAG_SUMMARY_CONFLICT": 409,
     "RAG_CONVERSATION_LIMIT_REACHED": 409,
 }
 
@@ -93,6 +94,62 @@ def load_conversation_context(
     )
     if not isinstance(result, dict):
         raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+    return result
+
+
+def load_summary_input(
+    supabase: Any,
+    *,
+    user_id: str,
+    session_id: str,
+    turn_id: str,
+    lease_token: str,
+    recent_turns: int,
+    batch_size: int,
+) -> dict[str, Any]:
+    result = _call_rpc(supabase, "rag_v2_get_summary_input", {
+        "p_user_id": user_id,
+        "p_session_id": session_id,
+        "p_turn_id": turn_id,
+        "p_lease_token": lease_token,
+        "p_recent_turns": recent_turns,
+        "p_batch_size": batch_size,
+    })
+    if not isinstance(result, dict):
+        raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+    return result
+
+
+def save_conversation_summary(
+    supabase: Any,
+    *,
+    user_id: str,
+    session_id: str,
+    turn_id: str,
+    lease_token: str,
+    expected_version: int,
+    covered_turn_index: int,
+    recent_turns: int,
+    summary: dict[str, Any],
+    token_count: int,
+    generation_method: str,
+    metadata: dict[str, Any],
+) -> dict[str, Any]:
+    result = _call_rpc(supabase, "rag_v2_save_summary", {
+        "p_user_id": user_id,
+        "p_session_id": session_id,
+        "p_turn_id": turn_id,
+        "p_lease_token": lease_token,
+        "p_expected_version": expected_version,
+        "p_covered_turn_index": covered_turn_index,
+        "p_recent_turns": recent_turns,
+        "p_summary": summary,
+        "p_token_count": token_count,
+        "p_generation_method": generation_method,
+        "p_metadata": metadata,
+    })
+    if not isinstance(result, dict):
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
     return result
 
 

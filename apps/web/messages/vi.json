@@ -1960,6 +1960,8 @@
     "conversationContext": "Ngữ cảnh hội thoại",
     "contextTurnsUsed": "Đang sử dụng {count} lượt hỏi đáp gần đây",
     "recentContextOnly": "Một phần nội dung trước đó nằm ngoài ngữ cảnh hiện tại.",
+    "compressedMemoryActive": "Đang sử dụng bộ nhớ hội thoại tóm tắt",
+    "compressedMemoryDescription": "Các lượt trao đổi trước được tóm tắt để giữ lại ngữ cảnh học tập quan trọng.",
     "conversationNearLimit": "Hội thoại này đang tiến gần đến giới hạn.",
     "conversationLimitReached": "Hội thoại này đã đạt giới hạn và không thể nhận thêm câu hỏi."
   },

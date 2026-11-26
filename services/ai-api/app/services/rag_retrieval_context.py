@@ -4,6 +4,7 @@ from typing import Sequence
 
 from app.core.rag_token_budget import count_text_tokens, truncate_text_to_tokens
 from app.schemas.rag_conversation_context import RagCompletedTurn, RagRetrievalStrategy
+from app.schemas.rag_conversation_summary import RagStoredSummary
 
 
 FOLLOW_UP_PATTERN = re.compile(
@@ -26,7 +27,9 @@ class RagRetrievalQuery:
 
 
 def build_retrieval_query(
-    question: str, recent_turns: Sequence[RagCompletedTurn]
+    question: str,
+    recent_turns: Sequence[RagCompletedTurn],
+    summary: RagStoredSummary | None = None,
 ) -> RagRetrievalQuery:
     if (
         not recent_turns
@@ -38,9 +41,15 @@ def build_retrieval_query(
     latest = max(recent_turns, key=lambda turn: turn.turn_index)
     topic = truncate_text_to_tokens(latest.question, 100)
     explanation = truncate_text_to_tokens(latest.answer, 140)
-    return RagRetrievalQuery(
+    text = (
         f"Current question:\n{question}\n"
         f"Recent conversation topic:\n{topic}\n"
-        f"Previous explanation context:\n{explanation}",
-        "history_augmented",
+        f"Previous explanation context:\n{explanation}"
     )
+    if summary:
+        terms = ", ".join(filter(None, [
+            summary.summary.main_topic, *summary.summary.covered_concepts[-3:],
+        ]))
+        if terms:
+            text += "\nEarlier study topic:\n" + truncate_text_to_tokens(terms, 100)
+    return RagRetrievalQuery(text, "history_augmented")

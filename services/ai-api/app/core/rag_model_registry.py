@@ -124,6 +124,18 @@ def validate_rag_configuration() -> None:
             "the generation deadline."
         )
 
+    if settings.rag_rolling_summary_enabled:
+        if not (
+            settings.rag_recent_turns
+            < settings.rag_summary_start_turns
+            < settings.rag_hard_turn_limit
+        ):
+            raise RagConfigurationError("RAG summary start must be between recent and hard turn limits.")
+        if settings.rag_summary_request_timeout_seconds > settings.rag_summary_deadline_seconds:
+            raise RagConfigurationError("RAG summary request timeout exceeds its deadline.")
+        if settings.rag_summary_max_batch_turns < settings.rag_summary_update_interval:
+            raise RagConfigurationError("RAG summary batch must cover its update interval.")
+
     for model in dict.fromkeys(
         chat_models + summary_models
     ):
@@ -151,6 +163,13 @@ def validate_rag_configuration() -> None:
 
     for model in summary_models:
         capability = get_rag_model_capability(model)
+
+        if settings.rag_rolling_summary_enabled and (
+            settings.rag_summary_completion_tokens > capability.max_completion_tokens
+            or settings.rag_max_prompt_tokens + settings.rag_summary_completion_tokens
+            > capability.context_window
+        ):
+            raise RagConfigurationError(f"RAG summary budget exceeds the limit of {model}.")
 
         if not capability.supports_structured_output:
             raise RagConfigurationError(

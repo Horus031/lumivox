@@ -3,6 +3,7 @@
 import {
   Brain,
   AlertCircle,
+  Layers,
 } from "lucide-react";
 
 import { useTranslations } from "next-intl";
@@ -25,6 +26,10 @@ export function RagContextIndicator({
   context,
 }: Props) {
   const t = useTranslations("rag");
+  const usesSummary = Boolean(
+    context?.summary_version_used &&
+    (context?.summary_tokens_used ?? 0) > 0,
+  );
 
   const reachedLimit =
     completedTurnCount >= hardTurnLimit;
@@ -64,6 +69,13 @@ export function RagContextIndicator({
             })}
           </p>
         )}
+
+      {usesSummary && (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Layers size={14} aria-hidden="true" className="shrink-0" />
+          <span>{t("compressedMemoryActive")}</span>
+        </div>
+      )}
 
       {context?.context_truncated && (
         <p className="text-xs text-muted-foreground">
