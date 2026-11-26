@@ -80,4 +80,76 @@ describe("Study workspace RAG chat", () => {
     expect(container.textContent).toContain("Here is your study answer.");
     expect(container.querySelector("textarea")).toBe(input);
   });
+
+  it("renders a Markdown table returned by the RAG API", async () => {
+    mocks.ask.mockResolvedValue({
+      success: true,
+      data: {
+        session_id: "chat-session",
+        answer: [
+          "## Algorithm comparison",
+          "",
+          "| Algorithm | Complexity |",
+          "| --- | --- |",
+          "| Binary Search | O(log n) |",
+          "| Linear Search | O(n) |",
+        ].join("\n"),
+        sources: [],
+        context_mode: "general",
+        top_k: 5,
+        prompt_variant: "grounded_rule",
+        latency_ms: 10,
+      },
+    });
+
+    const input =
+      container.querySelector("textarea")!;
+
+    act(() => {
+      Object.getOwnPropertyDescriptor(
+        HTMLTextAreaElement.prototype,
+        "value",
+      )!.set!.call(
+        input,
+        "Compare search algorithms",
+      );
+
+      input.dispatchEvent(
+        new Event("input", {
+          bubbles: true,
+        }),
+      );
+    });
+
+    await act(async () => {
+      container
+        .querySelector("form")!
+        .dispatchEvent(
+          new Event("submit", {
+            bubbles: true,
+            cancelable: true,
+          }),
+        );
+    });
+
+    expect(
+      container.querySelector("table"),
+    ).not.toBeNull();
+
+    expect(
+      container.querySelectorAll(
+        "tbody tr",
+      ),
+    ).toHaveLength(2);
+
+    expect(
+      container.querySelector(
+        ".rag-table-scroll",
+      ),
+    ).not.toBeNull();
+
+    expect(
+      container.querySelector("textarea"),
+    ).toBe(input);
+  });
 });

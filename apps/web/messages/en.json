@@ -1921,6 +1921,16 @@
     }
   },
   "rag": {
+    "copyCode": "Copy",
+    "codeCopied": "Copied",
+    "codeCopyFailed": "Copy failed",
+    "codeBlock": "Code block",
+    "plainText": "Plain text",
+    "markdownTable": "Scrollable table",
+    "blockedImage": "[Image not displayed]",
+    "blockedImageWithAlt": "[Image: {alt}]",
+    "taskCompleted": "Completed item",
+    "taskIncomplete": "Incomplete item",
     "title": "Study Assistant",
     "ragTitle": "RAG Study Assistant",
     "emptyPrompt": "How can I help you?",

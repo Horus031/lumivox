@@ -1916,6 +1916,16 @@
     }
   },
   "rag": {
+    "copyCode": "Sao chép",
+    "codeCopied": "Đã sao chép",
+    "codeCopyFailed": "Sao chép thất bại",
+    "codeBlock": "Khối mã",
+    "plainText": "Văn bản thuần",
+    "markdownTable": "Bảng có thể cuộn",
+    "blockedImage": "[Hình ảnh không được hiển thị]",
+    "blockedImageWithAlt": "[Hình ảnh: {alt}]",
+    "taskCompleted": "Mục đã hoàn thành",
+    "taskIncomplete": "Mục chưa hoàn thành",
     "title": "Trợ lý học tập",
     "ragTitle": "Trợ lý học tập RAG",
     "emptyPrompt": "Mình có thể giúp gì cho bạn?",

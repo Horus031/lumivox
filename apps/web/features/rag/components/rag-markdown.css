@@ -1,0 +1,291 @@
+.rag-markdown {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+
+.rag-markdown > * + * {
+  margin-block-start: 0.85rem;
+}
+
+.rag-markdown .rag-paragraph {
+  margin-block: 0.5rem;
+  line-height: 1.75;
+  white-space: normal;
+}
+
+/* Headings */
+
+.rag-markdown .rag-heading-primary {
+  margin-block: 1.25rem 0.5rem;
+  font-size: 1.125rem;
+  line-height: 1.5;
+  font-weight: 650;
+}
+
+.rag-markdown .rag-heading-secondary {
+  margin-block: 1rem 0.5rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+.rag-markdown .rag-heading-tertiary {
+  margin-block: 0.75rem 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  font-weight: 600;
+}
+
+/* Lists */
+
+.rag-markdown .rag-unordered-list {
+  list-style-type: disc;
+  padding-inline-start: 1.25rem;
+  margin-block: 0.5rem;
+}
+
+.rag-markdown .rag-ordered-list {
+  list-style-type: decimal;
+  padding-inline-start: 1.5rem;
+  margin-block: 0.5rem;
+}
+
+.rag-markdown li + li {
+  margin-block-start: 0.25rem;
+}
+
+.rag-markdown li > p {
+  margin-block: 0.25rem;
+}
+
+.rag-markdown li > ul,
+.rag-markdown li > ol {
+  margin-block: 0.25rem;
+}
+
+.rag-markdown ul ul {
+  list-style-type: circle;
+}
+
+.rag-markdown ul ul ul {
+  list-style-type: square;
+}
+
+.rag-markdown .contains-task-list {
+  list-style-type: none;
+}
+
+.rag-markdown .task-list-item {
+  list-style-type: none;
+}
+
+.rag-markdown .task-list-item input {
+  vertical-align: middle;
+}
+
+/* Quotes */
+
+.rag-markdown .rag-blockquote {
+  margin-block: 0.75rem;
+  padding: 0.5rem 0.875rem;
+  border-inline-start: 3px solid var(--primary);
+  color: var(--muted-foreground);
+  background: var(--muted);
+  border-radius: 0 0.375rem 0.375rem 0;
+}
+
+/* Tables */
+
+.rag-markdown .rag-table-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+}
+
+.rag-markdown .rag-table-scroll:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.rag-markdown .rag-table {
+  width: 100%;
+  min-width: max-content;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.rag-markdown .rag-table th,
+.rag-markdown .rag-table td {
+  padding: 0.625rem 0.875rem;
+  text-align: start;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border);
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+}
+
+.rag-markdown .rag-table th {
+  font-weight: 600;
+}
+
+.rag-markdown .rag-table th:last-child,
+.rag-markdown .rag-table td:last-child {
+  border-inline-end: 0;
+}
+
+.rag-markdown .rag-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+/* Inline code */
+
+.rag-markdown :not(pre) > code {
+  border-radius: 0.25rem;
+  background: var(--muted);
+  padding: 0.125rem 0.375rem;
+  font-size: 0.85em;
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+}
+
+/* Fenced code */
+
+.rag-markdown pre {
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre;
+  word-break: normal;
+  overflow-wrap: normal;
+  overscroll-behavior-x: contain;
+}
+
+.rag-markdown pre code {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+}
+
+/* Math */
+
+.rag-markdown .katex {
+  font-size: 1.05em;
+}
+
+.rag-markdown .katex-display {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-block: 0.625rem;
+  margin-block: 0.75rem;
+  overscroll-behavior-x: contain;
+}
+
+.rag-markdown .katex-display > .katex {
+  display: block;
+  width: max-content;
+  min-width: 100%;
+}
+
+.rag-markdown .katex-error {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Syntax highlighting — light theme */
+
+.rag-markdown .hljs-comment,
+.rag-markdown .hljs-quote {
+  color: #64748b;
+}
+
+.rag-markdown .hljs-keyword,
+.rag-markdown .hljs-selector-tag,
+.rag-markdown .hljs-literal,
+.rag-markdown .hljs-section {
+  color: #7e22ce;
+}
+
+.rag-markdown .hljs-string,
+.rag-markdown .hljs-regexp,
+.rag-markdown .hljs-addition {
+  color: #166534;
+}
+
+.rag-markdown .hljs-number,
+.rag-markdown .hljs-symbol,
+.rag-markdown .hljs-bullet {
+  color: #9a3412;
+}
+
+.rag-markdown .hljs-title,
+.rag-markdown .hljs-function,
+.rag-markdown .hljs-built_in,
+.rag-markdown .hljs-type {
+  color: #1d4ed8;
+}
+
+.rag-markdown .hljs-attr,
+.rag-markdown .hljs-variable,
+.rag-markdown .hljs-attribute {
+  color: #0e7490;
+}
+
+.rag-markdown .hljs-deletion {
+  color: #b91c1c;
+}
+
+/* Syntax highlighting — dark theme */
+
+.dark .rag-markdown .hljs-comment,
+.dark .rag-markdown .hljs-quote {
+  color: #94a3b8;
+}
+
+.dark .rag-markdown .hljs-keyword,
+.dark .rag-markdown .hljs-selector-tag,
+.dark .rag-markdown .hljs-literal,
+.dark .rag-markdown .hljs-section {
+  color: #d8b4fe;
+}
+
+.dark .rag-markdown .hljs-string,
+.dark .rag-markdown .hljs-regexp,
+.dark .rag-markdown .hljs-addition {
+  color: #86efac;
+}
+
+.dark .rag-markdown .hljs-number,
+.dark .rag-markdown .hljs-symbol,
+.dark .rag-markdown .hljs-bullet {
+  color: #fdba74;
+}
+
+.dark .rag-markdown .hljs-title,
+.dark .rag-markdown .hljs-function,
+.dark .rag-markdown .hljs-built_in,
+.dark .rag-markdown .hljs-type {
+  color: #93c5fd;
+}
+
+.dark .rag-markdown .hljs-attr,
+.dark .rag-markdown .hljs-variable,
+.dark .rag-markdown .hljs-attribute {
+  color: #67e8f9;
+}
+
+.dark .rag-markdown .hljs-deletion {
+  color: #fca5a5;
+}

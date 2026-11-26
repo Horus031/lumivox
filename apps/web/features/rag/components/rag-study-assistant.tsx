@@ -106,7 +106,7 @@ export function RagStudyAssistant({
 
     const cleanQuestion = question.trim();
 
-    if (!cleanQuestion) return;
+    if (!cleanQuestion || isPending) return;
 
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
@@ -161,11 +161,16 @@ export function RagStudyAssistant({
     });
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) => {
     if (e.nativeEvent.isComposing) return;
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
+
+      if (isPending) return;
+
       formRef.current?.requestSubmit();
     }
   };
@@ -197,7 +202,7 @@ export function RagStudyAssistant({
   return (
     <section
       className={cn(
-        "rounded-2xl h-fit border bg-background p-5 shadow-sm",
+        "min-w-0 max-w-full rounded-2xl h-fit border bg-background p-5 shadow-sm",
         fillHeight && "flex h-full min-h-0 flex-col overflow-hidden",
         className,
       )}
@@ -212,7 +217,7 @@ export function RagStudyAssistant({
         ref={chatContainerRef}
         onScroll={handleChatScroll}
         className={cn(
-          "mt-5 scroll-smooth h-96 space-y-4 rounded-2xl overflow-y-scroll",
+          "mt-5 min-w-0 max-w-full scroll-smooth h-96 space-y-4 rounded-2xl overflow-x-hidden overflow-y-scroll",
           compact && "mt-3 h-64 rounded-md",
           fillHeight && "h-auto min-h-0 flex-1 overflow-y-auto overscroll-contain",
         )}
@@ -242,7 +247,11 @@ export function RagStudyAssistant({
           messages.map((message) => (
             <article
               key={message.id}
-              className={`rounded-2xl p-4 ${message.role === "user" ? "bg-background border" : ""}`}
+              className={cn(
+                "min-w-0 max-w-full rounded-2xl p-4",
+                message.role === "user" &&
+                  "border bg-background",
+              )}
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 {message.role === "user" ? t("you") : t("assistant")}
@@ -251,7 +260,7 @@ export function RagStudyAssistant({
               {message.role === "assistant" ? (
                 <RagMarkdownMessage className="mt-2" content={message.content} />
               ) : (
-                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-foreground">
+                <p className="mt-2 whitespace-pre-wrap wrap-anywhere text-sm leading-6 text-foreground">
                   {message.content}
                 </p>
               )}
