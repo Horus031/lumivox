@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Literal
 from uuid import UUID
 
+from app.schemas.rag_conversation_context import RagContextMetadata
 
 
 class ProcessLearningDocumentRequest(BaseModel):
@@ -52,6 +53,9 @@ class RagAskResponse(BaseModel):
     turn_index: int | None = None
     completed_turn_count: int | None = None
     preferred_locale: str | None = None
+    context: RagContextMetadata | None = None
+    soft_turn_limit: int | None = None
+    hard_turn_limit: int | None = None
 
 
 class RagConversationRestoreRequest(BaseModel):
@@ -73,6 +77,8 @@ class RagConversationRestoreResponse(BaseModel):
     session_id: str | None = None
 
     completed_turn_count: int = 0
+    soft_turn_limit: int | None = None
+    hard_turn_limit: int | None = None
 
     selected_document_ids: list[str] = Field(
         default_factory=list

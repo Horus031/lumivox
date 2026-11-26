@@ -55,6 +55,7 @@ def test_flag_disabled_preserves_legacy_request_without_client_id(routes, monkey
     assert response.status_code == 200
     assert response.json()["answer"] == ANSWER["answer"]
     assert response.json()["completed_turn_count"] is None
+    assert response.json()["hard_turn_limit"] is None
     legacy.assert_called_once()
     conversation.assert_not_called()
 
@@ -74,6 +75,8 @@ def test_valid_request_id_reaches_v2_service(routes):
 
     assert response.status_code == 200
     assert response.json()["completed_turn_count"] == 1
+    assert response.json()["soft_turn_limit"] == settings.rag_soft_turn_limit
+    assert response.json()["hard_turn_limit"] == settings.rag_hard_turn_limit
     assert conversation.call_args.kwargs["client_request_id"] == REQUEST_ID
     legacy.assert_not_called()
 

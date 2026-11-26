@@ -16,6 +16,8 @@ ERROR_STATUS = {
     "RAG_CONTEXT_CHANGED": 409,
     "RAG_INVALID_LEASE": 409,
     "RAG_INVALID_RESPONSE": 500,
+    "RAG_CONTEXT_UNAVAILABLE": 409,
+    "RAG_CONVERSATION_LIMIT_REACHED": 409,
 }
 
 
@@ -69,22 +71,41 @@ def _call_rpc(
         ) from None
 
 
-def validate_scope(
+def load_conversation_context(
     supabase: Any,
     *,
     user_id: str,
-    focus_session_id: str,
-    selected_document_ids: list[str],
-) -> None:
-    _call_rpc(
+    session_id: str,
+    turn_id: str,
+    lease_token: str,
+    recent_turns: int,
+) -> dict[str, Any]:
+    result = _call_rpc(
         supabase,
-        "rag_v2_validate_scope",
+        "rag_v2_get_context",
         {
             "p_user_id": user_id,
-            "p_focus_session_id": focus_session_id,
-            "p_document_ids": selected_document_ids,
+            "p_session_id": session_id,
+            "p_turn_id": turn_id,
+            "p_lease_token": lease_token,
+            "p_recent_turns": recent_turns,
         },
     )
+    if not isinstance(result, dict):
+        raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+    return result
+
+
+def load_restore_snapshot(
+    supabase: Any, *, user_id: str, focus_session_id: str
+) -> dict[str, Any]:
+    result = _call_rpc(
+        supabase, "rag_v2_restore_context",
+        {"p_user_id": user_id, "p_focus_session_id": focus_session_id},
+    )
+    if not isinstance(result, dict):
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+    return result
 
 
 def reserve_turn(

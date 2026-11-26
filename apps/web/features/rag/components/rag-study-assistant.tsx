@@ -5,9 +5,11 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   askRagQuestionAction,
   restoreRagConversationAction,
+  type RagContextMetadata,
   type RagSourceChunk,
 } from "@/features/rag/rag-chat.actions";
 import { RagMarkdownMessage } from "@/features/rag/components/rag-markdown-message";
+import { RagContextIndicator } from "./rag-context-indicator";
 type RagDocumentOption = {
   id: string;
   file_name: string;
@@ -77,6 +79,8 @@ const REQUEST_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_SESSION_NOT_FOUND", "conversationUnavailable"],
   ["RAG_SESSION_CLOSED", "conversationUnavailable"],
   ["RAG_CONTEXT_CHANGED", "conversationUnavailable"],
+  ["RAG_CONTEXT_UNAVAILABLE", "conversationUnavailable"],
+  ["RAG_CONVERSATION_LIMIT_REACHED", "conversationLimitReached"],
 ]);
 
 type RagStudyAssistantProps = {
@@ -90,6 +94,8 @@ type RagStudyAssistantProps = {
 };
 
 const AUTO_SCROLL_THRESHOLD_PX = 100;
+const DEFAULT_SOFT_TURN_LIMIT = 18;
+const DEFAULT_HARD_TURN_LIMIT = 24;
 
 function isNearChatBottom(container: HTMLDivElement) {
   return (
@@ -124,6 +130,10 @@ export function RagStudyAssistant({
   const [conversationV2, setConversationV2] = useState(false);
 
   const [completedTurnCount, setCompletedTurnCount] = useState(0);
+  const [contextMetadata, setContextMetadata] = useState<RagContextMetadata | null>(null);
+  const [softTurnLimit, setSoftTurnLimit] = useState(DEFAULT_SOFT_TURN_LIMIT);
+  const [hardTurnLimit, setHardTurnLimit] = useState(DEFAULT_HARD_TURN_LIMIT);
+  const [serverTurnLimitReached, setServerTurnLimitReached] = useState(false);
   const [conversationError, setConversationError] = useState<string | null>(null);
   const [pendingRequest, setPendingRequest] = useState<PendingRagRequest | null>(null);
 
@@ -138,6 +148,8 @@ export function RagStudyAssistant({
 
   const canAsk = useMemo(() => question.trim().length > 0, [question]);
   const requestDisabled = isPending || isRestoring || restoreFailed;
+  const isConversationLimitReached =
+    serverTurnLimitReached || (conversationV2 && completedTurnCount >= hardTurnLimit);
   const conversationScopeLocked = conversationV2 && Boolean(sessionId);
   const documentSelectionDisabled =
     requestDisabled || conversationScopeLocked || pendingRequest !== null;
@@ -159,7 +171,10 @@ export function RagStudyAssistant({
 
     const cleanQuestion = question.trim();
 
-    if (!cleanQuestion || pendingRequest || requestDisabled || requestInFlightRef.current) return;
+    if (
+      !cleanQuestion || pendingRequest || requestDisabled || isConversationLimitReached
+      || requestInFlightRef.current
+    ) return;
 
     const request: PendingRagRequest = {
       clientRequestId: crypto.randomUUID(),
@@ -195,6 +210,9 @@ export function RagStudyAssistant({
         if (!result.success) {
           const errorKey = result.code ? REQUEST_ERROR_MESSAGES.get(result.code) : undefined;
           setConversationError(errorKey ? t(errorKey) : result.message);
+          if (result.code === "RAG_CONVERSATION_LIMIT_REACHED") {
+            setServerTurnLimitReached(true);
+          }
 
           if (!result.retrySameRequest) {
             if (result.sessionId) {
@@ -220,6 +238,9 @@ export function RagStudyAssistant({
 
         setPendingRequest(null);
         setSessionId(data.session_id);
+        setContextMetadata(data.context ?? null);
+        if (typeof data.soft_turn_limit === "number") setSoftTurnLimit(data.soft_turn_limit);
+        if (typeof data.hard_turn_limit === "number") setHardTurnLimit(data.hard_turn_limit);
 
         if (typeof data.completed_turn_count === "number") {
           setCompletedTurnCount(data.completed_turn_count);
@@ -292,6 +313,10 @@ export function RagStudyAssistant({
     setMessages([]);
     setSelectedDocumentIds([]);
     setCompletedTurnCount(0);
+    setContextMetadata(null);
+    setSoftTurnLimit(DEFAULT_SOFT_TURN_LIMIT);
+    setHardTurnLimit(DEFAULT_HARD_TURN_LIMIT);
+    setServerTurnLimitReached(false);
     setConversationV2(false);
     setConversationError(null);
     setPendingRequest(null);
@@ -330,6 +355,8 @@ export function RagStudyAssistant({
         setSessionId(data.session_id);
 
         setCompletedTurnCount(data.completed_turn_count);
+        if (typeof data.soft_turn_limit === "number") setSoftTurnLimit(data.soft_turn_limit);
+        if (typeof data.hard_turn_limit === "number") setHardTurnLimit(data.hard_turn_limit);
 
         setSelectedDocumentIds(data.selected_document_ids);
 
@@ -380,9 +407,12 @@ export function RagStudyAssistant({
           {t("restoringConversation")}
         </p>
       ) : conversationScopeLocked && (
-        <p className="mt-2 text-xs text-muted-foreground">
-          {t("conversationTurns", { count: completedTurnCount })}
-        </p>
+        <RagContextIndicator
+          completedTurnCount={completedTurnCount}
+          softTurnLimit={softTurnLimit}
+          hardTurnLimit={hardTurnLimit}
+          context={contextMetadata}
+        />
       )}
 
       <div
@@ -609,7 +639,7 @@ export function RagStudyAssistant({
 
           <Button
             type="submit"
-            disabled={!canAsk || requestDisabled || pendingRequest !== null}
+            disabled={!canAsk || requestDisabled || pendingRequest !== null || isConversationLimitReached}
             className={cn(
               "bg-primary text-foreground px-5 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
               compact &&

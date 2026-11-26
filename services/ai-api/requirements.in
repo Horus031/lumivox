@@ -18,3 +18,4 @@ matplotlib
 contourpy<1.4
 seaborn
 pypdf
+tiktoken>=0.11.0,<1

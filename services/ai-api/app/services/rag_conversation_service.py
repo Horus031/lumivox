@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import logging
 import time
+from dataclasses import asdict
 
 from typing import Literal
 
@@ -10,17 +11,19 @@ from app.clients.supabase_client import (
     get_supabase_client,
 )
 
-from app.services.rag_chat_service import (
-    _normalize_top_k,
-    generate_rag_answer,
-)
+from app.core.config import settings
+from app.core.rag_model_registry import validate_rag_configuration
+from app.schemas.rag_conversation_context import RagConversationContext
+from app.services.rag_chat_service import _normalize_top_k
+from app.services.rag_conversational_generation import generate_conversational_answer
 
 from app.services.rag_conversation_store import (
     RagConversationError,
     reserve_turn,
     complete_turn,
     fail_turn,
-    validate_scope,
+    load_conversation_context,
+    load_restore_snapshot,
 )
 
 
@@ -53,6 +56,7 @@ def ask_rag_conversation_question(
             400,
         )
 
+    validate_rag_configuration()
     document_ids = sorted(
         set(selected_document_ids)
     )
@@ -104,26 +108,40 @@ def ask_rag_conversation_question(
 
     turn_id = reservation["turn_id"]
     lease_token = reservation["lease_token"]
+    reserved_session_id = reservation["session_id"]
 
     try:
-        answer, sources, generation = (
-            generate_rag_answer(
-                supabase=supabase,
+        context = RagConversationContext.model_validate(
+            load_conversation_context(
+                supabase,
                 user_id=user_id,
-                question=question,
-                selected_document_ids=document_ids,
-                top_k=top_k,
-                prompt_variant=prompt_variant,
-                preferred_locale=preferred_locale,
+                session_id=reserved_session_id,
+                turn_id=turn_id,
+                lease_token=lease_token,
+                recent_turns=settings.rag_recent_turns,
+            ),
+        )
+        if context.completed_turn_count >= settings.rag_hard_turn_limit:
+            raise RagConversationError(
+                "RAG_CONVERSATION_LIMIT_REACHED", 409, session_id=reserved_session_id,
             )
+        generated = generate_conversational_answer(
+            supabase=supabase,
+            user_id=user_id,
+            question=question,
+            selected_document_ids=document_ids,
+            top_k=top_k,
+            prompt_variant=prompt_variant,
+            preferred_locale=preferred_locale,
+            context=context,
         )
 
-        if not answer.strip():
+        if not generated.answer.strip():
             raise RuntimeError(
                 "Empty generated answer"
             )
 
-    except Exception:
+    except Exception as error:
         logger.warning(
             "RAG generation failed for turn %s",
             turn_id,
@@ -145,6 +163,8 @@ def ask_rag_conversation_question(
             )
 
         if marked_failed:
+            if isinstance(error, RagConversationError):
+                raise error from None
             raise RagConversationError(
                 "RAG_GENERATION_FAILED",
                 502,
@@ -166,13 +186,16 @@ def ask_rag_conversation_question(
     # if completion has an uncertain outcome.
     # A network timeout may occur after DB commit.
 
+    generation = generated.generation
+    usage = asdict(generation.usage) if generation is not None else {}
+    usage["context"] = generated.context.model_dump()
     return complete_turn(
         supabase,
         user_id=user_id,
         turn_id=turn_id,
         lease_token=lease_token,
-        answer=answer,
-        sources=sources,
+        answer=generated.answer,
+        sources=generated.sources,
         provider=(
             generation.provider
             if generation else None
@@ -182,7 +205,7 @@ def ask_rag_conversation_question(
             if generation else None
         ),
         latency_ms=latency_ms,
-        usage=None,
+        usage=usage,
     )
 
 
@@ -191,118 +214,8 @@ def restore_rag_conversation(
     user_id: str,
     focus_session_id: str,
 ) -> dict:
-    supabase = get_supabase_client()
-
-    scope = (
-        supabase.table("focus_sessions")
-        .select("id")
-        .eq("id", focus_session_id)
-        .eq("user_id", user_id)
-        .limit(1)
-        .execute()
-    )
-
-    if not scope.data:
-        raise RagConversationError(
-            "RAG_SESSION_NOT_FOUND",
-            404,
-        )
-
-    sessions = (
-        supabase.table("rag_chat_sessions")
-        .select(
-            "id,completed_turn_count,"
-            "selected_document_ids,top_k,"
-            "prompt_variant"
-        )
-        .eq("user_id", user_id)
-        .eq("focus_session_id", focus_session_id)
-        .eq("conversation_version", 2)
-        .eq("status", "active")
-        .limit(1)
-        .execute()
-    ).data or []
-
-    if not sessions:
-        return {"enabled": True}
-
-    session = sessions[0]
-    session_id = session["id"]
-
-    document_ids = (
-        session["selected_document_ids"] or []
-    )
-
-    # Revalidate access before returning
-    # document-derived conversation content.
-    validate_scope(
-        supabase,
+    return load_restore_snapshot(
+        get_supabase_client(),
         user_id=user_id,
         focus_session_id=focus_session_id,
-        selected_document_ids=document_ids,
     )
-
-    turns = (
-        supabase.table("rag_chat_turns")
-        .select("id,turn_index")
-        .eq("user_id", user_id)
-        .eq("session_id", session_id)
-        .eq("status", "completed")
-        .order("turn_index", desc=True)
-        .limit(100)
-        .execute()
-    ).data or []
-
-    if not turns:
-        return {
-            "enabled": True,
-            "session_id": session_id,
-            "completed_turn_count": 0,
-            "selected_document_ids": document_ids,
-            "top_k": session["top_k"],
-            "prompt_variant": session["prompt_variant"],
-            "messages": [],
-        }
-
-    turn_indexes = {
-        turn["id"]: turn["turn_index"]
-        for turn in turns
-    }
-
-    rows = (
-        supabase.table("rag_chat_messages")
-        .select("id,turn_id,role,content")
-        .eq("user_id", user_id)
-        .eq("session_id", session_id)
-        .in_("turn_id", list(turn_indexes))
-        .limit(200)
-        .execute()
-    ).data or []
-
-    messages = [
-        {
-            **row,
-            "turn_index": turn_indexes[row["turn_id"]],
-        }
-        for row in rows
-        if row["role"] in ("user", "assistant")
-    ]
-
-    messages.sort(
-        key=lambda row: (
-            row["turn_index"],
-            0 if row["role"] == "user" else 1,
-        )
-    )
-
-    return {
-        "enabled": True,
-        "session_id": session_id,
-        "completed_turn_count": session[
-            "completed_turn_count"
-        ],
-        "selected_document_ids": document_ids,
-        "top_k": session["top_k"],
-        "prompt_variant": session["prompt_variant"],
-        "messages": messages,
-    }

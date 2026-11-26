@@ -684,14 +684,14 @@ isOneToOne: false
                   ]
                 },"rag_chat_turns": {
                   Row: {
-                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"created_at": string,"error_code": string | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"session_id": string,"status": string,"total_tokens": number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"context_truncated": boolean,"created_at": string,"error_code": string | null,"estimated_prompt_tokens": number | null,"generation_attempts": number | null,"history_turns_used": number | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"retrieval_strategy": string | null,"retrieved_chunks_used": number | null,"session_id": string,"status": string,"total_tokens": number | null,"turn_index": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"session_id": string,"status"?: string,"total_tokens"?: number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id": string,"status"?: string,"total_tokens"?: number | null,"turn_index": number,"user_id": string
                   }
                   Update: {
-                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"session_id"?: string,"status"?: string,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
+                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id"?: string,"status"?: string,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -2025,8 +2025,14 @@ isOneToOne: false
 "rag_v2_fail_turn":
 { Args: { "p_error_code": string,"p_lease_token": string,"p_turn_id": string,"p_user_id": string }; Returns: boolean
                            },
+"rag_v2_get_context":
+{ Args: { "p_lease_token": string,"p_recent_turns": number,"p_session_id": string,"p_turn_id": string,"p_user_id": string }; Returns: Json
+                           },
 "rag_v2_reserve_turn":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_restore_context":
+{ Args: { "p_focus_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "rag_v2_validate_scope":
 { Args: { "p_document_ids": (string)[],"p_focus_session_id": string,"p_user_id": string }; Returns: undefined

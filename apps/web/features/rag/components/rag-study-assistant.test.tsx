@@ -300,7 +300,7 @@ describe("Study workspace RAG chat", () => {
     expect(articles).toHaveLength(2);
     expect(articles[0].textContent).toContain("Stored question");
     expect(articles[1].querySelector("strong")?.textContent).toBe("Stored answer");
-    expect(container.textContent).toContain("1 completed turn");
+    expect(container.querySelector('[aria-label="1 completed turn"]')?.textContent).toMatch(/1\s*\/\s*24/);
     const checkbox = openDocumentSelector();
     expect(document.body.textContent).toContain(messages.rag.conversationScopeLocked);
     expect(checkbox.checked).toBe(true);
@@ -371,5 +371,53 @@ describe("Study workspace RAG chat", () => {
     expect(container.textContent).toContain("New answer");
     expect(container.textContent).not.toContain("Old answer");
     expect(container.textContent).not.toContain("Stale answer");
+  });
+
+  it("shows the configured limits and context, then blocks a new turn at the hard limit", async () => {
+    const restored = restoredConversation("Earlier question", "Earlier answer");
+    mocks.restore.mockResolvedValueOnce({
+      ...restored,
+      data: { ...restored.data, completed_turn_count: 5, soft_turn_limit: 5, hard_turn_limit: 6 },
+    });
+    await renderAssistant("limited-focus");
+    expect(container.textContent).toContain(messages.rag.conversationNearLimit);
+
+    mocks.ask.mockRejectedValueOnce(new Error("Final response disconnected")).mockResolvedValueOnce({
+      success: true,
+      data: {
+        session_id: "restored-session", answer: "Final answer", completed_turn_count: 6,
+        soft_turn_limit: 5, hard_turn_limit: 6,
+        context: {
+          estimated_prompt_tokens: 900, history_turns_used: 2, retrieved_chunks_used: 1,
+          context_truncated: true, retrieval_strategy: "history_augmented", generation_attempts: 1,
+        },
+      },
+    });
+    enterQuestion("Final question");
+    await submitQuestion();
+    await act(async () => retryButton()!.click());
+    expect(mocks.ask.mock.calls[1][0]).toEqual(mocks.ask.mock.calls[0][0]);
+
+    expect(container.textContent).toContain("Using 2 recent turns");
+    expect(container.textContent).toContain(messages.rag.recentContextOnly);
+    expect(container.textContent).toContain(messages.rag.conversationLimitReached);
+    expect(container.textContent).not.toContain("900");
+    enterQuestion("Blocked question");
+    await submitQuestion();
+    expect(mocks.ask).toHaveBeenCalledTimes(2);
+    expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+  });
+
+  it("blocks further submit after the server reports a concurrent turn limit", async () => {
+    mocks.ask.mockResolvedValueOnce({
+      success: false, code: "RAG_CONVERSATION_LIMIT_REACHED", message: "Limit reached",
+      retrySameRequest: false,
+    });
+    enterQuestion("New question");
+    await submitQuestion();
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(messages.rag.conversationLimitReached);
+    await submitQuestion();
+    expect(mocks.ask).toHaveBeenCalledTimes(1);
+    expect(retryButton()).toBeUndefined();
   });
 });

@@ -24,6 +24,9 @@ def reserve(monkeypatch):
     monkeypatch.setattr(service, "get_supabase_client", Mock())
     reserve_turn = Mock()
     monkeypatch.setattr(service, "reserve_turn", reserve_turn)
+    monkeypatch.setattr(service, "load_conversation_context", Mock(return_value={
+        "session_id": "session", "current_turn_index": 1, "completed_turn_count": 0,
+    }))
     return reserve_turn
 
 
@@ -31,9 +34,10 @@ def test_completed_turn_replays_persisted_response(reserve, monkeypatch):
     response = {"answer": "Stored answer", "completed_turn_count": 1}
     reserve.return_value = {"outcome": "completed", "response": response}
     generate = Mock()
-    monkeypatch.setattr(service, "generate_rag_answer", generate)
+    monkeypatch.setattr(service, "generate_conversational_answer", generate)
 
     assert ask() == response
+    service.load_conversation_context.assert_not_called()
     generate.assert_not_called()
 
 
@@ -47,7 +51,7 @@ def test_completed_turn_replays_persisted_response(reserve, monkeypatch):
 def test_existing_turn_reports_its_state(reserve, monkeypatch, outcome, code, session_id):
     reserve.return_value = {"outcome": outcome, "session_id": "session"}
     generate = Mock()
-    monkeypatch.setattr(service, "generate_rag_answer", generate)
+    monkeypatch.setattr(service, "generate_conversational_answer", generate)
 
     with pytest.raises(RagConversationError) as error:
         ask()
@@ -75,7 +79,7 @@ def test_generation_failure_requires_persistence_confirmation(
         "lease_token": "lease",
     }
     monkeypatch.setattr(
-        service, "generate_rag_answer", Mock(side_effect=RuntimeError("Provider failed"))
+        service, "generate_conversational_answer", Mock(side_effect=RuntimeError("Provider failed"))
     )
     mark_failed = Mock(return_value=registered_failure)
     if registered_failure is None:

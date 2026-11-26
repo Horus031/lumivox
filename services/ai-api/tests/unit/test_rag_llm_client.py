@@ -173,6 +173,37 @@ def test_generation_preserves_message_roles(
     assert "reasoning_format" not in call
 
 
+@pytest.mark.parametrize("roles", [
+    ["user"], ["system", "assistant", "user"], ["system", "user", "system", "user"],
+])
+def test_rejects_invalid_multiturn_sequences_before_provider(monkeypatch, roles):
+    client = install_fake(monkeypatch, [])
+    with pytest.raises(rag.RagLLMError) as error:
+        rag.generate_rag_chat([{"role": role, "content": "Study question"} for role in roles])
+    assert error.value.code == "invalid_request"
+    assert client.calls == []
+
+
+def test_rejects_oversized_prompt_before_provider(monkeypatch, messages):
+    client = install_fake(monkeypatch, [])
+    messages[-1]["content"] = "example " * 5000
+    with pytest.raises(rag.RagLLMError) as error:
+        rag.generate_rag_chat(messages)
+    assert error.value.code == "context_length_exceeded"
+    assert client.calls == []
+
+
+def test_reports_provider_prompt_overrun_without_logging_content(monkeypatch, messages, caplog):
+    response = make_response()
+    actual = rag.settings.rag_max_prompt_tokens + 1
+    response.usage.prompt_tokens = actual
+    install_fake(monkeypatch, [response])
+    result = rag.generate_rag_chat(messages)
+    assert result.usage.prompt_tokens == actual
+    assert f"actual={actual} budget={actual - 1}" in caplog.text
+    assert messages[-1]["content"] not in caplog.text
+
+
 def test_generation_returns_token_usage(
     monkeypatch,
     messages,

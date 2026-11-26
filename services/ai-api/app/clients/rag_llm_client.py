@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from dataclasses import dataclass
 from functools import lru_cache
@@ -19,6 +20,10 @@ from app.core.rag_model_registry import (
     parse_rag_model_chain,
     validate_rag_configuration,
 )
+from app.core.rag_token_budget import RagTokenBudgetError, assert_prompt_budget
+
+
+logger = logging.getLogger(__name__)
 
 
 class RagChatMessage(TypedDict):
@@ -99,7 +104,7 @@ def _get_rag_groq_client() -> Groq:
 def _validate_messages(
     messages: list[RagChatMessage],
 ) -> None:
-    if not messages:
+    if len(messages) < 2 or messages[0]["role"] != "system":
         raise RagLLMError(
             code="invalid_request",
             retryable=False,
@@ -111,12 +116,9 @@ def _validate_messages(
             retryable=False,
         )
 
-    for message in messages:
-        if message["role"] not in {
-            "system",
-            "user",
-            "assistant",
-        }:
+    for index, message in enumerate(messages):
+        expected_role = "system" if index == 0 else "user" if index % 2 else "assistant"
+        if message["role"] != expected_role:
             raise RagLLMError(
                 code="invalid_request",
                 retryable=False,
@@ -203,6 +205,10 @@ def generate_rag_chat(
 ) -> RagChatGeneration:
     validate_rag_configuration()
     _validate_messages(messages)
+    try:
+        assert_prompt_budget(messages)
+    except RagTokenBudgetError:
+        raise RagLLMError(code="context_length_exceeded", retryable=False) from None
 
     client = _get_rag_groq_client()
 
@@ -280,6 +286,17 @@ def generate_rag_chat(
                     )
                 )
 
+                usage = _read_token_usage(response)
+                if (
+                    usage.prompt_tokens is not None
+                    and usage.prompt_tokens > settings.rag_max_prompt_tokens
+                ):
+                    logger.warning(
+                        "RAG provider prompt tokens exceeded budget: actual=%s budget=%s",
+                        usage.prompt_tokens,
+                        settings.rag_max_prompt_tokens,
+                    )
+
                 if time.monotonic() >= deadline:
                     raise RagLLMError(
                         code="timeout",
@@ -325,7 +342,7 @@ def generate_rag_chat(
                         ) * 1000
                     ),
                     attempts=attempts,
-                    usage=_read_token_usage(response),
+                    usage=usage,
                     finish_reason=finish_reason,
                 )
 
