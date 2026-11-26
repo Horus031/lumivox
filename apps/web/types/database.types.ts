@@ -592,6 +592,44 @@ isOneToOne: true
                   Relationships: [
                     
                   ]
+                },"rag_chat_handoffs": {
+                  Row: {
+                    "completion_tokens": number | null,"created_at": string,"generation_method": string,"id": string,"latency_ms": number | null,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"schema_version": number,"selected_document_ids": (string)[],"source_completed_turn_count": number,"source_last_completed_turn_index": number | null,"source_session_id": string,"source_summary_version": number | null,"summary": NonNullable<Json>,"target_session_id": string,"token_count": number,"total_tokens": number | null,"transition_id": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "completion_tokens"?: number | null,"created_at"?: string,"generation_method": string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"schema_version"?: number,"selected_document_ids"?: (string)[],"source_completed_turn_count": number,"source_last_completed_turn_index"?: number | null,"source_session_id": string,"source_summary_version"?: number | null,"summary": NonNullable<Json>,"target_session_id": string,"token_count": number,"total_tokens"?: number | null,"transition_id": string,"user_id": string
+                  }
+                  Update: {
+                    "completion_tokens"?: number | null,"created_at"?: string,"generation_method"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"schema_version"?: number,"selected_document_ids"?: (string)[],"source_completed_turn_count"?: number,"source_last_completed_turn_index"?: number | null,"source_session_id"?: string,"source_summary_version"?: number | null,"summary"?: NonNullable<Json>,"target_session_id"?: string,"token_count"?: number,"total_tokens"?: number | null,"transition_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_chat_handoffs_transition_id_fkey"
+      columns: ["transition_id"]
+isOneToOne: true
+      referencedRelation: "rag_chat_transitions"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rag_handoff_source_owner_fk"
+      columns: ["source_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "rag_handoff_target_owner_fk"
+      columns: ["target_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "rag_handoff_transition_identity_fk"
+      columns: ["transition_id","user_id","source_session_id","target_session_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_transitions"
+      referencedColumns: ["id","user_id","source_session_id","target_session_id"]
+    }
+                  ]
                 },"rag_chat_messages": {
                   Row: {
                     "content": string,"content_locale": string | null,"context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"id": string,"latency_ms": number | null,"model_name": string | null,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids": (string)[],"retrieved_context": NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids": (string)[],"session_id": string,"top_k": number | null,"turn_id": string | null,"user_id": string
@@ -682,16 +720,42 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
-                },"rag_chat_turns": {
+                },"rag_chat_transitions": {
                   Row: {
-                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"context_truncated": boolean,"created_at": string,"error_code": string | null,"estimated_prompt_tokens": number | null,"generation_attempts": number | null,"history_turns_used": number | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"retrieval_strategy": string | null,"retrieved_chunks_used": number | null,"session_id": string,"status": string,"summary_covered_turn_index": number | null,"summary_generation_method": string | null,"summary_tokens_used": number | null,"summary_version_used": number | null,"total_tokens": number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"created_at": string,"id": string,"mode": string,"request_payload": NonNullable<Json>,"source_session_id": string,"target_session_id": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id": string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"created_at"?: string,"id"?: string,"mode": string,"request_payload": NonNullable<Json>,"source_session_id": string,"target_session_id": string,"user_id": string
                   }
                   Update: {
-                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id"?: string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
+                    "client_request_id"?: string,"created_at"?: string,"id"?: string,"mode"?: string,"request_payload"?: NonNullable<Json>,"source_session_id"?: string,"target_session_id"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_transition_source_owner_fk"
+      columns: ["source_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "rag_transition_target_owner_fk"
+      columns: ["target_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"rag_chat_turns": {
+                  Row: {
+                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"context_truncated": boolean,"created_at": string,"error_code": string | null,"estimated_prompt_tokens": number | null,"generation_attempts": number | null,"handoff_id_used": string | null,"handoff_tokens_used": number | null,"handoff_used": boolean,"history_turns_used": number | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"retrieval_strategy": string | null,"retrieved_chunks_used": number | null,"session_id": string,"status": string,"summary_covered_turn_index": number | null,"summary_generation_method": string | null,"summary_tokens_used": number | null,"summary_version_used": number | null,"total_tokens": number | null,"turn_index": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id": string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index": number,"user_id": string
+                  }
+                  Update: {
+                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id"?: string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -2019,6 +2083,9 @@ isOneToOne: false
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
             }[]
                            },
+"rag_v2_commit_new_chat":
+{ Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
 "rag_v2_complete_turn":
 { Args: { "p_answer": string,"p_latency_ms": number,"p_lease_token": string,"p_model_name": string,"p_provider": string,"p_sources": Json,"p_turn_id": string,"p_usage": Json,"p_user_id": string }; Returns: Json
                            },
@@ -2028,8 +2095,17 @@ isOneToOne: false
 "rag_v2_get_context":
 { Args: { "p_lease_token": string,"p_recent_turns": number,"p_session_id": string,"p_turn_id": string,"p_user_id": string }; Returns: Json
                            },
+"rag_v2_get_history_detail":
+{ Args: { "p_focus_session_id": string,"p_session_id": string,"p_user_id": string }; Returns: Json
+                           },
 "rag_v2_get_summary_input":
 { Args: { "p_batch_size": number,"p_lease_token": string,"p_recent_turns": number,"p_session_id": string,"p_turn_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_list_conversations":
+{ Args: { "p_cursor_created_at"?: string,"p_cursor_id"?: string,"p_focus_session_id": string,"p_limit"?: number,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_prepare_new_chat":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
                            },
 "rag_v2_reserve_turn":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_session_id": string,"p_user_id": string }; Returns: Json

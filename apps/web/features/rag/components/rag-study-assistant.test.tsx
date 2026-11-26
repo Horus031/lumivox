@@ -3,10 +3,16 @@ import { createRoot, type Root } from "react-dom/client";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
-const mocks = vi.hoisted(() => ({ ask: vi.fn(), restore: vi.fn() }));
+import vietnamese from "@/messages/vi.json";
+const mocks = vi.hoisted(() => ({
+  ask: vi.fn(), restore: vi.fn(), newChat: vi.fn(), history: vi.fn(), detail: vi.fn(),
+}));
 vi.mock("../rag-chat.actions", () => ({
   askRagQuestionAction: mocks.ask,
   restoreRagConversationAction: mocks.restore,
+  startNewRagConversationAction: mocks.newChat,
+  listRagConversationsAction: mocks.history,
+  restoreRagHistoryAction: mocks.detail,
 }));
 import { RagStudyAssistant } from "./rag-study-assistant";
 
@@ -42,6 +48,9 @@ describe("Study workspace RAG chat", () => {
   const previousScrollTo = HTMLDivElement.prototype.scrollTo;
   beforeEach(async () => {
     mocks.ask.mockReset();
+    mocks.newChat.mockReset();
+    mocks.history.mockReset();
+    mocks.detail.mockReset();
     mocks.restore.mockReset().mockResolvedValue({
       success: true,
       data: { ...emptyConversation, enabled: false },
@@ -54,10 +63,10 @@ describe("Study workspace RAG chat", () => {
     await renderAssistant();
   });
 
-  async function renderAssistant(focusSessionId = "focus-session") {
+  async function renderAssistant(focusSessionId = "focus-session", locale: "en" | "vi" = "en") {
     await act(async () =>
       root.render(
-        <NextIntlClientProvider locale="en" messages={messages} timeZone="UTC">
+        <NextIntlClientProvider locale={locale} messages={locale === "vi" ? vietnamese : messages} timeZone="UTC">
           <RagStudyAssistant
             compact
             fillHeight
@@ -445,5 +454,162 @@ describe("Study workspace RAG chat", () => {
     await submitQuestion();
     expect(container.textContent?.includes(messages.rag.compressedMemoryActive)).toBe(visible);
     expect(container.textContent).not.toContain("extractive");
+  });
+
+  const oldChat = restoredConversation("Previous question", "Previous answer");
+  const capableChat = {
+    ...oldChat,
+    data: { ...oldChat.data, new_chat_enabled: true, handoff_enabled: true },
+  };
+  const newChatResult = {
+    success: true, data: { source_session_id: "restored-session", target_session_id: "new-target",
+      mode: "fresh", has_handoff: false },
+  };
+  const canonicalChat = {
+    success: true,
+    data: { ...emptyConversation, session_id: "canonical-target", new_chat_enabled: true, handoff_enabled: true },
+  };
+
+  function button(text: string, scope: ParentNode = container) {
+    return [...scope.querySelectorAll("button")].find((item) => item.textContent?.trim() === text)!;
+  }
+
+  async function openNewChat() {
+    await act(async () => button(messages.rag.newChat).click());
+    return document.querySelector('[role="dialog"]')!;
+  }
+
+  it("keeps New Chat hidden when the backend capability is off", async () => {
+    mocks.restore.mockResolvedValueOnce(oldChat);
+    await renderAssistant("chat-disabled");
+    expect(button(messages.rag.newChat)).toBeUndefined();
+  });
+
+  it("defaults fresh, guards double submit and restores canonical active instead of using replay target", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce(canonicalChat);
+    let settle!: (value: typeof newChatResult) => void;
+    mocks.newChat.mockReturnValueOnce(new Promise((resolve) => { settle = resolve; }));
+    await renderAssistant("chat-active");
+    const modal = await openNewChat();
+    expect(modal.querySelectorAll('[role="radio"]')[0].getAttribute("aria-checked")).toBe("true");
+    const submit = button(messages.rag.newChat, modal);
+    await act(async () => { submit.click(); submit.click(); });
+    const payload = mocks.newChat.mock.calls[0][0];
+    expect(payload).toMatchObject({ mode: "fresh", selectedDocumentIds: [], sourceSessionId: "restored-session" });
+    expect(mocks.newChat).toHaveBeenCalledTimes(1);
+    expect(container.textContent).toContain("Previous answer");
+    expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+    await act(async () => settle(newChatResult));
+    expect(container.textContent).not.toContain("Previous answer");
+    expect(container.textContent).toContain("0/24");
+    mocks.ask.mockResolvedValueOnce({ success: false, message: "synthetic", retrySameRequest: false });
+    enterQuestion("Next question");
+    await submitQuestion();
+    expect(mocks.ask.mock.calls[0][0].sessionId).toBe("canonical-target");
+  });
+
+  it("retries an uncertain transition with the same request and preserves the old conversation until restore", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce(canonicalChat);
+    mocks.newChat.mockResolvedValueOnce({
+      success: false, code: "AI_API_TIMEOUT", retrySameRequest: true, message: "synthetic timeout",
+    }).mockResolvedValueOnce(newChatResult);
+    await renderAssistant("chat-uncertain");
+    const modal = await openNewChat();
+    await act(async () => button(messages.rag.newChat, modal).click());
+    expect(container.textContent).toContain("Previous answer");
+    expect(container.textContent).toContain(messages.rag.newChatOutcomeUnknown);
+    await act(async () => retryButton()!.click());
+    expect(mocks.newChat.mock.calls[1][0]).toEqual(mocks.newChat.mock.calls[0][0]);
+    expect(container.textContent).toContain("0/24");
+  });
+
+  it("keeps the old conversation after a determined rejection", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat);
+    mocks.newChat.mockResolvedValueOnce({
+      success: false, code: "RAG_HANDOFF_SOURCE_CHANGED", retrySameRequest: false, message: "fixture",
+    });
+    await renderAssistant("chat-conflict");
+    const modal = await openNewChat();
+    await act(async () => button(messages.rag.newChat, modal).click());
+    expect(container.textContent).toContain("Previous answer");
+    expect(container.textContent).toContain(messages.rag.handoffSourceChanged);
+    expect(retryButton()).toBeUndefined();
+  });
+
+  it("blocks New Chat while Ask is pending", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat);
+    let settle!: (value: unknown) => void;
+    mocks.ask.mockReturnValueOnce(new Promise((resolve) => { settle = resolve; }));
+    await renderAssistant("chat-pending-ask");
+    enterQuestion("Study question");
+    await submitQuestion();
+    expect(button(messages.rag.newChat).disabled).toBe(true);
+    await act(async () => settle({ success: false, message: "fixture", retrySameRequest: false }));
+    expect(button(messages.rag.newChat).disabled).toBe(false);
+  });
+
+  it("ignores a transition response after navigating away from its focus session", async () => {
+    mocks.restore.mockClear();
+    mocks.restore.mockResolvedValueOnce(capableChat)
+      .mockResolvedValueOnce(restoredConversation("New focus question", "New focus answer"));
+    let settle!: (value: typeof newChatResult) => void;
+    mocks.newChat.mockReturnValueOnce(new Promise((resolve) => { settle = resolve; }));
+    await renderAssistant("first-focus");
+    const modal = await openNewChat();
+    await act(async () => button(messages.rag.newChat, modal).click());
+    await renderAssistant("next-focus");
+    await act(async () => settle(newChatResult));
+    expect(container.textContent).toContain("New focus answer");
+    expect(mocks.restore).toHaveBeenCalledTimes(2);
+  });
+
+  it("shows Vietnamese labels and keeps document scope for the opted-in continuation", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat);
+    mocks.newChat.mockResolvedValueOnce({ success: false, message: "fixture", retrySameRequest: false });
+    await renderAssistant("chat-vietnamese", "vi");
+    await act(async () => button(vietnamese.rag.newChat).click());
+    const modal = document.querySelector('[role="dialog"]')!;
+    const continueRadio = modal.querySelectorAll<HTMLButtonElement>('[role="radio"]')[1];
+    await act(async () => continueRadio.click());
+    expect(modal.textContent).toContain(vietnamese.rag.continueWithContext);
+    expect(modal.textContent).toContain(vietnamese.rag.conversationScopeLocked);
+    await act(async () => button(vietnamese.rag.newChat, modal).click());
+    expect(mocks.newChat.mock.calls[0][0]).toMatchObject({
+      mode: "continue", selectedDocumentIds: ["document"], preferredLocale: "vi",
+    });
+  });
+
+  it("uses a read-only transcript for a closed conversation and restores the active composer", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce(capableChat);
+    mocks.history.mockResolvedValueOnce({ success: true, data: { next_cursor: null, conversations: [{
+      id: "older", status: "closed", title: "Older chat", completed_turn_count: 1, content_available: true,
+    }] } });
+    mocks.detail.mockResolvedValueOnce({ success: true, data: {
+      session_id: "older", status: "closed", read_only: true, completed_turn_count: 1,
+      messages: [{ id: "older-message", role: "assistant", content: "**Historical answer**" }],
+    } });
+    await renderAssistant("chat-history");
+    await act(async () => button(messages.rag.conversationHistory).click());
+    const row = [...document.querySelectorAll("button")].find((item) => item.textContent?.includes("Older chat"))!;
+    await act(async () => row.click());
+    expect(container.querySelector("strong")?.textContent).toBe("Historical answer");
+    expect(container.querySelector("textarea")?.disabled).toBe(true);
+    expect(container.textContent).toContain(messages.rag.readOnlyConversation);
+    await act(async () => button(messages.rag.returnToActiveConversation).click());
+    expect(container.textContent).toContain("Previous answer");
+    expect(container.querySelector("textarea")?.disabled).toBe(false);
+  });
+
+  it.each([false, true])("offers New Chat at the limit or with a revoked source (revoked=%s)", async (revoked) => {
+    mocks.restore.mockResolvedValueOnce({
+      ...capableChat, data: { ...capableChat.data, completed_turn_count: 24, content_available: !revoked,
+        messages: revoked ? [] : capableChat.data.messages },
+    });
+    await renderAssistant("chat-availability");
+    expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+    expect(button(messages.rag.newChat).disabled).toBe(false);
+    const modal = await openNewChat();
+    expect((modal.querySelectorAll('[role="radio"]')[1] as HTMLButtonElement).disabled).toBe(revoked);
+    if (revoked) expect(container.textContent).toContain(messages.rag.historyAccessUnavailable);
   });
 });

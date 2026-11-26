@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 from app.api.routes import rag
 from app.core.config import settings
 from app.main import app
+from app.services.rag_conversation_store import RagConversationError
 
 
 client = TestClient(app)
@@ -44,6 +45,65 @@ def post(payload):
         json=payload,
         headers={"x-lumivox-internal-key": settings.ai_internal_api_key},
     )
+
+
+def lifecycle_post(path, payload):
+    return client.post(
+        "/api/v1/rag/chat/" + path, json=payload,
+        headers={"x-lumivox-internal-key": settings.ai_internal_api_key},
+    )
+
+
+RESTORE_PAYLOAD = {"user_id": REQUEST["user_id"], "focus_session_id": REQUEST["focus_session_id"]}
+TRANSITION_PAYLOAD = {
+    **RESTORE_PAYLOAD, "source_session_id": ANSWER["session_id"],
+    "client_request_id": REQUEST_ID, "mode": "continue",
+}
+
+
+def test_new_chat_requires_internal_key():
+    response = client.post("/api/v1/rag/chat/new", json=TRANSITION_PAYLOAD)
+    assert response.status_code in (401, 403)
+
+
+def test_new_chat_returns_stable_code_for_revision_conflict(monkeypatch):
+    monkeypatch.setattr(rag, "start_new_conversation", Mock(
+        side_effect=RagConversationError("RAG_HANDOFF_SOURCE_CHANGED", 409),
+    ))
+    response = lifecycle_post("new", TRANSITION_PAYLOAD)
+    assert response.status_code == 409
+    assert response.json() == {"detail": {"code": "RAG_HANDOFF_SOURCE_CHANGED"}}
+
+
+def test_revoked_active_restore_only_exposes_id_for_fresh_recovery(monkeypatch):
+    monkeypatch.setattr(settings, "rag_conversation_v2_enabled", True)
+    monkeypatch.setattr(settings, "rag_new_chat_enabled", True)
+    monkeypatch.setattr(settings, "rag_handoff_enabled", True)
+    monkeypatch.setattr(rag, "restore_rag_conversation", Mock(
+        side_effect=RagConversationError("RAG_DOCUMENT_ACCESS_DENIED", 403),
+    ))
+    monkeypatch.setattr(rag, "get_supabase_client", Mock())
+    monkeypatch.setattr(rag, "list_conversations", Mock(return_value={
+        "active_session_id": ANSWER["session_id"],
+        "conversations": [{"id": ANSWER["session_id"], "content_available": False}],
+    }))
+    response = lifecycle_post("restore", RESTORE_PAYLOAD)
+    assert response.status_code == 200
+    data = response.json()
+    assert data["session_id"] == ANSWER["session_id"] and data["new_chat_enabled"]
+    assert not data["content_available"] and not data["has_handoff"]
+    assert data["messages"] == data["selected_document_ids"] == []
+
+
+def test_history_flag_off_and_malformed_cursor(monkeypatch):
+    monkeypatch.setattr(settings, "rag_conversation_v2_enabled", True)
+    monkeypatch.setattr(settings, "rag_new_chat_enabled", False)
+    assert lifecycle_post("history", RESTORE_PAYLOAD).status_code == 409
+    monkeypatch.setattr(settings, "rag_new_chat_enabled", True)
+    response = lifecycle_post("history", {
+        **RESTORE_PAYLOAD, "cursor": {"created_at": "2026-11-26T15:00:00", "id": REQUEST_ID},
+    })
+    assert response.status_code == 422
 
 
 def test_flag_disabled_preserves_legacy_request_without_client_id(routes, monkeypatch):

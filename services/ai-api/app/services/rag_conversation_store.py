@@ -18,6 +18,11 @@ ERROR_STATUS = {
     "RAG_INVALID_RESPONSE": 500,
     "RAG_CONTEXT_UNAVAILABLE": 409,
     "RAG_SUMMARY_CONFLICT": 409,
+    "RAG_NEW_CHAT_DISABLED": 409,
+    "RAG_HANDOFF_DISABLED": 409,
+    "RAG_HANDOFF_SOURCE_CHANGED": 409,
+    "RAG_HANDOFF_SCOPE_CHANGED": 409,
+    "RAG_HANDOFF_EMPTY_CONTEXT": 409,
     "RAG_CONVERSATION_LIMIT_REACHED": 409,
 }
 
@@ -151,6 +156,54 @@ def save_conversation_summary(
     if not isinstance(result, dict):
         raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
     return result
+
+
+def _conversation_object(supabase: Any, name: str, params: dict[str, Any]) -> dict[str, Any]:
+    result = _call_rpc(supabase, name, params)
+    if not isinstance(result, dict):
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+    return result
+
+
+def prepare_new_chat(
+    supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
+    client_request_id: str, request_payload: dict[str, Any],
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_prepare_new_chat", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id,
+        "p_source_session_id": source_session_id, "p_client_request_id": client_request_id,
+        "p_request": request_payload,
+    })
+
+
+def commit_new_chat(
+    supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
+    client_request_id: str, request_payload: dict[str, Any],
+    expected_revision: dict[str, Any], handoff: dict[str, Any] | None,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_commit_new_chat", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id,
+        "p_source_session_id": source_session_id, "p_client_request_id": client_request_id,
+        "p_request": request_payload, "p_expected_revision": expected_revision, "p_handoff": handoff,
+    })
+
+
+def list_conversations(
+    supabase: Any, *, user_id: str, focus_session_id: str, limit: int = 20,
+    cursor_created_at: str | None = None, cursor_id: str | None = None,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_list_conversations", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id, "p_limit": limit,
+        "p_cursor_created_at": cursor_created_at, "p_cursor_id": cursor_id,
+    })
+
+
+def load_history_detail(
+    supabase: Any, *, user_id: str, focus_session_id: str, session_id: str,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_get_history_detail", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id, "p_session_id": session_id,
+    })
 
 
 def load_restore_snapshot(

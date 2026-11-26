@@ -3,6 +3,7 @@ import logging
 from uuid import UUID
 
 from app.core.config import settings
+from app.clients.supabase_client import get_supabase_client
 
 from app.security.internal_api_key import verify_internal_api_key
 from app.schemas.rag_document_processing import (
@@ -24,6 +25,13 @@ from app.services.rag_conversation_service import (
 
 from app.services.rag_conversation_store import (
     RagConversationError,
+    list_conversations,
+    load_history_detail,
+)
+from app.services.rag_new_chat_service import start_new_conversation
+from app.schemas.rag_conversation_handoff import (
+    RagHistoryDetailRequest, RagHistoryDetailResponse, RagHistoryRequest, RagHistoryResponse,
+    RagNewChatRequest, RagNewChatResponse,
 )
 
 from app.schemas.rag_document_processing import (
@@ -183,18 +191,29 @@ def restore_conversation(
         )
 
     try:
-        result = restore_rag_conversation(
-            user_id=str(payload.user_id),
-            focus_session_id=str(
-                payload.focus_session_id
-            ),
-        )
+        user_id, focus_id = str(payload.user_id), str(payload.focus_session_id)
+        try:
+            result = restore_rag_conversation(user_id=user_id, focus_session_id=focus_id)
+        except RagConversationError as error:
+            if error.code != "RAG_DOCUMENT_ACCESS_DENIED" or not settings.rag_new_chat_enabled:
+                raise
+            history = list_conversations(get_supabase_client(), user_id=user_id, focus_session_id=focus_id)
+            active_id = history.get("active_session_id")
+            active = next((item for item in history["conversations"] if item["id"] == active_id), None)
+            if active_id and (active is None or not active["content_available"]):
+                result = {"enabled": True, "session_id": active_id, "content_available": False}
+            else:
+                result = restore_rag_conversation(user_id=user_id, focus_session_id=focus_id)
 
         return RagConversationRestoreResponse(
             **{
                 **result,
                 "soft_turn_limit": settings.rag_soft_turn_limit,
                 "hard_turn_limit": settings.rag_hard_turn_limit,
+                "new_chat_enabled": settings.rag_new_chat_enabled,
+                "handoff_enabled": settings.rag_new_chat_enabled and settings.rag_handoff_enabled,
+                "has_handoff": bool(result.get("has_handoff")) and settings.rag_handoff_enabled
+                and settings.rag_new_chat_enabled,
             }
         )
 
@@ -209,3 +228,45 @@ def restore_conversation(
             status_code=503,
             detail="RAG_PERSISTENCE_UNAVAILABLE",
         ) from None
+
+
+@router.post("/chat/new", response_model=RagNewChatResponse)
+def new_chat(payload: RagNewChatRequest, _: None = Depends(verify_internal_api_key)):
+    try:
+        return start_new_conversation(payload)
+    except RagConversationError as error:
+        raise HTTPException(error.status_code, detail={"code": error.code}) from None
+    except Exception:
+        raise HTTPException(503, detail={"code": "RAG_PERSISTENCE_UNAVAILABLE"}) from None
+
+
+@router.post("/chat/history", response_model=RagHistoryResponse)
+def conversation_history(payload: RagHistoryRequest, _: None = Depends(verify_internal_api_key)):
+    if not settings.rag_conversation_v2_enabled or not settings.rag_new_chat_enabled:
+        raise HTTPException(409, detail={"code": "RAG_NEW_CHAT_DISABLED"})
+    try:
+        cursor = payload.cursor
+        return RagHistoryResponse.model_validate(list_conversations(
+            get_supabase_client(), user_id=str(payload.user_id), focus_session_id=str(payload.focus_session_id),
+            limit=payload.limit, cursor_created_at=cursor.created_at.isoformat() if cursor else None,
+            cursor_id=str(cursor.id) if cursor else None,
+        ))
+    except RagConversationError as error:
+        raise HTTPException(error.status_code, detail={"code": error.code}) from None
+    except Exception:
+        raise HTTPException(503, detail={"code": "RAG_PERSISTENCE_UNAVAILABLE"}) from None
+
+
+@router.post("/chat/history/detail", response_model=RagHistoryDetailResponse)
+def history_detail(payload: RagHistoryDetailRequest, _: None = Depends(verify_internal_api_key)):
+    if not settings.rag_conversation_v2_enabled or not settings.rag_new_chat_enabled:
+        raise HTTPException(409, detail={"code": "RAG_NEW_CHAT_DISABLED"})
+    try:
+        return RagHistoryDetailResponse.model_validate(load_history_detail(
+            get_supabase_client(), user_id=str(payload.user_id),
+            focus_session_id=str(payload.focus_session_id), session_id=str(payload.session_id),
+        ))
+    except RagConversationError as error:
+        raise HTTPException(error.status_code, detail={"code": error.code}) from None
+    except Exception:
+        raise HTTPException(503, detail={"code": "RAG_PERSISTENCE_UNAVAILABLE"}) from None

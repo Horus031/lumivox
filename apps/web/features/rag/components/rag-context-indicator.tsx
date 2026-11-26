@@ -4,6 +4,7 @@ import {
   Brain,
   AlertCircle,
   Layers,
+  Link2,
 } from "lucide-react";
 
 import { useTranslations } from "next-intl";
@@ -17,6 +18,8 @@ type Props = {
   softTurnLimit: number;
   hardTurnLimit: number;
   context: RagContextMetadata | null;
+  hasHandoff?: boolean;
+  canStartNewChat?: boolean;
 };
 
 export function RagContextIndicator({
@@ -24,6 +27,8 @@ export function RagContextIndicator({
   softTurnLimit,
   hardTurnLimit,
   context,
+  hasHandoff,
+  canStartNewChat,
 }: Props) {
   const t = useTranslations("rag");
   const usesSummary = Boolean(
@@ -77,6 +82,13 @@ export function RagContextIndicator({
         </div>
       )}
 
+      {(context?.handoff_used || hasHandoff) && (
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <Link2 size={14} aria-hidden="true" className="shrink-0" />
+          <span>{t(context?.handoff_used ? "inheritedMemoryActive" : "inheritedMemoryReady")}</span>
+        </div>
+      )}
+
       {context?.context_truncated && (
         <p className="text-xs text-muted-foreground">
           {t("recentContextOnly")}
@@ -97,7 +109,7 @@ export function RagContextIndicator({
           <span>
             {t(
               reachedLimit
-                ? "conversationLimitReached"
+                ? canStartNewChat ? "conversationLimitNewChat" : "conversationLimitReached"
                 : "conversationNearLimit",
             )}
           </span>

@@ -40,6 +40,7 @@ def generate_conversational_answer(
             question,
             context.recent_turns,
             context.summary if settings.rag_rolling_summary_enabled else None,
+            context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
         )
         strategy = query.strategy
         sources = _retrieve_chunks(
@@ -78,6 +79,9 @@ def generate_conversational_answer(
                     "summary_tokens_used": 0,
                     "summary_covered_turn_index": None,
                     "summary_generation_method": None,
+                    "handoff_used": False,
+                    "handoff_tokens_used": 0,
+                    "handoff_id": None,
                     "generation_attempts": 0,
                 }
             ),

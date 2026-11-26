@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field
 
 from app.schemas.rag_conversation_summary import RagStoredSummary, RagSummaryMethod
+from app.schemas.rag_conversation_handoff import RagStoredHandoff
 
 RagRetrievalStrategy = Literal["none", "current_question", "history_augmented"]
 
@@ -19,6 +20,7 @@ class RagConversationContext(BaseModel):
     completed_turn_count: int = Field(ge=0)
     recent_turns: list[RagCompletedTurn] = Field(default_factory=list, max_length=12)
     summary: RagStoredSummary | None = None
+    handoff: RagStoredHandoff | None = None
 
 
 class RagSummaryInput(BaseModel):
@@ -40,3 +42,6 @@ class RagContextMetadata(BaseModel):
     summary_tokens_used: int = Field(default=0, ge=0)
     summary_covered_turn_index: int | None = Field(default=None, gt=0)
     summary_generation_method: RagSummaryMethod | None = None
+    handoff_used: bool = False
+    handoff_tokens_used: int = Field(default=0, ge=0)
+    handoff_id: str | None = Field(default=None, exclude=True)

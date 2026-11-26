@@ -77,6 +77,8 @@ def get_rag_model_capability(
 
 
 def validate_rag_configuration() -> None:
+    if settings.rag_handoff_enabled and not settings.rag_new_chat_enabled:
+        raise RagConfigurationError("RAG handoff requires New Chat to be enabled.")
     if settings.rag_hard_turn_limit > 24:
         raise RagConfigurationError("RAG hard turn limit exceeds the database safety ceiling.")
 

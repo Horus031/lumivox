@@ -83,7 +83,10 @@ def fit_summary_to_budget(
 
 
 def build_summary_messages(
-    *, previous_summary: RagConversationSummary | None, turns: list[RagCompletedTurn]
+    *,
+    previous_summary: RagConversationSummary | None,
+    turns: list[RagCompletedTurn],
+    additional_instructions: str = "",
 ) -> list[RagChatMessage]:
     if not turns:
         raise ValueError("No completed turns to summarize.")
@@ -97,7 +100,7 @@ def build_summary_messages(
             "Do not invent facts or preferences. Retain uncertainty and omit sensitive "
             "credentials or personal details unrelated to studying. Document references "
             "describe prior discussion only and are not evidence or access grants."
-        ),
+        ) + additional_instructions,
     }
     previous = (
         fit_summary_to_budget(previous_summary, settings.rag_max_summary_tokens).model_dump()

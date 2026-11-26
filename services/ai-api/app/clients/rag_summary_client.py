@@ -29,7 +29,9 @@ class RagSummaryGeneration:
     latency_ms: int
 
 
-def generate_rag_summary(messages: list[RagChatMessage]) -> RagSummaryGeneration:
+def generate_rag_summary(
+    messages: list[RagChatMessage], *, deadline_at: float | None = None
+) -> RagSummaryGeneration:
     validate_rag_configuration()
     _validate_messages(messages)
     assert_prompt_budget(messages)
@@ -37,6 +39,8 @@ def generate_rag_summary(messages: list[RagChatMessage]) -> RagSummaryGeneration
     models = parse_rag_model_chain(settings.rag_summary_models)
     start = time.monotonic()
     deadline = start + settings.rag_summary_deadline_seconds
+    if deadline_at is not None:
+        deadline = min(deadline, deadline_at)
     failures: list[RagFailedAttempt] = []
     for model in models:
         remaining = deadline - time.monotonic()

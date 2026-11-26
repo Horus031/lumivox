@@ -1,15 +1,25 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import {
   askRagQuestionAction,
+  listRagConversationsAction,
   restoreRagConversationAction,
+  restoreRagHistoryAction,
+  startNewRagConversationAction,
+  type RagConversationListItem,
+  type RagConversationRestoreResponse,
   type RagContextMetadata,
+  type RagHistoryCursor,
+  type RagHistoryDetail,
+  type RagNewChatPayload,
   type RagSourceChunk,
 } from "@/features/rag/rag-chat.actions";
 import { RagMarkdownMessage } from "@/features/rag/components/rag-markdown-message";
 import { RagContextIndicator } from "./rag-context-indicator";
+import { RagNewChatDialog } from "./rag-new-chat-dialog";
+import { RagConversationHistory } from "./rag-conversation-history";
 type RagDocumentOption = {
   id: string;
   file_name: string;
@@ -83,6 +93,15 @@ const REQUEST_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_CONVERSATION_LIMIT_REACHED", "conversationLimitReached"],
 ]);
 
+const TRANSITION_ERROR_MESSAGES = new Map<string, string>([
+  ["RAG_HANDOFF_SOURCE_CHANGED", "handoffSourceChanged"],
+  ["RAG_HANDOFF_SCOPE_CHANGED", "handoffSourceChanged"],
+  ["RAG_SESSION_CLOSED", "handoffSourceChanged"],
+  ["RAG_DOCUMENT_ACCESS_DENIED", "historyAccessUnavailable"],
+  ["RAG_IDEMPOTENCY_CONFLICT", "idempotencyConflict"],
+  ["RAG_TURN_IN_PROGRESS", "turnInProgress"],
+]);
+
 type RagStudyAssistantProps = {
   compact?: boolean;
   fillHeight?: boolean;
@@ -116,7 +135,8 @@ export function RagStudyAssistant({
   const locale = useLocale();
   const t = useTranslations("rag");
   const [question, setQuestion] = useState("");
-  const [sessionId, setSessionId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [viewingHistory, setViewingHistory] = useState<RagHistoryDetail | null>(null);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
   const [topK, setTopK] = useState(defaultTopK ?? 5);
 
@@ -136,8 +156,21 @@ export function RagStudyAssistant({
   const [serverTurnLimitReached, setServerTurnLimitReached] = useState(false);
   const [conversationError, setConversationError] = useState<string | null>(null);
   const [pendingRequest, setPendingRequest] = useState<PendingRagRequest | null>(null);
+  const [newChatEnabled, setNewChatEnabled] = useState(false);
+  const [handoffEnabled, setHandoffEnabled] = useState(false);
+  const [hasHandoff, setHasHandoff] = useState(false);
+  const [contentAvailable, setContentAvailable] = useState(true);
+  const [newChatOpen, setNewChatOpen] = useState(false);
+  const [isCreatingChat, setIsCreatingChat] = useState(false);
+  const [pendingNewChat, setPendingNewChat] = useState<RagNewChatPayload | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyItems, setHistoryItems] = useState<RagConversationListItem[]>([]);
+  const [historyCursor, setHistoryCursor] = useState<RagHistoryCursor | null>(null);
 
   const requestInFlightRef = useRef(false);
+  const transitionInFlightRef = useRef(false);
+  const historyInFlightRef = useRef(false);
   const conversationEpochRef = useRef(0);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -147,10 +180,15 @@ export function RagStudyAssistant({
   const shouldAutoScrollRef = useRef(true);
 
   const canAsk = useMemo(() => question.trim().length > 0, [question]);
-  const requestDisabled = isPending || isRestoring || restoreFailed;
+  const lifecycleBusy = isCreatingChat || historyLoading || pendingNewChat !== null;
+  const requestDisabled = isPending || isRestoring || restoreFailed || lifecycleBusy
+    || viewingHistory !== null || !contentAvailable || newChatOpen;
   const isConversationLimitReached =
     serverTurnLimitReached || (conversationV2 && completedTurnCount >= hardTurnLimit);
-  const conversationScopeLocked = conversationV2 && Boolean(sessionId);
+  const conversationScopeLocked = conversationV2 && Boolean(activeSessionId);
+  const newChatAvailable = newChatEnabled && Boolean(focusSessionId && activeSessionId);
+  const lifecycleDisabled = isPending || isRestoring || lifecycleBusy || pendingRequest !== null || newChatOpen;
+  const visibleMessages = viewingHistory?.messages ?? messages;
   const documentSelectionDisabled =
     requestDisabled || conversationScopeLocked || pendingRequest !== null;
 
@@ -173,13 +211,13 @@ export function RagStudyAssistant({
 
     if (
       !cleanQuestion || pendingRequest || requestDisabled || isConversationLimitReached
-      || requestInFlightRef.current
+      || requestInFlightRef.current || transitionInFlightRef.current || historyInFlightRef.current
     ) return;
 
     const request: PendingRagRequest = {
       clientRequestId: crypto.randomUUID(),
       question: cleanQuestion,
-      sessionId,
+      sessionId: activeSessionId,
       focusSessionId: focusSessionId ?? null,
       selectedDocumentIds: [...selectedDocumentIds],
       topK,
@@ -195,7 +233,7 @@ export function RagStudyAssistant({
   }
 
   function sendRequest(request: PendingRagRequest) {
-    if (requestDisabled || requestInFlightRef.current) return;
+    if (requestDisabled || requestInFlightRef.current || transitionInFlightRef.current || historyInFlightRef.current) return;
 
     requestInFlightRef.current = true;
     const epoch = conversationEpochRef.current;
@@ -216,7 +254,7 @@ export function RagStudyAssistant({
 
           if (!result.retrySameRequest) {
             if (result.sessionId) {
-              setSessionId(result.sessionId);
+              setActiveSessionId(result.sessionId);
               setConversationV2(true);
             }
 
@@ -237,7 +275,7 @@ export function RagStudyAssistant({
         }
 
         setPendingRequest(null);
-        setSessionId(data.session_id);
+        setActiveSessionId(data.session_id);
         setContextMetadata(data.context ?? null);
         if (typeof data.soft_turn_limit === "number") setSoftTurnLimit(data.soft_turn_limit);
         if (typeof data.hard_turn_limit === "number") setHardTurnLimit(data.hard_turn_limit);
@@ -270,6 +308,139 @@ export function RagStudyAssistant({
     });
   }
 
+  const applyActiveConversation = useCallback((data: RagConversationRestoreResponse) => {
+    conversationEpochRef.current += 1;
+    setConversationV2(data.enabled);
+    setNewChatEnabled(Boolean(data.new_chat_enabled));
+    setHandoffEnabled(Boolean(data.handoff_enabled));
+    setHasHandoff(Boolean(data.has_handoff));
+    setContentAvailable(data.content_available !== false);
+    setViewingHistory(null);
+    setRestoreFailed(false);
+    setConversationError(null);
+    setHistoryOpen(false);
+    setContextMetadata(null);
+    setServerTurnLimitReached(false);
+    setActiveSessionId(data.enabled ? data.session_id : null);
+    setCompletedTurnCount(data.enabled ? data.completed_turn_count : 0);
+    setSoftTurnLimit(data.soft_turn_limit ?? DEFAULT_SOFT_TURN_LIMIT);
+    setHardTurnLimit(data.hard_turn_limit ?? DEFAULT_HARD_TURN_LIMIT);
+    setSelectedDocumentIds(data.enabled ? data.selected_document_ids : []);
+    if (data.enabled) {
+      setTopK(data.top_k);
+      setPromptVariant(data.prompt_variant);
+    }
+    setMessages(data.enabled ? data.messages.map(({ id, role, content }) => ({ id, role, content })) : []);
+    shouldAutoScrollRef.current = true;
+  }, []);
+
+  async function submitNewChat(request: RagNewChatPayload) {
+    if (transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
+    transitionInFlightRef.current = true;
+    const epoch = conversationEpochRef.current;
+    setIsCreatingChat(true);
+    setNewChatOpen(false);
+    setHistoryOpen(false);
+    setPendingNewChat(request);
+    setConversationError(null);
+    try {
+      const result = await startNewRagConversationAction(request);
+      if (epoch !== conversationEpochRef.current) return;
+      if (!result.success) {
+        const key = result.code ? TRANSITION_ERROR_MESSAGES.get(result.code) : undefined;
+        if (!result.retrySameRequest) setPendingNewChat(null);
+        setConversationError(t(key ?? (result.retrySameRequest ? "newChatOutcomeUnknown" : "newChatUnavailable")));
+        return;
+      }
+      const restored = await restoreRagConversationAction(request.focusSessionId);
+      if (epoch !== conversationEpochRef.current) return;
+      if (!restored.success || !restored.data.enabled || !restored.data.session_id
+        || restored.data.session_id === request.sourceSessionId) {
+        setConversationError(t("newChatOutcomeUnknown"));
+        return;
+      }
+      applyActiveConversation(restored.data);
+      setPendingNewChat(null);
+      setPendingRequest(null);
+      setQuestion("");
+    } catch {
+      if (epoch === conversationEpochRef.current) setConversationError(t("newChatOutcomeUnknown"));
+    } finally {
+      transitionInFlightRef.current = false;
+      setIsCreatingChat(false);
+    }
+  }
+
+  function confirmNewChat(input: Pick<RagNewChatPayload, "mode" | "selectedDocumentIds">) {
+    if (!focusSessionId || !activeSessionId || !newChatEnabled || pendingNewChat || pendingRequest
+      || transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
+    void submitNewChat({
+      ...input, focusSessionId, sourceSessionId: activeSessionId,
+      clientRequestId: crypto.randomUUID(), topK, promptVariant,
+      preferredLocale: locale === "vi" ? "vi" : "en",
+    });
+  }
+
+  async function loadHistoryPage(cursor: RagHistoryCursor | null = null) {
+    if (!focusSessionId || historyInFlightRef.current || transitionInFlightRef.current
+      || requestInFlightRef.current || pendingNewChat) return;
+    historyInFlightRef.current = true;
+    const epoch = conversationEpochRef.current;
+    setHistoryLoading(true);
+    try {
+      const result = await listRagConversationsAction(focusSessionId, cursor);
+      if (epoch !== conversationEpochRef.current) return;
+      if (!result.success) {
+        setConversationError(t("historyUnavailable"));
+        return;
+      }
+      setHistoryItems((current) => cursor ? [...current, ...result.data.conversations] : result.data.conversations);
+      setHistoryCursor(result.data.next_cursor);
+    } catch {
+      if (epoch === conversationEpochRef.current) setConversationError(t("historyUnavailable"));
+    } finally {
+      historyInFlightRef.current = false;
+      setHistoryLoading(false);
+    }
+  }
+
+  async function viewConversation(item?: RagConversationListItem) {
+    if (!focusSessionId || historyInFlightRef.current || transitionInFlightRef.current
+      || requestInFlightRef.current || pendingNewChat || pendingRequest) return;
+    historyInFlightRef.current = true;
+    const epoch = conversationEpochRef.current;
+    setHistoryOpen(false);
+    setHistoryLoading(true);
+    try {
+      if (!item || item.status === "active") {
+        const result = await restoreRagConversationAction(focusSessionId);
+        if (epoch !== conversationEpochRef.current) return;
+        if (!result.success) {
+          setConversationError(t("restoreFailed"));
+          return;
+        }
+        if (result.data.session_id !== activeSessionId) setQuestion("");
+        applyActiveConversation(result.data);
+      } else {
+        const result = await restoreRagHistoryAction(focusSessionId, item.id);
+        if (epoch !== conversationEpochRef.current) return;
+        if (!result.success || !result.data.read_only || result.data.session_id !== item.id) {
+          setConversationError(t("historyAccessUnavailable"));
+          return;
+        }
+        conversationEpochRef.current += 1;
+        shouldAutoScrollRef.current = true;
+        setViewingHistory(result.data);
+        setConversationError(null);
+      }
+    } catch {
+      if (epoch === conversationEpochRef.current) setConversationError(t("historyUnavailable"));
+    } finally {
+      historyInFlightRef.current = false;
+      setHistoryLoading(false);
+    }
+  }
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.nativeEvent.isComposing) return;
 
@@ -284,7 +455,7 @@ export function RagStudyAssistant({
 
   function handleChatScroll() {
     const container = chatContainerRef.current;
-    if (!container || messages.length === 0) return;
+    if (!container || visibleMessages.length === 0) return;
 
     shouldAutoScrollRef.current = isNearChatBottom(container);
   }
@@ -304,12 +475,23 @@ export function RagStudyAssistant({
       });
       shouldAutoScrollRef.current = true;
     }
-  }, [messages]);
+  }, [visibleMessages]);
 
   useEffect(() => {
     let cancelled = false;
+    const epoch = conversationEpochRef.current;
 
-    setSessionId(null);
+    setActiveSessionId(null);
+    setViewingHistory(null);
+    setNewChatEnabled(false);
+    setHandoffEnabled(false);
+    setHasHandoff(false);
+    setContentAvailable(true);
+    setNewChatOpen(false);
+    setHistoryOpen(false);
+    setHistoryItems([]);
+    setHistoryCursor(null);
+    setPendingNewChat(null);
     setMessages([]);
     setSelectedDocumentIds([]);
     setCompletedTurnCount(0);
@@ -339,37 +521,14 @@ export function RagStudyAssistant({
       try {
         const result = await restoreRagConversationAction(focusSessionId!);
 
-        if (cancelled) return;
+        if (cancelled || epoch !== conversationEpochRef.current) return;
 
         if (!result.success || !result.data) {
           setRestoreFailed(true);
           return;
         }
 
-        const data = result.data;
-
-        setConversationV2(data.enabled);
-
-        if (!data.enabled) return;
-
-        setSessionId(data.session_id);
-
-        setCompletedTurnCount(data.completed_turn_count);
-        if (typeof data.soft_turn_limit === "number") setSoftTurnLimit(data.soft_turn_limit);
-        if (typeof data.hard_turn_limit === "number") setHardTurnLimit(data.hard_turn_limit);
-
-        setSelectedDocumentIds(data.selected_document_ids);
-
-        setTopK(data.top_k);
-        setPromptVariant(data.prompt_variant);
-
-        setMessages(
-          data.messages.map((message) => ({
-            id: message.id,
-            role: message.role,
-            content: message.content,
-          })),
-        );
+        applyActiveConversation(result.data);
       } catch {
         if (!cancelled) {
           setRestoreFailed(true);
@@ -387,7 +546,7 @@ export function RagStudyAssistant({
       cancelled = true;
       conversationEpochRef.current += 1;
     };
-  }, [focusSessionId, defaultTopK, defaultPromptVariant]);
+  }, [focusSessionId, defaultTopK, defaultPromptVariant, applyActiveConversation]);
 
   return (
     <section
@@ -406,12 +565,61 @@ export function RagStudyAssistant({
         <p role="status" className="mt-2 text-xs text-muted-foreground">
           {t("restoringConversation")}
         </p>
-      ) : conversationScopeLocked && (
+      ) : conversationScopeLocked && contentAvailable && !viewingHistory && (
         <RagContextIndicator
           completedTurnCount={completedTurnCount}
           softTurnLimit={softTurnLimit}
           hardTurnLimit={hardTurnLimit}
           context={contextMetadata}
+          hasHandoff={hasHandoff}
+          canStartNewChat={newChatAvailable}
+        />
+      )}
+
+      {newChatEnabled && focusSessionId && (
+        <div className="flex shrink-0 flex-wrap items-center gap-1">
+          {newChatAvailable && !viewingHistory && (
+            <Button type="button" size="sm" variant={isConversationLimitReached ? "default" : "outline"}
+              disabled={lifecycleDisabled} onClick={() => setNewChatOpen(true)}>
+              {t("newChat")}
+            </Button>
+          )}
+          <RagConversationHistory
+            open={historyOpen}
+            disabled={lifecycleDisabled && !historyLoading}
+            loading={historyLoading}
+            items={historyItems}
+            cursor={historyCursor}
+            viewingSessionId={viewingHistory?.session_id ?? activeSessionId}
+            onOpenChange={(open) => {
+              setHistoryOpen(open);
+              if (open) void loadHistoryPage();
+            }}
+            onNextPage={(cursor) => void loadHistoryPage(cursor)}
+            onSelect={(item) => void viewConversation(item)}
+          />
+          {viewingHistory && (
+            <Button type="button" size="sm" variant="outline" disabled={lifecycleDisabled}
+              onClick={() => void viewConversation()}>
+              {t("returnToActiveConversation")}
+            </Button>
+          )}
+        </div>
+      )}
+      {viewingHistory && <p role="status" className="mt-2 text-xs">{t("readOnlyConversation")}</p>}
+      {!contentAvailable && !viewingHistory && (
+        <p role="status" className="mt-2 text-xs">{t("historyAccessUnavailable")}</p>
+      )}
+      {isCreatingChat && <p role="status" className="mt-2 text-xs">{t("creatingConversation")}</p>}
+      {newChatOpen && (
+        <RagNewChatDialog
+          onOpenChange={setNewChatOpen}
+          handoffEnabled={handoffEnabled}
+          canContinueContext={contentAvailable && (completedTurnCount > 0 || hasHandoff)}
+          selectedDocumentIds={selectedDocumentIds}
+          documents={documents}
+          isSubmitting={isCreatingChat}
+          onConfirm={confirmNewChat}
         />
       )}
 
@@ -425,7 +633,7 @@ export function RagStudyAssistant({
             "h-auto min-h-0 flex-1 overflow-y-auto overscroll-contain",
         )}
       >
-        {messages.length === 0 ? (
+        {visibleMessages.length === 0 ? (
           <div className="flex flex-col h-full gap-4 items-center justify-center text-center">
             {!fillHeight && (
               <p
@@ -447,7 +655,7 @@ export function RagStudyAssistant({
             </p>
           </div>
         ) : (
-          messages.map((message) => (
+          visibleMessages.map((message) => (
             <article
               key={message.id}
               className={cn(
@@ -535,6 +743,12 @@ export function RagStudyAssistant({
                 disabled={requestDisabled}
                 onClick={() => sendRequest(pendingRequest)}
               >
+                {t("retryRequest")}
+              </Button>
+            )}
+            {pendingNewChat && (
+              <Button type="button" variant="outline" size="sm" disabled={isCreatingChat}
+                onClick={() => void submitNewChat(pendingNewChat)}>
                 {t("retryRequest")}
               </Button>
             )}
@@ -629,6 +843,7 @@ export function RagStudyAssistant({
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t("askPlaceholder")}
             aria-label={t("askPlaceholder")}
+            disabled={viewingHistory !== null || !contentAvailable || pendingNewChat !== null}
             onKeyDown={handleKeyDown}
             className={cn(
               "min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition",
