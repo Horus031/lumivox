@@ -4,6 +4,7 @@ import { AiApiError, AiApiTransportError, fetchAiApi } from "@/lib/ai-api/fetch-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
+import { z } from "zod";
 
 type RagPromptVariant = "no_rule" | "grounded_rule";
 
@@ -18,6 +19,8 @@ export type RagContextMetadata = {
   summary_tokens_used?: number;
   summary_covered_turn_index?: number | null;
   summary_generation_method?: "llm" | "extractive" | null;
+  handoff_used?: boolean;
+  handoff_tokens_used?: number;
 };
 
 export type RagSourceChunk = {
@@ -168,6 +171,10 @@ export type RagRestoredMessage = {
 
 export type RagConversationRestoreResponse = {
   enabled: boolean;
+  new_chat_enabled?: boolean;
+  handoff_enabled?: boolean;
+  has_handoff?: boolean;
+  content_available?: boolean;
   session_id: string | null;
   completed_turn_count: number;
   soft_turn_limit?: number | null;
@@ -204,4 +211,131 @@ export async function restoreRagConversationAction(
       message: "Unable to restore conversation.",
     };
   }
+}
+
+export type RagNewChatMode = "fresh" | "continue";
+
+const newChatPayloadSchema = z.object({
+  focusSessionId: z.uuid(),
+  sourceSessionId: z.uuid(),
+  clientRequestId: z.uuid(),
+  mode: z.enum(["fresh", "continue"]),
+  selectedDocumentIds: z.array(z.uuid()),
+  topK: z.number().int().min(1).max(9),
+  promptVariant: z.enum(["grounded_rule", "no_rule"]),
+  preferredLocale: z.enum(["en", "vi"]).optional(),
+});
+export type RagNewChatPayload = z.infer<typeof newChatPayloadSchema>;
+
+export type RagNewChatResponse = {
+  source_session_id: string;
+  target_session_id: string;
+  mode: RagNewChatMode;
+  has_handoff: boolean;
+};
+
+export type RagConversationListItem = {
+  id: string;
+  title: string | null;
+  status: "active" | "closed";
+  completed_turn_count: number;
+  has_handoff: boolean;
+  content_available: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+const historyCursorSchema = z.object({ created_at: z.iso.datetime({ offset: true }), id: z.uuid() });
+export type RagHistoryCursor = z.infer<typeof historyCursorSchema>;
+export type RagHistoryResponse = {
+  conversations: RagConversationListItem[];
+  next_cursor: RagHistoryCursor | null;
+};
+export type RagHistoryDetail = {
+  session_id: string;
+  status: "active" | "closed";
+  completed_turn_count: number;
+  messages: RagRestoredMessage[];
+  read_only: boolean;
+};
+
+type ChatLifecycleResult<T> =
+  | Extract<ActionResult<T>, { success: true }>
+  | { success: false; code?: string; message: string; retrySameRequest: boolean };
+
+async function lifecycleRequest<T>(
+  operation: "new" | "history" | "history/detail",
+  payload: Record<string, unknown>,
+): Promise<ChatLifecycleResult<T>> {
+  const isTransition = operation === "new";
+  try {
+    const { user } = await requireUser();
+    const rateLimit = await checkRateLimit({
+      key: isTransition ? `rag-new-chat:${user.id}` : `rag-history:${user.id}`,
+      limit: isTransition ? 5 : 30,
+      window: isTransition ? "10 m" : "1 m",
+    });
+    if (!rateLimit.success) {
+      return {
+        success: false, code: "RAG_RATE_LIMITED",
+        message: formatRateLimitMessage(rateLimit.reset), retrySameRequest: true,
+      };
+    }
+    const data = await fetchAiApi<T>({
+      path: `/api/v1/rag/chat/${operation}`, body: { ...payload, user_id: user.id }, retries: 0,
+    });
+    return { success: true, message: "Conversation loaded.", data };
+  } catch (error) {
+    return {
+      success: false,
+      message: "The conversation request failed.",
+      code: error instanceof AiApiError || error instanceof AiApiTransportError ? error.code : undefined,
+      retrySameRequest: isTransition && (
+        error instanceof AiApiTransportError
+        || (error instanceof AiApiError && (error.status === 408 || error.status >= 500))
+      ),
+    };
+  }
+}
+
+export async function startNewRagConversationAction(
+  input: RagNewChatPayload,
+): Promise<ChatLifecycleResult<RagNewChatResponse>> {
+  const parsed = newChatPayloadSchema.safeParse(input);
+  if (!parsed.success) {
+    return { success: false, code: "RAG_INVALID_REQUEST", message: "Invalid request.", retrySameRequest: false };
+  }
+  const data = parsed.data;
+  return lifecycleRequest("new", {
+    focus_session_id: data.focusSessionId, source_session_id: data.sourceSessionId,
+    client_request_id: data.clientRequestId, mode: data.mode,
+    selected_document_ids: data.selectedDocumentIds, top_k: data.topK,
+    prompt_variant: data.promptVariant, preferred_locale: data.preferredLocale ?? "auto",
+  });
+}
+
+export async function listRagConversationsAction(
+  focusId: string, cursor: RagHistoryCursor | null = null,
+): Promise<ChatLifecycleResult<RagHistoryResponse>> {
+  const parsed = z.object({ focusId: z.uuid(), cursor: historyCursorSchema.nullable() }).safeParse({
+    focusId, cursor,
+  });
+  if (!parsed.success) {
+    return { success: false, code: "RAG_INVALID_REQUEST", message: "Invalid request.", retrySameRequest: false };
+  }
+  return lifecycleRequest("history", {
+    focus_session_id: parsed.data.focusId, cursor: parsed.data.cursor, limit: 20,
+  });
+}
+
+export async function restoreRagHistoryAction(
+  focusId: string, sessionId: string,
+): Promise<ChatLifecycleResult<RagHistoryDetail>> {
+  const parsed = z.object({ focusId: z.uuid(), sessionId: z.uuid() }).safeParse({ focusId, sessionId });
+  if (!parsed.success) {
+    return { success: false, code: "RAG_INVALID_REQUEST", message: "Invalid request.", retrySameRequest: false };
+  }
+  return lifecycleRequest("history/detail", {
+    focus_session_id: parsed.data.focusId, session_id: parsed.data.sessionId,
+  });
 }

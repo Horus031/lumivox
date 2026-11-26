@@ -65,6 +65,11 @@ class Settings(BaseSettings):
         "openai/gpt-oss-120b"
     )
 
+    rag_new_chat_enabled: bool = False
+    rag_handoff_enabled: bool = False
+    rag_handoff_max_input_turns: int = Field(default=24, ge=1, le=100)
+    rag_handoff_max_tokens: int = Field(default=500, ge=128, le=500)
+    rag_handoff_deadline_seconds: float = Field(default=10.0, gt=0, le=20)
     rag_rolling_summary_enabled: bool = False
     rag_summary_start_turns: int = Field(default=6, ge=2, le=24)
     rag_summary_update_interval: int = Field(default=2, ge=1, le=8)

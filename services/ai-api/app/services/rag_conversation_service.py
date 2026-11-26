@@ -217,6 +217,8 @@ def ask_rag_conversation_question(
     generation = generated.generation
     usage = asdict(generation.usage) if generation is not None else {}
     usage["context"] = generated.context.model_dump()
+    if generated.context.handoff_id:
+        usage["context"]["handoff_id"] = generated.context.handoff_id
     return complete_turn(
         supabase,
         user_id=user_id,

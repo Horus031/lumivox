@@ -3,6 +3,7 @@ from typing import Literal
 from uuid import UUID
 
 from app.schemas.rag_conversation_context import RagContextMetadata
+from app.schemas.rag_conversation_handoff import RagConversationMessage
 
 
 class ProcessLearningDocumentRequest(BaseModel):
@@ -63,16 +64,12 @@ class RagConversationRestoreRequest(BaseModel):
     focus_session_id: UUID
 
 
-class RagConversationMessage(BaseModel):
-    id: str
-    turn_id: str
-    role: Literal["user", "assistant"]
-    content: str
-    turn_index: int
-
-
 class RagConversationRestoreResponse(BaseModel):
     enabled: bool
+    new_chat_enabled: bool = False
+    handoff_enabled: bool = False
+    has_handoff: bool = False
+    content_available: bool = True
 
     session_id: str | None = None
 

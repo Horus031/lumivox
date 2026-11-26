@@ -72,8 +72,8 @@ const documentId = randomUUID();
 const firstConnection = openTransactionConnection();
 let fixtureCreated = false;
 
-function reserve(session, requestId, documentIds = []) {
-  return `select public.rag_v2_reserve_turn('${owner}', '${session}', null, '${requestId}',
+function reserve(session, requestId, documentIds = [], focus = null) {
+  return `select public.rag_v2_reserve_turn('${owner}', '${session}', ${focus ? `'${focus}'` : "null"}, '${requestId}',
     '{"question":"Explain binary search","selected_document_ids":${JSON.stringify(documentIds)},"top_k":5,
       "prompt_variant":"grounded_rule","preferred_locale":"en"}'::jsonb);`;
 }
@@ -193,6 +193,159 @@ async function raceSummary(session, samePayload) {
   return turn;
 }
 
+async function focusConversation(documents = []) {
+  const focus = randomUUID();
+  const source = randomUUID();
+  const contextMode = documents.length ? "document_rag" : "general";
+  await query(`
+    insert into public.focus_sessions (id,user_id,planned_minutes,status,ended_at)
+    values ('${focus}','${owner}',25,'completed',now());
+    insert into public.rag_chat_sessions (id,user_id,focus_session_id,conversation_version,
+      selected_document_ids,context_mode,prompt_variant,top_k,preferred_locale)
+    values ('${source}','${owner}','${focus}',2,
+      '${"{" + documents.join(",") + "}"}'::uuid[],'${contextMode}','grounded_rule',5,'en');
+  `);
+  return { focus, source, documents };
+}
+
+function newChatArguments({ focus, source, documents }, requestId, mode) {
+  const payload = JSON.stringify({
+    focus_session_id: focus, source_session_id: source, mode, selected_document_ids: documents,
+    top_k: 5, prompt_variant: "grounded_rule", preferred_locale: "en",
+  });
+  return `'${owner}','${focus}','${source}','${requestId}','${payload}'::jsonb`;
+}
+
+async function prepareChat(fixture, requestId) {
+  const args = newChatArguments(fixture, requestId, "continue");
+  return JSON.parse(await query(`select public.rag_v2_prepare_new_chat(${args});`)).revision;
+}
+
+function commitChat(fixture, requestId, revision = null) {
+  const args = newChatArguments(fixture, requestId, revision ? "continue" : "fresh");
+  const memory = {
+    schema_version: 1, generation_method: "extractive", token_count: 60,
+    summary: {
+      main_topic: "Binary search", learning_objective: "", covered_concepts: [],
+      important_user_context: [], unresolved_questions: [], document_references: [],
+      uncertainties: [], continuation_hint: "",
+    },
+  };
+  const parameters = revision ? `'${JSON.stringify(revision)}','${JSON.stringify(memory)}'` : "null,null";
+  return `select public.rag_v2_commit_new_chat(${args},${parameters});`;
+}
+
+function completeHistoryTurn(turn) {
+  return `select public.rag_v2_complete_turn('${owner}','${turn.turn_id}','${turn.lease_token}',
+    'Synthetic answer','[]','fixture','fixture',1,'{}');`;
+}
+
+async function reserveFocusTurn(fixture) {
+  return JSON.parse(await query(reserve(fixture.source, randomUUID(), fixture.documents, fixture.focus)));
+}
+
+async function contend(firstSql, contenderSql) {
+  const app = `rag-chat-${randomUUID()}`;
+  let other;
+  let first;
+  await firstConnection.sql("begin; set local role service_role;");
+  try {
+    first = await firstConnection.sql(firstSql);
+    const firstPid = Number(await firstConnection.sql("select pg_backend_pid();"));
+    other = query(`set application_name='${app}'; set local role service_role; ${contenderSql}`)
+      .then((result) => ({ result }), (error) => ({ error }));
+    await waitForBlock(app, firstPid);
+  } finally {
+    await firstConnection.sql("commit;");
+  }
+  return { first, ...await other };
+}
+
+async function newChatRaces() {
+  for (const duplicate of [true, false]) {
+    const fixture = await focusConversation();
+    const request = randomUUID();
+    const result = await contend(commitChat(fixture, request), commitChat(fixture, duplicate ? request : randomUUID()));
+    if (duplicate) {
+      assert.ifError(result.error);
+      assert.equal(JSON.parse(result.first).target_session_id, JSON.parse(result.result).target_session_id);
+    } else {
+      assert.match(result.error?.stderr ?? "", /ERROR:\s+RAG_SESSION_CLOSED/);
+    }
+    assert.equal(await query(`select count(*) from public.rag_chat_transitions
+      where source_session_id='${fixture.source}';`), "1");
+    console.log(`PASS: ${duplicate ? "duplicate New Chat requests replay one target" : "distinct New Chat requests produce one transition"}`);
+  }
+
+  const reservationRace = await focusConversation();
+  const afterClosure = await contend(commitChat(reservationRace, randomUUID()),
+    reserve(reservationRace.source, randomUUID(), [], reservationRace.focus));
+  assert.match(afterClosure.error?.stderr ?? "", /ERROR:\s+RAG_SESSION_CLOSED/);
+  assert.equal(await query(`select count(*) from public.rag_chat_turns
+    where session_id='${reservationRace.source}' and status='processing';`), "0");
+  console.log("PASS: a competing ask cannot reserve against the closed source");
+
+  const completionRace = await focusConversation();
+  await query(completeHistoryTurn(await reserveFocusTurn(completionRace)));
+  const completionRequest = randomUUID();
+  const beforeCompletion = await prepareChat(completionRace, completionRequest);
+  const completing = await reserveFocusTurn(completionRace);
+  const completion = await contend(completeHistoryTurn(completing),
+    commitChat(completionRace, completionRequest, beforeCompletion));
+  assert.match(completion.error?.stderr ?? "", /ERROR:\s+RAG_HANDOFF_SOURCE_CHANGED/);
+  console.log("PASS: a competing completion changes the prepared handoff revision");
+
+  const summaryRace = await focusConversation();
+  for (let index = 0; index < 6; index++) await query(completeHistoryTurn(await reserveFocusTurn(summaryRace)));
+  const summaryRequest = randomUUID();
+  const beforeSummary = await prepareChat(summaryRace, summaryRequest);
+  const summarizing = await reserveFocusTurn(summaryRace);
+  const result = await contend(`${save(summaryRace.source, summarizing)}
+    update public.rag_chat_turns set lease_expires_at=clock_timestamp()-interval '1 second'
+      where id='${summarizing.turn_id}';`, commitChat(summaryRace, summaryRequest, beforeSummary));
+  assert.match(result.error?.stderr ?? "", /ERROR:\s+RAG_HANDOFF_SOURCE_CHANGED/);
+  assert.equal(await summaryCount(summaryRace.source), "1");
+  console.log("PASS: a competing rolling summary invalidates the prepared revision");
+
+  await query(`insert into public.learning_document_permissions (document_id,user_email,created_by)
+    values ('${documentId}','rag-race-${owner}@example.test','${documentOwner}');`);
+  const revoked = await focusConversation([documentId]);
+  await query(completeHistoryTurn(await reserveFocusTurn(revoked)));
+  const revokedRequest = randomUUID();
+  const beforeRevoke = await prepareChat(revoked, revokedRequest);
+  await firstConnection.sql(`delete from public.learning_document_permissions where document_id='${documentId}';`);
+  await assert.rejects(query(commitChat(revoked, revokedRequest, beforeRevoke)),
+    { stderr: /ERROR:\s+RAG_DOCUMENT_ACCESS_DENIED/ });
+  console.log("PASS: document revocation between prepare and commit prevents Continue");
+
+  const rollback = await focusConversation();
+  await query(completeHistoryTurn(await reserveFocusTurn(rollback)));
+  const rejectedRequest = randomUUID();
+  const revision = await prepareChat(rollback, rejectedRequest);
+  await firstConnection.sql("begin;");
+  try {
+    await firstConnection.sql(`
+      alter table public.rag_chat_handoffs add constraint phase5_fixture_failure check (false) not valid;
+      set local role service_role;
+      do $fixture$
+      declare constraint_name text;
+      begin
+        ${commitChat(rollback, rejectedRequest, revision).replace("select public.", "perform public.")}
+        raise exception 'Expected handoff insert failure';
+      exception when check_violation then
+        get stacked diagnostics constraint_name = constraint_name;
+        if constraint_name is distinct from 'phase5_fixture_failure' then raise; end if;
+      end; $fixture$;
+    `);
+    assert.equal(await firstConnection.sql(`select status from public.rag_chat_sessions where id='${rollback.source}';`), "active");
+    assert.equal(await firstConnection.sql(`select count(*) from public.rag_chat_transitions where source_session_id='${rollback.source}';`), "0");
+    assert.equal(await firstConnection.sql(`select count(*) from public.rag_chat_sessions where focus_session_id='${rollback.focus}';`), "1");
+  } finally {
+    await firstConnection.sql("rollback;");
+  }
+  console.log("PASS: a failed handoff insert rolls back source closure and target creation");
+}
+
 try {
   await query(`
     insert into auth.users (id, email) values
@@ -237,6 +390,7 @@ try {
     { stderr: /ERROR:\s+RAG_DOCUMENT_ACCESS_DENIED/ });
   assert.equal(await summaryCount(scopedSummarySession), "0");
   console.log("PASS: document revocation before save prevents a summary write");
+  await newChatRaces();
 } finally {
   firstConnection.close();
   if (fixtureCreated) {
