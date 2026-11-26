@@ -9,13 +9,34 @@ from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
 
 
-MARKDOWN_FORMATTING_RULES = """
-Formatting:
-- Use Markdown for readability.
-- Use short headings, bullet lists, and numbered steps when they make the answer easier to scan.
-- Use **bold** for key terms or important conclusions.
-- Use fenced code blocks with a language label for code, commands, formulas, or structured examples.
-- Do not wrap the entire answer in a code block.
+MARKDOWN_FORMATTING_RULES = r"""Formatting:
+- Use CommonMark and GitHub Flavored Markdown.
+- Prefer concise headings, paragraphs, and lists.
+- Use **bold** for key concepts or conclusions.
+- Use Markdown tables for meaningful comparisons.
+- Include a header row and a valid delimiter row
+  in every Markdown table.
+- Keep table cells concise when possible.
+- Put executable code and commands in fenced code
+  blocks with an appropriate language identifier,
+  such as python, javascript, sql, or bash.
+- Use inline code for identifiers, variables,
+  filenames, and short commands.
+- Use $...$ for inline mathematical expressions.
+- Use $$ delimiters on separate lines for display
+  equations, with the expression on its own line.
+- Do not put mathematical expressions inside code
+  fences when they should be rendered as equations.
+- Escape literal dollar signs when they represent
+  currency rather than mathematical notation.
+- Use nested lists when explaining hierarchical
+  concepts or multi-step procedures.
+- Do not generate raw HTML, embedded images,
+  iframes, scripts, or executable interactive content.
+- Do not wrap the entire answer in a code fence.
+- Choose formatting based on the educational value
+  of the answer; do not force tables or equations
+  when plain explanations are more appropriate.
 """.strip()
 
 def _locale_instruction(preferred_locale: str | None) -> str:

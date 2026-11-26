@@ -32,6 +32,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.2.1",
+    "katex": "0.19.1",
     "livekit-client": "^2.19.0",
     "livekit-server-sdk": "^2.15.3",
     "lucide-react": "^0.511.0",
@@ -43,11 +44,19 @@
     "react": "19.2.6",
     "react-day-picker": "^10.0.1",
     "react-dom": "19.2.6",
+    "react-markdown": "10.1.0",
     "recharts": "^3.8.1",
+    "rehype-highlight": "7.0.2",
+    "rehype-katex": "7.0.1",
+    "remark-gfm": "4.0.1",
+    "remark-math": "6.0.0",
     "resend": "6.37.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.0",
     "zod": "^4.4.3"
+  },
+  "overrides": {
+    "katex": "$katex"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
