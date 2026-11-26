@@ -1950,7 +1950,18 @@
     },
     "askPlaceholder": "Ask a question about your study materials...",
     "ask": "Ask",
-    "thinking": "Thinking..."
+    "thinking": "Thinking...",
+    "retryRequest": "Retry request",
+    "requestOutcomeUnknown": "We couldn’t confirm the result. Retry to check this request.",
+    "turnFailed": "The study assistant couldn’t complete this request. You can send the question again.",
+    "idempotencyConflict": "This request conflicts with one already recorded. Reload the workspace to check your conversation.",
+    "documentAccessDenied": "You no longer have access to one or more documents in this request.",
+    "restoringConversation": "Restoring conversation...",
+    "restoreFailed": "Unable to restore your conversation. Please reload the workspace.",
+    "conversationTurns": "{count, plural, one {# completed turn} other {# completed turns}}",
+    "conversationScopeLocked": "The document selection is fixed for this conversation.",
+    "turnInProgress": "Your previous question is still being processed.",
+    "conversationUnavailable": "This conversation is currently unavailable."
   },
   "admin": {
     "common": {

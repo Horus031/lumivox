@@ -594,14 +594,14 @@ isOneToOne: true
                   ]
                 },"rag_chat_messages": {
                   Row: {
-                    "content": string,"content_locale": string | null,"context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"id": string,"latency_ms": number | null,"model_name": string | null,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids": (string)[],"retrieved_context": NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids": (string)[],"session_id": string,"top_k": number | null,"user_id": string
+                    "content": string,"content_locale": string | null,"context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"id": string,"latency_ms": number | null,"model_name": string | null,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids": (string)[],"retrieved_context": NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids": (string)[],"session_id": string,"top_k": number | null,"turn_id": string | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "content": string,"content_locale"?: string | null,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids"?: (string)[],"retrieved_context"?: NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids"?: (string)[],"session_id": string,"top_k"?: number | null,"user_id": string
+                    "content": string,"content_locale"?: string | null,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids"?: (string)[],"retrieved_context"?: NonNullable<Json>,"role": Database["public"]['Enums']["rag_message_role"],"selected_document_ids"?: (string)[],"session_id": string,"top_k"?: number | null,"turn_id"?: string | null,"user_id": string
                   }
                   Update: {
-                    "content"?: string,"content_locale"?: string | null,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids"?: (string)[],"retrieved_context"?: NonNullable<Json>,"role"?: Database["public"]['Enums']["rag_message_role"],"selected_document_ids"?: (string)[],"session_id"?: string,"top_k"?: number | null,"user_id"?: string
+                    "content"?: string,"content_locale"?: string | null,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"id"?: string,"latency_ms"?: number | null,"model_name"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"] | null,"retrieved_chunk_ids"?: (string)[],"retrieved_context"?: NonNullable<Json>,"role"?: Database["public"]['Enums']["rag_message_role"],"selected_document_ids"?: (string)[],"session_id"?: string,"top_k"?: number | null,"turn_id"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -616,18 +616,24 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rag_message_turn_owner_fk"
+      columns: ["turn_id","session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_turns"
+      referencedColumns: ["id","session_id","user_id"]
     }
                   ]
                 },"rag_chat_sessions": {
                   Row: {
-                    "context_mode": Database["public"]['Enums']["rag_context_mode"],"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
+                    "closed_at": string | null,"completed_turn_count": number,"context_mode": Database["public"]['Enums']["rag_context_mode"],"conversation_version": number,"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"status": string,"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id": string
+                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "context_mode"?: Database["public"]['Enums']["rag_context_mode"],"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id"?: string
+                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -654,6 +660,46 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "profiles"
       referencedColumns: ["id"]
+    }
+                  ]
+                },"rag_chat_summaries": {
+                  Row: {
+                    "covered_turn_index": number,"created_at": string,"id": string,"model_name": string | null,"session_id": string,"summary": NonNullable<Json>,"token_count": number | null,"user_id": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "covered_turn_index": number,"created_at"?: string,"id"?: string,"model_name"?: string | null,"session_id": string,"summary": NonNullable<Json>,"token_count"?: number | null,"user_id": string,"version": number
+                  }
+                  Update: {
+                    "covered_turn_index"?: number,"created_at"?: string,"id"?: string,"model_name"?: string | null,"session_id"?: string,"summary"?: NonNullable<Json>,"token_count"?: number | null,"user_id"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_summary_session_owner_fk"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
+                },"rag_chat_turns": {
+                  Row: {
+                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"created_at": string,"error_code": string | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"session_id": string,"status": string,"total_tokens": number | null,"turn_index": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"session_id": string,"status"?: string,"total_tokens"?: number | null,"turn_index": number,"user_id": string
+                  }
+                  Update: {
+                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"session_id"?: string,"status"?: string,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_turn_session_owner_fk"
+      columns: ["session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
     }
                   ]
                 },"reward_ledger": {
@@ -1972,6 +2018,18 @@ isOneToOne: false
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
             }[]
+                           },
+"rag_v2_complete_turn":
+{ Args: { "p_answer": string,"p_latency_ms": number,"p_lease_token": string,"p_model_name": string,"p_provider": string,"p_sources": Json,"p_turn_id": string,"p_usage": Json,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_fail_turn":
+{ Args: { "p_error_code": string,"p_lease_token": string,"p_turn_id": string,"p_user_id": string }; Returns: boolean
+                           },
+"rag_v2_reserve_turn":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_request": Json,"p_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_validate_scope":
+{ Args: { "p_document_ids": (string)[],"p_focus_session_id": string,"p_user_id": string }; Returns: undefined
                            },
 "match_task_review_document_chunks":
 { Args: { "p_document_ids"?: (string)[],"p_embedding_model"?: string,"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {

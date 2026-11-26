@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { toast } from "sonner";
 
-import { askRagQuestionAction, type RagSourceChunk } from "@/features/rag/rag-chat.actions";
+import {
+  askRagQuestionAction,
+  restoreRagConversationAction,
+  type RagSourceChunk,
+} from "@/features/rag/rag-chat.actions";
 import { RagMarkdownMessage } from "@/features/rag/components/rag-markdown-message";
 type RagDocumentOption = {
   id: string;
@@ -47,6 +50,35 @@ type ChatMessage = {
   promptVariant?: "no_rule" | "grounded_rule";
 };
 
+type PendingRagRequest = {
+  clientRequestId: string;
+  question: string;
+  sessionId: string | null;
+  focusSessionId: string | null;
+  selectedDocumentIds: string[];
+  topK: number;
+  promptVariant: "grounded_rule" | "no_rule";
+  preferredLocale: "vi" | "en";
+};
+
+const REQUEST_ERROR_MESSAGES = new Map<string, string>([
+  ["AI_API_TIMEOUT", "requestOutcomeUnknown"],
+  ["AI_API_UNAVAILABLE", "requestOutcomeUnknown"],
+  ["RAG_TURN_OUTCOME_UNKNOWN", "requestOutcomeUnknown"],
+  ["RAG_PERSISTENCE_UNAVAILABLE", "requestOutcomeUnknown"],
+  ["RAG_INTERNAL_ERROR", "requestOutcomeUnknown"],
+  ["RAG_INVALID_LEASE", "requestOutcomeUnknown"],
+  ["RAG_INVALID_RESPONSE", "requestOutcomeUnknown"],
+  ["RAG_TURN_IN_PROGRESS", "turnInProgress"],
+  ["RAG_GENERATION_FAILED", "turnFailed"],
+  ["RAG_PREVIOUS_TURN_FAILED", "turnFailed"],
+  ["RAG_IDEMPOTENCY_CONFLICT", "idempotencyConflict"],
+  ["RAG_DOCUMENT_ACCESS_DENIED", "documentAccessDenied"],
+  ["RAG_SESSION_NOT_FOUND", "conversationUnavailable"],
+  ["RAG_SESSION_CLOSED", "conversationUnavailable"],
+  ["RAG_CONTEXT_CHANGED", "conversationUnavailable"],
+]);
+
 type RagStudyAssistantProps = {
   compact?: boolean;
   fillHeight?: boolean;
@@ -80,10 +112,23 @@ export function RagStudyAssistant({
   const [question, setQuestion] = useState("");
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [selectedDocumentIds, setSelectedDocumentIds] = useState<string[]>([]);
-  const [topK] = useState(defaultTopK ?? 5);
-  const [promptVariant] = useState<"grounded_rule" | "no_rule">(
-    defaultPromptVariant ?? "grounded_rule",
-  );
+  const [topK, setTopK] = useState(defaultTopK ?? 5);
+
+  const [promptVariant, setPromptVariant] = useState<
+    "grounded_rule" | "no_rule"
+  >(defaultPromptVariant ?? "grounded_rule");
+  const [isRestoring, setIsRestoring] = useState(Boolean(focusSessionId));
+
+  const [restoreFailed, setRestoreFailed] = useState(false);
+
+  const [conversationV2, setConversationV2] = useState(false);
+
+  const [completedTurnCount, setCompletedTurnCount] = useState(0);
+  const [conversationError, setConversationError] = useState<string | null>(null);
+  const [pendingRequest, setPendingRequest] = useState<PendingRagRequest | null>(null);
+
+  const requestInFlightRef = useRef(false);
+  const conversationEpochRef = useRef(0);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -92,8 +137,16 @@ export function RagStudyAssistant({
   const shouldAutoScrollRef = useRef(true);
 
   const canAsk = useMemo(() => question.trim().length > 0, [question]);
+  const requestDisabled = isPending || isRestoring || restoreFailed;
+  const conversationScopeLocked = conversationV2 && Boolean(sessionId);
+  const documentSelectionDisabled =
+    requestDisabled || conversationScopeLocked || pendingRequest !== null;
 
   function toggleDocument(documentId: string) {
+    if (documentSelectionDisabled || requestInFlightRef.current) {
+      return;
+    }
+
     setSelectedDocumentIds((current) =>
       current.includes(documentId)
         ? current.filter((id) => id !== documentId)
@@ -106,64 +159,97 @@ export function RagStudyAssistant({
 
     const cleanQuestion = question.trim();
 
-    if (!cleanQuestion || isPending) return;
+    if (!cleanQuestion || pendingRequest || requestDisabled || requestInFlightRef.current) return;
 
-    const userMessage: ChatMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: cleanQuestion,
+    const request: PendingRagRequest = {
+      clientRequestId: crypto.randomUUID(),
+      question: cleanQuestion,
+      sessionId,
+      focusSessionId: focusSessionId ?? null,
+      selectedDocumentIds: [...selectedDocumentIds],
+      topK,
+      promptVariant,
+      preferredLocale: locale === "vi" ? "vi" : "en",
     };
-
-    setMessages((current) => [...current, userMessage]);
+    setMessages((current) => [
+      ...current,
+      { id: request.clientRequestId, role: "user", content: request.question },
+    ]);
     setQuestion("");
+    sendRequest(request);
+  }
+
+  function sendRequest(request: PendingRagRequest) {
+    if (requestDisabled || requestInFlightRef.current) return;
+
+    requestInFlightRef.current = true;
+    const epoch = conversationEpochRef.current;
+    setPendingRequest(request);
+    setConversationError(null);
 
     startTransition(async () => {
-      const result = await askRagQuestionAction({
-        question: cleanQuestion,
-        selectedDocumentIds,
-        focusSessionId,
-        sessionId,
-        topK,
-        promptVariant,
-        preferredLocale: locale === "vi" ? "vi" : "en",
-      });
+      try {
+        const result = await askRagQuestionAction(request);
+        if (epoch !== conversationEpochRef.current) return;
 
-      if (!result.success || !result.data) {
-        toast.error(result.message);
+        if (!result.success) {
+          const errorKey = result.code ? REQUEST_ERROR_MESSAGES.get(result.code) : undefined;
+          setConversationError(errorKey ? t(errorKey) : result.message);
+
+          if (!result.retrySameRequest) {
+            if (result.sessionId) {
+              setSessionId(result.sessionId);
+              setConversationV2(true);
+            }
+
+            setPendingRequest(null);
+            setMessages((current) =>
+              current.filter((message) => message.id !== request.clientRequestId),
+            );
+            setQuestion((current) => current || request.question);
+          }
+
+          return;
+        }
+
+        const { data } = result;
+        if (!data) {
+          setConversationError(t("requestOutcomeUnknown"));
+          return;
+        }
+
+        setPendingRequest(null);
+        setSessionId(data.session_id);
+
+        if (typeof data.completed_turn_count === "number") {
+          setCompletedTurnCount(data.completed_turn_count);
+          setConversationV2(true);
+        }
 
         setMessages((current) => [
           ...current,
           {
             id: crypto.randomUUID(),
             role: "assistant",
-            content: result.message,
+            content: data.answer,
+            sources: data.sources,
+            latencyMs: data.latency_ms,
+            contextMode: data.context_mode,
+            topK: data.top_k,
+            promptVariant: data.prompt_variant,
           },
         ]);
-
-        return;
+      } catch {
+        if (epoch === conversationEpochRef.current) {
+          setConversationError(t("requestOutcomeUnknown"));
+        }
+      } finally {
+        requestInFlightRef.current = false;
       }
-
-      setSessionId(result.data.session_id);
-
-      setMessages((current) => [
-        ...current,
-        {
-          id: crypto.randomUUID(),
-          role: "assistant",
-          content: result.data.answer,
-          sources: result.data.sources,
-          latencyMs: result.data.latency_ms,
-          contextMode: result.data.context_mode,
-          topK: result.data.top_k,
-          promptVariant: result.data.prompt_variant,
-        },
-      ]);
     });
   }
 
-  const handleKeyDown = (
-    e: React.KeyboardEvent<HTMLTextAreaElement>,
-  ) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.nativeEvent.isComposing) return;
 
     if (e.key === "Enter" && !e.shiftKey) {
@@ -199,6 +285,83 @@ export function RagStudyAssistant({
     }
   }, [messages]);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    setSessionId(null);
+    setMessages([]);
+    setSelectedDocumentIds([]);
+    setCompletedTurnCount(0);
+    setConversationV2(false);
+    setConversationError(null);
+    setPendingRequest(null);
+    setRestoreFailed(false);
+    setTopK(defaultTopK ?? 5);
+    setPromptVariant(defaultPromptVariant ?? "grounded_rule");
+
+    if (!focusSessionId) {
+      setIsRestoring(false);
+
+      return () => {
+        cancelled = true;
+        conversationEpochRef.current += 1;
+      };
+    }
+
+    setIsRestoring(true);
+
+    async function restore() {
+      try {
+        const result = await restoreRagConversationAction(focusSessionId!);
+
+        if (cancelled) return;
+
+        if (!result.success || !result.data) {
+          setRestoreFailed(true);
+          return;
+        }
+
+        const data = result.data;
+
+        setConversationV2(data.enabled);
+
+        if (!data.enabled) return;
+
+        setSessionId(data.session_id);
+
+        setCompletedTurnCount(data.completed_turn_count);
+
+        setSelectedDocumentIds(data.selected_document_ids);
+
+        setTopK(data.top_k);
+        setPromptVariant(data.prompt_variant);
+
+        setMessages(
+          data.messages.map((message) => ({
+            id: message.id,
+            role: message.role,
+            content: message.content,
+          })),
+        );
+      } catch {
+        if (!cancelled) {
+          setRestoreFailed(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRestoring(false);
+        }
+      }
+    }
+
+    void restore();
+
+    return () => {
+      cancelled = true;
+      conversationEpochRef.current += 1;
+    };
+  }, [focusSessionId, defaultTopK, defaultPromptVariant]);
+
   return (
     <section
       className={cn(
@@ -212,6 +375,15 @@ export function RagStudyAssistant({
           {t("ragTitle")}
         </h3>
       )}
+      {isRestoring ? (
+        <p role="status" className="mt-2 text-xs text-muted-foreground">
+          {t("restoringConversation")}
+        </p>
+      ) : conversationScopeLocked && (
+        <p className="mt-2 text-xs text-muted-foreground">
+          {t("conversationTurns", { count: completedTurnCount })}
+        </p>
+      )}
 
       <div
         ref={chatContainerRef}
@@ -219,7 +391,8 @@ export function RagStudyAssistant({
         className={cn(
           "mt-5 min-w-0 max-w-full scroll-smooth h-96 space-y-4 rounded-2xl overflow-x-hidden overflow-y-scroll",
           compact && "mt-3 h-64 rounded-md",
-          fillHeight && "h-auto min-h-0 flex-1 overflow-y-auto overscroll-contain",
+          fillHeight &&
+            "h-auto min-h-0 flex-1 overflow-y-auto overscroll-contain",
         )}
       >
         {messages.length === 0 ? (
@@ -249,8 +422,7 @@ export function RagStudyAssistant({
               key={message.id}
               className={cn(
                 "min-w-0 max-w-full rounded-2xl p-4",
-                message.role === "user" &&
-                  "border bg-background",
+                message.role === "user" && "border bg-background",
               )}
             >
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
@@ -258,7 +430,10 @@ export function RagStudyAssistant({
               </p>
 
               {message.role === "assistant" ? (
-                <RagMarkdownMessage className="mt-2" content={message.content} />
+                <RagMarkdownMessage
+                  className="mt-2"
+                  content={message.content}
+                />
               ) : (
                 <p className="mt-2 whitespace-pre-wrap wrap-anywhere text-sm leading-6 text-foreground">
                   {message.content}
@@ -317,10 +492,33 @@ export function RagStudyAssistant({
           fillHeight && "mt-2 shrink-0 gap-2 border-t border-border pt-2",
         )}
       >
+        {(conversationError || restoreFailed) && (
+          <div className="flex flex-wrap items-center gap-2 rounded-md border border-destructive/30 p-2 text-sm">
+            <p role="alert" className="min-w-0 wrap-anywhere text-destructive">
+              {conversationError ?? t("restoreFailed")}
+            </p>
+            {pendingRequest && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={requestDisabled}
+                onClick={() => sendRequest(pendingRequest)}
+              >
+                {t("retryRequest")}
+              </Button>
+            )}
+          </div>
+        )}
         <div>
           <Popover>
             <PopoverTrigger asChild>
-              <Button type="button" variant="ghost" size="sm" className="max-w-full text-caption">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="max-w-full text-caption"
+              >
                 <Plus size={12} aria-hidden="true" /> {t("chooseDocuments")}
               </Button>
             </PopoverTrigger>
@@ -342,7 +540,9 @@ export function RagStudyAssistant({
                     </span>
                   </div>
                 </PopoverTitle>
-                <PopoverDescription>{t("documentDescription")}</PopoverDescription>
+                <PopoverDescription>
+                  {t(conversationScopeLocked ? "conversationScopeLocked" : "documentDescription")}
+                </PopoverDescription>
               </PopoverHeader>
               {documents.length === 0 ? (
                 <p className="mt-4 rounded-xl border border-dashed p-4 text-sm text-neutral-600 dark:border-neutral-800 dark:text-neutral-400">
@@ -365,6 +565,7 @@ export function RagStudyAssistant({
                         <input
                           type="checkbox"
                           checked={checked}
+                          disabled={documentSelectionDisabled}
                           onChange={() => toggleDocument(document.id)}
                           className="h-4 w-4"
                         />
@@ -376,7 +577,9 @@ export function RagStudyAssistant({
 
                           <p className="text-xs text-neutral-500 dark:text-neutral-400">
                             {t("documentStatus", {
-                              visibility: t(`visibility.${document.visibility}`),
+                              visibility: t(
+                                `visibility.${document.visibility}`,
+                              ),
                             })}
                           </p>
                         </div>
@@ -406,10 +609,11 @@ export function RagStudyAssistant({
 
           <Button
             type="submit"
-            disabled={!canAsk || isPending}
+            disabled={!canAsk || requestDisabled || pendingRequest !== null}
             className={cn(
               "bg-primary text-foreground px-5 py-2.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60",
-              compact && "h-touch px-3 text-primary-foreground sm:h-touch lg:h-control",
+              compact &&
+                "h-touch px-3 text-primary-foreground sm:h-touch lg:h-control",
             )}
           >
             {isPending ? t("thinking") : t("ask")}

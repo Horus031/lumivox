@@ -141,6 +141,9 @@ jobs:
       - name: Database tests
         run: supabase test db --local
 
+      - name: RAG conversation concurrency
+        run: node scripts/test-rag-conversation-concurrency.mjs
+
       - name: Stop local database
         if: always()
         run: supabase stop --no-backup

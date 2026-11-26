@@ -17,10 +17,24 @@ export class AiApiError extends Error {
     public readonly status: number,
 
     public readonly requestId: string,
+
+    public readonly code?: string,
+    public readonly details?: Record<string, unknown>,
   ) {
     super(message);
 
     this.name = "AiApiError";
+  }
+}
+
+export class AiApiTransportError extends Error {
+  constructor(
+    message: string,
+    public readonly requestId: string,
+    public readonly code: "AI_API_TIMEOUT" | "AI_API_UNAVAILABLE",
+  ) {
+    super(message);
+    this.name = "AiApiTransportError";
   }
 }
 
@@ -39,13 +53,27 @@ async function readErrorDetail(response: Response) {
     };
 
     if (typeof body.detail === "string") {
-      return body.detail;
+      return {
+        message: body.detail,
+        code: /^[A-Z][A-Z0-9_]*$/.test(body.detail) ? body.detail : undefined,
+      };
+    }
+
+    if (body.detail && typeof body.detail === "object" && !Array.isArray(body.detail)) {
+      const details = body.detail as Record<string, unknown>;
+      return {
+        message: typeof details.message === "string"
+          ? details.message
+          : `AI API request failed (${response.status}).`,
+        code: typeof details.code === "string" ? details.code : undefined,
+        details,
+      };
     }
   } catch {
     // Fall back below.
   }
 
-  return `AI API request failed ` + `(${response.status}).`;
+  return { message: `AI API request failed (${response.status}).` };
 }
 
 export async function fetchAiApi<TResponse>({
@@ -109,7 +137,13 @@ export async function fetchAiApi<TResponse>({
         continue;
       }
 
-      throw new AiApiError(`${detail} Reference: ${requestId}`, response.status, requestId);
+      throw new AiApiError(
+        `${detail.message} Reference: ${requestId}`,
+        response.status,
+        requestId,
+        detail.code,
+        detail.details,
+      );
     } catch (error) {
       if (error instanceof AiApiError) {
         throw error;
@@ -121,11 +155,22 @@ export async function fetchAiApi<TResponse>({
         continue;
       }
 
-      if (error instanceof Error && error.name === "AbortError") {
-        throw new Error("AI service timed out. " + `Reference: ${requestId}`);
+      if (
+        controller.signal.aborted ||
+        (typeof error === "object" && error !== null && "name" in error && error.name === "AbortError")
+      ) {
+        throw new AiApiTransportError(
+          `AI service timed out. Reference: ${requestId}`,
+          requestId,
+          "AI_API_TIMEOUT",
+        );
       }
 
-      throw new Error("AI service is temporarily " + "unavailable. " + `Reference: ${requestId}`);
+      throw new AiApiTransportError(
+        `AI service is temporarily unavailable. Reference: ${requestId}`,
+        requestId,
+        "AI_API_UNAVAILABLE",
+      );
     } finally {
       clearTimeout(timeout);
     }
