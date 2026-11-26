@@ -29,6 +29,8 @@ from app.services.rag_conversation_store import (
     load_history_detail,
 )
 from app.services.rag_new_chat_service import start_new_conversation
+from app.services.rag_operation_recovery_service import reconcile_operation
+from app.schemas.rag_operation_recovery import RagOperationStatusRequest, RagOperationStatusResponse
 from app.schemas.rag_conversation_handoff import (
     RagHistoryDetailRequest, RagHistoryDetailResponse, RagHistoryRequest, RagHistoryResponse,
     RagNewChatRequest, RagNewChatResponse,
@@ -85,6 +87,10 @@ def ask_question(
     ),
 ):
     try:
+        if payload.conversation_protocol == "v2" and not settings.rag_conversation_v2_enabled:
+            raise HTTPException(409, detail={"code": "RAG_V2_DISABLED"})
+        if payload.conversation_protocol == "legacy" and settings.rag_conversation_v2_enabled:
+            raise HTTPException(409, detail={"code": "RAG_PROTOCOL_MISMATCH"})
         if settings.rag_conversation_v2_enabled:
             if payload.client_request_id is None:
                 raise RagConversationError(
@@ -155,14 +161,15 @@ def ask_question(
         return RagAskResponse(**result)
 
     except RagConversationError as error:
-        raise HTTPException(
-            status_code=error.status_code,
-            detail=(
-                {"code": error.code, "session_id": error.session_id}
-                if error.session_id is not None
-                else error.code
-            ),
-        ) from None
+        details = {"code": error.code}
+        if error.session_id is not None:
+            details["session_id"] = error.session_id
+        if error.outcome is not None:
+            details["outcome"] = error.outcome
+        raise HTTPException(error.status_code, detail=details if len(details) > 1 else error.code) from None
+
+    except HTTPException:
+        raise
 
     except Exception:
         logger.error(
@@ -187,7 +194,7 @@ def restore_conversation(
 ):
     if not settings.rag_conversation_v2_enabled:
         return RagConversationRestoreResponse(
-            enabled=False
+            enabled=False, recovery_enabled=settings.rag_operation_recovery_enabled,
         )
 
     try:
@@ -208,6 +215,8 @@ def restore_conversation(
         return RagConversationRestoreResponse(
             **{
                 **result,
+                "recovery_enabled": settings.rag_operation_recovery_enabled,
+                "pending_operation": result.get("pending_operation") if settings.rag_operation_recovery_enabled else None,
                 "soft_turn_limit": settings.rag_soft_turn_limit,
                 "hard_turn_limit": settings.rag_hard_turn_limit,
                 "new_chat_enabled": settings.rag_new_chat_enabled,
@@ -234,6 +243,16 @@ def restore_conversation(
 def new_chat(payload: RagNewChatRequest, _: None = Depends(verify_internal_api_key)):
     try:
         return start_new_conversation(payload)
+    except RagConversationError as error:
+        raise HTTPException(error.status_code, detail={"code": error.code}) from None
+    except Exception:
+        raise HTTPException(503, detail={"code": "RAG_PERSISTENCE_UNAVAILABLE"}) from None
+
+
+@router.post("/chat/operation-status", response_model=RagOperationStatusResponse)
+def operation_status(payload: RagOperationStatusRequest, _: None = Depends(verify_internal_api_key)):
+    try:
+        return reconcile_operation(payload)
     except RagConversationError as error:
         raise HTTPException(error.status_code, detail={"code": error.code}) from None
     except Exception:

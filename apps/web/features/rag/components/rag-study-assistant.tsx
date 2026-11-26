@@ -20,6 +20,8 @@ import { RagMarkdownMessage } from "@/features/rag/components/rag-markdown-messa
 import { RagContextIndicator } from "./rag-context-indicator";
 import { RagNewChatDialog } from "./rag-new-chat-dialog";
 import { RagConversationHistory } from "./rag-conversation-history";
+import { useRagOperationRecovery } from "../hooks/use-rag-operation-recovery";
+import type { RagRecoveryReference } from "../lib/rag-recovery-journal";
 type RagDocumentOption = {
   id: string;
   file_name: string;
@@ -53,6 +55,8 @@ import { cn } from "@/lib/utils";
 
 type ChatMessage = {
   id: string;
+  turnId?: string;
+  turnIndex?: number;
   role: "user" | "assistant";
   content: string;
   sources?: RagSourceChunk[];
@@ -71,7 +75,17 @@ type PendingRagRequest = {
   topK: number;
   promptVariant: "grounded_rule" | "no_rule";
   preferredLocale: "vi" | "en";
+  conversationProtocol?: "legacy" | "v2";
 };
+
+const CANONICAL_RESTORE_CODES = new Set([
+  "RAG_SESSION_CLOSED", "RAG_SESSION_NOT_FOUND", "RAG_CONTEXT_CHANGED",
+  "RAG_HANDOFF_SOURCE_CHANGED", "RAG_DOCUMENT_ACCESS_DENIED", "RAG_V2_DISABLED", "RAG_PROTOCOL_MISMATCH",
+  "RAG_NEW_CHAT_DISABLED", "RAG_HANDOFF_DISABLED",
+]);
+const CONFIG_CHANGED_CODES = new Set([
+  "RAG_V2_DISABLED", "RAG_PROTOCOL_MISMATCH", "RAG_NEW_CHAT_DISABLED", "RAG_HANDOFF_DISABLED",
+]);
 
 const REQUEST_ERROR_MESSAGES = new Map<string, string>([
   ["AI_API_TIMEOUT", "requestOutcomeUnknown"],
@@ -107,6 +121,7 @@ type RagStudyAssistantProps = {
   fillHeight?: boolean;
   className?: string;
   focusSessionId?: string | null;
+  accountScope?: string;
   documents: RagDocumentOption[];
   defaultTopK?: number;
   defaultPromptVariant?: "grounded_rule" | "no_rule";
@@ -128,6 +143,7 @@ export function RagStudyAssistant({
   fillHeight = false,
   className,
   focusSessionId,
+  accountScope,
   documents,
   defaultTopK,
   defaultPromptVariant,
@@ -172,6 +188,11 @@ export function RagStudyAssistant({
   const transitionInFlightRef = useRef(false);
   const historyInFlightRef = useRef(false);
   const conversationEpochRef = useRef(0);
+  const restoreCallRef = useRef<object | null>(null);
+  const pendingAskRef = useRef<PendingRagRequest | null>(null);
+  const defaultsRef = useRef({ topK: defaultTopK ?? 5, promptVariant: defaultPromptVariant ?? "grounded_rule" });
+  const [recoveryEnabled, setRecoveryEnabled] = useState(false);
+  const [recoveryRestored, setRecoveryRestored] = useState(false);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isPending, startTransition] = useTransition();
@@ -179,15 +200,106 @@ export function RagStudyAssistant({
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const shouldAutoScrollRef = useRef(true);
 
+  useEffect(() => {
+    defaultsRef.current = { topK: defaultTopK ?? 5, promptVariant: defaultPromptVariant ?? "grounded_rule" };
+  }, [defaultTopK, defaultPromptVariant]);
+
+  const applyActiveConversation = useCallback((data: RagConversationRestoreResponse) => {
+    conversationEpochRef.current += 1;
+    setConversationV2(data.enabled);
+    setRecoveryEnabled(Boolean(data.recovery_enabled));
+    setNewChatEnabled(Boolean(data.new_chat_enabled));
+    setHandoffEnabled(Boolean(data.handoff_enabled));
+    setHasHandoff(Boolean(data.has_handoff));
+    setContentAvailable(data.content_available !== false);
+    setViewingHistory(null);
+    setRestoreFailed(false);
+    setConversationError(null);
+    setHistoryOpen(false);
+    setContextMetadata(null);
+    setServerTurnLimitReached(false);
+    setActiveSessionId(data.enabled ? data.session_id : null);
+    setCompletedTurnCount(data.enabled ? data.completed_turn_count : 0);
+    setSoftTurnLimit(data.soft_turn_limit ?? DEFAULT_SOFT_TURN_LIMIT);
+    setHardTurnLimit(data.hard_turn_limit ?? DEFAULT_HARD_TURN_LIMIT);
+    setSelectedDocumentIds(data.enabled ? data.selected_document_ids : []);
+    const persisted = data.enabled && data.session_id && data.content_available !== false;
+    setTopK(persisted ? data.top_k : defaultsRef.current.topK);
+    setPromptVariant(persisted ? data.prompt_variant : defaultsRef.current.promptVariant);
+    setMessages(data.enabled ? data.messages.map(({ id, role, content, turn_id, turn_index }) => ({
+      id, role, content, turnId: turn_id, turnIndex: turn_index,
+    })) : []);
+    shouldAutoScrollRef.current = true;
+  }, []);
+
+  const reconcileActiveConversation = useCallback(async (focusId: string, expectedEpoch: number, sourceId?: string) => {
+    try {
+      const result = await restoreRagConversationAction(focusId);
+      if (expectedEpoch !== conversationEpochRef.current || !result.success || !result.data
+        || (sourceId && result.data.session_id === sourceId)) return null;
+      applyActiveConversation(result.data);
+      return result.data;
+    } catch {
+      return null;
+    }
+  }, [applyActiveConversation]);
+
+  const finishRecovery = useCallback((reference: RagRecoveryReference, status: "completed" | "failed" | "access_unavailable") => {
+    const request = pendingAskRef.current;
+    if (status !== "completed" && request?.clientRequestId === reference.clientRequestId) {
+      setQuestion((current) => current || request.question);
+    }
+    if (reference.operation === "new_chat" && status === "completed") setQuestion("");
+    pendingAskRef.current = null;
+    setPendingRequest(null);
+    setPendingNewChat(null);
+    setRecoveryRestored(status === "completed");
+  }, []);
+
+  const {
+    state: recoveryState, reference: recoveryReference, track: trackRecovery, clear: clearRecovery,
+    check: checkRecovery, reset: resetRecovery, discover: discoverRecovery, setState: setRecoveryState,
+  } = useRagOperationRecovery({
+    accountScope, epoch: conversationEpochRef, restore: reconcileActiveConversation, onTerminal: finishRecovery,
+  });
+
+  const retryConversationRestore = useCallback(async () => {
+    if (!focusSessionId || restoreCallRef.current) return;
+    const call = {};
+    restoreCallRef.current = call;
+    const epoch = conversationEpochRef.current;
+    setIsRestoring(true);
+    try {
+      const data = await reconcileActiveConversation(focusSessionId, epoch);
+      if (restoreCallRef.current !== call) return;
+      if (!data) {
+        if (epoch === conversationEpochRef.current) setRestoreFailed(true);
+        return;
+      }
+      discoverRecovery(focusSessionId, data);
+    } finally {
+      if (restoreCallRef.current === call) {
+        restoreCallRef.current = null;
+        setIsRestoring(false);
+      }
+    }
+  }, [focusSessionId, reconcileActiveConversation, discoverRecovery]);
+
+  const recoveryBlocksSubmission = ["checking", "processing", "unknown", "unavailable"].includes(recoveryState);
+  const recoveryChecking = recoveryState === "checking" || recoveryState === "processing";
+  const canDismissRecovery = recoveryState === "unknown" || recoveryState === "unavailable";
+
   const canAsk = useMemo(() => question.trim().length > 0, [question]);
   const lifecycleBusy = isCreatingChat || historyLoading || pendingNewChat !== null;
-  const requestDisabled = isPending || isRestoring || restoreFailed || lifecycleBusy
+  const askUnavailable = isPending || isRestoring || restoreFailed || lifecycleBusy
     || viewingHistory !== null || !contentAvailable || newChatOpen;
+  const requestDisabled = askUnavailable || recoveryBlocksSubmission;
   const isConversationLimitReached =
     serverTurnLimitReached || (conversationV2 && completedTurnCount >= hardTurnLimit);
   const conversationScopeLocked = conversationV2 && Boolean(activeSessionId);
   const newChatAvailable = newChatEnabled && Boolean(focusSessionId && activeSessionId);
-  const lifecycleDisabled = isPending || isRestoring || lifecycleBusy || pendingRequest !== null || newChatOpen;
+  const lifecycleDisabled = isPending || isRestoring || lifecycleBusy || recoveryBlocksSubmission
+    || pendingRequest !== null || newChatOpen;
   const visibleMessages = viewingHistory?.messages ?? messages;
   const documentSelectionDisabled =
     requestDisabled || conversationScopeLocked || pendingRequest !== null;
@@ -202,6 +314,27 @@ export function RagStudyAssistant({
         ? current.filter((id) => id !== documentId)
         : [...current, documentId],
     );
+  }
+
+  function trackRequest(
+    operation: RagRecoveryReference["operation"], requestId: string, focusId: string | null, sessionId: string | null,
+  ) {
+    if (!recoveryEnabled || !focusId) return null;
+    setRecoveryRestored(false);
+    return trackRecovery({
+      version: 1, protocol: "rag-v2", operation, clientRequestId: requestId, focusSessionId: focusId,
+      sessionId, createdAt: Date.now(),
+    });
+  }
+
+  async function restoreAfterConflict(focusId: string, epoch: number, code: string, discoverPending = true) {
+    const data = await reconcileActiveConversation(focusId, epoch);
+    if (data) {
+      if (discoverPending) discoverRecovery(focusId, data);
+      setConversationError(t(CONFIG_CHANGED_CODES.has(code) ? "ragVersionChanged" : "sessionChanged"));
+    } else if (epoch === conversationEpochRef.current) {
+      setRestoreFailed(true);
+    }
   }
 
   function handleAsk(event: React.FormEvent<HTMLFormElement>) {
@@ -223,20 +356,25 @@ export function RagStudyAssistant({
       topK,
       promptVariant,
       preferredLocale: locale === "vi" ? "vi" : "en",
+      conversationProtocol: focusSessionId ? (conversationV2 ? "v2" : "legacy") : undefined,
     };
+    const reference = request.conversationProtocol === "v2"
+      ? trackRequest("ask", request.clientRequestId, request.focusSessionId, request.sessionId) : null;
     setMessages((current) => [
       ...current,
       { id: request.clientRequestId, role: "user", content: request.question },
     ]);
     setQuestion("");
-    sendRequest(request);
+    sendRequest(request, reference);
   }
 
-  function sendRequest(request: PendingRagRequest) {
-    if (requestDisabled || requestInFlightRef.current || transitionInFlightRef.current || historyInFlightRef.current) return;
+  function sendRequest(request: PendingRagRequest, reference: RagRecoveryReference | null, retrying = false) {
+    if (askUnavailable || recoveryChecking || requestInFlightRef.current
+      || transitionInFlightRef.current || historyInFlightRef.current) return;
 
     requestInFlightRef.current = true;
     const epoch = conversationEpochRef.current;
+    pendingAskRef.current = request;
     setPendingRequest(request);
     setConversationError(null);
 
@@ -247,22 +385,37 @@ export function RagStudyAssistant({
 
         if (!result.success) {
           const errorKey = result.code ? REQUEST_ERROR_MESSAGES.get(result.code) : undefined;
+          const canonicalCode = result.code && CANONICAL_RESTORE_CODES.has(result.code) ? result.code : null;
           setConversationError(errorKey ? t(errorKey) : result.message);
           if (result.code === "RAG_CONVERSATION_LIMIT_REACHED") {
             setServerTurnLimitReached(true);
           }
 
           if (!result.retrySameRequest) {
-            if (result.sessionId) {
+            if (retrying && reference && canonicalCode && request.focusSessionId && result.outcome !== "failed") {
+              await checkRecovery(reference);
+              if (epoch === conversationEpochRef.current) {
+                await restoreAfterConflict(request.focusSessionId, epoch, canonicalCode, false);
+              }
+              return;
+            }
+            if (reference) clearRecovery(reference);
+            if (result.sessionId && (!activeSessionId || activeSessionId === result.sessionId)) {
               setActiveSessionId(result.sessionId);
               setConversationV2(true);
             }
 
             setPendingRequest(null);
+            pendingAskRef.current = null;
             setMessages((current) =>
               current.filter((message) => message.id !== request.clientRequestId),
             );
             setQuestion((current) => current || request.question);
+            if (request.focusSessionId && canonicalCode) {
+              await restoreAfterConflict(request.focusSessionId, epoch, canonicalCode);
+            }
+          } else if (reference) {
+            await checkRecovery(reference);
           }
 
           return;
@@ -271,24 +424,69 @@ export function RagStudyAssistant({
         const { data } = result;
         if (!data) {
           setConversationError(t("requestOutcomeUnknown"));
+          if (reference) await checkRecovery(reference);
           return;
         }
 
+        const differentSession = Boolean(activeSessionId && data.session_id !== activeSessionId);
+        if (differentSession && !request.focusSessionId) {
+          pendingAskRef.current = null;
+          setPendingRequest(null);
+          setMessages((current) => current.filter((message) => message.id !== request.clientRequestId));
+          setConversationError(t("sessionChanged"));
+          return;
+        }
+        const hasGap = typeof data.completed_turn_count === "number" && data.completed_turn_count > completedTurnCount + 1;
+        const olderReplay = typeof data.completed_turn_count === "number" && data.completed_turn_count <= completedTurnCount;
+        if (request.focusSessionId && (differentSession || (data.turn_id && (retrying || hasGap || olderReplay)))) {
+          const restored = await reconcileActiveConversation(request.focusSessionId, epoch);
+          if (restored) {
+            if (reference) clearRecovery(reference);
+            pendingAskRef.current = null;
+            setPendingRequest(null);
+            discoverRecovery(request.focusSessionId, restored);
+            return;
+          }
+          if (epoch !== conversationEpochRef.current) return;
+          if (reference || differentSession) {
+            if (reference) setRecoveryState("unavailable");
+            else {
+              pendingAskRef.current = null;
+              setPendingRequest(null);
+              setMessages((current) => current.filter((message) => message.id !== request.clientRequestId));
+              setRestoreFailed(true);
+            }
+            setConversationError(t("requestOutcomeUnknown"));
+            return;
+          }
+        }
+
         setPendingRequest(null);
+        pendingAskRef.current = null;
+        if (reference) clearRecovery(reference);
         setActiveSessionId(data.session_id);
-        setContextMetadata(data.context ?? null);
+        if (!olderReplay) setContextMetadata(data.context ?? null);
         if (typeof data.soft_turn_limit === "number") setSoftTurnLimit(data.soft_turn_limit);
         if (typeof data.hard_turn_limit === "number") setHardTurnLimit(data.hard_turn_limit);
 
         if (typeof data.completed_turn_count === "number") {
-          setCompletedTurnCount(data.completed_turn_count);
+          const count = data.completed_turn_count;
+          setCompletedTurnCount((current) => Math.max(current, count));
           setConversationV2(true);
         }
 
-        setMessages((current) => [
-          ...current,
-          {
-            id: crypto.randomUUID(),
+        setMessages((current) => {
+          if (data.turn_id && current.some((message) => message.turnId === data.turn_id && message.role === "assistant")) {
+            return current.filter((message) => message.id !== request.clientRequestId);
+          }
+          const turnId = data.turn_id ?? undefined;
+          const turnIndex = data.turn_index ?? undefined;
+          const updated = current.map((message) => message.id === request.clientRequestId
+            ? { ...message, turnId, turnIndex } : message);
+          return [...updated, {
+            id: turnId ? `${turnId}:assistant` : crypto.randomUUID(),
+            turnId,
+            turnIndex,
             role: "assistant",
             content: data.answer,
             sources: data.sources,
@@ -296,11 +494,12 @@ export function RagStudyAssistant({
             contextMode: data.context_mode,
             topK: data.top_k,
             promptVariant: data.prompt_variant,
-          },
-        ]);
+          }];
+        });
       } catch {
         if (epoch === conversationEpochRef.current) {
           setConversationError(t("requestOutcomeUnknown"));
+          if (reference) await checkRecovery(reference);
         }
       } finally {
         requestInFlightRef.current = false;
@@ -308,36 +507,12 @@ export function RagStudyAssistant({
     });
   }
 
-  const applyActiveConversation = useCallback((data: RagConversationRestoreResponse) => {
-    conversationEpochRef.current += 1;
-    setConversationV2(data.enabled);
-    setNewChatEnabled(Boolean(data.new_chat_enabled));
-    setHandoffEnabled(Boolean(data.handoff_enabled));
-    setHasHandoff(Boolean(data.has_handoff));
-    setContentAvailable(data.content_available !== false);
-    setViewingHistory(null);
-    setRestoreFailed(false);
-    setConversationError(null);
-    setHistoryOpen(false);
-    setContextMetadata(null);
-    setServerTurnLimitReached(false);
-    setActiveSessionId(data.enabled ? data.session_id : null);
-    setCompletedTurnCount(data.enabled ? data.completed_turn_count : 0);
-    setSoftTurnLimit(data.soft_turn_limit ?? DEFAULT_SOFT_TURN_LIMIT);
-    setHardTurnLimit(data.hard_turn_limit ?? DEFAULT_HARD_TURN_LIMIT);
-    setSelectedDocumentIds(data.enabled ? data.selected_document_ids : []);
-    if (data.enabled) {
-      setTopK(data.top_k);
-      setPromptVariant(data.prompt_variant);
-    }
-    setMessages(data.enabled ? data.messages.map(({ id, role, content }) => ({ id, role, content })) : []);
-    shouldAutoScrollRef.current = true;
-  }, []);
-
   async function submitNewChat(request: RagNewChatPayload) {
-    if (transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
+    if (recoveryChecking || transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
     transitionInFlightRef.current = true;
     const epoch = conversationEpochRef.current;
+    const retrying = pendingNewChat?.clientRequestId === request.clientRequestId;
+    const reference = trackRequest("new_chat", request.clientRequestId, request.focusSessionId, request.sourceSessionId);
     setIsCreatingChat(true);
     setNewChatOpen(false);
     setHistoryOpen(false);
@@ -348,23 +523,44 @@ export function RagStudyAssistant({
       if (epoch !== conversationEpochRef.current) return;
       if (!result.success) {
         const key = result.code ? TRANSITION_ERROR_MESSAGES.get(result.code) : undefined;
-        if (!result.retrySameRequest) setPendingNewChat(null);
+        const canonicalCode = result.code && CANONICAL_RESTORE_CODES.has(result.code) ? result.code : null;
         setConversationError(t(key ?? (result.retrySameRequest ? "newChatOutcomeUnknown" : "newChatUnavailable")));
+        if (!result.retrySameRequest) {
+          if (retrying && reference && canonicalCode) {
+            await checkRecovery(reference);
+            if (epoch === conversationEpochRef.current) {
+              await restoreAfterConflict(request.focusSessionId, epoch, canonicalCode, false);
+            }
+            return;
+          }
+          setPendingNewChat(null);
+          if (reference) clearRecovery(reference);
+          if (canonicalCode) {
+            await restoreAfterConflict(request.focusSessionId, epoch, canonicalCode);
+          }
+        } else if (reference) {
+          await checkRecovery(reference);
+        }
         return;
       }
-      const restored = await restoreRagConversationAction(request.focusSessionId);
-      if (epoch !== conversationEpochRef.current) return;
-      if (!restored.success || !restored.data.enabled || !restored.data.session_id
-        || restored.data.session_id === request.sourceSessionId) {
-        setConversationError(t("newChatOutcomeUnknown"));
+      const restored = await reconcileActiveConversation(request.focusSessionId, epoch, request.sourceSessionId);
+      if (!restored) {
+        if (epoch === conversationEpochRef.current) {
+          setConversationError(t("newChatOutcomeUnknown"));
+          if (reference) setRecoveryState("unavailable");
+        }
         return;
       }
-      applyActiveConversation(restored.data);
+      if (reference) clearRecovery(reference);
+      discoverRecovery(request.focusSessionId, restored);
       setPendingNewChat(null);
       setPendingRequest(null);
       setQuestion("");
     } catch {
-      if (epoch === conversationEpochRef.current) setConversationError(t("newChatOutcomeUnknown"));
+      if (epoch === conversationEpochRef.current) {
+        setConversationError(t("newChatOutcomeUnknown"));
+        if (reference) await checkRecovery(reference);
+      }
     } finally {
       transitionInFlightRef.current = false;
       setIsCreatingChat(false);
@@ -372,7 +568,7 @@ export function RagStudyAssistant({
   }
 
   function confirmNewChat(input: Pick<RagNewChatPayload, "mode" | "selectedDocumentIds">) {
-    if (!focusSessionId || !activeSessionId || !newChatEnabled || pendingNewChat || pendingRequest
+    if (!focusSessionId || !activeSessionId || !newChatEnabled || pendingNewChat || pendingRequest || recoveryBlocksSubmission
       || transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
     void submitNewChat({
       ...input, focusSessionId, sourceSessionId: activeSessionId,
@@ -381,8 +577,24 @@ export function RagStudyAssistant({
     });
   }
 
+  function dismissRecovery() {
+    if (!recoveryReference || !canDismissRecovery || isPending || isCreatingChat || isRestoring
+      || !window.confirm(t("dismissRecoveryConfirmation"))) return;
+    const requestId = recoveryReference.clientRequestId;
+    if (pendingAskRef.current?.clientRequestId === requestId) {
+      const draft = pendingAskRef.current.question;
+      setQuestion((current) => current || draft);
+    }
+    pendingAskRef.current = null;
+    setMessages((current) => current.filter((message) => message.id !== requestId));
+    setPendingRequest(null);
+    setPendingNewChat(null);
+    setConversationError(null);
+    clearRecovery(recoveryReference);
+  }
+
   async function loadHistoryPage(cursor: RagHistoryCursor | null = null) {
-    if (!focusSessionId || historyInFlightRef.current || transitionInFlightRef.current
+    if (!focusSessionId || recoveryBlocksSubmission || historyInFlightRef.current || transitionInFlightRef.current
       || requestInFlightRef.current || pendingNewChat) return;
     historyInFlightRef.current = true;
     const epoch = conversationEpochRef.current;
@@ -405,7 +617,7 @@ export function RagStudyAssistant({
   }
 
   async function viewConversation(item?: RagConversationListItem) {
-    if (!focusSessionId || historyInFlightRef.current || transitionInFlightRef.current
+    if (!focusSessionId || recoveryBlocksSubmission || historyInFlightRef.current || transitionInFlightRef.current
       || requestInFlightRef.current || pendingNewChat || pendingRequest) return;
     historyInFlightRef.current = true;
     const epoch = conversationEpochRef.current;
@@ -413,14 +625,13 @@ export function RagStudyAssistant({
     setHistoryLoading(true);
     try {
       if (!item || item.status === "active") {
-        const result = await restoreRagConversationAction(focusSessionId);
-        if (epoch !== conversationEpochRef.current) return;
-        if (!result.success) {
-          setConversationError(t("restoreFailed"));
+        const data = await reconcileActiveConversation(focusSessionId, epoch);
+        if (!data) {
+          if (epoch === conversationEpochRef.current) setConversationError(t("restoreFailed"));
           return;
         }
-        if (result.data.session_id !== activeSessionId) setQuestion("");
-        applyActiveConversation(result.data);
+        if (data.session_id !== activeSessionId) setQuestion("");
+        discoverRecovery(focusSessionId, data);
       } else {
         const result = await restoreRagHistoryAction(focusSessionId, item.id);
         if (epoch !== conversationEpochRef.current) return;
@@ -478,10 +689,8 @@ export function RagStudyAssistant({
   }, [visibleMessages]);
 
   useEffect(() => {
-    let cancelled = false;
-    const epoch = conversationEpochRef.current;
-
     setActiveSessionId(null);
+    setQuestion("");
     setViewingHistory(null);
     setNewChatEnabled(false);
     setHandoffEnabled(false);
@@ -500,53 +709,23 @@ export function RagStudyAssistant({
     setHardTurnLimit(DEFAULT_HARD_TURN_LIMIT);
     setServerTurnLimitReached(false);
     setConversationV2(false);
+    setRecoveryEnabled(false);
+    setRecoveryRestored(false);
     setConversationError(null);
     setPendingRequest(null);
+    pendingAskRef.current = null;
     setRestoreFailed(false);
-    setTopK(defaultTopK ?? 5);
-    setPromptVariant(defaultPromptVariant ?? "grounded_rule");
-
-    if (!focusSessionId) {
-      setIsRestoring(false);
-
-      return () => {
-        cancelled = true;
-        conversationEpochRef.current += 1;
-      };
-    }
-
-    setIsRestoring(true);
-
-    async function restore() {
-      try {
-        const result = await restoreRagConversationAction(focusSessionId!);
-
-        if (cancelled || epoch !== conversationEpochRef.current) return;
-
-        if (!result.success || !result.data) {
-          setRestoreFailed(true);
-          return;
-        }
-
-        applyActiveConversation(result.data);
-      } catch {
-        if (!cancelled) {
-          setRestoreFailed(true);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsRestoring(false);
-        }
-      }
-    }
-
-    void restore();
+    setTopK(defaultsRef.current.topK);
+    setPromptVariant(defaultsRef.current.promptVariant);
+    resetRecovery();
+    if (focusSessionId) void retryConversationRestore();
+    else setIsRestoring(false);
 
     return () => {
-      cancelled = true;
+      restoreCallRef.current = null;
       conversationEpochRef.current += 1;
     };
-  }, [focusSessionId, defaultTopK, defaultPromptVariant, applyActiveConversation]);
+  }, [focusSessionId, accountScope, resetRecovery, retryConversationRestore]);
 
   return (
     <section
@@ -740,17 +919,50 @@ export function RagStudyAssistant({
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={requestDisabled}
-                onClick={() => sendRequest(pendingRequest)}
+                disabled={askUnavailable || recoveryChecking}
+                onClick={() => sendRequest(pendingRequest, recoveryReference, true)}
               >
                 {t("retryRequest")}
               </Button>
             )}
             {pendingNewChat && (
-              <Button type="button" variant="outline" size="sm" disabled={isCreatingChat}
+              <Button type="button" variant="outline" size="sm" disabled={isCreatingChat || recoveryChecking || isRestoring}
                 onClick={() => void submitNewChat(pendingNewChat)}>
                 {t("retryRequest")}
               </Button>
+            )}
+            {restoreFailed && (
+              <Button type="button" variant="outline" size="sm" disabled={isRestoring}
+                onClick={() => void retryConversationRestore()}>
+                {t("retryRestore")}
+              </Button>
+            )}
+          </div>
+        )}
+        {recoveryRestored && <p role="status" className="text-xs">{t("conversationReconciled")}</p>}
+        {recoveryState !== "idle" && (
+          <div role="status" className="space-y-2 rounded-md border p-2 text-xs">
+            <p>{t({
+              checking: "recoveringRequest", processing: "requestStillProcessing",
+              unknown: "recoveryUnknown", unavailable: "recoveryUnavailable",
+              failed: "recoveryFailed", access_unavailable: "historyAccessUnavailable",
+            }[recoveryState])}</p>
+            {recoveryReference && (
+              <div className="flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant="outline"
+                  disabled={recoveryState === "checking" || isRestoring || isPending || isCreatingChat}
+                  onClick={() => void checkRecovery(recoveryReference)}>
+                  {t("checkRequestStatus")}
+                </Button>
+                {canDismissRecovery && (
+                  <>
+                    <Button type="button" size="sm" variant="outline" disabled={isRestoring || isCreatingChat || isPending}
+                      onClick={() => void retryConversationRestore()}>{t("restoreCurrentConversation")}</Button>
+                    <Button type="button" size="sm" variant="ghost" disabled={isRestoring || isCreatingChat || isPending}
+                      onClick={dismissRecovery}>{t("dismissRecovery")}</Button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         )}
@@ -843,7 +1055,7 @@ export function RagStudyAssistant({
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t("askPlaceholder")}
             aria-label={t("askPlaceholder")}
-            disabled={viewingHistory !== null || !contentAvailable || pendingNewChat !== null}
+            disabled={viewingHistory !== null || !contentAvailable || pendingNewChat !== null || recoveryBlocksSubmission}
             onKeyDown={handleKeyDown}
             className={cn(
               "min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition",

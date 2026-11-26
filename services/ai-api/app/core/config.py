@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     # ========================================================
 
     rag_conversation_v2_enabled: bool = False
+    rag_operation_recovery_enabled: bool = False
 
     rag_chat_models: str = (
         "openai/gpt-oss-20b,"

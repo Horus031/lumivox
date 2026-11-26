@@ -210,33 +210,43 @@ def ask_rag_conversation_question(
         ) * 1000
     )
 
-    # Do not mark the turn failed automatically
-    # if completion has an uncertain outcome.
-    # A network timeout may occur after DB commit.
-
     generation = generated.generation
     usage = asdict(generation.usage) if generation is not None else {}
     usage["context"] = generated.context.model_dump()
     if generated.context.handoff_id:
         usage["context"]["handoff_id"] = generated.context.handoff_id
-    return complete_turn(
-        supabase,
-        user_id=user_id,
-        turn_id=turn_id,
-        lease_token=lease_token,
-        answer=generated.answer,
-        sources=generated.sources,
-        provider=(
-            generation.provider
-            if generation else None
-        ),
-        model_name=(
-            generation.model
-            if generation else None
-        ),
-        latency_ms=latency_ms,
-        usage=usage,
-    )
+    try:
+        return complete_turn(
+            supabase,
+            user_id=user_id,
+            turn_id=turn_id,
+            lease_token=lease_token,
+            answer=generated.answer,
+            sources=generated.sources,
+            provider=generation.provider if generation else None,
+            model_name=generation.model if generation else None,
+            latency_ms=latency_ms,
+            usage=usage,
+        )
+    except RagConversationError as error:
+        failure_reason = {
+            "RAG_DOCUMENT_ACCESS_DENIED": "document_access_denied",
+            "RAG_INVALID_RESPONSE": "persistence_failed",
+        }.get(error.code)
+        if failure_reason is not None:
+            try:
+                marked_failed = fail_turn(
+                    supabase, user_id=user_id, turn_id=turn_id, lease_token=lease_token,
+                    error_code=failure_reason,
+                )
+            except RagConversationError:
+                marked_failed = False
+            if marked_failed:
+                raise RagConversationError(
+                    error.code, error.status_code, session_id=reserved_session_id, outcome="failed",
+                ) from None
+        # A transport or lease error can arrive after the completion committed.
+        raise RagConversationError("RAG_TURN_OUTCOME_UNKNOWN", 503, outcome="unknown") from None
 
 
 def restore_rag_conversation(

@@ -4,6 +4,7 @@ from uuid import UUID
 
 from app.schemas.rag_conversation_context import RagContextMetadata
 from app.schemas.rag_conversation_handoff import RagConversationMessage
+from app.schemas.rag_operation_recovery import RagPendingOperation
 
 
 class ProcessLearningDocumentRequest(BaseModel):
@@ -30,6 +31,7 @@ class RagAskRequest(BaseModel):
     prompt_variant: Literal["no_rule", "grounded_rule"] = "grounded_rule"
     preferred_locale: Literal["auto", "en", "vi"] = "auto"
     client_request_id: UUID | None = None
+    conversation_protocol: Literal["legacy", "v2"] | None = None
 
 
 class RagSourceChunk(BaseModel):
@@ -66,6 +68,8 @@ class RagConversationRestoreRequest(BaseModel):
 
 class RagConversationRestoreResponse(BaseModel):
     enabled: bool
+    recovery_enabled: bool = False
+    pending_operation: RagPendingOperation | None = None
     new_chat_enabled: bool = False
     handoff_enabled: bool = False
     has_handoff: bool = False

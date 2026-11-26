@@ -244,7 +244,7 @@ async function reserveFocusTurn(fixture) {
   return JSON.parse(await query(reserve(fixture.source, randomUUID(), fixture.documents, fixture.focus)));
 }
 
-async function contend(firstSql, contenderSql) {
+async function contend(firstSql, contenderSql, afterBlockedSql) {
   const app = `rag-chat-${randomUUID()}`;
   let other;
   let first;
@@ -255,10 +255,77 @@ async function contend(firstSql, contenderSql) {
     other = query(`set application_name='${app}'; set local role service_role; ${contenderSql}`)
       .then((result) => ({ result }), (error) => ({ error }));
     await waitForBlock(app, firstPid);
+    if (afterBlockedSql) await firstConnection.sql(afterBlockedSql);
   } finally {
     await firstConnection.sql("commit;");
   }
   return { first, ...await other };
+}
+
+function recoverTurn(fixture, requestId) {
+  return `select public.rag_v2_recover_expired_turn('${owner}','${fixture.focus}','${requestId}');`;
+}
+
+async function recoveryFixture({ expired = false, documents = [] } = {}) {
+  const fixture = await focusConversation(documents);
+  const requestId = randomUUID();
+  const sql = reserve(fixture.source, requestId, documents, fixture.focus);
+  const turn = JSON.parse(await query(sql));
+  if (expired) {
+    await query(`update public.rag_chat_turns set lease_expires_at=clock_timestamp()-interval '1 second'
+      where id='${turn.turn_id}';`);
+  }
+  return { fixture, requestId, turn, reserveSql: sql };
+}
+
+async function recoveryRaces() {
+  const committed = await recoveryFixture();
+  const completed = await contend(completeHistoryTurn(committed.turn), recoverTurn(committed.fixture, committed.requestId));
+  assert.ifError(completed.error);
+  // Ignore the completion response and recover using only the original request ID.
+  assert.equal(JSON.parse(completed.result).status, "completed");
+  const statusSql = `select public.rag_v2_get_operation_status('${owner}',
+    '${committed.fixture.focus}','${committed.requestId}','ask');`;
+  assert.equal(JSON.parse(await query(statusSql)).status, "completed");
+  assert.equal(await query(`select count(*) from public.rag_chat_messages
+    where turn_id='${committed.turn.turn_id}';`), "2");
+  console.log("PASS: committed answer survives a lost response and a competing recovery");
+
+  const expired = await recoveryFixture({ expired: true });
+  const expiryWins = await contend(recoverTurn(expired.fixture, expired.requestId), completeHistoryTurn(expired.turn));
+  assert.equal(JSON.parse(expiryWins.first).status, "failed");
+  assert.match(expiryWins.error?.stderr ?? "", /ERROR:\s+RAG_INVALID_LEASE/);
+  assert.equal(await query(`select count(*) from public.rag_chat_messages where turn_id='${expired.turn.turn_id}';`), "0");
+  console.log("PASS: expiry recovery prevents late completion and message insert");
+
+  const duplicate = await recoveryFixture({ expired: true });
+  const recoverSql = recoverTurn(duplicate.fixture, duplicate.requestId);
+  const twice = await contend(recoverSql, recoverSql);
+  assert.ifError(twice.error);
+  assert.equal(twice.first, twice.result);
+  assert.equal(JSON.parse(twice.result).status, "failed");
+  assert.equal(await query(`select status || ':' || error_code from public.rag_chat_turns
+    where id='${duplicate.turn.turn_id}';`), "failed:lease_expired");
+  console.log("PASS: concurrent expiry recovery returns one durable failed state");
+
+  const closing = await recoveryFixture({ expired: true });
+  const transition = await contend(recoverTurn(closing.fixture, closing.requestId), commitChat(closing.fixture, randomUUID()));
+  assert.ifError(transition.error);
+  assert.equal(JSON.parse(transition.result).outcome, "completed");
+  assert.equal(await query(`select count(*) from public.rag_chat_turns
+    where session_id='${closing.fixture.source}' and status='processing';`), "0");
+  console.log("PASS: expiry recovery and New Chat leave no processing turn on a closed source");
+
+  await query(`insert into public.learning_document_permissions (document_id,user_email,created_by)
+    values ('${documentId}','rag-race-${owner}@example.test','${documentOwner}');`);
+  const revoked = await recoveryFixture({ documents: [documentId] });
+  await query(completeHistoryTurn(revoked.turn));
+  const lockSource = `select id from public.rag_chat_sessions where id='${revoked.fixture.source}' for update;`;
+  const revokeAccess = `reset role; delete from public.learning_document_permissions where document_id='${documentId}';`;
+  const replay = await contend(lockSource, revoked.reserveSql, revokeAccess);
+  assert.match(replay.error?.stderr ?? "", /ERROR:\s+RAG_DOCUMENT_ACCESS_DENIED/);
+  assert.equal(await query(`select status from public.rag_chat_turns where id='${revoked.turn.turn_id}';`), "completed");
+  console.log("PASS: replay revalidates document access after waiting on the session lock");
 }
 
 async function newChatRaces() {
@@ -391,6 +458,7 @@ try {
   assert.equal(await summaryCount(scopedSummarySession), "0");
   console.log("PASS: document revocation before save prevents a summary write");
   await newChatRaces();
+  await recoveryRaces();
 } finally {
   firstConnection.close();
   if (fixtureCreated) {
