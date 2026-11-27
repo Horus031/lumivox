@@ -164,7 +164,7 @@ do $$ begin
   perform pg_temp.complete(pg_temp.ask(42,pg_temp.result('continued','target_session_id'),true,E'  Explain\n  binary search  '));
 end; $$;
 select is((select title from public.rag_chat_sessions where id=pg_temp.result('continued','target_session_id')),
-  'Explain binary search','REC20 first successful turn sets a normalized title');
+  'Continued study conversation','REC20 first successful turn preserves the neutral title');
 select is(pg_temp.status(42)->>'status','completed','REC05 committed status survives a missing client response');
 
 insert into recovery_results

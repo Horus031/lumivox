@@ -8,6 +8,7 @@ from supabase import Client, ClientOptions, create_client
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
+from app.security.rag_dispatch import rag_dispatch_deadline
 
 
 @lru_cache(maxsize=1)
@@ -55,6 +56,10 @@ def bounded_rag_supabase(
                 reserve += answer_reserve
                 if (summary_deadline := _summary_deadline.get()) is not None:
                     expires_at = min(expires_at - reserve, summary_deadline.expires_at)
+                    reserve = 0
+            if rpc in {"rag_v2_assert_turn_authorized", "rag_v2_assert_preparation_authorized"}:
+                if (dispatch_deadline := rag_dispatch_deadline.get()) is not None:
+                    expires_at = min(expires_at - reserve, dispatch_deadline.expires_at)
                     reserve = 0
             timeout = RagDeadline(expires_at - reserve).require_remaining()
         request.extensions["timeout"] = httpx.Timeout(timeout).as_dict()

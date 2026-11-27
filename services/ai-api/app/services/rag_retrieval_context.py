@@ -8,6 +8,7 @@ from app.schemas.rag_conversation_context import RagCompletedTurn, RagRetrievalS
 from app.schemas.rag_conversation_summary import RagStoredSummary
 from app.schemas.rag_conversation_handoff import RagStoredHandoff
 from app.services.rag_summary_builder import _clean
+from app.services.rag_learning_artifacts import artifact_excerpt
 from app.services.rag_topic_context import (
     EXPLICIT_TOPIC_CHANGE, PREVIOUS_CONVERSATION, classify_question_intent, normalize_topic_text, topic_overlap,
 )
@@ -23,6 +24,10 @@ FOLLOW_UP_PATTERN = re.compile(
 class RagRetrievalQuery:
     text: str
     strategy: RagRetrievalStrategy
+
+
+def _artifact_safe_excerpt(text: str, limit: int) -> str:
+    return artifact_excerpt(text, truncate_text_to_tokens(text, limit))
 
 
 def _build_legacy_retrieval_query(
@@ -75,8 +80,8 @@ def build_adaptive_retrieval_query(
             topic_overlap(question, f"{_clean(entry.question)}\n{_clean(entry.answer)}"), entry.turn_index,
         ))
         expansions.append(
-            "\nRecent conversation topic:\n" + truncate_text_to_tokens(_clean(turn.question), 100)
-            + "\nPrevious explanation context:\n" + truncate_text_to_tokens(_clean(turn.answer), 140)
+            "\nRecent conversation topic:\n" + _artifact_safe_excerpt(_clean(turn.question), 100)
+            + "\nPrevious explanation context:\n" + _artifact_safe_excerpt(_clean(turn.answer), 140)
         )
 
     for memory, heading in ((summary, "Earlier study topic"), (handoff, "Inherited study topic")):
@@ -87,10 +92,10 @@ def build_adaptive_retrieval_query(
         ])))
         if terms and (not expansions or (memory is handoff and inherited_reference)
                       or topic_overlap(question, terms)):
-            expansions.append(f"\n{heading}:\n" + truncate_text_to_tokens(terms, 100))
+            expansions.append(f"\n{heading}:\n" + _artifact_safe_excerpt(terms, 100))
     if not expansions:
         return RagRetrievalQuery(question, "current_question")
-    expansion = truncate_text_to_tokens("".join(expansions), 300)
+    expansion = _artifact_safe_excerpt("".join(expansions), 300)
     return RagRetrievalQuery(question + expansion, "history_augmented")
 
 

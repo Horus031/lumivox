@@ -36,7 +36,7 @@ class RagNewChatRequest(BaseModel):
     source_session_id: UUID
     client_request_id: UUID
     mode: RagNewChatMode
-    selected_document_ids: list[UUID] = Field(default_factory=list)
+    selected_document_ids: list[UUID] = Field(default_factory=list, max_length=3000)
     top_k: int = Field(default=5, ge=1, le=9, strict=True)
     prompt_variant: Literal["grounded_rule", "no_rule"] = "grounded_rule"
     preferred_locale: Literal["auto", "en", "vi"] = "auto"
@@ -80,6 +80,7 @@ class RagHistoryItem(BaseModel):
     completed_turn_count: int = Field(ge=0)
     has_handoff: bool
     content_available: bool
+    memory_quarantined: bool = False
     created_at: datetime
     updated_at: datetime
 

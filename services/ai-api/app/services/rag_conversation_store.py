@@ -15,6 +15,7 @@ ERROR_STATUS = {
     "RAG_SESSION_CLOSED": 409,
     "RAG_CONTEXT_CHANGED": 409,
     "RAG_INVALID_LEASE": 409,
+    "RAG_MEMORY_QUARANTINED": 409,
     "RAG_INVALID_RESPONSE": 500,
     "RAG_CONTEXT_UNAVAILABLE": 409,
     "RAG_SUMMARY_CONFLICT": 409,
@@ -80,6 +81,25 @@ def _call_rpc(
             "RAG_PERSISTENCE_UNAVAILABLE",
             503,
         ) from None
+
+
+def assert_turn_authorized(supabase: Any, *, user_id: str, session_id: str, turn_id: str, lease_token: str) -> None:
+    result = _call_rpc(supabase, "rag_v2_assert_turn_authorized", {
+        "p_user_id": user_id, "p_session_id": session_id, "p_turn_id": turn_id, "p_lease_token": lease_token,
+    })
+    if result is not True:
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+
+
+def assert_preparation_authorized(
+    supabase: Any, *, user_id: str, preparation_id: str, lease_token: str, expected_revision: dict,
+) -> None:
+    result = _call_rpc(supabase, "rag_v2_assert_preparation_authorized", {
+        "p_user_id": user_id, "p_preparation_id": preparation_id, "p_lease_token": lease_token,
+        "p_expected_revision": expected_revision,
+    })
+    if result is not True:
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
 
 
 def load_conversation_context(

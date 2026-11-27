@@ -10,6 +10,8 @@ from app.schemas.rag_conversation_context import (
     RagConversationContext,
     RagRetrievalStrategy,
 )
+from app.security.rag_citations import validate_rag_citations
+from app.security.rag_privacy import sanitize_rag_text
 from app.services.rag_chat_service import _generate_query_embedding, _retrieve_chunks
 from app.services.rag_context_builder import build_conversational_context
 from app.services.rag_retrieval_context import build_retrieval_query
@@ -36,6 +38,7 @@ def generate_conversational_answer(
     deadline: RagDeadline | None = None,
     execution_context: RagExecutionContext | None = None,
 ) -> RagConversationalAnswer:
+    provider_question = sanitize_rag_text(question, target="provider") if settings.rag_privacy_filter_enabled else question
     document_mode = bool(selected_document_ids)
     strategy: RagRetrievalStrategy = "none"
     sources: list[dict[str, Any]] = []
@@ -47,15 +50,16 @@ def generate_conversational_answer(
         ):
             summary = None
         query = build_retrieval_query(
-            question,
+            provider_question,
             context.recent_turns,
             summary,
             context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
         )
         strategy = query.strategy
+        query_text = sanitize_rag_text(query.text, target="provider") if settings.rag_privacy_filter_enabled else query.text
         embedding = (
-            _generate_query_embedding(query.text, deadline=deadline, execution_context=execution_context)
-            if deadline or execution_context else _generate_query_embedding(query.text)
+            _generate_query_embedding(query_text, deadline=deadline, execution_context=execution_context)
+            if deadline or execution_context else _generate_query_embedding(query_text)
         )
         sources = _retrieve_chunks(
             supabase,
@@ -69,7 +73,7 @@ def generate_conversational_answer(
     if deadline:
         deadline.require_remaining()
     built = build_conversational_context(
-        question=question,
+        question=provider_question,
         context=context,
         sources=sources,
         document_mode=document_mode,
@@ -115,9 +119,11 @@ def generate_conversational_answer(
                           execution_context=execution_context)
         if deadline or execution_context else generate_rag_chat(built.messages)
     )
+    answer, unsupported = validate_rag_citations(generation.text, len(built.sources))
     return RagConversationalAnswer(
-        answer=generation.text,
+        answer=answer,
         sources=built.sources,
         generation=generation,
-        context=built.metadata.model_copy(update={"generation_attempts": generation.attempts}),
+        context=built.metadata.model_copy(update={"generation_attempts": generation.attempts,
+                                                  "citation_validation": "unsupported" if unsupported else "valid"}),
     )

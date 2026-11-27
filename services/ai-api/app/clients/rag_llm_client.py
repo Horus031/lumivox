@@ -16,6 +16,7 @@ from groq import (
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
+from app.security.rag_dispatch import before_rag_dispatch
 from app.core.rag_execution_context import RagExecutionContext
 from app.services.rag_provider_execution import RagProviderExecutionError, execute_rag_provider_call
 from app.core.rag_model_registry import (
@@ -360,6 +361,8 @@ def generate_rag_chat(
                         estimated_prompt_tokens=estimated_prompt_tokens, classify_error=_classify_provider_error,
                         parse_response=parse_response,
                     )
+                if before_rag_dispatch(*(message["content"] for message in messages), deadline=RagDeadline(deadline)):
+                    request_options["timeout"] = min(request_options["timeout"], RagDeadline(deadline).require_remaining())
                 return parse_response(client.chat.completions.create(**request_options))
 
             except (

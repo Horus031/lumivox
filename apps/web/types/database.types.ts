@@ -698,14 +698,14 @@ isOneToOne: false
 
 "rag_chat_sessions": {
                   Row: {
-                    "closed_at": string | null,"completed_turn_count": number,"context_mode": Database["public"]['Enums']["rag_context_mode"],"conversation_version": number,"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"status": string,"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
+                    "closed_at": string | null,"completed_turn_count": number,"context_mode": Database["public"]['Enums']["rag_context_mode"],"conversation_version": number,"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"memory_quarantine_reason": string | null,"memory_quarantined_at": string | null,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"status": string,"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id": string
+                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"memory_quarantine_reason"?: string | null,"memory_quarantined_at"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id"?: string
+                    "closed_at"?: string | null,"completed_turn_count"?: number,"context_mode"?: Database["public"]['Enums']["rag_context_mode"],"conversation_version"?: number,"created_at"?: string,"focus_session_id"?: string | null,"goal_id"?: string | null,"id"?: string,"memory_quarantine_reason"?: string | null,"memory_quarantined_at"?: string | null,"preferred_locale"?: string | null,"prompt_variant"?: Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids"?: (string)[],"status"?: string,"task_id"?: string | null,"title"?: string | null,"top_k"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -2153,6 +2153,12 @@ isOneToOne: false
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
             }[]
                            },
+"rag_v2_assert_preparation_authorized":
+{ Args: { "p_expected_revision": Json,"p_lease_token": string,"p_preparation_id": string,"p_user_id": string }; Returns: boolean
+                           },
+"rag_v2_assert_turn_authorized":
+{ Args: { "p_lease_token": string,"p_session_id": string,"p_turn_id": string,"p_user_id": string }; Returns: boolean
+                           },
 "rag_v2_commit_new_chat":
 { Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
                            },
@@ -2185,6 +2191,9 @@ isOneToOne: false
                            },
 "rag_v2_prepare_new_chat_recovery":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_v2_quarantine_memory":
+{ Args: { "p_reason": string,"p_session_id": string,"p_user_id": string }; Returns: number
                            },
 "rag_v2_recover_expired_turn":
 { Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_user_id": string }; Returns: Json

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 
 import type { ActionResult } from "@/lib/actions/action-result";
 import { fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
@@ -17,6 +18,7 @@ type ProcessLearningDocumentApiResponse = {
 export async function processLearningDocumentAction(
   documentId: string,
 ): Promise<ActionResult<ProcessLearningDocumentApiResponse>> {
+  const t = await getTranslations("rag");
   try {
     const { supabase, user } = await requireUser();
 
@@ -50,7 +52,7 @@ export async function processLearningDocumentAction(
     if (error) {
       return {
         success: false,
-        message: `Failed to verify document ownership: ${error.message}`,
+        message: t("documentProcessingUnavailable"),
       };
     }
 
@@ -85,19 +87,14 @@ export async function processLearningDocumentAction(
 
     revalidatePath(`/documents/shared/${documentId}`);
 
-    return {
-      success: result.status === "completed",
-
-      message: result.message,
-
-      data: result,
-    };
-  } catch (error) {
+    const message = t(result.status === "completed" ? "documentProcessingSucceeded"
+      : result.status === "unsupported" ? "documentProcessingUnsupported" : "documentProcessingUnavailable");
+    return { success: result.status === "completed", message, data: { ...result, message } };
+  } catch {
     return {
       success: false,
 
-      message:
-        error instanceof Error ? error.message : "Unexpected error while processing document.",
+      message: t("documentProcessingUnavailable"),
     };
   }
 }

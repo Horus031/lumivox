@@ -60,6 +60,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit production npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Lint
         run: npm run lint
 
@@ -124,6 +127,13 @@ jobs:
 
       - name: Compile Python source
         run: python -m compileall -q app scripts
+
+      - name: Audit pinned Python runtime dependencies
+        run: |
+          python -m pip check
+          python -m venv "$RUNNER_TEMP/pip-audit"
+          "$RUNNER_TEMP/pip-audit/bin/python" -m pip install 'pip-audit==2.10.0'
+          "$RUNNER_TEMP/pip-audit/bin/python" -m pip_audit --disable-pip --no-deps -r requirements.txt
 
       - name: Verify native task risk artifact
         run: python scripts/verify_native_task_risk_artifact.py

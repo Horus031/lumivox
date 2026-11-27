@@ -1,5 +1,4 @@
 import json
-import re
 
 from app.clients.rag_llm_client import RagChatMessage
 from app.core.config import settings
@@ -17,18 +16,14 @@ from app.schemas.rag_conversation_summary import (
 )
 from app.services.rag_learning_artifacts import ARTIFACT_LABELS, artifact_excerpt, extract_learning_artifacts
 from app.services.rag_topic_context import classify_question_intent
+from app.security.rag_privacy import sanitize_rag_text
 
 
-_SECRET_PATTERN = re.compile(
-    r"(?i)\b(?:bearer\s+[^\s,;]+|(?:password|api[_ -]?key|secret|access[_ -]?token)"
-    r"\s*[:=]\s*(?:\"[^\"\n]+\"|'[^'\n]+'|[^\s,;]+))|\b(?:gsk_|sk-)[\w-]{12,}"
-    r"|-----BEGIN [^-\r\n]*PRIVATE KEY-----[\s\S]*?(?:-----END [^-\r\n]*PRIVATE KEY-----|\Z)"
-)
 _TEXT_LENGTH_LIMITS = {"main_topic": 240, "learning_objective": 400, "continuation_hint": 400}
 
 
 def _clean(text: str) -> str:
-    return _SECRET_PATTERN.sub("[redacted]", text.strip()).replace("<|", "&lt;|")
+    return sanitize_rag_text(text.strip(), target="memory")
 
 
 def _json(value: object) -> str:
