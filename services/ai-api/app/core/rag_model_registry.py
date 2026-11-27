@@ -80,6 +80,8 @@ def get_rag_model_capability(
 
 
 def validate_rag_configuration() -> None:
+    if settings.rag_context_quality_enabled and settings.rag_history_candidate_turns < settings.rag_recent_turns:
+        raise RagConfigurationError("History candidate window must cover the recent-turn window.")
     if settings.rag_resource_control_enabled:
         if not settings.upstash_redis_rest_url or not valid_rag_redis_url(settings.upstash_redis_rest_url) \
             or not (settings.upstash_redis_rest_token or "").strip():

@@ -40,10 +40,16 @@ def generate_conversational_answer(
     strategy: RagRetrievalStrategy = "none"
     sources: list[dict[str, Any]] = []
     if document_mode:
+        summary = context.summary if settings.rag_rolling_summary_enabled else None
+        if settings.rag_context_quality_enabled and summary and (
+            summary.covered_turn_index >= context.current_turn_index
+            or summary.covered_turn_count > context.completed_turn_count
+        ):
+            summary = None
         query = build_retrieval_query(
             question,
             context.recent_turns,
-            context.summary if settings.rag_rolling_summary_enabled else None,
+            summary,
             context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
         )
         strategy = query.strategy
@@ -94,6 +100,12 @@ def generate_conversational_answer(
                     "handoff_tokens_used": 0,
                     "handoff_id": None,
                     "generation_attempts": 0,
+                    "history_tokens_used": 0,
+                    "summary_covered_turn_count": 0,
+                    "truncated_history_turns": 0,
+                    "omitted_history_turns": (
+                        context.completed_turn_count if settings.rag_context_quality_enabled else 0
+                    ),
                 }
             ),
         )

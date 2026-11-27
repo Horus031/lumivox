@@ -90,3 +90,14 @@ def test_empty_handoff_is_rejected(provider):
     with pytest.raises(RagConversationError, match="RAG_HANDOFF_EMPTY_CONTEXT"):
         builder.build_final_handoff(inherited=None, rolling=None, turns=[])
     provider.assert_not_called()
+
+
+def test_adaptive_handoff_fallback_retains_exact_worked_exercise_without_extra_calls(monkeypatch, provider):
+    monkeypatch.setattr(builder.settings, "rag_context_quality_enabled", True)
+    provider.side_effect = RagLLMError(code="provider_busy", retryable=False)
+    exercise = RagCompletedTurn(turn_index=1, question="Sort [8, 3, 5].", answer="Final result: [3, 5, 8]")
+    result = builder.build_final_handoff(inherited=None, rolling=None, turns=[exercise])
+    assert result.generation_method == "extractive"
+    assert "[8, 3, 5]" in result.summary.continuation_hint and "[3, 5, 8]" in result.summary.continuation_hint
+    assert result.token_count <= 500
+    provider.assert_called_once()

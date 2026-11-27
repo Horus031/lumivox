@@ -15,6 +15,8 @@ from app.schemas.rag_conversation_summary import (
     SUMMARY_LIST_FIELDS,
     SUMMARY_TEXT_FIELDS,
 )
+from app.services.rag_learning_artifacts import ARTIFACT_LABELS, artifact_excerpt, extract_learning_artifacts
+from app.services.rag_topic_context import classify_question_intent
 
 
 _SECRET_PATTERN = re.compile(
@@ -45,19 +47,25 @@ def fit_summary_to_budget(
     summary: RagConversationSummary, max_tokens: int
 ) -> RagConversationSummary:
     data = summary.model_dump()
+
+    def preserve(text: str, excerpt: str) -> str:
+        return artifact_excerpt(text, excerpt) if settings.rag_context_quality_enabled else excerpt
+
     for field, limit in _TEXT_LENGTH_LIMITS.items():
-        data[field] = _clean(data[field])[:limit]
+        clean = _clean(data[field])
+        data[field] = preserve(clean, clean[:limit])
     for field in SUMMARY_LIST_FIELDS:
-        data[field] = list(dict.fromkeys(_clean(item) for item in data[field] if item.strip()))
+        cleaned = (_clean(item) for item in data[field] if item.strip())
+        data[field] = list(dict.fromkeys(value for item in cleaned if (value := preserve(item, item))))
     candidate = RagConversationSummary.model_validate(data)
     if summary_token_count(candidate) <= max_tokens:
         return candidate
 
     for field, limit in zip(SUMMARY_TEXT_FIELDS, (40, 55, 45)):
-        data[field] = truncate_text_to_tokens(data[field], limit)
+        data[field] = preserve(data[field], truncate_text_to_tokens(data[field], limit))
     for field in SUMMARY_LIST_FIELDS:
         data[field] = list(dict.fromkeys(
-            truncate_text_to_tokens(item, 32) for item in data[field]
+            excerpt for item in data[field] if (excerpt := preserve(item, truncate_text_to_tokens(item, 32)))
         ))
 
     for field in (
@@ -75,7 +83,7 @@ def fit_summary_to_budget(
         if summary_token_count(candidate) <= max_tokens:
             return candidate
         for field in SUMMARY_TEXT_FIELDS:
-            data[field] = truncate_text_to_tokens(data[field], limit)
+            data[field] = preserve(data[field], truncate_text_to_tokens(data[field], limit))
     candidate = RagConversationSummary.model_validate(data)
     if summary_token_count(candidate) > max_tokens:
         raise RagTokenBudgetError("RAG summary exceeds its token budget.")
@@ -90,6 +98,16 @@ def build_summary_messages(
 ) -> list[RagChatMessage]:
     if not turns:
         raise ValueError("No completed turns to summarize.")
+    quality = settings.rag_context_quality_enabled
+    max_prompt_tokens = min(4000, settings.rag_max_prompt_tokens) if quality else settings.rag_max_prompt_tokens
+    if quality:
+        additional_instructions += (
+            " Preserve exact learner-provided inputs and the latest worked exercise results when needed for "
+            "future continuation. Examples include arrays, equations, small datasets, code identifiers, variable "
+            "assignments and numerical results. Do not infer missing values. Distinguish an earlier answer "
+            "from independently verified facts. Do not mark a completed question as unresolved solely because it "
+            "was asked. Store full artifacts in continuation_hint or important_user_context, or omit them."
+        )
     system: RagChatMessage = {
         "role": "system",
         "content": (
@@ -107,27 +125,32 @@ def build_summary_messages(
         if previous_summary is not None else None
     )
     cleaned = [(turn.turn_index, _clean(turn.question), _clean(turn.answer)) for turn in turns]
-    for user_limit, answer_limit in ((120, 180), (72, 108), (36, 54), (12, 18), (4, 4)):
-        payload = {
-            "previous_summary": previous,
-            "completed_turns": [
-                {
+    latest, question, answer = max(cleaned, key=lambda entry: entry[0])
+    artifacts = (_latest_artifacts(question, answer) if quality else {})
+    for keep_artifacts in ((True, False) if artifacts else (False,)):
+        for user_limit, answer_limit in ((120, 180), (72, 108), (36, 54), (12, 18), (4, 4)):
+            completed = []
+            for index, question, answer in cleaned:
+                priority = 2 if quality and index == latest else 1
+                question_excerpt = truncate_text_to_tokens(question, user_limit * priority)
+                answer_excerpt = truncate_text_to_tokens(answer, answer_limit * priority)
+                completed.append({
                     "turn_index": index,
-                    "question": truncate_text_to_tokens(question, user_limit),
-                    "answer": truncate_text_to_tokens(answer, answer_limit),
-                }
-                for index, question, answer in cleaned
-            ],
-        }
-        messages: list[RagChatMessage] = [
-            system, {"role": "user", "content": "Untrusted conversation data:\n" + _json(payload)}
-        ]
-        if estimate_message_tokens(messages) <= settings.rag_max_prompt_tokens:
-            return messages
+                    "question": artifact_excerpt(question, question_excerpt) if quality else question_excerpt,
+                    "answer": artifact_excerpt(answer, answer_excerpt) if quality else answer_excerpt,
+                })
+            payload = {"previous_summary": previous, "completed_turns": completed}
+            if keep_artifacts:
+                payload["latest_worked_exercise"] = artifacts
+            messages: list[RagChatMessage] = [
+                system, {"role": "user", "content": "Untrusted conversation data:\n" + _json(payload)}
+            ]
+            if estimate_message_tokens(messages) <= max_prompt_tokens:
+                return messages
     raise RagTokenBudgetError("RAG summary input exceeds its token budget.")
 
 
-def build_extractive_summary(
+def _build_legacy_extractive_summary(
     *,
     previous_summary: RagConversationSummary | None,
     turns: list[RagCompletedTurn],
@@ -149,3 +172,52 @@ def build_extractive_summary(
             [*data["unresolved_questions"], *questions]
         ))[-8:]
     return fit_summary_to_budget(RagConversationSummary.model_validate(data), max_tokens)
+
+
+def _latest_artifacts(question: str, answer: str) -> dict[str, list[str]]:
+    inputs = extract_learning_artifacts(question, max_tokens=40)
+    results = extract_learning_artifacts(answer, max_tokens=60)
+    return {label: items for label, items in zip(ARTIFACT_LABELS, (inputs, results)) if items}
+
+
+def build_adaptive_extractive_summary(
+    *, previous_summary: RagConversationSummary | None, turns: list[RagCompletedTurn], max_tokens: int,
+) -> RagConversationSummary:
+    if not turns:
+        raise ValueError("No completed turns to summarize.")
+    data = previous_summary.model_dump() if previous_summary else {
+        **dict.fromkeys(SUMMARY_TEXT_FIELDS, ""),
+        **{field: [] for field in SUMMARY_LIST_FIELDS},
+    }
+    ordered = sorted(turns, key=lambda turn: turn.turn_index)
+    latest = ordered[-1]
+    observations = []
+    for turn in ordered:
+        question, answer = _clean(turn.question), _clean(turn.answer)
+        question = artifact_excerpt(question, truncate_text_to_tokens(question, 24))
+        answer = artifact_excerpt(answer, truncate_text_to_tokens(answer, 32))
+        observation = f"Asked: {question} Earlier answer: {answer}"
+        observations.append(artifact_excerpt(observation, observation[:240]))
+    changed_topic = classify_question_intent(latest.question) == "topic_change"
+    if not data["main_topic"] or changed_topic:
+        topic = _clean(latest.question)
+        data["main_topic"] = artifact_excerpt(topic, topic[:240])
+    data["covered_concepts"] = list(dict.fromkeys([*data["covered_concepts"], *observations]))[-12:]
+    data["uncertainties"] = [
+        *[item for item in data["uncertainties"] if item != "Extractive memory may omit details or prior mistakes."],
+        "Extractive memory may omit details or prior mistakes.",
+    ][-8:]
+    artifacts = _latest_artifacts(_clean(latest.question), _clean(latest.answer))
+    if artifacts:
+        data["continuation_hint"] = "\n".join(f"{label} {'; '.join(items)}" for label, items in artifacts.items())
+    elif changed_topic or not any(label in data["continuation_hint"] for label in ARTIFACT_LABELS):
+        data["continuation_hint"] = observations[-1]
+    data["continuation_hint"] = artifact_excerpt(data["continuation_hint"], data["continuation_hint"][:400])
+    return fit_summary_to_budget(RagConversationSummary.model_validate(data), max_tokens)
+
+
+def build_extractive_summary(
+    *, previous_summary: RagConversationSummary | None, turns: list[RagCompletedTurn], max_tokens: int,
+) -> RagConversationSummary:
+    build = build_adaptive_extractive_summary if settings.rag_context_quality_enabled else _build_legacy_extractive_summary
+    return build(previous_summary=previous_summary, turns=turns, max_tokens=max_tokens)

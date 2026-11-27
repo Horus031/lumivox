@@ -25,6 +25,13 @@ export type RagContextMetadata = {
   summary_generation_method?: "llm" | "extractive" | null;
   handoff_used?: boolean;
   handoff_tokens_used?: number;
+  context_policy?: "legacy" | "adaptive_v1";
+  history_candidate_turns?: number;
+  history_tokens_used?: number;
+  summary_covered_turn_count?: number;
+  omitted_history_turns?: number;
+  truncated_history_turns?: number;
+  sources_truncated?: boolean;
 };
 
 export type RagSourceChunk = {

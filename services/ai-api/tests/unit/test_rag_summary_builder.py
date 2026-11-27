@@ -72,6 +72,26 @@ def test_summary_input_bounds_every_pair_and_cleans_untrusted_data(monkeypatch, 
     assert payload["previous_summary"]["main_topic"] == stored_summary.summary.main_topic
 
 
+def test_adaptive_summary_prioritizes_the_latest_pair_and_preserves_exact_artifacts(monkeypatch):
+    monkeypatch.setattr(builder.settings, "rag_context_quality_enabled", True)
+    monkeypatch.setattr(builder.settings, "rag_max_prompt_tokens", 1500)
+    turns = [
+        RagCompletedTurn(turn_index=i, question="A longer question " * 200,
+                         answer="A longer explanation " * 200)
+        for i in range(1, 5)
+    ]
+    turns[-1] = turns[-1].model_copy(update={
+        "question": turns[-1].question + " Sort [8, 3, 5].",
+        "answer": turns[-1].answer + "\nResult: [3, 5, 8]",
+    })
+    messages = builder.build_summary_messages(previous_summary=None, turns=turns)
+    payload = json.loads(messages[1]["content"].split("\n", 1)[1])
+    assert assert_prompt_budget(messages) <= 1500
+    assert len(payload["completed_turns"][-1]["question"]) > len(payload["completed_turns"][0]["question"])
+    assert payload["latest_worked_exercise"]["Learner-provided inputs:"] == ["[8, 3, 5]"]
+    assert payload["latest_worked_exercise"]["Earlier assistant results:"] == ["Result: [3, 5, 8]"]
+
+
 def test_extractive_summary_keeps_questions_without_inventing_assistant_facts(stored_summary):
     turns = [RagCompletedTurn(
         turn_index=3, question="How do I test it? api_key=synthetic-secret",

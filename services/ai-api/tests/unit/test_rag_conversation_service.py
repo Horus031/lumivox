@@ -150,6 +150,29 @@ def test_summary_conflict_or_uncertain_write_reconciles_before_generation(
     assert dependencies.generate.call_args.kwargs["context"].summary == stored_summary
 
 
+def test_adaptive_candidate_window_is_reused_on_reconciliation(monkeypatch, dependencies):
+    monkeypatch.setattr(service.settings, "rag_context_quality_enabled", True)
+    monkeypatch.setattr(service.settings, "rag_history_candidate_turns", 24)
+    monkeypatch.setattr(service.settings, "rag_hard_turn_limit", 20)
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    refresh = Mock(side_effect=RagConversationError("RAG_SUMMARY_CONFLICT", 409))
+    monkeypatch.setattr(service, "maybe_refresh_summary", refresh)
+    service.ask_rag_conversation_question(**BASE_REQUEST)
+    assert [call.kwargs["recent_turns"] for call in dependencies.load.call_args_list] == [20, 20]
+    assert service.settings.rag_recent_turns == 4
+    refresh.assert_called_once()
+
+
+def test_invalid_stored_summary_stops_adaptive_generation(monkeypatch, dependencies):
+    monkeypatch.setattr(service.settings, "rag_context_quality_enabled", True)
+    monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
+    dependencies.load.return_value["summary"] = {"version": 1, "invalid": True}
+    with pytest.raises(RagConversationError, match="RAG_GENERATION_FAILED"):
+        service.ask_rag_conversation_question(**BASE_REQUEST)
+    dependencies.generate.assert_not_called()
+    dependencies.fail.assert_called_once()
+
+
 @pytest.mark.parametrize("code", ["RAG_DOCUMENT_ACCESS_DENIED", "RAG_INVALID_LEASE", "RAG_CONTEXT_UNAVAILABLE"])
 def test_summary_authorization_or_lease_failure_blocks_answer(monkeypatch, dependencies, code):
     monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
