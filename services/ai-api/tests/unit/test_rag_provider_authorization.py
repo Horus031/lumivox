@@ -3,10 +3,12 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.clients.rag_llm_client import generate_rag_chat
+from app.clients.rag_summary_client import generate_rag_summary
 from app.core import rag_deadline
 from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
 from app.core.rag_execution_context import RagExecutionContext
-from app.security.rag_dispatch import rag_dispatch_authorization
+from app.security.rag_dispatch import RagDispatchAuthorizationError, rag_dispatch_authorization
 from app.services import rag_chat_service, rag_provider_execution
 from app.services.rag_conversation_store import RagConversationError, assert_turn_authorized
 from app.services.rag_provider_budget import RagProviderPermit
@@ -68,3 +70,17 @@ def test_missing_authorization_result_fails_closed():
     supabase.rpc.return_value.execute.return_value.data = None
     with pytest.raises(RagConversationError, match="RAG_PERSISTENCE_UNAVAILABLE"):
         assert_turn_authorized(supabase, user_id="owner", session_id="session", turn_id="turn", lease_token="lease")
+
+
+@pytest.mark.parametrize("dispatch", [
+    lambda: generate_rag_chat([{"role": "user", "content": "Synthetic"}]),
+    lambda: generate_rag_summary([{"role": "user", "content": "Synthetic"}]),
+    lambda: rag_chat_service._generate_query_embedding("Synthetic"),
+])
+def test_low_level_rag_clients_require_authorization_even_with_accounting_disabled(monkeypatch, dispatch):
+    from app.core.config import settings
+
+    for name in ("rag_observability_enabled", "rag_durable_accounting_enabled", "rag_provider_throughput_enabled"):
+        monkeypatch.setattr(settings, name, False)
+    with pytest.raises(RagDispatchAuthorizationError):
+        dispatch()

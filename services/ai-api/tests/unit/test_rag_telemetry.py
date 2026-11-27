@@ -62,3 +62,21 @@ def test_unknown_usage_and_ledger_states():
     assert result["accounting_state"] == "partial_usage" and result["fallback_used"]
     execution.ledger_unconfirmed = True
     assert operation.snapshot()["accounting_state"] == "interrupted"
+
+
+def test_only_bounded_server_request_ids_are_correlated(monkeypatch, caplog):
+    monkeypatch.setattr(telemetry.settings, "rag_observability_enabled", True)
+
+    @telemetry.observe_operation
+    def ask():
+        return "fixture"
+
+    trace_id = "20000000-0000-4000-8000-000000000001"
+    with caplog.at_level("INFO", logger=telemetry.__name__):
+        with telemetry.bind_rag_request_trace(trace_id):
+            ask()
+        with telemetry.bind_rag_request_trace("synthetic-arbitrary-header"):
+            ask()
+    first, second = (json.loads(record.getMessage()) for record in caplog.records)
+    assert first["trace_id"] == trace_id and second["trace_id"] != trace_id
+    assert "synthetic-arbitrary-header" not in caplog.text

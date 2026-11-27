@@ -27,7 +27,8 @@ Measure request stages and preserve provider accounting across interrupted worke
 | Web regression | 1,294 tests passed and 26 skipped in the full run. All 37 focused Study Assistant tests passed after adding the quota denial case. Route type generation, TypeScript, the production build and all 29 production safeguard tests passed. |
 | Worker interruption | Two independent synthetic workers exited at the prescribed points. Both left one durable pending intent and null observed usage. The worker before dispatch made zero synthetic provider calls, and the worker after the response made one. |
 | Dependency audit | npm and pinned Python audit reported no known vulnerabilities |
-| Hosted QA and GitHub Actions | Pending |
+| Hosted functional QA | Pass, developer-confirmed in Phase 6G |
+| Post-merge staging CI | Pass, cited in the Phase 6G brief |
 
 The existing web lint rules reported 45 warnings and zero errors. The reviewed React compiler groups included 20 effects that set state, 15 ref-access diagnostics, two dependency diagnostics and two purity diagnostics. Existing web components outside the RAG availability notice are outside this change.
 
@@ -53,4 +54,8 @@ Account-specific RPM/TPM, input/output and daily limits for GPT-OSS 20B and 120B
 
 ## Release decision
 
-Phase 6F hosted acceptance remains pending, including actual provider limits, hosted performance and GitHub Actions on committed changes. The Phase 6E live comparative benchmark, real embedding quality, blind and semantic citation scoring, live security and live lifecycle evaluations also remain pending. No hosted flags were changed. The baseline is `product-release` at `7cd362e5fef680ace3e6ae1d8d9e808360b39489`.
+Phase 6F hosted and live functional acceptance is developer-confirmed. Numerical hosted performance and comparative thresholds remain unreported in the supplied evidence. Production activation is tracked separately. The baseline is `product-release` at `7cd362e5fef680ace3e6ae1d8d9e808360b39489`.
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.

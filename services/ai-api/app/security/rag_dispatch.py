@@ -17,7 +17,7 @@ class RagDispatchAuthorizationError(RuntimeError):
 
 def require_rag_dispatch_authorization() -> None:
     if _authorize.get() is None:
-        raise RagDispatchAuthorizationError("RAG v2 provider dispatch requires operation authorization.")
+        raise RagDispatchAuthorizationError("RAG provider dispatch requires operation authorization.")
 
 
 @contextmanager

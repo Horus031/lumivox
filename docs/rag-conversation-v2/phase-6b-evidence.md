@@ -80,3 +80,7 @@ The concurrency harness exercised competing transactions and verified the durabl
 ## Release Decision
 
 Pending GitHub Actions, hosted browser QA, and staging resource measurements. Keep production RAG v2 disabled through that release gate.
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.

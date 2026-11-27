@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from functools import lru_cache
 from dataclasses import dataclass
 from typing import Generic, TypeVar
@@ -87,13 +88,22 @@ def _apply_strict_object_rules(value) -> None:
             _apply_strict_object_rules(child)
 
 
-def _generate_gemini_text(prompt: str) -> LLMTextGeneration:
+def _generate_gemini_text(prompt: str, authorize_dispatch: Callable[[], None] | None = None) -> LLMTextGeneration:
     started_at = time.perf_counter()
     client = get_gemini_client()
 
+    options = {}
+    if authorize_dispatch is not None:
+        from google.genai import types
+
+        options["config"] = types.GenerateContentConfig(
+            http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(attempts=1)),
+        )
+        authorize_dispatch()
     response = client.models.generate_content(
         model=settings.gemini_text_model,
         contents=prompt,
+        **options,
     )
 
     text = getattr(response, "text", None)
@@ -140,16 +150,19 @@ def generate_text(
     prompt: str,
     *,
     model_chain: list[str] | None = None,
+    authorize_dispatch: Callable[[], None] | None = None,
 ) -> LLMTextGeneration:
     provider = settings.llm_provider.lower()
 
     if provider == "google":
-        return _generate_gemini_text(prompt)
+        return _generate_gemini_text(prompt, authorize_dispatch) if authorize_dispatch else _generate_gemini_text(prompt)
 
     if provider != "groq":
         raise RuntimeError(f"Unsupported LLM provider: {settings.llm_provider}")
 
     client = _get_groq_client()
+    if authorize_dispatch is not None:
+        client = client.with_options(max_retries=0)
     models = model_chain or _split_model_chain(settings.groq_chat_models)
     attempts_per_model = _get_attempt_count()
     started_at = time.perf_counter()
@@ -158,6 +171,8 @@ def generate_text(
 
     for model in models:
         for _ in range(attempts_per_model):
+            if authorize_dispatch is not None:
+                authorize_dispatch()
             attempts += 1
             try:
                 response = client.chat.completions.create(
@@ -185,8 +200,11 @@ def generate_text(
                     attempts=attempts,
                 )
             except Exception as error:
-                errors.append(f"{model}: {error}")
+                if authorize_dispatch is None:
+                    errors.append(f"{model}: {error}")
 
+    if authorize_dispatch is not None:
+        raise RuntimeError("All guarded text generation attempts failed.")
     raise RuntimeError(
         "All Groq text generation attempts failed. "
         + " | ".join(errors)

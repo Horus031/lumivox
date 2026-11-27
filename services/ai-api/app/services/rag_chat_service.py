@@ -11,10 +11,10 @@ from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext, RagProviderAttempt
 from app.core.rag_telemetry import current_telemetry, measure_stage, timed_stage
-from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_dispatch import before_rag_dispatch, rag_dispatch_authorization, require_rag_dispatch_authorization
 from app.security.rag_privacy import sanitize_rag_text
 from app.services.rag_provider_execution import RagProviderExecutionError
-from app.services.rag_conversation_store import RagConversationError
+from app.services.rag_conversation_store import RagConversationError, _call_rpc
 
 
 MARKDOWN_FORMATTING_RULES = r"""Formatting:
@@ -75,6 +75,7 @@ def _normalize_top_k(top_k: int) -> int:
 def _generate_query_embedding(
     question: str, *, deadline: RagDeadline | None = None, execution_context: RagExecutionContext | None = None,
 ) -> list[float]:
+    require_rag_dispatch_authorization()
     client = get_gemini_client()
 
     model_name = settings.gemini_embedding_model
@@ -96,12 +97,10 @@ def _generate_query_embedding(
             attempt.error_code = "dispatch_cancelled"
             execution_context.finish_attempt(attempt_id, attempt, deadline.bounded(1.0))
             raise
-    http_options = None
-    if deadline:
-        http_options = types.HttpOptions(
-            timeout=max(1, int(deadline.require_remaining() * 1_000)),
-            retry_options=types.HttpRetryOptions(attempts=1),
-        )
+    http_options = types.HttpOptions(
+        timeout=max(1, int(deadline.require_remaining() * 1_000)) if deadline else None,
+        retry_options=types.HttpRetryOptions(attempts=1),
+    )
     if attempt is not None:
         execution_context.attempts.append(attempt)
     elif telemetry := current_telemetry():
@@ -318,8 +317,8 @@ Answer:
 
 
 def _generate_answer_from_prompt(prompt: str) -> LLMTextGeneration:
-    before_rag_dispatch(prompt)
-    return generate_text(prompt)
+    require_rag_dispatch_authorization()
+    return generate_text(prompt, authorize_dispatch=lambda: before_rag_dispatch(prompt))
 
 
 def _store_message(
@@ -379,6 +378,7 @@ def generate_rag_answer(
     list[dict[str, Any]],
     LLMTextGeneration | None,
 ]:
+    require_rag_dispatch_authorization()
     if settings.rag_privacy_filter_enabled:
         question = sanitize_rag_text(question, target="provider")
     if not selected_document_ids:
@@ -454,6 +454,17 @@ def ask_rag_question(
     supabase = get_supabase_client()
 
     normalized_top_k = _normalize_top_k(top_k)
+    chat_session_id = session_id
+
+    def authorize_dispatch() -> None:
+        result = _call_rpc(supabase, "rag_assert_legacy_dispatch", {
+            "p_user_id": user_id, "p_session_id": chat_session_id,
+            "p_focus_session_id": focus_session_id, "p_document_ids": selected_document_ids,
+        })
+        if result is not True:
+            raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+
+    authorize_dispatch()
 
     context_mode = (
         "document_rag"
@@ -488,15 +499,16 @@ def ask_rag_question(
         preferred_locale=preferred_locale,
     )
 
-    answer, sources, generation = generate_rag_answer(
-        supabase=supabase,
-        user_id=user_id,
-        question=question,
-        selected_document_ids=selected_document_ids,
-        top_k=normalized_top_k,
-        prompt_variant=prompt_variant,
-        preferred_locale=preferred_locale,
-    )
+    with rag_dispatch_authorization(authorize_dispatch):
+        answer, sources, generation = generate_rag_answer(
+            supabase=supabase,
+            user_id=user_id,
+            question=question,
+            selected_document_ids=selected_document_ids,
+            top_k=normalized_top_k,
+            prompt_variant=prompt_variant,
+            preferred_locale=preferred_locale,
+        )
     if context_mode == "document_rag" and not sources:
         answer = (
             "I could not find relevant information in the selected documents. "

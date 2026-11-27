@@ -57,6 +57,7 @@ class RagExecutionContext:
     attempts: list[RagProviderAttempt] = field(default_factory=list)
     ledger: RagAttemptLedger | None = None
     ledger_unconfirmed: bool = False
+    ledger_intent_count: int = 0
 
     def begin_attempt(self, attempt: RagProviderAttempt, reserved_output: int | None,
                       deadline: RagDeadline) -> str | None:
@@ -65,12 +66,16 @@ class RagExecutionContext:
         require_rag_dispatch_authorization()
         if self.ledger is None:
             raise RagLedgerUnavailable("RAG attempt ledger is required.")
+        if not self.has_ledger_budget():
+            raise RagLedgerUnavailable("RAG attempt ledger is blocked or exhausted.")
+        attempt_index = self.ledger_intent_count + 1
         attempt_id = str(uuid4())
         token = rag_dispatch_deadline.set(deadline)
         try:
             with measure_stage("attempt_begin"):
-                if not self.ledger.begin(attempt_id, len(self.attempts) + 1, attempt, reserved_output):
+                if not self.ledger.begin(attempt_id, attempt_index, attempt, reserved_output):
                     raise RagLedgerUnavailable("RAG attempt identity already exists.")
+                self.ledger_intent_count = attempt_index
         except Exception:
             self.ledger_unconfirmed = True
             raise
@@ -91,11 +96,16 @@ class RagExecutionContext:
         finally:
             rag_dispatch_deadline.reset(token)
 
+    def has_ledger_budget(self, reserve: int = 0) -> bool:
+        return not self.ledger_unconfirmed and self.ledger_intent_count + reserve < self.max_provider_calls
+
     def has_provider_budget(self, stage: RagProviderStage) -> bool:
         reserve = self.answer_call_reserve if stage in {"rolling_summary", "embedding"} else 0
         if stage == "rolling_summary" and self.needs_embedding:
             reserve += 1
-        return len(self.attempts) + reserve < self.max_provider_calls
+        return len(self.attempts) + reserve < self.max_provider_calls and (
+            not settings.rag_durable_accounting_enabled or self.has_ledger_budget(reserve)
+        )
 
     def accounting(self) -> list[dict]:
         return [asdict(attempt) for attempt in self.attempts]

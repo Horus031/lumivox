@@ -1,5 +1,7 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
+
 import { AiApiError, AiApiTransportError, fetchAiApi } from "@/lib/ai-api/fetch-ai-api";
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
@@ -96,8 +98,44 @@ const admittedAskSchema = z.object({
   conversationProtocol: z.literal("v2"),
 });
 
+async function traceRagAction<T extends { success: boolean }>(
+  operation: "ask" | "new_chat",
+  run: (traceId: string) => Promise<T>,
+): Promise<T> {
+  const traceId = randomUUID();
+  const started = performance.now();
+  let success = false;
+  try {
+    const result = await run(traceId);
+    success = result.success;
+    return result;
+  } finally {
+    if (process.env.RAG_OBSERVABILITY_ENABLED === "true") {
+      try {
+        console.info(JSON.stringify({
+          event: "rag.web.operation.finished",
+          schema_version: 1,
+          operation,
+          trace_id: traceId,
+          elapsed_ms: Math.round(performance.now() - started),
+          success,
+        }));
+      } catch {
+        // Logging leaves the action result unchanged.
+      }
+    }
+  }
+}
+
 export async function askRagQuestionAction(
   payload: RagAskActionPayload,
+): Promise<RagAskActionResult> {
+  return traceRagAction("ask", (traceId) => askRagQuestion(payload, traceId));
+}
+
+async function askRagQuestion(
+  payload: RagAskActionPayload,
+  traceId: string,
 ): Promise<RagAskActionResult> {
   try {
     const { user } = await requireUser();
@@ -124,7 +162,7 @@ export async function askRagQuestionAction(
       const rejected = await checkRagAdmission(user.id, "ask", requestId, canonical);
       if (rejected) return rejected;
       const result = await fetchAiApi<RagAskActionResponse>({
-        path: "/api/v1/rag/chat/ask", retries: 0,
+        path: "/api/v1/rag/chat/ask", retries: 0, requestId: traceId,
         body: {
           user_id: user.id, question: canonical.question, selected_document_ids: selectedDocumentIds,
           focus_session_id: canonical.focusSessionId, session_id: canonical.sessionId, top_k: canonical.topK,
@@ -170,6 +208,7 @@ export async function askRagQuestionAction(
 
     const result = await fetchAiApi<RagAskActionResponse>({
       path: "/api/v1/rag/chat/ask",
+      requestId: traceId,
       body: {
         user_id: user.id,
         question,
@@ -382,6 +421,7 @@ async function lifecycleRequest<T>(
   operation: "new" | "history" | "history/detail",
   payload: Record<string, unknown>,
   admission?: { requestId: string; canonical: unknown },
+  traceId?: string,
 ): Promise<ChatLifecycleResult<T>> {
   const isTransition = operation === "new";
   try {
@@ -400,7 +440,7 @@ async function lifecycleRequest<T>(
       };
     }
     const data = await fetchAiApi<T>({
-      path: `/api/v1/rag/chat/${operation}`, body: { ...payload, user_id: user.id }, retries: 0,
+      path: `/api/v1/rag/chat/${operation}`, body: { ...payload, user_id: user.id }, retries: 0, requestId: traceId,
     });
     return { success: true, message: "Conversation loaded.", data };
   } catch (error) {
@@ -420,6 +460,13 @@ async function lifecycleRequest<T>(
 export async function startNewRagConversationAction(
   input: RagNewChatPayload,
 ): Promise<ChatLifecycleResult<RagNewChatResponse>> {
+  return traceRagAction("new_chat", (traceId) => startNewRagConversation(input, traceId));
+}
+
+async function startNewRagConversation(
+  input: RagNewChatPayload,
+  traceId: string,
+): Promise<ChatLifecycleResult<RagNewChatResponse>> {
   const parsed = newChatPayloadSchema.safeParse(input);
   if (!parsed.success) {
     return { success: false, code: "RAG_INVALID_REQUEST", message: "Invalid request.", retrySameRequest: false };
@@ -438,7 +485,7 @@ export async function startNewRagConversationAction(
   };
   return lifecycleRequest("new", {
     ...canonical, client_request_id: requestId,
-  }, enabled ? { requestId, canonical } : undefined);
+  }, enabled ? { requestId, canonical } : undefined, traceId);
 }
 
 export async function listRagConversationsAction(

@@ -50,6 +50,7 @@ def test_real_answer_dispatch_uses_isolated_redacted_copy(monkeypatch):
 def test_legacy_ask_sanitizes_provider_inputs_but_preserves_the_transcript(monkeypatch, document_mode):
     monkeypatch.setattr(settings, "rag_privacy_filter_enabled", True)
     database = Mock()
+    database.rpc.return_value.execute.return_value.data = True
     database.table.return_value.insert.return_value.execute.return_value.data = [{"id": "session"}]
     monkeypatch.setattr(rag_chat_service, "get_supabase_client", lambda: database)
     embed = Mock(return_value=[0.1])
@@ -57,7 +58,11 @@ def test_legacy_ask_sanitizes_provider_inputs_but_preserves_the_transcript(monke
         "chunk_id": "chunk", "document_id": "document", "file_name": "worksheet.txt",
         "chunk_index": 0, "similarity": 0.9, "content": "Read the notes. password: synthetic-source",
     }])
-    provider = Mock(return_value=SimpleNamespace(text="Study answer", model="test"))
+    def generate(_prompt, *, authorize_dispatch):
+        authorize_dispatch()
+        return SimpleNamespace(text="Study answer", model="test")
+
+    provider = Mock(side_effect=generate)
     store = Mock()
     monkeypatch.setattr(rag_chat_service, "_generate_query_embedding", embed)
     monkeypatch.setattr(rag_chat_service, "_retrieve_chunks", lookup)
@@ -112,7 +117,9 @@ def test_v2_provider_paths_require_operation_authorization(monkeypatch, accounti
 
 
 def test_legacy_empty_document_answer_preserves_the_existing_response(monkeypatch):
-    monkeypatch.setattr(rag_chat_service, "get_supabase_client", Mock())
+    database = Mock()
+    database.rpc.return_value.execute.return_value.data = True
+    monkeypatch.setattr(rag_chat_service, "get_supabase_client", lambda: database)
     monkeypatch.setattr(rag_chat_service, "_get_or_create_session", Mock(return_value="legacy-session"))
     monkeypatch.setattr(rag_chat_service, "_store_message", Mock())
     monkeypatch.setattr(rag_chat_service, "_generate_query_embedding", Mock(return_value=[0.1]))

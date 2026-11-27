@@ -3,7 +3,7 @@ import io
 import re
 import time
 from dataclasses import dataclass
-from typing import Any
+from uuid import uuid4
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,8 +13,9 @@ from google.genai import types
 from pypdf import PdfReader
 from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
-from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_dispatch import before_rag_dispatch, rag_dispatch_authorization, require_rag_dispatch_authorization
 from app.security.rag_privacy import sanitize_rag_text
+from app.services.rag_conversation_store import RagConversationError, _call_rpc
 
 
 LEARNING_DOCUMENT_BUCKET = "learning-documents"
@@ -131,15 +132,19 @@ def _estimate_tokens(text: str) -> int:
 def _generate_embedding(text: str) -> list[float]:
     if settings.rag_privacy_filter_enabled:
         text = sanitize_rag_text(text, target="provider")
-    before_rag_dispatch(text)
+    require_rag_dispatch_authorization()
     client = _configure_gemini()
+    before_rag_dispatch(text)
 
     model_name = settings.gemini_embedding_model
 
     result = client.models.embed_content(
         model=model_name,
         contents=text,
-        config=types.EmbedContentConfig(output_dimensionality=768)
+        config=types.EmbedContentConfig(
+            output_dimensionality=768,
+            http_options=types.HttpOptions(retry_options=types.HttpRetryOptions(attempts=1)),
+        )
     )
     
     
@@ -162,204 +167,74 @@ def _to_pgvector_literal(values: list[float]) -> str:
     return "[" + ",".join(str(float(value)) for value in values) + "]"
 
 
-def _fetch_document(
-    supabase: Any,
-    document_id: str,
-    user_id: str,
-) -> LearningDocument:
-    response = (
-        supabase.table("learning_documents")
-        .select("id,owner_id,file_name,file_path,mime_type")
-        .eq("id", document_id)
-        .single()
-        .execute()
-    )
-
-    document = response.data
-
-    if not document:
-        raise ValueError("Document not found.")
-
-    if document["owner_id"] != user_id:
-        raise PermissionError("Only the document owner can process this document.")
-
-    return LearningDocument(
-        id=document["id"],
-        owner_id=document["owner_id"],
-        file_name=document["file_name"],
-        file_path=document["file_path"],
-        mime_type=document["mime_type"],
-    )
-
-
-def _update_document_status(
-    supabase: Any,
-    document_id: str,
-    status: str,
-    preview: str | None = None,
-) -> None:
-    payload: dict[str, Any] = {
-        "extracted_text_status": status,
-    }
-
-    if preview is not None:
-        payload["extracted_text_preview"] = preview[:1200]
-
-    supabase.table("learning_documents").update(payload).eq(
-        "id",
-        document_id,
-    ).execute()
-
-
 def process_learning_document(
     document_id: str,
     user_id: str,
-) -> dict[str, Any]:
+) -> dict:
     started_at = time.perf_counter()
-
     supabase = _get_supabase_admin()
+    identity = {"p_document_id": document_id, "p_user_id": user_id, "p_operation_id": str(uuid4())}
+    document = LearningDocument(**_call_rpc(supabase, "rag_begin_document_processing", identity))
 
-    document = _fetch_document(
-        supabase=supabase,
-        document_id=document_id,
-        user_id=user_id,
-    )
+    def authorize_dispatch() -> None:
+        if _call_rpc(supabase, "rag_assert_document_processing", identity) is not True:
+            raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
 
-    _update_document_status(
-        supabase=supabase,
-        document_id=document.id,
-        status="processing",
-    )
+    def finish(status: str, *, preview: str | None = None, rows: list[dict] | None = None) -> int:
+        count = _call_rpc(supabase, "rag_finish_document_processing", {
+            **identity, "p_status": status, "p_preview": preview, "p_chunks": rows,
+        })
+        if type(count) is not int:
+            raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+        return count
 
     try:
-        file_bytes = supabase.storage.from_(LEARNING_DOCUMENT_BUCKET).download(
-            document.file_path
-        )
-
-        extracted_text = _extract_text(
-            file_bytes=file_bytes,
-            mime_type=document.mime_type,
-            file_name=document.file_name,
-        )
-
-        if not extracted_text:
-            _update_document_status(
-                supabase=supabase,
-                document_id=document.id,
-                status="failed",
-                preview="",
-            )
-
-            return {
-                "document_id": document.id,
-                "status": "failed",
-                "chunk_count": 0,
-                "message": "No extractable text was found in this document.",
-            }
-
+        file_bytes = supabase.storage.from_(LEARNING_DOCUMENT_BUCKET).download(document.file_path)
+        extracted_text = _extract_text(file_bytes, document.mime_type, document.file_name)
         chunk_size = int(os.getenv("RAG_CHUNK_SIZE_CHARS", "1800"))
         overlap = int(os.getenv("RAG_CHUNK_OVERLAP_CHARS", "250"))
         max_chunks = int(os.getenv("RAG_MAX_CHUNKS_PER_DOCUMENT", "80"))
-
-        chunks = _chunk_text(
-            text=extracted_text,
-            chunk_size=chunk_size,
-            overlap=overlap,
-            max_chunks=max_chunks,
-        )
-
+        chunks = _chunk_text(extracted_text, chunk_size=chunk_size, overlap=overlap, max_chunks=max_chunks)
         if not chunks:
-            _update_document_status(
-                supabase=supabase,
-                document_id=document.id,
-                status="failed",
-                preview=extracted_text,
-            )
-
+            finish("failed", preview="")
             return {
-                "document_id": document.id,
-                "status": "failed",
-                "chunk_count": 0,
-                "message": "Text extraction succeeded, but no chunks were created.",
+                "document_id": document.id, "status": "failed", "chunk_count": 0,
+                "message": ("Text extraction succeeded, but no chunks were created."
+                            if extracted_text else "No extractable text was found in this document."),
             }
 
-        # Re-processing should replace old chunks for the same document.
-        supabase.table("document_chunks").delete().eq(
-            "document_id",
-            document.id,
-        ).execute()
-
-        embedding_model = settings.gemini_embedding_model
-
-        rows: list[dict[str, Any]] = []
-
-        for index, chunk in enumerate(chunks):
-            embedding = _generate_embedding(chunk)
-
-            rows.append(
-                {
-                    "document_id": document.id,
-                    "owner_id": document.owner_id,
-                    "chunk_index": index,
-                    "content": chunk,
-                    "content_char_count": len(chunk),
-                    "token_estimate": _estimate_tokens(chunk),
-                    "embedding": _to_pgvector_literal(embedding),
-                    "embedding_model": embedding_model,
-                    "status": "embedded",
+        rows = []
+        with rag_dispatch_authorization(authorize_dispatch):
+            for index, chunk in enumerate(chunks):
+                embedding = _generate_embedding(chunk)
+                rows.append({
+                    "chunk_index": index, "content": chunk, "token_estimate": _estimate_tokens(chunk),
+                    "embedding": _to_pgvector_literal(embedding), "embedding_model": settings.gemini_embedding_model,
                     "metadata": {
-                        "file_name": document.file_name,
-                        "mime_type": document.mime_type,
-                        "chunk_size_chars": chunk_size,
-                        "chunk_overlap_chars": overlap,
+                        "file_name": document.file_name, "mime_type": document.mime_type,
+                        "chunk_size_chars": chunk_size, "chunk_overlap_chars": overlap,
                     },
-                }
-            )
-
-        # Insert in small batches to avoid payload size issues.
-        batch_size = 20
-
-        for start in range(0, len(rows), batch_size):
-            batch = rows[start : start + batch_size]
-            supabase.table("document_chunks").insert(batch).execute()
-
-        _update_document_status(
-            supabase=supabase,
-            document_id=document.id,
-            status="completed",
-            preview=extracted_text,
-        )
-
+                })
+        chunk_count = finish("completed", preview=extracted_text, rows=rows)
         latency_ms = int((time.perf_counter() - started_at) * 1000)
-
         return {
-            "document_id": document.id,
-            "status": "completed",
-            "chunk_count": len(rows),
+            "document_id": document.id, "status": "completed", "chunk_count": chunk_count,
             "message": f"Document processed successfully in {latency_ms}ms.",
         }
-
+    except RagConversationError:
+        raise
     except ValueError as error:
         unsupported = "Unsupported file type" in str(error)
-
-        _update_document_status(
-            supabase=supabase,
-            document_id=document.id,
-            status="unsupported" if unsupported else "failed",
-        )
-
+        status = "unsupported" if unsupported else "failed"
+        finish(status)
         return {
-            "document_id": document.id,
-            "status": "unsupported" if unsupported else "failed",
-            "chunk_count": 0,
+            "document_id": document.id, "status": status, "chunk_count": 0,
             "message": "RAG_UNSUPPORTED_DOCUMENT" if unsupported else "RAG_INVALID_DOCUMENT",
         }
-
     except Exception:
-        _update_document_status(
-            supabase=supabase,
-            document_id=document.id,
-            status="failed",
-        )
-
+        # A deleted or superseded operation must not update the replacement job.
+        try:
+            finish("failed")
+        except RagConversationError:
+            pass
         raise RuntimeError("RAG_DOCUMENT_PROCESSING_FAILED") from None

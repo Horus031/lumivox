@@ -800,6 +800,32 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"rag_document_processing_jobs": {
+                  Row: {
+                    "document_id": string,"document_updated_at": string,"operation_id": string,"owner_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "document_id": string,"document_updated_at": string,"operation_id": string,"owner_id": string
+                  }
+                  Update: {
+                    "document_id"?: string,"document_updated_at"?: string,"operation_id"?: string,"owner_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_document_processing_jobs_document_id_fkey"
+      columns: ["document_id"]
+isOneToOne: true
+      referencedRelation: "learning_documents"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rag_document_processing_jobs_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"rag_provider_attempts": {
                   Row: {
                       "attempt_index": number
@@ -2232,6 +2258,18 @@ isOneToOne: false
 { Args: { "p_document_ids"?: (string)[],"p_match_count"?: number,"p_query_embedding": string,"p_user_id"?: string }; Returns: {
               "chunk_id": string,"chunk_index": number,"content": string,"document_id": string,"file_name": string,"similarity": number
             }[]
+                           },
+"rag_assert_document_processing":
+{ Args: { "p_document_id": string,"p_operation_id": string,"p_user_id": string }; Returns: boolean
+                           },
+"rag_assert_legacy_dispatch":
+{ Args: { "p_document_ids": (string)[],"p_focus_session_id": string,"p_session_id": string,"p_user_id": string }; Returns: boolean
+                           },
+"rag_begin_document_processing":
+{ Args: { "p_document_id": string,"p_operation_id": string,"p_user_id": string }; Returns: Json
+                           },
+"rag_finish_document_processing":
+{ Args: { "p_chunks": Json,"p_document_id": string,"p_operation_id": string,"p_preview": string,"p_status": string,"p_user_id": string }; Returns: number
                            },
 "rag_v2_assert_preparation_authorized":
 { Args: { "p_expected_revision": Json,"p_lease_token": string,"p_preparation_id": string,"p_user_id": string }; Returns: boolean

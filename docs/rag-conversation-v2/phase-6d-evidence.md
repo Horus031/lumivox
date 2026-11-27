@@ -96,3 +96,7 @@ The pinned Python scan completed with **zero known vulnerabilities** after targe
 - Quarantine prevents future memory use. It retains transcripts, published answers, backups, and data already sent to providers. Existing document embeddings require separately authorized reindexing.
 - Rotate the internal API key through the secret configuration for Next.js and FastAPI in the same rollout. Verify authorization with the replacement key and remove the previous value from both deployments.
 - Hosted QA, CI, and live model evaluation remain release gates. `RAG_PRIVACY_FILTER_ENABLED` and `RAG_CONTEXT_ISOLATION_ENABLED` default to disabled for controlled rollout. Quarantine, authorization, and safe error handling apply independently of both flags.
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.
