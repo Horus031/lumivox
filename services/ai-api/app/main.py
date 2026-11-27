@@ -40,6 +40,7 @@ from app.services.deadline_risk_runtime import (
 )
 from app.core.config import settings
 from app.core.rag_token_budget import get_rag_encoding
+from app.core.rag_telemetry import configure_telemetry_logging
 from app.clients.rag_redis_client import close_rag_redis_http_client
 
 from app.services.native_task_risk_service import (
@@ -56,6 +57,7 @@ logger = logging.getLogger(
 async def lifespan(
     app: FastAPI,
 ):
+    configure_telemetry_logging()
     # Legacy OULAD deadline-risk must
     # not block the entire API.
     try:

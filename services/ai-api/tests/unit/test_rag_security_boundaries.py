@@ -80,8 +80,11 @@ def test_legacy_ask_sanitizes_provider_inputs_but_preserves_the_transcript(monke
         embed.assert_not_called()
 
 
-def test_v2_provider_paths_require_operation_authorization(monkeypatch):
+@pytest.mark.parametrize("accounting_enabled", [False, True])
+def test_v2_provider_paths_require_operation_authorization(monkeypatch, accounting_enabled):
     monkeypatch.setattr(settings, "rag_rolling_summary_enabled", True)
+    monkeypatch.setattr(settings, "rag_observability_enabled", accounting_enabled)
+    monkeypatch.setattr(settings, "rag_durable_accounting_enabled", accounting_enabled)
     turn = RagCompletedTurn(turn_index=1, question="Earlier question", answer="Earlier answer")
     context = RagConversationContext(session_id="session", current_turn_index=13, completed_turn_count=12)
     embed, answer, summary, handoff = Mock(), Mock(), Mock(), Mock()

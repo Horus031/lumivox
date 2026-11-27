@@ -800,6 +800,86 @@ isOneToOne: false
       referencedColumns: ["id","user_id"]
     }
                   ]
+                },"rag_provider_attempts": {
+                  Row: {
+                      "attempt_index": number
+                      "attempt_limit": number
+                      "completion_tokens": number | null
+                      "created_at": string
+                      "error_code": string | null
+                      "estimated_prompt_tokens": number | null
+                      "finished_at": string | null
+                      "id": string
+                      "latency_ms": number | null
+                      "model_name": string
+                      "preparation_id": string | null
+                      "prompt_tokens": number | null
+                      "provider": string
+                      "reserved_completion_tokens": number | null
+                      "stage": string
+                      "status": string
+                      "total_tokens": number | null
+                      "turn_id": string | null
+                      "user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                      "attempt_index": number
+                      "attempt_limit": number
+                      "completion_tokens"?: number | null
+                      "created_at"?: string
+                      "error_code"?: string | null
+                      "estimated_prompt_tokens"?: number | null
+                      "finished_at"?: string | null
+                      "id": string
+                      "latency_ms"?: number | null
+                      "model_name": string
+                      "preparation_id"?: string | null
+                      "prompt_tokens"?: number | null
+                      "provider": string
+                      "reserved_completion_tokens"?: number | null
+                      "stage": string
+                      "status"?: string
+                      "total_tokens"?: number | null
+                      "turn_id"?: string | null
+                      "user_id": string
+                  }
+                  Update: {
+                      "attempt_index"?: number
+                      "attempt_limit"?: number
+                      "completion_tokens"?: number | null
+                      "created_at"?: string
+                      "error_code"?: string | null
+                      "estimated_prompt_tokens"?: number | null
+                      "finished_at"?: string | null
+                      "id"?: string
+                      "latency_ms"?: number | null
+                      "model_name"?: string
+                      "preparation_id"?: string | null
+                      "prompt_tokens"?: number | null
+                      "provider"?: string
+                      "reserved_completion_tokens"?: number | null
+                      "stage"?: string
+                      "status"?: string
+                      "total_tokens"?: number | null
+                      "turn_id"?: string | null
+                      "user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_provider_attempts_preparation_id_user_id_fkey"
+      columns: ["preparation_id","user_id"]
+      isOneToOne: false
+      referencedRelation: "rag_chat_preparations"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "rag_provider_attempts_turn_id_user_id_fkey"
+      columns: ["turn_id","user_id"]
+      isOneToOne: false
+      referencedRelation: "rag_chat_turns"
+      referencedColumns: ["id","user_id"]
+    }
+                  ]
                 },"reward_ledger": {
                   Row: {
                     "created_at": string,"event_type": Database["public"]['Enums']["reward_event_type"],"id": string,"occurred_at": string,"reward_note": string,"source_key": string,"source_payload": NonNullable<Json>,"token_delta": number,"user_id": string
@@ -2165,6 +2245,37 @@ isOneToOne: false
 "rag_v2_commit_new_chat_recovery":
 { Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
                            },
+"rag_v2_begin_provider_attempt": {
+  Args: {
+    "p_attempt_id": string
+    "p_attempt_index": number
+    "p_estimated_prompt_tokens": number
+    "p_expected_revision": Json
+    "p_lease_token": string
+    "p_max_attempts": number
+    "p_model_name": string
+    "p_preparation_id": string
+    "p_provider": string
+    "p_reserved_completion_tokens": number
+    "p_stage": string
+    "p_turn_id": string
+    "p_user_id": string
+  }
+  Returns: string
+},
+"rag_v2_finish_provider_attempt": {
+  Args: {
+    "p_attempt_id": string
+    "p_completion_tokens": number
+    "p_error_code": string
+    "p_latency_ms": number
+    "p_prompt_tokens": number
+    "p_status": string
+    "p_total_tokens": number
+    "p_user_id": string
+  }
+  Returns: boolean
+},
 "rag_v2_complete_turn":
 { Args: { "p_answer": string,"p_latency_ms": number,"p_lease_token": string,"p_model_name": string,"p_provider": string,"p_sources": Json,"p_turn_id": string,"p_usage": Json,"p_user_id": string }; Returns: Json
                            },

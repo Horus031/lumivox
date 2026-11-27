@@ -308,6 +308,23 @@ describe("Study workspace RAG chat", () => {
     expect(container.textContent).toContain("New answer");
   });
 
+  it("shows a localized availability notice for provider throughput denials", async () => {
+    mocks.ask.mockResolvedValueOnce({
+      success: false,
+      code: "RAG_PROVIDER_TPM_LIMITED",
+      message: "Internal quota detail",
+      retrySameRequest: false,
+      sessionId: "chat-session",
+    });
+
+    enterQuestion("Explain binary search");
+    await submitQuestion();
+
+    expect(container.querySelector('[role="alert"]')?.textContent).toBe(messages.rag.providerBusy);
+    expect(retryButton()).toBeUndefined();
+    expect(container.querySelector("textarea")?.value).toBe("Explain binary search");
+  });
+
   it("restores messages in order and keeps the restored document scope fixed", async () => {
     mocks.restore.mockResolvedValueOnce(restoredConversation("Stored question", "**Stored answer**"));
 

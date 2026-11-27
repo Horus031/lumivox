@@ -21,6 +21,7 @@ from app.core.rag_execution_context import RagExecutionContext, RagProviderStage
 from app.services.rag_provider_execution import RagProviderExecutionError, execute_rag_provider_call
 from app.core.rag_model_registry import parse_rag_model_chain, validate_rag_configuration
 from app.core.rag_token_budget import assert_prompt_budget
+from app.core.rag_telemetry import measure_stage, note_unmanaged_dispatch
 from app.schemas.rag_conversation_summary import RagConversationSummary, SUMMARY_RESPONSE_FORMAT
 
 
@@ -83,9 +84,14 @@ def generate_rag_summary(
                     deadline=RagDeadline(deadline), estimated_prompt_tokens=estimated_prompt_tokens,
                     classify_error=_classify_summary_error, parse_response=parse_response,
                 )
+            if settings.rag_durable_accounting_enabled or settings.rag_provider_throughput_enabled:
+                raise RagProviderExecutionError("provider_quota_unavailable")
             if before_rag_dispatch(*(message["content"] for message in messages), deadline=RagDeadline(deadline)):
                 request_options["timeout"] = min(request_options["timeout"], RagDeadline(deadline).require_remaining())
-            return parse_response(client.chat.completions.create(**request_options))
+            note_unmanaged_dispatch(stage, "groq", model)
+            with measure_stage("provider_dispatch"):
+                response = client.chat.completions.create(**request_options)
+            return parse_response(response)
 
         except (APIConnectionError, APIStatusError, RagLLMError, RagProviderExecutionError, ValidationError) as error:
             code, retryable = _classify_summary_error(error)

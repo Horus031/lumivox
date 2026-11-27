@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from app.clients.rag_redis_client import RagRedisUnavailable, execute_rag_redis_command
 from app.core.config import settings
+from app.core.rag_provider_quotas import RagQuotaConfigurationError, configured_quotas
+from app.services.rag_provider_throughput import ACQUIRE_WITH_QUOTA_SCRIPT, SETTLE_DEBT_SCRIPT, quota_arguments
 
 
 ACQUIRE_SCRIPT = """
@@ -38,30 +40,61 @@ return 1
 class RagProviderPermit:
     key: str
     permit_id: str
+    quota_keys: tuple[str, str] | None = None
 
 
 def provider_keys(model: str) -> tuple[str, str]:
-    prefix = f"lumivox:rag:provider:{{{settings.rag_resource_namespace}:groq}}"
+    if settings.rag_provider_throughput_enabled:
+        configured_quotas()
+        prefix = f"lumivox:rag:quota:{{{settings.rag_provider_quota_scope}:groq}}"
+    else:
+        prefix = f"lumivox:rag:provider:{{{settings.rag_resource_namespace}:groq}}"
     return f"{prefix}:permits", f"{prefix}:cooldown:{model}"
 
 
 def acquire_provider_permit(
-    model: str, *, timeout: float,
-) -> tuple[Literal["acquired", "busy", "cooldown"], RagProviderPermit | None]:
-    permits, cooldown = provider_keys(model)
+    model: str, *, timeout: float, input_tokens: int = 0, output_tokens: int = 0,
+) -> tuple[Literal["acquired", "busy", "cooldown", "rpm_limited", "tpm_limited", "quota_unavailable"],
+           RagProviderPermit | None]:
     permit_id = str(uuid4())
+    try:
+        permits, cooldown = provider_keys(model)
+        quota = configured_quotas()[model] if settings.rag_provider_throughput_enabled else None
+    except (RagQuotaConfigurationError, KeyError):
+        return "quota_unavailable", None
+    keys = [permits, cooldown]
+    args = [permit_id, settings.rag_provider_max_concurrency, settings.rag_provider_lease_seconds * 1000]
+    quota_keys = None
+    if quota is not None:
+        quota_keys = (f"{cooldown}:timestamps", f"{cooldown}:weights")
+        keys.extend(quota_keys)
+        args.extend(quota_arguments(quota, input_tokens, output_tokens))
     result = execute_rag_redis_command([
-        "EVAL", ACQUIRE_SCRIPT, 2, permits, cooldown, permit_id,
-        settings.rag_provider_max_concurrency, settings.rag_provider_lease_seconds * 1_000,
+        "EVAL", ACQUIRE_WITH_QUOTA_SCRIPT if quota else ACQUIRE_SCRIPT, len(keys), *keys, *args,
     ], timeout=timeout)
     if isinstance(result, list) and len(result) == 2:
         if result == ["acquired", permit_id]:
-            return "acquired", RagProviderPermit(permits, permit_id)
+            return "acquired", RagProviderPermit(permits, permit_id, quota_keys)
         if result == ["busy", "0"]:
             return "busy", None
         if result == ["cooldown", "0"]:
             return "cooldown", None
+        if quota and result in (["rpm_limited", "0"], ["tpm_limited", "0"]):
+            return result[0], None
+        if quota and result in (["existing", "0"], ["unavailable", "0"]):
+            return "quota_unavailable", None
     raise RagRedisUnavailable("RAG resource control is unavailable.")
+
+
+def settle_provider_debt(permit: RagProviderPermit, *, input_tokens: int, output_tokens: int, total_tokens: int,
+                         timeout: float) -> None:
+    if permit.quota_keys is None:
+        return
+    result = execute_rag_redis_command([
+        "EVAL", SETTLE_DEBT_SCRIPT, 2, *permit.quota_keys, permit.permit_id, input_tokens, output_tokens, total_tokens,
+    ], timeout=timeout)
+    if type(result) is not int or result not in {0, 1}:
+        raise RagRedisUnavailable("RAG quota settlement is unavailable.")
 
 
 def release_provider_permit(permit: RagProviderPermit, *, timeout: float) -> None:

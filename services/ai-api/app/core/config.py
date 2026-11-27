@@ -61,6 +61,11 @@ class Settings(BaseSettings):
     rag_conversation_v2_enabled: bool = False
     rag_operation_recovery_enabled: bool = False
     rag_resource_control_enabled: bool = False
+    rag_observability_enabled: bool = False
+    rag_durable_accounting_enabled: bool = False
+    rag_provider_throughput_enabled: bool = False
+    rag_provider_quota_scope: str | None = None
+    rag_provider_quotas_json: str = "{}"
     rag_context_quality_enabled: bool = False
     rag_privacy_filter_enabled: bool = False
     rag_context_isolation_enabled: bool = False

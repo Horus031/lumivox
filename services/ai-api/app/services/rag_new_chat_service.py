@@ -9,7 +9,9 @@ from app.clients.supabase_client import bounded_rag_supabase, get_supabase_clien
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext
-from app.core.rag_model_registry import validate_rag_configuration
+from app.core.rag_model_registry import RagProviderQuotaConfigurationError, validate_rag_configuration
+from app.core.rag_telemetry import current_telemetry, observe_operation, record_outcome
+from app.services.rag_attempt_ledger import SupabaseRagAttemptLedger
 from app.security.rag_dispatch import rag_dispatch_authorization
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.schemas.rag_conversation_handoff import (
@@ -62,10 +64,14 @@ _KNOWN_COMMIT_REJECTIONS = {
 }
 
 
+@observe_operation
 def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
     if not settings.rag_conversation_v2_enabled or not settings.rag_new_chat_enabled:
         raise RagConversationError("RAG_NEW_CHAT_DISABLED", 409)
-    validate_rag_configuration()
+    try:
+        validate_rag_configuration()
+    except RagProviderQuotaConfigurationError:
+        raise RagConversationError("RAG_PROVIDER_QUOTA_UNAVAILABLE", 503, outcome="failed") from None
     if request.mode == "continue" and not settings.rag_handoff_enabled:
         raise RagConversationError("RAG_HANDOFF_DISABLED", 409)
 
@@ -84,6 +90,8 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
         execution = RagExecutionContext(
             RagDeadline.start(settings.rag_request_deadline_seconds), settings.rag_max_provider_calls_per_handoff,
         )
+    if telemetry := current_telemetry():
+        telemetry.execution = execution
     db = bounded_rag_supabase(execution.deadline, completion_reserve=settings.rag_completion_reserve_seconds) \
         if execution else nullcontext(get_supabase_client())
     with db as supabase:
@@ -101,6 +109,7 @@ def _run_transition(
     except ValidationError:
         raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503) from None
     if isinstance(prepared, _CompletedChat):
+        record_outcome("replayed")
         return prepared
     if isinstance(prepared, _PreparationStatus):
         if prepared.outcome == "processing":
@@ -115,6 +124,12 @@ def _run_transition(
             "user_id": args["user_id"], "preparation_id": str(prepared.preparation_id),
             "lease_token": str(prepared.lease_token),
         }
+        if execution and settings.rag_durable_accounting_enabled and request.mode == "continue":
+            execution.ledger = SupabaseRagAttemptLedger(
+                supabase, identity["user_id"], identity["lease_token"], execution.max_provider_calls,
+                preparation_id=identity["preparation_id"], revision=revision,
+            )
+
         def authorize_dispatch() -> None:
             assert_preparation_authorized(supabase, **identity, expected_revision=revision)
 

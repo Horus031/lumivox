@@ -101,6 +101,10 @@ const REQUEST_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_NEW_CHAT_IN_PROGRESS", "newChatInProgress"],
   ["RAG_PROVIDER_BUSY", "providerBusy"],
   ["RAG_PROVIDER_COOLDOWN", "providerBusy"],
+  ["RAG_PROVIDER_RPM_LIMITED", "providerBusy"],
+  ["RAG_PROVIDER_TPM_LIMITED", "providerBusy"],
+  ["RAG_PROVIDER_RATE_LIMITED", "providerBusy"],
+  ["RAG_PROVIDER_QUOTA_UNAVAILABLE", "resourceControlUnavailable"],
   ["RAG_RESOURCE_CONTROL_UNAVAILABLE", "resourceControlUnavailable"],
   ["RAG_REQUEST_DEADLINE_EXCEEDED", "turnFailed"],
   ["RAG_PROVIDER_CALL_BUDGET_EXCEEDED", "turnFailed"],
@@ -126,6 +130,7 @@ const TRANSITION_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_NEW_CHAT_IN_PROGRESS", "newChatInProgress"],
   ["RAG_NEW_CHAT_PREPARATION_FAILED", "newChatPreparationFailed"],
   ["RAG_RESOURCE_CONTROL_UNAVAILABLE", "resourceControlUnavailable"],
+  ["RAG_PROVIDER_QUOTA_UNAVAILABLE", "resourceControlUnavailable"],
 ]);
 
 type RagStudyAssistantProps = {

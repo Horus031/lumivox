@@ -1,10 +1,12 @@
 from types import SimpleNamespace
 from unittest.mock import Mock
+import json
 
 import pytest
 
 from app.clients.rag_llm_client import RagChatGeneration, RagTokenUsage
 from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
+from app.core.rag_telemetry import observe_operation
 from app.schemas.rag_conversation_context import RagCompletedTurn, RagConversationContext
 from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_conversational_generation as service
@@ -48,6 +50,15 @@ def test_retrieval_timeout_prevents_grounded_generation(dependencies):
     assert dependencies.embedding.call_args.kwargs["deadline"] is deadline
     assert dependencies.retrieval.call_args.kwargs["deadline"] is deadline
     dependencies.generation.assert_not_called()
+
+
+def test_stage_timings_keep_optional_embedding_and_retrieval_absent(dependencies, monkeypatch, caplog):
+    monkeypatch.setattr(service.settings, "rag_observability_enabled", True)
+    with caplog.at_level("INFO", logger="app.core.rag_telemetry"):
+        observe_operation(ask)()
+    stages = json.loads(caplog.records[-1].getMessage())["stages"]
+    assert stages["context_pack"]["count"] == stages["answer_generation"]["count"] == 1
+    assert "embedding" not in stages and "vector_retrieval" not in stages
 
 
 @pytest.mark.parametrize("history", [False, True])
