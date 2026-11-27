@@ -33,10 +33,10 @@ def verify_internal_api_key(
 
     if (
         not supplied
-        or not expected
+        or not expected.strip()
         or not compare_digest(
-            supplied,
-            expected,
+            supplied.encode("utf-8"),
+            expected.encode("utf-8"),
         )
     ):
         raise HTTPException(

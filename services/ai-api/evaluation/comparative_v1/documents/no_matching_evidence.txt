@@ -1,0 +1,1 @@
+A fictional laboratory stores calibration worksheets in blue folders. Each worksheet contains a device serial label and a space for handwritten notes.

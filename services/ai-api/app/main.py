@@ -17,6 +17,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import (
     CORSMiddleware,
 )
+from starlette.concurrency import run_in_threadpool
 
 from app.api.routes import (
     ai_translations,
@@ -37,6 +38,10 @@ from app.api.routes import (
 from app.services.deadline_risk_runtime import (
     load_deadline_risk_runtime,
 )
+from app.core.config import settings
+from app.core.rag_token_budget import get_rag_encoding
+from app.core.rag_telemetry import configure_telemetry_logging
+from app.clients.rag_redis_client import close_rag_redis_http_client
 
 from app.services.native_task_risk_service import (
     validate_native_task_risk_artifact,
@@ -52,6 +57,7 @@ logger = logging.getLogger(
 async def lifespan(
     app: FastAPI,
 ):
+    configure_telemetry_logging()
     # Legacy OULAD deadline-risk must
     # not block the entire API.
     try:
@@ -81,7 +87,16 @@ async def lifespan(
         validate_native_task_risk_artifact()
     )
 
-    yield
+    if settings.rag_conversation_v2_enabled:
+        try:
+            await run_in_threadpool(get_rag_encoding)
+        except Exception:
+            logger.warning("RAG tokenizer warm-up failed.")
+
+    try:
+        yield
+    finally:
+        close_rag_redis_http_client()
 
     app.state.deadline_risk_runtime = (
         None

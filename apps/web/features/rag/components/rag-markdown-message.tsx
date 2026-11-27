@@ -1,261 +1,334 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import ReactMarkdown, {
+  type Components,
+  type UrlTransform,
+} from "react-markdown";
+
+import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+
+import rehypeKatex from "rehype-katex";
+import rehypeHighlight from "rehype-highlight";
 
 import { cn } from "@/lib/utils";
 
-type MarkdownBlock =
-  | { type: "paragraph"; content: string }
-  | { type: "heading"; level: 2 | 3 | 4; content: string }
-  | { type: "code"; language?: string; content: string }
-  | { type: "list"; ordered: boolean; items: string[] }
-  | { type: "quote"; content: string };
+import { RagCodeBlock } from "./rag-code-block";
+
+import "katex/dist/katex.min.css";
+import "./rag-markdown.css";
 
 type RagMarkdownMessageProps = {
   content: string;
   className?: string;
 };
 
-const SPECIAL_BLOCK_PATTERN = /^(#{1,3}\s+|```|>\s?|[-*]\s+|\d+\.\s+)/;
+const safeUrlTransform: UrlTransform = (
+  url,
+  key,
+) => {
+  // Only hyperlinks are permitted.
+  // Never load resources from generated Markdown.
+  if (key !== "href") return "";
 
-function parseMarkdownBlocks(content: string): MarkdownBlock[] {
-  const blocks: MarkdownBlock[] = [];
-  const lines = content.replace(/\r\n/g, "\n").split("\n");
-  let index = 0;
+  const normalized = url.trim();
 
-  while (index < lines.length) {
-    const line = lines[index];
+  if (/[\u0000-\u001f\u007f]/.test(normalized)) {
+    return "";
+  }
 
-    if (!line.trim()) {
-      index += 1;
-      continue;
-    }
+  if (
+    !/^(https?:\/\/|mailto:)/i.test(normalized)
+  ) {
+    return "";
+  }
 
-    const codeFenceMatch = line.match(/^```([\w-]+)?\s*$/);
-    if (codeFenceMatch) {
-      const codeLines: string[] = [];
-      index += 1;
+  try {
+    const parsed = new URL(normalized);
 
-      while (index < lines.length && !lines[index].startsWith("```")) {
-        codeLines.push(lines[index]);
-        index += 1;
-      }
-
-      blocks.push({
-        type: "code",
-        language: codeFenceMatch[1],
-        content: codeLines.join("\n"),
-      });
-
-      index += index < lines.length ? 1 : 0;
-      continue;
-    }
-
-    const headingMatch = line.match(/^(#{1,3})\s+(.+)$/);
-    if (headingMatch) {
-      blocks.push({
-        type: "heading",
-        level: Math.min(headingMatch[1].length + 1, 4) as 2 | 3 | 4,
-        content: headingMatch[2],
-      });
-      index += 1;
-      continue;
-    }
-
-    if (line.startsWith(">")) {
-      const quoteLines: string[] = [];
-
-      while (index < lines.length && lines[index].startsWith(">")) {
-        quoteLines.push(lines[index].replace(/^>\s?/, ""));
-        index += 1;
-      }
-
-      blocks.push({ type: "quote", content: quoteLines.join("\n") });
-      continue;
-    }
-
-    const unorderedMatch = line.match(/^[-*]\s+(.+)$/);
-    const orderedMatch = line.match(/^\d+\.\s+(.+)$/);
-    if (unorderedMatch || orderedMatch) {
-      const ordered = Boolean(orderedMatch);
-      const items: string[] = [];
-
-      while (index < lines.length) {
-        const itemMatch = ordered
-          ? lines[index].match(/^\d+\.\s+(.+)$/)
-          : lines[index].match(/^[-*]\s+(.+)$/);
-
-        if (!itemMatch) break;
-
-        items.push(itemMatch[1]);
-        index += 1;
-      }
-
-      blocks.push({ type: "list", ordered, items });
-      continue;
-    }
-
-    const paragraphLines: string[] = [];
-
-    while (
-      index < lines.length &&
-      lines[index].trim() &&
-      !SPECIAL_BLOCK_PATTERN.test(lines[index])
+    if (
+      parsed.protocol !== "https:" &&
+      parsed.protocol !== "http:" &&
+      parsed.protocol !== "mailto:"
     ) {
-      paragraphLines.push(lines[index]);
-      index += 1;
+      return "";
     }
 
-    blocks.push({ type: "paragraph", content: paragraphLines.join("\n") });
+    return normalized;
+  } catch {
+    return "";
   }
+};
 
-  return blocks;
-}
+export function RagMarkdownMessage({
+  content,
+  className,
+}: RagMarkdownMessageProps) {
+  const t = useTranslations("rag");
 
-function getSafeHref(rawHref: string) {
-  const href = rawHref.trim();
+  const components: Components = {
+    h1: ({ children }) => (
+      <h2 className="rag-heading-primary">
+        {children}
+      </h2>
+    ),
 
-  if (/^(https?:|mailto:)/i.test(href)) {
-    return href;
-  }
+    h2: ({ children }) => (
+      <h3 className="rag-heading-secondary">
+        {children}
+      </h3>
+    ),
 
-  return undefined;
-}
+    h3: ({ children }) => (
+      <h4 className="rag-heading-tertiary">
+        {children}
+      </h4>
+    ),
 
-function renderInlineMarkdown(text: string): ReactNode[] {
-  const pattern = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_[^_]+_|\[[^\]]+\]\([^)]+\))/g;
-  const nodes: ReactNode[] = [];
-  let lastIndex = 0;
+    h4: ({ children }) => (
+      <h5 className="rag-heading-tertiary">
+        {children}
+      </h5>
+    ),
 
-  for (const match of text.matchAll(pattern)) {
-    const value = match[0];
-    const index = match.index ?? 0;
+    h5: ({ children }) => (
+      <h6 className="rag-heading-tertiary">
+        {children}
+      </h6>
+    ),
 
-    if (index > lastIndex) {
-      nodes.push(text.slice(lastIndex, index));
-    }
+    h6: ({ children }) => (
+      <h6 className="rag-heading-tertiary">
+        {children}
+      </h6>
+    ),
 
-    const key = `${index}-${value}`;
+    p: ({ children }) => (
+      <p className="rag-paragraph">
+        {children}
+      </p>
+    ),
 
-    if (value.startsWith("`")) {
-      nodes.push(
-        <code
-          key={key}
-          className="rounded bg-muted px-1.5 py-0.5 font-mono text-[0.85em] text-foreground"
+    strong: ({ children }) => (
+      <strong className="font-semibold">
+        {children}
+      </strong>
+    ),
+
+    em: ({ children }) => (
+      <em className="italic">
+        {children}
+      </em>
+    ),
+
+    del: ({ children }) => (
+      <del className="text-muted-foreground">
+        {children}
+      </del>
+    ),
+
+    ul: ({ children, className }) => (
+      <ul
+        className={cn(
+          "rag-unordered-list",
+          className,
+        )}
+      >
+        {children}
+      </ul>
+    ),
+
+    ol: ({ children, start, className }) => (
+      <ol
+        start={start}
+        className={cn(
+          "rag-ordered-list",
+          className,
+        )}
+      >
+        {children}
+      </ol>
+    ),
+
+    li: ({ children, className }) => (
+      <li className={className}>
+        {children}
+      </li>
+    ),
+
+    blockquote: ({ children }) => (
+      <blockquote className="rag-blockquote">
+        {children}
+      </blockquote>
+    ),
+
+    hr: () => (
+      <hr className="my-4 border-border" />
+    ),
+
+    a: ({ children, href, title }) => {
+      if (!href) {
+        return <span>{children}</span>;
+      }
+
+      return (
+        <a
+          href={href}
+          title={title}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-primary underline underline-offset-4"
         >
-          {value.slice(1, -1)}
-        </code>,
+          {children}
+        </a>
       );
-    } else if (value.startsWith("**") || value.startsWith("__")) {
-      nodes.push(
-        <strong key={key} className="font-semibold text-foreground">
-          {renderInlineMarkdown(value.slice(2, -2))}
-        </strong>,
+    },
+
+    // Block all Markdown images.
+    // This prevents external requests and tracking.
+    img: ({ alt }) => (
+      <span className="text-xs italic text-muted-foreground">
+        {alt
+          ? t("blockedImageWithAlt", { alt })
+          : t("blockedImage")}
+      </span>
+    ),
+
+    input: ({ type, checked }) => {
+      if (type !== "checkbox") return null;
+
+      return (
+        <input
+          type="checkbox"
+          checked={Boolean(checked)}
+          disabled
+          readOnly
+          aria-label={
+            checked
+              ? t("taskCompleted")
+              : t("taskIncomplete")
+          }
+          className="mr-1 accent-primary"
+        />
       );
-    } else if (value.startsWith("*") || value.startsWith("_")) {
-      nodes.push(
-        <em key={key} className="italic">
-          {renderInlineMarkdown(value.slice(1, -1))}
-        </em>,
+    },
+
+    table: ({ children }) => (
+      <div
+        role="region"
+        aria-label={t("markdownTable")}
+        tabIndex={0}
+        className="rag-table-scroll"
+      >
+        <table className="rag-table">
+          {children}
+        </table>
+      </div>
+    ),
+
+    thead: ({ children }) => (
+      <thead className="bg-muted/60">
+        {children}
+      </thead>
+    ),
+
+    tbody: ({ children }) => (
+      <tbody>{children}</tbody>
+    ),
+
+    tr: ({ children }) => (
+      <tr>{children}</tr>
+    ),
+
+    th: ({ children, style }) => (
+      <th scope="col" style={style}>
+        {children}
+      </th>
+    ),
+
+    td: ({ children, style }) => (
+      <td style={style}>{children}</td>
+    ),
+
+    pre: ({ node, children }) => {
+      const codeNode = node?.children.find(
+        (child) =>
+          child.type === "element" &&
+          child.tagName === "code",
       );
-    } else {
-      const linkMatch = value.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
-      const href = linkMatch ? getSafeHref(linkMatch[2]) : undefined;
 
-      nodes.push(
-        href ? (
-          <a
-            key={key}
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium text-primary underline underline-offset-4"
-          >
-            {renderInlineMarkdown(linkMatch?.[1] ?? href)}
-          </a>
-        ) : (
-          value
-        ),
+      const rawClassName =
+        codeNode?.type === "element"
+          ? codeNode.properties.className
+          : undefined;
+
+      const classNames = Array.isArray(
+        rawClassName,
+      )
+        ? rawClassName.map(String).join(" ")
+        : String(rawClassName ?? "");
+
+      const language = classNames.match(
+        /(?:^|\s)language-([^\s]+)/,
+      )?.[1];
+
+      return (
+        <RagCodeBlock language={language}>
+          {children}
+        </RagCodeBlock>
       );
-    }
+    },
 
-    lastIndex = index + value.length;
-  }
-
-  if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex));
-  }
-
-  return nodes;
-}
-
-export function RagMarkdownMessage({ content, className }: RagMarkdownMessageProps) {
-  const blocks = parseMarkdownBlocks(content);
+    code: ({ children, className }) => (
+      <code className={className}>
+        {children}
+      </code>
+    ),
+  };
 
   return (
-    <div className={cn("space-y-3 text-sm leading-6 text-foreground", className)}>
-      {blocks.map((block, index) => {
-        if (block.type === "heading") {
-          const Heading = `h${block.level}` as "h2" | "h3" | "h4";
-
-          return (
-            <Heading
-              key={`${block.type}-${index}`}
-              className="font-semibold leading-7 text-foreground"
-            >
-              {renderInlineMarkdown(block.content)}
-            </Heading>
-          );
-        }
-
-        if (block.type === "code") {
-          return (
-            <figure
-              key={`${block.type}-${index}`}
-              className="overflow-hidden rounded-lg border bg-muted/40"
-            >
-              {block.language ? (
-                <figcaption className="border-b px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide text-muted-foreground">
-                  {block.language}
-                </figcaption>
-              ) : null}
-              <pre className="overflow-x-auto p-3 text-xs leading-5">
-                <code>{block.content}</code>
-              </pre>
-            </figure>
-          );
-        }
-
-        if (block.type === "list") {
-          const List = block.ordered ? "ol" : "ul";
-
-          return (
-            <List
-              key={`${block.type}-${index}`}
-              className={cn("space-y-1 pl-5", block.ordered ? "list-decimal" : "list-disc")}
-            >
-              {block.items.map((item, itemIndex) => (
-                <li key={`${itemIndex}-${item}`}>{renderInlineMarkdown(item)}</li>
-              ))}
-            </List>
-          );
-        }
-
-        if (block.type === "quote") {
-          return (
-            <blockquote
-              key={`${block.type}-${index}`}
-              className="border-l-2 border-primary/40 pl-3 text-muted-foreground"
-            >
-              {renderInlineMarkdown(block.content)}
-            </blockquote>
-          );
-        }
-
-        return (
-          <p key={`${block.type}-${index}`} className="whitespace-pre-wrap">
-            {renderInlineMarkdown(block.content)}
-          </p>
-        );
-      })}
+    <div
+      className={cn(
+        "rag-markdown min-w-0 max-w-full",
+        "text-sm leading-6 text-foreground",
+        className,
+      )}
+    >
+      <ReactMarkdown
+        skipHtml
+        urlTransform={safeUrlTransform}
+        remarkPlugins={[
+          remarkGfm,
+          [
+            remarkMath,
+            { singleDollarTextMath: true },
+          ],
+        ]}
+        rehypePlugins={[
+          [
+            rehypeKatex,
+            {
+              trust: false,
+              maxExpand: 500,
+              maxSize: 20,
+              output: "htmlAndMathml",
+              strict: "warn",
+            },
+          ],
+          [
+            rehypeHighlight,
+            {
+              detect: false,
+              plainText: ["text", "txt", "plaintext"],
+            },
+          ],
+        ]}
+        components={components}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 }

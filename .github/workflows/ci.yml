@@ -24,6 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 10
+
     defaults:
       run:
         working-directory: apps/web
@@ -53,6 +60,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Audit production npm dependencies
+        run: npm audit --omit=dev --audit-level=high
+
       - name: Lint
         run: npm run lint
 
@@ -61,6 +71,8 @@ jobs:
         run: node --test scripts/ci/production-safeguards.test.mjs
 
       - name: Unit tests
+        env:
+          RAG_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
         run: npm run test:unit
 
       - name: TypeScript typecheck
@@ -75,6 +87,13 @@ jobs:
     name: AI API · Unit Tests
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 10
 
     defaults:
       run:
@@ -107,13 +126,35 @@ jobs:
           python -m pip install -r requirements-dev.txt
 
       - name: Compile Python source
-        run: python -m compileall -q app scripts
+        run: python -m compileall -q app scripts evaluation
+
+      - name: Audit pinned Python runtime dependencies
+        run: |
+          python -m pip check
+          python -m venv "$RUNNER_TEMP/pip-audit"
+          "$RUNNER_TEMP/pip-audit/bin/python" -m pip install 'pip-audit==2.10.0'
+          "$RUNNER_TEMP/pip-audit/bin/python" -m pip_audit --disable-pip --no-deps -r requirements.txt
 
       - name: Verify native task risk artifact
         run: python scripts/verify_native_task_risk_artifact.py
 
       - name: Unit tests
         run: python -m pytest -q
+
+      - name: RAG context quality regression
+        run: python -m scripts.verify_rag_context_quality --dataset evaluation/context_quality_v1.jsonl --variant adaptive --mode offline --strict
+
+      - name: RAG security regression
+        run: python -m scripts.verify_rag_security --dataset evaluation/security_adversarial_v1.jsonl
+
+      - name: RAG comparative offline evaluation
+        run: |
+          for variant in A B C D; do
+            python -m scripts.verify_rag_comparative --variant "$variant" --mode offline --output "$RUNNER_TEMP/rag-$variant-offline.jsonl" || exit 1
+          done
+
+      - name: RAG provider concurrency against Redis
+        run: python -m scripts.verify_rag_resource_control
 
   database:
     name: Supabase · Migration Replay
@@ -140,6 +181,9 @@ jobs:
 
       - name: Database tests
         run: supabase test db --local
+
+      - name: RAG conversation concurrency
+        run: node scripts/test-rag-conversation-concurrency.mjs
 
       - name: Stop local database
         if: always()
