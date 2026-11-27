@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field
 
 
 RagOperation = Literal["ask", "new_chat"]
@@ -15,13 +15,6 @@ class RagOperationStatusRequest(BaseModel):
     client_request_id: UUID
     operation: RagOperation
     recover_expired: bool = False
-
-    @model_validator(mode="after")
-    def validate_expiry_operation(self):
-        if self.recover_expired and self.operation != "ask":
-            raise ValueError("Only Ask operations can recover an expired lease.")
-        return self
-
 
 class RagOperationStatusResponse(BaseModel):
     operation: RagOperation
@@ -37,7 +30,7 @@ class RagOperationStatusResponse(BaseModel):
 
 
 class RagPendingOperation(BaseModel):
-    operation: Literal["ask"]
+    operation: RagOperation
     status: Literal["processing", "expired"]
     client_request_id: UUID
     lease_expires_at: datetime

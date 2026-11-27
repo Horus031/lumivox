@@ -60,6 +60,19 @@ class Settings(BaseSettings):
 
     rag_conversation_v2_enabled: bool = False
     rag_operation_recovery_enabled: bool = False
+    rag_resource_control_enabled: bool = False
+    upstash_redis_rest_url: str | None = None
+    upstash_redis_rest_token: str | None = None
+    rag_resource_namespace: str = "local"
+    rag_provider_max_concurrency: int = Field(default=4, ge=1, le=32)
+    rag_provider_lease_seconds: int = Field(default=45, ge=15, le=180)
+    rag_provider_admission_timeout_seconds: float = Field(default=1.0, gt=0, le=5)
+    rag_provider_cooldown_seconds: int = Field(default=15, ge=1, le=120)
+    rag_request_deadline_seconds: float = Field(default=25.0, ge=10, le=60)
+    rag_answer_reserve_seconds: float = Field(default=10.0, gt=0, le=30)
+    rag_completion_reserve_seconds: float = Field(default=3.0, gt=0, le=10)
+    rag_max_provider_calls_per_ask: int = Field(default=4, ge=1, le=16)
+    rag_max_provider_calls_per_handoff: int = Field(default=6, ge=1, le=16)
 
     rag_chat_models: str = (
         "openai/gpt-oss-20b,"

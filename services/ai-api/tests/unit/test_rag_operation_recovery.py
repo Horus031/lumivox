@@ -52,11 +52,15 @@ def test_recovery_disabled_never_calls_the_database(monkeypatch, stores):
         store.assert_not_called()
 
 
-def test_explicit_expiry_mutation_uses_ask_rpc_only(stores):
+def test_explicit_expiry_mutation_uses_operation_specific_rpc(monkeypatch, stores):
+    recover_preparation = Mock(return_value={"operation": "new_chat", "status": "failed"})
+    monkeypatch.setattr(service, "recover_expired_preparation", recover_preparation)
     assert post(recover_expired=True).json()["status"] == "failed"
-    assert post(operation="new_chat", recover_expired=True).status_code == 422
+    response = post(operation="new_chat", recover_expired=True)
+    assert response.status_code == 200 and response.json()["status"] == "failed"
     stores[0].assert_not_called()
     stores[1].assert_called_once()
+    recover_preparation.assert_called_once()
 
 
 def test_rollback_restore_still_advertises_recovery(monkeypatch):

@@ -662,7 +662,41 @@ isOneToOne: false
       referencedColumns: ["id","session_id","user_id"]
     }
                   ]
-                },"rag_chat_sessions": {
+                },"rag_chat_preparations": {
+                  Row: {
+                    "client_request_id": string,"completed_at": string | null,"created_at": string,"error_code": string | null,"id": string,"include_rolling_summary": boolean,"known_provider_tokens": number | null,"lease_expires_at": string,"lease_token": string,"provider_attempt_metadata": Json | null,"provider_calls_total": number | null,"request_payload": NonNullable<Json>,"source_session_id": string,"status": string,"transition_id": string | null,"unknown_usage_attempts": number | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_request_id": string,"completed_at"?: string | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"include_rolling_summary": boolean,"known_provider_tokens"?: number | null,"lease_expires_at": string,"lease_token"?: string,"provider_attempt_metadata"?: Json | null,"provider_calls_total"?: number | null,"request_payload": NonNullable<Json>,"source_session_id": string,"status"?: string,"transition_id"?: string | null,"unknown_usage_attempts"?: number | null,"user_id": string
+                  }
+                  Update: {
+                    "client_request_id"?: string,"completed_at"?: string | null,"created_at"?: string,"error_code"?: string | null,"id"?: string,"include_rolling_summary"?: boolean,"known_provider_tokens"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"provider_attempt_metadata"?: Json | null,"provider_calls_total"?: number | null,"request_payload"?: NonNullable<Json>,"source_session_id"?: string,"status"?: string,"transition_id"?: string | null,"unknown_usage_attempts"?: number | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "rag_chat_preparations_transition_id_fkey"
+      columns: ["transition_id"]
+isOneToOne: true
+      referencedRelation: "rag_chat_transitions"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "rag_preparation_source_owner_fk"
+      columns: ["source_session_id","user_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_sessions"
+      referencedColumns: ["id","user_id"]
+    },{
+      foreignKeyName: "rag_preparation_transition_identity_fk"
+      columns: ["transition_id","user_id","source_session_id","client_request_id"]
+isOneToOne: false
+      referencedRelation: "rag_chat_transitions"
+      referencedColumns: ["id","user_id","source_session_id","client_request_id"]
+    }
+                  ]
+                },
+
+"rag_chat_sessions": {
                   Row: {
                     "closed_at": string | null,"completed_turn_count": number,"context_mode": Database["public"]['Enums']["rag_context_mode"],"conversation_version": number,"created_at": string,"focus_session_id": string | null,"goal_id": string | null,"id": string,"preferred_locale": string | null,"prompt_variant": Database["public"]['Enums']["rag_prompt_variant"],"selected_document_ids": (string)[],"status": string,"task_id": string | null,"title": string | null,"top_k": number,"updated_at": string,"user_id": string
                   }
@@ -748,14 +782,14 @@ isOneToOne: false
                   ]
                 },"rag_chat_turns": {
                   Row: {
-                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"context_truncated": boolean,"created_at": string,"error_code": string | null,"estimated_prompt_tokens": number | null,"generation_attempts": number | null,"handoff_id_used": string | null,"handoff_tokens_used": number | null,"handoff_used": boolean,"history_turns_used": number | null,"id": string,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"retrieval_strategy": string | null,"retrieved_chunks_used": number | null,"session_id": string,"status": string,"summary_covered_turn_index": number | null,"summary_generation_method": string | null,"summary_tokens_used": number | null,"summary_version_used": number | null,"total_tokens": number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"completed_at": string | null,"completion_tokens": number | null,"context_truncated": boolean,"created_at": string,"error_code": string | null,"estimated_prompt_tokens": number | null,"generation_attempts": number | null,"handoff_id_used": string | null,"handoff_tokens_used": number | null,"handoff_used": boolean,"history_turns_used": number | null,"id": string,"known_provider_tokens": number | null,"latency_ms": number | null,"lease_expires_at": string,"lease_token": string,"model_name": string | null,"prompt_tokens": number | null,"provider": string | null,"provider_attempt_metadata": Json | null,"provider_calls_total": number | null,"request_payload": NonNullable<Json>,"response_payload": Json | null,"retrieval_strategy": string | null,"retrieved_chunks_used": number | null,"session_id": string,"status": string,"summary_covered_turn_index": number | null,"summary_generation_method": string | null,"summary_tokens_used": number | null,"summary_version_used": number | null,"total_tokens": number | null,"turn_index": number,"unknown_usage_attempts": number | null,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id": string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index": number,"user_id": string
+                    "client_request_id": string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"known_provider_tokens"?: number | null,"latency_ms"?: number | null,"lease_expires_at": string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"provider_attempt_metadata"?: Json | null,"provider_calls_total"?: number | null,"request_payload": NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id": string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index": number,"unknown_usage_attempts"?: number | null,"user_id": string
                   }
                   Update: {
-                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id"?: string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index"?: number,"user_id"?: string
+                    "client_request_id"?: string,"completed_at"?: string | null,"completion_tokens"?: number | null,"context_truncated"?: boolean,"created_at"?: string,"error_code"?: string | null,"estimated_prompt_tokens"?: number | null,"generation_attempts"?: number | null,"handoff_id_used"?: string | null,"handoff_tokens_used"?: number | null,"handoff_used"?: boolean,"history_turns_used"?: number | null,"id"?: string,"known_provider_tokens"?: number | null,"latency_ms"?: number | null,"lease_expires_at"?: string,"lease_token"?: string,"model_name"?: string | null,"prompt_tokens"?: number | null,"provider"?: string | null,"provider_attempt_metadata"?: Json | null,"provider_calls_total"?: number | null,"request_payload"?: NonNullable<Json>,"response_payload"?: Json | null,"retrieval_strategy"?: string | null,"retrieved_chunks_used"?: number | null,"session_id"?: string,"status"?: string,"summary_covered_turn_index"?: number | null,"summary_generation_method"?: string | null,"summary_tokens_used"?: number | null,"summary_version_used"?: number | null,"total_tokens"?: number | null,"turn_index"?: number,"unknown_usage_attempts"?: number | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -1807,6 +1841,42 @@ isOneToOne: false
 "abandon_task_risk_recovery":
 { Args: { p_attempt_id: string }; Returns: boolean
                            },
+"rag_v2_commit_new_chat_resource_internal":
+{ Args: { "p_client_request_id": string,"p_expected_revision": Json,"p_focus_session_id": string,"p_handoff": Json,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+
+"rag_v2_commit_prepared_new_chat":
+{ Args: { "p_attempts"?: Json,"p_expected_revision": Json,"p_handoff": Json,"p_lease_token": string,"p_preparation_id": string,"p_user_id": string }; Returns: Json
+                           },
+
+"rag_v2_fail_new_chat_preparation":
+{ Args: { "p_attempts"?: Json,"p_error_code": string,"p_lease_token": string,"p_preparation_id": string,"p_user_id": string }; Returns: boolean
+                           },
+
+"rag_v2_fail_turn_with_usage":
+{ Args: { "p_attempts": Json,"p_error_code": string,"p_lease_token": string,"p_turn_id": string,"p_user_id": string }; Returns: boolean
+                           },
+
+"rag_v2_guard_no_preparation":
+{ Args: { "p_source_session_id": string,"p_user_id": string }; Returns: undefined
+                           },
+
+"rag_v2_pending_new_chat":
+{ Args: { "p_focus_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+
+"rag_v2_recover_expired_preparation":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+
+"rag_v2_reserve_new_chat_preparation":
+{ Args: { "p_client_request_id": string,"p_focus_session_id": string,"p_include_rolling_summary": boolean,"p_request": Json,"p_source_session_id": string,"p_user_id": string }; Returns: Json
+                           },
+
+"rag_v2_validate_provider_attempts":
+{ Args: { "p_attempts": Json }; Returns: Json
+                           },
+
 "reserve_task_risk_reassessment":
 { Args: { p_user_id: string, p_attempt_id: string, p_allow_dispatch?: boolean }; Returns: Json
                            },

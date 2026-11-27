@@ -7,6 +7,10 @@ import pytest
 from groq import APIStatusError, APITimeoutError
 
 from app.clients import rag_llm_client as rag
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext
+from app.services import rag_provider_execution as provider
+from app.services.rag_provider_budget import RagProviderPermit
 
 
 PRIMARY = "openai/gpt-oss-20b"
@@ -147,6 +151,36 @@ def install_fake(monkeypatch, responses):
     )
 
     return client
+
+
+def test_resource_control_skips_cooled_down_model(monkeypatch, messages):
+    client = install_fake(monkeypatch, [make_response()])
+    permit = RagProviderPermit("permits", "owned")
+    monkeypatch.setattr(provider, "acquire_provider_permit", lambda model, **_: (
+        ("cooldown", None) if model == PRIMARY else ("acquired", permit)
+    ))
+    monkeypatch.setattr(provider, "release_provider_permit", lambda *args, **kwargs: None)
+    execution = RagExecutionContext(RagDeadline.start(10), 4)
+    assert rag.generate_rag_chat(messages, execution_context=execution).model == FALLBACK
+    assert [call["model"] for call in client.calls] == [FALLBACK]
+    assert [entry.model for entry in execution.attempts] == [FALLBACK]
+
+
+def test_resource_control_global_saturation_does_not_attempt_fallback(monkeypatch, messages):
+    client = install_fake(monkeypatch, [])
+    checked = []
+
+    def acquire(model, **kwargs):
+        checked.append(model)
+        return "busy", None
+
+    monkeypatch.setattr(provider, "acquire_provider_permit", acquire)
+    execution = RagExecutionContext(RagDeadline.start(10), 4)
+    with pytest.raises(rag.RagLLMError) as error:
+        rag.generate_rag_chat(messages, execution_context=execution)
+    assert error.value.code == "provider_busy"
+    assert checked == [PRIMARY]
+    assert not client.calls
 
 
 def test_generation_preserves_message_roles(

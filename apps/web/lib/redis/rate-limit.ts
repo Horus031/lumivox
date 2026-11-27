@@ -54,6 +54,15 @@ export async function checkRateLimit({
 
   try {
     const result = await ratelimit.limit(key);
+    if (mode === "fail-closed" && result.reason === "timeout") {
+      return {
+        success: false,
+        limit,
+        remaining: 0,
+        reset: Date.now() + 5_000,
+        message: "Request protection is temporarily unavailable. Please try again shortly.",
+      };
+    }
 
     return {
       success: result.success,

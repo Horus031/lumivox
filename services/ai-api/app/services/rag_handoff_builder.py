@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from app.clients.rag_llm_client import RagLLMError
 from app.clients.rag_summary_client import generate_rag_summary
 from app.core.config import settings
+from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_token_budget import RagTokenBudgetError
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.schemas.rag_conversation_summary import (
@@ -57,9 +58,12 @@ def build_final_handoff(
     inherited: RagConversationSummary | None,
     rolling: RagConversationSummary | None,
     turns: list[RagCompletedTurn],
+    execution_context: RagExecutionContext | None = None,
 ) -> RagBuiltHandoff:
     starts = time.monotonic()
     deadline = starts + settings.rag_handoff_deadline_seconds
+    if execution_context is not None:
+        deadline = min(deadline, execution_context.deadline.expires_at - settings.rag_completion_reserve_seconds)
     budget = settings.rag_handoff_max_tokens
     if len(turns) > settings.rag_handoff_max_input_turns:
         raise RagConversationError("RAG_INVALID_REQUEST", 400)
@@ -91,7 +95,9 @@ def build_final_handoff(
                         "Keep unresolved questions and mark unresolved conflicts as uncertainties."
                     ),
                 )
-                generation = generate_rag_summary(messages, deadline_at=deadline)
+                generation = generate_rag_summary(messages, deadline_at=deadline, **(
+                    {"execution_context": execution_context, "stage": "handoff"} if execution_context else {}
+                ))
                 summary = fit_summary_to_budget(generation.summary, budget)
                 provider = generation.provider
                 if generation.model not in models:

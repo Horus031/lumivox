@@ -19,6 +19,12 @@ beforeEach(() => {
 });
 
 describe("Recovery Redis protection", () => {
+  it("denies fail-closed requests when an upstream timeout reports success", async () => {
+    provider.limit.mockResolvedValue({ success: true, limit: 10, remaining: 10, reset: 0, reason: "timeout" });
+    await expect(checkRateLimit(config)).resolves.toMatchObject({ success: false, remaining: 0 });
+    await expect(checkRateLimit({ ...config, mode: "fail-open" })).resolves.toMatchObject({ success: true });
+  });
+
   it("preserves a provider quota rejection and reset time", async () => {
     provider.limit.mockResolvedValue({ success: false, limit: 10, remaining: 0, reset: 12345 });
     await expect(checkRateLimit(config)).resolves.toEqual({
