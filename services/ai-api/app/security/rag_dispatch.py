@@ -10,6 +10,15 @@ _authorize: ContextVar[Callable[[], None] | None] = ContextVar("rag_dispatch_aut
 rag_dispatch_deadline: ContextVar[RagDeadline | None] = ContextVar("rag_dispatch_deadline", default=None)
 
 
+class RagDispatchAuthorizationError(RuntimeError):
+    pass
+
+
+def require_rag_dispatch_authorization() -> None:
+    if _authorize.get() is None:
+        raise RagDispatchAuthorizationError("RAG v2 provider dispatch requires operation authorization.")
+
+
 @contextmanager
 def rag_dispatch_authorization(authorize: Callable[[], None]) -> Iterator[None]:
     token = _authorize.set(authorize)

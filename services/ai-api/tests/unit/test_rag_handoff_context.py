@@ -4,6 +4,7 @@ import pytest
 
 from app.core.config import settings
 from app.schemas.rag_conversation_context import RagCompletedTurn, RagConversationContext
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_conversational_generation as generation
 from app.services.rag_context_builder import build_conversational_context
 from app.services.rag_retrieval_context import build_retrieval_query
@@ -58,12 +59,13 @@ def test_rollback_and_no_evidence_never_report_usage(monkeypatch, flags, stored_
     monkeypatch.setattr(generation, "_generate_query_embedding", embed)
     monkeypatch.setattr(generation, "_retrieve_chunks", lookup)
     monkeypatch.setattr(generation, "generate_rag_chat", provider)
-    result = generation.generate_conversational_answer(
-        supabase=object(), user_id="owner", question="Why is it efficient?", selected_document_ids=["allowed"],
-        top_k=5, prompt_variant="grounded_rule", preferred_locale="en",
-        context=RagConversationContext(session_id="session", current_turn_index=1,
-                                       completed_turn_count=0, handoff=stored_handoff),
-    )
+    with rag_dispatch_authorization(Mock()):
+        result = generation.generate_conversational_answer(
+            supabase=object(), user_id="owner", question="Why is it efficient?", selected_document_ids=["allowed"],
+            top_k=5, prompt_variant="grounded_rule", preferred_locale="en",
+            context=RagConversationContext(session_id="session", current_turn_index=1,
+                                           completed_turn_count=0, handoff=stored_handoff),
+        )
     assert (stored_handoff.summary.main_topic in embed.call_args.args[0]) is handoff_enabled
     assert lookup.call_args.kwargs["selected_document_ids"] == ["allowed"]
     assert not result.context.handoff_used and result.context.handoff_tokens_used == 0

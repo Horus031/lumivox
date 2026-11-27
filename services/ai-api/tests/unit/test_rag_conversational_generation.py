@@ -6,6 +6,7 @@ import pytest
 from app.clients.rag_llm_client import RagChatGeneration, RagTokenUsage
 from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
 from app.schemas.rag_conversation_context import RagCompletedTurn, RagConversationContext
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_conversational_generation as service
 
 
@@ -20,7 +21,8 @@ def dependencies(monkeypatch):
     monkeypatch.setattr(service, "_generate_query_embedding", embedding)
     monkeypatch.setattr(service, "_retrieve_chunks", retrieval)
     monkeypatch.setattr(service, "generate_rag_chat", generation)
-    return SimpleNamespace(embedding=embedding, retrieval=retrieval, generation=generation)
+    with rag_dispatch_authorization(Mock()):
+        yield SimpleNamespace(embedding=embedding, retrieval=retrieval, generation=generation)
 
 
 def ask(*, history=False, document=False, variant="grounded_rule", locale="en", summary=None, deadline=None):

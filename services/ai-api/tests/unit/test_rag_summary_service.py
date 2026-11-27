@@ -6,6 +6,7 @@ import pytest
 from app.clients.rag_llm_client import RagLLMError, RagTokenUsage
 from app.clients.rag_summary_client import RagSummaryGeneration
 from app.schemas.rag_conversation_context import RagConversationContext
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_summary_service as service
 
 
@@ -31,7 +32,8 @@ def dependencies(monkeypatch, stored_summary):
     monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", True)
     monkeypatch.setattr(service.settings, "rag_summary_start_turns", 6)
     monkeypatch.setattr(service.settings, "rag_summary_update_interval", 2)
-    return SimpleNamespace(load=load, generate=generate, save=save)
+    with rag_dispatch_authorization(Mock()):
+        yield SimpleNamespace(load=load, generate=generate, save=save)
 
 
 def snapshot(indexes, *, previous=None):

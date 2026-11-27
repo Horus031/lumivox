@@ -1,0 +1,73 @@
+{
+  "session_id": "33333333-3333-4333-8333-333333333333",
+  "current_turn_index": 10,
+  "completed_turn_count": 9,
+  "recent_turns": [
+    {
+      "turn_index": 1,
+      "question": "Ghi lại thông tin đã chốt để dùng tiếp.",
+      "answer": "Người học đặt ngưỡng mô phỏng 68 điểm."
+    },
+    {
+      "turn_index": 2,
+      "question": "Why keep a calculation log?",
+      "answer": "An ordered log makes each arithmetic step traceable."
+    },
+    {
+      "turn_index": 3,
+      "question": "What is a baseline?",
+      "answer": "A baseline is a reference condition for comparisons."
+    },
+    {
+      "turn_index": 4,
+      "question": "Can a unit conversion change the underlying quantity?",
+      "answer": "It changes the representation of the quantity."
+    },
+    {
+      "turn_index": 5,
+      "question": "How should I record a correction?",
+      "answer": "Keep a labeled correction and retire the superseded conclusion."
+    },
+    {
+      "turn_index": 6,
+      "question": "What is an independent variable?",
+      "answer": "It is the factor deliberately changed in a controlled comparison."
+    },
+    {
+      "turn_index": 7,
+      "question": "What belongs in the conclusion?",
+      "answer": "Report the answer supported by the observations."
+    },
+    {
+      "turn_index": 8,
+      "question": "What should I do with a missing reading?",
+      "answer": "Mark it missing and record why it was unavailable."
+    },
+    {
+      "turn_index": 9,
+      "question": "Why repeat a measurement?",
+      "answer": "Repetition can reveal variation between readings."
+    }
+  ],
+  "summary": {
+    "id": "summary-EVAL-LONG-RANGE-RECALL-007",
+    "version": 1,
+    "schema_version": 1,
+    "covered_turn_index": 4,
+    "covered_turn_count": 4,
+    "summary": {
+      "main_topic": "Synthetic study notebook",
+      "learning_objective": "Continue the synthetic academic exercise",
+      "covered_concepts": [],
+      "important_user_context": [
+        "Người học đặt ngưỡng mô phỏng 68 điểm."
+      ],
+      "unresolved_questions": [],
+      "document_references": [],
+      "uncertainties": [],
+      "continuation_hint": "Người học đặt ngưỡng mô phỏng 68 điểm."
+    },
+    "generation_method": "extractive"
+  },
+  "handoff": null
+}

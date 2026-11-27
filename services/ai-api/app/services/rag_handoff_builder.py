@@ -14,6 +14,7 @@ from app.schemas.rag_conversation_summary import (
     SUMMARY_TEXT_FIELDS,
 )
 from app.services.rag_conversation_store import RagConversationError
+from app.security.rag_dispatch import require_rag_dispatch_authorization
 from app.services.rag_summary_builder import (
     build_extractive_summary,
     build_summary_messages,
@@ -95,6 +96,7 @@ def build_final_handoff(
                         "Keep unresolved questions and mark unresolved conflicts as uncertainties."
                     ),
                 )
+                require_rag_dispatch_authorization()
                 generation = generate_rag_summary(messages, deadline_at=deadline, **(
                     {"execution_context": execution_context, "stage": "handoff"} if execution_context else {}
                 ))
