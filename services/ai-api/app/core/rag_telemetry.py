@@ -1,5 +1,6 @@
 import json
 import logging
+import re
 from contextlib import contextmanager, nullcontext
 from contextvars import ContextVar
 from dataclasses import asdict, dataclass, field
@@ -98,6 +99,18 @@ class RagOperationTelemetry:
 
 
 _current: ContextVar[RagOperationTelemetry | None] = ContextVar("rag_operation_telemetry", default=None)
+_request_trace_id: ContextVar[str | None] = ContextVar("rag_request_trace_id", default=None)
+_TRACE_ID = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")
+
+
+@contextmanager
+def bind_rag_request_trace(value: str | None):
+    trace_id = value.lower() if value and len(value) == 36 else None
+    token = _request_trace_id.set(trace_id if trace_id and _TRACE_ID.fullmatch(trace_id) else None)
+    try:
+        yield
+    finally:
+        _request_trace_id.reset(token)
 
 _OUTCOMES = {
     "RAG_TURN_IN_PROGRESS": "in_progress", "RAG_NEW_CHAT_IN_PROGRESS": "in_progress",
@@ -166,6 +179,7 @@ def observe_operation(function):
         telemetry = RagOperationTelemetry(
             request.mode if request else "ask",
             bool(request.selected_document_ids if request else kwargs.get("selected_document_ids")),
+            trace_id=_request_trace_id.get() or str(uuid4()),
         )
         token = _current.set(telemetry)
         try:

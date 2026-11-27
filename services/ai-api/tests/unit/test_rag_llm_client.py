@@ -9,12 +9,19 @@ from groq import APIStatusError, APITimeoutError
 from app.clients import rag_llm_client as rag
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_provider_execution as provider
 from app.services.rag_provider_budget import RagProviderPermit
 
 
 PRIMARY = "openai/gpt-oss-20b"
 FALLBACK = "openai/gpt-oss-120b"
+
+
+@pytest.fixture(autouse=True)
+def authorize_synthetic_dispatch():
+    with rag_dispatch_authorization(lambda: None):
+        yield
 
 
 class FakeGroqClient:
@@ -471,17 +478,15 @@ def test_deadline_prevents_additional_calls(
         ],
     )
 
-    timestamps = iter([
-        0.0,
-        1.0,
-        100.0,
-    ])
+    current_time = 0.0
 
-    monkeypatch.setattr(
-        rag.time,
-        "monotonic",
-        lambda: next(timestamps),
-    )
+    def dispatch(**options):
+        nonlocal current_time
+        current_time = 100.0
+        return client.create(**options)
+
+    monkeypatch.setattr(rag.time, "monotonic", lambda: current_time)
+    monkeypatch.setattr(client.chat.completions, "create", dispatch)
 
     with pytest.raises(
         rag.RagLLMError

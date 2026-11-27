@@ -34,4 +34,15 @@ where a.status = 'dispatch_pending'
   and a.created_at >= now() - interval '24 hours'
 group by a.stage, a.provider;
 
+-- Keep stale intents observable after the daily operational window.
+select a.provider, a.stage, coalesce(t.status, p.status, 'unknown') as parent_status,
+  count(*) as unresolved_intents, min(a.created_at) as oldest_intent_at,
+  max(now() - a.created_at) as oldest_intent_age
+from public.rag_provider_attempts a
+left join public.rag_chat_turns t on (t.id,t.user_id) = (a.turn_id,a.user_id)
+left join public.rag_chat_preparations p on (p.id,p.user_id) = (a.preparation_id,a.user_id)
+where a.status = 'dispatch_pending'
+group by a.provider, a.stage, coalesce(t.status, p.status, 'unknown')
+order by oldest_intent_at;
+
 commit;

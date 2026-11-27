@@ -7,7 +7,9 @@ from groq import AuthenticationError
 
 from app.clients import rag_summary_client as client
 from app.clients.rag_llm_client import RagLLMError
+from app.core import rag_deadline
 from app.core.rag_token_budget import RagTokenBudgetError
+from app.security.rag_dispatch import rag_dispatch_authorization
 
 
 MESSAGES = [
@@ -16,6 +18,12 @@ MESSAGES = [
 ]
 MODEL_20B = "openai/gpt-oss-20b"
 MODEL_120B = "openai/gpt-oss-120b"
+
+
+@pytest.fixture(autouse=True)
+def authorize_synthetic_dispatch():
+    with rag_dispatch_authorization(lambda: None):
+        yield
 
 
 @pytest.fixture
@@ -56,14 +64,20 @@ def test_strict_structured_output_uses_independent_summary_chain(provider, store
 def test_invalid_or_truncated_summary_fails_over_with_remaining_deadline(
     monkeypatch, provider, stored_summary, caplog, finish,
 ):
-    clock = Mock(side_effect=[10, 10, 14, 14, 15, 15])
-    monkeypatch.setattr(client, "time", SimpleNamespace(monotonic=clock))
+    current_time = 10.0
+    clock = SimpleNamespace(monotonic=lambda: current_time)
+    monkeypatch.setattr(client, "time", clock)
+    monkeypatch.setattr(rag_deadline, "time", clock)
     monkeypatch.setattr(client.settings, "rag_summary_deadline_seconds", 6)
     monkeypatch.setattr(client.settings, "rag_summary_request_timeout_seconds", 4)
-    provider.side_effect = [
-        response('{"private":"provider payload"}', finish),
-        response(stored_summary.summary.model_dump_json()),
-    ]
+    def dispatch(**options):
+        nonlocal current_time
+        if options["model"] == MODEL_20B:
+            current_time = 14.0
+            return response('{"private":"provider payload"}', finish)
+        return response(stored_summary.summary.model_dump_json())
+
+    provider.side_effect = dispatch
     result = client.generate_rag_summary(MESSAGES)
     assert result.model == MODEL_120B
     assert [call.kwargs["timeout"] for call in provider.call_args_list] == [4, 2]

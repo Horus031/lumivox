@@ -87,6 +87,25 @@ describe("RAG ask error contract", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("correlates a server action with the API without changing the logical request ID", async () => {
+    vi.stubEnv("RAG_OBSERVABILITY_ENABLED", "true");
+    const log = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    fetchMock.mockResolvedValue(Response.json({ answer: "Study answer" }));
+    try {
+      await expect(askRagQuestionAction(payload)).resolves.toMatchObject({ success: true });
+      const request = fetchMock.mock.calls[0]?.[1];
+      const traceId = new Headers(request?.headers).get("x-lumivox-request-id");
+      expect(traceId).toMatch(/^[0-9a-f-]{36}$/);
+      expect(JSON.parse(String(request?.body)).client_request_id).toBe(payload.clientRequestId);
+      expect(JSON.parse(String(log.mock.calls[0]?.[0]))).toMatchObject({
+        event: "rag.web.operation.finished", trace_id: traceId, success: true,
+      });
+      expect(log.mock.calls[0]?.[0]).not.toContain(payload.question);
+    } finally {
+      log.mockRestore();
+    }
+  });
+
   it("caps new v2 scopes while keeping existing authorized scopes eligible", async () => {
     vi.stubEnv("RAG_IDEMPOTENT_ADMISSION_ENABLED", "true");
     const ids = Array.from({ length: 21 }, (_, index) => `11111111-1111-4111-8111-${String(index).padStart(12, "0")}`);

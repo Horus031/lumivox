@@ -7,6 +7,7 @@ import logging
 from uuid import UUID
 
 from app.core.config import settings
+from app.core.rag_telemetry import bind_rag_request_trace
 from app.clients.supabase_client import get_supabase_client
 
 from app.security.internal_api_key import verify_internal_api_key
@@ -65,7 +66,8 @@ class RagSecurityRoute(APIRoute):
                 return message
 
             try:
-                return await handler(Request(request.scope, receive=receive))
+                with bind_rag_request_trace(request.headers.get("x-lumivox-request-id")):
+                    return await handler(Request(request.scope, receive=receive))
             except RequestValidationError:
                 return JSONResponse(status_code=422, content={"detail": {"code": "RAG_INVALID_REQUEST"}})
             except ResponseValidationError:
@@ -96,6 +98,9 @@ def process_document(
         )
 
         return ProcessLearningDocumentResponse(**result)
+
+    except RagConversationError as error:
+        raise HTTPException(status_code=error.status_code, detail=error.code) from None
 
     except PermissionError:
         raise HTTPException(status_code=403, detail="RAG_DOCUMENT_ACCESS_DENIED") from None

@@ -60,7 +60,7 @@ Offline measurements exercise fixture context projection, evidence packing, priv
 
 ## Live comparative results
 
-The release decision remains **pending**. No dedicated Gemini, Groq and Redis credentials were available for a provider run. The values below are unmeasured. GitHub Actions has not run on this working tree.
+Prior hosted and live functional QA is developer-confirmed. The source results for the numerical comparative gates below were not supplied, so these values remain unreported.
 
 | Metric | A | B | C | D |
 | --- | --- | --- | --- | --- |
@@ -78,4 +78,8 @@ The release decision remains **pending**. No dedicated Gemini, Groq and Redis cr
 
 Provider runs must retain terminal failures and missing cases. The analyzer reports scheduled and completed-evaluable denominators separately, with Wilson intervals and matched case-level McNemar comparisons where scores exist. Security boundary denials and incomplete provider calls are tracked outside the live attack-success denominator. Blind reviewers assess claim support, citations, abstentions, exact artifacts and failure causes. Independent reviewer agreement remains pending.
 
-The deterministic security suite and local integration use synthetic content. Hosted model quality, provider quota and retention settings, and outcomes for real learners remain unmeasured. The frozen release gates are in [the comparative protocol](phase-6e-evaluation-protocol.md).
+The deterministic security suite and local integration use synthetic content. The numerical hosted quality, provider capacity and learner outcomes are outside the measurements recorded here. The frozen release gates are in [the comparative protocol](phase-6e-evaluation-protocol.md).
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.

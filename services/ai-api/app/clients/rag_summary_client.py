@@ -16,7 +16,7 @@ from app.clients.rag_llm_client import (
 )
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
-from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_dispatch import before_rag_dispatch, require_rag_dispatch_authorization
 from app.core.rag_execution_context import RagExecutionContext, RagProviderStage
 from app.services.rag_provider_execution import RagProviderExecutionError, execute_rag_provider_call
 from app.core.rag_model_registry import parse_rag_model_chain, validate_rag_configuration
@@ -38,6 +38,7 @@ def generate_rag_summary(
     messages: list[RagChatMessage], *, deadline_at: float | None = None,
     execution_context: RagExecutionContext | None = None, stage: RagProviderStage = "rolling_summary"
 ) -> RagSummaryGeneration:
+    require_rag_dispatch_authorization()
     validate_rag_configuration()
     _validate_messages(messages)
     estimated_prompt_tokens = assert_prompt_budget(messages)

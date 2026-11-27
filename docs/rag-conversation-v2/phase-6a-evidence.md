@@ -58,3 +58,7 @@ SQL on the synthetic run found zero expired processing turns, failed turns conta
 - Status polling pauses in hidden tabs and stops scheduling automatically after 60 seconds. The manual status control remains available.
 - Older clients without a protocol marker still depend on the existing legacy session protection. A first request without a persisted session has no protocol history.
 - The migration and application checks passed locally. Keep the recovery flag off by default pending CI and the 12 hosted QA scenarios in the implementation guide.
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.

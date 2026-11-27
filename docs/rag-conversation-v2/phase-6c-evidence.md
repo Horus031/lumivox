@@ -69,3 +69,7 @@ All five consistency queries returned zero violations on the synthetic fixture, 
 ## Release Decision
 
 GitHub Actions, live provider evaluation, and hosted browser QA remain release gates. The context-quality flag defaults to disabled.
+
+## Hosted and Live Verification
+
+Functional hosted QA and live provider checks were accepted from the project developer's confirmation supplied with the Phase 6G preparation brief on 2026-11-27. Phase 6G uses that confirmation for prior-phase functional acceptance. Numerical thresholds still require their measured reports or explicit developer confirmation against those thresholds.

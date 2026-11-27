@@ -16,7 +16,7 @@ from groq import (
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
-from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_dispatch import before_rag_dispatch, require_rag_dispatch_authorization
 from app.core.rag_execution_context import RagExecutionContext
 from app.services.rag_provider_execution import RagProviderExecutionError, execute_rag_provider_call
 from app.core.rag_model_registry import (
@@ -217,6 +217,7 @@ def generate_rag_chat(
     deadline_at: float | None = None,
     execution_context: RagExecutionContext | None = None,
 ) -> RagChatGeneration:
+    require_rag_dispatch_authorization()
     validate_rag_configuration()
     _validate_messages(messages)
     try:
