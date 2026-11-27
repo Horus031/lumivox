@@ -3,15 +3,21 @@ from __future__ import annotations
 
 import logging
 import time
+from contextlib import nullcontext
 from dataclasses import asdict
 
-from typing import Literal
+from typing import Any, Literal
 
 from app.clients.supabase_client import (
     get_supabase_client,
+    bounded_rag_supabase,
+    rag_supabase_summary_deadline,
 )
+from app.clients.rag_llm_client import RagLLMError
 
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
+from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_model_registry import validate_rag_configuration
 from app.schemas.rag_conversation_context import RagConversationContext
 from app.services.rag_chat_service import _normalize_top_k
@@ -64,8 +70,33 @@ def ask_rag_conversation_question(
 
     top_k = _normalize_top_k(top_k)
 
-    supabase = get_supabase_client()
+    execution = None
+    if settings.rag_resource_control_enabled:
+        max_calls = settings.rag_max_provider_calls_per_ask
+        execution = RagExecutionContext(
+            RagDeadline.start(settings.rag_request_deadline_seconds), max_calls,
+            answer_call_reserve=min(2, max_calls - int(bool(document_ids))),
+            needs_embedding=bool(document_ids),
+        )
+    db = bounded_rag_supabase(
+        execution.deadline, completion_reserve=settings.rag_completion_reserve_seconds,
+        answer_reserve=settings.rag_answer_reserve_seconds,
+    ) if execution else nullcontext(get_supabase_client())
+    with db as supabase:
+        return _run_ask(
+            supabase, user_id=user_id, question=question, document_ids=document_ids,
+            focus_session_id=focus_session_id, session_id=session_id, client_request_id=client_request_id,
+            top_k=top_k, prompt_variant=prompt_variant, preferred_locale=preferred_locale,
+            started_at=started_at, execution=execution,
+        )
 
+
+def _run_ask(
+    supabase: Any, *, user_id: str, question: str, document_ids: list[str], focus_session_id: str | None,
+    session_id: str | None, client_request_id: str, top_k: int,
+    prompt_variant: Literal["no_rule", "grounded_rule"], preferred_locale: Literal["auto", "en", "vi"],
+    started_at: float, execution: RagExecutionContext | None,
+) -> dict:
     request_payload = {
         "question": question,
         "selected_document_ids": document_ids,
@@ -127,16 +158,24 @@ def ask_rag_conversation_question(
             raise RagConversationError(
                 "RAG_CONVERSATION_LIMIT_REACHED", 409, session_id=reserved_session_id,
             )
-        if settings.rag_rolling_summary_enabled:
+        summary_deadline = execution.deadline.bounded(
+            settings.rag_summary_deadline_seconds,
+            settings.rag_answer_reserve_seconds + settings.rag_completion_reserve_seconds,
+        ) if execution else None
+        if settings.rag_rolling_summary_enabled and (
+            not execution or (summary_deadline.remaining() > 0.1 and execution.has_provider_budget("rolling_summary"))
+        ):
             try:
-                context = maybe_refresh_summary(
-                    supabase=supabase,
-                    user_id=user_id,
-                    session_id=reserved_session_id,
-                    turn_id=turn_id,
-                    lease_token=lease_token,
-                    context=context,
-                )
+                with rag_supabase_summary_deadline(summary_deadline):
+                    context = maybe_refresh_summary(
+                        supabase=supabase,
+                        user_id=user_id,
+                        session_id=reserved_session_id,
+                        turn_id=turn_id,
+                        lease_token=lease_token,
+                        context=context,
+                        **({"deadline": summary_deadline, "execution_context": execution} if execution else {}),
+                    )
             except Exception as summary_error:
                 if isinstance(summary_error, RagConversationError) and summary_error.code in {
                     "RAG_DOCUMENT_ACCESS_DENIED",
@@ -153,6 +192,9 @@ def ask_rag_conversation_question(
                     lease_token=lease_token,
                     recent_turns=settings.rag_recent_turns,
                 ))
+        answer_deadline = execution.deadline.bounded(
+            settings.rag_generation_deadline_seconds, settings.rag_completion_reserve_seconds,
+        ) if execution else None
         generated = generate_conversational_answer(
             supabase=supabase,
             user_id=user_id,
@@ -162,6 +204,7 @@ def ask_rag_conversation_question(
             prompt_variant=prompt_variant,
             preferred_locale=preferred_locale,
             context=context,
+            **({"deadline": answer_deadline, "execution_context": execution} if execution else {}),
         )
 
         if not generated.answer.strip():
@@ -183,6 +226,7 @@ def ask_rag_conversation_question(
                 turn_id=turn_id,
                 lease_token=lease_token,
                 error_code="generation_failed",
+                **({"attempts": execution.accounting()} if execution else {}),
             )
         except RagConversationError:
             logger.warning(
@@ -193,6 +237,16 @@ def ask_rag_conversation_question(
         if marked_failed:
             if isinstance(error, RagConversationError):
                 raise error from None
+            if isinstance(error, RagLLMError) and error.code in {
+                "provider_busy", "provider_cooldown", "resource_control_unavailable", "provider_call_budget_exceeded",
+            }:
+                raise RagConversationError(
+                    f"RAG_{error.code.upper()}", 503, session_id=reserved_session_id, outcome="failed",
+                ) from None
+            if execution and isinstance(error, RagDeadlineExceeded):
+                raise RagConversationError(
+                    "RAG_REQUEST_DEADLINE_EXCEEDED", 504, session_id=reserved_session_id, outcome="failed",
+                ) from None
             raise RagConversationError(
                 "RAG_GENERATION_FAILED",
                 502,
@@ -215,6 +269,8 @@ def ask_rag_conversation_question(
     usage["context"] = generated.context.model_dump()
     if generated.context.handoff_id:
         usage["context"]["handoff_id"] = generated.context.handoff_id
+    if execution:
+        usage["provider_attempts"] = execution.accounting()
     try:
         return complete_turn(
             supabase,
@@ -238,6 +294,7 @@ def ask_rag_conversation_question(
                 marked_failed = fail_turn(
                     supabase, user_id=user_id, turn_id=turn_id, lease_token=lease_token,
                     error_code=failure_reason,
+                    **({"attempts": execution.accounting()} if execution else {}),
                 )
             except RagConversationError:
                 marked_failed = False

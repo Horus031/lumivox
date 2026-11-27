@@ -20,7 +20,7 @@ const POLL_WINDOW_MS = 60_000;
 function pendingReference(focusId: string, data: RagConversationRestoreResponse): RagRecoveryReference | null {
   if (!data.pending_operation || !data.recovery_enabled) return null;
   return {
-    version: 1, protocol: "rag-v2", operation: "ask",
+    version: 1, protocol: "rag-v2", operation: data.pending_operation.operation,
     clientRequestId: data.pending_operation.client_request_id,
     focusSessionId: focusId, sessionId: data.session_id, createdAt: Date.now(),
   };
@@ -68,7 +68,7 @@ export function useRagOperationRecovery({ accountScope, epoch, restore, onTermin
     try {
       let result = await reconcileRagOperationAction(args);
       if (!isCurrent()) return;
-      if (result.success && result.data.status === "expired" && target.operation === "ask") {
+      if (result.success && result.data.status === "expired") {
         result = await reconcileRagOperationAction({ ...args, recoverExpired: true });
       }
       if (!isCurrent()) return;

@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
+
+from app.clients.rag_redis_client import valid_rag_redis_url
 
 from app.core.config import settings
 
@@ -77,6 +80,22 @@ def get_rag_model_capability(
 
 
 def validate_rag_configuration() -> None:
+    if settings.rag_resource_control_enabled:
+        if not settings.upstash_redis_rest_url or not valid_rag_redis_url(settings.upstash_redis_rest_url) \
+            or not (settings.upstash_redis_rest_token or "").strip():
+            raise RagConfigurationError("RAG resource control requires a secure Redis endpoint and credentials.")
+        if not re.fullmatch(r"[A-Za-z0-9_-]+", settings.rag_resource_namespace):
+            raise RagConfigurationError("Invalid RAG resource namespace.")
+        if settings.app_env.lower() in {"prod", "production"} and settings.rag_resource_namespace.lower() == "local":
+            raise RagConfigurationError("Production RAG requires an isolated resource namespace.")
+        if settings.rag_request_deadline_seconds <= settings.rag_answer_reserve_seconds + settings.rag_completion_reserve_seconds:
+            raise RagConfigurationError("RAG deadline must exceed the combined answer and completion reserves.")
+        if settings.rag_provider_lease_seconds <= max(
+            settings.rag_request_timeout_seconds, settings.rag_summary_request_timeout_seconds,
+        ) + settings.rag_provider_admission_timeout_seconds + 5:
+            raise RagConfigurationError("RAG provider lease must exceed call timeout plus safety margin.")
+        if settings.rag_max_provider_calls_per_ask < 2:
+            raise RagConfigurationError("RAG Ask must budget an embedding and a primary answer.")
     if settings.rag_handoff_enabled and not settings.rag_new_chat_enabled:
         raise RagConfigurationError("RAG handoff requires New Chat to be enabled.")
     if settings.rag_hard_turn_limit > 24:

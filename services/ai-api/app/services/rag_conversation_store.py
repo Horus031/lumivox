@@ -19,6 +19,8 @@ ERROR_STATUS = {
     "RAG_CONTEXT_UNAVAILABLE": 409,
     "RAG_SUMMARY_CONFLICT": 409,
     "RAG_RECOVERY_DISABLED": 409,
+    "RAG_NEW_CHAT_IN_PROGRESS": 409,
+    "RAG_NEW_CHAT_PREPARATION_FAILED": 409,
     "RAG_NEW_CHAT_DISABLED": 409,
     "RAG_HANDOFF_DISABLED": 409,
     "RAG_HANDOFF_SOURCE_CHANGED": 409,
@@ -185,11 +187,30 @@ def recover_expired_turn(
     })
 
 
+def recover_expired_preparation(
+    supabase: Any, *, user_id: str, focus_session_id: str, client_request_id: str,
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_recover_expired_preparation", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id, "p_client_request_id": client_request_id,
+    })
+
+
+def load_pending_new_chat(supabase: Any, *, user_id: str, focus_session_id: str) -> dict | None:
+    result = _call_rpc(supabase, "rag_v2_pending_new_chat", {
+        "p_user_id": user_id, "p_focus_session_id": focus_session_id,
+    })
+    if result is not None and not isinstance(result, dict):
+        raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+    return result
+
+
 def prepare_new_chat(
     supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
     client_request_id: str, request_payload: dict[str, Any], include_rolling_summary: bool,
+    reserve: bool = False,
 ) -> dict[str, Any]:
-    return _conversation_object(supabase, "rag_v2_prepare_new_chat_recovery", {
+    name = "rag_v2_reserve_new_chat_preparation" if reserve else "rag_v2_prepare_new_chat_recovery"
+    return _conversation_object(supabase, name, {
         "p_user_id": user_id, "p_focus_session_id": focus_session_id,
         "p_source_session_id": source_session_id, "p_client_request_id": client_request_id,
         "p_request": request_payload,
@@ -208,6 +229,26 @@ def commit_new_chat(
         "p_request": request_payload, "p_expected_revision": expected_revision, "p_handoff": handoff,
         "p_include_rolling_summary": include_rolling_summary,
     })
+
+
+def commit_prepared_new_chat(
+    supabase: Any, *, user_id: str, preparation_id: str, lease_token: str,
+    expected_revision: dict[str, Any], handoff: dict[str, Any] | None, attempts: list[dict],
+) -> dict[str, Any]:
+    return _conversation_object(supabase, "rag_v2_commit_prepared_new_chat", {
+        "p_user_id": user_id, "p_preparation_id": preparation_id, "p_lease_token": lease_token,
+        "p_expected_revision": expected_revision, "p_handoff": handoff, "p_attempts": attempts,
+    })
+
+
+def fail_new_chat_preparation(
+    supabase: Any, *, user_id: str, preparation_id: str, lease_token: str, error_code: str, attempts: list[dict],
+) -> bool:
+    result = _call_rpc(supabase, "rag_v2_fail_new_chat_preparation", {
+        "p_user_id": user_id, "p_preparation_id": preparation_id, "p_lease_token": lease_token,
+        "p_error_code": error_code, "p_attempts": attempts,
+    })
+    return result is True
 
 
 def list_conversations(
@@ -315,16 +356,18 @@ def fail_turn(
     turn_id: str,
     lease_token: str,
     error_code: str,
+    attempts: list[dict] | None = None,
 ) -> bool:
     return bool(
         _call_rpc(
             supabase,
-            "rag_v2_fail_turn",
+            "rag_v2_fail_turn" if attempts is None else "rag_v2_fail_turn_with_usage",
             {
                 "p_user_id": user_id,
                 "p_turn_id": turn_id,
                 "p_lease_token": lease_token,
                 "p_error_code": error_code,
+                **({"p_attempts": attempts} if attempts is not None else {}),
             },
         )
     )

@@ -1,4 +1,5 @@
 
+from contextlib import nullcontext
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -6,6 +7,7 @@ import pytest
 from postgrest.exceptions import APIError
 
 from app.clients.rag_llm_client import RagTokenUsage
+from app.core import rag_deadline
 from app.schemas.rag_conversation_context import RagContextMetadata
 from app.services import (
     rag_conversation_service as service,
@@ -103,6 +105,32 @@ def dependencies(monkeypatch):
         complete=complete,
         fail=fail,
     )
+
+
+@pytest.mark.parametrize("uncertain", [False, True])
+def test_resource_control_completes_generated_answer_after_deadline(monkeypatch, dependencies, uncertain):
+    monkeypatch.setattr(service.settings, "rag_resource_control_enabled", True)
+    monkeypatch.setattr(service, "validate_rag_configuration", lambda: None)
+    monkeypatch.setattr(service, "bounded_rag_supabase", lambda *args, **kwargs: nullcontext(object()))
+    now = [100.0]
+    monkeypatch.setattr(rag_deadline, "time", SimpleNamespace(monotonic=lambda: now[0]))
+    generated = dependencies.generate.return_value
+
+    def answer(**kwargs):
+        assert kwargs["deadline"].remaining() > 0
+        now[0] += service.settings.rag_request_deadline_seconds
+        return generated
+
+    dependencies.generate.side_effect = answer
+    if uncertain:
+        dependencies.complete.side_effect = RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+        with pytest.raises(RagConversationError) as error:
+            service.ask_rag_conversation_question(**BASE_REQUEST)
+        assert error.value.code == "RAG_TURN_OUTCOME_UNKNOWN"
+    else:
+        assert service.ask_rag_conversation_question(**BASE_REQUEST)["answer"] == "Study answer"
+    dependencies.complete.assert_called_once()
+    dependencies.fail.assert_not_called()
 
 
 @pytest.mark.parametrize("code", ["RAG_SUMMARY_CONFLICT", "RAG_PERSISTENCE_UNAVAILABLE"])

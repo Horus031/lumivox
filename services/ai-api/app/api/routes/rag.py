@@ -26,6 +26,7 @@ from app.services.rag_conversation_service import (
 from app.services.rag_conversation_store import (
     RagConversationError,
     list_conversations,
+    load_pending_new_chat,
     load_history_detail,
 )
 from app.services.rag_new_chat_service import start_new_conversation
@@ -209,6 +210,10 @@ def restore_conversation(
             active = next((item for item in history["conversations"] if item["id"] == active_id), None)
             if active_id and (active is None or not active["content_available"]):
                 result = {"enabled": True, "session_id": active_id, "content_available": False}
+                if settings.rag_operation_recovery_enabled:
+                    result["pending_operation"] = load_pending_new_chat(
+                        get_supabase_client(), user_id=user_id, focus_session_id=focus_id,
+                    )
             else:
                 result = restore_rag_conversation(user_id=user_id, focus_session_id=focus_id)
 
@@ -244,7 +249,10 @@ def new_chat(payload: RagNewChatRequest, _: None = Depends(verify_internal_api_k
     try:
         return start_new_conversation(payload)
     except RagConversationError as error:
-        raise HTTPException(error.status_code, detail={"code": error.code}) from None
+        detail = {"code": error.code}
+        if error.outcome is not None:
+            detail["outcome"] = error.outcome
+        raise HTTPException(error.status_code, detail=detail) from None
     except Exception:
         raise HTTPException(503, detail={"code": "RAG_PERSISTENCE_UNAVAILABLE"}) from None
 

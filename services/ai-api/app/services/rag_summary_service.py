@@ -6,6 +6,8 @@ from typing import Any
 from app.clients.rag_llm_client import RagLLMError
 from app.clients.rag_summary_client import generate_rag_summary
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_token_budget import RagTokenBudgetError
 from app.schemas.rag_conversation_context import RagConversationContext, RagSummaryInput
 from app.schemas.rag_conversation_summary import RagStoredSummary, RagSummaryMethod
@@ -29,10 +31,14 @@ def maybe_refresh_summary(
     turn_id: str,
     lease_token: str,
     context: RagConversationContext,
+    deadline: RagDeadline | None = None,
+    execution_context: RagExecutionContext | None = None,
 ) -> RagConversationContext:
     if not settings.rag_rolling_summary_enabled:
         return context.model_copy(update={"summary": None})
     if context.completed_turn_count < settings.rag_summary_start_turns:
+        return context
+    if deadline and deadline.remaining() <= 0.1:
         return context
 
     batch_size = settings.rag_summary_max_batch_turns
@@ -61,8 +67,9 @@ def maybe_refresh_summary(
         "batch_size": batch_size,
     }
     try:
-        generation = generate_rag_summary(build_summary_messages(
-            previous_summary=previous, turns=snapshot.turns,
+        messages = build_summary_messages(previous_summary=previous, turns=snapshot.turns)
+        generation = generate_rag_summary(messages, **(
+            {"deadline_at": deadline.expires_at, "execution_context": execution_context} if deadline else {}
         ))
         summary = fit_summary_to_budget(generation.summary, max_tokens)
         metadata.update(
@@ -72,6 +79,8 @@ def maybe_refresh_summary(
             **asdict(generation.usage),
         )
     except (RagLLMError, RagTokenBudgetError):
+        if deadline and deadline.remaining() <= 0.1:
+            return context
         method = "extractive"
         started = time.monotonic()
         try:
@@ -83,6 +92,8 @@ def maybe_refresh_summary(
             return context
         metadata["latency_ms"] = round((time.monotonic() - started) * 1000)
 
+    if deadline and deadline.remaining() <= 0.1:
+        return context
     saved = save_conversation_summary(
         supabase,
         user_id=user_id,

@@ -4,9 +4,13 @@ import { AiApiError, AiApiTransportError, fetchAiApi } from "@/lib/ai-api/fetch-
 import { requireUser } from "@/lib/auth/require-user";
 import type { ActionResult } from "@/lib/actions/action-result";
 import { checkRateLimit, formatRateLimitMessage } from "@/lib/redis/rate-limit";
+import { canonicalRagDocumentIds, checkRagAdmission } from "@/lib/redis/rag-admission";
 import { z } from "zod";
 
 type RagPromptVariant = "no_rule" | "grounded_rule";
+const MAX_NEW_SCOPE_DOCUMENTS = 20;
+// Bound the raw array near the Server Action body limit while preserving existing scopes.
+const documentIdsSchema = z.array(z.uuid()).max(262_144);
 
 export type RagContextMetadata = {
   estimated_prompt_tokens: number;
@@ -72,12 +76,56 @@ type RagAskActionResult =
       outcome?: "failed" | "unknown";
     };
 
+const admittedAskSchema = z.object({
+  question: z.string().trim().min(1).max(2000),
+  clientRequestId: z.uuid(),
+  sessionId: z.uuid().nullish(),
+  focusSessionId: z.uuid().nullish(),
+  selectedDocumentIds: documentIdsSchema.default([]),
+  topK: z.number().int().min(1).max(9).default(5),
+  promptVariant: z.enum(["no_rule", "grounded_rule"]).default("grounded_rule"),
+  preferredLocale: z.enum(["vi", "en"]).optional(),
+  conversationProtocol: z.literal("v2"),
+});
+
 export async function askRagQuestionAction(
   payload: RagAskActionPayload,
 ): Promise<RagAskActionResult> {
   try {
     const { user } = await requireUser();
 
+    const admissionEnabled = process.env.RAG_IDEMPOTENT_ADMISSION_ENABLED === "true"
+      && payload.conversationProtocol === "v2";
+    if (admissionEnabled) {
+      const parsed = admittedAskSchema.safeParse(payload);
+      if (!parsed.success) return {
+        success: false, message: "Invalid RAG request.", code: "RAG_INVALID_REQUEST", retrySameRequest: false,
+      };
+      const data = parsed.data;
+      const selectedDocumentIds = canonicalRagDocumentIds(data.selectedDocumentIds);
+      if (!data.sessionId && selectedDocumentIds.length > MAX_NEW_SCOPE_DOCUMENTS) return {
+        success: false, message: "Select at most 20 documents.", code: "RAG_INVALID_REQUEST", retrySameRequest: false,
+      };
+      const canonical = {
+        question: data.question, focusSessionId: data.focusSessionId?.toLowerCase() ?? null,
+        sessionId: data.sessionId?.toLowerCase() ?? null, selectedDocumentIds, topK: data.topK,
+        promptVariant: data.promptVariant, preferredLocale: data.preferredLocale ?? "auto",
+        conversationProtocol: data.conversationProtocol,
+      };
+      const requestId = data.clientRequestId.toLowerCase();
+      const rejected = await checkRagAdmission(user.id, "ask", requestId, canonical);
+      if (rejected) return rejected;
+      const result = await fetchAiApi<RagAskActionResponse>({
+        path: "/api/v1/rag/chat/ask", retries: 0,
+        body: {
+          user_id: user.id, question: canonical.question, selected_document_ids: selectedDocumentIds,
+          focus_session_id: canonical.focusSessionId, session_id: canonical.sessionId, top_k: canonical.topK,
+          prompt_variant: canonical.promptVariant, preferred_locale: canonical.preferredLocale,
+          client_request_id: requestId, conversation_protocol: canonical.conversationProtocol,
+        },
+      });
+      return { success: true, message: "Answer generated.", data: result };
+    }
     const question = payload.question.trim();
 
     if (!question) {
@@ -149,6 +197,7 @@ export async function askRagQuestionAction(
           error.code !== "RAG_GENERATION_FAILED" &&
           error.code !== "RAG_INVALID_RESPONSE" &&
           (error.code === "RAG_TURN_IN_PROGRESS" ||
+            error.code === "RAG_NEW_CHAT_IN_PROGRESS" ||
             error.code === "RAG_INVALID_LEASE" ||
             error.status === 408 ||
             error.status === 429 ||
@@ -180,7 +229,7 @@ export type RagConversationRestoreResponse = {
   enabled: boolean;
   recovery_enabled?: boolean;
   pending_operation?: {
-    operation: "ask";
+    operation: "ask" | "new_chat";
     client_request_id: string;
     status: "processing" | "expired";
     lease_expires_at: string;
@@ -246,7 +295,7 @@ export type RagOperationStatusResponse = {
 const operationStatusSchema = z.object({
   focusSessionId: z.uuid(), clientRequestId: z.uuid(),
   operation: z.enum(["ask", "new_chat"]), recoverExpired: z.boolean().optional(),
-}).refine((input) => !input.recoverExpired || input.operation === "ask");
+});
 
 export async function reconcileRagOperationAction(
   input: z.input<typeof operationStatusSchema>,
@@ -279,7 +328,7 @@ const newChatPayloadSchema = z.object({
   sourceSessionId: z.uuid(),
   clientRequestId: z.uuid(),
   mode: z.enum(["fresh", "continue"]),
-  selectedDocumentIds: z.array(z.uuid()),
+  selectedDocumentIds: documentIdsSchema,
   topK: z.number().int().min(1).max(9),
   promptVariant: z.enum(["grounded_rule", "no_rule"]),
   preferredLocale: z.enum(["en", "vi"]).optional(),
@@ -325,17 +374,20 @@ type ChatLifecycleResult<T> =
 async function lifecycleRequest<T>(
   operation: "new" | "history" | "history/detail",
   payload: Record<string, unknown>,
+  admission?: { requestId: string; canonical: unknown },
 ): Promise<ChatLifecycleResult<T>> {
   const isTransition = operation === "new";
   try {
     const { user } = await requireUser();
-    const rateLimit = await checkRateLimit({
-      key: isTransition ? `rag-new-chat:${user.id}` : `rag-history:${user.id}`,
-      limit: isTransition ? 5 : 30,
-      window: isTransition ? "10 m" : "1 m",
-    });
-    if (!rateLimit.success) {
-      return {
+    if (admission) {
+      const rejected = await checkRagAdmission(user.id, "new_chat", admission.requestId, admission.canonical);
+      if (rejected) return rejected;
+    } else {
+      const rateLimit = await checkRateLimit({
+        key: isTransition ? `rag-new-chat:${user.id}` : `rag-history:${user.id}`,
+        limit: isTransition ? 5 : 30, window: isTransition ? "10 m" : "1 m",
+      });
+      if (!rateLimit.success) return {
         success: false, code: "RAG_RATE_LIMITED",
         message: formatRateLimitMessage(rateLimit.reset), retrySameRequest: true,
       };
@@ -351,7 +403,8 @@ async function lifecycleRequest<T>(
       code: error instanceof AiApiError || error instanceof AiApiTransportError ? error.code : undefined,
       retrySameRequest: isTransition && (
         error instanceof AiApiTransportError
-        || (error instanceof AiApiError && (error.status === 408 || error.status >= 500))
+        || (error instanceof AiApiError && error.details?.outcome !== "failed"
+          && (error.status === 408 || error.status >= 500 || error.code === "RAG_NEW_CHAT_IN_PROGRESS"))
       ),
     };
   }
@@ -365,12 +418,20 @@ export async function startNewRagConversationAction(
     return { success: false, code: "RAG_INVALID_REQUEST", message: "Invalid request.", retrySameRequest: false };
   }
   const data = parsed.data;
-  return lifecycleRequest("new", {
-    focus_session_id: data.focusSessionId, source_session_id: data.sourceSessionId,
-    client_request_id: data.clientRequestId, mode: data.mode,
-    selected_document_ids: data.selectedDocumentIds, top_k: data.topK,
+  const selectedDocumentIds = canonicalRagDocumentIds(data.selectedDocumentIds);
+  const requestId = data.clientRequestId.toLowerCase();
+  const canonical = {
+    focus_session_id: data.focusSessionId.toLowerCase(), source_session_id: data.sourceSessionId.toLowerCase(),
+    mode: data.mode, selected_document_ids: selectedDocumentIds, top_k: data.topK,
     prompt_variant: data.promptVariant, preferred_locale: data.preferredLocale ?? "auto",
-  });
+  };
+  const enabled = process.env.RAG_IDEMPOTENT_ADMISSION_ENABLED === "true";
+  if (enabled && data.mode === "fresh" && selectedDocumentIds.length > MAX_NEW_SCOPE_DOCUMENTS) return {
+    success: false, code: "RAG_INVALID_REQUEST", message: "Select at most 20 documents.", retrySameRequest: false,
+  };
+  return lifecycleRequest("new", {
+    ...canonical, client_request_id: requestId,
+  }, enabled ? { requestId, canonical } : undefined);
 }
 
 export async function listRagConversationsAction(

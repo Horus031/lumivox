@@ -15,6 +15,9 @@ from groq import (
 )
 
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext
+from app.services.rag_provider_execution import RagProviderExecutionError, execute_rag_provider_call
 from app.core.rag_model_registry import (
     get_rag_model_capability,
     parse_rag_model_chain,
@@ -42,6 +45,10 @@ RagErrorCode = Literal[
     "provider_unavailable",
     "empty_response",
     "incomplete_response",
+    "provider_busy",
+    "provider_cooldown",
+    "resource_control_unavailable",
+    "provider_call_budget_exceeded",
 ]
 
 
@@ -150,7 +157,7 @@ def _read_token_usage(response) -> RagTokenUsage:
 def _classify_provider_error(
     error: Exception,
 ) -> tuple[RagErrorCode, bool]:
-    if isinstance(error, RagLLMError):
+    if isinstance(error, (RagLLMError, RagProviderExecutionError)):
         return error.code, error.retryable
 
     if isinstance(error, APITimeoutError):
@@ -202,11 +209,13 @@ def generate_rag_chat(
     messages: list[RagChatMessage],
     *,
     max_completion_tokens: int | None = None,
+    deadline_at: float | None = None,
+    execution_context: RagExecutionContext | None = None,
 ) -> RagChatGeneration:
     validate_rag_configuration()
     _validate_messages(messages)
     try:
-        assert_prompt_budget(messages)
+        estimated_prompt_tokens = assert_prompt_budget(messages)
     except RagTokenBudgetError:
         raise RagLLMError(code="context_length_exceeded", retryable=False) from None
 
@@ -238,6 +247,9 @@ def generate_rag_chat(
         started_at
         + settings.rag_generation_deadline_seconds
     )
+
+    if deadline_at is not None:
+        deadline = min(deadline, deadline_at)
 
     failures: list[RagFailedAttempt] = []
     attempts = 0
@@ -280,76 +292,81 @@ def generate_rag_chat(
                         settings.rag_reasoning_effort
                     )
 
-                response = (
-                    client.chat.completions.create(
-                        **request_options
-                    )
-                )
+                def parse_response(response) -> RagChatGeneration:
+                    usage = _read_token_usage(response)
+                    if (
+                        usage.prompt_tokens is not None
+                        and usage.prompt_tokens > settings.rag_max_prompt_tokens
+                    ):
+                        logger.warning(
+                            "RAG provider prompt tokens exceeded budget: actual=%s budget=%s",
+                            usage.prompt_tokens,
+                            settings.rag_max_prompt_tokens,
+                        )
 
-                usage = _read_token_usage(response)
-                if (
-                    usage.prompt_tokens is not None
-                    and usage.prompt_tokens > settings.rag_max_prompt_tokens
-                ):
-                    logger.warning(
-                        "RAG provider prompt tokens exceeded budget: actual=%s budget=%s",
-                        usage.prompt_tokens,
-                        settings.rag_max_prompt_tokens,
-                    )
+                    if execution_context is None and time.monotonic() >= deadline:
+                        raise RagLLMError(
+                            code="timeout",
+                            retryable=True,
+                        )
 
-                if time.monotonic() >= deadline:
-                    raise RagLLMError(
-                        code="timeout",
-                        retryable=True,
-                    )
+                    if not response.choices:
+                        raise RagLLMError(
+                            code="empty_response",
+                            retryable=True,
+                        )
 
-                if not response.choices:
-                    raise RagLLMError(
-                        code="empty_response",
-                        retryable=True,
-                    )
+                    choice = response.choices[0]
 
-                choice = response.choices[0]
-
-                finish_reason = (
-                    choice.finish_reason or "unknown"
-                )
-
-                if finish_reason != "stop":
-                    raise RagLLMError(
-                        code="incomplete_response",
-                        retryable=True,
+                    finish_reason = (
+                        choice.finish_reason or "unknown"
                     )
 
-                text = (
-                    choice.message.content or ""
-                ).strip()
+                    if finish_reason != "stop":
+                        raise RagLLMError(
+                            code="incomplete_response",
+                            retryable=True,
+                        )
 
-                if not text:
-                    raise RagLLMError(
-                        code="empty_response",
-                        retryable=True,
+                    text = (
+                        choice.message.content or ""
+                    ).strip()
+
+                    if not text:
+                        raise RagLLMError(
+                            code="empty_response",
+                            retryable=True,
+                        )
+
+                    return RagChatGeneration(
+                        text=text,
+                        provider="groq",
+                        model=model,
+                        latency_ms=int(
+                            (
+                                time.monotonic()
+                                - started_at
+                            ) * 1000
+                        ),
+                        attempts=(sum(item.stage == "answer" for item in execution_context.attempts)
+                                  if execution_context is not None else attempts),
+                        usage=usage,
+                        finish_reason=finish_reason,
                     )
-
-                return RagChatGeneration(
-                    text=text,
-                    provider="groq",
-                    model=model,
-                    latency_ms=int(
-                        (
-                            time.monotonic()
-                            - started_at
-                        ) * 1000
-                    ),
-                    attempts=attempts,
-                    usage=usage,
-                    finish_reason=finish_reason,
-                )
+                if execution_context is not None:
+                    return execute_rag_provider_call(
+                        client=client, request_options=request_options, stage="answer",
+                        context=execution_context, deadline=RagDeadline(deadline),
+                        estimated_prompt_tokens=estimated_prompt_tokens, classify_error=_classify_provider_error,
+                        parse_response=parse_response,
+                    )
+                return parse_response(client.chat.completions.create(**request_options))
 
             except (
                 APIStatusError,
                 APIConnectionError,
                 RagLLMError,
+                RagProviderExecutionError,
             ) as error:
                 code, retryable = (
                     _classify_provider_error(error)
@@ -371,6 +388,7 @@ def generate_rag_chat(
 
                 if code in {
                     "rate_limit",
+                    "provider_cooldown",
                     "model_unavailable",
                     "incomplete_response",
                     "empty_response",

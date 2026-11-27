@@ -24,6 +24,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 10
+
     defaults:
       run:
         working-directory: apps/web
@@ -61,6 +68,8 @@ jobs:
         run: node --test scripts/ci/production-safeguards.test.mjs
 
       - name: Unit tests
+        env:
+          RAG_TEST_REDIS_CONTAINER: ${{ job.services.redis.id }}
         run: npm run test:unit
 
       - name: TypeScript typecheck
@@ -75,6 +84,13 @@ jobs:
     name: AI API · Unit Tests
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 2s --health-timeout 2s --health-retries 10
 
     defaults:
       run:
@@ -114,6 +130,9 @@ jobs:
 
       - name: Unit tests
         run: python -m pytest -q
+
+      - name: RAG provider concurrency against Redis
+        run: python -m scripts.verify_rag_resource_control
 
   database:
     name: Supabase · Migration Replay

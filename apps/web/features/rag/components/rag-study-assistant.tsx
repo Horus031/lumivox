@@ -96,6 +96,12 @@ const REQUEST_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_INVALID_LEASE", "requestOutcomeUnknown"],
   ["RAG_INVALID_RESPONSE", "requestOutcomeUnknown"],
   ["RAG_TURN_IN_PROGRESS", "turnInProgress"],
+  ["RAG_NEW_CHAT_IN_PROGRESS", "newChatInProgress"],
+  ["RAG_PROVIDER_BUSY", "providerBusy"],
+  ["RAG_PROVIDER_COOLDOWN", "providerBusy"],
+  ["RAG_RESOURCE_CONTROL_UNAVAILABLE", "resourceControlUnavailable"],
+  ["RAG_REQUEST_DEADLINE_EXCEEDED", "turnFailed"],
+  ["RAG_PROVIDER_CALL_BUDGET_EXCEEDED", "turnFailed"],
   ["RAG_GENERATION_FAILED", "turnFailed"],
   ["RAG_PREVIOUS_TURN_FAILED", "turnFailed"],
   ["RAG_IDEMPOTENCY_CONFLICT", "idempotencyConflict"],
@@ -114,6 +120,9 @@ const TRANSITION_ERROR_MESSAGES = new Map<string, string>([
   ["RAG_DOCUMENT_ACCESS_DENIED", "historyAccessUnavailable"],
   ["RAG_IDEMPOTENCY_CONFLICT", "idempotencyConflict"],
   ["RAG_TURN_IN_PROGRESS", "turnInProgress"],
+  ["RAG_NEW_CHAT_IN_PROGRESS", "newChatInProgress"],
+  ["RAG_NEW_CHAT_PREPARATION_FAILED", "newChatPreparationFailed"],
+  ["RAG_RESOURCE_CONTROL_UNAVAILABLE", "resourceControlUnavailable"],
 ]);
 
 type RagStudyAssistantProps = {

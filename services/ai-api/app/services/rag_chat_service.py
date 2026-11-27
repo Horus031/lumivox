@@ -6,7 +6,11 @@ from google.genai import types
 from app.clients.gemini_client import get_gemini_client
 from app.clients.llm_client import LLMTextGeneration, generate_text
 from app.clients.supabase_client import get_supabase_client
+from app.clients.supabase_client import bounded_rag_supabase
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext, RagProviderAttempt
+from app.services.rag_provider_execution import RagProviderExecutionError
 from app.services.rag_conversation_store import RagConversationError
 
 
@@ -64,29 +68,49 @@ def _normalize_top_k(top_k: int) -> int:
     return min(allowed, key=lambda value: abs(value - top_k))
 
 
-def _generate_query_embedding(question: str) -> list[float]:
+def _generate_query_embedding(
+    question: str, *, deadline: RagDeadline | None = None, execution_context: RagExecutionContext | None = None,
+) -> list[float]:
     client = get_gemini_client()
 
     model_name = settings.gemini_embedding_model
 
-    result = client.models.embed_content(
-        model=model_name,
-        contents=question,
-        config=types.EmbedContentConfig(output_dimensionality=768)
-    )
-
-    [embedding] = result.embeddings
-    embedding_length = len(embedding.values)
-    
-    if not embedding:
-        raise RuntimeError("Gemini did not return an embedding.")
-
-    if embedding_length != 768:
-        raise RuntimeError(
-            f"Embedding dimension mismatch. Expected 768, got {embedding_length}. "
+    if execution_context and not execution_context.has_provider_budget("embedding"):
+        raise RagProviderExecutionError("provider_call_budget_exceeded")
+    http_options = None
+    if deadline:
+        http_options = types.HttpOptions(
+            timeout=max(1, int(deadline.require_remaining() * 1_000)),
+            retry_options=types.HttpRetryOptions(attempts=1),
         )
-
-    return embedding.values
+    attempt = None
+    if execution_context:
+        attempt = RagProviderAttempt("embedding", "google", model_name)
+        execution_context.attempts.append(attempt)
+    started = time.monotonic()
+    try:
+        result = client.models.embed_content(
+            model=model_name, contents=question,
+            config=types.EmbedContentConfig(output_dimensionality=768, http_options=http_options),
+        )
+        if deadline:
+            deadline.require_remaining()
+        if not result.embeddings or len(result.embeddings) != 1:
+            raise RuntimeError("Gemini did not return one embedding.")
+        values = result.embeddings[0].values
+        if not values or len(values) != 768:
+            raise RuntimeError("Gemini returned an invalid embedding dimension.")
+        if attempt:
+            attempt.outcome = "success"
+        return values
+    except Exception as error:
+        if attempt:
+            attempt.outcome = "failed" if isinstance(getattr(error, "code", None), int) else "unknown"
+            attempt.error_code = "embedding_failed"
+        raise
+    finally:
+        if attempt:
+            attempt.latency_ms = max(0, round((time.monotonic() - started) * 1_000))
 
 
 def _to_pgvector_literal(values: list[float]) -> str:
@@ -157,16 +181,19 @@ def _retrieve_chunks(
     query_embedding: list[float],
     selected_document_ids: list[str],
     top_k: int,
+    deadline: RagDeadline | None = None,
 ) -> list[dict[str, Any]]:
-    response = supabase.rpc(
-        "match_learning_document_chunks",
-        {
-            "p_query_embedding": _to_pgvector_literal(query_embedding),
-            "p_match_count": top_k,
-            "p_document_ids": selected_document_ids,
-            "p_user_id": user_id,
-        },
-    ).execute()
+    params = {
+        "p_query_embedding": _to_pgvector_literal(query_embedding), "p_match_count": top_k,
+        "p_document_ids": selected_document_ids, "p_user_id": user_id,
+    }
+    if deadline:
+        deadline.require_remaining()
+        with bounded_rag_supabase(deadline) as client:
+            response = client.rpc("match_learning_document_chunks", params).execute()
+        deadline.require_remaining()
+    else:
+        response = supabase.rpc("match_learning_document_chunks", params).execute()
 
     return response.data or []
 

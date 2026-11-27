@@ -40,6 +40,7 @@ from app.services.deadline_risk_runtime import (
 )
 from app.core.config import settings
 from app.core.rag_token_budget import get_rag_encoding
+from app.clients.rag_redis_client import close_rag_redis_http_client
 
 from app.services.native_task_risk_service import (
     validate_native_task_risk_artifact,
@@ -90,7 +91,10 @@ async def lifespan(
         except Exception:
             logger.warning("RAG tokenizer warm-up failed.")
 
-    yield
+    try:
+        yield
+    finally:
+        close_rag_redis_http_client()
 
     app.state.deadline_risk_runtime = (
         None

@@ -221,9 +221,8 @@ async function prepareChat(fixture, requestId) {
   return JSON.parse(await query(`select public.rag_v2_prepare_new_chat(${args});`)).revision;
 }
 
-function commitChat(fixture, requestId, revision = null) {
-  const args = newChatArguments(fixture, requestId, revision ? "continue" : "fresh");
-  const memory = {
+function handoffMemory() {
+  return {
     schema_version: 1, generation_method: "extractive", token_count: 60,
     summary: {
       main_topic: "Binary search", learning_objective: "", covered_concepts: [],
@@ -231,8 +230,80 @@ function commitChat(fixture, requestId, revision = null) {
       uncertainties: [], continuation_hint: "",
     },
   };
-  const parameters = revision ? `'${JSON.stringify(revision)}','${JSON.stringify(memory)}'` : "null,null";
+}
+
+function commitChat(fixture, requestId, revision = null) {
+  const args = newChatArguments(fixture, requestId, revision ? "continue" : "fresh");
+  const parameters = revision ? `'${JSON.stringify(revision)}','${JSON.stringify(handoffMemory())}'` : "null,null";
   return `select public.rag_v2_commit_new_chat(${args},${parameters});`;
+}
+
+async function resourceControlRaces() {
+  const fixture = async () => {
+    const conversation = await focusConversation();
+    await query(completeHistoryTurn(await reserveFocusTurn(conversation)));
+    return conversation;
+  };
+  const reservePreparation = (conversation, id) =>
+    `select public.rag_v2_reserve_new_chat_preparation(${newChatArguments(conversation, id, "continue")},false);`;
+  const commitPreparation = (preparation) =>
+    `select public.rag_v2_commit_prepared_new_chat('${owner}','${preparation.preparation_id}',
+      '${preparation.lease_token}','${JSON.stringify(preparation.revision)}','${JSON.stringify(handoffMemory())}');`;
+
+  const duplicate = await fixture();
+  const same = reservePreparation(duplicate, randomUUID());
+  const duplication = await contend(same, same);
+  assert.equal(JSON.parse(duplication.first).outcome, "reserved");
+  const replay = JSON.parse(duplication.result);
+  assert.equal(replay.outcome, "processing");
+  assert.equal(replay.preparation_id, JSON.parse(duplication.first).preparation_id);
+  assert.equal(replay.lease_token, undefined);
+  console.log("PASS: concurrent duplicate Continue gets exactly one generation lease");
+
+  const distinct = await fixture();
+  const contention = await contend(reservePreparation(distinct, randomUUID()), reservePreparation(distinct, randomUUID()));
+  assert.equal(JSON.parse(contention.first).outcome, "reserved");
+  assert.match(contention.error?.stderr ?? "", /ERROR:\s+RAG_NEW_CHAT_IN_PROGRESS/);
+  console.log("PASS: distinct concurrent preparations cannot both reserve the same source");
+
+  const ask = await fixture();
+  const mutation = await contend(reserve(ask.source, randomUUID(), ask.documents, ask.focus),
+    reservePreparation(ask, randomUUID()));
+  assert.equal(JSON.parse(mutation.first).outcome, "reserved");
+  assert.match(mutation.error?.stderr ?? "", /ERROR:\s+RAG_TURN_IN_PROGRESS/);
+  console.log("PASS: concurrent Ask and Continue cannot both reserve a mutation");
+
+  const expired = await fixture();
+  const expiredRequest = randomUUID();
+  const expire = JSON.parse(await query(reservePreparation(expired, expiredRequest)));
+  await query(`update public.rag_chat_preparations set lease_expires_at=clock_timestamp()-interval '1 second'
+    where id='${expire.preparation_id}';`);
+  const recovery = await contend(
+    `select public.rag_v2_recover_expired_preparation('${owner}','${expired.focus}','${expiredRequest}');`,
+    commitPreparation(expire));
+  assert.equal(JSON.parse(recovery.first).status, "failed");
+  assert.match(recovery.error?.stderr ?? "", /ERROR:\s+RAG_INVALID_LEASE/);
+  console.log("PASS: preparation recovery blocks a concurrent late commit");
+
+  const failing = await fixture();
+  const failure = JSON.parse(await query(reservePreparation(failing, randomUUID())));
+  const failed = await contend(`select public.rag_v2_fail_new_chat_preparation('${owner}','${failure.preparation_id}',
+    '${failure.lease_token}','generation_failed');`, commitPreparation(failure));
+  assert.equal(failed.first, "t");
+  assert.match(failed.error?.stderr ?? "", /ERROR:\s+RAG_INVALID_LEASE/);
+  assert.equal(await query(`select status from public.rag_chat_sessions where id='${failing.source}';`), "active");
+  console.log("PASS: a preparation failure stays terminal when a commit races it");
+
+  const committing = await fixture();
+  const preparation = JSON.parse(await query(reservePreparation(committing, randomUUID())));
+  const command = commitPreparation(preparation);
+  const committed = await contend(command, command);
+  const target = JSON.parse(committed.first).target_session_id;
+  assert.ok(target);
+  assert.equal(JSON.parse(committed.result).target_session_id, target);
+  assert.equal(await query(`select count(*) from public.rag_chat_transitions
+    where source_session_id='${committing.source}';`), "1");
+  console.log("PASS: concurrent preparation commits create one target and replay its ID");
 }
 
 function completeHistoryTurn(turn) {
@@ -459,6 +530,7 @@ try {
   console.log("PASS: document revocation before save prevents a summary write");
   await newChatRaces();
   await recoveryRaces();
+  await resourceControlRaces();
 } finally {
   firstConnection.close();
   if (fixtureCreated) {

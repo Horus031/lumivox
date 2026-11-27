@@ -3,6 +3,8 @@ from typing import Any, Literal
 
 from app.clients.rag_llm_client import RagChatGeneration, generate_rag_chat
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext
 from app.schemas.rag_conversation_context import (
     RagContextMetadata,
     RagConversationContext,
@@ -31,6 +33,8 @@ def generate_conversational_answer(
     prompt_variant: Literal["grounded_rule", "no_rule"],
     preferred_locale: str,
     context: RagConversationContext,
+    deadline: RagDeadline | None = None,
+    execution_context: RagExecutionContext | None = None,
 ) -> RagConversationalAnswer:
     document_mode = bool(selected_document_ids)
     strategy: RagRetrievalStrategy = "none"
@@ -43,14 +47,21 @@ def generate_conversational_answer(
             context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
         )
         strategy = query.strategy
+        embedding = (
+            _generate_query_embedding(query.text, deadline=deadline, execution_context=execution_context)
+            if deadline or execution_context else _generate_query_embedding(query.text)
+        )
         sources = _retrieve_chunks(
             supabase,
             user_id=user_id,
-            query_embedding=_generate_query_embedding(query.text),
+            query_embedding=embedding,
             selected_document_ids=selected_document_ids,
             top_k=top_k,
+            **({"deadline": deadline} if deadline else {}),
         )
 
+    if deadline:
+        deadline.require_remaining()
     built = build_conversational_context(
         question=question,
         context=context,
@@ -87,7 +98,11 @@ def generate_conversational_answer(
             ),
         )
 
-    generation = generate_rag_chat(built.messages)
+    generation = (
+        generate_rag_chat(built.messages, deadline_at=deadline.expires_at if deadline else None,
+                          execution_context=execution_context)
+        if deadline or execution_context else generate_rag_chat(built.messages)
+    )
     return RagConversationalAnswer(
         answer=generation.text,
         sources=built.sources,

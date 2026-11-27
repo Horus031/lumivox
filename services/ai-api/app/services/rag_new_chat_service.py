@@ -1,18 +1,23 @@
 from dataclasses import asdict
-from typing import Annotated, Literal
+from contextlib import nullcontext
+from typing import Annotated, Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field, TypeAdapter, ValidationError
 
-from app.clients.supabase_client import get_supabase_client
+from app.clients.supabase_client import bounded_rag_supabase, get_supabase_client
 from app.core.config import settings
+from app.core.rag_deadline import RagDeadline
+from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_model_registry import validate_rag_configuration
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.schemas.rag_conversation_handoff import (
     RagHandoffRevision, RagNewChatRequest, RagNewChatResponse, RagStoredHandoff,
 )
 from app.schemas.rag_conversation_summary import RagStoredSummary
-from app.services.rag_conversation_store import RagConversationError, commit_new_chat, prepare_new_chat
+from app.services.rag_conversation_store import (
+    RagConversationError, commit_new_chat, commit_prepared_new_chat, fail_new_chat_preparation, prepare_new_chat,
+)
 from app.services.rag_handoff_builder import build_final_handoff
 
 
@@ -28,8 +33,31 @@ class _PreparedChat(BaseModel):
 class _CompletedChat(RagNewChatResponse):
     outcome: Literal["completed"]
 
+class _ReservedChat(BaseModel):
+    outcome: Literal["reserved"]
+    source_session_id: UUID
+    revision: RagHandoffRevision
+    previous_summary: RagStoredSummary | None
+    inherited_memory: RagStoredHandoff | None
+    uncovered_turns: list[RagCompletedTurn] = Field(max_length=100)
+    preparation_id: UUID
+    lease_token: UUID
 
-_PREPARE_RESPONSE = TypeAdapter(Annotated[_PreparedChat | _CompletedChat, Field(discriminator="outcome")])
+
+class _PreparationStatus(BaseModel):
+    outcome: Literal["processing", "failed"]
+    preparation_id: UUID
+
+
+_PREPARE_RESPONSE = TypeAdapter(Annotated[
+    _PreparedChat | _ReservedChat | _PreparationStatus | _CompletedChat, Field(discriminator="outcome"),
+])
+
+_KNOWN_COMMIT_REJECTIONS = {
+    "RAG_HANDOFF_SOURCE_CHANGED", "RAG_HANDOFF_SCOPE_CHANGED", "RAG_HANDOFF_EMPTY_CONTEXT",
+    "RAG_DOCUMENT_ACCESS_DENIED", "RAG_INVALID_REQUEST", "RAG_INVALID_RESPONSE", "RAG_SESSION_CLOSED",
+    "RAG_SESSION_NOT_FOUND", "RAG_TURN_IN_PROGRESS",
+}
 
 
 def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
@@ -47,36 +75,88 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
         "request_payload": payload,
         "include_rolling_summary": settings.rag_rolling_summary_enabled,
     }
-    supabase = get_supabase_client()
+    execution = None
+    if settings.rag_resource_control_enabled:
+        execution = RagExecutionContext(
+            RagDeadline.start(settings.rag_request_deadline_seconds), settings.rag_max_provider_calls_per_handoff,
+        )
+    db = bounded_rag_supabase(execution.deadline, completion_reserve=settings.rag_completion_reserve_seconds) \
+        if execution else nullcontext(get_supabase_client())
+    with db as supabase:
+        return _run_transition(supabase, request, args, execution)
+
+
+def _run_transition(
+    supabase: Any, request: RagNewChatRequest, args: dict, execution: RagExecutionContext | None,
+) -> RagNewChatResponse:
     try:
-        prepared = _PREPARE_RESPONSE.validate_python(prepare_new_chat(supabase, **args))
+        prepared = _PREPARE_RESPONSE.validate_python(prepare_new_chat(
+            supabase, **args, **({"reserve": True} if execution else {}),
+        ))
     except ValidationError:
         raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503) from None
     if isinstance(prepared, _CompletedChat):
         return prepared
+    if isinstance(prepared, _PreparationStatus):
+        if prepared.outcome == "processing":
+            raise RagConversationError("RAG_NEW_CHAT_IN_PROGRESS", 409)
+        raise RagConversationError("RAG_NEW_CHAT_PREPARATION_FAILED", 409, outcome="failed")
 
-    handoff = None
-    if request.mode == "continue":
-        inherited = prepared.inherited_memory
-        rolling = prepared.previous_summary
-        if rolling is not None and not args["include_rolling_summary"]:
-            raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
-        expected_count = prepared.revision.source_completed_turn_count
-        if rolling:
-            expected_count -= rolling.covered_turn_count
-        if len(prepared.uncovered_turns) != expected_count:
-            raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
-        built = build_final_handoff(
-            inherited=inherited.summary if inherited else None,
-            rolling=rolling.summary if rolling else None,
-            turns=prepared.uncovered_turns,
-        )
-        handoff = {**asdict(built), "schema_version": 1, "summary": built.summary.model_dump()}
-
-    result = commit_new_chat(
-        supabase, **args, expected_revision=prepared.revision.model_dump(mode="json"), handoff=handoff,
-    )
+    revision = prepared.revision.model_dump(mode="json")
+    if execution:
+        if not isinstance(prepared, _ReservedChat):
+            raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
+        identity = {
+            "user_id": args["user_id"], "preparation_id": str(prepared.preparation_id),
+            "lease_token": str(prepared.lease_token),
+        }
+        try:
+            handoff = _build_handoff(prepared, args["include_rolling_summary"], execution) \
+                if request.mode == "continue" else None
+        except Exception as error:
+            known = error if isinstance(error, RagConversationError) else RagConversationError("RAG_GENERATION_FAILED", 502)
+            raise _terminate_preparation(supabase, identity, execution, known, "generation_failed") from None
+        try:
+            result = commit_prepared_new_chat(
+                supabase, **identity, expected_revision=revision, handoff=handoff, attempts=execution.accounting(),
+            )
+        except RagConversationError as error:
+            if error.code in _KNOWN_COMMIT_REJECTIONS:
+                raise _terminate_preparation(supabase, identity, execution, error, "commit_rejected") from None
+            raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503, outcome="unknown") from None
+    else:
+        handoff = _build_handoff(prepared, args["include_rolling_summary"], None) \
+            if request.mode == "continue" else None
+        result = commit_new_chat(supabase, **args, expected_revision=revision, handoff=handoff)
     try:
         return _CompletedChat.model_validate(result)
     except ValidationError:
         raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503) from None
+
+
+def _build_handoff(
+    prepared: _PreparedChat | _ReservedChat, include_rolling: bool, execution: RagExecutionContext | None,
+) -> dict:
+    inherited, rolling = prepared.inherited_memory, prepared.previous_summary
+    if rolling is not None and not include_rolling:
+        raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+    expected_count = prepared.revision.source_completed_turn_count - (rolling.covered_turn_count if rolling else 0)
+    if len(prepared.uncovered_turns) != expected_count:
+        raise RagConversationError("RAG_CONTEXT_UNAVAILABLE", 409)
+    built = build_final_handoff(
+        inherited=inherited.summary if inherited else None, rolling=rolling.summary if rolling else None,
+        turns=prepared.uncovered_turns, **({"execution_context": execution} if execution else {}),
+    )
+    return {**asdict(built), "schema_version": 1, "summary": built.summary.model_dump()}
+
+
+def _terminate_preparation(
+    supabase: Any, identity: dict[str, str], execution: RagExecutionContext,
+    error: RagConversationError, reason: str,
+) -> RagConversationError:
+    try:
+        if fail_new_chat_preparation(supabase, **identity, error_code=reason, attempts=execution.accounting()):
+            return RagConversationError(error.code, error.status_code, outcome="failed")
+    except RagConversationError:
+        pass
+    return RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503, outcome="unknown")
