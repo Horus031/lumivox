@@ -30,7 +30,13 @@ def artifact_excerpt(text: str, excerpt: str) -> str:
         for match in pattern.finditer(text):
             if match.start() < len(excerpt) < match.end():
                 excerpt = excerpt[:match.start()].rstrip()
-    # A partial array from provider-generated memory must not survive compression.
-    if excerpt.rfind("[") > excerpt.rfind("]"):
-        excerpt = excerpt[:excerpt.rfind("[")].rstrip()
+    # An outer array may still be open after complete inner arrays.
+    unclosed = []
+    for index, char in enumerate(excerpt):
+        if char == "[":
+            unclosed.append(index)
+        elif char == "]" and unclosed:
+            unclosed.pop()
+    if unclosed:
+        excerpt = excerpt[:unclosed[0]].rstrip()
     return excerpt

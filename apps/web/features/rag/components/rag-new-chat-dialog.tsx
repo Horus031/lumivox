@@ -13,6 +13,7 @@ type Props = {
   onOpenChange: (open: boolean) => void;
   handoffEnabled: boolean;
   canContinueContext: boolean;
+  memoryQuarantined: boolean;
   selectedDocumentIds: string[];
   documents: { id: string; file_name: string }[];
   isSubmitting: boolean;
@@ -20,7 +21,7 @@ type Props = {
 };
 
 export function RagNewChatDialog({
-  onOpenChange, handoffEnabled, canContinueContext, selectedDocumentIds, documents, isSubmitting, onConfirm,
+  onOpenChange, handoffEnabled, canContinueContext, memoryQuarantined, selectedDocumentIds, documents, isSubmitting, onConfirm,
 }: Props) {
   const t = useTranslations("rag");
   const id = useId();
@@ -64,7 +65,8 @@ export function RagNewChatDialog({
                   {t(value === "fresh" ? "startFresh" : "continueWithContext")}
                 </span>
                 <span id={`${id}-${value}-description`} className="text-muted-foreground">
-                  {t(value === "fresh" ? "startFreshDescription" : "continueWithContextDescription")}
+                  {t(value === "fresh" ? "startFreshDescription"
+                    : memoryQuarantined ? "memoryContinuationUnavailable" : "continueWithContextDescription")}
                 </span>
               </span>
             </label>

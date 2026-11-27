@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { getTranslations } from "next-intl/server";
 import { z } from "zod";
 
 import { requireAdmin } from "@/features/admin/admin-auth";
@@ -27,6 +28,7 @@ type ProcessLearningDocumentApiResponse = {
 export async function adminReprocessLearningDocumentAction(
   input: z.infer<typeof reprocessDocumentSchema>,
 ): Promise<ActionResult<ProcessLearningDocumentApiResponse>> {
+  const t = await getTranslations("rag");
   try {
     await requireAdmin();
 
@@ -50,16 +52,13 @@ export async function adminReprocessLearningDocumentAction(
     revalidatePath("/admin/documents");
     revalidatePath(`/admin/documents/${parsed.data.documentId}`);
 
-    return {
-      success: result.status === "completed",
-      message: result.message,
-      data: result,
-    };
-  } catch (error) {
+    const message = t(result.status === "completed" ? "documentProcessingSucceeded"
+      : result.status === "unsupported" ? "documentProcessingUnsupported" : "documentProcessingUnavailable");
+    return { success: result.status === "completed", message, data: { ...result, message } };
+  } catch {
     return {
       success: false,
-      message:
-        error instanceof Error ? error.message : "Unexpected error while re-processing document.",
+      message: t("documentProcessingUnavailable"),
     };
   }
 }

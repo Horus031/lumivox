@@ -17,6 +17,7 @@ from app.clients.rag_llm_client import RagLLMError
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_model_registry import validate_rag_configuration
 from app.schemas.rag_conversation_context import RagConversationContext
@@ -26,6 +27,7 @@ from app.services.rag_summary_service import maybe_refresh_summary
 
 from app.services.rag_conversation_store import (
     RagConversationError,
+    assert_turn_authorized,
     reserve_turn,
     complete_turn,
     fail_turn,
@@ -67,6 +69,8 @@ def ask_rag_conversation_question(
     document_ids = sorted(
         set(selected_document_ids)
     )
+    if session_id is None and len(document_ids) > settings.rag_max_selected_documents:
+        raise RagConversationError("RAG_INVALID_REQUEST", 400)
 
     top_k = _normalize_top_k(top_k)
 
@@ -141,6 +145,12 @@ def _run_ask(
     turn_id = reservation["turn_id"]
     lease_token = reservation["lease_token"]
     reserved_session_id = reservation["session_id"]
+
+    def authorize_dispatch() -> None:
+        assert_turn_authorized(
+            supabase, user_id=user_id, session_id=reserved_session_id, turn_id=turn_id, lease_token=lease_token,
+        )
+
     history_window = (
         min(settings.rag_history_candidate_turns, settings.rag_hard_turn_limit)
         if settings.rag_context_quality_enabled else settings.rag_recent_turns
@@ -170,7 +180,7 @@ def _run_ask(
             not execution or (summary_deadline.remaining() > 0.1 and execution.has_provider_budget("rolling_summary"))
         ):
             try:
-                with rag_supabase_summary_deadline(summary_deadline):
+                with rag_supabase_summary_deadline(summary_deadline), rag_dispatch_authorization(authorize_dispatch):
                     context = maybe_refresh_summary(
                         supabase=supabase,
                         user_id=user_id,
@@ -185,6 +195,7 @@ def _run_ask(
                     "RAG_DOCUMENT_ACCESS_DENIED",
                     "RAG_INVALID_LEASE",
                     "RAG_SESSION_NOT_FOUND",
+                    "RAG_MEMORY_QUARANTINED",
                 }:
                     raise
                 logger.warning("RAG summary refresh unavailable; reloading authorized context.")
@@ -199,17 +210,18 @@ def _run_ask(
         answer_deadline = execution.deadline.bounded(
             settings.rag_generation_deadline_seconds, settings.rag_completion_reserve_seconds,
         ) if execution else None
-        generated = generate_conversational_answer(
-            supabase=supabase,
-            user_id=user_id,
-            question=question,
-            selected_document_ids=document_ids,
-            top_k=top_k,
-            prompt_variant=prompt_variant,
-            preferred_locale=preferred_locale,
-            context=context,
-            **({"deadline": answer_deadline, "execution_context": execution} if execution else {}),
-        )
+        with rag_dispatch_authorization(authorize_dispatch):
+            generated = generate_conversational_answer(
+                supabase=supabase,
+                user_id=user_id,
+                question=question,
+                selected_document_ids=document_ids,
+                top_k=top_k,
+                prompt_variant=prompt_variant,
+                preferred_locale=preferred_locale,
+                context=context,
+                **({"deadline": answer_deadline, "execution_context": execution} if execution else {}),
+            )
 
         if not generated.answer.strip():
             raise RuntimeError(
@@ -217,6 +229,8 @@ def _run_ask(
             )
 
     except Exception as error:
+        if isinstance(error, RagConversationError) and error.code == "RAG_MEMORY_QUARANTINED":
+            raise RagConversationError(error.code, 409, session_id=reserved_session_id, outcome="failed") from None
         logger.warning(
             "RAG generation failed for turn %s",
             turn_id,
@@ -294,6 +308,8 @@ def _run_ask(
             usage=usage,
         )
     except RagConversationError as error:
+        if error.code == "RAG_MEMORY_QUARANTINED":
+            raise RagConversationError(error.code, 409, session_id=reserved_session_id) from None
         failure_reason = {
             "RAG_DOCUMENT_ACCESS_DENIED": "document_access_denied",
             "RAG_INVALID_RESPONSE": "persistence_failed",

@@ -52,3 +52,4 @@ class RagContextMetadata(BaseModel):
     omitted_history_turns: int = Field(default=0, ge=0, le=24)
     truncated_history_turns: int = Field(default=0, ge=0, le=24)
     sources_truncated: bool = False
+    citation_validation: Literal["valid", "unsupported"] | None = None

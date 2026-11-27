@@ -26,18 +26,23 @@ def request_for(mode="fresh"):
 def dependencies(monkeypatch, stored_summary):
     for name in ("rag_conversation_v2_enabled", "rag_new_chat_enabled", "rag_handoff_enabled"):
         monkeypatch.setattr(service.settings, name, True)
-    prepare = Mock(return_value={
+    snapshot = {
         "outcome": "prepared", "source_session_id": fixture_id(3),
         "revision": {"source_completed_turn_count": 1, "source_last_completed_turn_index": 1},
         "previous_summary": None, "inherited_memory": None,
         "uncovered_turns": [{"turn_index": 1, "question": "Study question", "answer": "Answer"}],
+    }
+    prepare = Mock(side_effect=lambda *args, **kwargs: {
+        **snapshot, **({"outcome": "reserved", "preparation_id": fixture_id(7), "lease_token": fixture_id(8)}
+                       if kwargs.get("reserve") else {}),
     })
     commit = Mock(return_value={"outcome": "completed", "source_session_id": fixture_id(3),
         "target_session_id": fixture_id(5), "mode": "fresh", "has_handoff": False})
     build = Mock(return_value=RagBuiltHandoff(stored_summary.summary, "extractive", 100, 15))
     for name, mock in (
         ("get_supabase_client", Mock()), ("prepare_new_chat", prepare),
-        ("commit_new_chat", commit), ("build_final_handoff", build),
+        ("commit_new_chat", commit), ("commit_prepared_new_chat", commit),
+        ("fail_new_chat_preparation", Mock(return_value=True)), ("build_final_handoff", build),
     ):
         monkeypatch.setattr(service, name, mock)
     return SimpleNamespace(prepare=prepare, commit=commit, build=build)
@@ -54,6 +59,7 @@ def test_fresh_uses_sorted_distinct_ids_and_zero_provider_calls(dependencies):
 
 
 def test_replay_never_rebuilds_or_recommits(dependencies):
+    dependencies.prepare.side_effect = None
     dependencies.prepare.return_value = dependencies.commit.return_value
     service.start_new_conversation(request_for())
     dependencies.build.assert_not_called()
@@ -98,6 +104,7 @@ def test_rolling_rollback_uses_full_snapshot_with_same_policy_at_commit(monkeypa
     monkeypatch.setattr(service.settings, "rag_rolling_summary_enabled", False)
     service.start_new_conversation(request_for("continue"))
     assert dependencies.prepare.call_args.kwargs["include_rolling_summary"] is False
-    assert dependencies.commit.call_args.kwargs["include_rolling_summary"] is False
+    assert dependencies.prepare.call_args.kwargs["reserve"] is True
+    assert dependencies.commit.call_args.kwargs["preparation_id"] == fixture_id(7)
     assert dependencies.build.call_args.kwargs["rolling"] is None
     assert [turn.turn_index for turn in dependencies.build.call_args.kwargs["turns"]] == [1]

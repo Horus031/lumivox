@@ -9,6 +9,7 @@ from app.clients.rag_redis_client import RagRedisUnavailable
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext, RagProviderAttempt, RagProviderStage
+from app.security.rag_dispatch import before_rag_dispatch
 from app.services.rag_provider_budget import (
     acquire_provider_permit, mark_model_cooldown, release_provider_permit, retry_after_seconds,
 )
@@ -59,9 +60,13 @@ def execute_rag_provider_call(
 
     retain_permit = False
     try:
+        messages = request_options.get("messages", [])
+        before_rag_dispatch(*(message["content"] for message in messages), deadline=deadline)
         remaining = min(deadline.remaining(), context.deadline.remaining())
         if remaining <= 0.1:
             raise RagProviderExecutionError("timeout", retryable=True)
+        if not context.has_provider_budget(stage):
+            raise RagProviderExecutionError("provider_call_budget_exceeded")
         options = {**request_options, "timeout": min(request_options["timeout"], remaining)}
         attempt = RagProviderAttempt(stage, "groq", model, estimated_prompt_tokens=estimated_prompt_tokens)
         context.attempts.append(attempt)

@@ -1,4 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.exceptions import RequestValidationError, ResponseValidationError
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
+from starlette.requests import Request
 import logging
 from uuid import UUID
 
@@ -44,9 +48,36 @@ from app.schemas.rag_document_processing import (
 
 logger = logging.getLogger(__name__)
 
+
+class RagSecurityRoute(APIRoute):
+    def get_route_handler(self):
+        handler = super().get_route_handler()
+
+        async def handle(request: Request):
+            bytes_received = 0
+
+            async def receive():
+                nonlocal bytes_received
+                message = await request.receive()
+                bytes_received += len(message.get("body", b""))
+                if bytes_received > 128 * 1024:
+                    raise HTTPException(413, detail="RAG_REQUEST_TOO_LARGE")
+                return message
+
+            try:
+                return await handler(Request(request.scope, receive=receive))
+            except RequestValidationError:
+                return JSONResponse(status_code=422, content={"detail": {"code": "RAG_INVALID_REQUEST"}})
+            except ResponseValidationError:
+                logger.error("Invalid RAG response")
+                return JSONResponse(status_code=500, content={"detail": {"code": "RAG_INTERNAL_ERROR"}})
+
+        return handle
+
 router = APIRouter(
     prefix="/api/v1/rag",
     tags=["rag"],
+    route_class=RagSecurityRoute,
 )
 
 
@@ -66,14 +97,15 @@ def process_document(
 
         return ProcessLearningDocumentResponse(**result)
 
-    except PermissionError as error:
-        raise HTTPException(status_code=403, detail=str(error)) from error
+    except PermissionError:
+        raise HTTPException(status_code=403, detail="RAG_DOCUMENT_ACCESS_DENIED") from None
 
-    except ValueError as error:
-        raise HTTPException(status_code=400, detail=str(error)) from error
+    except ValueError:
+        raise HTTPException(status_code=400, detail="RAG_INVALID_DOCUMENT") from None
 
-    except Exception as error:
-        raise HTTPException(status_code=500, detail=str(error)) from error
+    except Exception:
+        logger.error("Unexpected RAG document processing failure")
+        raise HTTPException(status_code=500, detail="RAG_DOCUMENT_PROCESSING_FAILED") from None
 
 
 
@@ -209,7 +241,8 @@ def restore_conversation(
             active_id = history.get("active_session_id")
             active = next((item for item in history["conversations"] if item["id"] == active_id), None)
             if active_id and (active is None or not active["content_available"]):
-                result = {"enabled": True, "session_id": active_id, "content_available": False}
+                result = {"enabled": True, "session_id": active_id, "content_available": False,
+                          "memory_quarantined": bool(active and active.get("memory_quarantined"))}
                 if settings.rag_operation_recovery_enabled:
                     result["pending_operation"] = load_pending_new_chat(
                         get_supabase_client(), user_id=user_id, focus_session_id=focus_id,

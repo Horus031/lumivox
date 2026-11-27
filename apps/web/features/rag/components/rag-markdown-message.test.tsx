@@ -102,6 +102,13 @@ describe("RAG Markdown renderer", () => {
     ).toBe("binary_search");
   });
 
+  it("renders source markers and unavailable citations as non-interactive text", () => {
+    renderMarkdown("Authorized evidence \\[source 1\\]. Unsupported reference \\[source unavailable\\].\n\n"
+      + "[source unavailable]: https://example.test");
+    expect(container.textContent).toContain("[source unavailable]");
+    expect(container.querySelectorAll("a, button")).toHaveLength(0);
+  });
+
   it("renders GFM tables as semantic HTML", () => {
     renderMarkdown(
       "| Algorithm | Complexity |\n" +

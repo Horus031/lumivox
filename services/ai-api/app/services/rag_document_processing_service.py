@@ -13,6 +13,8 @@ from google.genai import types
 from pypdf import PdfReader
 from app.clients.supabase_client import get_supabase_client
 from app.core.config import settings
+from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_privacy import sanitize_rag_text
 
 
 LEARNING_DOCUMENT_BUCKET = "learning-documents"
@@ -127,6 +129,9 @@ def _estimate_tokens(text: str) -> int:
 
 
 def _generate_embedding(text: str) -> list[float]:
+    if settings.rag_privacy_filter_enabled:
+        text = sanitize_rag_text(text, target="provider")
+    before_rag_dispatch(text)
     client = _configure_gemini()
 
     model_name = settings.gemini_embedding_model
@@ -335,9 +340,7 @@ def process_learning_document(
         }
 
     except ValueError as error:
-        message = str(error)
-
-        unsupported = "Unsupported file type" in message
+        unsupported = "Unsupported file type" in str(error)
 
         _update_document_status(
             supabase=supabase,
@@ -349,14 +352,14 @@ def process_learning_document(
             "document_id": document.id,
             "status": "unsupported" if unsupported else "failed",
             "chunk_count": 0,
-            "message": message,
+            "message": "RAG_UNSUPPORTED_DOCUMENT" if unsupported else "RAG_INVALID_DOCUMENT",
         }
 
-    except Exception as error:
+    except Exception:
         _update_document_status(
             supabase=supabase,
             document_id=document.id,
             status="failed",
         )
 
-        raise RuntimeError(f"Failed to process learning document: {error}") from error
+        raise RuntimeError("RAG_DOCUMENT_PROCESSING_FAILED") from None

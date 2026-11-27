@@ -10,13 +10,15 @@ from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_model_registry import validate_rag_configuration
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.schemas.rag_conversation_handoff import (
     RagHandoffRevision, RagNewChatRequest, RagNewChatResponse, RagStoredHandoff,
 )
 from app.schemas.rag_conversation_summary import RagStoredSummary
 from app.services.rag_conversation_store import (
-    RagConversationError, commit_new_chat, commit_prepared_new_chat, fail_new_chat_preparation, prepare_new_chat,
+    RagConversationError, assert_preparation_authorized, commit_new_chat, commit_prepared_new_chat,
+    fail_new_chat_preparation, prepare_new_chat,
 )
 from app.services.rag_handoff_builder import build_final_handoff
 
@@ -69,6 +71,8 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
 
     payload = request.model_dump(mode="json", exclude={"user_id", "client_request_id"})
     payload["selected_document_ids"] = sorted(set(payload["selected_document_ids"]))
+    if request.mode == "fresh" and len(payload["selected_document_ids"]) > settings.rag_max_selected_documents:
+        raise RagConversationError("RAG_INVALID_REQUEST", 400)
     args = {
         "user_id": str(request.user_id), "focus_session_id": str(request.focus_session_id),
         "source_session_id": str(request.source_session_id), "client_request_id": str(request.client_request_id),
@@ -89,9 +93,10 @@ def start_new_conversation(request: RagNewChatRequest) -> RagNewChatResponse:
 def _run_transition(
     supabase: Any, request: RagNewChatRequest, args: dict, execution: RagExecutionContext | None,
 ) -> RagNewChatResponse:
+    reserve = execution is not None or request.mode == "continue"
     try:
         prepared = _PREPARE_RESPONSE.validate_python(prepare_new_chat(
-            supabase, **args, **({"reserve": True} if execution else {}),
+            supabase, **args, **({"reserve": True} if reserve else {}),
         ))
     except ValidationError:
         raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503) from None
@@ -103,24 +108,33 @@ def _run_transition(
         raise RagConversationError("RAG_NEW_CHAT_PREPARATION_FAILED", 409, outcome="failed")
 
     revision = prepared.revision.model_dump(mode="json")
-    if execution:
+    if reserve:
         if not isinstance(prepared, _ReservedChat):
             raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503)
         identity = {
             "user_id": args["user_id"], "preparation_id": str(prepared.preparation_id),
             "lease_token": str(prepared.lease_token),
         }
+        def authorize_dispatch() -> None:
+            assert_preparation_authorized(supabase, **identity, expected_revision=revision)
+
         try:
-            handoff = _build_handoff(prepared, args["include_rolling_summary"], execution) \
-                if request.mode == "continue" else None
+            with rag_dispatch_authorization(authorize_dispatch):
+                handoff = _build_handoff(prepared, args["include_rolling_summary"], execution) \
+                    if request.mode == "continue" else None
         except Exception as error:
             known = error if isinstance(error, RagConversationError) else RagConversationError("RAG_GENERATION_FAILED", 502)
+            if known.code == "RAG_MEMORY_QUARANTINED":
+                raise RagConversationError(known.code, 409, outcome="failed") from None
             raise _terminate_preparation(supabase, identity, execution, known, "generation_failed") from None
         try:
             result = commit_prepared_new_chat(
-                supabase, **identity, expected_revision=revision, handoff=handoff, attempts=execution.accounting(),
+                supabase, **identity, expected_revision=revision, handoff=handoff,
+                attempts=execution.accounting() if execution else None,
             )
         except RagConversationError as error:
+            if error.code == "RAG_MEMORY_QUARANTINED":
+                raise RagConversationError(error.code, 409, outcome="failed") from None
             if error.code in _KNOWN_COMMIT_REJECTIONS:
                 raise _terminate_preparation(supabase, identity, execution, error, "commit_rejected") from None
             raise RagConversationError("RAG_PERSISTENCE_UNAVAILABLE", 503, outcome="unknown") from None
@@ -151,11 +165,12 @@ def _build_handoff(
 
 
 def _terminate_preparation(
-    supabase: Any, identity: dict[str, str], execution: RagExecutionContext,
+    supabase: Any, identity: dict[str, str], execution: RagExecutionContext | None,
     error: RagConversationError, reason: str,
 ) -> RagConversationError:
     try:
-        if fail_new_chat_preparation(supabase, **identity, error_code=reason, attempts=execution.accounting()):
+        if fail_new_chat_preparation(supabase, **identity, error_code=reason,
+                                     attempts=execution.accounting() if execution else None):
             return RagConversationError(error.code, error.status_code, outcome="failed")
     except RagConversationError:
         pass

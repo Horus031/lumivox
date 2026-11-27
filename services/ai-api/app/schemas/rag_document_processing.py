@@ -22,7 +22,7 @@ class RagAskRequest(BaseModel):
     user_id: str = Field(..., min_length=1)
     question: str = Field(..., min_length=1, max_length=2000)
 
-    selected_document_ids: list[str] = Field(default_factory=list)
+    selected_document_ids: list[str] = Field(default_factory=list, max_length=3000)
 
     focus_session_id: str | None = None
     session_id: str | None = None
@@ -74,6 +74,7 @@ class RagConversationRestoreResponse(BaseModel):
     handoff_enabled: bool = False
     has_handoff: bool = False
     content_available: bool = True
+    memory_quarantined: bool = False
 
     session_id: str | None = None
 

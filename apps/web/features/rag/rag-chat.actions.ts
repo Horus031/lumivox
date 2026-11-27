@@ -32,6 +32,7 @@ export type RagContextMetadata = {
   omitted_history_turns?: number;
   truncated_history_turns?: number;
   sources_truncated?: boolean;
+  citation_validation?: "valid" | "unsupported" | null;
 };
 
 export type RagSourceChunk = {
@@ -195,7 +196,7 @@ export async function askRagQuestionAction(
 
       return {
         success: false,
-        message: error.message,
+        message: "The study assistant could not complete this request.",
         code: error.code,
         sessionId: typeof sessionId === "string" ? sessionId : undefined,
         outcome: outcome === "failed" || outcome === "unknown" ? outcome : undefined,
@@ -216,10 +217,7 @@ export async function askRagQuestionAction(
       success: false,
       code: error instanceof AiApiTransportError ? error.code : undefined,
       retrySameRequest: true,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Unexpected error while asking the study assistant.",
+      message: "The study assistant could not complete this request.",
     };
   }
 }
@@ -234,6 +232,7 @@ export type RagRestoredMessage = {
 
 export type RagConversationRestoreResponse = {
   enabled: boolean;
+  memory_quarantined?: boolean;
   recovery_enabled?: boolean;
   pending_operation?: {
     operation: "ask" | "new_chat";
@@ -356,6 +355,7 @@ export type RagConversationListItem = {
   completed_turn_count: number;
   has_handoff: boolean;
   content_available: boolean;
+  memory_quarantined?: boolean;
   created_at: string;
   updated_at: string;
 };

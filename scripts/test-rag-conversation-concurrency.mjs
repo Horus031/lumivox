@@ -311,6 +311,58 @@ function completeHistoryTurn(turn) {
     'Synthetic answer','[]','fixture','fixture',1,'{}');`;
 }
 
+async function securityRaces() {
+  const quarantine = (session) => `select public.rag_v2_quarantine_memory('${owner}','${session}','security_review');`;
+  const prepare = (fixture, id) =>
+    `select public.rag_v2_reserve_new_chat_preparation(${newChatArguments(fixture, id, "continue")},false);`;
+  const commit = ({ preparation_id, lease_token, revision }) =>
+    `select public.rag_v2_commit_prepared_new_chat('${owner}','${preparation_id}','${lease_token}',
+      '${JSON.stringify(revision)}','${JSON.stringify(handoffMemory())}');`;
+  const expectDenied = (result) => assert.match(result.error?.stderr ?? "", /ERROR:\s+RAG_MEMORY_QUARANTINED/);
+
+  const ask = await focusConversation();
+  expectDenied(await contend(quarantine(ask.source), reserve(ask.source, randomUUID(), ask.documents, ask.focus)));
+  assert.equal(await query(`select count(*) from public.rag_chat_turns where session_id='${ask.source}';`), "0");
+  console.log("PASS: a winning quarantine prevents Ask reservation");
+
+  const completing = await focusConversation();
+  const turn = await reserveFocusTurn(completing);
+  expectDenied(await contend(quarantine(completing.source), completeHistoryTurn(turn)));
+  assert.equal(await query(`select status||':'||error_code from public.rag_chat_turns where id='${turn.turn_id}';`),
+    "failed:memory_quarantined");
+  assert.equal(await query(`select count(*) from public.rag_chat_messages where turn_id='${turn.turn_id}';`), "0");
+  console.log("PASS: quarantine prevents a late completion and terminally fails the request");
+
+  const summarizing = await focusConversation();
+  for (let index = 0; index < 6; index += 1) await query(completeHistoryTurn(await reserveFocusTurn(summarizing)));
+  const live = await reserveFocusTurn(summarizing);
+  expectDenied(await contend(quarantine(summarizing.source), save(summarizing.source, live)));
+  assert.equal(await summaryCount(summarizing.source), "0");
+  console.log("PASS: quarantine prevents a concurrent summary write");
+
+  const preparing = await focusConversation();
+  await query(completeHistoryTurn(await reserveFocusTurn(preparing)));
+  expectDenied(await contend(quarantine(preparing.source), prepare(preparing, randomUUID())));
+  assert.equal(await query(`select count(*) from public.rag_chat_preparations where source_session_id='${preparing.source}';`), "0");
+  console.log("PASS: quarantine prevents a concurrent Continue preparation");
+
+  const transitioning = await focusConversation();
+  await query(completeHistoryTurn(await reserveFocusTurn(transitioning)));
+  const snapshot = JSON.parse(await query(prepare(transitioning, randomUUID())));
+  const handoff = await contend(commit(snapshot), quarantine(transitioning.source));
+  const { target_session_id: target } = JSON.parse(handoff.first);
+  assert.ok(target);
+  assert.equal(handoff.result, "2");
+  assert.equal(await query(`select memory_quarantine_reason from public.rag_chat_sessions where id='${target}';`), "security_review");
+  console.log("PASS: quarantine reaches the target when a competing Continue commits first");
+
+  const repeated = await focusConversation();
+  const result = await contend(quarantine(repeated.source), quarantine(repeated.source));
+  assert.equal(result.first, "1");
+  assert.equal(result.result, "0");
+  console.log("PASS: concurrent quarantine requests preserve one terminal state");
+}
+
 async function reserveFocusTurn(fixture) {
   return JSON.parse(await query(reserve(fixture.source, randomUUID(), fixture.documents, fixture.focus)));
 }
@@ -531,6 +583,7 @@ try {
   await newChatRaces();
   await recoveryRaces();
   await resourceControlRaces();
+  await securityRaces();
 } finally {
   firstConnection.close();
   if (fixtureCreated) {

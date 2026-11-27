@@ -8,8 +8,8 @@ def test_internal_api_key_uses_constant_time_compare(monkeypatch):
     calls = []
 
     def fake_compare_digest(
-        supplied: str,
-        expected: str,
+        supplied: bytes,
+        expected: bytes,
     ) -> bool:
         calls.append(
             (
@@ -37,8 +37,8 @@ def test_internal_api_key_uses_constant_time_compare(monkeypatch):
 
     assert calls == [
         (
-            "supplied-key",
-            "expected-key",
+            b"supplied-key",
+            b"expected-key",
         )
     ]
 

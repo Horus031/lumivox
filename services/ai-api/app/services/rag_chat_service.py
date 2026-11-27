@@ -10,6 +10,8 @@ from app.clients.supabase_client import bounded_rag_supabase
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext, RagProviderAttempt
+from app.security.rag_dispatch import before_rag_dispatch
+from app.security.rag_privacy import sanitize_rag_text
 from app.services.rag_provider_execution import RagProviderExecutionError
 from app.services.rag_conversation_store import RagConversationError
 
@@ -77,6 +79,7 @@ def _generate_query_embedding(
 
     if execution_context and not execution_context.has_provider_budget("embedding"):
         raise RagProviderExecutionError("provider_call_budget_exceeded")
+    before_rag_dispatch(question, deadline=deadline)
     http_options = None
     if deadline:
         http_options = types.HttpOptions(
@@ -294,6 +297,7 @@ Answer:
 
 
 def _generate_answer_from_prompt(prompt: str) -> LLMTextGeneration:
+    before_rag_dispatch(prompt)
     return generate_text(prompt)
 
 
@@ -354,6 +358,8 @@ def generate_rag_answer(
     list[dict[str, Any]],
     LLMTextGeneration | None,
 ]:
+    if settings.rag_privacy_filter_enabled:
+        question = sanitize_rag_text(question, target="provider")
     if not selected_document_ids:
         prompt = _build_general_prompt(
             question,
@@ -395,6 +401,9 @@ def generate_rag_answer(
         if prompt_variant == "no_rule"
         else _build_grounded_prompt
     )
+    if settings.rag_privacy_filter_enabled:
+        sources = [{**source, "content": sanitize_rag_text(source["content"], target="provider"),
+                    "file_name": sanitize_rag_text(source["file_name"], target="provider")} for source in sources]
 
     prompt = builder(
         question=question,

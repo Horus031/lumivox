@@ -79,6 +79,7 @@ type PendingRagRequest = {
 };
 
 const CANONICAL_RESTORE_CODES = new Set([
+  "RAG_MEMORY_QUARANTINED",
   "RAG_SESSION_CLOSED", "RAG_SESSION_NOT_FOUND", "RAG_CONTEXT_CHANGED",
   "RAG_HANDOFF_SOURCE_CHANGED", "RAG_DOCUMENT_ACCESS_DENIED", "RAG_V2_DISABLED", "RAG_PROTOCOL_MISMATCH",
   "RAG_NEW_CHAT_DISABLED", "RAG_HANDOFF_DISABLED",
@@ -88,6 +89,7 @@ const CONFIG_CHANGED_CODES = new Set([
 ]);
 
 const REQUEST_ERROR_MESSAGES = new Map<string, string>([
+  ["RAG_MEMORY_QUARANTINED", "memoryQuarantined"],
   ["AI_API_TIMEOUT", "requestOutcomeUnknown"],
   ["AI_API_UNAVAILABLE", "requestOutcomeUnknown"],
   ["RAG_TURN_OUTCOME_UNKNOWN", "requestOutcomeUnknown"],
@@ -114,6 +116,7 @@ const REQUEST_ERROR_MESSAGES = new Map<string, string>([
 ]);
 
 const TRANSITION_ERROR_MESSAGES = new Map<string, string>([
+  ["RAG_MEMORY_QUARANTINED", "memoryQuarantined"],
   ["RAG_HANDOFF_SOURCE_CHANGED", "handoffSourceChanged"],
   ["RAG_HANDOFF_SCOPE_CHANGED", "handoffSourceChanged"],
   ["RAG_SESSION_CLOSED", "handoffSourceChanged"],
@@ -185,6 +188,7 @@ export function RagStudyAssistant({
   const [handoffEnabled, setHandoffEnabled] = useState(false);
   const [hasHandoff, setHasHandoff] = useState(false);
   const [contentAvailable, setContentAvailable] = useState(true);
+  const [memoryQuarantined, setMemoryQuarantined] = useState(false);
   const [newChatOpen, setNewChatOpen] = useState(false);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
   const [pendingNewChat, setPendingNewChat] = useState<RagNewChatPayload | null>(null);
@@ -221,6 +225,7 @@ export function RagStudyAssistant({
     setHandoffEnabled(Boolean(data.handoff_enabled));
     setHasHandoff(Boolean(data.has_handoff));
     setContentAvailable(data.content_available !== false);
+    setMemoryQuarantined(Boolean(data.memory_quarantined));
     setViewingHistory(null);
     setRestoreFailed(false);
     setConversationError(null);
@@ -301,7 +306,7 @@ export function RagStudyAssistant({
   const canAsk = useMemo(() => question.trim().length > 0, [question]);
   const lifecycleBusy = isCreatingChat || historyLoading || pendingNewChat !== null;
   const askUnavailable = isPending || isRestoring || restoreFailed || lifecycleBusy
-    || viewingHistory !== null || !contentAvailable || newChatOpen;
+    || viewingHistory !== null || !contentAvailable || memoryQuarantined || newChatOpen;
   const requestDisabled = askUnavailable || recoveryBlocksSubmission;
   const isConversationLimitReached =
     serverTurnLimitReached || (conversationV2 && completedTurnCount >= hardTurnLimit);
@@ -340,7 +345,9 @@ export function RagStudyAssistant({
     const data = await reconcileActiveConversation(focusId, epoch);
     if (data) {
       if (discoverPending) discoverRecovery(focusId, data);
-      setConversationError(t(CONFIG_CHANGED_CODES.has(code) ? "ragVersionChanged" : "sessionChanged"));
+      if (!data.memory_quarantined) {
+        setConversationError(t(CONFIG_CHANGED_CODES.has(code) ? "ragVersionChanged" : "sessionChanged"));
+      }
     } else if (epoch === conversationEpochRef.current) {
       setRestoreFailed(true);
     }
@@ -393,6 +400,7 @@ export function RagStudyAssistant({
         if (epoch !== conversationEpochRef.current) return;
 
         if (!result.success) {
+          if (result.code === "RAG_MEMORY_QUARANTINED") setMemoryQuarantined(true);
           const errorKey = result.code ? REQUEST_ERROR_MESSAGES.get(result.code) : undefined;
           const canonicalCode = result.code && CANONICAL_RESTORE_CODES.has(result.code) ? result.code : null;
           setConversationError(errorKey ? t(errorKey) : result.message);
@@ -533,6 +541,7 @@ export function RagStudyAssistant({
       if (!result.success) {
         const key = result.code ? TRANSITION_ERROR_MESSAGES.get(result.code) : undefined;
         const canonicalCode = result.code && CANONICAL_RESTORE_CODES.has(result.code) ? result.code : null;
+        if (result.code === "RAG_MEMORY_QUARANTINED") setMemoryQuarantined(true);
         setConversationError(t(key ?? (result.retrySameRequest ? "newChatOutcomeUnknown" : "newChatUnavailable")));
         if (!result.retrySameRequest) {
           if (retrying && reference && canonicalCode) {
@@ -577,6 +586,7 @@ export function RagStudyAssistant({
   }
 
   function confirmNewChat(input: Pick<RagNewChatPayload, "mode" | "selectedDocumentIds">) {
+    if (memoryQuarantined && input.mode === "continue") return;
     if (!focusSessionId || !activeSessionId || !newChatEnabled || pendingNewChat || pendingRequest || recoveryBlocksSubmission
       || transitionInFlightRef.current || requestInFlightRef.current || historyInFlightRef.current) return;
     void submitNewChat({
@@ -705,6 +715,7 @@ export function RagStudyAssistant({
     setHandoffEnabled(false);
     setHasHandoff(false);
     setContentAvailable(true);
+    setMemoryQuarantined(false);
     setNewChatOpen(false);
     setHistoryOpen(false);
     setHistoryItems([]);
@@ -795,6 +806,7 @@ export function RagStudyAssistant({
         </div>
       )}
       {viewingHistory && <p role="status" className="mt-2 text-xs">{t("readOnlyConversation")}</p>}
+      {memoryQuarantined && !viewingHistory && <p role="status" className="px-3 py-2 text-sm">{t("memoryQuarantined")}</p>}
       {!contentAvailable && !viewingHistory && (
         <p role="status" className="mt-2 text-xs">{t("historyAccessUnavailable")}</p>
       )}
@@ -803,7 +815,8 @@ export function RagStudyAssistant({
         <RagNewChatDialog
           onOpenChange={setNewChatOpen}
           handoffEnabled={handoffEnabled}
-          canContinueContext={contentAvailable && (completedTurnCount > 0 || hasHandoff)}
+          canContinueContext={contentAvailable && !memoryQuarantined && (completedTurnCount > 0 || hasHandoff)}
+          memoryQuarantined={memoryQuarantined}
           selectedDocumentIds={selectedDocumentIds}
           documents={documents}
           isSubmitting={isCreatingChat}
@@ -1064,7 +1077,8 @@ export function RagStudyAssistant({
             onChange={(event) => setQuestion(event.target.value)}
             placeholder={t("askPlaceholder")}
             aria-label={t("askPlaceholder")}
-            disabled={viewingHistory !== null || !contentAvailable || pendingNewChat !== null || recoveryBlocksSubmission}
+            disabled={viewingHistory !== null || !contentAvailable || memoryQuarantined
+              || pendingNewChat !== null || recoveryBlocksSubmission}
             onKeyDown={handleKeyDown}
             className={cn(
               "min-h-13 resize-none flex-1 rounded-xl border bg-background px-3 py-2.5 text-sm outline-none transition",

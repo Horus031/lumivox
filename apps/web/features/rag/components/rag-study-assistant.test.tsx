@@ -510,6 +510,29 @@ describe("Study workspace RAG chat", () => {
     return document.querySelector('[role="dialog"]')!;
   }
 
+  it("reconciles a quarantine response, disables Ask and Continue, and keeps Fresh available", async () => {
+    mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce({
+      ...capableChat, data: { ...capableChat.data, memory_quarantined: true },
+    }).mockResolvedValueOnce(canonicalChat);
+    mocks.ask.mockResolvedValueOnce({
+      success: false, code: "RAG_MEMORY_QUARANTINED", retrySameRequest: false, outcome: "failed",
+      message: "private upstream diagnostic",
+    });
+    mocks.newChat.mockResolvedValueOnce(newChatResult);
+    await renderAssistant("quarantined-focus");
+    enterQuestion("Try to continue");
+    await submitQuestion();
+    expect(container.textContent).toContain(messages.rag.memoryQuarantined);
+    expect(container.textContent).not.toContain("private upstream diagnostic");
+    expect(container.querySelector("textarea")?.disabled).toBe(true);
+    const modal = await openNewChat();
+    expect(modal.querySelectorAll('[role="radio"]')[1].hasAttribute("disabled")).toBe(true);
+    expect(modal.textContent).toContain(messages.rag.memoryContinuationUnavailable);
+    await act(async () => button(messages.rag.newChat, modal).click());
+    expect(mocks.newChat.mock.calls[0][0]).toMatchObject({ mode: "fresh", selectedDocumentIds: [] });
+    expect(container.querySelector("textarea")?.disabled).toBe(false);
+  });
+
   it("keeps New Chat hidden when the backend capability is off", async () => {
     mocks.restore.mockResolvedValueOnce(oldChat);
     await renderAssistant("chat-disabled");
@@ -613,7 +636,8 @@ describe("Study workspace RAG chat", () => {
   it("uses a read-only transcript for a closed conversation and restores the active composer", async () => {
     mocks.restore.mockResolvedValueOnce(capableChat).mockResolvedValueOnce(capableChat);
     mocks.history.mockResolvedValueOnce({ success: true, data: { next_cursor: null, conversations: [{
-      id: "older", status: "closed", title: "Older chat", completed_turn_count: 1, content_available: true,
+      id: "older", status: "closed", title: "Private historical title", completed_turn_count: 1, content_available: true,
+      created_at: "2026-11-27T08:00:00Z", updated_at: "2026-11-27T08:00:00Z",
     }] } });
     mocks.detail.mockResolvedValueOnce({ success: true, data: {
       session_id: "older", status: "closed", read_only: true, completed_turn_count: 1,
@@ -621,7 +645,9 @@ describe("Study workspace RAG chat", () => {
     } });
     await renderAssistant("chat-history");
     await act(async () => button(messages.rag.conversationHistory).click());
-    const row = [...document.querySelectorAll("button")].find((item) => item.textContent?.includes("Older chat"))!;
+    const row = [...document.querySelectorAll("button")].find((item) => item.textContent?.includes(messages.rag.studyConversationTitle))!;
+    expect(row.textContent).not.toContain("Private historical title");
+    expect(row.querySelector("time")?.dateTime).toBe("2026-11-27T08:00:00Z");
     await act(async () => row.click());
     expect(container.querySelector("strong")?.textContent).toBe("Historical answer");
     expect(container.querySelector("textarea")?.disabled).toBe(true);

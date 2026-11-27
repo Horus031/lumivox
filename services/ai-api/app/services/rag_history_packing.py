@@ -34,9 +34,11 @@ def pack_history_candidates(
     *, question: str, turns: list[RagCompletedTurn], system: RagChatMessage, current: RagChatMessage,
     max_history_tokens: int, max_prompt_tokens: int, recent_window: int,
     history_excerpt: Callable[[str, int], tuple[str, bool]],
+    prompt_cost: Callable[[list[RagChatMessage]], int] | None = None,
 ) -> RagPackedHistory:
-    baseline = estimate_message_tokens([system, current])
-    remaining = min(max_prompt_tokens - baseline, max_history_tokens)
+    measure = prompt_cost or (lambda messages: estimate_message_tokens([system, *messages, current]))
+    baseline = measure([])
+    ceiling = min(max_prompt_tokens, baseline + max_history_tokens)
     selected: dict[int, tuple[list[RagChatMessage], bool]] = {}
     for turn in rank_history_candidates(question=question, turns=turns, recent_window=recent_window):
         for question_tokens, answer_tokens in EXCERPT_PROFILES:
@@ -46,14 +48,15 @@ def pack_history_candidates(
                 {"role": "user", "content": user},
                 {"role": "assistant", "content": assistant},
             ]
-            cost = estimate_message_tokens([system, *pair, current]) - baseline
-            if cost <= remaining:
+            trial = {index: value[0] for index, value in selected.items()}
+            trial[turn.turn_index] = pair
+            candidate = [message for index in sorted(trial) for message in trial[index]]
+            if measure(candidate) <= ceiling:
                 selected[turn.turn_index] = (pair, user_truncated or assistant_truncated)
-                remaining -= cost
                 break
     indices = tuple(sorted(selected))
     messages = [message for index in indices for message in selected[index][0]]
     return RagPackedHistory(
         messages, indices, tuple(index for index in indices if selected[index][1]),
-        estimate_message_tokens([system, *messages, current]) - baseline,
+        measure(messages) - baseline,
     )
