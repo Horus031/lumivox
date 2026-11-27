@@ -135,6 +135,7 @@ def main():
     parser.add_argument("--variant", choices=("baseline", "adaptive"), required=True)
     parser.add_argument("--mode", choices=("offline", "live"), required=True)
     parser.add_argument("--max-cases", type=int)
+    parser.add_argument("--strict", action="store_true")
     args = parser.parse_args()
     cases = [json.loads(line) for line in args.dataset.read_text(encoding="utf-8").splitlines() if line.strip()]
     if args.max_cases is not None:
@@ -189,7 +190,11 @@ def main():
     report["failed_cases"] = [item for item in results
                               if False in item["checks"].values() or item["live_accuracy"] is False]
     print(json.dumps(report, indent=2, ensure_ascii=False))
+    return int(args.strict and bool(
+        len(results) != 30 or report["failed_cases"] or report["prompt_budget_violations"]
+        or report["memory_budget_violations"] or report["out_of_scope_sources"]
+    ))
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,3 +1,5 @@
+import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any, Literal
 
@@ -11,6 +13,7 @@ from app.schemas.rag_conversation_context import (
     RagRetrievalStrategy,
 )
 from app.security.rag_citations import validate_rag_citations
+from app.security.rag_dispatch import require_rag_dispatch_authorization
 from app.security.rag_privacy import sanitize_rag_text
 from app.services.rag_chat_service import _generate_query_embedding, _retrieve_chunks
 from app.services.rag_context_builder import build_conversational_context
@@ -25,6 +28,15 @@ class RagConversationalAnswer:
     context: RagContextMetadata
 
 
+@dataclass(frozen=True)
+class RagRetrievalObservation:
+    retrieved: tuple[tuple[str, str], ...]
+    packed: tuple[tuple[str, str], ...]
+    strategy: RagRetrievalStrategy
+    latency_ms: int
+    sources_truncated: bool
+
+
 def generate_conversational_answer(
     *,
     supabase: Any,
@@ -37,11 +49,16 @@ def generate_conversational_answer(
     context: RagConversationContext,
     deadline: RagDeadline | None = None,
     execution_context: RagExecutionContext | None = None,
+    observe_retrieval: Callable[[RagRetrievalObservation], None] | None = None,
+    retrieval_only: bool = False,
 ) -> RagConversationalAnswer:
+    require_rag_dispatch_authorization()
     provider_question = sanitize_rag_text(question, target="provider") if settings.rag_privacy_filter_enabled else question
     document_mode = bool(selected_document_ids)
     strategy: RagRetrievalStrategy = "none"
     sources: list[dict[str, Any]] = []
+    retrieval_started = time.perf_counter()
+    retrieval_latency_ms = 0
     if document_mode:
         summary = context.summary if settings.rag_rolling_summary_enabled else None
         if settings.rag_context_quality_enabled and summary and (
@@ -69,6 +86,7 @@ def generate_conversational_answer(
             top_k=top_k,
             **({"deadline": deadline} if deadline else {}),
         )
+        retrieval_latency_ms = round((time.perf_counter() - retrieval_started) * 1000)
 
     if deadline:
         deadline.require_remaining()
@@ -81,6 +99,17 @@ def generate_conversational_answer(
         preferred_locale=preferred_locale,
         retrieval_strategy=strategy,
     )
+
+    if observe_retrieval is not None:
+        observe_retrieval(RagRetrievalObservation(
+            retrieved=tuple((source["chunk_id"], source["document_id"]) for source in sources),
+            packed=tuple((source["chunk_id"], source["document_id"]) for source in built.sources),
+            strategy=strategy,
+            latency_ms=retrieval_latency_ms,
+            sources_truncated=built.metadata.sources_truncated,
+        ))
+    if retrieval_only:
+        return RagConversationalAnswer("", built.sources, None, built.metadata)
 
     if document_mode and prompt_variant == "grounded_rule" and not built.sources:
         answer = (

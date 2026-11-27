@@ -11,6 +11,7 @@ from app.core.rag_execution_context import RagExecutionContext
 from app.core.rag_token_budget import RagTokenBudgetError
 from app.schemas.rag_conversation_context import RagConversationContext, RagSummaryInput
 from app.schemas.rag_conversation_summary import RagStoredSummary, RagSummaryMethod
+from app.security.rag_dispatch import require_rag_dispatch_authorization
 from app.services.rag_conversation_store import load_summary_input, save_conversation_summary
 from app.services.rag_summary_builder import (
     build_extractive_summary,
@@ -68,6 +69,7 @@ def maybe_refresh_summary(
     }
     try:
         messages = build_summary_messages(previous_summary=previous, turns=snapshot.turns)
+        require_rag_dispatch_authorization()
         generation = generate_rag_summary(messages, **(
             {"deadline_at": deadline.expires_at, "execution_context": execution_context} if deadline else {}
         ))

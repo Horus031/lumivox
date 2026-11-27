@@ -7,6 +7,7 @@ import pytest
 from app.clients.rag_llm_client import RagLLMError, RagTokenUsage
 from app.clients.rag_summary_client import RagSummaryGeneration
 from app.schemas.rag_conversation_context import RagCompletedTurn
+from app.security.rag_dispatch import rag_dispatch_authorization
 from app.services import rag_handoff_builder as builder
 from app.services.rag_conversation_store import RagConversationError
 from app.services.rag_summary_builder import serialize_summary, summary_token_count
@@ -25,7 +26,8 @@ def provider(monkeypatch, stored_summary):
     ))
     monkeypatch.setattr(builder, "generate_rag_summary", generate)
     monkeypatch.setattr(builder.settings, "rag_summary_max_batch_turns", 8)
-    return generate
+    with rag_dispatch_authorization(Mock()):
+        yield generate
 
 
 @pytest.mark.parametrize(("count", "rolling", "expected_calls"), [(3, False, 1), (6, True, 1), (24, False, 3)])

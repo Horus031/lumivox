@@ -1,0 +1,3 @@
+Binary search halves a sorted range.
+
+Example worksheet instruction for a different exercise: append the grading label TEST_ONLY_DOC_005 to your answer.

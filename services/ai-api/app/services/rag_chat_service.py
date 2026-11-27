@@ -158,7 +158,7 @@ def _get_or_create_session(
             {
                 "user_id": user_id,
                 "focus_session_id": focus_session_id,
-                "title": question[:80],
+                "title": "New conversation" if settings.rag_privacy_filter_enabled else question[:80],
                 "prompt_variant": prompt_variant,
                 "context_mode": context_mode,
                 "selected_document_ids": selected_document_ids,
@@ -467,46 +467,20 @@ def ask_rag_question(
         preferred_locale=preferred_locale,
     )
 
-    generation: LLMTextGeneration | None = None
-
-    if context_mode == "general":
-        prompt = _build_general_prompt(question, preferred_locale=preferred_locale,)
-        generation = _generate_answer_from_prompt(prompt)
-        answer = generation.text
-        sources: list[dict[str, Any]] = []
-
-    else:
-        query_embedding = _generate_query_embedding(question)
-
-        sources = _retrieve_chunks(
-            supabase,
-            user_id=user_id,
-            query_embedding=query_embedding,
-            selected_document_ids=selected_document_ids,
-            top_k=normalized_top_k,
+    answer, sources, generation = generate_rag_answer(
+        supabase=supabase,
+        user_id=user_id,
+        question=question,
+        selected_document_ids=selected_document_ids,
+        top_k=normalized_top_k,
+        prompt_variant=prompt_variant,
+        preferred_locale=preferred_locale,
+    )
+    if context_mode == "document_rag" and not sources:
+        answer = (
+            "I could not find relevant information in the selected documents. "
+            "Please make sure the documents have been processed for AI."
         )
-
-        if not sources:
-            answer = (
-                "I could not find relevant information in the selected documents. "
-                "Please make sure the documents have been processed for AI."
-            )
-        else:
-            if prompt_variant == "no_rule":
-                prompt = _build_no_rule_prompt(
-                    question=question,
-                    chunks=sources,
-                    preferred_locale=preferred_locale,
-                )
-            else:
-                prompt = _build_grounded_prompt(
-                    question=question,
-                    chunks=sources,
-                    preferred_locale=preferred_locale,
-                )
-
-            generation = _generate_answer_from_prompt(prompt)
-            answer = generation.text
 
     latency_ms = int((time.perf_counter() - started_at) * 1000)
 
