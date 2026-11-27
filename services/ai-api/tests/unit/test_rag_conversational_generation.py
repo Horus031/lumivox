@@ -95,6 +95,17 @@ def test_strict_document_mode_without_usable_evidence_skips_provider(dependencie
     dependencies.generation.assert_not_called()
 
 
+def test_adaptive_no_evidence_preserves_retrieval_metadata_without_claiming_model_usage(monkeypatch, dependencies):
+    monkeypatch.setattr(service.settings, "rag_context_quality_enabled", True)
+    result = ask(history=True, document=True)
+    assert result.context.retrieval_strategy == "history_augmented"
+    assert result.context.history_candidate_turns == result.context.omitted_history_turns == 1
+    assert result.context.history_turns_used == result.context.history_tokens_used == 0
+    assert result.context.summary_covered_turn_count == result.context.truncated_history_turns == 0
+    dependencies.embedding.assert_called_once()
+    dependencies.generation.assert_not_called()
+
+
 def test_no_rule_document_mode_can_use_general_knowledge(dependencies):
     result = ask(document=True, variant="no_rule")
     assert result.answer == "Study answer"

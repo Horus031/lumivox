@@ -2,10 +2,15 @@ import re
 from dataclasses import dataclass
 from typing import Sequence
 
+from app.core.config import settings
 from app.core.rag_token_budget import count_text_tokens, truncate_text_to_tokens
 from app.schemas.rag_conversation_context import RagCompletedTurn, RagRetrievalStrategy
 from app.schemas.rag_conversation_summary import RagStoredSummary
 from app.schemas.rag_conversation_handoff import RagStoredHandoff
+from app.services.rag_summary_builder import _clean
+from app.services.rag_topic_context import (
+    EXPLICIT_TOPIC_CHANGE, PREVIOUS_CONVERSATION, classify_question_intent, normalize_topic_text, topic_overlap,
+)
 
 
 FOLLOW_UP_PATTERN = re.compile(
@@ -14,20 +19,13 @@ FOLLOW_UP_PATTERN = re.compile(
     r"phần này|phần đó|vậy|tại sao|còn|tiếp theo)\b",
     re.IGNORECASE,
 )
-EXPLICIT_TOPIC_CHANGE = re.compile(
-    r"\b(new topic|unrelated question|switch topics|chủ đề mới|đổi chủ đề|"
-    r"câu hỏi khác)\b",
-    re.IGNORECASE,
-)
-
-
 @dataclass(frozen=True)
 class RagRetrievalQuery:
     text: str
     strategy: RagRetrievalStrategy
 
 
-def build_retrieval_query(
+def _build_legacy_retrieval_query(
     question: str,
     recent_turns: Sequence[RagCompletedTurn],
     summary: RagStoredSummary | None = None,
@@ -58,3 +56,49 @@ def build_retrieval_query(
             text += f"\n{heading}:\n{excerpt}"
             remaining -= count_text_tokens(excerpt)
     return RagRetrievalQuery(text, "history_augmented")
+
+
+def build_adaptive_retrieval_query(
+    question: str,
+    recent_turns: Sequence[RagCompletedTurn],
+    summary: RagStoredSummary | None = None,
+    handoff: RagStoredHandoff | None = None,
+) -> RagRetrievalQuery:
+    intent = classify_question_intent(question)
+    if intent in {"standalone", "topic_change"}:
+        return RagRetrievalQuery(question, "current_question")
+
+    inherited_reference = bool(PREVIOUS_CONVERSATION.search(normalize_topic_text(question)))
+    expansions = []
+    if recent_turns and not (handoff and inherited_reference):
+        turn = max(recent_turns, key=lambda entry: (
+            topic_overlap(question, f"{_clean(entry.question)}\n{_clean(entry.answer)}"), entry.turn_index,
+        ))
+        expansions.append(
+            "\nRecent conversation topic:\n" + truncate_text_to_tokens(_clean(turn.question), 100)
+            + "\nPrevious explanation context:\n" + truncate_text_to_tokens(_clean(turn.answer), 140)
+        )
+
+    for memory, heading in ((summary, "Earlier study topic"), (handoff, "Inherited study topic")):
+        if memory is None or (memory is summary and handoff and inherited_reference):
+            continue
+        terms = _clean(", ".join(filter(None, [
+            memory.summary.main_topic, *memory.summary.covered_concepts[-3:], memory.summary.continuation_hint,
+        ])))
+        if terms and (not expansions or (memory is handoff and inherited_reference)
+                      or topic_overlap(question, terms)):
+            expansions.append(f"\n{heading}:\n" + truncate_text_to_tokens(terms, 100))
+    if not expansions:
+        return RagRetrievalQuery(question, "current_question")
+    expansion = truncate_text_to_tokens("".join(expansions), 300)
+    return RagRetrievalQuery(question + expansion, "history_augmented")
+
+
+def build_retrieval_query(
+    question: str,
+    recent_turns: Sequence[RagCompletedTurn],
+    summary: RagStoredSummary | None = None,
+    handoff: RagStoredHandoff | None = None,
+) -> RagRetrievalQuery:
+    build = build_adaptive_retrieval_query if settings.rag_context_quality_enabled else _build_legacy_retrieval_query
+    return build(question, recent_turns, summary, handoff)

@@ -18,7 +18,11 @@ from app.schemas.rag_conversation_context import (
     RagRetrievalStrategy,
 )
 from app.services.rag_chat_service import MARKDOWN_FORMATTING_RULES, _locale_instruction
-from app.services.rag_summary_builder import fit_summary_to_budget, serialize_summary, summary_token_count
+from app.services.rag_history_packing import pack_history_candidates
+from app.services.rag_summary_builder import _clean, fit_summary_to_budget, serialize_summary, summary_token_count
+from app.services.rag_topic_context import (
+    PREVIOUS_CONVERSATION, RagQuestionIntent, classify_question_intent, normalize_topic_text,
+)
 from app.schemas.rag_conversation_summary import RagConversationSummary
 
 
@@ -32,6 +36,15 @@ class RagBuiltContext:
     messages: list[RagChatMessage]
     sources: list[dict[str, Any]]
     metadata: RagContextMetadata
+
+
+@dataclass(frozen=True)
+class RagPackedMemory:
+    summary_text: str | None
+    handoff_text: str | None
+    summary_tokens: int
+    handoff_tokens: int
+    current_message: RagChatMessage
 
 
 def _escape_control_markers(text: str) -> str:
@@ -98,6 +111,55 @@ def _pack_memory_block(
     return None
 
 
+def pack_adaptive_memory(
+    *, system: RagChatMessage, question: str, sources: list[dict[str, Any]],
+    summary: RagConversationSummary | None, handoff: RagConversationSummary | None,
+    memory_limit: int, intent: RagQuestionIntent,
+) -> RagPackedMemory:
+    base = _current_message(question, sources)
+    if intent == "topic_change" or memory_limit <= 0 or not (summary or handoff):
+        return RagPackedMemory(None, None, 0, 0, base)
+
+    memories = {"summary": summary, "handoff": handoff}
+    priority = ["summary", "handoff"]
+    if PREVIOUS_CONVERSATION.search(normalize_topic_text(question)):
+        priority.reverse()
+    priority = [name for name in priority if memories[name] is not None]
+    texts: dict[str, str] = {}
+    tokens: dict[str, int] = {}
+    current = base
+
+    def pack(name: str, limit: int) -> None:
+        nonlocal current
+        memory = memories[name]
+        if memory is None or limit <= tokens.get(name, 0):
+            return
+        previous = dict(texts)
+        previous.pop(name, None)
+
+        def candidate(text: str | None = None) -> RagChatMessage:
+            active = {**previous, name: text}
+            return _current_message(question, sources, active.get("summary"), active.get("handoff"))
+
+        if name == "handoff":
+            limit = min(limit, settings.rag_handoff_max_tokens)
+        fitted = _pack_memory_block(system, memory, limit, estimate_message_tokens([system, candidate()]), candidate)
+        if fitted is not None and fitted[2] > tokens.get(name, 0):
+            texts[name], current, tokens[name] = fitted
+            # Attribute costs consistently from the combined message after any repack.
+            rolling_only = _current_message(question, sources, texts.get("summary"))
+            tokens["summary"] = estimate_message_tokens([system, rolling_only]) - estimate_message_tokens([system, base])
+            tokens["handoff"] = estimate_message_tokens([system, current]) - estimate_message_tokens([system, rolling_only])
+
+    for index, name in enumerate(priority):
+        available = memory_limit - sum(tokens.values())
+        pack(name, memory_limit * 3 // 5 if index == 0 and len(priority) == 2 else available)
+    for name in priority:
+        pack(name, memory_limit - sum(tokens.values()) + tokens.get(name, 0))
+    return RagPackedMemory(texts.get("summary"), texts.get("handoff"), tokens.get("summary", 0),
+                           tokens.get("handoff", 0), current)
+
+
 def _pack_sources(
     system: RagChatMessage,
     question: str,
@@ -148,6 +210,8 @@ def build_conversational_context(
     preferred_locale: str,
     retrieval_strategy: RagRetrievalStrategy = "none",
 ) -> RagBuiltContext:
+    adaptive = settings.rag_context_quality_enabled
+    max_prompt_tokens = min(4000, settings.rag_max_prompt_tokens) if adaptive else settings.rag_max_prompt_tokens
     instructions = [
         "You are Lumivox Study Assistant. Help with study questions and explain clearly.",
         _locale_instruction(preferred_locale),
@@ -175,9 +239,9 @@ def build_conversational_context(
     instructions.append(MARKDOWN_FORMATTING_RULES)
     system: RagChatMessage = {"role": "system", "content": "\n\n".join(instructions)}
 
-    base = assert_prompt_budget([system, _current_message(question, [])])
+    base = assert_prompt_budget([system, _current_message(question, [])], max_prompt_tokens)
     selected, sources_truncated = _pack_sources(
-        system, question, sources, min(settings.rag_max_prompt_tokens, base + SOURCE_TOKEN_TARGET)
+        system, question, sources, min(max_prompt_tokens, base + SOURCE_TOKEN_TARGET)
     )
     current = _current_message(question, selected)
     baseline = estimate_message_tokens([system, current])
@@ -185,13 +249,35 @@ def build_conversational_context(
     if summary and summary.covered_turn_index >= context.current_turn_index:
         summary = None
     handoff = context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None
+    if adaptive and summary and summary.covered_turn_count > context.completed_turn_count:
+        summary = None
     used_summary = None
     summary_tokens = 0
     handoff_tokens = 0
     summary_text = None
     reserve = HISTORY_TOKEN_TARGET if context.recent_turns else 0
-    memory_limit = min(settings.rag_max_summary_tokens, settings.rag_max_prompt_tokens - baseline - reserve)
-    if summary:
+    intent = classify_question_intent(question) if adaptive else "standalone"
+    if adaptive:
+        potential_coverage = summary.covered_turn_index if summary and intent != "topic_change" else 0
+        reserve_messages: list[RagChatMessage] = []
+        for turn in (turn for turn in context.recent_turns
+                     if potential_coverage < turn.turn_index < context.current_turn_index):
+            reserve_messages.extend([
+                {"role": "user", "content": _history_excerpt(_clean(turn.question), 160)[0]},
+                {"role": "assistant", "content": _history_excerpt(_clean(turn.answer), 220)[0]},
+            ])
+        reserve = min(HISTORY_TOKEN_TARGET,
+                      estimate_message_tokens([system, *reserve_messages, current]) - baseline)
+    memory_limit = min(settings.rag_max_summary_tokens, max_prompt_tokens - baseline - reserve)
+    if adaptive:
+        memory = pack_adaptive_memory(
+            system=system, question=question, sources=selected,
+            summary=summary.summary if summary else None, handoff=handoff.summary if handoff else None,
+            memory_limit=min(500, memory_limit), intent=intent,
+        )
+        current, summary_tokens, handoff_tokens = memory.current_message, memory.summary_tokens, memory.handoff_tokens
+        used_summary = summary if memory.summary_text else None
+    elif summary:
         rolling_limit = min(memory_limit, settings.rag_max_summary_tokens * 3 // 5) if handoff else memory_limit
         packed = _pack_memory_block(
             system, summary.summary, rolling_limit, baseline,
@@ -201,7 +287,7 @@ def build_conversational_context(
             summary_text, current, summary_tokens = packed
             baseline += summary_tokens
             used_summary = summary
-    if handoff:
+    if handoff and not adaptive:
         handoff_limit = min(memory_limit - summary_tokens, settings.rag_handoff_max_tokens)
         if used_summary:
             handoff_limit = min(handoff_limit, settings.rag_max_summary_tokens * 2 // 5)
@@ -221,7 +307,27 @@ def build_conversational_context(
         key=lambda turn: turn.turn_index,
         reverse=True,
     )
-    for turn in prior_turns[:settings.rag_recent_turns]:
+    details = {}
+    if adaptive:
+        packed_history = pack_history_candidates(
+            question=question, turns=prior_turns, system=system, current=current,
+            max_history_tokens=HISTORY_TOKEN_TARGET, max_prompt_tokens=max_prompt_tokens,
+            recent_window=settings.rag_recent_turns,
+            history_excerpt=lambda text, limit: _history_excerpt(_clean(text), limit),
+        )
+        history = packed_history.messages
+        covered_count = used_summary.covered_turn_count if used_summary else 0
+        details = {
+            "context_policy": "adaptive_v1",
+            "history_candidate_turns": len(context.recent_turns),
+            "history_tokens_used": packed_history.tokens_used,
+            "summary_covered_turn_count": covered_count,
+            "omitted_history_turns": max(0, context.completed_turn_count - covered_count
+                                        - len(packed_history.selected_turn_indices)),
+            "truncated_history_turns": len(packed_history.truncated_turn_indices),
+            "sources_truncated": sources_truncated,
+        }
+    for turn in ([] if adaptive else prior_turns[:settings.rag_recent_turns]):
         user, user_truncated = _history_excerpt(turn.question, 160)
         assistant, assistant_truncated = _history_excerpt(turn.answer, 220)
         candidate: list[RagChatMessage] = [
@@ -230,7 +336,7 @@ def build_conversational_context(
             *history,
         ]
         cost = estimate_message_tokens([system, *candidate, current])
-        if cost > min(settings.rag_max_prompt_tokens, baseline + HISTORY_TOKEN_TARGET):
+        if cost > min(max_prompt_tokens, baseline + HISTORY_TOKEN_TARGET):
             break
         history = candidate
         history_truncated |= user_truncated or assistant_truncated
@@ -241,12 +347,13 @@ def build_conversational_context(
         messages=messages,
         sources=selected,
         metadata=RagContextMetadata(
-            estimated_prompt_tokens=assert_prompt_budget(messages),
+            estimated_prompt_tokens=assert_prompt_budget(messages, max_prompt_tokens),
             history_turns_used=history_count,
             retrieved_chunks_used=len(selected),
             context_truncated=(
                 sources_truncated or history_truncated
-                or history_count < max(context.completed_turn_count, len(prior_turns))
+                or (bool(details["omitted_history_turns"] or details["truncated_history_turns"]) if adaptive
+                    else history_count < max(context.completed_turn_count, len(prior_turns)))
             ),
             retrieval_strategy=retrieval_strategy,
             summary_version_used=used_summary.version if used_summary else None,
@@ -256,5 +363,6 @@ def build_conversational_context(
             handoff_used=handoff_tokens > 0,
             handoff_tokens_used=handoff_tokens,
             handoff_id=str(handoff.id) if handoff and handoff_tokens > 0 else None,
+            **details,
         ),
     )

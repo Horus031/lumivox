@@ -18,7 +18,7 @@ class RagConversationContext(BaseModel):
     session_id: str
     current_turn_index: int = Field(gt=0)
     completed_turn_count: int = Field(ge=0)
-    recent_turns: list[RagCompletedTurn] = Field(default_factory=list, max_length=12)
+    recent_turns: list[RagCompletedTurn] = Field(default_factory=list, max_length=24)
     summary: RagStoredSummary | None = None
     handoff: RagStoredHandoff | None = None
 
@@ -45,3 +45,10 @@ class RagContextMetadata(BaseModel):
     handoff_used: bool = False
     handoff_tokens_used: int = Field(default=0, ge=0)
     handoff_id: str | None = Field(default=None, exclude=True)
+    context_policy: Literal["legacy", "adaptive_v1"] = "legacy"
+    history_candidate_turns: int = Field(default=0, ge=0, le=24)
+    history_tokens_used: int = Field(default=0, ge=0)
+    summary_covered_turn_count: int = Field(default=0, ge=0, le=24)
+    omitted_history_turns: int = Field(default=0, ge=0, le=24)
+    truncated_history_turns: int = Field(default=0, ge=0, le=24)
+    sources_truncated: bool = False

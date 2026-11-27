@@ -61,6 +61,8 @@ class Settings(BaseSettings):
     rag_conversation_v2_enabled: bool = False
     rag_operation_recovery_enabled: bool = False
     rag_resource_control_enabled: bool = False
+    rag_context_quality_enabled: bool = False
+    rag_history_candidate_turns: int = Field(default=12, ge=4, le=24)
     upstash_redis_rest_url: str | None = None
     upstash_redis_rest_token: str | None = None
     rag_resource_namespace: str = "local"

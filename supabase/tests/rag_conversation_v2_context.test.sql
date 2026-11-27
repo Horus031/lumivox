@@ -150,7 +150,7 @@ select is((select body->'summary' from context_results where name = 'snapshot'),
   'CTX08 summary is reserved for Phase 4');
 select is(jsonb_path_query_array(pg_temp.context(1), '$.recent_turns[*].turn_index'), '[3]'::jsonb,
   'CTX09 context returns the newest requested completed turns');
-select throws_ok($$select pg_temp.context(13)$$,
+select throws_ok($$select pg_temp.context(25)$$,
   'P0001', 'RAG_INVALID_REQUEST', 'CTX09 out-of-range recent turn request is rejected');
 
 insert into context_results values ('restore', public.rag_v2_restore_context(

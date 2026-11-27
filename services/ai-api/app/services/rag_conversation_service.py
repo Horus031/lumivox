@@ -141,6 +141,10 @@ def _run_ask(
     turn_id = reservation["turn_id"]
     lease_token = reservation["lease_token"]
     reserved_session_id = reservation["session_id"]
+    history_window = (
+        min(settings.rag_history_candidate_turns, settings.rag_hard_turn_limit)
+        if settings.rag_context_quality_enabled else settings.rag_recent_turns
+    )
 
     try:
         snapshot = load_conversation_context(
@@ -149,7 +153,7 @@ def _run_ask(
             session_id=reserved_session_id,
             turn_id=turn_id,
             lease_token=lease_token,
-            recent_turns=settings.rag_recent_turns,
+            recent_turns=history_window,
         )
         if not settings.rag_rolling_summary_enabled:
             snapshot = {**snapshot, "summary": None}
@@ -190,7 +194,7 @@ def _run_ask(
                     session_id=reserved_session_id,
                     turn_id=turn_id,
                     lease_token=lease_token,
-                    recent_turns=settings.rag_recent_turns,
+                    recent_turns=history_window,
                 ))
         answer_deadline = execution.deadline.bounded(
             settings.rag_generation_deadline_seconds, settings.rag_completion_reserve_seconds,
@@ -266,7 +270,12 @@ def _run_ask(
 
     generation = generated.generation
     usage = asdict(generation.usage) if generation is not None else {}
-    usage["context"] = generated.context.model_dump()
+    usage["context"] = generated.context.model_dump(
+        exclude={
+            "context_policy", "history_candidate_turns", "history_tokens_used", "summary_covered_turn_count",
+            "omitted_history_turns", "truncated_history_turns", "sources_truncated",
+        } if generated.context.context_policy == "legacy" else None,
+    )
     if generated.context.handoff_id:
         usage["context"]["handoff_id"] = generated.context.handoff_id
     if execution:

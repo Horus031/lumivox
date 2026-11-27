@@ -1982,6 +1982,8 @@
     "conversationContext": "Conversation context",
     "contextTurnsUsed": "{count, plural, one {Using # recent turn} other {Using # recent turns}}",
     "recentContextOnly": "Some earlier content is outside the current context.",
+    "someContextOmitted": "Some earlier conversation context may be omitted.",
+    "historyContentCondensed": "Some previous messages were shortened to fit the available context.",
     "compressedMemoryActive": "Using summarized conversation memory",
     "compressedMemoryDescription": "Earlier exchanges are summarized to preserve important learning context.",
     "conversationNearLimit": "This conversation is approaching its limit.",

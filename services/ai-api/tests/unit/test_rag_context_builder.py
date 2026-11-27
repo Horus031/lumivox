@@ -125,3 +125,12 @@ def test_memory_disabled_or_no_space_keeps_raw_history(monkeypatch, stored_summa
     assert result.metadata.summary_tokens_used == 0
     assert result.metadata.history_turns_used == 2
     assert all("Earlier conversation memory" not in message["content"] for message in result.messages)
+
+
+def test_adaptive_unpacked_summary_does_not_exclude_raw_pairs(monkeypatch, stored_summary):
+    monkeypatch.setattr(builder.settings, "rag_context_quality_enabled", True)
+    monkeypatch.setattr(builder.settings, "rag_rolling_summary_enabled", True)
+    result = build(question="New topic: cardinality", turns=[turn(1), turn(2), turn(3)], summary=stored_summary)
+    assert result.metadata.summary_covered_turn_count == 0
+    assert result.metadata.history_turns_used == 3
+    assert result.metadata.omitted_history_turns == 0

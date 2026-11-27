@@ -425,6 +425,29 @@ describe("Study workspace RAG chat", () => {
     expect(container.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
   });
 
+  it("shows adaptive omission and condensation independently of the legacy notice", async () => {
+    mocks.restore.mockResolvedValueOnce(restoredConversation("Earlier question", "Earlier answer"));
+    await renderAssistant("adaptive-focus");
+    mocks.ask.mockResolvedValueOnce({
+      success: true,
+      data: {
+        session_id: "restored-session", answer: "Study answer", completed_turn_count: 6,
+        context: {
+          context_policy: "adaptive_v1", estimated_prompt_tokens: 909, history_turns_used: 2,
+          omitted_history_turns: 1, truncated_history_turns: 1, retrieved_chunks_used: 0,
+          context_truncated: true, retrieval_strategy: "none", summary_version_used: 1, summary_tokens_used: 60,
+        },
+      },
+    });
+    enterQuestion("Follow-up question");
+    await submitQuestion();
+    expect(container.textContent).toContain(messages.rag.someContextOmitted);
+    expect(container.textContent).toContain(messages.rag.historyContentCondensed);
+    expect(container.textContent).toContain(messages.rag.compressedMemoryActive);
+    expect(container.textContent).not.toContain(messages.rag.recentContextOnly);
+    expect(container.textContent).not.toContain("909");
+  });
+
   it("blocks further submit after the server reports a concurrent turn limit", async () => {
     mocks.ask.mockResolvedValueOnce({
       success: false, code: "RAG_CONVERSATION_LIMIT_REACHED", message: "Limit reached",

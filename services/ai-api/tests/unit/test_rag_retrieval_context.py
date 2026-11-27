@@ -1,6 +1,7 @@
 import pytest
 
 from app.core.rag_token_budget import count_text_tokens
+from app.core.config import settings
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.services.rag_retrieval_context import build_retrieval_query
 
@@ -63,3 +64,18 @@ def test_explicit_topic_change_excludes_summary(stored_summary):
     result = build_retrieval_query(question, HISTORY, stored_summary)
     assert result.strategy == "current_question"
     assert result.text == question
+
+
+def test_adaptive_handoff_only_and_unrelated_inherited_topic(monkeypatch, stored_handoff):
+    monkeypatch.setattr(settings, "rag_context_quality_enabled", True)
+    handoff = stored_handoff.model_copy(update={
+        "summary": stored_handoff.summary.model_copy(update={"main_topic": "Optical lenses", "covered_concepts": []}),
+    })
+    inherited = build_retrieval_query("Continue from the previous conversation?", [], handoff=handoff)
+    assert inherited.strategy == "history_augmented" and "Optical lenses" in inherited.text
+    local = build_retrieval_query("Why is it faster?", HISTORY, handoff=handoff)
+    assert local.strategy == "history_augmented" and "Binary search" in local.text
+    assert "Optical lenses" not in local.text
+    assert build_retrieval_query("SQL joins?", HISTORY).text == "SQL joins?"
+    monkeypatch.setattr(settings, "rag_context_quality_enabled", False)
+    assert build_retrieval_query("SQL joins?", HISTORY).strategy == "history_augmented"

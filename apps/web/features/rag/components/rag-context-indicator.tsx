@@ -31,6 +31,7 @@ export function RagContextIndicator({
   canStartNewChat,
 }: Props) {
   const t = useTranslations("rag");
+  const adaptive = context?.context_policy === "adaptive_v1";
   const usesSummary = Boolean(
     context?.summary_version_used &&
     (context?.summary_tokens_used ?? 0) > 0,
@@ -89,7 +90,15 @@ export function RagContextIndicator({
         </div>
       )}
 
-      {context?.context_truncated && (
+      {adaptive && (context.omitted_history_turns ?? 0) > 0 && (
+        <p className="text-xs text-muted-foreground">{t("someContextOmitted")}</p>
+      )}
+
+      {adaptive && (context.truncated_history_turns ?? 0) > 0 && (
+        <p className="text-xs text-muted-foreground">{t("historyContentCondensed")}</p>
+      )}
+
+      {!adaptive && context?.context_truncated && (
         <p className="text-xs text-muted-foreground">
           {t("recentContextOnly")}
         </p>
