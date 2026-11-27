@@ -55,6 +55,94 @@ def configure(redis, namespace):
     budget.execute_rag_redis_command = redis
 
 
+def configure_quota(redis, namespace, scope, **limits):
+    configure(redis, namespace)
+    budget.settings.rag_provider_throughput_enabled = True
+    budget.settings.rag_provider_quota_scope = scope
+    budget.settings.rag_provider_quotas_json = json.dumps({
+        model: limits for model in ("synthetic", "fallback")
+    })
+
+
+def quota_worker(redis, namespace, scope, start, results):
+    configure_quota(redis, namespace, scope, rpm=3, tpm=100)
+    start.wait(timeout=20)
+    for _ in range(4):
+        status, permit = budget.acquire_provider_permit("synthetic", timeout=2, input_tokens=5, output_tokens=5)
+        if permit:
+            budget.release_provider_permit(permit, timeout=2)
+        results.append(status)
+
+
+def verify_throughput(redis, namespace, ctx):
+    scope = f"{namespace}-shared"
+    with ctx.Manager() as manager:
+        results = manager.list()
+        start = ctx.Barrier(3)
+        workers = [ctx.Process(target=quota_worker, args=(redis, f"{namespace}-{n}", scope, start, results))
+                   for n in range(3)]
+        for process in workers:
+            process.start()
+        for process in workers:
+            process.join(30)
+            assert process.exitcode == 0, process.exitcode
+        assert list(results).count("acquired") == 3 and list(results).count("rpm_limited") == 9
+
+    configure_quota(redis, namespace, scope, rpm=3, tpm=100)
+    permitted, permit = budget.acquire_provider_permit("fallback", timeout=2, input_tokens=1, output_tokens=1)
+    assert permitted == "acquired"
+    budget.release_provider_permit(permit, timeout=2)
+    assert redis(["ZCARD", permit.key]) == 0
+
+    for name, limits in (("tpm", {"tpm": 15}), ("itpm", {"tpm": 100, "itpm": 7}),
+                         ("otpm", {"tpm": 100, "otpm": 7})):
+        configure_quota(redis, namespace, f"{namespace}-{name}", rpm=9, **limits)
+        status, permit = budget.acquire_provider_permit("synthetic", timeout=2, input_tokens=5, output_tokens=5)
+        assert status == "acquired"
+        budget.release_provider_permit(permit, timeout=2)
+        assert budget.acquire_provider_permit("synthetic", timeout=2, input_tokens=5, output_tokens=5) == ("tpm_limited", None)
+        timestamps, weights = permit.quota_keys
+        redis(["EVAL", '''
+            local clock = redis.call("TIME")
+            local now = tonumber(clock[1]) * 1000 + math.floor(tonumber(clock[2]) / 1000)
+            return redis.call("ZADD", KEYS[1], now - 60001, ARGV[1])
+        ''', 1, timestamps, permit.permit_id])
+        status, current = budget.acquire_provider_permit("synthetic", timeout=2, input_tokens=2, output_tokens=2)
+        assert status == "acquired" and redis(["HEXISTS", weights, permit.permit_id]) == 0
+        budget.settle_provider_debt(current, input_tokens=7, output_tokens=7, total_tokens=14, timeout=2)
+        budget.release_provider_permit(current, timeout=2)
+        assert budget.acquire_provider_permit("synthetic", timeout=2, input_tokens=2, output_tokens=2) == ("tpm_limited", None)
+        budget.mark_model_cooldown("synthetic", seconds=20, timeout=2)
+        assert budget.acquire_provider_permit("synthetic", timeout=2) == ("cooldown", None)
+        redis(["HDEL", weights, current.permit_id])
+        assert budget.acquire_provider_permit("synthetic", timeout=2) == ("quota_unavailable", None)
+
+    budget.settings.rag_provider_quotas_json = "{}"
+    assert budget.acquire_provider_permit("synthetic", timeout=2) == ("quota_unavailable", None)
+    configure_quota(redis, namespace, f"{namespace}-ambiguous", rpm=9, tpm=50)
+
+    def ambiguous(*args, **kwargs):
+        redis(*args, **kwargs)
+        raise RagRedisUnavailable("synthetic lost response")
+
+    budget.execute_rag_redis_command = ambiguous
+    context = RagExecutionContext(RagDeadline.start(5), max_provider_calls=4)
+    try:
+        execute_rag_provider_call(
+            client=object(), request_options={"model": "synthetic", "timeout": 1, "max_completion_tokens": 5},
+            stage="answer", context=context, deadline=context.deadline, estimated_prompt_tokens=5,
+            classify_error=lambda _: ("unknown", False), parse_response=lambda response: response,
+        )
+    except RagProviderExecutionError as error:
+        assert error.code == "provider_quota_unavailable" and not context.attempts
+    else:
+        raise AssertionError("Unconfirmed reservation was used to dispatch")
+    budget.settings.rag_provider_throughput_enabled = False
+    configure(redis, namespace)
+    return {"workers": 3, "scheduled": 12, "admitted": 3, "rpm_rejected": 9,
+            "token_dimensions_verified": ["tpm", "itpm", "otpm"], "ambiguous_provider_calls": 0}
+
+
 def worker(redis, namespace, start, active, peak, counts, lock, permits):
     configure(redis, namespace)
 
@@ -95,6 +183,7 @@ def main():
     args = parser.parse_args()
     redis = Redis(args.redis_host, args.redis_port)
     namespace = f"stress-{uuid4()}"
+    budget.settings.rag_provider_throughput_enabled = False
     configure(redis, namespace)
     permits_key, cooldown_key = budget.provider_keys("synthetic")
     ctx = multiprocessing.get_context("spawn")
@@ -161,6 +250,7 @@ def main():
         raise AssertionError("Redis outage unexpectedly admitted provider work")
     report.update(final_permits=final_permits, crashed_permit_recovered=True, cooldown_expired=True,
                   outage_provider_calls=0)
+    report["throughput"] = verify_throughput(redis, namespace, ctx)
     print(json.dumps(report, sort_keys=True))
 
 

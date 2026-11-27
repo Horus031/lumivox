@@ -17,9 +17,11 @@ from app.clients.rag_llm_client import RagLLMError
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline, RagDeadlineExceeded
+from app.core.rag_telemetry import current_telemetry, measure_stage, observe_operation, record_outcome
+from app.services.rag_attempt_ledger import SupabaseRagAttemptLedger
 from app.security.rag_dispatch import rag_dispatch_authorization
 from app.core.rag_execution_context import RagExecutionContext
-from app.core.rag_model_registry import validate_rag_configuration
+from app.core.rag_model_registry import RagProviderQuotaConfigurationError, validate_rag_configuration
 from app.schemas.rag_conversation_context import RagConversationContext
 from app.services.rag_chat_service import _normalize_top_k
 from app.services.rag_conversational_generation import generate_conversational_answer
@@ -39,6 +41,7 @@ from app.services.rag_conversation_store import (
 logger = logging.getLogger(__name__)
 
 
+@observe_operation
 def ask_rag_conversation_question(
     *,
     user_id: str,
@@ -65,7 +68,10 @@ def ask_rag_conversation_question(
             400,
         )
 
-    validate_rag_configuration()
+    try:
+        validate_rag_configuration()
+    except RagProviderQuotaConfigurationError:
+        raise RagConversationError("RAG_PROVIDER_QUOTA_UNAVAILABLE", 503, outcome="failed") from None
     document_ids = sorted(
         set(selected_document_ids)
     )
@@ -82,6 +88,8 @@ def ask_rag_conversation_question(
             answer_call_reserve=min(2, max_calls - int(bool(document_ids))),
             needs_embedding=bool(document_ids),
         )
+    if telemetry := current_telemetry():
+        telemetry.execution = execution
     db = bounded_rag_supabase(
         execution.deadline, completion_reserve=settings.rag_completion_reserve_seconds,
         answer_reserve=settings.rag_answer_reserve_seconds,
@@ -121,6 +129,7 @@ def _run_ask(
     outcome = reservation.get("outcome")
 
     if outcome == "completed":
+        record_outcome("replayed")
         return reservation["response"]
 
     if outcome == "processing":
@@ -146,6 +155,11 @@ def _run_ask(
     lease_token = reservation["lease_token"]
     reserved_session_id = reservation["session_id"]
 
+    if execution and settings.rag_durable_accounting_enabled:
+        execution.ledger = SupabaseRagAttemptLedger(
+            supabase, user_id, lease_token, execution.max_provider_calls, turn_id=turn_id,
+        )
+
     def authorize_dispatch() -> None:
         assert_turn_authorized(
             supabase, user_id=user_id, session_id=reserved_session_id, turn_id=turn_id, lease_token=lease_token,
@@ -157,14 +171,15 @@ def _run_ask(
     )
 
     try:
-        snapshot = load_conversation_context(
-            supabase,
-            user_id=user_id,
-            session_id=reserved_session_id,
-            turn_id=turn_id,
-            lease_token=lease_token,
-            recent_turns=history_window,
-        )
+        with measure_stage("context_load"):
+            snapshot = load_conversation_context(
+                supabase,
+                user_id=user_id,
+                session_id=reserved_session_id,
+                turn_id=turn_id,
+                lease_token=lease_token,
+                recent_turns=history_window,
+            )
         if not settings.rag_rolling_summary_enabled:
             snapshot = {**snapshot, "summary": None}
         context = RagConversationContext.model_validate(snapshot)
@@ -199,14 +214,16 @@ def _run_ask(
                 }:
                     raise
                 logger.warning("RAG summary refresh unavailable; reloading authorized context.")
-                context = RagConversationContext.model_validate(load_conversation_context(
-                    supabase,
-                    user_id=user_id,
-                    session_id=reserved_session_id,
-                    turn_id=turn_id,
-                    lease_token=lease_token,
-                    recent_turns=history_window,
-                ))
+                with measure_stage("context_reload"):
+                    context = RagConversationContext.model_validate(load_conversation_context(
+                        supabase,
+                        user_id=user_id,
+                        session_id=reserved_session_id,
+                        turn_id=turn_id,
+                        lease_token=lease_token,
+                        recent_turns=history_window,
+                    ))
+
         answer_deadline = execution.deadline.bounded(
             settings.rag_generation_deadline_seconds, settings.rag_completion_reserve_seconds,
         ) if execution else None
@@ -231,10 +248,7 @@ def _run_ask(
     except Exception as error:
         if isinstance(error, RagConversationError) and error.code == "RAG_MEMORY_QUARANTINED":
             raise RagConversationError(error.code, 409, session_id=reserved_session_id, outcome="failed") from None
-        logger.warning(
-            "RAG generation failed for turn %s",
-            turn_id,
-        )
+        logger.warning("RAG turn generation failed.")
 
         marked_failed = False
         try:
@@ -247,19 +261,19 @@ def _run_ask(
                 **({"attempts": execution.accounting()} if execution else {}),
             )
         except RagConversationError:
-            logger.warning(
-                "Unable to mark RAG turn failed: %s",
-                turn_id,
-            )
+            logger.warning("RAG turn failure persistence was not confirmed.")
 
         if marked_failed:
             if isinstance(error, RagConversationError):
                 raise error from None
             if isinstance(error, RagLLMError) and error.code in {
                 "provider_busy", "provider_cooldown", "resource_control_unavailable", "provider_call_budget_exceeded",
+                "provider_rpm_limited", "provider_tpm_limited", "provider_quota_unavailable", "rate_limit", "timeout",
             }:
                 raise RagConversationError(
-                    f"RAG_{error.code.upper()}", 503, session_id=reserved_session_id, outcome="failed",
+                    {"rate_limit": "RAG_PROVIDER_RATE_LIMITED", "timeout": "RAG_REQUEST_DEADLINE_EXCEEDED"}.get(
+                        error.code, f"RAG_{error.code.upper()}",
+                    ), 504 if error.code == "timeout" else 503, session_id=reserved_session_id, outcome="failed",
                 ) from None
             if execution and isinstance(error, RagDeadlineExceeded):
                 raise RagConversationError(
@@ -283,6 +297,8 @@ def _run_ask(
     )
 
     generation = generated.generation
+    if generation is None:
+        record_outcome("deterministic_abstention")
     usage = asdict(generation.usage) if generation is not None else {}
     usage["context"] = generated.context.model_dump(
         exclude={

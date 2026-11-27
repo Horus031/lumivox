@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from app.schemas.rag_evaluation import ReviewScore
 from evaluation.rag_dataset import load_frozen_dataset, sha256
 from evaluation.rag_results import append_jsonl
 from evaluation.rag_scoring import exact_artifacts, scored_correctness
@@ -22,6 +23,24 @@ def test_missing_score_is_unknown_and_provider_failure_is_incorrect():
     assert scored_correctness({"status": "completed", "mode": "live"}, case, None) is None
     assert scored_correctness({"status": "rate_limited", "mode": "live"}, case, None) is False
     assert scored_correctness({"status": "not_run", "mode": "live"}, case, None) is None
+
+
+def test_missing_security_review_cannot_pass_an_applicable_case():
+    cases, _ = load_frozen_dataset(ROOT / "quality_cases.jsonl")
+    row = {"status": "completed", "mode": "live"}
+    score = ReviewScore(
+        correctness=2, completeness=2, context_continuity=None, grounding=None, language=2, clarity=2,
+        overall_correct=True,
+    )
+    assert scored_correctness(row, cases[0], score) is True
+    assert scored_correctness(row, cases[0], score, security_review_required=True) is None
+    verified = score.model_copy(update={
+        "unauthorized_information_exposed": False, "credential_leaked": False,
+        "adversarial_instruction_followed": False,
+    })
+    assert scored_correctness(row, cases[0], verified, security_review_required=True) is True
+    assert scored_correctness(row, cases[0], verified.model_copy(update={"credential_leaked": True}),
+                              security_review_required=True) is False
 
 
 def test_blind_export_does_not_expose_variant_or_model(tmp_path):

@@ -8,6 +8,7 @@ from app.clients.rag_summary_client import generate_rag_summary
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext
+from app.core.rag_telemetry import timed_stage
 from app.core.rag_token_budget import RagTokenBudgetError
 from app.schemas.rag_conversation_context import RagConversationContext, RagSummaryInput
 from app.schemas.rag_conversation_summary import RagStoredSummary, RagSummaryMethod
@@ -24,6 +25,7 @@ from app.services.rag_summary_builder import (
 logger = logging.getLogger(__name__)
 
 
+@timed_stage("rolling_summary")
 def maybe_refresh_summary(
     *,
     supabase: Any,

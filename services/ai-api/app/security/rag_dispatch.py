@@ -4,6 +4,7 @@ from contextvars import ContextVar
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
+from app.core.rag_telemetry import measure_stage
 from app.security.rag_privacy import assert_safe_rag_provider_text
 
 _authorize: ContextVar[Callable[[], None] | None] = ContextVar("rag_dispatch_authorize", default=None)
@@ -39,7 +40,8 @@ def before_rag_dispatch(*contents: str, deadline: RagDeadline | None = None) -> 
         deadline.require_remaining()
     token = rag_dispatch_deadline.set(deadline)
     try:
-        callback()
+        with measure_stage("provider_authorization"):
+            callback()
     finally:
         rag_dispatch_deadline.reset(token)
     if deadline:

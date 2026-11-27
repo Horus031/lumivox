@@ -7,7 +7,7 @@ import { promisify } from "node:util";
 
 // Target the same local Docker database as the existing Supabase concurrency tests.
 const databaseArgs = [
-  "exec", "-i", "supabase_db_lumivox-proj",
+  "exec", "-i", process.env.RAG_TEST_DB_CONTAINER ?? "supabase_db_lumivox-proj",
   "psql", "-XqAt", "-v", "ON_ERROR_STOP=1", "-v", "VERBOSITY=terse",
   "-U", "postgres", "-d", "postgres",
 ];
@@ -385,6 +385,64 @@ async function contend(firstSql, contenderSql, afterBlockedSql) {
   return { first, ...await other };
 }
 
+function beginAttempt(turn, id) {
+  return `select public.rag_v2_begin_provider_attempt(
+    '${id}','${owner}','${turn.turn_id}',null,'${turn.lease_token}',null,4,1,'answer','groq',
+    'openai/gpt-oss-20b',100,1200);`;
+}
+
+function finishAttempt(id, tokens) {
+  return `select public.rag_v2_finish_provider_attempt(
+    '${id}','${owner}','success',null,null,${tokens},100,null);`;
+}
+
+async function attemptLedgerRaces() {
+  const duplicate = await recoveryFixture();
+  const id = randomUUID();
+  const begin = beginAttempt(duplicate.turn, id);
+  const confirmation = await contend(begin, begin);
+  assert.equal(confirmation.first, "created");
+  assert.equal(confirmation.result, "existing");
+  console.log("PASS: duplicate begin confirms exactly one durable dispatch intent");
+
+  const conflicting = await contend(finishAttempt(id, 100), finishAttempt(id, 101));
+  assert.equal(conflicting.first, "t");
+  assert.match(conflicting.error?.stderr ?? "", /ERROR:\s+RAG_INVALID_REQUEST/);
+  console.log("PASS: concurrent conflicting finishes cannot overwrite an observed result");
+
+  const expiry = await recoveryFixture();
+  const expire = `update public.rag_chat_turns set lease_expires_at=clock_timestamp()-interval '1 second'
+    where id='${expiry.turn.turn_id}';`;
+  const expired = await contend(
+    `select 1 from public.rag_chat_sessions where id='${expiry.fixture.source}' for update;`,
+    beginAttempt(expiry.turn, randomUUID()), expire,
+  );
+  assert.match(expired.error?.stderr ?? "", /ERROR:\s+RAG_INVALID_LEASE/);
+  console.log("PASS: beginning an intent after a concurrent lease expiry is denied");
+
+  const quarantined = await recoveryFixture();
+  const deny = await contend(
+    `select public.rag_v2_quarantine_memory('${owner}','${quarantined.fixture.source}','security_review');`,
+    beginAttempt(quarantined.turn, randomUUID()),
+  );
+  assert.match(deny.error?.stderr ?? "", /ERROR:\s+RAG_MEMORY_QUARANTINED/);
+  console.log("PASS: beginning an intent after concurrent quarantine is denied");
+
+  const recovering = await recoveryFixture();
+  const pending = randomUUID();
+  await query(beginAttempt(recovering.turn, pending));
+  await query(`update public.rag_chat_turns set lease_expires_at=clock_timestamp()-interval '1 second'
+    where id='${recovering.turn.turn_id}';`);
+  const [recorded] = await Promise.all([
+    query(finishAttempt(pending, 123)),
+    query(recoverTurn(recovering.fixture, recovering.requestId)),
+  ]);
+  assert.equal(recorded, "t");
+  assert.equal(await query(`select status from public.rag_chat_turns where id='${recovering.turn.turn_id}';`), "failed");
+  assert.equal(await query(`select total_tokens from public.rag_provider_attempts where id='${pending}';`), "123");
+  console.log("PASS: recovery and late accounting preserve both operation status and observed usage");
+}
+
 function recoverTurn(fixture, requestId) {
   return `select public.rag_v2_recover_expired_turn('${owner}','${fixture.focus}','${requestId}');`;
 }
@@ -584,6 +642,7 @@ try {
   await recoveryRaces();
   await resourceControlRaces();
   await securityRaces();
+  await attemptLedgerRaces();
 } finally {
   firstConnection.close();
   if (fixtureCreated) {

@@ -6,7 +6,8 @@ from typing import Any, Literal
 from app.clients.rag_llm_client import RagChatGeneration, generate_rag_chat
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
-from app.core.rag_execution_context import RagExecutionContext
+from app.core.rag_execution_context import RagExecutionContext, RagLedgerUnavailable
+from app.core.rag_telemetry import measure_stage
 from app.schemas.rag_conversation_context import (
     RagContextMetadata,
     RagConversationContext,
@@ -53,6 +54,8 @@ def generate_conversational_answer(
     retrieval_only: bool = False,
 ) -> RagConversationalAnswer:
     require_rag_dispatch_authorization()
+    if settings.rag_durable_accounting_enabled and (execution_context is None or execution_context.ledger is None):
+        raise RagLedgerUnavailable("RAG attempt ledger is required.")
     provider_question = sanitize_rag_text(question, target="provider") if settings.rag_privacy_filter_enabled else question
     document_mode = bool(selected_document_ids)
     strategy: RagRetrievalStrategy = "none"
@@ -66,14 +69,15 @@ def generate_conversational_answer(
             or summary.covered_turn_count > context.completed_turn_count
         ):
             summary = None
-        query = build_retrieval_query(
-            provider_question,
-            context.recent_turns,
-            summary,
-            context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
-        )
-        strategy = query.strategy
-        query_text = sanitize_rag_text(query.text, target="provider") if settings.rag_privacy_filter_enabled else query.text
+        with measure_stage("query_build"):
+            query = build_retrieval_query(
+                provider_question,
+                context.recent_turns,
+                summary,
+                context.handoff if settings.rag_new_chat_enabled and settings.rag_handoff_enabled else None,
+            )
+            strategy = query.strategy
+            query_text = sanitize_rag_text(query.text, target="provider") if settings.rag_privacy_filter_enabled else query.text
         embedding = (
             _generate_query_embedding(query_text, deadline=deadline, execution_context=execution_context)
             if deadline or execution_context else _generate_query_embedding(query_text)
@@ -90,15 +94,16 @@ def generate_conversational_answer(
 
     if deadline:
         deadline.require_remaining()
-    built = build_conversational_context(
-        question=provider_question,
-        context=context,
-        sources=sources,
-        document_mode=document_mode,
-        prompt_variant=prompt_variant,
-        preferred_locale=preferred_locale,
-        retrieval_strategy=strategy,
-    )
+    with measure_stage("context_pack"):
+        built = build_conversational_context(
+            question=provider_question,
+            context=context,
+            sources=sources,
+            document_mode=document_mode,
+            prompt_variant=prompt_variant,
+            preferred_locale=preferred_locale,
+            retrieval_strategy=strategy,
+        )
 
     if observe_retrieval is not None:
         observe_retrieval(RagRetrievalObservation(
@@ -143,11 +148,12 @@ def generate_conversational_answer(
             ),
         )
 
-    generation = (
-        generate_rag_chat(built.messages, deadline_at=deadline.expires_at if deadline else None,
-                          execution_context=execution_context)
-        if deadline or execution_context else generate_rag_chat(built.messages)
-    )
+    with measure_stage("answer_generation"):
+        generation = (
+            generate_rag_chat(built.messages, deadline_at=deadline.expires_at if deadline else None,
+                              execution_context=execution_context)
+            if deadline or execution_context else generate_rag_chat(built.messages)
+        )
     answer, unsupported = validate_rag_citations(generation.text, len(built.sources))
     return RagConversationalAnswer(
         answer=answer,

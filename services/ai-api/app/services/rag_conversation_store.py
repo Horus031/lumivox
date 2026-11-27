@@ -5,6 +5,8 @@ from typing import Any, Literal
 
 from postgrest.exceptions import APIError
 
+from app.core.rag_telemetry import timed_stage
+
 
 ERROR_STATUS = {
     "RAG_INVALID_REQUEST": 400,
@@ -224,6 +226,7 @@ def load_pending_new_chat(supabase: Any, *, user_id: str, focus_session_id: str)
     return result
 
 
+@timed_stage("preparation")
 def prepare_new_chat(
     supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
     client_request_id: str, request_payload: dict[str, Any], include_rolling_summary: bool,
@@ -238,6 +241,7 @@ def prepare_new_chat(
     })
 
 
+@timed_stage("transition_commit")
 def commit_new_chat(
     supabase: Any, *, user_id: str, focus_session_id: str, source_session_id: str,
     client_request_id: str, request_payload: dict[str, Any],
@@ -251,6 +255,7 @@ def commit_new_chat(
     })
 
 
+@timed_stage("transition_commit")
 def commit_prepared_new_chat(
     supabase: Any, *, user_id: str, preparation_id: str, lease_token: str,
     expected_revision: dict[str, Any], handoff: dict[str, Any] | None, attempts: list[dict],
@@ -261,6 +266,7 @@ def commit_prepared_new_chat(
     })
 
 
+@timed_stage("failure_persistence")
 def fail_new_chat_preparation(
     supabase: Any, *, user_id: str, preparation_id: str, lease_token: str, error_code: str, attempts: list[dict],
 ) -> bool:
@@ -301,6 +307,7 @@ def load_restore_snapshot(
     return result
 
 
+@timed_stage("reservation")
 def reserve_turn(
     supabase: Any,
     *,
@@ -331,6 +338,7 @@ def reserve_turn(
     return result
 
 
+@timed_stage("completion")
 def complete_turn(
     supabase: Any,
     *,
@@ -369,6 +377,7 @@ def complete_turn(
     return result
 
 
+@timed_stage("failure_persistence")
 def fail_turn(
     supabase: Any,
     *,

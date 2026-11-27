@@ -20,6 +20,7 @@ from app.schemas.rag_conversation_handoff import RagNewChatRequest
 from app.security.rag_dispatch import RagDispatchAuthorizationError, rag_dispatch_authorization
 from app.security.rag_privacy import RagPrivacyError, assert_safe_rag_provider_text, sanitize_rag_text
 from app.services.rag_context_builder import build_conversational_context
+from app.services.rag_attempt_ledger import SupabaseRagAttemptLedger
 from app.services.rag_conversation_service import ask_rag_conversation_question
 from app.services.rag_conversation_store import RagConversationError, assert_turn_authorized, fail_turn, reserve_turn
 from app.services.rag_conversational_generation import generate_conversational_answer
@@ -49,9 +50,10 @@ def classify_error(error):
             return "security_rejected", code
         if code in {"timeout", "request_deadline_exceeded"}:
             return "timeout", code
-        if code in {"rate_limited", "provider_cooldown", "rate_limit"}:
+        if code in {"rate_limited", "provider_cooldown", "rate_limit", "provider_rate_limited",
+                    "provider_rpm_limited", "provider_tpm_limited"}:
             return "rate_limited", code
-        if code in {"provider_busy", "resource_control_unavailable"}:
+        if code in {"provider_busy", "resource_control_unavailable", "provider_quota_unavailable"}:
             return "provider_busy", code
         if code == "provider_call_budget_exceeded":
             return "budget_rejected", code
@@ -163,6 +165,8 @@ def snapshot(case, context, corpus, row):
         if reserved.get("outcome") != "reserved":
             raise RagDispatchAuthorizationError("Snapshot did not acquire an evaluation turn lease")
         identity = {"user_id": user_id, "turn_id": reserved["turn_id"], "lease_token": reserved["lease_token"]}
+        if settings.rag_durable_accounting_enabled:
+            execution.ledger = SupabaseRagAttemptLedger(db, max_attempts=execution.max_provider_calls, **identity)
         def authorize():
             assert_turn_authorized(db, session_id=reserved["session_id"], **identity)
         generation_failed = False
@@ -223,12 +227,33 @@ def lifecycle(case, corpus, row):
               "prompt_variant": "grounded_rule"}
     row["operation_audit"] = audit
     def track(table, request_id, operation, ceiling):
-        fields = "provider_attempt_metadata" if operation == "continue" else "provider,model_name,provider_attempt_metadata"
+        fields = "id,provider_attempt_metadata"
+        if operation != "continue":
+            fields += ",provider,model_name"
         result = db.table(table).select(fields).eq("user_id", user_id).eq("client_request_id", request_id).execute().data
         if not result:
             audit.append({"operation": operation, "provider_calls": None})
             return {}
         operation_attempts = result[0]["provider_attempt_metadata"]
+        pending = None
+        if settings.rag_durable_accounting_enabled:
+            parent = "preparation_id" if operation == "continue" else "turn_id"
+            ledger = db.table("rag_provider_attempts").select(
+                "stage,provider,model_name,status,latency_ms,error_code,estimated_prompt_tokens,"
+                "prompt_tokens,completion_tokens,total_tokens"
+            ).eq("user_id", user_id).eq(parent, result[0]["id"]).order("attempt_index").execute().data
+            pending = sum(attempt["status"] == "dispatch_pending" for attempt in ledger)
+            if ledger:
+                operation_attempts = [
+                    {key: value for key, value in attempt.items() if key not in {"model_name", "status"}}
+                    | {"model": attempt["model_name"], "outcome": attempt["status"]}
+                    for attempt in ledger if attempt["status"] != "dispatch_pending"
+                    and attempt["error_code"] != "dispatch_cancelled"
+                ]
+                # A failed finalize can leave a pending intent alongside an observed terminal attempt.
+                # Use the complete terminal array when present. Keep pending counts separately.
+                if result[0]["provider_attempt_metadata"] is not None:
+                    operation_attempts = result[0]["provider_attempt_metadata"]
         if operation_attempts is not None:
             attempts.extend(operation_attempts)
             record_usage(row, attempts)
@@ -236,8 +261,15 @@ def lifecycle(case, corpus, row):
                 len(operation_attempts) > ceiling
             )
         audit.append({"operation": operation,
+                      "unresolved_dispatch_intents": pending,
                       "provider_calls": len(operation_attempts) if operation_attempts is not None else None})
         return result[0]
+
+    def track_failure(table, request_id, operation, ceiling):
+        try:
+            track(table, request_id, operation, ceiling)
+        except Exception:
+            audit.append({"operation": operation, "provider_calls": None, "accounting_unavailable": True})
 
     def ask(question):
         request_id = str(uuid4())
@@ -246,8 +278,8 @@ def lifecycle(case, corpus, row):
                 **common, question=question, session_id=session, client_request_id=request_id,
                 selected_document_ids=docs,
             )
-        except RagConversationError:
-            track("rag_chat_turns", request_id, "ask", settings.rag_max_provider_calls_per_ask)
+        except Exception:
+            track_failure("rag_chat_turns", request_id, "ask", settings.rag_max_provider_calls_per_ask)
             raise
         usage = track("rag_chat_turns", request_id, "ask", settings.rag_max_provider_calls_per_ask)
         return result, usage
@@ -257,9 +289,14 @@ def lifecycle(case, corpus, row):
         session = result["session_id"]
     if case.category == "handoff":
         request_id = str(uuid4())
-        transition = start_new_conversation(RagNewChatRequest(
-            **common, source_session_id=session, client_request_id=request_id, mode="continue", selected_document_ids=docs,
-        ))
+        try:
+            transition = start_new_conversation(RagNewChatRequest(
+                **common, source_session_id=session, client_request_id=request_id, mode="continue",
+                selected_document_ids=docs,
+            ))
+        except Exception:
+            track_failure("rag_chat_preparations", request_id, "continue", settings.rag_max_provider_calls_per_handoff)
+            raise
         track("rag_chat_preparations", request_id, "continue", settings.rag_max_provider_calls_per_handoff)
         session = str(transition.target_session_id)
         row["has_handoff"] = transition.has_handoff

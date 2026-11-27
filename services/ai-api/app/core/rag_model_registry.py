@@ -7,6 +7,7 @@ import re
 from app.clients.rag_redis_client import valid_rag_redis_url
 
 from app.core.config import settings
+from app.core.rag_provider_quotas import RagQuotaConfigurationError, validate_provider_quotas
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,10 @@ RAG_MODEL_REGISTRY: dict[str, RagModelCapability] = {
 
 
 class RagConfigurationError(ValueError):
+    pass
+
+
+class RagProviderQuotaConfigurationError(RagConfigurationError):
     pass
 
 
@@ -80,6 +85,10 @@ def get_rag_model_capability(
 
 
 def validate_rag_configuration() -> None:
+    if settings.rag_provider_throughput_enabled and not settings.rag_resource_control_enabled:
+        raise RagProviderQuotaConfigurationError("RAG throughput requires provider resource control.")
+    if settings.rag_durable_accounting_enabled and not settings.rag_resource_control_enabled:
+        raise RagConfigurationError("RAG accounting requires provider resource control.")
     if settings.rag_context_quality_enabled and settings.rag_history_candidate_turns < settings.rag_recent_turns:
         raise RagConfigurationError("History candidate window must cover the recent-turn window.")
     if settings.rag_resource_control_enabled:
@@ -110,6 +119,11 @@ def validate_rag_configuration() -> None:
     summary_models = parse_rag_model_chain(
         settings.rag_summary_models
     )
+    if settings.rag_provider_throughput_enabled:
+        try:
+            validate_provider_quotas(chat_models, summary_models)
+        except RagQuotaConfigurationError as error:
+            raise RagProviderQuotaConfigurationError(str(error)) from None
 
     if (
         settings.rag_soft_turn_limit

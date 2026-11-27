@@ -1,5 +1,5 @@
 from functools import lru_cache
-from contextlib import contextmanager
+from contextlib import ExitStack, contextmanager
 from contextvars import ContextVar
 from collections.abc import Iterator
 
@@ -8,6 +8,7 @@ from supabase import Client, ClientOptions, create_client
 
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
+from app.core.rag_telemetry import measure_stage
 from app.security.rag_dispatch import rag_dispatch_deadline
 
 
@@ -57,17 +58,21 @@ def bounded_rag_supabase(
                 if (summary_deadline := _summary_deadline.get()) is not None:
                     expires_at = min(expires_at - reserve, summary_deadline.expires_at)
                     reserve = 0
-            if rpc in {"rag_v2_assert_turn_authorized", "rag_v2_assert_preparation_authorized"}:
+            if rpc in {"rag_v2_assert_turn_authorized", "rag_v2_assert_preparation_authorized",
+                       "rag_v2_begin_provider_attempt", "rag_v2_finish_provider_attempt"}:
                 if (dispatch_deadline := rag_dispatch_deadline.get()) is not None:
                     expires_at = min(expires_at - reserve, dispatch_deadline.expires_at)
                     reserve = 0
             timeout = RagDeadline(expires_at - reserve).require_remaining()
         request.extensions["timeout"] = httpx.Timeout(timeout).as_dict()
 
-    with httpx.Client(
-        follow_redirects=False, transport=httpx.HTTPTransport(retries=0),
-        event_hooks={"request": [bound_request]},
-    ) as http:
-        yield create_client(settings.supabase_url, settings.supabase_secret_key, options=ClientOptions(
-            httpx_client=http, auto_refresh_token=False, persist_session=False,
-        ))
+    with ExitStack() as stack:
+        with measure_stage("database_setup"):
+            http = stack.enter_context(httpx.Client(
+                follow_redirects=False, transport=httpx.HTTPTransport(retries=0),
+                event_hooks={"request": [bound_request]},
+            ))
+            client = create_client(settings.supabase_url, settings.supabase_secret_key, options=ClientOptions(
+                httpx_client=http, auto_refresh_token=False, persist_session=False,
+            ))
+        yield client

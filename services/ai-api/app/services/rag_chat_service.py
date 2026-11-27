@@ -10,6 +10,7 @@ from app.clients.supabase_client import bounded_rag_supabase
 from app.core.config import settings
 from app.core.rag_deadline import RagDeadline
 from app.core.rag_execution_context import RagExecutionContext, RagProviderAttempt
+from app.core.rag_telemetry import current_telemetry, measure_stage, timed_stage
 from app.security.rag_dispatch import before_rag_dispatch
 from app.security.rag_privacy import sanitize_rag_text
 from app.services.rag_provider_execution import RagProviderExecutionError
@@ -70,6 +71,7 @@ def _normalize_top_k(top_k: int) -> int:
     return min(allowed, key=lambda value: abs(value - top_k))
 
 
+@timed_stage("embedding")
 def _generate_query_embedding(
     question: str, *, deadline: RagDeadline | None = None, execution_context: RagExecutionContext | None = None,
 ) -> list[float]:
@@ -80,22 +82,39 @@ def _generate_query_embedding(
     if execution_context and not execution_context.has_provider_budget("embedding"):
         raise RagProviderExecutionError("provider_call_budget_exceeded")
     before_rag_dispatch(question, deadline=deadline)
+    attempt = RagProviderAttempt("embedding", "google", model_name) if execution_context else None
+    attempt_id = None
+    if attempt is not None:
+        deadline = deadline or execution_context.deadline
+        attempt_id = execution_context.begin_attempt(attempt, None, deadline.bounded(1.0))
+        try:
+            if attempt_id is not None:
+                before_rag_dispatch(deadline=deadline)
+            deadline.require_remaining()
+        except Exception:
+            attempt.outcome = "failed"
+            attempt.error_code = "dispatch_cancelled"
+            execution_context.finish_attempt(attempt_id, attempt, deadline.bounded(1.0))
+            raise
     http_options = None
     if deadline:
         http_options = types.HttpOptions(
             timeout=max(1, int(deadline.require_remaining() * 1_000)),
             retry_options=types.HttpRetryOptions(attempts=1),
         )
-    attempt = None
-    if execution_context:
-        attempt = RagProviderAttempt("embedding", "google", model_name)
+    if attempt is not None:
         execution_context.attempts.append(attempt)
+    elif telemetry := current_telemetry():
+        telemetry.provider_models.append(("embedding", "google", model_name))
     started = time.monotonic()
+    response_received = False
     try:
-        result = client.models.embed_content(
-            model=model_name, contents=question,
-            config=types.EmbedContentConfig(output_dimensionality=768, http_options=http_options),
-        )
+        with measure_stage("provider_dispatch"):
+            result = client.models.embed_content(
+                model=model_name, contents=question,
+                config=types.EmbedContentConfig(output_dimensionality=768, http_options=http_options),
+            )
+        response_received = True
         if deadline:
             deadline.require_remaining()
         if not result.embeddings or len(result.embeddings) != 1:
@@ -108,12 +127,13 @@ def _generate_query_embedding(
         return values
     except Exception as error:
         if attempt:
-            attempt.outcome = "failed" if isinstance(getattr(error, "code", None), int) else "unknown"
+            attempt.outcome = "failed" if response_received or isinstance(getattr(error, "code", None), int) else "unknown"
             attempt.error_code = "embedding_failed"
         raise
     finally:
         if attempt:
             attempt.latency_ms = max(0, round((time.monotonic() - started) * 1_000))
+            execution_context.finish_attempt(attempt_id, attempt, deadline.bounded(1.0))
 
 
 def _to_pgvector_literal(values: list[float]) -> str:
@@ -177,6 +197,7 @@ def _get_or_create_session(
     return data[0]["id"]
 
 
+@timed_stage("vector_retrieval")
 def _retrieve_chunks(
     supabase: Any,
     *,

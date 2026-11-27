@@ -88,7 +88,9 @@ def summarize(plan, rows, cases, frozen, review):
         status = row["status"]
         statuses[status] += 1
         score = review.get(tuple(row_identity(row, plan).items())) if status == "completed" else None
-        correctness = scored_correctness(row, case, score) if plan["mode"] in {"live", "lifecycle"} else None
+        correctness = scored_correctness(
+            row, case, score, security_review_required=case_id in frozen["security"],
+        ) if plan["mode"] in {"live", "lifecycle"} else None
         scores[case_id] = correctness
         by_category[case.category].append(correctness)
         if status == "completed":

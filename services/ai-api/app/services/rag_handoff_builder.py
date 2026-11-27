@@ -5,6 +5,7 @@ from app.clients.rag_llm_client import RagLLMError
 from app.clients.rag_summary_client import generate_rag_summary
 from app.core.config import settings
 from app.core.rag_execution_context import RagExecutionContext
+from app.core.rag_telemetry import timed_stage
 from app.core.rag_token_budget import RagTokenBudgetError
 from app.schemas.rag_conversation_context import RagCompletedTurn
 from app.schemas.rag_conversation_summary import (
@@ -54,6 +55,7 @@ def merge_summary_seeds(
     return RagConversationSummary.model_validate(current)
 
 
+@timed_stage("handoff_generation")
 def build_final_handoff(
     *,
     inherited: RagConversationSummary | None,
@@ -97,8 +99,8 @@ def build_final_handoff(
                     ),
                 )
                 require_rag_dispatch_authorization()
-                generation = generate_rag_summary(messages, deadline_at=deadline, **(
-                    {"execution_context": execution_context, "stage": "handoff"} if execution_context else {}
+                generation = generate_rag_summary(messages, deadline_at=deadline, stage="handoff", **(
+                    {"execution_context": execution_context} if execution_context else {}
                 ))
                 summary = fit_summary_to_budget(generation.summary, budget)
                 provider = generation.provider

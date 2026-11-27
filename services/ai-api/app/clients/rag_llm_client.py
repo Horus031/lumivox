@@ -25,6 +25,7 @@ from app.core.rag_model_registry import (
     validate_rag_configuration,
 )
 from app.core.rag_token_budget import RagTokenBudgetError, assert_prompt_budget
+from app.core.rag_telemetry import measure_stage, note_unmanaged_dispatch
 
 
 logger = logging.getLogger(__name__)
@@ -50,6 +51,9 @@ RagErrorCode = Literal[
     "provider_cooldown",
     "resource_control_unavailable",
     "provider_call_budget_exceeded",
+    "provider_rpm_limited",
+    "provider_tpm_limited",
+    "provider_quota_unavailable",
 ]
 
 
@@ -361,9 +365,14 @@ def generate_rag_chat(
                         estimated_prompt_tokens=estimated_prompt_tokens, classify_error=_classify_provider_error,
                         parse_response=parse_response,
                     )
+                if settings.rag_durable_accounting_enabled or settings.rag_provider_throughput_enabled:
+                    raise RagProviderExecutionError("provider_quota_unavailable")
                 if before_rag_dispatch(*(message["content"] for message in messages), deadline=RagDeadline(deadline)):
                     request_options["timeout"] = min(request_options["timeout"], RagDeadline(deadline).require_remaining())
-                return parse_response(client.chat.completions.create(**request_options))
+                note_unmanaged_dispatch("answer", "groq", model)
+                with measure_stage("provider_dispatch"):
+                    response = client.chat.completions.create(**request_options)
+                return parse_response(response)
 
             except (
                 APIStatusError,
@@ -392,6 +401,8 @@ def generate_rag_chat(
                 if code in {
                     "rate_limit",
                     "provider_cooldown",
+                    "provider_rpm_limited",
+                    "provider_tpm_limited",
                     "model_unavailable",
                     "incomplete_response",
                     "empty_response",
